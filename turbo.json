@@ -37,7 +37,7 @@
   "globalEnv": [
     "SERVER_HOSTNAME",
     "SERVER_PORT",
-    "DATABASE_URL",
+    "POSTGRES_URL",
     "CORS_ORIGIN",
     "JWT_SECRET",
     "VITE_API_URL"
@@ -45,7 +45,7 @@
   "globalPassThroughEnv": [
     "SERVER_HOSTNAME",
     "SERVER_PORT",
-    "DATABASE_URL",
+    "POSTGRES_URL",
     "CORS_ORIGIN",
     "JWT_SECRET",
     "VITE_API_URL"

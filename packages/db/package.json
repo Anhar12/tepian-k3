@@ -10,21 +10,24 @@
     }
   },
   "scripts": {
-    "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate",
-    "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate"
+    "db:push": "pnpm with-env drizzle-kit push",
+    "db:generate": "pnpm with-env drizzle-kit generate",
+    "db:studio": "pnpm with-env drizzle-kit studio",
+    "db:migrate": "pnpm with-env drizzle-kit migrate",
+    "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {
+    "@tepian-k3/config": "workspace:*",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.8",
-    "@types/pg": "^8.15.6",
-    "typescript": "catalog:",
-    "@tepian-k3/config": "workspace:*"
+    "typescript": "catalog:"
   },
   "dependencies": {
-    "drizzle-orm": "^0.45.1",
-    "pg": "^8.16.3",
+    "@t3-oss/env-core": "^0.13.10",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
+    "postgres": "^3.4.7",
+    "uuid": "catalog:",
     "zod": "catalog:"
   }
 }

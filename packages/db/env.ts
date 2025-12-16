@@ -3,9 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    SERVER_HOSTNAME: z.string().min(1),
-    SERVER_PORT: z.coerce.number().default(3000),
-    CORS_ORIGIN: z.url().optional(),
+    POSTGRES_URL: z.url(),
   },
 
   /**
