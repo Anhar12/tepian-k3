@@ -9,3 +9,4 @@ catalog:
   uuid: ^13.0.0
   "@trpc/server": ^11.7.2
   "@trpc/client": ^11.7.2
+  "@node-rs/argon2": ^2.0.2

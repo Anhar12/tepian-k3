@@ -1,7 +1,5 @@
 import "dotenv/config";
 import { trpcServer } from "@hono/trpc-server";
-import { createContext } from "@tepian-k3/api/context";
-import { appRouter } from "@tepian-k3/api/routers/index";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -22,7 +20,7 @@ app.use(
   trpcServer({
     router: appRouter,
     createContext: (_opts, context) => {
-      return createContext({ context });
+      return createTRPCContext(context);
     },
   })
 );
@@ -33,6 +31,8 @@ app.get("/", (c) => {
 
 import { serve } from "@hono/node-server";
 import { env } from "env";
+import { createTRPCContext } from "@tepian-k3/api";
+import { appRouter } from "@tepian-k3/api/root";
 
 serve(
   {

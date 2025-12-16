@@ -2,9 +2,9 @@ import type { JWTPayload as JoseJWTPayload } from "jose";
 
 export interface SessionUser {
   id: string;
-  username: string;
-  createdAt: string;
-  updatedAt: string | null;
+  userId: string;
+  expiresAt: Date;
+  createdAt: Date;
 }
 
 export interface JWTPayload extends JoseJWTPayload {

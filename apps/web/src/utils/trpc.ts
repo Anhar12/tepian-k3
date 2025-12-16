@@ -1,9 +1,10 @@
-import type { AppRouter } from "@tepian-k3/api/routers/index";
+import type { AppRouter } from "@tepian-k3/api/root";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { env } from "@/env";
+import SuperJSON from "superjson";
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -24,6 +25,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       url: `${env.VITE_SERVER_URL}/trpc`,
+      transformer: SuperJSON,
     }),
   ],
 });
