@@ -24,6 +24,7 @@ First, install the dependencies:
 ```bash
 pnpm install
 ```
+
 ## Database Setup
 
 This project uses PostgreSQL with Drizzle ORM.
@@ -32,10 +33,10 @@ This project uses PostgreSQL with Drizzle ORM.
 2. Update your `apps/server/.env` file with your PostgreSQL connection details.
 
 3. Apply the schema to your database:
+
 ```bash
 pnpm run db:push
 ```
-
 
 Then, run the development server:
 
@@ -46,12 +47,6 @@ pnpm run dev
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
 The API is running at [http://localhost:3000](http://localhost:3000).
 
-
-
-
-
-
-
 ## Project Structure
 
 ```
@@ -61,7 +56,11 @@ tepian-k3/
 │   └── server/      # Backend API (Hono, TRPC)
 ├── packages/
 │   ├── api/         # API layer / business logic
-│   └── db/          # Database schema & queries
+│   ├── auth/        # Authentication utilities
+│   ├── config/      # Configuration utilities
+│   ├── db/          # Database schema & queries
+│   ├── queries/     # Database queries
+│   └── schema/      # Shared validation schemas
 ```
 
 ## Available Scripts
