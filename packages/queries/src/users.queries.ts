@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { type DBType, db } from "@tepian-k3/db/client";
+import { db } from "@tepian-k3/db/client";
 import { eq } from "@tepian-k3/db/index";
 import { users } from "@tepian-k3/db/schema";
 import { z } from "zod";
@@ -15,7 +15,7 @@ const usersQueries = {
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: `Pengguna dengan username ${username} tidak ditemukan.`,
+        message: `Pengguna dengan username tersebut tidak ditemukan.`,
       });
     }
 
@@ -30,18 +30,20 @@ const usersQueries = {
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: `Pengguna dengan ID ${userId} tidak ditemukan.`,
+        message: `Pengguna tidak ditemukan.`,
       });
     }
   },
 
   async createUser(data: z.infer<typeof userSchema.createUserSchema>) {
-    const isUsernameTaken = await this.getUserByUsername(data.username);
+    const isUsernameTaken = await db.query.users.findFirst({
+      where: eq(users.username, data.username),
+    });
 
     if (isUsernameTaken) {
       throw new TRPCError({
         code: "CONFLICT",
-        message: `Username ${data.username} sudah digunakan.`,
+        message: `Username sudah digunakan.`,
       });
     }
 

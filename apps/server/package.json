@@ -3,11 +3,10 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "pnpm with-env tsdown",
     "check-types": "tsc -b",
     "compile": "bun with-env build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "pnpm with-env tsx watch src/index.ts",
-    "start": "pnpm with-env node dist/index.js",
+    "start": "pnpm with-env tsx src/index.ts",
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {

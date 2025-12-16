@@ -14,10 +14,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { queryClient, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import authSchema from "@tepian-k3/schema/auth.schema";
 import type z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -29,12 +28,13 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { Link, useNavigate } from "@tanstack/react-router";
+import userSchema from "@tepian-k3/schema/users.schema";
 import { Separator } from "./ui/separator";
 
-export function LoginForm({
+export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -42,24 +42,20 @@ export function LoginForm({
 
   const [type, setType] = useState<"text" | "password">("password");
 
-  const form = useForm<z.infer<typeof authSchema.loginSchema>>({
-    resolver: zodResolver(authSchema.loginSchema),
+  const form = useForm<z.infer<typeof userSchema.createUserSchema>>({
+    resolver: zodResolver(userSchema.createUserSchema),
     defaultValues: {
       username: "",
       password: "",
     },
   });
 
-  const loginMutation = useMutation(
-    trpc.auth.login.mutationOptions({
-      onSuccess: async (data) => {
-        localStorage.setItem("token", data.token);
+  const registerMutation = useMutation(
+    trpc.auth.register.mutationOptions({
+      onSuccess: () => {
+        globalSuccessToast("Daftar berhasil, silahkan login");
 
-        await queryClient.refetchQueries(trpc.auth.me.queryFilter());
-
-        globalSuccessToast("Login berhasil");
-
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/login" });
       },
       onError: (error) => {
         globalErrorToast(error.message);
@@ -67,17 +63,17 @@ export function LoginForm({
     })
   );
 
-  function handleSubmit(values: z.infer<typeof authSchema.loginSchema>) {
-    loginMutation.mutate(values);
+  function handleSubmit(values: z.infer<typeof userSchema.createUserSchema>) {
+    registerMutation.mutate(values);
   }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login ke akun Anda</CardTitle>
+          <CardTitle>Daftar akun baru</CardTitle>
           <CardDescription>
-            Masukkan username Anda di bawah untuk login ke akun Anda
+            Masukkan email Anda di bawah untuk mendaftar akun baru
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -97,7 +93,7 @@ export function LoginForm({
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="Enter your username"
+                        placeholder="Masukkan username Anda"
                         className="h-10 text-sm"
                         {...field}
                       />
@@ -148,19 +144,19 @@ export function LoginForm({
               <Button
                 type="submit"
                 className="mt-2 h-10 w-full text-sm"
-                disabled={loginMutation.isPending}
+                disabled={registerMutation.isPending}
               >
-                {loginMutation.isPending ? (
+                {registerMutation.isPending ? (
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Masuk
+                Daftar
               </Button>
               <Separator />
               <Link
-                to="/register"
+                to="/login"
                 className="text-center text-sm text-primary hover:underline"
               >
-                Belum punya akun? Daftar di sini
+                Sudah punya akun? Masuk di sini
               </Link>
             </form>
           </Form>
