@@ -1,0 +1,37 @@
+{
+  "name": "tepian-k3",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @tepian-k3/db db:push",
+    "db:studio": "turbo -F @tepian-k3/db db:studio",
+    "db:generate": "turbo -F @tepian-k3/db db:generate",
+    "db:migrate": "turbo -F @tepian-k3/db db:migrate"
+  },
+  "dependencies": {
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "turbo": "^2.6.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "typescript": "catalog:",
+    "@types/node": "^22.13.11"
+  },
+  "lint-staged": {
+    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": ""
+  },
+  "packageManager": "pnpm@10.5.2"
+}
