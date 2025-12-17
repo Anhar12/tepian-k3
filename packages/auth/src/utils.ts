@@ -1,6 +1,5 @@
-import type { JWTPayload } from "jose";
 import { decrypt } from ".";
-import type { SessionUser } from "./types/auth.types";
+import type { JWTPayload, SessionUser } from "./types/auth.types";
 
 export async function validateToken(token: string): Promise<{
   session: SessionUser | null;
@@ -24,7 +23,7 @@ export async function validateToken(token: string): Promise<{
 
     const user = {
       id: payload.id,
-      username: payload.username,
+      email: payload.email,
       createdAt: payload.createdAt,
       updatedAt: payload.updatedAt,
     };

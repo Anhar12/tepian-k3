@@ -17,6 +17,7 @@
   "dependencies": {
     "@tepian-k3/auth": "workspace:*",
     "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/services": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/queries": "workspace:*",
     "@trpc/client": "catalog:",

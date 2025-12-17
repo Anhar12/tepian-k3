@@ -5,12 +5,14 @@ import { TRPCError } from "@trpc/server";
 import { verify } from "@node-rs/argon2";
 import { encrypt } from "@tepian-k3/auth";
 import userSchema from "@tepian-k3/schema/users.schema";
+import otpSchema from "@tepian-k3/schema/otp.schema";
+import { OTPService } from "@tepian-k3/auth/services/otp";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
     .input(authSchema.loginSchema)
     .mutation(async ({ input }) => {
-      const user = await usersQueries.getUserByUsername(input.username);
+      const user = await usersQueries.getUserByEmail(input.email);
 
       if (!user) {
         throw new TRPCError({
@@ -31,7 +33,7 @@ export const authRouter = createTRPCRouter({
       // Generate JWT token
       const token = await encrypt({
         id: user.id,
-        username: user.username,
+        email: user.email,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days
@@ -55,7 +57,43 @@ export const authRouter = createTRPCRouter({
       return createdUser;
     }),
 
-  me: publicProcedure.query(({ ctx }) => {
-    return ctx.user ?? null;
+  sendOTP: publicProcedure
+    .input(otpSchema.createOtpSchema)
+    .mutation(async ({ input }) => {
+      const result = await OTPService.createOTP(input);
+
+      if (!result.success) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: result.message,
+        });
+      }
+
+      return result;
+    }),
+
+  verifyOTP: publicProcedure
+    .input(otpSchema.verifyOtpSchema)
+    .mutation(async ({ input }) => {
+      const result = await OTPService.verifyOTP(input);
+
+      if (!result.success) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: result.message,
+        });
+      }
+
+      return result;
+    }),
+
+  me: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) {
+      return null;
+    }
+
+    const user = await usersQueries.getUserById(ctx.user?.id);
+
+    return user;
   }),
 });

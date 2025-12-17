@@ -1,6 +1,6 @@
 {
-  "id": "59ffd448-50bb-4326-bc52-c53ba6474902",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "8b3a5d38-facd-491c-806d-2d0a560ef273",
+  "prevId": "59ffd448-50bb-4326-bc52-c53ba6474902",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -138,7 +138,7 @@
           "name": "name",
           "type": "varchar(250)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email_verified": {
           "name": "email_verified",

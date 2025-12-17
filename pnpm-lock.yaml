@@ -350,6 +350,9 @@ importers:
       '@tepian-k3/schema':
         specifier: workspace:*
         version: link:../schema
+      '@tepian-k3/services':
+        specifier: workspace:*
+        version: link:../services
       '@trpc/client':
         specifier: 'catalog:'
         version: 11.8.0(@trpc/server@11.8.0(typescript@5.9.3))(typescript@5.9.3)
@@ -381,6 +384,15 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.2.1)
+      '@tepian-k3/queries':
+        specifier: workspace:*
+        version: link:../queries
+      '@tepian-k3/schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@tepian-k3/services':
+        specifier: workspace:*
+        version: link:../services
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
