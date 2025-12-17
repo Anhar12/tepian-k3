@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -29,6 +30,10 @@ export const users = createTable(
       withTimezone: true,
       mode: "string",
     }),
+    deletedAt: timestamp("deleted_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
     createdAt: timestamp("created_at", {
       withTimezone: true,
       mode: "string",
@@ -44,6 +49,9 @@ export const users = createTable(
     unique("user_email_unique_idx").on(table.email),
     index("user_idx").using("btree", table.id),
     index("user_email_idx").using("btree", table.email),
+    uniqueIndex("email_deleted_at_unique_idx")
+      .on(table.email)
+      .where(sql`${table.deletedAt} IS NULL`),
   ]
 );
 
