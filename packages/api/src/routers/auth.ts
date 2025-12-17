@@ -30,6 +30,13 @@ export const authRouter = createTRPCRouter({
         });
       }
 
+      if (!user.emailVerified) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Email belum terverifikasi.",
+        });
+      }
+
       // Generate JWT token
       const token = await encrypt({
         id: user.id,
