@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.email("Gunakan format email yang valid"),
+  password: z.string().min(8, "Password harus terdiri dari minimal 8 karakter"),
 });
 
 const authSchema = {

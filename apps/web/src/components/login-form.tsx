@@ -45,7 +45,7 @@ export function LoginForm({
   const form = useForm<z.infer<typeof authSchema.loginSchema>>({
     resolver: zodResolver(authSchema.loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -77,7 +77,7 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>Login ke akun Anda</CardTitle>
           <CardDescription>
-            Masukkan username Anda di bawah untuk login ke akun Anda
+            Masukkan email Anda di bawah untuk login ke akun Anda
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -88,16 +88,16 @@ export function LoginForm({
             >
               <FormField
                 control={form.control}
-                name="username"
+                name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
                     <FormLabel className="ml-1 font-bold text-sm">
-                      Username
+                      Email
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type="text"
-                        placeholder="Enter your username"
+                        type="email"
+                        placeholder="Enter your email"
                         className="h-10 text-sm"
                         {...field}
                       />

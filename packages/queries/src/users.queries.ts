@@ -7,15 +7,15 @@ import userSchema from "@tepian-k3/schema/users.schema";
 import { hash } from "@node-rs/argon2";
 
 const usersQueries = {
-  async getUserByUsername(username: string) {
+  async getUserByEmail(email: string) {
     const user = await db.query.users.findFirst({
-      where: eq(users.username, username),
+      where: eq(users.email, email),
     });
 
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: `Pengguna dengan username tersebut tidak ditemukan.`,
+        message: `Pengguna dengan email tersebut tidak ditemukan.`,
       });
     }
 
@@ -25,6 +25,9 @@ const usersQueries = {
   async getUserById(userId: string) {
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
+      columns: {
+        password: false,
+      },
     });
 
     if (!user) {
@@ -33,14 +36,16 @@ const usersQueries = {
         message: `Pengguna tidak ditemukan.`,
       });
     }
+
+    return user;
   },
 
   async createUser(data: z.infer<typeof userSchema.createUserSchema>) {
-    const isUsernameTaken = await db.query.users.findFirst({
-      where: eq(users.username, data.username),
+    const isEmailTaken = await db.query.users.findFirst({
+      where: eq(users.email, data.email),
     });
 
-    if (isUsernameTaken) {
+    if (isEmailTaken) {
       throw new TRPCError({
         code: "CONFLICT",
         message: `Username sudah digunakan.`,
@@ -62,6 +67,24 @@ const usersQueries = {
       });
     }
 
+    return user;
+  },
+
+  async markUserEmailAsVerified(userId: string) {
+    await this.getUserById(userId);
+
+    const [user] = await db
+      .update(users)
+      .set({ emailVerified: true, emailVerifiedAt: new Date().toISOString() })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!user) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Gagal memverifikasi email pengguna.`,
+      });
+    }
     return user;
   },
 };

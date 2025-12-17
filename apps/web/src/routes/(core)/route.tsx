@@ -14,6 +14,10 @@ export const Route = createFileRoute("/(core)")({
       throw redirect({ to: "/login" });
     }
 
+    if (user && !user.emailVerified) {
+      throw redirect({ to: "/verify-email" });
+    }
+
     return null;
   },
   component: RouteComponent,

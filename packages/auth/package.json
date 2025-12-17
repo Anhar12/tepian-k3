@@ -16,6 +16,9 @@
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",
+    "@tepian-k3/schema": "workspace:*",
+    "@tepian-k3/queries": "workspace:*",
+    "@tepian-k3/services": "workspace:*",
     "dotenv": "catalog:",
     "jose": "^6.1.3",
     "zod": "catalog:"

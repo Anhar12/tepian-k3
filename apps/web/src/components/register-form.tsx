@@ -45,7 +45,8 @@ export function RegisterForm({
   const form = useForm<z.infer<typeof userSchema.createUserSchema>>({
     resolver: zodResolver(userSchema.createUserSchema),
     defaultValues: {
-      username: "",
+      name: "",
+      email: "",
       password: "",
     },
   });
@@ -84,16 +85,36 @@ export function RegisterForm({
             >
               <FormField
                 control={form.control}
-                name="username"
+                name="name"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
                     <FormLabel className="ml-1 font-bold text-sm">
-                      Username
+                      Nama
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="Masukkan username Anda"
+                        placeholder="Masukkan nama Anda"
+                        className="h-10 text-sm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="min-h-4 text-xs" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel className="ml-1 font-bold text-sm">
+                      Email
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="Masukkan email Anda"
                         className="h-10 text-sm"
                         {...field}
                       />
