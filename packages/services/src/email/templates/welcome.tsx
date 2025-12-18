@@ -10,6 +10,7 @@ import {
   Section,
   Text,
   Tailwind,
+  pixelBasedPreset,
 } from "@react-email/components";
 
 interface WelcomeEmailProps {
@@ -22,7 +23,11 @@ export function WelcomeEmail({ name, dashboardUrl }: WelcomeEmailProps) {
     <Html>
       <Head />
       <Preview>Welcome to our platform!</Preview>
-      <Tailwind>
+      <Tailwind
+        config={{
+          presets: [pixelBasedPreset],
+        }}
+      >
         <Body className="bg-gray-100 font-sans">
           <Container className="mx-auto my-10 max-w-2xl rounded-lg bg-white p-8 shadow-lg">
             <Heading className="mb-6 text-3xl font-bold text-gray-900">

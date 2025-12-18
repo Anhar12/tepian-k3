@@ -9,6 +9,7 @@ import {
   Section,
   Text,
   Tailwind,
+  pixelBasedPreset,
 } from "@react-email/components";
 
 interface OTPEmailProps {
@@ -21,7 +22,11 @@ export function OTPEmail({ code, expiresInMinutes }: OTPEmailProps) {
     <Html>
       <Head />
       <Preview>Your verification code: {code}</Preview>
-      <Tailwind>
+      <Tailwind
+        config={{
+          presets: [pixelBasedPreset],
+        }}
+      >
         <Body className="bg-gray-100 font-sans">
           <Container className="mx-auto my-10 max-w-2xl rounded-lg bg-white p-8 shadow-lg">
             <Heading className="mb-6 text-2xl font-bold text-gray-900">
