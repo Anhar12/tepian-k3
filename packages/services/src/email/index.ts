@@ -6,6 +6,7 @@ import type { SendEmailOptions } from "./providers/nodemailer";
 import { OTPEmail } from "./templates/otp";
 import { WelcomeEmail } from "./templates/welcome";
 import { PasswordResetEmail } from "./templates/password-reset";
+
 export class EmailService {
   private provider = emailProvider;
 
