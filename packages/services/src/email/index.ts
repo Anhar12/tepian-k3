@@ -1,6 +1,6 @@
-import { nodemailerProvider as emailProvider } from "./providers/nodemailer";
+// import { nodemailerProvider as emailProvider } from "./providers/nodemailer";
 // Or use Resend:
-// import { resendProvider as emailProvider } from './providers/resend';
+import { resendProvider as emailProvider } from "./providers/resend";
 
 import type { SendEmailOptions } from "./providers/nodemailer";
 import { OTPEmail } from "./templates/otp";
@@ -51,7 +51,7 @@ export class EmailService {
   // Verify email connection (Nodemailer only)
   async verify() {
     if ("verify" in this.provider) {
-      return await this.provider.verify();
+      return await this.provider.verify;
     }
     return true;
   }
