@@ -1,14 +1,15 @@
 {
   "name": "@tepian-k3/services",
-  "private": true,
+  "type": "module",
   "scripts": {
     "email:dev": "email dev --dir ./src/email/dev --port 3001",
     "email:verify": "pnpm with-env tsx src/scripts/verify-email.ts",
     "with-env": "dotenv -e ../../.env --"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./email": "./src/email/index.ts"
+    "./email": {
+      "default": "./src/email/index.ts"
+    }
   },
   "dependencies": {
     "@react-email/components": "^1.0.1",

@@ -1,4 +1,3 @@
-// Choose your provider
 import { nodemailerProvider as emailProvider } from "./providers/nodemailer";
 // Or use Resend:
 // import { resendProvider as emailProvider } from './providers/resend';
@@ -7,7 +6,6 @@ import type { SendEmailOptions } from "./providers/nodemailer";
 import { OTPEmail } from "./templates/otp";
 import { WelcomeEmail } from "./templates/welcome";
 import { PasswordResetEmail } from "./templates/password-reset";
-
 export class EmailService {
   private provider = emailProvider;
 
@@ -60,6 +58,3 @@ export class EmailService {
 }
 
 export const emailService = new EmailService();
-
-// Export templates for testing/preview
-export { OTPEmail, WelcomeEmail, PasswordResetEmail };

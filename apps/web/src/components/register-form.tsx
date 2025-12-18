@@ -53,10 +53,15 @@ export function RegisterForm({
 
   const registerMutation = useMutation(
     trpc.auth.register.mutationOptions({
-      onSuccess: () => {
-        globalSuccessToast("Daftar berhasil, silahkan login");
+      onSuccess: (data) => {
+        globalSuccessToast("Daftar berhasil, silahkan verifikasi email Anda.");
 
-        navigate({ to: "/login" });
+        navigate({
+          to: "/verify-email",
+          search: {
+            email: data.email,
+          },
+        });
       },
       onError: (error) => {
         globalErrorToast(error.message);
