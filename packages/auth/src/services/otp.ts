@@ -139,6 +139,9 @@ export class OTPService {
         };
       }
 
+      // Invalidate old OTPs
+      await otpQueries.deleteOTPsByEmail(email);
+
       // Rate Limiting
       const lastOTP = await otpQueries.findLastOTPByEmail(email);
       if (lastOTP) {

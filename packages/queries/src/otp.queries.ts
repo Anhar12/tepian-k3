@@ -74,6 +74,12 @@ const otpQueries = {
       .delete(otpCodes)
       .where(gt(otpCodes.expiresAt, new Date().toISOString()));
   },
+
+  async deleteOTPsByEmail(email: string) {
+    await db
+      .delete(otpCodes)
+      .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false)));
+  },
 };
 
 export default otpQueries;
