@@ -25,6 +25,9 @@ export const users = createTable(
     password: varchar("password", { length: 150 }).notNull(),
     email: varchar("email", { length: 250 }).notNull(),
     name: varchar("name", { length: 250 }).notNull(),
+    address: text("address").notNull(),
+    company: varchar("company", { length: 250 }).notNull(),
+    phone: varchar("phone", { length: 50 }).notNull(),
     emailVerified: boolean("email_verified").notNull().default(false),
     emailVerifiedAt: timestamp("email_verified_at", {
       withTimezone: true,
