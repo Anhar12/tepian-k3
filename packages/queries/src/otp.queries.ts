@@ -37,6 +37,15 @@ const otpQueries = {
     return res;
   },
 
+  async findLastOTPByEmail(email: string) {
+    const res = await db.query.otpCodes.findFirst({
+      where: eq(otpCodes.email, email),
+      orderBy: (otpCodes, { desc }) => [desc(otpCodes.createdAt)],
+    });
+
+    return res;
+  },
+
   async incrementOTPAttempts(id: string, currentAttempt: number) {
     const [result] = await db
       .update(otpCodes)

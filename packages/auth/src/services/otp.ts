@@ -126,6 +126,75 @@ export class OTPService {
     }
   }
 
+  static async resendOTP(input: z.infer<typeof otpSchema.createOtpSchema>) {
+    try {
+      const { email } = input;
+
+      const user = await userQueries.getUserByEmail(email);
+
+      if (!user) {
+        return {
+          success: false,
+          message: "Pengguna dengan email tersebut tidak ditemukan.",
+        };
+      }
+
+      // Rate Limiting
+      const lastOTP = await otpQueries.findLastOTPByEmail(email);
+      if (lastOTP) {
+        const timeSinceLastOTP =
+          Date.now() - new Date(lastOTP.createdAt).getTime();
+        const MIN_RESEND_INTERVAL = 60 * 1000; // 1 minute
+
+        if (timeSinceLastOTP < MIN_RESEND_INTERVAL) {
+          const waitTime = Math.ceil(
+            (MIN_RESEND_INTERVAL - timeSinceLastOTP) / 1000
+          );
+          return {
+            success: false,
+            message: `Silakan tunggu ${waitTime} detik sebelum mengirim ulang OTP.`,
+          };
+        }
+      }
+
+      // Invalidate old OTPs
+      await otpQueries.invalidateOTPsByEmail(email);
+
+      // Generate new OTP
+      const code = this.generateOTP();
+      const expiresAt = new Date(
+        Date.now() + this.OTP_EXPIRY_MINUTES * 60 * 1000
+      ).toISOString();
+
+      await otpQueries.createOTP({
+        userId: user.id,
+        code,
+        email,
+        expiresAt,
+        attempts: 0,
+        verified: false,
+      });
+
+      // Send email
+      await emailService.sendOTP({
+        email,
+        code,
+        expiresInMinutes: this.OTP_EXPIRY_MINUTES,
+      });
+
+      return {
+        success: true,
+        message: "New verification code sent successfully",
+      };
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      return {
+        success: false,
+        message: "Failed to resend OTP",
+      };
+    }
+  }
+
   static async cleanupExpiredOTPs(): Promise<void> {
     try {
       await otpQueries.deleteExpiredOTPs();

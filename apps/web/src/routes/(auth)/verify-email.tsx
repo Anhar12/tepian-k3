@@ -84,6 +84,20 @@ function VerifyEmailComponent() {
   //   }
   // );
 
+  const resendMutation = useMutation(
+    trpc.auth.resendOTP.mutationOptions({
+      onSuccess: () => {
+        globalSuccessToast(
+          "Kode verifikasi telah dikirim ulang ke email Anda."
+        );
+        setCode("");
+      },
+      onError: (error) => {
+        globalErrorToast(error.message);
+      },
+    })
+  );
+
   const handleSendOTP = (): void => {
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -116,11 +130,11 @@ function VerifyEmailComponent() {
     verifyMutation.mutate({ email, code: codeValue });
   };
 
-  // const handleResend = (): void => {
-  //   setCode("");
-  //   // In real app: resendMutation.mutate({ email });
-  //   resendMutation.mutate({ email });
-  // };
+  const handleResend = (): void => {
+    setCode("");
+    // In real app: resendMutation.mutate({ email });
+    resendMutation.mutate({ email });
+  };
 
   const handleBackToEmail = (): void => {
     setStep("email");
@@ -219,7 +233,7 @@ function VerifyEmailComponent() {
               <Button
                 onClick={() => handleVerify()}
                 disabled={verifyMutation.isPending || code.length !== 6}
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                className="w-full h-12 text-base font-semibold bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                 size="lg"
               >
                 {verifyMutation.isPending ? (
@@ -244,27 +258,25 @@ function VerifyEmailComponent() {
               </div>
             </div>
 
-            {/* <div className="text-center space-y-3">
-                <p className="text-sm text-gray-600">
-                  Didn't receive the code?
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleResend}
-                  disabled={resendMutation.isPending}
-                  className="w-full h-11 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-medium"
-                >
-                  {resendMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Resend Verification Code"
-                  )}
-                </Button>
-              </div> */}
+            <div className="text-center space-y-3">
+              <p className="text-sm text-gray-600">Didn't receive the code?</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResend}
+                disabled={resendMutation.isPending}
+                className="w-full h-11 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-medium"
+              >
+                {resendMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Resend Verification Code"
+                )}
+              </Button>
+            </div>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4 pt-2">

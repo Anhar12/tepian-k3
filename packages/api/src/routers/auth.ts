@@ -79,6 +79,21 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
+  resendOTP: publicProcedure
+    .input(otpSchema.createOtpSchema)
+    .mutation(async ({ input }) => {
+      const result = await OTPService.resendOTP(input);
+
+      if (!result.success) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: result.message,
+        });
+      }
+
+      return result;
+    }),
+
   verifyOTP: publicProcedure
     .input(otpSchema.verifyOtpSchema)
     .mutation(async ({ input }) => {
