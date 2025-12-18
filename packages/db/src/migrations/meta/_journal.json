@@ -15,6 +15,13 @@
       "when": 1765953256514,
       "tag": "0001_eager_iron_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765970824426,
+      "tag": "0002_previous_shiver_man",
+      "breakpoints": true
     }
   ]
 }
