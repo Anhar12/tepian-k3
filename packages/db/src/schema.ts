@@ -12,6 +12,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { v7 as uuidv7 } from "uuid";
+import { timestamps } from "./utils";
 
 export const createTable = pgTableCreator((name) => `${name}`);
 
@@ -26,27 +27,13 @@ export const users = createTable(
     email: varchar("email", { length: 250 }).notNull(),
     name: varchar("name", { length: 250 }).notNull(),
     address: text("address").notNull(),
-    company: varchar("company", { length: 250 }).notNull(),
     phone: varchar("phone", { length: 50 }).notNull(),
     emailVerified: boolean("email_verified").notNull().default(false),
     emailVerifiedAt: timestamp("email_verified_at", {
       withTimezone: true,
       mode: "string",
     }),
-    deletedAt: timestamp("deleted_at", {
-      withTimezone: true,
-      mode: "string",
-    }),
-    createdAt: timestamp("created_at", {
-      withTimezone: true,
-      mode: "string",
-    })
-      .$default(() => sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", {
-      withTimezone: true,
-      mode: "string",
-    }),
+    ...timestamps,
   },
   (table) => [
     unique("user_email_unique_idx").on(table.email),
@@ -89,3 +76,16 @@ export const otpCodes = createTable(
     index("otp_code_email_idx").using("btree", table.email),
   ]
 );
+
+export const userCompanies = createTable("user_companies", {
+  id: uuid("id")
+    .primaryKey()
+    .notNull()
+    .$default(() => uuidv7()),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  companyName: varchar("company_name", { length: 250 }).notNull(),
+  companyAddress: text("company_address").notNull(),
+  ...timestamps,
+});

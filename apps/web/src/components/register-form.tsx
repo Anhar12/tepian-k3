@@ -48,7 +48,6 @@ export function RegisterForm({
       name: "",
       email: "",
       address: "",
-      company: "",
       phone: "",
       password: "",
     },
@@ -143,26 +142,6 @@ export function RegisterForm({
                       <Input
                         type="text"
                         placeholder="Masukkan alamat Anda"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="company"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
-                      Perusahaan
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan perusahaan Anda"
                         className="h-10 text-sm"
                         {...field}
                       />

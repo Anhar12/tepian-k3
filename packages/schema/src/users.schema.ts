@@ -5,7 +5,6 @@ import z from "zod";
 const createUserSchema = createInsertSchema(users, {
   name: z.string().min(1),
   address: z.string().min(1),
-  company: z.string().min(1),
   phone: z
     .string()
     .min(1)
