@@ -9,14 +9,19 @@
   "exports": {
     "./email": {
       "default": "./src/email/index.ts"
+    },
+    "./logger": {
+      "default": "./src/logger/index.ts"
     }
   },
   "dependencies": {
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
+    "logform": "^2.7.0",
     "nodemailer": "^7.0.11",
     "react": "19.2.3",
-    "resend": "^6.6.0"
+    "resend": "^6.6.0",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@react-email/preview-server": "5.0.8",

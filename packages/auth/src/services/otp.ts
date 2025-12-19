@@ -5,6 +5,7 @@ import otpQueries from "@tepian-k3/queries/otp.queries";
 import { emailService } from "@tepian-k3/services/email";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import { encrypt } from "..";
+import logger from "@tepian-k3/services/logger";
 
 export class OTPService {
   //   private static OTP_LENGTH = 6;
@@ -51,12 +52,18 @@ export class OTPService {
         expiresInMinutes: this.OTP_EXPIRY_MINUTES,
       });
 
+      logger.info("OTP created and sent to email:", { email });
+
       return {
         success: true,
         message: "OTP berhasil dibuat dan dikirim ke email.",
       };
     } catch (error) {
-      console.error("Error creating OTP:", error);
+      logger.error("Error creating OTP", {
+        email: input.email,
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
 
       return {
         success: false,
@@ -118,7 +125,12 @@ export class OTPService {
         token,
       };
     } catch (error) {
-      console.error("Error verifying OTP:", error);
+      logger.error("Error verifying OTP", {
+        email: input.email,
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
       return {
         success: false,
         message: "Gagal memverifikasi OTP.",
@@ -191,7 +203,12 @@ export class OTPService {
         message: "New verification code sent successfully",
       };
     } catch (error) {
-      console.error("Error resending OTP:", error);
+      logger.error("Error resending OTP", {
+        email: input.email,
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
       return {
         success: false,
         message: "Failed to resend OTP",
@@ -203,7 +220,10 @@ export class OTPService {
     try {
       await otpQueries.deleteExpiredOTPs();
     } catch (error) {
-      console.error("Error cleaning up OTPs:", error);
+      logger.error("Error cleaning up OTPs", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     }
   }
 }
