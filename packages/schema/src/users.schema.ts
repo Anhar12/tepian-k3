@@ -13,7 +13,6 @@ const createUserSchema = createInsertSchema(users, {
 }).pick({
   name: true,
   address: true,
-  company: true,
   phone: true,
   email: true,
   password: true,
@@ -23,7 +22,6 @@ const updateUserSchema = createUpdateSchema(users).pick({
   id: true,
   name: true,
   address: true,
-  company: true,
   phone: true,
   password: true,
 });

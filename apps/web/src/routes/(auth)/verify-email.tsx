@@ -73,17 +73,6 @@ function VerifyEmailComponent() {
     })
   );
 
-  // const resendMutation = useMockMutation(
-  //   () => {
-  //     setError("");
-  //     setCode("");
-  //     alert("Verification code resent to your email!");
-  //   },
-  //   (error: MutationError) => {
-  //     setError(error.message);
-  //   }
-  // );
-
   const resendMutation = useMutation(
     trpc.auth.resendOTP.mutationOptions({
       onSuccess: () => {
@@ -106,13 +95,11 @@ function VerifyEmailComponent() {
       return;
     }
 
-    // In real app: sendOTPMutation.mutate({ email });
     sendOTPMutation.mutate({ email });
   };
 
   const handleCodeChange = (value: string): void => {
     setCode(value);
-    //   setError("");
 
     // Auto-submit when all 6 digits entered
     if (value.length === 6) {
@@ -126,13 +113,11 @@ function VerifyEmailComponent() {
       return;
     }
 
-    // In real app: verifyMutation.mutate({ email, code: codeValue });
     verifyMutation.mutate({ email, code: codeValue });
   };
 
   const handleResend = (): void => {
     setCode("");
-    // In real app: resendMutation.mutate({ email });
     resendMutation.mutate({ email });
   };
 
@@ -142,7 +127,7 @@ function VerifyEmailComponent() {
   };
 
   const handleBack = (): void => {
-    console.log("Going back to previous page...");
+    navigate({ to: "/register" });
   };
 
   useEffect(() => {
@@ -156,24 +141,24 @@ function VerifyEmailComponent() {
   // Success Screen
   if (step === "success") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-        <Card className="w-full max-w-md shadow-xl border-0">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
           <CardContent className="pt-8 pb-10 text-center">
             <div className="mb-6 flex justify-center">
-              <div className="rounded-full bg-linear-to-br from-green-400 to-emerald-500 p-4 shadow-lg">
-                <CheckCircle2 className="h-14 w-14 text-white" />
+              <div className="rounded-full bg-primary p-4">
+                <CheckCircle2 className="h-14 w-14 text-primary-foreground" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold mb-3 text-gray-900">
+            <h2 className="text-3xl font-bold mb-3 text-foreground">
               Email Verified!
             </h2>
-            <p className="text-gray-600 mb-8 text-lg">
+            <p className="text-muted-foreground mb-8 text-lg">
               Your email has been successfully verified.
               <br />
               Redirecting to your dashboard...
             </p>
             <div className="flex justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -184,19 +169,19 @@ function VerifyEmailComponent() {
   // OTP Verification Screen
   if (step === "otp") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-        <Card className="w-full max-w-md shadow-xl border-0">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-3 pb-6">
-            <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg">
-              <Mail className="h-10 w-10 text-white" />
+            <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary">
+              <Mail className="h-10 w-10 text-primary-foreground" />
             </div>
-            <CardTitle className="text-3xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold">
               Verify Your Email
             </CardTitle>
-            <CardDescription className="text-base text-gray-600">
+            <CardDescription className="text-base">
               We've sent a 6-digit verification code to
               <br />
-              <span className="font-semibold text-gray-900 text-lg">
+              <span className="font-semibold text-foreground text-lg">
                 {email}
               </span>
             </CardDescription>
@@ -205,7 +190,7 @@ function VerifyEmailComponent() {
           <CardContent className="space-y-6">
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="text-center block text-base font-medium text-gray-700">
+                <label className="text-center block text-base font-medium text-foreground">
                   Enter verification code
                 </label>
                 <div className="flex justify-center">
@@ -225,7 +210,7 @@ function VerifyEmailComponent() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <p className="text-center text-sm text-gray-600">
+                <p className="text-center text-sm text-muted-foreground">
                   Enter the 6-digit code sent to your email
                 </p>
               </div>
@@ -233,7 +218,7 @@ function VerifyEmailComponent() {
               <Button
                 onClick={() => handleVerify()}
                 disabled={verifyMutation.isPending || code.length !== 6}
-                className="w-full h-12 text-base font-semibold bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                className="w-full h-12 text-base font-semibold"
                 size="lg"
               >
                 {verifyMutation.isPending ? (
@@ -249,23 +234,25 @@ function VerifyEmailComponent() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-200" />
+                <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">
+                <span className="bg-card px-2 text-muted-foreground">
                   Having trouble?
                 </span>
               </div>
             </div>
 
             <div className="text-center space-y-3">
-              <p className="text-sm text-gray-600">Didn't receive the code?</p>
+              <p className="text-sm text-muted-foreground">
+                Didn't receive the code?
+              </p>
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleResend}
                 disabled={resendMutation.isPending}
-                className="w-full h-11 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-medium"
+                className="w-full h-11 font-medium"
               >
                 {resendMutation.isPending ? (
                   <>
@@ -282,27 +269,27 @@ function VerifyEmailComponent() {
           <CardFooter className="flex flex-col space-y-4 pt-2">
             <Button
               variant="ghost"
-              className="w-full text-gray-600 hover:text-gray-900"
+              className="w-full"
               onClick={handleBackToEmail}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Change Email
             </Button>
 
-            <p className="text-xs text-center text-gray-500">
+            <p className="text-xs text-center text-muted-foreground">
               By verifying your email, you agree to our Terms of Service and
               Privacy Policy
             </p>
           </CardFooter>
         </Card>
 
-        <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-xl border max-w-xs">
-          <p className="text-sm font-semibold mb-2 text-gray-900">
+        <div className="fixed bottom-4 right-4 bg-card p-4 rounded-lg shadow-lg border max-w-xs">
+          <p className="text-sm font-semibold mb-2 text-foreground">
             💡 Demo Instructions
           </p>
-          <p className="text-xs text-gray-600 leading-relaxed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Enter{" "}
-            <span className="font-mono font-bold bg-blue-100 px-1.5 py-0.5 rounded text-blue-700">
+            <span className="font-mono font-bold bg-muted px-1.5 py-0.5 rounded text-foreground">
               123456
             </span>{" "}
             to verify successfully.
@@ -314,16 +301,16 @@ function VerifyEmailComponent() {
 
   // Email Input Screen (Default)
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <Card className="w-full max-w-md shadow-xl border-0">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-3 pb-6">
-          <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg">
-            <Mail className="h-10 w-10 text-white" />
+          <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary">
+            <Mail className="h-10 w-10 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <CardTitle className="text-3xl font-bold">
             Verify Your Email
           </CardTitle>
-          <CardDescription className="text-base text-gray-600">
+          <CardDescription className="text-base">
             Enter your email address to receive a verification code
           </CardDescription>
         </CardHeader>
@@ -332,7 +319,7 @@ function VerifyEmailComponent() {
           <div className="space-y-2">
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground"
             >
               Email Address
             </label>
@@ -352,7 +339,7 @@ function VerifyEmailComponent() {
               disabled={sendOTPMutation.isPending}
               className="h-12 text-base"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               We'll send a 6-digit verification code to this email
             </p>
           </div>
@@ -360,7 +347,7 @@ function VerifyEmailComponent() {
           <Button
             onClick={handleSendOTP}
             disabled={sendOTPMutation.isPending || !email}
-            className="w-full h-12 text-base font-semibold bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+            className="w-full h-12 text-base font-semibold"
             size="lg"
           >
             {sendOTPMutation.isPending ? (
@@ -375,26 +362,22 @@ function VerifyEmailComponent() {
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4 pt-2">
-          <Button
-            variant="ghost"
-            className="w-full text-gray-600 hover:text-gray-900"
-            onClick={handleBack}
-          >
+          <Button variant="ghost" className="w-full" onClick={handleBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Sign Up
           </Button>
 
-          <p className="text-xs text-center text-gray-500">
+          <p className="text-xs text-center text-muted-foreground">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
         </CardFooter>
       </Card>
 
-      <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-xl border max-w-xs">
-        <p className="text-sm font-semibold mb-2 text-gray-900">
+      <div className="fixed bottom-4 right-4 bg-card p-4 rounded-lg shadow-lg border max-w-xs">
+        <p className="text-sm font-semibold mb-2 text-foreground">
           💡 Demo Instructions
         </p>
-        <p className="text-xs text-gray-600 leading-relaxed">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           Enter any valid email format to proceed to the OTP screen.
         </p>
       </div>

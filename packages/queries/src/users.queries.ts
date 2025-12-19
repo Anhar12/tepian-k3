@@ -12,13 +12,6 @@ const usersQueries = {
       where: and(eq(users.email, email), isNull(users.deletedAt)),
     });
 
-    if (!user) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: `Pengguna dengan email tersebut tidak ditemukan.`,
-      });
-    }
-
     return user;
   },
 
