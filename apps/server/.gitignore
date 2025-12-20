@@ -53,3 +53,7 @@ lerna-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Uploads (except .gitkeep)
+uploads/*
+!uploads/.gitkeep
