@@ -7,38 +7,18 @@ import { TRPCError } from "@trpc/server";
 import { Effect, Option } from "effect";
 import logger from "@tepian-k3/services/logger";
 
-type OTPQueries = {
-  invalidateOTPsByEmail: (
-    email: string
-  ) => Effect.Effect<unknown, TRPCError, never>;
-  createOTP: (
-    data: z.infer<typeof otpSchema.insertOtpSchema>
-  ) => Effect.Effect<unknown, TRPCError, never>;
-  findValidOTP: (
-    email: string
-  ) => Effect.Effect<Option.Option<unknown>, TRPCError, never>;
-  findLastOTPByEmail: (
-    email: string
-  ) => Effect.Effect<Option.Option<unknown>, TRPCError, never>;
-  incrementOTPAttempts: (
-    id: string,
-    currentAttempt: number
-  ) => Effect.Effect<unknown, TRPCError, never>;
-  markOTPAsVerified: (id: string) => Effect.Effect<unknown, TRPCError, never>;
-  deleteExpiredOTPs: () => Effect.Effect<unknown, TRPCError, never>;
-  deleteOTPsByEmail: (
-    email: string
-  ) => Effect.Effect<unknown, TRPCError, never>;
-};
-
-const otpQueries: OTPQueries = {
+const otpQueries = {
   invalidateOTPsByEmail(email: string) {
     return Effect.tryPromise({
-      try: () =>
-        db
+      try: () => {
+        const res = db
           .update(otpCodes)
           .set({ verified: true })
-          .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false))),
+          .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false)))
+          .returning();
+
+        return res;
+      },
       catch: (error) => {
         logger.error("Failed to invalidate OTPs by email", { email, error });
         return new TRPCError({
@@ -51,7 +31,7 @@ const otpQueries: OTPQueries = {
   },
 
   createOTP(data: z.infer<typeof otpSchema.insertOtpSchema>) {
-    return Effect.gen(this, function* () {
+    return Effect.gen(function* () {
       const [result] = yield* Effect.tryPromise({
         try: () => db.insert(otpCodes).values(data).returning(),
         catch: (error) => {
@@ -154,8 +134,14 @@ const otpQueries: OTPQueries = {
 
   markOTPAsVerified(id: string) {
     return Effect.tryPromise({
-      try: () =>
-        db.update(otpCodes).set({ verified: true }).where(eq(otpCodes.id, id)),
+      try: () => {
+        const res = db
+          .update(otpCodes)
+          .set({ verified: true })
+          .where(eq(otpCodes.id, id))
+          .returning();
+        return res;
+      },
       catch: (error) => {
         logger.error("Failed to mark OTP as verified", { id, error });
         return new TRPCError({
@@ -169,10 +155,14 @@ const otpQueries: OTPQueries = {
 
   deleteExpiredOTPs() {
     return Effect.tryPromise({
-      try: () =>
-        db
+      try: () => {
+        const res = db
           .delete(otpCodes)
-          .where(gt(otpCodes.expiresAt, new Date().toISOString())),
+          .where(gt(otpCodes.expiresAt, new Date().toISOString()))
+          .returning();
+
+        return res;
+      },
       catch: (error) => {
         logger.error("Failed to delete expired OTPs", { error });
         return new TRPCError({
@@ -186,10 +176,14 @@ const otpQueries: OTPQueries = {
 
   deleteOTPsByEmail(email: string) {
     return Effect.tryPromise({
-      try: () =>
-        db
+      try: () => {
+        const res = db
           .delete(otpCodes)
-          .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false))),
+          .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false)))
+          .returning();
+
+        return res;
+      },
       catch: (error) => {
         logger.error("Failed to delete OTPs by email", { email, error });
         return new TRPCError({
