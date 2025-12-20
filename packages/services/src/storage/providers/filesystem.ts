@@ -36,9 +36,17 @@ export class FileSystemProvider {
     const ext = filename ? path.extname(filename) : "";
     const name = filename ? path.basename(filename, ext) : "file";
     const uniqueId = uuidv7();
-    const key = `${name}-${uniqueId}${ext}`;
 
-    return folder ? `${folder}/${key}` : key;
+    // Clean filename: remove special chars, keep only alphanumeric, dash, underscore
+    const cleanName = name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase();
+
+    // Format: uploads/[folderName]/[cleanName]-[uuid].[ext]
+    const generatedFileName = `${cleanName}-${uniqueId}${ext}`;
+
+    // Always use a folder (default to 'general' if not provided)
+    const folderName = folder || "general";
+
+    return `${folderName}/${generatedFileName}`;
   }
 
   upload(
@@ -58,7 +66,6 @@ export class FileSystemProvider {
             Effect.tryPromise({
               try: async () => {
                 await fs.writeFile(filePath, file);
-
                 return {
                   key,
                   url: this.getPublicUrl(key),
@@ -88,6 +95,7 @@ export class FileSystemProvider {
   }
 
   getSignedUrl(key: string): Effect.Effect<string> {
+    // Filesystem doesn't support signed URLs, return public URL
     return Effect.succeed(this.getPublicUrl(key));
   }
 
