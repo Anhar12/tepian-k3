@@ -7,61 +7,78 @@ import { encrypt } from "@tepian-k3/auth";
 import userSchema from "@tepian-k3/schema/users.schema";
 import otpSchema from "@tepian-k3/schema/otp.schema";
 import { OTPService } from "@tepian-k3/auth/services/otp";
+import { Effect } from "effect";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
     .input(authSchema.loginSchema)
     .mutation(async ({ input }) => {
-      const user = await usersQueries.getUserByEmail(input.email);
+      return Effect.runPromise(
+        Effect.gen(function* () {
+          const user = yield* usersQueries.getUserByEmail(input.email);
 
-      if (!user) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Username atau password salah.",
-        });
-      }
+          const verifyPasswordResult = yield* Effect.tryPromise({
+            try: () => verify(user.password, input.password),
+            catch: (error) =>
+              new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal memverifikasi password.",
+                cause: error,
+              }),
+          });
 
-      const verifyPasswordResult = await verify(user.password, input.password);
+          if (!verifyPasswordResult) {
+            return yield* Effect.fail(
+              new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "Username atau password salah.",
+              })
+            );
+          }
 
-      if (!verifyPasswordResult) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Username atau password salah.",
-        });
-      }
+          if (!user.emailVerified) {
+            return yield* Effect.fail(
+              new TRPCError({
+                code: "FORBIDDEN",
+                message: "Email belum terverifikasi.",
+              })
+            );
+          }
 
-      if (!user.emailVerified) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Email belum terverifikasi.",
-        });
-      }
+          const token = yield* Effect.tryPromise({
+            try: () =>
+              encrypt({
+                id: user.id,
+                email: user.email,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
+                iat: Math.floor(Date.now() / 1000),
+                jti: user.id,
+              }),
+            catch: (error) =>
+              new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal membuat token.",
+                cause: error,
+              }),
+          });
 
-      // Generate JWT token
-      const token = await encrypt({
-        id: user.id,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days
-        iat: Math.floor(Date.now() / 1000),
-        jti: user.id,
-      });
-
-      return {
-        token,
-        user: {
-          ...user,
-          password: undefined,
-        },
-      };
+          return {
+            token,
+            user: {
+              ...user,
+              password: undefined,
+            },
+          };
+        })
+      );
     }),
+
   register: publicProcedure
     .input(userSchema.createUserSchema)
     .mutation(async ({ input }) => {
-      const createdUser = await usersQueries.createUser(input);
-
-      return createdUser;
+      return Effect.runPromise(usersQueries.createUser(input));
     }),
 
   sendOTP: publicProcedure
@@ -114,8 +131,6 @@ export const authRouter = createTRPCRouter({
       return null;
     }
 
-    const user = await usersQueries.getUserById(ctx.user?.id);
-
-    return user;
+    return Effect.runPromise(usersQueries.getUserById(ctx.user?.id));
   }),
 });

@@ -20,6 +20,7 @@
     "@tepian-k3/queries": "workspace:*",
     "@tepian-k3/services": "workspace:*",
     "dotenv": "catalog:",
+    "effect": "catalog:",
     "jose": "^6.1.3",
     "zod": "catalog:"
   }

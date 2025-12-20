@@ -6,9 +6,14 @@ import { emailService } from "@tepian-k3/services/email";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import { encrypt } from "..";
 import logger from "@tepian-k3/services/logger";
+import { Data, Effect, Option } from "effect";
+
+class OTPError extends Data.TaggedError("OTPError")<{
+  status: boolean;
+  message: string;
+}> {}
 
 export class OTPService {
-  //   private static OTP_LENGTH = 6;
   private static OTP_EXPIRY_MINUTES = 10;
   private static MAX_ATTEMPTS = 5;
 
@@ -17,213 +22,205 @@ export class OTPService {
   }
 
   static async createOTP(input: z.infer<typeof otpSchema.createOtpSchema>) {
-    try {
-      const { email } = input;
+    return Effect.runPromise(
+      Effect.gen(function* () {
+        const { email } = input;
 
-      const user = await userQueries.getUserByEmail(email);
+        const user = yield* userQueries.getUserByEmail(email);
 
-      if (!user) {
+        yield* otpQueries.invalidateOTPsByEmail(email);
+
+        const code = OTPService.generateOTP();
+        const expiresAt = new Date(
+          Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000
+        ).toISOString();
+
+        yield* otpQueries.createOTP({
+          userId: user.id,
+          code,
+          email,
+          expiresAt,
+          attempts: 0,
+          verified: false,
+        });
+
+        yield* Effect.tryPromise({
+          try: () =>
+            emailService.sendOTP({
+              email,
+              code,
+              expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
+            }),
+          catch: (error) => {
+            logger.error("Failed to send OTP email", { email, error });
+            return new OTPError({
+              status: false,
+              message: "Gagal mengirim email OTP.",
+            });
+          },
+        });
+
+        logger.info("OTP created and sent to email:", { email });
+
         return {
-          success: false,
-          message: "Pengguna dengan email tersebut tidak ditemukan.",
+          success: true,
+          message: "OTP berhasil dibuat dan dikirim ke email.",
         };
-      }
-
-      await otpQueries.invalidateOTPsByEmail(email);
-
-      const code = this.generateOTP();
-      const expiresAt = new Date(
-        Date.now() + this.OTP_EXPIRY_MINUTES * 60 * 1000
-      ).toISOString();
-
-      await otpQueries.createOTP({
-        userId: user.id,
-        code,
-        email,
-        expiresAt,
-        attempts: 0,
-        verified: false,
-      });
-
-      // Send OTP via email using React Email template
-      await emailService.sendOTP({
-        email,
-        code,
-        expiresInMinutes: this.OTP_EXPIRY_MINUTES,
-      });
-
-      logger.info("OTP created and sent to email:", { email });
-
-      return {
-        success: true,
-        message: "OTP berhasil dibuat dan dikirim ke email.",
-      };
-    } catch (error) {
-      logger.error("Error creating OTP", {
-        email: input.email,
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-
-      return {
-        success: false,
-        message: "Gagal membuat OTP",
-        cause: error instanceof Error ? error.message : String(error),
-      };
-    }
+      })
+    );
   }
 
   static async verifyOTP(input: z.infer<typeof otpSchema.verifyOtpSchema>) {
-    try {
-      const { email, code } = input;
+    return Effect.runPromise(
+      Effect.gen(function* () {
+        const { email, code } = input;
 
-      const otp = await otpQueries.findValidOTP(email);
+        const otpOption = yield* otpQueries.findValidOTP(email);
 
-      if (!otp) {
+        if (Option.isNone(otpOption)) {
+          return yield* Effect.fail(
+            new OTPError({
+              status: false,
+              message: "OTP tidak ditemukan atau sudah kedaluwarsa.",
+            })
+          );
+        }
+
+        const otp = otpOption.value;
+
+        if (otp.attempts >= OTPService.MAX_ATTEMPTS) {
+          return yield* Effect.fail(
+            new OTPError({
+              status: false,
+              message: "Jumlah percobaan OTP telah melebihi batas.",
+            })
+          );
+        }
+
+        if (otp.code !== code) {
+          yield* otpQueries.incrementOTPAttempts(otp.id, otp.attempts);
+          return yield* Effect.fail(
+            new OTPError({
+              status: false,
+              message: "Kode OTP salah.",
+            })
+          );
+        }
+
+        yield* otpQueries.markOTPAsVerified(otp.id);
+        yield* usersQueries.markUserEmailAsVerified(otp.userId);
+
+        const user = yield* usersQueries.getUserById(otp.userId);
+
+        const token = yield* Effect.tryPromise({
+          try: () =>
+            encrypt({
+              id: user.id,
+              email: user.email,
+              createdAt: user.createdAt,
+              updatedAt: user.updatedAt,
+              exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
+              iat: Math.floor(Date.now() / 1000),
+              jti: user.id,
+            }),
+          catch: (error) => {
+            logger.error("Failed to generate token", {
+              userId: user.id,
+              error,
+            });
+            return new OTPError({
+              status: false,
+              message: "Gagal membuat token.",
+            });
+          },
+        });
+
         return {
-          success: false,
-          message: "OTP tidak ditemukan atau sudah kedaluwarsa.",
+          success: true,
+          message: "OTP berhasil diverifikasi.",
+          userId: otp.userId,
+          token,
         };
-      }
-
-      if (otp.attempts >= this.MAX_ATTEMPTS) {
-        return {
-          success: false,
-          message: "Jumlah percobaan OTP telah melebihi batas.",
-        };
-      }
-
-      if (otp.code !== code) {
-        await otpQueries.incrementOTPAttempts(otp.id, otp.attempts);
-        return {
-          success: false,
-          message: "Kode OTP salah.",
-        };
-      }
-
-      await otpQueries.markOTPAsVerified(otp.id);
-
-      await usersQueries.markUserEmailAsVerified(otp.userId);
-
-      const user = await usersQueries.getUserById(otp.userId);
-
-      // Generate JWT token
-      const token = await encrypt({
-        id: user.id,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days
-        iat: Math.floor(Date.now() / 1000),
-        jti: user.id,
-      });
-
-      return {
-        success: true,
-        message: "OTP berhasil diverifikasi.",
-        userId: otp.userId || undefined,
-        token,
-      };
-    } catch (error) {
-      logger.error("Error verifying OTP", {
-        email: input.email,
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-
-      return {
-        success: false,
-        message: "Gagal memverifikasi OTP.",
-        cause: error instanceof Error ? error.message : String(error),
-      };
-    }
+      })
+    );
   }
 
   static async resendOTP(input: z.infer<typeof otpSchema.createOtpSchema>) {
-    try {
-      const { email } = input;
+    return Effect.runPromise(
+      Effect.gen(function* () {
+        const { email } = input;
 
-      const user = await userQueries.getUserByEmail(email);
+        const user = yield* userQueries.getUserByEmail(email);
 
-      if (!user) {
-        return {
-          success: false,
-          message: "Pengguna dengan email tersebut tidak ditemukan.",
-        };
-      }
+        yield* otpQueries.deleteOTPsByEmail(email);
 
-      // Invalidate old OTPs
-      await otpQueries.deleteOTPsByEmail(email);
+        const lastOTPOption = yield* otpQueries.findLastOTPByEmail(email);
 
-      // Rate Limiting
-      const lastOTP = await otpQueries.findLastOTPByEmail(email);
-      if (lastOTP) {
-        const timeSinceLastOTP =
-          Date.now() - new Date(lastOTP.createdAt).getTime();
-        const MIN_RESEND_INTERVAL = 60 * 1000; // 1 minute
+        if (Option.isSome(lastOTPOption)) {
+          const lastOTP = lastOTPOption.value;
+          const timeSinceLastOTP =
+            Date.now() - new Date(lastOTP.createdAt).getTime();
+          const MIN_RESEND_INTERVAL = 60 * 1000;
 
-        if (timeSinceLastOTP < MIN_RESEND_INTERVAL) {
-          const waitTime = Math.ceil(
-            (MIN_RESEND_INTERVAL - timeSinceLastOTP) / 1000
-          );
-          return {
-            success: false,
-            message: `Silakan tunggu ${waitTime} detik sebelum mengirim ulang OTP.`,
-          };
+          if (timeSinceLastOTP < MIN_RESEND_INTERVAL) {
+            const waitTime = Math.ceil(
+              (MIN_RESEND_INTERVAL - timeSinceLastOTP) / 1000
+            );
+            return yield* Effect.fail(
+              new OTPError({
+                status: false,
+                message: `Silakan tunggu ${waitTime} detik sebelum mengirim ulang OTP.`,
+              })
+            );
+          }
         }
-      }
 
-      // Invalidate old OTPs
-      await otpQueries.invalidateOTPsByEmail(email);
+        yield* otpQueries.invalidateOTPsByEmail(email);
 
-      // Generate new OTP
-      const code = this.generateOTP();
-      const expiresAt = new Date(
-        Date.now() + this.OTP_EXPIRY_MINUTES * 60 * 1000
-      ).toISOString();
+        const code = OTPService.generateOTP();
+        const expiresAt = new Date(
+          Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000
+        ).toISOString();
 
-      await otpQueries.createOTP({
-        userId: user.id,
-        code,
-        email,
-        expiresAt,
-        attempts: 0,
-        verified: false,
-      });
+        yield* otpQueries.createOTP({
+          userId: user.id,
+          code,
+          email,
+          expiresAt,
+          attempts: 0,
+          verified: false,
+        });
 
-      // Send email
-      await emailService.sendOTP({
-        email,
-        code,
-        expiresInMinutes: this.OTP_EXPIRY_MINUTES,
-      });
+        yield* Effect.tryPromise({
+          try: () =>
+            emailService.sendOTP({
+              email,
+              code,
+              expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
+            }),
+          catch: (error) => {
+            logger.error("Failed to send OTP email", { email, error });
+            return new OTPError({
+              status: false,
+              message: "Gagal mengirim email OTP.",
+            });
+          },
+        });
 
-      return {
-        success: true,
-        message: "New verification code sent successfully",
-      };
-    } catch (error) {
-      logger.error("Error resending OTP", {
-        email: input.email,
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-
-      return {
-        success: false,
-        message: "Failed to resend OTP",
-      };
-    }
+        return {
+          success: true,
+          message: "Kode OTP baru berhasil dikirim.",
+        };
+      })
+    );
   }
 
   static async cleanupExpiredOTPs(): Promise<void> {
-    try {
-      await otpQueries.deleteExpiredOTPs();
-    } catch (error) {
+    await Effect.runPromise(otpQueries.deleteExpiredOTPs()).catch((error) => {
       logger.error("Error cleaning up OTPs", {
         error: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
       });
-    }
+    });
   }
 }

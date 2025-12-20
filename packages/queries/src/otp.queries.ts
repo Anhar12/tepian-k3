@@ -4,81 +4,201 @@ import { otpCodes } from "@tepian-k3/db/schema";
 import type z from "zod";
 import otpSchema from "@tepian-k3/schema/otp.schema";
 import { TRPCError } from "@trpc/server";
+import { Effect, Option } from "effect";
+import logger from "@tepian-k3/services/logger";
 
-const otpQueries = {
-  async invalidateOTPsByEmail(email: string) {
-    await db
-      .update(otpCodes)
-      .set({ verified: true })
-      .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false)));
+type OTPQueries = {
+  invalidateOTPsByEmail: (
+    email: string
+  ) => Effect.Effect<unknown, TRPCError, never>;
+  createOTP: (
+    data: z.infer<typeof otpSchema.insertOtpSchema>
+  ) => Effect.Effect<unknown, TRPCError, never>;
+  findValidOTP: (
+    email: string
+  ) => Effect.Effect<Option.Option<unknown>, TRPCError, never>;
+  findLastOTPByEmail: (
+    email: string
+  ) => Effect.Effect<Option.Option<unknown>, TRPCError, never>;
+  incrementOTPAttempts: (
+    id: string,
+    currentAttempt: number
+  ) => Effect.Effect<unknown, TRPCError, never>;
+  markOTPAsVerified: (id: string) => Effect.Effect<unknown, TRPCError, never>;
+  deleteExpiredOTPs: () => Effect.Effect<unknown, TRPCError, never>;
+  deleteOTPsByEmail: (
+    email: string
+  ) => Effect.Effect<unknown, TRPCError, never>;
+};
+
+const otpQueries: OTPQueries = {
+  invalidateOTPsByEmail(email: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .update(otpCodes)
+          .set({ verified: true })
+          .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false))),
+      catch: (error) => {
+        logger.error("Failed to invalidate OTPs by email", { email, error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menonaktifkan kode OTP.",
+          cause: error,
+        });
+      },
+    });
   },
 
-  async createOTP(data: z.infer<typeof otpSchema.insertOtpSchema>) {
-    const [result] = await db.insert(otpCodes).values(data).returning();
-
-    if (!result)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Gagal membuat kode OTP.",
+  createOTP(data: z.infer<typeof otpSchema.insertOtpSchema>) {
+    return Effect.gen(this, function* () {
+      const [result] = yield* Effect.tryPromise({
+        try: () => db.insert(otpCodes).values(data).returning(),
+        catch: (error) => {
+          logger.error("Failed to create OTP", { data, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat kode OTP.",
+            cause: error,
+          });
+        },
       });
 
-    return result;
-  },
+      if (!result) {
+        logger.error("No OTP result returned after creation", { data });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat kode OTP.",
+          })
+        );
+      }
 
-  async findValidOTP(email: string) {
-    const res = await db.query.otpCodes.findFirst({
-      where: and(
-        eq(otpCodes.email, email),
-        eq(otpCodes.verified, false),
-        gte(otpCodes.expiresAt, new Date().toISOString())
-      ),
+      return Effect.succeed(result);
     });
-
-    return res;
   },
 
-  async findLastOTPByEmail(email: string) {
-    const res = await db.query.otpCodes.findFirst({
-      where: eq(otpCodes.email, email),
-      orderBy: (otpCodes, { desc }) => [desc(otpCodes.createdAt)],
-    });
-
-    return res;
+  findValidOTP(email: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.otpCodes.findFirst({
+          where: and(
+            eq(otpCodes.email, email),
+            eq(otpCodes.verified, false),
+            gte(otpCodes.expiresAt, new Date().toISOString())
+          ),
+        }),
+      catch: (error) => {
+        logger.error("Failed to find valid OTP", { email, error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil kode OTP yang valid.",
+          cause: error,
+        });
+      },
+    }).pipe(Effect.map((otp) => (otp ? Option.some(otp) : Option.none())));
   },
 
-  async incrementOTPAttempts(id: string, currentAttempt: number) {
-    const [result] = await db
-      .update(otpCodes)
-      .set({ attempts: currentAttempt + 1 })
-      .where(eq(otpCodes.id, id))
-      .returning();
+  findLastOTPByEmail(email: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.otpCodes.findFirst({
+          where: eq(otpCodes.email, email),
+          orderBy: (otpCodes, { desc }) => [desc(otpCodes.createdAt)],
+        }),
+      catch: (error) => {
+        logger.error("Failed to find last OTP by email", { email, error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil kode OTP terakhir.",
+          cause: error,
+        });
+      },
+    }).pipe(Effect.map((otp) => (otp ? Option.some(otp) : Option.none())));
+  },
 
-    if (!result)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Gagal memperbarui percobaan kode OTP.",
+  incrementOTPAttempts(id: string, currentAttempt: number) {
+    return Effect.gen(function* () {
+      const [result] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(otpCodes)
+            .set({ attempts: currentAttempt + 1 })
+            .where(eq(otpCodes.id, id))
+            .returning(),
+        catch: (error) => {
+          logger.error("Failed to increment OTP attempts", { id, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menambah percobaan kode OTP.",
+            cause: error,
+          });
+        },
       });
 
-    return result;
+      if (!result) {
+        logger.error("No OTP result returned after incrementing attempts", {
+          id,
+        });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menambah percobaan kode OTP.",
+          })
+        );
+      }
+
+      return Effect.succeed(result);
+    });
   },
 
-  async markOTPAsVerified(id: string) {
-    await db
-      .update(otpCodes)
-      .set({ verified: true })
-      .where(eq(otpCodes.id, id));
+  markOTPAsVerified(id: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.update(otpCodes).set({ verified: true }).where(eq(otpCodes.id, id)),
+      catch: (error) => {
+        logger.error("Failed to mark OTP as verified", { id, error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menandai kode OTP sebagai terverifikasi.",
+          cause: error,
+        });
+      },
+    });
   },
 
-  async deleteExpiredOTPs() {
-    await db
-      .delete(otpCodes)
-      .where(gt(otpCodes.expiresAt, new Date().toISOString()));
+  deleteExpiredOTPs() {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .delete(otpCodes)
+          .where(gt(otpCodes.expiresAt, new Date().toISOString())),
+      catch: (error) => {
+        logger.error("Failed to delete expired OTPs", { error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus kode OTP yang kedaluwarsa.",
+          cause: error,
+        });
+      },
+    });
   },
 
-  async deleteOTPsByEmail(email: string) {
-    await db
-      .delete(otpCodes)
-      .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false)));
+  deleteOTPsByEmail(email: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .delete(otpCodes)
+          .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false))),
+      catch: (error) => {
+        logger.error("Failed to delete OTPs by email", { email, error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus kode OTP.",
+          cause: error,
+        });
+      },
+    });
   },
 };
 
