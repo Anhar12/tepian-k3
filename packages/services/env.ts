@@ -5,6 +5,17 @@ export const env = createEnv({
   server: {
     // NODE_ENV: z.enum(["development", "production", "test"]),
     BASE_URL: z.url(),
+    STORAGE_TYPE: z.enum(["filesystem", "s3", "minio"]).default("filesystem"),
+    UPLOADS_DIR: z.string().default("uploads"),
+    AWS_ACCESS_KEY_ID: z.string().optional(),
+    AWS_SECRET_ACCESS_KEY: z.string().optional(),
+    S3_BUCKET: z.string().optional(),
+    MINIO_ENDPOINT: z.string().optional(),
+    MINIO_PORT: z.string().optional(),
+    MINIO_USE_SSL: z.enum(["true", "false"]).optional(),
+    MINIO_ACCESS_KEY: z.string().optional(),
+    MINIO_SECRET_KEY: z.string().optional(),
+    MINIO_BUCKET: z.string().optional(),
     EMAIL_FROM: z.email(),
     EMAIL_PROVIDER: z.enum([
       "smtp",
