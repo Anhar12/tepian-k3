@@ -4,6 +4,7 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     // NODE_ENV: z.enum(["development", "production", "test"]),
+    BASE_URL: z.url(),
     EMAIL_FROM: z.email(),
     EMAIL_PROVIDER: z.enum([
       "smtp",
