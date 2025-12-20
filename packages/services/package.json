@@ -1,0 +1,36 @@
+{
+  "name": "@tepian-k3/services",
+  "type": "module",
+  "scripts": {
+    "email:dev": "email dev --dir ./src/email/dev --port 3001",
+    "email:verify": "pnpm with-env tsx src/scripts/verify-email.ts",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "exports": {
+    "./email": {
+      "default": "./src/email/index.ts"
+    },
+    "./logger": {
+      "default": "./src/logger/index.ts"
+    }
+  },
+  "dependencies": {
+    "@react-email/components": "^1.0.1",
+    "@react-email/render": "^2.0.0",
+    "logform": "^2.7.0",
+    "nodemailer": "^7.0.11",
+    "react": "19.2.3",
+    "resend": "^6.6.0",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@react-email/preview-server": "5.0.8",
+    "@t3-oss/env-core": "^0.13.10",
+    "@tepian-k3/config": "workspace:*",
+    "@types/nodemailer": "^7.0.4",
+    "@types/react": "19.2.3",
+    "dotenv-cli": "^11.0.0",
+    "react-email": "^5.0.8",
+    "tsx": "^4.19.0"
+  }
+}

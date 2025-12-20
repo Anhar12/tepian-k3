@@ -1,37 +1,103 @@
 {
-	"$schema": "https://turbo.build/schema.json",
-	"ui": "tui",
-	"tasks": {
-		"build": {
-			"dependsOn": ["^build"],
-			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"outputs": ["dist/**"]
-		},
-		"lint": {
-			"dependsOn": ["^lint"]
-		},
-		"check-types": {
-			"dependsOn": ["^check-types"]
-		},
-		"dev": {
-			"cache": false,
-			"persistent": true
-		},
-		"db:push": {
-			"cache": false,
-			"persistent": true
-		},
-		"db:studio": {
-			"cache": false,
-			"persistent": true
-		},
-		"db:migrate": {
-			"cache": false,
-			"persistent": true
-		},
-		"db:generate": {
-			"cache": false,
-			"persistent": true
-		}
-	}
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:push": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:migrate": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:generate": {
+      "cache": false,
+      "persistent": true
+    },
+    "email:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "email:verify": {
+      "cache": false,
+      "persistent": true
+    }
+  },
+  "globalEnv": [
+    "NODE_ENV",
+    "SERVER_HOSTNAME",
+    "SERVER_PORT",
+    "POSTGRES_URL",
+    "CORS_ORIGIN",
+    "JWT_SECRET",
+    "VITE_API_URL",
+    "EMAIL_FROM",
+    "EMAIL_PROVIDER",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_SECURE",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "EMAIL_USER",
+    "EMAIL_PASSWORD",
+    "SENDGRID_API_KEY",
+    "MAILGUN_SMTP_HOST",
+    "MAILGUN_SMTP_USER",
+    "MAILGUN_SMTP_PASSWORD",
+    "AWS_REGION",
+    "AWS_SES_SMTP_USER",
+    "AWS_SES_SMTP_PASSWORD",
+    "RESEND_API_KEY",
+    "ETHEREAL_USER",
+    "ETHEREAL_PASSWORD",
+    "DASHBOARD_URL"
+  ],
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "SERVER_HOSTNAME",
+    "SERVER_PORT",
+    "POSTGRES_URL",
+    "CORS_ORIGIN",
+    "JWT_SECRET",
+    "VITE_API_URL",
+    "EMAIL_FROM",
+    "EMAIL_PROVIDER",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_SECURE",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "EMAIL_USER",
+    "EMAIL_PASSWORD",
+    "SENDGRID_API_KEY",
+    "MAILGUN_SMTP_HOST",
+    "MAILGUN_SMTP_USER",
+    "MAILGUN_SMTP_PASSWORD",
+    "AWS_REGION",
+    "AWS_SES_SMTP_USER",
+    "AWS_SES_SMTP_PASSWORD",
+    "RESEND_API_KEY",
+    "ETHEREAL_USER",
+    "ETHEREAL_PASSWORD",
+    "DASHBOARD_URL"
+  ]
 }

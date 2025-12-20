@@ -1,0 +1,23 @@
+{
+  "name": "@tepian-k3/schema",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {},
+  "devDependencies": {
+    "@tepian-k3/config": "workspace:*",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.10",
+    "@tepian-k3/db": "workspace:*",
+    "drizzle-zod": "^0.8.3",
+    "zod": "catalog:"
+  }
+}

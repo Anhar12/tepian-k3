@@ -1,29 +1,31 @@
 {
-  "name": "server",
+  "name": "@tepian-k3/server",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsdown",
     "check-types": "tsc -b",
-    "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js"
+    "compile": "bun with-env build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
+    "dev": "pnpm with-env tsx watch src/index.ts",
+    "start": "pnpm with-env tsx src/index.ts",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "hono": "catalog:",
     "@hono/node-server": "^1.14.4",
-    "@trpc/server": "catalog:",
     "@hono/trpc-server": "^0.4.0",
-    "dotenv": "catalog:",
-    "zod": "catalog:",
+    "@t3-oss/env-core": "^0.13.10",
     "@tepian-k3/api": "workspace:*",
-    "@tepian-k3/db": "workspace:*"
+    "@tepian-k3/db": "workspace:*",
+    "@trpc/server": "catalog:",
+    "dotenv": "catalog:",
+    "hono": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "tsx": "^4.19.2",
+    "@tepian-k3/config": "workspace:*",
     "@types/node": "^22.13.11",
-    "typescript": "catalog:",
+    "dotenv-cli": "^11.0.0",
     "tsdown": "^0.16.5",
-    "@tepian-k3/config": "workspace:*"
+    "tsx": "^4.19.2",
+    "typescript": "catalog:"
   }
 }

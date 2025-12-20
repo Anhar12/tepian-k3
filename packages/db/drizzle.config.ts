@@ -1,15 +1,15 @@
-import { defineConfig } from "drizzle-kit";
-import dotenv from "dotenv";
+import type { Config } from "drizzle-kit";
 
-dotenv.config({
-	path: "../../apps/server/.env",
-});
+if (!process.env.POSTGRES_URL) {
+  throw new Error("Missing POSTGRES_URL");
+}
 
-export default defineConfig({
-	schema: "./src/schema",
-	out: "./src/migrations",
-	dialect: "postgresql",
-	dbCredentials: {
-		url: process.env.DATABASE_URL || "",
-	},
-});
+const nonPoolingUrl = process.env.POSTGRES_URL.replace(":6543", ":5432");
+
+export default {
+  schema: "./src/schema.ts",
+  dialect: "postgresql",
+  out: "./src/migrations",
+  dbCredentials: { url: nonPoolingUrl },
+  casing: "snake_case",
+} satisfies Config;

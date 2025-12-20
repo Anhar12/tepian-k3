@@ -1,0 +1,24 @@
+{
+  "name": "@tepian-k3/queries",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {},
+  "devDependencies": {
+    "@tepian-k3/config": "workspace:*",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/schema": "workspace:*",
+    "@trpc/server": "catalog:",
+    "@node-rs/argon2": "catalog:",
+    "zod": "catalog:"
+  }
+}

@@ -11,15 +11,21 @@
   "type": "module",
   "scripts": {},
   "devDependencies": {
-    "typescript": "catalog:",
-    "@tepian-k3/config": "workspace:*"
+    "@tepian-k3/config": "workspace:*",
+    "typescript": "catalog:"
   },
   "dependencies": {
-    "@trpc/server": "catalog:",
+    "@tepian-k3/auth": "workspace:*",
+    "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/services": "workspace:*",
+    "@tepian-k3/schema": "workspace:*",
+    "@tepian-k3/queries": "workspace:*",
     "@trpc/client": "catalog:",
-    "hono": "catalog:",
+    "@trpc/server": "catalog:",
+    "@node-rs/argon2": "catalog:",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@tepian-k3/db": "workspace:*"
+    "hono": "catalog:",
+    "superjson": "^2.2.6",
+    "zod": "catalog:"
   }
 }
