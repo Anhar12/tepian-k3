@@ -12,6 +12,9 @@
     },
     "./logger": {
       "default": "./src/logger/index.ts"
+    },
+    "./storage": {
+      "default": "./src/storage/index.ts"
     }
   },
   "dependencies": {

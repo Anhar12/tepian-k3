@@ -6,6 +6,7 @@ export interface UploadOptions {
 }
 
 export interface UploadResult {
+  filename: string;
   key: string;
   url: string;
   size: number;

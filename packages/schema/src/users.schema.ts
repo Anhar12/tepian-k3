@@ -1,6 +1,7 @@
 import { users } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
+import { zfd } from "zod-form-data";
 
 const createUserSchema = createInsertSchema(users, {
   name: z.string().min(1),
@@ -26,9 +27,16 @@ const updateUserSchema = createUpdateSchema(users).pick({
   password: true,
 });
 
+const updateUserProfileSchema = zfd.formData({
+  avatar: zfd.file().refine((file) => file.size > 0, {
+    message: "Avatar file is required",
+  }),
+});
+
 const userSchema = {
   createUserSchema,
   updateUserSchema,
+  updateUserProfileSchema,
 };
 
 export default userSchema;

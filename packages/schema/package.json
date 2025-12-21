@@ -18,6 +18,7 @@
     "@t3-oss/env-core": "^0.13.10",
     "@tepian-k3/db": "workspace:*",
     "drizzle-zod": "^0.8.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zod-form-data": "catalog:"
   }
 }

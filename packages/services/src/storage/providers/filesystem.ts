@@ -32,7 +32,10 @@ export class FileSystemProvider {
     });
   }
 
-  private generateKey(filename?: string, folder?: string): string {
+  private generateKey(
+    filename?: string,
+    folder?: string
+  ): { filename: string; key: string } {
     const ext = filename ? path.extname(filename) : "";
     const name = filename ? path.basename(filename, ext) : "file";
     const uniqueId = uuidv7();
@@ -46,7 +49,10 @@ export class FileSystemProvider {
     // Always use a folder (default to 'general' if not provided)
     const folderName = folder || "general";
 
-    return `${folderName}/${generatedFileName}`;
+    return {
+      filename: generatedFileName,
+      key: `${folderName}/${generatedFileName}`,
+    };
   }
 
   upload(
@@ -55,7 +61,7 @@ export class FileSystemProvider {
   ): Effect.Effect<UploadResult, UploadFailedError> {
     return pipe(
       Effect.sync(() => this.generateKey(options.filename, options.folder)),
-      Effect.flatMap((key) => {
+      Effect.flatMap(({ filename, key }) => {
         const filePath = path.join(this.uploadsDir, key);
         const fileDir = path.dirname(filePath);
 
@@ -67,6 +73,7 @@ export class FileSystemProvider {
               try: async () => {
                 await fs.writeFile(filePath, file);
                 return {
+                  filename,
                   key,
                   url: this.getPublicUrl(key),
                   size: file.length,
@@ -100,6 +107,6 @@ export class FileSystemProvider {
   }
 
   getPublicUrl(key: string): string {
-    return `${this.baseUrl}/uploads/${key}`;
+    return `${this.baseUrl}/api/uploads/${key}`;
   }
 }

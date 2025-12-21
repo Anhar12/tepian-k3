@@ -40,13 +40,22 @@ export class MinioProvider {
     });
   }
 
-  private generateKey(filename?: string, folder?: string): string {
+  private generateKey(
+    filename?: string,
+    folder?: string
+  ): {
+    filename: string;
+    key: string;
+  } {
     const ext = filename ? path.extname(filename) : "";
     const name = filename ? path.basename(filename, ext) : "file";
     const uniqueId = uuidv7();
     const key = `${name}-${uniqueId}${ext}`;
 
-    return folder ? `${folder}/${key}` : key;
+    return {
+      filename: key,
+      key: folder ? `${folder}/${key}` : key,
+    };
   }
 
   upload(
@@ -58,7 +67,7 @@ export class MinioProvider {
       Effect.flatMap(() =>
         Effect.sync(() => this.generateKey(options.filename, options.folder))
       ),
-      Effect.flatMap((key) => {
+      Effect.flatMap(({ filename, key }) => {
         const metadata = {
           "Content-Type": options.contentType || "application/octet-stream",
         };
@@ -83,6 +92,7 @@ export class MinioProvider {
               : this.getSignedUrl(key)
           ),
           Effect.map((url) => ({
+            filename,
             key,
             url,
             size: file.length,
