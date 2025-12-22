@@ -223,6 +223,9 @@ importers:
       '@tepian-k3/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@tepian-k3/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@trpc/client':
         specifier: 'catalog:'
         version: 11.8.0(@trpc/server@11.8.0(typescript@5.9.3))(typescript@5.9.3)
@@ -580,6 +583,22 @@ importers:
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
+
+  packages/types:
+    dependencies:
+      '@tepian-k3/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@tepian-k3/config':
+        specifier: workspace:*
+        version: link:../config
+      type-fest:
+        specifier: ^5.3.1
+        version: 5.3.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
 packages:
 

@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import z from "zod";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { LoaderCircle } from "lucide-react";
 
 export default function ChangePasswordForm() {
   const form = useForm<z.infer<typeof userSchema.updateUserPasswordSchema>>({
@@ -100,7 +100,12 @@ export default function ChangePasswordForm() {
               )}
             />
 
-            <Button className="w-full">Perbarui Password</Button>
+            <Button className="w-full">
+              {updatePasswordMutation.isPending ? (
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Perbarui Password
+            </Button>
           </form>
         </Form>
       </CardContent>

@@ -1,0 +1,21 @@
+{
+  "name": "@tepian-k3/types",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "devDependencies": {
+    "@tepian-k3/config": "workspace:*",
+    "type-fest": "^5.3.1",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@tepian-k3/db": "workspace:*"
+  }
+}

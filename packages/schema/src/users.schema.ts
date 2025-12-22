@@ -19,12 +19,17 @@ const createUserSchema = createInsertSchema(users, {
   password: true,
 });
 
-const updateUserSchema = createUpdateSchema(users).pick({
-  id: true,
+const updateUserSchema = createUpdateSchema(users, {
+  name: z.string().min(1),
+  address: z.string().min(1),
+  phone: z
+    .string()
+    .min(1)
+    .regex(/^\+?[0-9\s\-()]+$/, "Nomor telepon tidak valid"),
+}).pick({
   name: true,
   address: true,
   phone: true,
-  password: true,
 });
 
 const updateUserProfileSchema = zfd.formData({

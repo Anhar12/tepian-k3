@@ -150,7 +150,41 @@ const usersQueries = {
     });
   },
 
-  updateUserProfile(id: string, filename: string, url: string) {
+  updateUserProfile(
+    id: string,
+    data: z.infer<typeof userSchema.updateUserSchema>
+  ) {
+    return Effect.gen(this, function* () {
+      yield* this.getUserById(id);
+
+      const [user] = yield* Effect.tryPromise({
+        try: () =>
+          db.update(users).set(data).where(eq(users.id, id)).returning(),
+        catch: (error) => {
+          logger.error("Failed to update user profile", { id, data, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui profil pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      if (!user) {
+        logger.error("No user returned after profile update", { id });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui profil pengguna.`,
+          })
+        );
+      }
+
+      return user;
+    });
+  },
+
+  updateUserAvatar(id: string, filename: string, url: string) {
     return Effect.gen(this, function* () {
       const user = yield* this.getUserById(id);
 

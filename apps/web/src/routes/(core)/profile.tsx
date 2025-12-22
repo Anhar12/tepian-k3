@@ -16,6 +16,7 @@ import { useState, useRef } from "react";
 import { Upload, ArrowLeft, Camera } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import ChangePasswordForm from "@/components/change-password-form";
+import UpdateUserProfileForm from "@/components/update-user-profile-form";
 
 export const Route = createFileRoute("/(core)/profile")({
   component: RouteComponent,
@@ -82,9 +83,9 @@ function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="h-screen flex flex-col bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-950/80">
+      <header className="shrink-0 border-b bg-white/80 backdrop-blur-sm dark:bg-gray-950/80">
         <div className="container mx-auto px-4 py-4">
           <Button
             variant="ghost"
@@ -104,7 +105,7 @@ function RouteComponent() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 overflow-y-auto container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Avatar Upload Card */}
           <Card>
@@ -172,46 +173,10 @@ function RouteComponent() {
             </CardContent>
           </Card>
 
-          {/* Profile Information Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update your personal details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  defaultValue={user?.name || ""}
-                  placeholder="Enter your name"
-                />
-              </div>
+          {/* Profile Information Form */}
+          <UpdateUserProfileForm user={user!} />
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  defaultValue={user?.email || ""}
-                  placeholder="Enter your email"
-                  disabled
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Input id="bio" placeholder="Tell us about yourself" />
-              </div>
-
-              <Button className="w-full">Save Changes</Button>
-            </CardContent>
-          </Card>
-
-          {/* Change Password Card */}
+          {/* Change Password Form */}
           <ChangePasswordForm />
         </div>
       </main>

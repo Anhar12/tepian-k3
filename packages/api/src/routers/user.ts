@@ -5,6 +5,12 @@ import { storageService } from "@tepian-k3/services/storage";
 import usersQueries from "@tepian-k3/queries/users.queries";
 
 export const userRouter = createTRPCRouter({
+  updateProfile: protectedProcedure
+    .input(userSchema.updateUserSchema)
+    .mutation(async ({ input, ctx: { user } }) =>
+      Effect.runPromise(usersQueries.updateUserProfile(user.id, input))
+    ),
+
   updateAvatar: protectedProcedure
     .input(userSchema.updateUserProfileSchema)
     .mutation(async ({ input, ctx: { user } }) =>
@@ -21,7 +27,7 @@ export const userRouter = createTRPCRouter({
             folder: "avatars",
           });
 
-          yield* usersQueries.updateUserProfile(
+          yield* usersQueries.updateUserAvatar(
             user.id,
             uploadedFile.filename,
             uploadedFile.key
