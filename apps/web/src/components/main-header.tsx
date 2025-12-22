@@ -44,9 +44,7 @@ export default function MainHeader() {
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10">
                 <AvatarImage
-                  src={
-                    user?.profilePictureUrl || "https://github.com/shadcn.png"
-                  }
+                  src={user?.profilePictureUrl || undefined}
                   alt={user?.name || "User"}
                 />
                 <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>

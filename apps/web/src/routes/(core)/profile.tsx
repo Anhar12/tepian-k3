@@ -26,7 +26,6 @@ function RouteComponent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
 
   const uploadAvatarMutation = useMutation(
     trpc.user.updateAvatar.mutationOptions({
@@ -38,9 +37,6 @@ function RouteComponent() {
       },
       onError: () => {
         globalErrorToast("Failed to upload avatar");
-      },
-      onSettled: () => {
-        setIsUploading(false);
       },
     })
   );
@@ -71,7 +67,6 @@ function RouteComponent() {
   const handleUpload = async () => {
     if (!selectedFile) return;
 
-    setIsUploading(true);
     const formData = new FormData();
     formData.append("avatar", selectedFile);
     uploadAvatarMutation.mutate(formData);
@@ -121,11 +116,7 @@ function RouteComponent() {
                 <div className="relative">
                   <Avatar className="h-32 w-32">
                     <AvatarImage
-                      src={
-                        previewUrl ||
-                        user?.profilePictureUrl ||
-                        "https://github.com/shadcn.png"
-                      }
+                      src={previewUrl || user?.profilePictureUrl || undefined}
                       alt={user?.name || "User"}
                     />
                     <AvatarFallback className="text-4xl">
@@ -152,14 +143,19 @@ function RouteComponent() {
 
                 {selectedFile && (
                   <div className="flex gap-2">
-                    <Button onClick={handleUpload} disabled={isUploading}>
+                    <Button
+                      onClick={handleUpload}
+                      disabled={uploadAvatarMutation.isPending}
+                    >
                       <Upload className="mr-2 h-4 w-4" />
-                      {isUploading ? "Uploading..." : "Upload"}
+                      {uploadAvatarMutation.isPending
+                        ? "Uploading..."
+                        : "Upload"}
                     </Button>
                     <Button
                       variant="outline"
                       onClick={handleCancel}
-                      disabled={isUploading}
+                      disabled={uploadAvatarMutation.isPending}
                     >
                       Cancel
                     </Button>
