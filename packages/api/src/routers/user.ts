@@ -29,4 +29,13 @@ export const userRouter = createTRPCRouter({
         })
       )
     ),
+  updatePassword: protectedProcedure
+    .input(userSchema.updateUserPasswordSchema)
+    .mutation(async ({ input, ctx: { user } }) =>
+      Effect.runPromise(
+        Effect.gen(function* () {
+          yield* usersQueries.updateUserPassword(user.id, input.newPassword);
+        })
+      )
+    ),
 });

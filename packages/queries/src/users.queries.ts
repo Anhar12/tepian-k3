@@ -146,7 +146,7 @@ const usersQueries = {
         );
       }
 
-      return Effect.succeed(user);
+      return user;
     });
   },
 
@@ -189,7 +189,56 @@ const usersQueries = {
         );
       }
 
-      return Effect.succeed(updatedUser);
+      return updatedUser;
+    });
+  },
+
+  updateUserPassword(userId: string, newPassword: string) {
+    return Effect.gen(this, function* () {
+      yield* this.getUserById(userId);
+
+      const hashedPassword = yield* Effect.tryPromise({
+        try: () => hash(newPassword),
+        catch: (error) => {
+          logger.error("Failed to hash new password", { userId, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal mengenkripsi password baru.`,
+            cause: error,
+          });
+        },
+      });
+
+      const [user] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(users)
+            .set({
+              password: hashedPassword,
+            })
+            .where(eq(users.id, userId))
+            .returning(),
+        catch: (error) => {
+          logger.error("Failed to update user password", { userId, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui password pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      if (!user) {
+        logger.error("No user returned after password update", { userId });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui password pengguna.`,
+          })
+        );
+      }
+
+      return user;
     });
   },
 

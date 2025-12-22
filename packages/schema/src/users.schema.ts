@@ -28,15 +28,35 @@ const updateUserSchema = createUpdateSchema(users).pick({
 });
 
 const updateUserProfileSchema = zfd.formData({
-  avatar: zfd.file().refine((file) => file.size > 0, {
-    message: "Avatar file is required",
-  }),
+  avatar: zfd.file().refine(
+    (file) => {
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const isValidType = allowedTypes.includes(file.type);
+      const isValidSize = file.size <= 2 * 1024 * 1024; // 2MB
+      return isValidType && isValidSize;
+    },
+    {
+      message:
+        "File harus berupa gambar (JPEG, PNG) dan berukuran maksimal 2MB",
+    }
+  ),
 });
+
+const updateUserPasswordSchema = z
+  .object({
+    newPassword: z.string().min(6, "Password minimal 6 karakter"),
+    newPasswordConfirm: z.string().min(6, "Password minimal 6 karakter"),
+  })
+  .refine((data) => data.newPassword === data.newPasswordConfirm, {
+    message: "Konfirmasi password tidak sesuai",
+    path: ["newPasswordConfirm"],
+  });
 
 const userSchema = {
   createUserSchema,
   updateUserSchema,
   updateUserProfileSchema,
+  updateUserPasswordSchema,
 };
 
 export default userSchema;

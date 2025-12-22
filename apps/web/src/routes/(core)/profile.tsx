@@ -15,6 +15,7 @@ import { globalSuccessToast, globalErrorToast } from "@/lib/toast";
 import { useState, useRef } from "react";
 import { Upload, ArrowLeft, Camera } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import ChangePasswordForm from "@/components/change-password-form";
 
 export const Route = createFileRoute("/(core)/profile")({
   component: RouteComponent,
@@ -211,42 +212,7 @@ function RouteComponent() {
           </Card>
 
           {/* Change Password Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Change Password</CardTitle>
-              <CardDescription>Update your password</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  placeholder="Enter current password"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="Enter new password"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  placeholder="Confirm new password"
-                />
-              </div>
-
-              <Button className="w-full">Update Password</Button>
-            </CardContent>
-          </Card>
+          <ChangePasswordForm />
         </div>
       </main>
     </div>
