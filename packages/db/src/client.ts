@@ -2,10 +2,12 @@ import { drizzle } from "drizzle-orm/postgres-js";
 
 import { env } from "../env";
 import * as schema from "./schema";
+import * as relations from "./relations";
 
 export const db = drizzle(env.POSTGRES_URL, {
   schema: {
     ...schema,
+    ...relations,
   },
 });
 

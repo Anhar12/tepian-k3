@@ -11,6 +11,8 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod";
 import type { Context as HonoContext } from "hono";
+import permissionQueries from "@tepian-k3/queries/permission.queries";
+import { Effect } from "effect";
 
 /**
  * Isomorphic Session getter for API requests
@@ -171,4 +173,68 @@ export const protectedProcedure = t.procedure
         session: ctx.session,
       },
     });
+  });
+
+export const withPermission = (permission: string) =>
+  protectedProcedure.use(async ({ ctx, next }) => {
+    const hasPermission = await Effect.runPromise(
+      permissionQueries.userHasPermission(ctx.user.id, permission)
+    );
+
+    if (!hasPermission) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Anda tidak memiliki izin untuk mengakses sumber daya ini.",
+      });
+    }
+
+    return next();
+  });
+
+export const withRole = (role: string) =>
+  protectedProcedure.use(async ({ ctx, next }) => {
+    const hasRole = await Effect.runPromise(
+      permissionQueries.userHasRole(ctx.user.id, role)
+    );
+
+    if (!hasRole) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Anda tidak memiliki izin untuk mengakses sumber daya ini.",
+      });
+    }
+
+    return next();
+  });
+
+export const withAnyRole = (roleNames: string[]) =>
+  protectedProcedure.use(async ({ ctx, next }) => {
+    const hasRole = await Effect.runPromise(
+      permissionQueries.userHasAnyRole(ctx.user.id, roleNames)
+    );
+
+    if (!hasRole) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Anda tidak memiliki izin untuk mengakses sumber daya ini.",
+      });
+    }
+
+    return next();
+  });
+
+export const withAllRoles = (roleNames: string[]) =>
+  protectedProcedure.use(async ({ ctx, next }) => {
+    const hasRole = await Effect.runPromise(
+      permissionQueries.userHasAllRoles(ctx.user.id, roleNames)
+    );
+
+    if (!hasRole) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Anda tidak memiliki izin untuk mengakses sumber daya ini.",
+      });
+    }
+
+    return next();
   });

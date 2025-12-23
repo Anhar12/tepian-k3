@@ -8,6 +8,7 @@ import userSchema from "@tepian-k3/schema/users.schema";
 import otpSchema from "@tepian-k3/schema/otp.schema";
 import { OTPService } from "@tepian-k3/auth/services/otp";
 import { Effect } from "effect";
+import permissionQueries from "@tepian-k3/queries/permission.queries";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -45,11 +46,17 @@ export const authRouter = createTRPCRouter({
             );
           }
 
+          const permission = yield* permissionQueries.getUserWithPermissions(
+            user.id
+          );
+
           const token = yield* Effect.tryPromise({
             try: () =>
               encrypt({
                 id: user.id,
                 email: user.email,
+                roles: permission?.roles.map((role) => role.name) || [],
+                permissions: permission?.permissions || [],
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
                 exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,

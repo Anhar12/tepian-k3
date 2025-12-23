@@ -1,0 +1,13 @@
+{
+  "name": "@tepian-k3/constants",
+  "type": "module",
+  "exports": {
+    "./constants": "./src/index.ts"
+  },
+  "scripts": {},
+  "devDependencies": {
+    "@tepian-k3/config": "workspace:*",
+    "typescript": "catalog:"
+  },
+  "dependencies": {}
+}

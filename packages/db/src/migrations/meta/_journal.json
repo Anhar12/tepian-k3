@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1765952952988,
-      "tag": "0000_even_jubilee",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1765953256514,
-      "tag": "0001_eager_iron_patriot",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1765970824426,
-      "tag": "0002_previous_shiver_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1766052046168,
-      "tag": "0003_dark_firebrand",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1766052377781,
-      "tag": "0004_tan_forgotten_one",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1766105302286,
-      "tag": "0005_freezing_moonstone",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1766231114585,
-      "tag": "0006_glossy_nextwave",
+      "when": 1766473733248,
+      "tag": "0000_boring_liz_osborn",
       "breakpoints": true
     }
   ]

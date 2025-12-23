@@ -3,7 +3,9 @@ import {
   boolean,
   index,
   integer,
+  pgEnum,
   pgTableCreator,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -13,8 +15,11 @@ import {
 } from "drizzle-orm/pg-core";
 import { v7 as uuidv7 } from "uuid";
 import { timestamps } from "./utils";
+import { PERMISSION_ACTION } from "@tepian-k3/constants/constants";
 
 export const createTable = pgTableCreator((name) => `${name}`);
+
+export const permissionActionEnum = pgEnum("action", PERMISSION_ACTION);
 
 export const users = createTable(
   "users",
@@ -91,3 +96,100 @@ export const userCompanies = createTable("user_companies", {
   companyAddress: text("company_address").notNull(),
   ...timestamps,
 });
+
+export const userRoles = createTable(
+  "user_roles",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    roleId: uuid("role_id")
+      .notNull()
+      .references(() => roles.id, { onDelete: "cascade" }),
+    assignedAt: timestamp("assigned_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .$default(() => sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.userId, table.roleId],
+    }),
+    index("user_role_user_id_idx").using("btree", table.userId),
+    index("user_role_role_id_idx").using("btree", table.roleId),
+  ]
+);
+
+export const roles = createTable(
+  "roles",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    name: varchar("name", { length: 100 }).notNull().unique(),
+    description: text("description"),
+    ...timestamps,
+  },
+  (table) => [index("role_name_idx").using("btree", table.name)]
+);
+
+export const permission = createTable(
+  "permissions",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    name: text("name").notNull().unique(),
+    description: text("description"),
+    resource: text("resource").notNull(),
+    action: permissionActionEnum("action").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("permission_name_resource_action_idx").using(
+      "btree",
+      table.name,
+      table.resource,
+      table.action
+    ),
+  ]
+);
+
+export const rolePermissions = createTable(
+  "role_permissions",
+  {
+    roleId: uuid("role_id")
+      .notNull()
+      .references(() => roles.id, { onDelete: "cascade" }),
+    permissionId: uuid("permission_id")
+      .notNull()
+      .references(() => permission.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.roleId, table.permissionId],
+    }),
+  ]
+);
+
+export const userPermissions = createTable(
+  "user_permissions",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    permissionId: uuid("permission_id")
+      .notNull()
+      .references(() => permission.id, { onDelete: "cascade" }),
+    granted: boolean("granted").notNull().default(true),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.permissionId] }),
+  })
+);

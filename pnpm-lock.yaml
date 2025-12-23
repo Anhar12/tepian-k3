@@ -436,20 +436,38 @@ importers:
 
   packages/config: {}
 
+  packages/constants:
+    devDependencies:
+      '@tepian-k3/config':
+        specifier: workspace:*
+        version: link:../config
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/db:
     dependencies:
       '@t3-oss/env-core':
         specifier: ^0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.2.1)
+      '@tepian-k3/constants':
+        specifier: workspace:*
+        version: link:../constants
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@types/pg@8.16.0)(pg@8.16.3)(postgres@3.4.7)
+      drizzle-seed:
+        specifier: ^0.3.1
+        version: 0.3.1(drizzle-orm@0.45.1(@types/pg@8.16.0)(pg@8.16.3)(postgres@3.4.7))
       postgres:
         specifier: ^3.4.7
         version: 3.4.7
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       uuid:
         specifier: 'catalog:'
         version: 13.0.0
@@ -484,6 +502,9 @@ importers:
       '@tepian-k3/services':
         specifier: workspace:*
         version: link:../services
+      '@tepian-k3/types':
+        specifier: workspace:*
+        version: link:../types
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.8.0(typescript@5.9.3)
@@ -4596,6 +4617,14 @@ packages:
       sql.js:
         optional: true
       sqlite3:
+        optional: true
+
+  drizzle-seed@0.3.1:
+    resolution: {integrity: sha512-F/0lgvfOAsqlYoHM/QAGut4xXIOXoE5VoAdv2FIl7DpGYVXlAzKuJO+IphkKUFK3Dz+rFlOsQLnMNrvoQ0cx7g==}
+    peerDependencies:
+      drizzle-orm: '>=0.36.4'
+    peerDependenciesMeta:
+      drizzle-orm:
         optional: true
 
   drizzle-zod@0.8.3:
@@ -10652,6 +10681,12 @@ snapshots:
       '@types/pg': 8.16.0
       pg: 8.16.3
       postgres: 3.4.7
+
+  drizzle-seed@0.3.1(drizzle-orm@0.45.1(@types/pg@8.16.0)(pg@8.16.3)(postgres@3.4.7)):
+    dependencies:
+      pure-rand: 6.1.0
+    optionalDependencies:
+      drizzle-orm: 0.45.1(@types/pg@8.16.0)(pg@8.16.3)(postgres@3.4.7)
 
   drizzle-zod@0.8.3(drizzle-orm@0.45.1(@types/pg@8.16.0)(pg@8.16.3)(postgres@3.4.7))(zod@4.2.1):
     dependencies:

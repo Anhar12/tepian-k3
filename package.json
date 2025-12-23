@@ -18,6 +18,7 @@
     "db:studio": "turbo -F @tepian-k3/db db:studio",
     "db:generate": "turbo -F @tepian-k3/db db:generate",
     "db:migrate": "turbo -F @tepian-k3/db db:migrate",
+    "db:seed": "turbo -F @tepian-k3/db db:seed",
     "email:dev": "turbo -F @tepian-k3/services email:dev",
     "email:verify": "turbo -F @tepian-k3/services email:verify"
   },
