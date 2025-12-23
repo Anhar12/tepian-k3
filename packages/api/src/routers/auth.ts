@@ -9,6 +9,7 @@ import otpSchema from "@tepian-k3/schema/otp.schema";
 import { OTPService } from "@tepian-k3/auth/services/otp";
 import { Effect } from "effect";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
+import { storageService } from "@tepian-k3/services/storage";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -138,6 +139,21 @@ export const authRouter = createTRPCRouter({
       return null;
     }
 
-    return Effect.runPromise(usersQueries.getUserById(ctx.user?.id));
+    const user = await Effect.runPromise(
+      permissionQueries.getUserWithPermissions(ctx.user.id)
+    );
+    if (!user) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+
+    return {
+      ...user,
+      profilePictureUrl: user.profilePictureUrl
+        ? storageService.getPublicUrl(user.profilePictureUrl)
+        : null,
+    };
   }),
 });

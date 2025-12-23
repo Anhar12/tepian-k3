@@ -20,6 +20,9 @@ const permissionQueries = {
         try: () =>
           db.query.users.findFirst({
             where: eq(users.id, userId),
+            columns: {
+              password: false,
+            },
           }),
         catch: (error) => {
           logger.error("Error fetching user", { error });
