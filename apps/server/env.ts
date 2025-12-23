@@ -7,6 +7,7 @@ export const env = createEnv({
     SERVER_HOSTNAME: z.string().min(1),
     SERVER_PORT: z.coerce.number().default(3000),
     CORS_ORIGIN: z.url().optional(),
+    UPLOADS_DIR: z.string().min(1).default("uploads"),
   },
 
   /**

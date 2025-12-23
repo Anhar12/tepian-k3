@@ -1,3 +1,4 @@
+import MainHeader from "@/components/main-header";
 import { trpc } from "@/utils/trpc";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
@@ -24,5 +25,9 @@ export const Route = createFileRoute("/(core)")({
 });
 
 function RouteComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+    </>
+  );
 }

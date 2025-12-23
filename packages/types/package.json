@@ -1,5 +1,6 @@
 {
-  "name": "@tepian-k3/schema",
+  "name": "@tepian-k3/types",
+  "type": "module",
   "exports": {
     ".": {
       "default": "./src/index.ts"
@@ -8,17 +9,13 @@
       "default": "./src/*.ts"
     }
   },
-  "type": "module",
   "scripts": {},
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",
+    "type-fest": "^5.3.1",
     "typescript": "catalog:"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.10",
-    "@tepian-k3/db": "workspace:*",
-    "drizzle-zod": "^0.8.3",
-    "zod": "catalog:",
-    "zod-form-data": "catalog:"
+    "@tepian-k3/db": "workspace:*"
   }
 }

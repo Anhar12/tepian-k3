@@ -7,6 +7,7 @@ import userSchema from "@tepian-k3/schema/users.schema";
 import { hash } from "@node-rs/argon2";
 import { Effect } from "effect";
 import { logger } from "@tepian-k3/services/logger";
+import { storageService } from "@tepian-k3/services/storage";
 
 const usersQueries = {
   getUserByEmail(email: string) {
@@ -57,7 +58,12 @@ const usersQueries = {
     }).pipe(
       Effect.flatMap((user) =>
         user
-          ? Effect.succeed(user)
+          ? Effect.succeed({
+              ...user,
+              profilePictureUrl: user.profilePictureUrl
+                ? storageService.getPublicUrl(user.profilePictureUrl)
+                : null,
+            })
           : Effect.fail(
               new TRPCError({
                 code: "NOT_FOUND",
@@ -140,7 +146,133 @@ const usersQueries = {
         );
       }
 
-      return Effect.succeed(user);
+      return user;
+    });
+  },
+
+  updateUserProfile(
+    id: string,
+    data: z.infer<typeof userSchema.updateUserSchema>
+  ) {
+    return Effect.gen(this, function* () {
+      yield* this.getUserById(id);
+
+      const [user] = yield* Effect.tryPromise({
+        try: () =>
+          db.update(users).set(data).where(eq(users.id, id)).returning(),
+        catch: (error) => {
+          logger.error("Failed to update user profile", { id, data, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui profil pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      if (!user) {
+        logger.error("No user returned after profile update", { id });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui profil pengguna.`,
+          })
+        );
+      }
+
+      return user;
+    });
+  },
+
+  updateUserAvatar(id: string, filename: string, url: string) {
+    return Effect.gen(this, function* () {
+      const user = yield* this.getUserById(id);
+
+      // this should remove previous profile picture from storage if user had one
+      if (user.profilePictureFileName && user.profilePictureUrl) {
+        yield* storageService.delete(`avatars/${user.profilePictureFileName}`);
+      }
+
+      const [updatedUser] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(users)
+            .set({
+              profilePictureFileName: filename,
+              profilePictureUrl: url,
+            })
+            .where(eq(users.id, id))
+            .returning(),
+        catch: (error) => {
+          logger.error("Failed to update user profile", { id, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui profil pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      if (!updatedUser) {
+        logger.error("No user returned after profile update", { id });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui profil pengguna.`,
+          })
+        );
+      }
+
+      return updatedUser;
+    });
+  },
+
+  updateUserPassword(userId: string, newPassword: string) {
+    return Effect.gen(this, function* () {
+      yield* this.getUserById(userId);
+
+      const hashedPassword = yield* Effect.tryPromise({
+        try: () => hash(newPassword),
+        catch: (error) => {
+          logger.error("Failed to hash new password", { userId, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal mengenkripsi password baru.`,
+            cause: error,
+          });
+        },
+      });
+
+      const [user] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(users)
+            .set({
+              password: hashedPassword,
+            })
+            .where(eq(users.id, userId))
+            .returning(),
+        catch: (error) => {
+          logger.error("Failed to update user password", { userId, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui password pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      if (!user) {
+        logger.error("No user returned after password update", { userId });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memperbarui password pengguna.`,
+          })
+        );
+      }
+
+      return user;
     });
   },
 

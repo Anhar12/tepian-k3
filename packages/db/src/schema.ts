@@ -33,6 +33,8 @@ export const users = createTable(
       withTimezone: true,
       mode: "string",
     }),
+    profilePictureFileName: text("profile_picture_file_name"),
+    profilePictureUrl: text("profile_picture_url"),
     ...timestamps,
   },
   (table) => [

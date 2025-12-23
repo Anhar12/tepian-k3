@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
+import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as coreDashboardRouteImport } from './routes/(core)/dashboard'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
@@ -29,6 +31,16 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const coreSettingsRoute = coreSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreProfileRoute = coreProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => coreRouteRoute,
 } as any)
 const coreDashboardRoute = coreDashboardRouteImport.update({
   id: '/dashboard',
@@ -57,6 +69,8 @@ export interface FileRoutesByFullPath {
   '/register': typeof authRegisterRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/dashboard': typeof coreDashboardRoute
+  '/profile': typeof coreProfileRoute
+  '/settings': typeof coreSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -64,6 +78,8 @@ export interface FileRoutesByTo {
   '/register': typeof authRegisterRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/dashboard': typeof coreDashboardRoute
+  '/profile': typeof coreProfileRoute
+  '/settings': typeof coreSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -74,12 +90,28 @@ export interface FileRoutesById {
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/dashboard': typeof coreDashboardRoute
+  '/(core)/profile': typeof coreProfileRoute
+  '/(core)/settings': typeof coreSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/verify-email' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-email'
+    | '/dashboard'
+    | '/profile'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/verify-email' | '/dashboard'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-email'
+    | '/dashboard'
+    | '/profile'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -89,6 +121,8 @@ export interface FileRouteTypes {
     | '/(auth)/register'
     | '/(auth)/verify-email'
     | '/(core)/dashboard'
+    | '/(core)/profile'
+    | '/(core)/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +153,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(core)/settings': {
+      id: '/(core)/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof coreSettingsRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/profile': {
+      id: '/(core)/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof coreProfileRouteImport
+      parentRoute: typeof coreRouteRoute
     }
     '/(core)/dashboard': {
       id: '/(core)/dashboard'
@@ -169,10 +217,14 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface coreRouteRouteChildren {
   coreDashboardRoute: typeof coreDashboardRoute
+  coreProfileRoute: typeof coreProfileRoute
+  coreSettingsRoute: typeof coreSettingsRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreDashboardRoute: coreDashboardRoute,
+  coreProfileRoute: coreProfileRoute,
+  coreSettingsRoute: coreSettingsRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(

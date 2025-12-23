@@ -43,6 +43,13 @@
       "when": 1766105302286,
       "tag": "0005_freezing_moonstone",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1766231114585,
+      "tag": "0006_glossy_nextwave",
+      "breakpoints": true
     }
   ]
 }

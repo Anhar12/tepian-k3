@@ -12,15 +12,20 @@
     },
     "./logger": {
       "default": "./src/logger/index.ts"
+    },
+    "./storage": {
+      "default": "./src/storage/index.ts"
     }
   },
   "dependencies": {
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
     "logform": "^2.7.0",
+    "minio": "^8.0.6",
     "nodemailer": "^7.0.11",
     "react": "19.2.3",
     "resend": "^6.6.0",
+    "uuid": "catalog:",
     "winston": "^3.19.0"
   },
   "devDependencies": {
@@ -30,6 +35,7 @@
     "@types/nodemailer": "^7.0.4",
     "@types/react": "19.2.3",
     "dotenv-cli": "^11.0.0",
+    "effect": "catalog:",
     "react-email": "^5.0.8",
     "tsx": "^4.19.0"
   }
