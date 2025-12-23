@@ -37,6 +37,10 @@
       "cache": false,
       "persistent": true
     },
+    "db:reset": {
+      "cache": false,
+      "persistent": true
+    },
     "email:dev": {
       "cache": false,
       "persistent": true

@@ -1,5 +1,7 @@
+import { hash } from "@node-rs/argon2";
 import { db } from "./client";
 import { permission, rolePermissions, roles, userRoles, users } from "./schema";
+import { exit } from "process";
 
 async function seed() {
   // Create permissions
@@ -61,12 +63,14 @@ async function seed() {
     ...perms.map((p) => ({ roleId: adminRole[0]!.id, permissionId: p.id })),
   ]);
 
+  const password = await hash("test12345");
+
   // Create example user with multiple roles
   const superAdmin = await db
     .insert(users)
     .values({
       email: "superadmin@mail.com",
-      password: "test12345",
+      password,
       address: "Jl. Test Address No.123",
       name: "superadmin",
       phone: "081234567890",
@@ -79,7 +83,7 @@ async function seed() {
     .insert(users)
     .values({
       email: "admin@mail.com",
-      password: "test12345",
+      password,
       address: "Jl. Test Address No.123",
       name: "admin",
       phone: "081234567890",
@@ -92,7 +96,7 @@ async function seed() {
     .insert(users)
     .values({
       email: "user@mail.com",
-      password: "test12345",
+      password,
       address: "Jl. Test Address No.123",
       name: "user",
       phone: "081234567890",
@@ -113,6 +117,7 @@ async function seed() {
   ]);
 
   console.log("✅ Seeded roles, permissions, and users");
+  exit(0);
 }
 
 seed();
