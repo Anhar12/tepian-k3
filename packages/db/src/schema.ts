@@ -171,6 +171,11 @@ export const rolePermissions = createTable(
     createdAt: timestamp("created_at").defaultNow(),
   },
   (table) => [
+    index("role_permission_role_id_idx").using("btree", table.roleId),
+    index("role_permission_permission_id_idx").using(
+      "btree",
+      table.permissionId
+    ),
     primaryKey({
       columns: [table.roleId, table.permissionId],
     }),
@@ -189,7 +194,12 @@ export const userPermissions = createTable(
     granted: boolean("granted").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow(),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.userId, table.permissionId] }),
-  })
+  (table) => [
+    primaryKey({ columns: [table.userId, table.permissionId] }),
+    index("user_permission_user_id_idx").using("btree", table.userId),
+    index("user_permission_permission_id_idx").using(
+      "btree",
+      table.permissionId
+    ),
+  ]
 );
