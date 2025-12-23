@@ -16,9 +16,11 @@
   },
   "dependencies": {
     "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/services": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
     "@trpc/server": "catalog:",
     "@node-rs/argon2": "catalog:",
+    "effect": "catalog:",
     "zod": "catalog:"
   }
 }
