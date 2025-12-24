@@ -1,6 +1,9 @@
 import GridBackground from "@/components/grid-background";
+import { Button } from "@/components/ui/button";
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, type LinkProps } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -33,9 +36,29 @@ function HomeComponent() {
   const pusatLayananItems: {
     imageSrc: string;
     title: string;
-    description: string;
-    link: string;
-  }[] = [];
+    to: LinkProps["to"];
+  }[] = [
+    {
+      imageSrc: "/assets/pengujian.jpg",
+      title: "Pengujian",
+      to: "/",
+    },
+    {
+      imageSrc: "/assets/pelatihan.jpg",
+      title: "Pelatihan",
+      to: "/",
+    },
+    {
+      imageSrc: "/assets/uji-kompetensi.jpg",
+      title: "Uji Kompetensi",
+      to: "/",
+    },
+    {
+      imageSrc: "/assets/konsultasi.jpg",
+      title: "Konsultasi",
+      to: "/",
+    },
+  ];
 
   return (
     <div className="relative min-h-screen w-full bg-white dark:bg-neutral-950">
@@ -122,7 +145,7 @@ function HomeComponent() {
 
       {/* Pusat layanan kami */}
       <section
-        className="relative container min-h-screen bg-muted/50 py-16 px-10"
+        className="relative container min-h-screen bg-muted/50 py-16 px-10 flex flex-col"
         id="#layanan"
       >
         <GridBackground />
@@ -132,19 +155,59 @@ function HomeComponent() {
           </h2>
           <div className="mx-auto h-0.5 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 relative z-10">
+        <div className="flex flex-row flex-wrap gap-6 items-center justify-center relative z-10 mt-12">
           {/* Service Cards */}
-          {["Pelatihan K3", "Konsultasi K3", "Audit K3"].map((service) => (
-            <div
-              key={service}
-              className="rounded-lg border border-border bg-white p-6 text-center dark:bg-neutral-900"
-            >
-              <h3 className="text-xl font-medium mb-2">{service}</h3>
-              <p className="text-muted-foreground">
-                Deskripsi singkat tentang layanan {service}.
-              </p>
-            </div>
+          {pusatLayananItems.map((item) => (
+            <Card key={item.title} className="overflow-hidden rounded-4xl w-64">
+              <CardHeader>
+                <img
+                  src={item.imageSrc}
+                  alt={item.title}
+                  className="h-40 w-full object-contain"
+                />
+              </CardHeader>
+              <CardFooter className="flex flex-row items-center">
+                <a
+                  href={item.to}
+                  className="text-2xl font-semibold text-primary text-center w-full"
+                >
+                  {item.title}
+                </a>
+              </CardFooter>
+            </Card>
           ))}
+        </div>
+      </section>
+
+      {/* Profile */}
+      <section
+        className="relative container min-h-[60vh] py-16 px-10 flex flex-row gap-4"
+        id="#profile"
+      >
+        {/* Logo */}
+        <img
+          src="/assets/logo-balai-k3.png"
+          alt="Balai Tepian K3 Logo"
+          className="object-contain w-64 mx-auto"
+        />
+        <div className="relative z-10 mb-8 w-fit flex flex-col items-start mx-auto gap-4 justify-between">
+          <h2 className="text-4xl font-semibold text-start text-primary">
+            Balai K3 Samarinda
+          </h2>
+          <h3 className="text-2xl font-medium text-balance text-justify text-foreground">
+            Balai Keselamatan dan Kesehatan Kerja (K3) Samarinda merupakan
+            lembaga yang berperan dalam mendukung penerapan keselamatan dan
+            kesehatan kerja melalui pembinaan, pengujian, dan pelatihan K3.
+            Balai ini bertujuan membantu menciptakan lingkungan kerja yang aman,
+            sehat, dan produktif sesuai dengan peraturan yang berlaku.
+          </h3>
+          <Button
+            variant="outline"
+            className="text-sm font-semibold border-primary rounded-3xl text-primary hover:bg-primary/10 inline-flex h-10 items-center justify-center px-6 transition-colors bg-white"
+          >
+            Baca selengkapnya
+            <ArrowRight className="size-4" />
+          </Button>
         </div>
       </section>
 
