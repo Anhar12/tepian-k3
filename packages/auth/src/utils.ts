@@ -24,6 +24,8 @@ export async function validateToken(token: string): Promise<{
     const user = {
       id: payload.id,
       email: payload.email,
+      roles: payload.roles,
+      permissions: payload.permissions,
       createdAt: payload.createdAt,
       updatedAt: payload.updatedAt,
     };

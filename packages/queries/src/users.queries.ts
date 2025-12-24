@@ -43,11 +43,15 @@ const usersQueries = {
       try: () =>
         db.query.users.findFirst({
           where: and(eq(users.id, userId), isNull(users.deletedAt)),
+          with: {
+            roles: true,
+          },
           columns: {
             password: false,
           },
         }),
       catch: (error) => {
+        console.log(error);
         logger.error("Failed to get user by ID", { userId, error });
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

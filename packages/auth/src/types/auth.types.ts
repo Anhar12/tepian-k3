@@ -10,6 +10,8 @@ export interface SessionUser {
 export interface JWTPayload extends JoseJWTPayload {
   id: string;
   email: string;
+  roles: string[];
+  permissions: string[];
   createdAt: string;
   updatedAt: string | null;
 }

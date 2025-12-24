@@ -7,13 +7,16 @@
     },
     "./*": {
       "default": "./src/*.ts"
-    }
+    },
+    "./seed": null
   },
   "scripts": {
     "db:push": "pnpm with-env drizzle-kit push",
     "db:generate": "pnpm with-env drizzle-kit generate",
     "db:studio": "pnpm with-env drizzle-kit studio",
     "db:migrate": "pnpm with-env drizzle-kit migrate",
+    "db:seed": "pnpm with-env tsx ./src/seed.ts",
+    "db:reset": "pnpm with-env tsx ./src/reset.ts",
     "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {
@@ -23,10 +26,14 @@
     "typescript": "catalog:"
   },
   "dependencies": {
+    "@node-rs/argon2": "catalog:",
     "@t3-oss/env-core": "^0.13.10",
+    "@tepian-k3/constants": "workspace:*",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
+    "drizzle-seed": "^0.3.1",
     "postgres": "^3.4.7",
+    "tsx": "^4.21.0",
     "uuid": "catalog:",
     "zod": "catalog:"
   }
