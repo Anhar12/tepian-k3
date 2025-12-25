@@ -1,9 +1,15 @@
 import GridBackground from "@/components/grid-background";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { createFileRoute, type LinkProps } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -61,7 +67,7 @@ function HomeComponent() {
   ];
 
   return (
-    <div className="relative min-h-screen w-full bg-white dark:bg-neutral-950">
+    <div className="relative h-screen w-full bg-white dark:bg-neutral-950">
       {/* Landing Page Navbar */}
       <nav className="sticky top-0 z-50 container mx-auto flex h-16 items-center justify-between py-3.5 px-5 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-sm">
         <a href="/" className="text-xl font-bold text-primary">
@@ -101,7 +107,7 @@ function HomeComponent() {
 
       {/* Hero */}
       <section
-        className="relative flex min-h-[80vh] flex-col justify-center px-10 text-center"
+        className="relative flex h-[80vh] flex-col justify-center px-10 text-center"
         id="#beranda"
       >
         {/* Background Image/SVG */}
@@ -113,9 +119,9 @@ function HomeComponent() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col w-full h-full flex-1 justify-center">
+        <div className="relative z-10 flex flex-col w-full h-full flex-1 justify-center items-start">
           {/* Hero Title */}
-          <div>
+          <div className="mb-25">
             <h1 className="relative text-6xl text-white text-start font-semibold">
               Pusat Pelatihan
             </h1>
@@ -124,20 +130,22 @@ function HomeComponent() {
             </h1>
           </div>
           {/* Hero Footer */}
-          <div className="mt-32 flex items-center gap-6">
-            <div className="flex flex-col items-start gap-1">
-              <h2 className="text-2xl text-white font-bold">500+</h2>
-              <p className="text-white text-sm">Perusahaan Mitra</p>
-            </div>
-            <div className="h-12 w-px bg-white/50" />
-            <div className="flex flex-col items-start gap-1">
-              <h2 className="text-2xl text-white font-bold">10K+</h2>
-              <p className="text-white text-sm">Pelatihan Selesai</p>
-            </div>
-            <div className="h-12 w-px bg-white/50" />
-            <div className="flex flex-col items-start gap-1">
-              <h2 className="text-2xl text-white font-bold">98%</h2>
-              <p className="text-white text-sm">Tingkat Kepuasan</p>
+          <div className="absolute bottom-15 w-full text-center">
+            <div className="mt-32 flex items-center gap-6">
+              <div className="flex flex-col items-start gap-1">
+                <h2 className="text-2xl text-white font-bold">500+</h2>
+                <p className="text-white text-sm">Perusahaan Mitra</p>
+              </div>
+              <div className="h-12 w-px bg-white/50" />
+              <div className="flex flex-col items-start gap-1">
+                <h2 className="text-2xl text-white font-bold">10K+</h2>
+                <p className="text-white text-sm">Pelatihan Selesai</p>
+              </div>
+              <div className="h-12 w-px bg-white/50" />
+              <div className="flex flex-col items-start gap-1">
+                <h2 className="text-2xl text-white font-bold">98%</h2>
+                <p className="text-white text-sm">Tingkat Kepuasan</p>
+              </div>
             </div>
           </div>
         </div>
@@ -150,10 +158,10 @@ function HomeComponent() {
       >
         <GridBackground />
         <div className="relative z-10 mb-8 w-fit flex flex-col items-center mx-auto gap-2">
-          <h2 className="text-3xl font-semibold text-center text-primary">
+          <h2 className="text-6xl font-semibold text-center text-primary mb-2">
             Pusat Layanan Kami
           </h2>
-          <div className="mx-auto h-0.5 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
+          <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
         <div className="flex flex-row flex-wrap gap-6 items-center justify-center relative z-10 mt-12">
           {/* Service Cards */}
@@ -181,7 +189,7 @@ function HomeComponent() {
 
       {/* Profile */}
       <section
-        className="relative container min-h-[60vh] py-16 px-10 flex flex-row gap-4"
+        className="relative container h-[60vh] py-16 px-10 flex flex-row gap-4"
         id="#profile"
       >
         {/* Logo */}
@@ -190,7 +198,7 @@ function HomeComponent() {
           alt="Balai Tepian K3 Logo"
           className="object-contain w-64 mx-auto"
         />
-        <div className="relative z-10 mb-8 w-fit flex flex-col items-start mx-auto gap-4 justify-between">
+        <div className="relative z-10 w-fit flex flex-col items-start mx-auto gap-4 justify-between h-full">
           <h2 className="text-4xl font-semibold text-start text-primary">
             Balai K3 Samarinda
           </h2>
@@ -211,44 +219,178 @@ function HomeComponent() {
         </div>
       </section>
 
-      {/* Content layer - not affected by mask */}
-      <div className="relative container mx-auto max-w-3xl px-4 py-2">
+      {/* Informasi Kesalamatan & Kesehatan Kerja */}
+      <section
+        className="relative container min-h-screen bg-accent/10 py-16 px-10 flex flex-col"
+        id="#informasi"
+      >
         <GridBackground />
-        <pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
-        <div className="grid gap-6">
-          {/* Card with inverted corner effect */}
-          <section className="relative rounded-2xl border border-r-0 border-t-0 bg-white p-6 dark:bg-neutral-900">
-            {/* Inverted corner at top-right with proper border */}
-            <svg
-              className="absolute -top-px -right-px h-8 w-8"
-              viewBox="0 0 32 32"
-              fill="none"
-            >
-              {/* Background fill for the inverted curve */}
-              <path
-                d="M 0 0 L 32 0 L 32 32 Q 32 0 0 0 Z"
-                className="fill-white dark:fill-neutral-950"
-              />
-              {/* The inverted curve border */}
-              <path
-                d="M 0 0 Q 32 0 32 32"
-                className="stroke-border"
-                strokeWidth="1"
-                fill="none"
-              />
-            </svg>
-            {/* Top border line (left of the notch) */}
-            <div className="bg-border absolute -top-px left-3 h-px w-[calc(100%-2rem)]" />
-            {/* Right border line (below the notch) */}
-            <div className="bg-border absolute -right-px top-8 h-[calc(100%-2.5rem)] w-px" />
-            <h2 className="text-lg font-semibold">Card Title</h2>
-            <p className="text-muted-foreground mt-2">
-              This card has an inverted border radius effect on the top-right
-              corner.
-            </p>
-          </section>
+        <div className="relative z-10 mb-8 w-fit flex flex-col items-center mx-auto gap-2">
+          <h2 className="text-6xl font-semibold text-center text-primary w-200 mb-2">
+            Informasi Keselamatan & Kesehatan Kerja
+          </h2>
+          <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
-      </div>
+        {/* Cards */}
+        <div className="flex flex-col gap-4">
+          {/* Infographic Card */}
+          <div className="flex items-center justify-center relative z-10">
+            <Card className="overflow-hidden rounded-4xl w-full h-96 flex flex-col">
+              <CardHeader>
+                <img
+                  src="/assets/infographic-k3.jpg"
+                  alt="Infographic K3"
+                  className="h-64 w-full object-contain"
+                />
+              </CardHeader>
+              <CardFooter className="flex flex-row items-center">
+                <a
+                  href="#"
+                  className="text-2xl font-semibold text-primary text-center w-full"
+                >
+                  Infographic Keselamatan & Kesehatan Kerja
+                </a>
+              </CardFooter>
+            </Card>
+          </div>
+          {/* Small News Card */}
+          <div className="flex flex-row flex-wrap gap-6 items-center justify-center relative z-10">
+            {[1, 2, 3].map((item) => (
+              <Card
+                key={item}
+                className="overflow-hidden rounded-4xl size-96 flex flex-col"
+              >
+                <CardHeader>
+                  <img
+                    src="/assets/info-k3.jpg"
+                    alt="Informasi K3"
+                    className="h-32 w-full object-contain"
+                  />
+                </CardHeader>
+                <CardFooter className="flex flex-row items-center">
+                  <a
+                    href="#"
+                    className="text-lg font-semibold text-primary text-center w-full"
+                  >
+                    Informasi K3 #{item}
+                  </a>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section
+        className="relative container h-screen py-16 px-10 flex flex-col"
+        id="#faq"
+      >
+        <div className="relative z-10 mb-8 w-fit flex flex-col items-center mx-auto gap-2">
+          <h2 className="text-6xl font-semibold text-center text-primary mb-2 w-137.5 text-balance">
+            Frequently Asked Questions
+          </h2>
+          <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
+        </div>
+        {/* FAQ Items */}
+        <div className="flex flex-col gap-6 relative z-10 w-150 mx-auto">
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            defaultValue="item-1"
+          >
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Product Information</AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-4 text-balance">
+                <p>
+                  Our flagship product combines cutting-edge technology with
+                  sleek design. Built with premium materials, it offers
+                  unparalleled performance and reliability.
+                </p>
+                <p>
+                  Key features include advanced processing capabilities, and an
+                  intuitive user interface designed for both beginners and
+                  experts.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Shipping Details</AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-4 text-balance">
+                <p>
+                  We offer worldwide shipping through trusted courier partners.
+                  Standard delivery takes 3-5 business days, while express
+                  shipping ensures delivery within 1-2 business days.
+                </p>
+                <p>
+                  All orders are carefully packaged and fully insured. Track
+                  your shipment in real-time through our dedicated tracking
+                  portal.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+              <AccordionTrigger>Return Policy</AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-4 text-balance">
+                <p>
+                  We stand behind our products with a comprehensive 30-day
+                  return policy. If you&apos;re not completely satisfied, simply
+                  return the item in its original condition.
+                </p>
+                <p>
+                  Our hassle-free return process includes free return shipping
+                  and full refunds processed within 48 hours of receiving the
+                  returned item.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Stakeholder */}
+      <section
+        className="relative container h-[75vh] py-16 px-10 flex flex-col bg-primary"
+        id="#stakeholder"
+      >
+        <div className="flex flex-col justify-center gap-4 w-full h-full">
+          <img
+            src="/assets/stakeholder-tepian-k3.png"
+            alt="Tepian K3 Stakeholder Logos"
+            className="object-contain w-96 h-32 self-end"
+          />
+        </div>
+        {/* Bottom of Stakeholder Section Text */}
+        <div className="absolute bottom-4 w-full text-center text-sm text-primary-foreground container">
+          <div className="flex flex-row gap-6">
+            {/* Jam Kerja */}
+            <div className="flex flex-row items-center gap-1">
+              <AlarmClock className="size-4 mx-auto" />
+              <p className="font-normal text-sm">
+                Senin - Jumat, 08.00 - 16.00 WITA
+              </p>
+            </div>
+            {/* Email */}
+            <div className="flex flex-row items-center gap-1">
+              <Mail className="size-4 mx-auto" />
+              <p className="font-normal text-sm">balaik3samarinda@gmail.com</p>
+            </div>
+            {/* Phone */}
+            <div className="flex flex-row items-center gap-1">
+              <PhoneCall className="size-4 mx-auto" />
+              <p className="font-normal text-sm">+0232 4522 4023</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative container h-11 py-4 px-10 flex items-center justify-center bg-muted/50">
+        <p className="text-sm font-normal text-center text-foreground">
+          &copy; 2025 Balai K3 Samarinda
+        </p>
+      </footer>
     </div>
   );
 }
