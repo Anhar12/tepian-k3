@@ -114,7 +114,9 @@ export default function getUsersColumns({
       ),
       cell: ({ row }) => (
         <span>
-          {format(new Date(row.getValue("updatedAt")), "dd/MM/yyyy HH:mm:ss")}
+          {row.getValue("updatedAt")
+            ? format(new Date(row.getValue("updatedAt")), "dd/MM/yyyy HH:mm:ss")
+            : "-"}
         </span>
       ),
     },
