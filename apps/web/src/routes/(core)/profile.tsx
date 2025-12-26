@@ -40,7 +40,7 @@ function RouteComponent() {
       onError: () => {
         globalErrorToast("Failed to upload avatar");
       },
-    })
+    }),
   );
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +83,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="flex h-screen flex-col bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <header className="shrink-0 border-b bg-white/80 backdrop-blur-sm dark:bg-gray-950/80">
         <div className="container mx-auto px-4 py-4">
@@ -95,7 +95,7 @@ function RouteComponent() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
-          <h1 className="text-2xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
             Profile Settings
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -105,8 +105,8 @@ function RouteComponent() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto space-y-6">
+      <main className="container mx-auto flex-1 overflow-y-auto px-4 py-8">
+        <div className="mx-auto max-w-2xl space-y-6">
           {/* Avatar Upload Card */}
           <Card>
             <CardHeader>
@@ -128,7 +128,7 @@ function RouteComponent() {
                   <Button
                     size="icon"
                     variant="secondary"
-                    className="absolute bottom-0 right-0 rounded-full h-10 w-10"
+                    className="absolute right-0 bottom-0 h-10 w-10 rounded-full"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Camera className="h-4 w-4" />
@@ -164,7 +164,7 @@ function RouteComponent() {
                   </div>
                 )}
 
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-center text-xs text-muted-foreground">
                   Recommended: Square image, at least 400x400px
                   <br />
                   Maximum file size: 5MB

@@ -49,7 +49,7 @@ function VerifyEmailComponent() {
       onError: (error) => {
         globalErrorToast(error.message);
       },
-    })
+    }),
   );
 
   const verifyMutation = useMutation(
@@ -70,21 +70,21 @@ function VerifyEmailComponent() {
       onError: (error) => {
         globalErrorToast(error.message);
       },
-    })
+    }),
   );
 
   const resendMutation = useMutation(
     trpc.auth.resendOTP.mutationOptions({
       onSuccess: () => {
         globalSuccessToast(
-          "Kode verifikasi telah dikirim ulang ke email Anda."
+          "Kode verifikasi telah dikirim ulang ke email Anda.",
         );
         setCode("");
       },
       onError: (error) => {
         globalErrorToast(error.message);
       },
-    })
+    }),
   );
 
   const handleSendOTP = (): void => {
@@ -141,7 +141,7 @@ function VerifyEmailComponent() {
   // Success Screen
   if (step === "success") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-8 pb-10 text-center">
             <div className="mb-6 flex justify-center">
@@ -149,10 +149,10 @@ function VerifyEmailComponent() {
                 <CheckCircle2 className="h-14 w-14 text-primary-foreground" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold mb-3 text-foreground">
+            <h2 className="mb-3 text-3xl font-bold text-foreground">
               Email Verified!
             </h2>
-            <p className="text-muted-foreground mb-8 text-lg">
+            <p className="mb-8 text-lg text-muted-foreground">
               Your email has been successfully verified.
               <br />
               Redirecting to your dashboard...
@@ -169,9 +169,9 @@ function VerifyEmailComponent() {
   // OTP Verification Screen
   if (step === "otp") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
-          <CardHeader className="text-center space-y-3 pb-6">
+          <CardHeader className="space-y-3 pb-6 text-center">
             <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary">
               <Mail className="h-10 w-10 text-primary-foreground" />
             </div>
@@ -181,7 +181,7 @@ function VerifyEmailComponent() {
             <CardDescription className="text-base">
               We've sent a 6-digit verification code to
               <br />
-              <span className="font-semibold text-foreground text-lg">
+              <span className="text-lg font-semibold text-foreground">
                 {email}
               </span>
             </CardDescription>
@@ -190,7 +190,7 @@ function VerifyEmailComponent() {
           <CardContent className="space-y-6">
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="text-center block text-base font-medium text-foreground">
+                <label className="block text-center text-base font-medium text-foreground">
                   Enter verification code
                 </label>
                 <div className="flex justify-center">
@@ -218,7 +218,7 @@ function VerifyEmailComponent() {
               <Button
                 onClick={() => handleVerify()}
                 disabled={verifyMutation.isPending || code.length !== 6}
-                className="w-full h-12 text-base font-semibold"
+                className="h-12 w-full text-base font-semibold"
                 size="lg"
               >
                 {verifyMutation.isPending ? (
@@ -243,7 +243,7 @@ function VerifyEmailComponent() {
               </div>
             </div>
 
-            <div className="text-center space-y-3">
+            <div className="space-y-3 text-center">
               <p className="text-sm text-muted-foreground">
                 Didn't receive the code?
               </p>
@@ -252,7 +252,7 @@ function VerifyEmailComponent() {
                 variant="outline"
                 onClick={handleResend}
                 disabled={resendMutation.isPending}
-                className="w-full h-11 font-medium"
+                className="h-11 w-full font-medium"
               >
                 {resendMutation.isPending ? (
                   <>
@@ -276,20 +276,20 @@ function VerifyEmailComponent() {
               Change Email
             </Button>
 
-            <p className="text-xs text-center text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground">
               By verifying your email, you agree to our Terms of Service and
               Privacy Policy
             </p>
           </CardFooter>
         </Card>
 
-        <div className="fixed bottom-4 right-4 bg-card p-4 rounded-lg shadow-lg border max-w-xs">
-          <p className="text-sm font-semibold mb-2 text-foreground">
+        <div className="fixed right-4 bottom-4 max-w-xs rounded-lg border bg-card p-4 shadow-lg">
+          <p className="mb-2 text-sm font-semibold text-foreground">
             💡 Demo Instructions
           </p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             Enter{" "}
-            <span className="font-mono font-bold bg-muted px-1.5 py-0.5 rounded text-foreground">
+            <span className="rounded bg-muted px-1.5 py-0.5 font-mono font-bold text-foreground">
               123456
             </span>{" "}
             to verify successfully.
@@ -301,9 +301,9 @@ function VerifyEmailComponent() {
 
   // Email Input Screen (Default)
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-3 pb-6">
+        <CardHeader className="space-y-3 pb-6 text-center">
           <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary">
             <Mail className="h-10 w-10 text-primary-foreground" />
           </div>
@@ -347,7 +347,7 @@ function VerifyEmailComponent() {
           <Button
             onClick={handleSendOTP}
             disabled={sendOTPMutation.isPending || !email}
-            className="w-full h-12 text-base font-semibold"
+            className="h-12 w-full text-base font-semibold"
             size="lg"
           >
             {sendOTPMutation.isPending ? (
@@ -367,17 +367,17 @@ function VerifyEmailComponent() {
             Back to Sign Up
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
         </CardFooter>
       </Card>
 
-      <div className="fixed bottom-4 right-4 bg-card p-4 rounded-lg shadow-lg border max-w-xs">
-        <p className="text-sm font-semibold mb-2 text-foreground">
+      <div className="fixed right-4 bottom-4 max-w-xs rounded-lg border bg-card p-4 shadow-lg">
+        <p className="mb-2 text-sm font-semibold text-foreground">
           💡 Demo Instructions
         </p>
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-xs leading-relaxed text-muted-foreground">
           Enter any valid email format to proceed to the OTP screen.
         </p>
       </div>

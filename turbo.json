@@ -48,6 +48,10 @@
     "email:verify": {
       "cache": false,
       "persistent": true
+    },
+    "web:prettier": {
+      "cache": false,
+      "persistent": true
     }
   },
   "globalEnv": [

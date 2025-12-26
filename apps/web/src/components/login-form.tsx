@@ -58,7 +58,7 @@ export function LoginForm({
       onError: (error) => {
         globalErrorToast(error.message);
       },
-    })
+    }),
   );
 
   function handleSubmit(values: z.infer<typeof authSchema.loginSchema>) {
@@ -85,7 +85,7 @@ export function LoginForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
+                    <FormLabel className="ml-1 text-sm font-bold">
                       Email
                     </FormLabel>
                     <FormControl>
@@ -105,7 +105,7 @@ export function LoginForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
+                    <FormLabel className="ml-1 text-sm font-bold">
                       Password
                     </FormLabel>
                     <FormControl>
@@ -123,7 +123,7 @@ export function LoginForm({
                           className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => {
                             setType((prev) =>
-                              prev === "password" ? "text" : "password"
+                              prev === "password" ? "text" : "password",
                             );
                           }}
                         >

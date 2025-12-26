@@ -30,9 +30,9 @@ export default function MainHeader() {
 
   return (
     <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-950/80">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <div>
-          <h1 className="text-2xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
             Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">Welcome back!</p>
@@ -54,7 +54,7 @@ export default function MainHeader() {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
+                <p className="text-sm leading-none font-medium">
                   {user?.name || "User"}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
