@@ -24,6 +24,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
+import { ModeToggle } from "./mode-toggle";
 
 export function NavUser() {
   const navigate = useNavigate();
@@ -98,8 +99,7 @@ export function NavUser() {
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
+                <ModeToggle />
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <IconNotification />

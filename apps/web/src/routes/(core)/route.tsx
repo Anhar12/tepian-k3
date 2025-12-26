@@ -49,7 +49,9 @@ function RouteComponent() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <Outlet />
+        <main className="container overflow-auto p-4">
+          <Outlet />
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

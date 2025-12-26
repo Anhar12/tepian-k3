@@ -14,10 +14,11 @@ import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
-import { Route as coreDashboardRouteImport } from './routes/(core)/dashboard'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
+import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
+import { Route as coreDashboardUsersRouteImport } from './routes/(core)/dashboard/users'
 
 const coreRouteRoute = coreRouteRouteImport.update({
   id: '/(core)',
@@ -42,11 +43,6 @@ const coreProfileRoute = coreProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => coreRouteRoute,
 } as any)
-const coreDashboardRoute = coreDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => coreRouteRoute,
-} as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
@@ -62,24 +58,36 @@ const authLoginRoute = authLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => authRouteRoute,
 } as any)
+const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDashboardUsersRoute = coreDashboardUsersRouteImport.update({
+  id: '/dashboard/users',
+  path: '/dashboard/users',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-email': typeof authVerifyEmailRoute
-  '/dashboard': typeof coreDashboardRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/dashboard/users': typeof coreDashboardUsersRoute
+  '/dashboard': typeof coreDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-email': typeof authVerifyEmailRoute
-  '/dashboard': typeof coreDashboardRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/dashboard/users': typeof coreDashboardUsersRoute
+  '/dashboard': typeof coreDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,9 +97,10 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
-  '/(core)/dashboard': typeof coreDashboardRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/(core)/dashboard/users': typeof coreDashboardUsersRoute
+  '/(core)/dashboard/': typeof coreDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,18 +109,20 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/verify-email'
-    | '/dashboard'
     | '/profile'
     | '/settings'
+    | '/dashboard/users'
+    | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/register'
     | '/verify-email'
-    | '/dashboard'
     | '/profile'
     | '/settings'
+    | '/dashboard/users'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
@@ -120,9 +131,10 @@ export interface FileRouteTypes {
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-email'
-    | '/(core)/dashboard'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/(core)/dashboard/users'
+    | '/(core)/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -168,13 +180,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreProfileRouteImport
       parentRoute: typeof coreRouteRoute
     }
-    '/(core)/dashboard': {
-      id: '/(core)/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof coreDashboardRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
     '/(auth)/verify-email': {
       id: '/(auth)/verify-email'
       path: '/verify-email'
@@ -196,6 +201,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLoginRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(core)/dashboard/': {
+      id: '/(core)/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof coreDashboardIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/users': {
+      id: '/(core)/dashboard/users'
+      path: '/dashboard/users'
+      fullPath: '/dashboard/users'
+      preLoaderRoute: typeof coreDashboardUsersRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
   }
 }
 
@@ -216,15 +235,17 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface coreRouteRouteChildren {
-  coreDashboardRoute: typeof coreDashboardRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
+  coreDashboardUsersRoute: typeof coreDashboardUsersRoute
+  coreDashboardIndexRoute: typeof coreDashboardIndexRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
-  coreDashboardRoute: coreDashboardRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
+  coreDashboardUsersRoute: coreDashboardUsersRoute,
+  coreDashboardIndexRoute: coreDashboardIndexRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(

@@ -84,83 +84,78 @@ function RouteComponent() {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-y-auto bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Main Content */}
-      <main className="container mx-auto flex-1 px-4 py-8">
-        <div className="mx-auto max-w-2xl space-y-6">
-          {/* Avatar Upload Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Picture</CardTitle>
-              <CardDescription>Update your profile picture</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative">
-                  <Avatar className="h-32 w-32">
-                    <AvatarImage
-                      src={previewUrl || user.profilePictureUrl || undefined}
-                      alt={user.name || "User"}
-                    />
-                    <AvatarFallback className="text-4xl">
-                      {user.name.charAt(0) || "U"}
-                    </AvatarFallback>
-                  </Avatar>
+    <div className="flex min-h-full flex-col">
+      <div className="container mx-auto max-w-2xl space-y-6">
+        {/* Avatar Upload Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile Picture</CardTitle>
+            <CardDescription>Update your profile picture</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <Avatar className="h-32 w-32">
+                  <AvatarImage
+                    src={previewUrl || user.profilePictureUrl || undefined}
+                    alt={user.name || "User"}
+                  />
+                  <AvatarFallback className="text-4xl">
+                    {user.name.charAt(0) || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute right-0 bottom-0 h-10 w-10 rounded-full"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {selectedFile && (
+                <div className="flex gap-2">
                   <Button
-                    size="icon"
-                    variant="secondary"
-                    className="absolute right-0 bottom-0 h-10 w-10 rounded-full"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={handleUpload}
+                    disabled={uploadAvatarMutation.isPending}
                   >
-                    <Camera className="h-4 w-4" />
+                    <Upload className="mr-2 h-4 w-4" />
+                    {uploadAvatarMutation.isPending ? "Uploading..." : "Upload"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={uploadAvatarMutation.isPending}
+                  >
+                    Cancel
                   </Button>
                 </div>
+              )}
 
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
+              <p className="text-center text-xs text-muted-foreground">
+                Recommended: Square image, at least 400x400px
+                <br />
+                Maximum file size: 5MB
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-                {selectedFile && (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleUpload}
-                      disabled={uploadAvatarMutation.isPending}
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploadAvatarMutation.isPending
-                        ? "Uploading..."
-                        : "Upload"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={handleCancel}
-                      disabled={uploadAvatarMutation.isPending}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
+        {/* Profile Information Form */}
+        <UpdateUserProfileForm user={user} />
 
-                <p className="text-center text-xs text-muted-foreground">
-                  Recommended: Square image, at least 400x400px
-                  <br />
-                  Maximum file size: 5MB
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Profile Information Form */}
-          <UpdateUserProfileForm user={user} />
-
-          {/* Change Password Form */}
-          <ChangePasswordForm />
-        </div>
-      </main>
+        {/* Change Password Form */}
+        <ChangePasswordForm />
+      </div>
     </div>
   );
 }
