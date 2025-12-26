@@ -142,6 +142,7 @@ export const authRouter = createTRPCRouter({
     const user = await Effect.runPromise(
       permissionQueries.getUserWithPermissions(ctx.user.id)
     );
+
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
