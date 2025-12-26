@@ -1,5 +1,3 @@
-"use client";
-
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -7,7 +5,6 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
