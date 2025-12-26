@@ -62,7 +62,7 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col">
-      <div className="mb-4 flex items-center justify-end gap-4">
+      <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex flex-row gap-2">
           <Checkbox
             id="show-deleted-users"
