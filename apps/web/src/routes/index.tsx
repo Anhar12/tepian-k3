@@ -19,47 +19,53 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { trpc } from "@/utils/trpc";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, type LinkProps } from "@tanstack/react-router";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(context.trpc.auth.me.queryOptions()),
   component: HomeComponent,
 });
 
-function HomeComponent() {
-  const navItems = [
-    { label: "Beranda", href: "#" },
-    { label: "Transaksi", href: "#" },
-    { label: "FAQ", href: "#faq" },
-    { label: "PPID", href: "#" },
-  ];
+const navItems = [
+  { label: "Beranda", href: "#" },
+  { label: "Transaksi", href: "#" },
+  { label: "FAQ", href: "#faq" },
+  { label: "PPID", href: "#" },
+];
 
-  const pusatLayananItems: {
-    imageSrc: string;
-    title: string;
-    to: LinkProps["to"];
-  }[] = [
-    {
-      imageSrc: "/assets/pengujian.jpg",
-      title: "Pengujian",
-      to: "/",
-    },
-    {
-      imageSrc: "/assets/pelatihan.jpg",
-      title: "Pelatihan",
-      to: "/",
-    },
-    {
-      imageSrc: "/assets/uji-kompetensi.jpg",
-      title: "Uji Kompetensi",
-      to: "/",
-    },
-    {
-      imageSrc: "/assets/konsultasi.jpg",
-      title: "Konsultasi",
-      to: "/",
-    },
-  ];
+const pusatLayananItems: {
+  imageSrc: string;
+  title: string;
+  to: LinkProps["to"];
+}[] = [
+  {
+    imageSrc: "/assets/pengujian.jpg",
+    title: "Pengujian",
+    to: "/",
+  },
+  {
+    imageSrc: "/assets/pelatihan.jpg",
+    title: "Pelatihan",
+    to: "/",
+  },
+  {
+    imageSrc: "/assets/uji-kompetensi.jpg",
+    title: "Uji Kompetensi",
+    to: "/",
+  },
+  {
+    imageSrc: "/assets/konsultasi.jpg",
+    title: "Konsultasi",
+    to: "/",
+  },
+];
+
+function HomeComponent() {
+  const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
 
   return (
     <div className="w-full bg-white dark:bg-neutral-950">
@@ -84,20 +90,29 @@ function HomeComponent() {
             </a>
           ))}
         </div>
-        <div className="flex items-center gap-4">
+        {user ? (
           <a
-            href="/login"
-            className="text-sm font-medium text-primary hover:underline"
+            href="/dashboard"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Login
+            Dashboard
           </a>
-          <a
-            href="/register"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Sign Up
-          </a>
-        </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <a
+              href="/login"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Login
+            </a>
+            <a
+              href="/register"
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Sign Up
+            </a>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
