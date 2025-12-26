@@ -15,11 +15,22 @@ import {
 } from "drizzle-orm/pg-core";
 import { v7 as uuidv7 } from "uuid";
 import { timestamps } from "./utils";
-import { PERMISSION_ACTION } from "@tepian-k3/constants/constants";
+import {
+  PERMISSION_ACTION,
+  TOOLS_AVAILABILITY,
+  TOOLS_CONDITIONS,
+} from "@tepian-k3/constants/constants";
 
 export const createTable = pgTableCreator((name) => `${name}`);
 
 export const permissionActionEnum = pgEnum("action", PERMISSION_ACTION);
+
+export const ToolsConditionEnum = pgEnum("tools_condition", TOOLS_CONDITIONS);
+
+export const ToolsAvailabilityEnum = pgEnum(
+  "tools_availability",
+  TOOLS_AVAILABILITY
+);
 
 export const users = createTable(
   "users",
@@ -201,5 +212,36 @@ export const userPermissions = createTable(
       "btree",
       table.permissionId
     ),
+  ]
+);
+
+export const tools = createTable(
+  "tools",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    toolCode: varchar("tool_code", { length: 256 }).notNull().unique(),
+    toolName: varchar("tool_name", { length: 256 }).notNull(),
+    function: text("function"),
+    location: text("location"),
+    shelf: text("shelf"),
+    BMNnumber: varchar("bmn_number", { length: 100 }),
+    NUPnumber: varchar("nup_number", { length: 100 }),
+    brand: varchar("brand", { length: 256 }),
+    type: varchar("type", { length: 256 }),
+    serialNumber: varchar("serial_number", { length: 256 }),
+    originOfAcquisition: text("origin_of_acquisition"),
+    acquisitionYear: integer("acquisition_year"),
+    correction: text("correction"),
+    condition: ToolsConditionEnum("condition").notNull(),
+    availability: ToolsAvailabilityEnum("availability").notNull(),
+    information: text("information"),
+    ...timestamps,
+  },
+  (table) => [
+    index("tool_id_idx").using("btree", table.id),
+    index("tool_tool_code_idx").using("btree", table.toolCode),
   ]
 );
