@@ -3,6 +3,8 @@ import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-m
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import getUsersColumns from "@/components/users-columns";
 import { useDataTable } from "@/hooks/use-data-table";
 import { trpc } from "@/utils/trpc";
@@ -10,7 +12,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { PlusCircle } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/(core)/dashboard/users/")({
   validateSearch: (search) => userSchema.getAllUsersSchema.parse(search),
@@ -32,6 +34,8 @@ function RouteComponent() {
   const { data: users } = useSuspenseQuery(
     trpc.user.getUserPaginated.queryOptions(params),
   );
+
+  const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
   const columns = useMemo(
     () =>
@@ -58,13 +62,32 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col">
-      <Button
-        className="mb-4 self-end"
-        onClick={() => navigate({ to: "/dashboard/users/create" })}
-      >
-        <PlusCircle className="size-4" />
-        Tambah Pengguna
-      </Button>
+      <div className="mb-4 flex items-center justify-end gap-4">
+        <div className="flex flex-row gap-2">
+          <Checkbox
+            id="show-deleted-users"
+            checked={showDeleted}
+            onCheckedChange={(checked) => {
+              navigate({
+                to: "/dashboard/users",
+                search: {
+                  ...params,
+                  showDeleted: Boolean(checked),
+                },
+              });
+              setShowDeleted(Boolean(checked));
+            }}
+          />
+          <Label>Deleted Users</Label>
+        </div>
+        <Button
+          className="self-end"
+          onClick={() => navigate({ to: "/dashboard/users/create" })}
+        >
+          <PlusCircle className="size-4" />
+          Tambah Pengguna
+        </Button>
+      </div>
       <DataTable table={table}>
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />

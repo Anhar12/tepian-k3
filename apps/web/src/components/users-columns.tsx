@@ -2,11 +2,12 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import type { UsersWithoutFoto } from "@tepian-k3/types/users.types";
 import DataTableActionCell from "./data-table-action-cell";
-import { Text, Trash } from "lucide-react";
+import { ArchiveRestore, Text, Trash } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table/data-table-column-header";
 import { format } from "date-fns";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/utils/trpc";
+import { Route } from "@/routes/(core)/dashboard/users";
 
 interface UsersColumnsProps {
   currentPage: number;
@@ -14,13 +15,15 @@ interface UsersColumnsProps {
 }
 
 const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
+  const params = Route.useSearch();
+
   const deleteUserMutation = useMutation(
     trpc.user.deleteUser.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil menghapus user");
 
         await queryClient.invalidateQueries(
-          trpc.user.getUserPaginated.queryFilter(),
+          trpc.user.getUserPaginated.queryOptions(params),
         );
       },
       onError: (error) => {
@@ -31,19 +34,49 @@ const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
     }),
   );
 
+  const restoreUserMutation = useMutation(
+    trpc.user.restoreUser.mutationOptions({
+      onSuccess: async () => {
+        globalSuccessToast("Berhasil mengembalikan user");
+        await queryClient.invalidateQueries(
+          trpc.user.getUserPaginated.queryOptions(params),
+        );
+      },
+      onError: (error) => {
+        globalErrorToast(
+          `Gagal mengembalikan user. ${error.message ?? "Silahkan coba lagi."}`,
+        );
+      },
+    }),
+  );
+
   return (
     <DataTableActionCell
-      icon={<Trash className="mr-4 size-4" />}
-      isLoading={deleteUserMutation.isPending}
+      icon={
+        row.original.deletedAt ? (
+          <ArchiveRestore className="mr-4 size-4" />
+        ) : (
+          <Trash className="mr-4 size-4" />
+        )
+      }
+      isLoading={deleteUserMutation.isPending || restoreUserMutation.isPending}
       editText="Edit"
-      triggerText="Hapus"
-      dialogTitle="Hapus data"
-      dialogDescription="Apakah anda yakin ingin menghapus data ini?"
+      triggerText={row.original.deletedAt ? "Kembalikan" : "Hapus"}
+      dialogTitle={
+        row.original.deletedAt ? "Kembalikan data user" : "Hapus data user"
+      }
+      dialogDescription={
+        row.original.deletedAt
+          ? "Apakah anda yakin ingin mengembalikan data user ini?"
+          : "Apakah anda yakin ingin menghapus data user ini? Data yang sudah dihapus tidak dapat dikembalikan."
+      }
       btnClassName="bg-red-600 text-white hover:bg-red-500"
       onEditAction={`users/${row.original.id}/edit`}
-      onConfirm={() => {
-        deleteUserMutation.mutate({ id: row.original.id });
-      }}
+      onConfirm={() =>
+        row.original.deletedAt
+          ? restoreUserMutation.mutate({ id: row.original.id })
+          : deleteUserMutation.mutate({ id: row.original.id })
+      }
     />
   );
 };

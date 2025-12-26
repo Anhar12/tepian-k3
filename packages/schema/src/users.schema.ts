@@ -27,6 +27,7 @@ const getAllUsersSchema = z.object({
   createdAt: z.array(z.coerce.number()).default([]),
   filters: z.array(filterSchema).default([]),
   joinOperator: z.enum(["and", "or"]).default("and"),
+  showDeleted: z.boolean().default(false),
 });
 
 const createUserSchema = createInsertSchema(users, {

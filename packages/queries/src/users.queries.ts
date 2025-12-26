@@ -159,7 +159,9 @@ const usersQueries = {
                     : undefined
                 )
               : undefined,
-            isNull(users.deletedAt)
+            input.showDeleted
+              ? isNotNull(users.deletedAt)
+              : isNull(users.deletedAt)
           );
 
       const orderBy =
