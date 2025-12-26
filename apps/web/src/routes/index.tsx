@@ -19,7 +19,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Separator } from "@/components/ui/separator";
 import { createFileRoute, type LinkProps } from "@tanstack/react-router";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
 
@@ -31,7 +30,7 @@ function HomeComponent() {
   const navItems = [
     { label: "Beranda", href: "#" },
     { label: "Transaksi", href: "#" },
-    { label: "FAQ", href: "#" },
+    { label: "FAQ", href: "#faq" },
     { label: "PPID", href: "#" },
   ];
 
@@ -63,9 +62,9 @@ function HomeComponent() {
   ];
 
   return (
-    <div className="relative h-screen w-full bg-white dark:bg-neutral-950">
+    <div className="w-full bg-white dark:bg-neutral-950">
       {/* Landing Page Navbar */}
-      <nav className="sticky top-0 z-50 container mx-auto flex h-16 items-center justify-between bg-white/80 px-5 py-3.5 backdrop-blur-sm dark:bg-neutral-950/80">
+      <nav className="sticky top-0 z-50 mx-auto flex h-16 max-h-16 min-h-16 w-full items-center justify-between bg-white/80 px-5 backdrop-blur-sm dark:bg-neutral-950/80">
         <a href="/" className="text-xl font-bold text-primary">
           {/* image */}
           <img
@@ -104,7 +103,7 @@ function HomeComponent() {
       {/* Hero */}
       <section
         className="relative flex h-[80vh] flex-col justify-center px-10 text-center"
-        id="#beranda"
+        id="beranda"
       >
         {/* Background Image/SVG */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -150,7 +149,7 @@ function HomeComponent() {
       {/* Pusat layanan kami */}
       <section
         className="relative container flex min-h-screen flex-col bg-muted/50 px-10 py-16"
-        id="#layanan"
+        id="layanan"
       >
         <GridBackground />
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
@@ -186,7 +185,7 @@ function HomeComponent() {
       {/* Profile */}
       <section
         className="relative container flex h-[60vh] flex-row gap-4 px-10 py-16"
-        id="#profile"
+        id="profile"
       >
         {/* Logo */}
         <img
@@ -218,7 +217,7 @@ function HomeComponent() {
       {/* Informasi Kesalamatan & Kesehatan Kerja */}
       <section
         className="relative container flex min-h-screen flex-col bg-accent/10 px-10 py-16"
-        id="#informasi"
+        id="informasi"
       >
         <GridBackground />
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
@@ -282,7 +281,7 @@ function HomeComponent() {
       {/* FAQ */}
       <section
         className="relative container flex h-screen flex-col px-10 py-16"
-        id="#faq"
+        id="faq"
       >
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
           <h2 className="mb-2 w-137.5 text-center text-6xl font-semibold text-balance text-primary">
@@ -350,7 +349,7 @@ function HomeComponent() {
       {/* Stakeholder */}
       <section
         className="relative container flex h-[75vh] flex-col bg-primary px-10 py-16"
-        id="#stakeholder"
+        id="stakeholder"
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">
           <img
