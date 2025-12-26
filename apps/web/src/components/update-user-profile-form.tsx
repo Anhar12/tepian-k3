@@ -52,7 +52,7 @@ export default function UpdateUserProfileForm({
       onError: (error) => {
         globalErrorToast(error.message);
       },
-    })
+    }),
   );
 
   function onSubmit(data: z.infer<typeof userSchema.updateUserSchema>) {

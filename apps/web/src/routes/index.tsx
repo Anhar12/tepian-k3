@@ -6,7 +6,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Separator } from "@/components/ui/separator";
 import { createFileRoute, type LinkProps } from "@tanstack/react-router";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
@@ -69,13 +81,13 @@ function HomeComponent() {
   return (
     <div className="relative h-screen w-full bg-white dark:bg-neutral-950">
       {/* Landing Page Navbar */}
-      <nav className="sticky top-0 z-50 container mx-auto flex h-16 items-center justify-between py-3.5 px-5 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-sm">
+      <nav className="sticky top-0 z-50 container mx-auto flex h-16 items-center justify-between bg-white/80 px-5 py-3.5 backdrop-blur-sm dark:bg-neutral-950/80">
         <a href="/" className="text-xl font-bold text-primary">
           {/* image */}
           <img
             src="/assets/logo-tepiank3.png"
             alt="Tepian K3 Logo"
-            className="object-contain w-44"
+            className="w-44 object-contain"
           />
         </a>
         <div className="flex items-center gap-4">
@@ -83,7 +95,7 @@ function HomeComponent() {
             <a
               key={item.label}
               href={item.href}
-              className="text-lg font-medium text-primary hover:underline hover:cursor-pointer"
+              className="text-lg font-medium text-primary hover:cursor-pointer hover:underline"
             >
               {item.label}
             </a>
@@ -98,7 +110,7 @@ function HomeComponent() {
           </a>
           <a
             href="/register"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Sign Up
           </a>
@@ -114,18 +126,18 @@ function HomeComponent() {
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <img
             src="/assets/hero-banner.jpg"
-            className="object-fill w-full h-full"
+            className="h-full w-full object-fill"
           />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col w-full h-full flex-1 justify-center items-start">
+        <div className="relative z-10 flex h-full w-full flex-1 flex-col items-start justify-center">
           {/* Hero Title */}
           <div className="mb-25">
-            <h1 className="relative text-6xl text-white text-start font-semibold">
+            <h1 className="relative text-start text-6xl font-semibold text-white">
               Pusat Pelatihan
             </h1>
-            <h1 className="relative text-6xl text-white text-start font-semibold">
+            <h1 className="relative text-start text-6xl font-semibold text-white">
               K3 Samarinda
             </h1>
           </div>
@@ -133,18 +145,18 @@ function HomeComponent() {
           <div className="absolute bottom-15 w-full text-center">
             <div className="mt-32 flex items-center gap-6">
               <div className="flex flex-col items-start gap-1">
-                <h2 className="text-2xl text-white font-bold">500+</h2>
-                <p className="text-white text-sm">Perusahaan Mitra</p>
+                <h2 className="text-2xl font-bold text-white">500+</h2>
+                <p className="text-sm text-white">Perusahaan Mitra</p>
               </div>
               <div className="h-12 w-px bg-white/50" />
               <div className="flex flex-col items-start gap-1">
-                <h2 className="text-2xl text-white font-bold">10K+</h2>
-                <p className="text-white text-sm">Pelatihan Selesai</p>
+                <h2 className="text-2xl font-bold text-white">10K+</h2>
+                <p className="text-sm text-white">Pelatihan Selesai</p>
               </div>
               <div className="h-12 w-px bg-white/50" />
               <div className="flex flex-col items-start gap-1">
-                <h2 className="text-2xl text-white font-bold">98%</h2>
-                <p className="text-white text-sm">Tingkat Kepuasan</p>
+                <h2 className="text-2xl font-bold text-white">98%</h2>
+                <p className="text-sm text-white">Tingkat Kepuasan</p>
               </div>
             </div>
           </div>
@@ -153,20 +165,20 @@ function HomeComponent() {
 
       {/* Pusat layanan kami */}
       <section
-        className="relative container min-h-screen bg-muted/50 py-16 px-10 flex flex-col"
+        className="relative container flex min-h-screen flex-col bg-muted/50 px-10 py-16"
         id="#layanan"
       >
         <GridBackground />
-        <div className="relative z-10 mb-8 w-fit flex flex-col items-center mx-auto gap-2">
-          <h2 className="text-6xl font-semibold text-center text-primary mb-2">
+        <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
+          <h2 className="mb-2 text-center text-6xl font-semibold text-primary">
             Pusat Layanan Kami
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
-        <div className="flex flex-row flex-wrap gap-6 items-center justify-center relative z-10 mt-12">
+        <div className="relative z-10 mt-12 flex flex-row flex-wrap items-center justify-center gap-6">
           {/* Service Cards */}
           {pusatLayananItems.map((item) => (
-            <Card key={item.title} className="overflow-hidden rounded-4xl w-64">
+            <Card key={item.title} className="w-64 overflow-hidden rounded-4xl">
               <CardHeader>
                 <img
                   src={item.imageSrc}
@@ -177,7 +189,7 @@ function HomeComponent() {
               <CardFooter className="flex flex-row items-center">
                 <a
                   href={item.to}
-                  className="text-2xl font-semibold text-primary text-center w-full"
+                  className="w-full text-center text-2xl font-semibold text-primary"
                 >
                   {item.title}
                 </a>
@@ -189,20 +201,20 @@ function HomeComponent() {
 
       {/* Profile */}
       <section
-        className="relative container h-[60vh] py-16 px-10 flex flex-row gap-4"
+        className="relative container flex h-[60vh] flex-row gap-4 px-10 py-16"
         id="#profile"
       >
         {/* Logo */}
         <img
           src="/assets/logo-balai-k3.png"
           alt="Balai Tepian K3 Logo"
-          className="object-contain w-64 mx-auto"
+          className="mx-auto w-64 object-contain"
         />
-        <div className="relative z-10 w-fit flex flex-col items-start mx-auto gap-4 justify-between h-full">
-          <h2 className="text-4xl font-semibold text-start text-primary">
+        <div className="relative z-10 mx-auto flex h-full w-fit flex-col items-start justify-between gap-4">
+          <h2 className="text-start text-4xl font-semibold text-primary">
             Balai K3 Samarinda
           </h2>
-          <h3 className="text-2xl font-medium text-balance text-justify text-foreground">
+          <h3 className="text-justify text-2xl font-medium text-balance text-foreground">
             Balai Keselamatan dan Kesehatan Kerja (K3) Samarinda merupakan
             lembaga yang berperan dalam mendukung penerapan keselamatan dan
             kesehatan kerja melalui pembinaan, pengujian, dan pelatihan K3.
@@ -211,7 +223,7 @@ function HomeComponent() {
           </h3>
           <Button
             variant="outline"
-            className="text-sm font-semibold border-primary rounded-3xl text-primary hover:bg-primary/10 inline-flex h-10 items-center justify-center px-6 transition-colors bg-white"
+            className="inline-flex h-10 items-center justify-center rounded-3xl border-primary bg-white px-6 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
           >
             Baca selengkapnya
             <ArrowRight className="size-4" />
@@ -221,12 +233,12 @@ function HomeComponent() {
 
       {/* Informasi Kesalamatan & Kesehatan Kerja */}
       <section
-        className="relative container min-h-screen bg-accent/10 py-16 px-10 flex flex-col"
+        className="relative container flex min-h-screen flex-col bg-accent/10 px-10 py-16"
         id="#informasi"
       >
         <GridBackground />
-        <div className="relative z-10 mb-8 w-fit flex flex-col items-center mx-auto gap-2">
-          <h2 className="text-6xl font-semibold text-center text-primary w-200 mb-2">
+        <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
+          <h2 className="mb-2 w-200 text-center text-6xl font-semibold text-primary">
             Informasi Keselamatan & Kesehatan Kerja
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
@@ -234,31 +246,33 @@ function HomeComponent() {
         {/* Cards */}
         <div className="flex flex-col gap-4">
           {/* Infographic Card */}
-          <div className="flex items-center justify-center relative z-10">
-            <Card className="overflow-hidden rounded-4xl w-full h-96 flex flex-col">
-              <CardHeader>
-                <img
-                  src="/assets/infographic-k3.jpg"
-                  alt="Infographic K3"
-                  className="h-64 w-full object-contain"
-                />
-              </CardHeader>
-              <CardFooter className="flex flex-row items-center">
-                <a
-                  href="#"
-                  className="text-2xl font-semibold text-primary text-center w-full"
-                >
-                  Infographic Keselamatan & Kesehatan Kerja
-                </a>
-              </CardFooter>
-            </Card>
+          <div className="relative z-10 flex w-full items-center justify-center">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-1">
+                      <Card className="h-96 w-full rounded-2xl">
+                        <CardContent className="flex h-full flex-col items-center justify-center">
+                          <span className="text-4xl font-semibold">
+                            {index + 1}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="absolute top-1/2 left-0 ml-2 -translate-y-1/2 rounded-none border-0 bg-transparent p-2 shadow-none" />
+              <CarouselNext className="absolute top-1/2 right-0 mr-2 -translate-y-1/2 rounded-none border-0 bg-transparent p-2 shadow-none" />
+            </Carousel>
           </div>
           {/* Small News Card */}
-          <div className="flex flex-row flex-wrap gap-6 items-center justify-center relative z-10">
+          <div className="relative z-10 flex flex-row flex-wrap items-center justify-center gap-6">
             {[1, 2, 3].map((item) => (
               <Card
                 key={item}
-                className="overflow-hidden rounded-4xl size-96 flex flex-col"
+                className="flex size-96 flex-col overflow-hidden rounded-4xl"
               >
                 <CardHeader>
                   <img
@@ -270,7 +284,7 @@ function HomeComponent() {
                 <CardFooter className="flex flex-row items-center">
                   <a
                     href="#"
-                    className="text-lg font-semibold text-primary text-center w-full"
+                    className="w-full text-center text-lg font-semibold text-primary"
                   >
                     Informasi K3 #{item}
                   </a>
@@ -283,17 +297,17 @@ function HomeComponent() {
 
       {/* FAQ */}
       <section
-        className="relative container h-screen py-16 px-10 flex flex-col"
+        className="relative container flex h-screen flex-col px-10 py-16"
         id="#faq"
       >
-        <div className="relative z-10 mb-8 w-fit flex flex-col items-center mx-auto gap-2">
-          <h2 className="text-6xl font-semibold text-center text-primary mb-2 w-137.5 text-balance">
+        <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
+          <h2 className="mb-2 w-137.5 text-center text-6xl font-semibold text-balance text-primary">
             Frequently Asked Questions
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
         {/* FAQ Items */}
-        <div className="flex flex-col gap-6 relative z-10 w-150 mx-auto">
+        <div className="relative z-10 mx-auto flex w-150 flex-col gap-6">
           <Accordion
             type="single"
             collapsible
@@ -351,43 +365,43 @@ function HomeComponent() {
 
       {/* Stakeholder */}
       <section
-        className="relative container h-[75vh] py-16 px-10 flex flex-col bg-primary"
+        className="relative container flex h-[75vh] flex-col bg-primary px-10 py-16"
         id="#stakeholder"
       >
-        <div className="flex flex-col justify-center gap-4 w-full h-full">
+        <div className="flex h-full w-full flex-col justify-center gap-4">
           <img
             src="/assets/stakeholder-tepian-k3.png"
             alt="Tepian K3 Stakeholder Logos"
-            className="object-contain w-96 h-32 self-end"
+            className="h-32 w-96 self-end object-contain"
           />
         </div>
         {/* Bottom of Stakeholder Section Text */}
-        <div className="absolute bottom-4 w-full text-center text-sm text-primary-foreground container">
+        <div className="absolute bottom-4 container w-full text-center text-sm text-primary-foreground">
           <div className="flex flex-row gap-6">
             {/* Jam Kerja */}
             <div className="flex flex-row items-center gap-1">
-              <AlarmClock className="size-4 mx-auto" />
-              <p className="font-normal text-sm">
+              <AlarmClock className="mx-auto size-4" />
+              <p className="text-sm font-normal">
                 Senin - Jumat, 08.00 - 16.00 WITA
               </p>
             </div>
             {/* Email */}
             <div className="flex flex-row items-center gap-1">
-              <Mail className="size-4 mx-auto" />
-              <p className="font-normal text-sm">balaik3samarinda@gmail.com</p>
+              <Mail className="mx-auto size-4" />
+              <p className="text-sm font-normal">balaik3samarinda@gmail.com</p>
             </div>
             {/* Phone */}
             <div className="flex flex-row items-center gap-1">
-              <PhoneCall className="size-4 mx-auto" />
-              <p className="font-normal text-sm">+0232 4522 4023</p>
+              <PhoneCall className="mx-auto size-4" />
+              <p className="text-sm font-normal">+0232 4522 4023</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative container h-11 py-4 px-10 flex items-center justify-center bg-muted/50">
-        <p className="text-sm font-normal text-center text-foreground">
+      <footer className="relative container flex h-11 items-center justify-center bg-muted/50 px-10 py-4">
+        <p className="text-center text-sm font-normal text-foreground">
           &copy; 2025 Balai K3 Samarinda
         </p>
       </footer>

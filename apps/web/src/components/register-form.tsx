@@ -62,7 +62,7 @@ export function RegisterForm({
       onError: (error) => {
         globalErrorToast(error.message);
       },
-    })
+    }),
   );
 
   function handleSubmit(values: z.infer<typeof userSchema.createUserSchema>) {
@@ -89,7 +89,7 @@ export function RegisterForm({
                 name="name"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
+                    <FormLabel className="ml-1 text-sm font-bold">
                       Nama
                     </FormLabel>
                     <FormControl>
@@ -109,7 +109,7 @@ export function RegisterForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
+                    <FormLabel className="ml-1 text-sm font-bold">
                       Email
                     </FormLabel>
                     <FormControl>
@@ -129,7 +129,7 @@ export function RegisterForm({
                 name="address"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
+                    <FormLabel className="ml-1 text-sm font-bold">
                       Alamat
                     </FormLabel>
                     <FormControl>
@@ -149,7 +149,7 @@ export function RegisterForm({
                 name="phone"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
+                    <FormLabel className="ml-1 text-sm font-bold">
                       Telepon
                     </FormLabel>
                     <FormControl>
@@ -169,7 +169,7 @@ export function RegisterForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 font-bold text-sm">
+                    <FormLabel className="ml-1 text-sm font-bold">
                       Password
                     </FormLabel>
                     <FormControl>
@@ -187,7 +187,7 @@ export function RegisterForm({
                           className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => {
                             setType((prev) =>
-                              prev === "password" ? "text" : "password"
+                              prev === "password" ? "text" : "password",
                             );
                           }}
                         >

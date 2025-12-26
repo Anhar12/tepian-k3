@@ -42,7 +42,7 @@ export default function ChangePasswordForm() {
       onError: (error) => {
         globalErrorToast(error.message);
       },
-    })
+    }),
   );
 
   function onSubmit(data: z.infer<typeof userSchema.updateUserPasswordSchema>) {
@@ -65,7 +65,7 @@ export default function ChangePasswordForm() {
               name="newPassword"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="ml-1 font-bold text-sm">
+                  <FormLabel className="ml-1 text-sm font-bold">
                     Password Baru
                   </FormLabel>
                   <FormControl>
@@ -85,7 +85,7 @@ export default function ChangePasswordForm() {
               name="newPasswordConfirm"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel className="ml-1 font-bold text-sm">
+                  <FormLabel className="ml-1 text-sm font-bold">
                     Konfirmasi Password Baru
                   </FormLabel>
                   <FormControl>
