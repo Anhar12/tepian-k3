@@ -148,7 +148,7 @@ function HomeComponent() {
 
       {/* Pusat layanan kami */}
       <section
-        className="relative container flex min-h-screen flex-col bg-muted/50 px-10 py-16"
+        className="relative flex min-h-screen flex-col bg-muted/50 px-10 py-16"
         id="layanan"
       >
         <GridBackground />
@@ -184,7 +184,7 @@ function HomeComponent() {
 
       {/* Profile */}
       <section
-        className="relative container flex h-[60vh] flex-row gap-4 px-10 py-16"
+        className="relative flex h-[60vh] flex-row gap-4 px-10 py-16"
         id="profile"
       >
         {/* Logo */}
@@ -216,7 +216,7 @@ function HomeComponent() {
 
       {/* Informasi Kesalamatan & Kesehatan Kerja */}
       <section
-        className="relative container flex min-h-screen flex-col bg-accent/10 px-10 py-16"
+        className="relative flex min-h-screen flex-col bg-accent/10 px-10 py-16"
         id="informasi"
       >
         <GridBackground />
@@ -279,10 +279,7 @@ function HomeComponent() {
       </section>
 
       {/* FAQ */}
-      <section
-        className="relative container flex h-screen flex-col px-10 py-16"
-        id="faq"
-      >
+      <section className="relative flex h-screen flex-col px-10 py-16" id="faq">
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
           <h2 className="mb-2 w-137.5 text-center text-6xl font-semibold text-balance text-primary">
             Frequently Asked Questions
@@ -348,7 +345,7 @@ function HomeComponent() {
 
       {/* Stakeholder */}
       <section
-        className="relative container flex h-[75vh] flex-col bg-primary px-10 py-16"
+        className="relative flex h-[75vh] flex-col bg-primary px-10 py-16"
         id="stakeholder"
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">
@@ -383,7 +380,7 @@ function HomeComponent() {
       </section>
 
       {/* Footer */}
-      <footer className="relative container flex h-11 items-center justify-center bg-muted/50 px-10 py-4">
+      <footer className="relative flex h-11 items-center justify-center bg-muted/50 px-10 py-4">
         <p className="text-center text-sm font-normal text-foreground">
           &copy; 2025 Balai K3 Samarinda
         </p>
