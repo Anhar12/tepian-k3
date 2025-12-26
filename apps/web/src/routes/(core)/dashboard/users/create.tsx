@@ -52,8 +52,12 @@ import {
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
+import { requirePermission } from "@/utils/require-permission";
 
 export const Route = createFileRoute("/(core)/dashboard/users/create")({
+  beforeLoad: async ({ context }) => {
+    await requirePermission(context, { permission: "users.create" });
+  },
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(
       context.trpc.role.getAllRoles.queryOptions(),

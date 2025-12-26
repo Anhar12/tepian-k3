@@ -5,7 +5,7 @@ import DataTableActionCell from "./data-table-action-cell";
 import { ArchiveRestore, Text, Trash } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table/data-table-column-header";
 import { format } from "date-fns";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/dashboard/users";
 
@@ -16,6 +16,11 @@ interface UsersColumnsProps {
 
 const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
   const params = Route.useSearch();
+
+  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+
+  const canEdit = profile.permissions.includes("users.update");
+  const canDelete = profile.permissions.includes("users.delete");
 
   const deleteUserMutation = useMutation(
     trpc.user.deleteUser.mutationOptions({
@@ -72,6 +77,8 @@ const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
       }
       btnClassName="bg-red-600 text-white hover:bg-red-500"
       onEditAction={`users/${row.original.id}/edit`}
+      showEdit={canEdit}
+      showDelete={canDelete}
       onConfirm={() =>
         row.original.deletedAt
           ? restoreUserMutation.mutate({ id: row.original.id })

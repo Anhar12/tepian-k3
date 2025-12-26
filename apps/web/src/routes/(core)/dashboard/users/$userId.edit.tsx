@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/popover";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
@@ -37,6 +38,8 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/dashboard/users/$userId/edit")({
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "users.update" }),
   params: z.object({
     userId: z.uuidv7(),
   }),

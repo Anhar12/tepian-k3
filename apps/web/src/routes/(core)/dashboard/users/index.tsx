@@ -2,11 +2,13 @@ import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
+import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import getUsersColumns from "@/components/users-columns";
 import { useDataTable } from "@/hooks/use-data-table";
+import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -16,6 +18,8 @@ import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/(core)/dashboard/users/")({
   validateSearch: (search) => userSchema.getAllUsersSchema.parse(search),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "users.read" }),
   loaderDeps: (search) => ({
     searchParams: userSchema.getAllUsersSchema.parse(search),
   }),
@@ -80,13 +84,12 @@ function RouteComponent() {
           />
           <Label>Deleted Users</Label>
         </div>
-        <Button
-          className="self-end"
-          onClick={() => navigate({ to: "/dashboard/users/create" })}
-        >
-          <PlusCircle className="size-4" />
-          Tambah Pengguna
-        </Button>
+        <PermissionGate permission="users.create">
+          <Button onClick={() => navigate({ to: "/dashboard/users/create" })}>
+            <PlusCircle className="size-4" />
+            Tambah Pengguna
+          </Button>
+        </PermissionGate>
       </div>
       <DataTable table={table}>
         <DataTableToolbar table={table}>

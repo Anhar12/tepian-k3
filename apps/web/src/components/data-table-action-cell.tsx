@@ -37,7 +37,7 @@ type DataTableActionCellProps = {
   confirmText?: string;
   isLoading?: boolean;
   btnClassName?: string;
-  onEditAction: string | (() => void);
+  onEditAction?: string | (() => void);
   onConfirm: () => void;
   showDetail?: boolean;
   detailIcon?: React.ReactNode;
@@ -50,6 +50,10 @@ type DataTableActionCellProps = {
   deleteIcon?: React.ReactNode;
   deleteText?: string;
   customActions?: CustomAction[];
+  /** Show edit action - defaults to true if onEditAction is provided */
+  showEdit?: boolean;
+  /** Show delete action - defaults to true */
+  showDelete?: boolean;
 };
 
 export default function DataTableActionCell({
@@ -76,6 +80,8 @@ export default function DataTableActionCell({
   deleteIcon = icon,
   deleteText = triggerText,
   customActions = [],
+  showEdit = true,
+  showDelete = true,
 }: DataTableActionCellProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -142,21 +148,23 @@ export default function DataTableActionCell({
             ))}
 
           {/* Edit Action */}
-          {typeof onEditAction === "string" ? (
-            <DropdownMenuItem asChild>
-              <a href={onEditAction} className="flex flex-row">
-                {editIcon}
-                {editText}
-              </a>
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={() => onEditAction()}>
-              <div className="flex flex-row items-center">
-                {editIcon}
-                {editText}
-              </div>
-            </DropdownMenuItem>
-          )}
+          {showEdit &&
+            onEditAction &&
+            (typeof onEditAction === "string" ? (
+              <DropdownMenuItem asChild>
+                <a href={onEditAction} className="flex flex-row">
+                  {editIcon}
+                  {editText}
+                </a>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => onEditAction()}>
+                <div className="flex flex-row items-center">
+                  {editIcon}
+                  {editText}
+                </div>
+              </DropdownMenuItem>
+            ))}
 
           {/* Print Action */}
           {showPrint && onPrintAction && (
@@ -174,14 +182,16 @@ export default function DataTableActionCell({
           )}
 
           {/* Delete Action */}
-          <DropdownMenuItem className="focus:text-destructive-foreground focus:bg-destructive">
-            <AlertDialogTrigger asChild onClick={() => setIsOpen(true)}>
-              <div className="flex flex-row items-center">
-                {deleteIcon}
-                {deleteText}
-              </div>
-            </AlertDialogTrigger>
-          </DropdownMenuItem>
+          {showDelete && (
+            <DropdownMenuItem className="focus:text-destructive-foreground focus:bg-destructive">
+              <AlertDialogTrigger asChild onClick={() => setIsOpen(true)}>
+                <div className="flex flex-row items-center">
+                  {deleteIcon}
+                  {deleteText}
+                </div>
+              </AlertDialogTrigger>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <AlertDialogContent>
