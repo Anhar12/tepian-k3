@@ -13,6 +13,16 @@ async function seed() {
       { name: "users.update", resource: "users", action: "update" },
       { name: "users.delete", resource: "users", action: "delete" },
       { name: "users.manage", resource: "users", action: "manage" },
+      { name: "roles.create", resource: "roles", action: "create" },
+      { name: "roles.read", resource: "roles", action: "read" },
+      { name: "roles.update", resource: "roles", action: "update" },
+      { name: "roles.delete", resource: "roles", action: "delete" },
+      { name: "roles.manage", resource: "roles", action: "manage" },
+      { name: "permissions.create", resource: "permissions", action: "create" },
+      { name: "permissions.read", resource: "permissions", action: "read" },
+      { name: "permissions.update", resource: "permissions", action: "update" },
+      { name: "permissions.delete", resource: "permissions", action: "delete" },
+      { name: "permissions.manage", resource: "permissions", action: "manage" },
     ])
     .returning();
 

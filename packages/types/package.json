@@ -16,6 +16,8 @@
     "typescript": "catalog:"
   },
   "dependencies": {
-    "@tepian-k3/db": "workspace:*"
+    "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/shared": "workspace:*",
+    "@tanstack/react-table": "catalog:"
   }
 }

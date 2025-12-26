@@ -18,7 +18,9 @@ import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-emai
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
-import { Route as coreDashboardUsersRouteImport } from './routes/(core)/dashboard/users'
+import { Route as coreDashboardUsersIndexRouteImport } from './routes/(core)/dashboard/users/index'
+import { Route as coreDashboardUsersCreateRouteImport } from './routes/(core)/dashboard/users/create'
+import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
 
 const coreRouteRoute = coreRouteRouteImport.update({
   id: '/(core)',
@@ -63,11 +65,23 @@ const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => coreRouteRoute,
 } as any)
-const coreDashboardUsersRoute = coreDashboardUsersRouteImport.update({
-  id: '/dashboard/users',
-  path: '/dashboard/users',
+const coreDashboardUsersIndexRoute = coreDashboardUsersIndexRouteImport.update({
+  id: '/dashboard/users/',
+  path: '/dashboard/users/',
   getParentRoute: () => coreRouteRoute,
 } as any)
+const coreDashboardUsersCreateRoute =
+  coreDashboardUsersCreateRouteImport.update({
+    id: '/dashboard/users/create',
+    path: '/dashboard/users/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardUsersUserIdEditRoute =
+  coreDashboardUsersUserIdEditRouteImport.update({
+    id: '/dashboard/users/$userId/edit',
+    path: '/dashboard/users/$userId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -76,8 +90,10 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/dashboard/users': typeof coreDashboardUsersRoute
   '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,8 +102,10 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/dashboard/users': typeof coreDashboardUsersRoute
   '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -99,8 +117,10 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
-  '/(core)/dashboard/users': typeof coreDashboardUsersRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
+  '/(core)/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
+  '/(core)/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,8 +131,10 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
-    | '/dashboard/users'
     | '/dashboard'
+    | '/dashboard/users/create'
+    | '/dashboard/users'
+    | '/dashboard/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -121,8 +143,10 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
-    | '/dashboard/users'
     | '/dashboard'
+    | '/dashboard/users/create'
+    | '/dashboard/users'
+    | '/dashboard/users/$userId/edit'
   id:
     | '__root__'
     | '/'
@@ -133,8 +157,10 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
-    | '/(core)/dashboard/users'
     | '/(core)/dashboard/'
+    | '/(core)/dashboard/users/create'
+    | '/(core)/dashboard/users/'
+    | '/(core)/dashboard/users/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -208,11 +234,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardIndexRouteImport
       parentRoute: typeof coreRouteRoute
     }
-    '/(core)/dashboard/users': {
-      id: '/(core)/dashboard/users'
+    '/(core)/dashboard/users/': {
+      id: '/(core)/dashboard/users/'
       path: '/dashboard/users'
       fullPath: '/dashboard/users'
-      preLoaderRoute: typeof coreDashboardUsersRouteImport
+      preLoaderRoute: typeof coreDashboardUsersIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/users/create': {
+      id: '/(core)/dashboard/users/create'
+      path: '/dashboard/users/create'
+      fullPath: '/dashboard/users/create'
+      preLoaderRoute: typeof coreDashboardUsersCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/users/$userId/edit': {
+      id: '/(core)/dashboard/users/$userId/edit'
+      path: '/dashboard/users/$userId/edit'
+      fullPath: '/dashboard/users/$userId/edit'
+      preLoaderRoute: typeof coreDashboardUsersUserIdEditRouteImport
       parentRoute: typeof coreRouteRoute
     }
   }
@@ -237,15 +277,19 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface coreRouteRouteChildren {
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
-  coreDashboardUsersRoute: typeof coreDashboardUsersRoute
   coreDashboardIndexRoute: typeof coreDashboardIndexRoute
+  coreDashboardUsersCreateRoute: typeof coreDashboardUsersCreateRoute
+  coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
+  coreDashboardUsersUserIdEditRoute: typeof coreDashboardUsersUserIdEditRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
-  coreDashboardUsersRoute: coreDashboardUsersRoute,
   coreDashboardIndexRoute: coreDashboardIndexRoute,
+  coreDashboardUsersCreateRoute: coreDashboardUsersCreateRoute,
+  coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,
+  coreDashboardUsersUserIdEditRoute: coreDashboardUsersUserIdEditRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(

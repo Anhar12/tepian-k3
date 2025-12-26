@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { Toaster } from "@/components/ui/sonner";
 import type { trpc } from "@/utils/trpc";
 import type { QueryClient } from "@tanstack/react-query";
@@ -48,7 +49,9 @@ function RootComponent() {
         storageKey="vite-ui-theme"
       >
         <div className="grid h-svh grid-rows-[auto_1fr]">
-          <Outlet />
+          <NuqsAdapter>
+            <Outlet />
+          </NuqsAdapter>
         </div>
         <Toaster position="bottom-right" richColors />
       </ThemeProvider>

@@ -1,0 +1,20 @@
+{
+  "name": "@tepian-k3/utils",
+  "type": "module",
+  "scripts": {},
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/shared": "workspace:*",
+    "@tepian-k3/types": "workspace:*",
+    "@tanstack/react-table": "catalog:",
+    "date-fns": "catalog:",
+    "nuqs": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tepian-k3/config": "workspace:*"
+  }
+}
