@@ -26,8 +26,10 @@ import {
 } from "@/components/ui/sidebar";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
+import { useNavigate } from "@tanstack/react-router";
 
 export function NavUser() {
+  const navigate = useNavigate();
   const { isMobile } = useSidebar();
 
   const { data: user } = useSuspenseQuery(trpc.auth.profile.queryOptions());
@@ -94,9 +96,9 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate({ to: "/profile" })}>
                 <IconUserCircle />
-                Account
+                Profile
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <IconCreditCard />
