@@ -9,15 +9,16 @@ import {
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
-export function NavMain({
-  items,
-}: {
+export interface NavMainProps {
   items: {
     title: string;
     url: string;
     icon?: Icon;
+    permission?: string;
   }[];
-}) {
+}
+
+export function NavMain({ items }: NavMainProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
