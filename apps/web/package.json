@@ -8,6 +8,7 @@
     "build": "pnpm with-env vite build",
     "serve": "pnpm with-env vite preview",
     "start": "pnpm with-env vite",
+    "prettier": "prettier --write .",
     "check-types": "tsc --noEmit",
     "generate-pwa-assets": "pwa-assets-generator",
     "with-env": "dotenv -e ../../.env --"
