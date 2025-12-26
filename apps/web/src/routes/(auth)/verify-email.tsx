@@ -24,7 +24,7 @@ import z from "zod";
 
 export const Route = createFileRoute("/(auth)/verify-email")({
   validateSearch: z.object({
-    email: z.string().email().optional(),
+    email: z.email().optional(),
   }),
   component: VerifyEmailComponent,
 });
