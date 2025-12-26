@@ -8,234 +8,234 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as coreRouteRouteImport } from "./routes/(core)/route";
-import { Route as authRouteRouteImport } from "./routes/(auth)/route";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as coreSettingsRouteImport } from "./routes/(core)/settings";
-import { Route as coreProfileRouteImport } from "./routes/(core)/profile";
-import { Route as coreDashboardRouteImport } from "./routes/(core)/dashboard";
-import { Route as authVerifyEmailRouteImport } from "./routes/(auth)/verify-email";
-import { Route as authRegisterRouteImport } from "./routes/(auth)/register";
-import { Route as authLoginRouteImport } from "./routes/(auth)/login";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as coreRouteRouteImport } from './routes/(core)/route'
+import { Route as authRouteRouteImport } from './routes/(auth)/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
+import { Route as coreProfileRouteImport } from './routes/(core)/profile'
+import { Route as coreDashboardRouteImport } from './routes/(core)/dashboard'
+import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
+import { Route as authRegisterRouteImport } from './routes/(auth)/register'
+import { Route as authLoginRouteImport } from './routes/(auth)/login'
 
 const coreRouteRoute = coreRouteRouteImport.update({
-  id: "/(core)",
+  id: '/(core)',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const authRouteRoute = authRouteRouteImport.update({
-  id: "/(auth)",
+  id: '/(auth)',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => coreRouteRoute,
-} as any);
+} as any)
 const coreProfileRoute = coreProfileRouteImport.update({
-  id: "/profile",
-  path: "/profile",
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => coreRouteRoute,
-} as any);
+} as any)
 const coreDashboardRoute = coreDashboardRouteImport.update({
-  id: "/dashboard",
-  path: "/dashboard",
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => coreRouteRoute,
-} as any);
+} as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
-  id: "/verify-email",
-  path: "/verify-email",
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => authRouteRoute,
-} as any);
+} as any)
 const authRegisterRoute = authRegisterRouteImport.update({
-  id: "/register",
-  path: "/register",
+  id: '/register',
+  path: '/register',
   getParentRoute: () => authRouteRoute,
-} as any);
+} as any)
 const authLoginRoute = authLoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => authRouteRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/login": typeof authLoginRoute;
-  "/register": typeof authRegisterRoute;
-  "/verify-email": typeof authVerifyEmailRoute;
-  "/dashboard": typeof coreDashboardRoute;
-  "/profile": typeof coreProfileRoute;
-  "/settings": typeof coreSettingsRoute;
+  '/': typeof IndexRoute
+  '/login': typeof authLoginRoute
+  '/register': typeof authRegisterRoute
+  '/verify-email': typeof authVerifyEmailRoute
+  '/dashboard': typeof coreDashboardRoute
+  '/profile': typeof coreProfileRoute
+  '/settings': typeof coreSettingsRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/login": typeof authLoginRoute;
-  "/register": typeof authRegisterRoute;
-  "/verify-email": typeof authVerifyEmailRoute;
-  "/dashboard": typeof coreDashboardRoute;
-  "/profile": typeof coreProfileRoute;
-  "/settings": typeof coreSettingsRoute;
+  '/': typeof IndexRoute
+  '/login': typeof authLoginRoute
+  '/register': typeof authRegisterRoute
+  '/verify-email': typeof authVerifyEmailRoute
+  '/dashboard': typeof coreDashboardRoute
+  '/profile': typeof coreProfileRoute
+  '/settings': typeof coreSettingsRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/(auth)": typeof authRouteRouteWithChildren;
-  "/(core)": typeof coreRouteRouteWithChildren;
-  "/(auth)/login": typeof authLoginRoute;
-  "/(auth)/register": typeof authRegisterRoute;
-  "/(auth)/verify-email": typeof authVerifyEmailRoute;
-  "/(core)/dashboard": typeof coreDashboardRoute;
-  "/(core)/profile": typeof coreProfileRoute;
-  "/(core)/settings": typeof coreSettingsRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/(auth)': typeof authRouteRouteWithChildren
+  '/(core)': typeof coreRouteRouteWithChildren
+  '/(auth)/login': typeof authLoginRoute
+  '/(auth)/register': typeof authRegisterRoute
+  '/(auth)/verify-email': typeof authVerifyEmailRoute
+  '/(core)/dashboard': typeof coreDashboardRoute
+  '/(core)/profile': typeof coreProfileRoute
+  '/(core)/settings': typeof coreSettingsRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/login"
-    | "/register"
-    | "/verify-email"
-    | "/dashboard"
-    | "/profile"
-    | "/settings";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-email'
+    | '/dashboard'
+    | '/profile'
+    | '/settings'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/login"
-    | "/register"
-    | "/verify-email"
-    | "/dashboard"
-    | "/profile"
-    | "/settings";
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-email'
+    | '/dashboard'
+    | '/profile'
+    | '/settings'
   id:
-    | "__root__"
-    | "/"
-    | "/(auth)"
-    | "/(core)"
-    | "/(auth)/login"
-    | "/(auth)/register"
-    | "/(auth)/verify-email"
-    | "/(core)/dashboard"
-    | "/(core)/profile"
-    | "/(core)/settings";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/(auth)'
+    | '/(core)'
+    | '/(auth)/login'
+    | '/(auth)/register'
+    | '/(auth)/verify-email'
+    | '/(core)/dashboard'
+    | '/(core)/profile'
+    | '/(core)/settings'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  authRouteRoute: typeof authRouteRouteWithChildren;
-  coreRouteRoute: typeof coreRouteRouteWithChildren;
+  IndexRoute: typeof IndexRoute
+  authRouteRoute: typeof authRouteRouteWithChildren
+  coreRouteRoute: typeof coreRouteRouteWithChildren
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/(core)": {
-      id: "/(core)";
-      path: "";
-      fullPath: "";
-      preLoaderRoute: typeof coreRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/(auth)": {
-      id: "/(auth)";
-      path: "";
-      fullPath: "";
-      preLoaderRoute: typeof authRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/(core)/settings": {
-      id: "/(core)/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof coreSettingsRouteImport;
-      parentRoute: typeof coreRouteRoute;
-    };
-    "/(core)/profile": {
-      id: "/(core)/profile";
-      path: "/profile";
-      fullPath: "/profile";
-      preLoaderRoute: typeof coreProfileRouteImport;
-      parentRoute: typeof coreRouteRoute;
-    };
-    "/(core)/dashboard": {
-      id: "/(core)/dashboard";
-      path: "/dashboard";
-      fullPath: "/dashboard";
-      preLoaderRoute: typeof coreDashboardRouteImport;
-      parentRoute: typeof coreRouteRoute;
-    };
-    "/(auth)/verify-email": {
-      id: "/(auth)/verify-email";
-      path: "/verify-email";
-      fullPath: "/verify-email";
-      preLoaderRoute: typeof authVerifyEmailRouteImport;
-      parentRoute: typeof authRouteRoute;
-    };
-    "/(auth)/register": {
-      id: "/(auth)/register";
-      path: "/register";
-      fullPath: "/register";
-      preLoaderRoute: typeof authRegisterRouteImport;
-      parentRoute: typeof authRouteRoute;
-    };
-    "/(auth)/login": {
-      id: "/(auth)/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof authLoginRouteImport;
-      parentRoute: typeof authRouteRoute;
-    };
+    '/(core)': {
+      id: '/(core)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof coreRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)': {
+      id: '/(auth)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof authRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(core)/settings': {
+      id: '/(core)/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof coreSettingsRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/profile': {
+      id: '/(core)/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof coreProfileRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard': {
+      id: '/(core)/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof coreDashboardRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(auth)/verify-email': {
+      id: '/(auth)/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof authVerifyEmailRouteImport
+      parentRoute: typeof authRouteRoute
+    }
+    '/(auth)/register': {
+      id: '/(auth)/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof authRegisterRouteImport
+      parentRoute: typeof authRouteRoute
+    }
+    '/(auth)/login': {
+      id: '/(auth)/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authLoginRouteImport
+      parentRoute: typeof authRouteRoute
+    }
   }
 }
 
 interface authRouteRouteChildren {
-  authLoginRoute: typeof authLoginRoute;
-  authRegisterRoute: typeof authRegisterRoute;
-  authVerifyEmailRoute: typeof authVerifyEmailRoute;
+  authLoginRoute: typeof authLoginRoute
+  authRegisterRoute: typeof authRegisterRoute
+  authVerifyEmailRoute: typeof authVerifyEmailRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
-};
+}
 
 const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
-);
+)
 
 interface coreRouteRouteChildren {
-  coreDashboardRoute: typeof coreDashboardRoute;
-  coreProfileRoute: typeof coreProfileRoute;
-  coreSettingsRoute: typeof coreSettingsRoute;
+  coreDashboardRoute: typeof coreDashboardRoute
+  coreProfileRoute: typeof coreProfileRoute
+  coreSettingsRoute: typeof coreSettingsRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreDashboardRoute: coreDashboardRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
-};
+}
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
   coreRouteRouteChildren,
-);
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

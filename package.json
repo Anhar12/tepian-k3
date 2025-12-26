@@ -21,7 +21,8 @@
     "db:seed": "turbo -F @tepian-k3/db db:seed",
     "db:reset": "turbo -F @tepian-k3/db db:reset",
     "email:dev": "turbo -F @tepian-k3/services email:dev",
-    "email:verify": "turbo -F @tepian-k3/services email:verify"
+    "email:verify": "turbo -F @tepian-k3/services email:verify",
+    "web:prettier": "pnpm --filter @tepian-k3/web prettier"
   },
   "dependencies": {
     "dotenv": "catalog:",
