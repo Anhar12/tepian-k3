@@ -43,7 +43,7 @@ function RootComponent() {
       <HeadContent />
       <ThemeProvider
         attribute="class"
-        defaultTheme="light"
+        defaultTheme="system"
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
