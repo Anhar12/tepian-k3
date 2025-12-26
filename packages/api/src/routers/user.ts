@@ -16,6 +16,15 @@ export const userRouter = createTRPCRouter({
       return { data, pageCount };
     }),
 
+  getDeletedUserPaginated: withPermission("users.read")
+    .input(userSchema.getAllUsersSchema)
+    .query(async ({ input }) => {
+      const { data, pageCount } = await Effect.runPromise(
+        usersQueries.getOffsetPaginatedDeletedUsers(input)
+      );
+      return { data, pageCount };
+    }),
+
   getUserDetails: withPermission("users.read")
     .input(
       z.object({
@@ -79,5 +88,16 @@ export const userRouter = createTRPCRouter({
           yield* usersQueries.updateUserPassword(user.id, input.newPassword);
         })
       )
+    ),
+
+  deleteUser: withPermission("users.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      })
+    )
+    .mutation(
+      async ({ input }) =>
+        await Effect.runPromise(usersQueries.deleteUser(input.id))
     ),
 });

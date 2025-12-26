@@ -8,6 +8,7 @@ import {
   eq,
   gte,
   ilike,
+  isNotNull,
   isNull,
 } from "@tepian-k3/db/index";
 import { users } from "@tepian-k3/db/schema";
@@ -159,6 +160,107 @@ const usersQueries = {
                 )
               : undefined,
             isNull(users.deletedAt)
+          );
+
+      const orderBy =
+        input.sort.length > 0
+          ? input.sort.map((item) =>
+              item.desc ? desc(users[item.id]) : asc(users[item.id])
+            )
+          : [desc(users.createdAt)];
+
+      const { data, total } = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const data = await tx
+              .select({
+                id: users.id,
+                name: users.name,
+                email: users.email,
+                phone: users.phone,
+                address: users.address,
+                emailVerified: users.emailVerified,
+                emailVerifiedAt: users.emailVerifiedAt,
+                createdAt: users.createdAt,
+                updatedAt: users.updatedAt,
+                deletedAt: users.deletedAt,
+              })
+              .from(users)
+              .limit(input.perPage)
+              .offset(offset)
+              .where(where)
+              .orderBy(...orderBy);
+
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(users)
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
+
+            return { data, total };
+          }),
+        catch: (error) => {
+          logger.error("Failed to get all users", { input, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal mengambil data pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      const pageCount = Math.ceil(total / input.perPage);
+
+      return {
+        data,
+        pageCount,
+      };
+    });
+  },
+
+  getOffsetPaginatedDeletedUsers(
+    input: z.infer<typeof userSchema.getAllUsersSchema>
+  ) {
+    return Effect.gen(function* () {
+      const offset = (input.page - 1) * input.perPage;
+      const advancedTable = input.filters && input.filters.length > 0;
+
+      const where = advancedTable
+        ? filterColumns({
+            table: users,
+            filters: input.filters as ExtendedColumnFilter<typeof users>[],
+            joinOperator: "and",
+          })
+        : and(
+            input.name ? ilike(users.name, `%${input.name}%`) : undefined,
+            input.createdAt.length > 0
+              ? and(
+                  input.createdAt[0]
+                    ? gte(
+                        users.createdAt,
+                        (() => {
+                          const date = new Date(input.createdAt[0]);
+                          date.setHours(0, 0, 0, 0);
+                          return date.toISOString();
+                        })()
+                      )
+                    : undefined,
+                  input.createdAt[1]
+                    ? gte(
+                        users.createdAt,
+                        (() => {
+                          const date = new Date(input.createdAt[1]);
+                          date.setHours(23, 59, 59, 999);
+                          return date.toISOString();
+                        })()
+                      )
+                    : undefined
+                )
+              : undefined,
+            isNotNull(users.deletedAt)
           );
 
       const orderBy =
@@ -675,6 +777,68 @@ const usersQueries = {
       }
 
       return Effect.succeed(user);
+    });
+  },
+
+  restoreUser(userId: string) {
+    return Effect.gen(this, function* () {
+      const isExistDeletedUser = yield* Effect.tryPromise({
+        try: () =>
+          db.query.users.findFirst({
+            where: and(eq(users.id, userId), isNotNull(users.deletedAt)),
+          }),
+        catch: (error) => {
+          logger.error("Failed to check if deleted user exists", {
+            userId,
+            error,
+          });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal memeriksa data pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      if (!isExistDeletedUser) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: `Pengguna tidak ditemukan.`,
+          })
+        );
+      }
+
+      const [user] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(users)
+            .set({
+              deletedAt: null,
+            })
+            .where(eq(users.id, userId))
+            .returning(),
+        catch: (error) => {
+          logger.error("Failed to restore user", { userId, error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal mengembalikan pengguna.`,
+            cause: error,
+          });
+        },
+      });
+
+      if (!user) {
+        logger.error("No user returned after restoration", { userId });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal mengembalikan pengguna.`,
+          })
+        );
+      }
+
+      return user;
     });
   },
 };

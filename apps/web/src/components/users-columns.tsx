@@ -5,6 +5,8 @@ import DataTableActionCell from "./data-table-action-cell";
 import { Text, Trash } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table/data-table-column-header";
 import { format } from "date-fns";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient, trpc } from "@/utils/trpc";
 
 interface UsersColumnsProps {
   currentPage: number;
@@ -12,20 +14,27 @@ interface UsersColumnsProps {
 }
 
 const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
-  //   const { mutate, status } = api.user.delete.useMutation({
-  //     onSuccess: () => {
-  //       globalSuccessToast("Berhasil menghapus atlit");
+  const deleteUserMutation = useMutation(
+    trpc.user.deleteUser.mutationOptions({
+      onSuccess: async () => {
+        globalSuccessToast("Berhasil menghapus user");
 
-  //     },
-  //     onError: (error) => {
-  //       globalErrorToast(error.message);
-  //     },
-  //   });
+        await queryClient.invalidateQueries(
+          trpc.user.getUserPaginated.queryFilter(),
+        );
+      },
+      onError: (error) => {
+        globalErrorToast(
+          `Gagal menghapus user. ${error.message ?? "Silahkan coba lagi."}`,
+        );
+      },
+    }),
+  );
 
   return (
     <DataTableActionCell
       icon={<Trash className="mr-4 size-4" />}
-      //   isLoading={status === "pending"}
+      isLoading={deleteUserMutation.isPending}
       editText="Edit"
       triggerText="Hapus"
       dialogTitle="Hapus data"
@@ -33,9 +42,7 @@ const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
       btnClassName="bg-red-600 text-white hover:bg-red-500"
       onEditAction={`users/${row.original.id}/edit`}
       onConfirm={() => {
-        // mutate({
-        //   id: row.original.id,
-        // });
+        deleteUserMutation.mutate({ id: row.original.id });
       }}
     />
   );
