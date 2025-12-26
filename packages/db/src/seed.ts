@@ -23,6 +23,11 @@ async function seed() {
       { name: "permissions.update", resource: "permissions", action: "update" },
       { name: "permissions.delete", resource: "permissions", action: "delete" },
       { name: "permissions.manage", resource: "permissions", action: "manage" },
+      { name: "tools.create", resource: "tools", action: "create" },
+      { name: "tools.read", resource: "tools", action: "read" },
+      { name: "tools.update", resource: "tools", action: "update" },
+      { name: "tools.delete", resource: "tools", action: "delete" },
+      { name: "tools.manage", resource: "tools", action: "manage" },
     ])
     .returning();
 

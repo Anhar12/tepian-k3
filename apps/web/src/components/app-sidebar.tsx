@@ -1,25 +1,12 @@
 import * as React from "react";
 import {
-  IconCamera,
-  IconChartBar,
   IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
   IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
+  IconTools,
   IconUsers,
 } from "@tabler/icons-react";
 
-import { NavDocuments } from "@/components/nav-documents";
 import { NavMain, type NavMainProps } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -47,6 +34,12 @@ const data: {
       url: "/dashboard/users",
       icon: IconUsers,
       permission: "users.read",
+    },
+    {
+      title: "Tools",
+      url: "/dashboard/tools",
+      icon: IconTools,
+      permission: "tools.read",
     },
   ],
 };
