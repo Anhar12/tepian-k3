@@ -53,6 +53,7 @@
     "@tanstack/react-router": "^1.141.1",
     "@tanstack/react-table": "catalog:",
     "@tepian-k3/api": "workspace:*",
+    "@tepian-k3/constants": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/types": "workspace:*",
     "@tepian-k3/utils": "workspace:*",

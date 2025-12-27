@@ -247,6 +247,9 @@ importers:
       '@tepian-k3/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@tepian-k3/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@tepian-k3/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -578,6 +581,9 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.2.1)
+      '@tepian-k3/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@tepian-k3/db':
         specifier: workspace:*
         version: link:../db

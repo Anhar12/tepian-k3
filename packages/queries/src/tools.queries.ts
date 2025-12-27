@@ -98,14 +98,7 @@ const toolsQueries = {
       },
     }).pipe(
       Effect.flatMap((tool) =>
-        tool
-          ? Effect.succeed(tool)
-          : Effect.fail(
-              new TRPCError({
-                code: "NOT_FOUND",
-                message: "Alat tidak ditemukan",
-              })
-            )
+        tool ? Effect.succeed(tool) : Effect.succeed(null)
       )
     );
   },

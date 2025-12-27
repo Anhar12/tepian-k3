@@ -2,6 +2,8 @@ import { tools } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
 import { filterSchema } from "./filter.schema";
+import { TOOLS_CONDITIONS } from "@tepian-k3/constants";
+import { TOOLS_AVAILABILITY } from "@tepian-k3/constants";
 
 export const SORTABLE_TOOL_FIELDS = [
   "toolName",
@@ -31,7 +33,20 @@ const getAllToolsSchema = z.object({
   showDeleted: z.boolean().default(false),
 });
 
-const createToolSchema = createInsertSchema(tools);
+const createToolSchema = createInsertSchema(tools, {
+  toolCode: z.string().min(1).max(256),
+  toolName: z.string().min(1).max(256),
+  function: z.string().optional(),
+  location: z.string().optional(),
+  shelf: z.string().optional(),
+  BMNnumber: z.string().max(100).optional(),
+  NUPnumber: z.string().max(100).optional(),
+  brand: z.string().optional(),
+  type: z.string().optional(),
+  serialNumber: z.string().optional(),
+  condition: z.enum(TOOLS_CONDITIONS),
+  availability: z.enum(TOOLS_AVAILABILITY),
+});
 
 const updateToolSchema = createUpdateSchema(tools, {
   id: z.uuidv7(),

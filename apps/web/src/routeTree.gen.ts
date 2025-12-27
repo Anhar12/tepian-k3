@@ -20,7 +20,9 @@ import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreDashboardUsersIndexRouteImport } from './routes/(core)/dashboard/users/index'
+import { Route as coreDashboardToolsIndexRouteImport } from './routes/(core)/dashboard/tools/index'
 import { Route as coreDashboardUsersCreateRouteImport } from './routes/(core)/dashboard/users/create'
+import { Route as coreDashboardToolsCreateRouteImport } from './routes/(core)/dashboard/tools/create'
 import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -76,10 +78,21 @@ const coreDashboardUsersIndexRoute = coreDashboardUsersIndexRouteImport.update({
   path: '/dashboard/users/',
   getParentRoute: () => coreRouteRoute,
 } as any)
+const coreDashboardToolsIndexRoute = coreDashboardToolsIndexRouteImport.update({
+  id: '/dashboard/tools/',
+  path: '/dashboard/tools/',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 const coreDashboardUsersCreateRoute =
   coreDashboardUsersCreateRouteImport.update({
     id: '/dashboard/users/create',
     path: '/dashboard/users/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardToolsCreateRoute =
+  coreDashboardToolsCreateRouteImport.update({
+    id: '/dashboard/tools/create',
+    path: '/dashboard/tools/create',
     getParentRoute: () => coreRouteRoute,
   } as any)
 const coreDashboardUsersUserIdEditRoute =
@@ -98,7 +111,9 @@ export interface FileRoutesByFullPath {
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
   '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
@@ -111,7 +126,9 @@ export interface FileRoutesByTo {
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
   '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
@@ -127,7 +144,9 @@ export interface FileRoutesById {
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
+  '/(core)/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/(core)/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/(core)/dashboard/tools/': typeof coreDashboardToolsIndexRoute
   '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
   '/(core)/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
@@ -142,7 +161,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/dashboard'
+    | '/dashboard/tools/create'
     | '/dashboard/users/create'
+    | '/dashboard/tools'
     | '/dashboard/users'
     | '/dashboard/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -155,7 +176,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/dashboard'
+    | '/dashboard/tools/create'
     | '/dashboard/users/create'
+    | '/dashboard/tools'
     | '/dashboard/users'
     | '/dashboard/users/$userId/edit'
   id:
@@ -170,7 +193,9 @@ export interface FileRouteTypes {
     | '/(core)/profile'
     | '/(core)/settings'
     | '/(core)/dashboard/'
+    | '/(core)/dashboard/tools/create'
     | '/(core)/dashboard/users/create'
+    | '/(core)/dashboard/tools/'
     | '/(core)/dashboard/users/'
     | '/(core)/dashboard/users/$userId/edit'
   fileRoutesById: FileRoutesById
@@ -261,11 +286,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardUsersIndexRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/dashboard/tools/': {
+      id: '/(core)/dashboard/tools/'
+      path: '/dashboard/tools'
+      fullPath: '/dashboard/tools'
+      preLoaderRoute: typeof coreDashboardToolsIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/dashboard/users/create': {
       id: '/(core)/dashboard/users/create'
       path: '/dashboard/users/create'
       fullPath: '/dashboard/users/create'
       preLoaderRoute: typeof coreDashboardUsersCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/tools/create': {
+      id: '/(core)/dashboard/tools/create'
+      path: '/dashboard/tools/create'
+      fullPath: '/dashboard/tools/create'
+      preLoaderRoute: typeof coreDashboardToolsCreateRouteImport
       parentRoute: typeof coreRouteRoute
     }
     '/(core)/dashboard/users/$userId/edit': {
@@ -298,7 +337,9 @@ interface coreRouteRouteChildren {
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
   coreDashboardIndexRoute: typeof coreDashboardIndexRoute
+  coreDashboardToolsCreateRoute: typeof coreDashboardToolsCreateRoute
   coreDashboardUsersCreateRoute: typeof coreDashboardUsersCreateRoute
+  coreDashboardToolsIndexRoute: typeof coreDashboardToolsIndexRoute
   coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
   coreDashboardUsersUserIdEditRoute: typeof coreDashboardUsersUserIdEditRoute
 }
@@ -307,7 +348,9 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
   coreDashboardIndexRoute: coreDashboardIndexRoute,
+  coreDashboardToolsCreateRoute: coreDashboardToolsCreateRoute,
   coreDashboardUsersCreateRoute: coreDashboardUsersCreateRoute,
+  coreDashboardToolsIndexRoute: coreDashboardToolsIndexRoute,
   coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,
   coreDashboardUsersUserIdEditRoute: coreDashboardUsersUserIdEditRoute,
 }

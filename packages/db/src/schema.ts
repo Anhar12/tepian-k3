@@ -19,7 +19,7 @@ import {
   PERMISSION_ACTION,
   TOOLS_AVAILABILITY,
   TOOLS_CONDITIONS,
-} from "@tepian-k3/constants/constants";
+} from "@tepian-k3/constants";
 
 export const createTable = pgTableCreator((name) => `${name}`);
 

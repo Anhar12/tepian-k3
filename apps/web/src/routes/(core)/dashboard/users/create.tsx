@@ -17,13 +17,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -36,11 +34,7 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import {
-  createFileRoute,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { format } from "date-fns";
 import {
@@ -50,8 +44,8 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import z from "zod";
+import { Controller, useForm } from "react-hook-form";
+import type z from "zod";
 import { requirePermission } from "@/utils/require-permission";
 
 export const Route = createFileRoute("/(core)/dashboard/users/create")({
@@ -110,267 +104,294 @@ function RouteComponent() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="grid gap-4"
-            >
-              <FormField
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="grid gap-4"
+          >
+            <FieldGroup>
+              <Controller
                 control={form.control}
                 name="roleId"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Role
-                    </FormLabel>
-                    <FormControl>
-                      <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={open}
-                              className={cn(
-                                "w-full justify-between",
-                                !field.value?.length && "text-muted-foreground",
-                              )}
-                            >
-                              {field.value?.length
-                                ? field.value.length === 1
-                                  ? roles.find(
-                                      (role) => role.id === field.value[0],
-                                    )?.name
-                                  : `${field.value.length} role dipilih`
-                                : "Pilih Role..."}
-                              <ChevronsUpDown className="opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="popover-content-width-full p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder="Cari Role..."
-                              className="h-9"
-                            />
-                            <CommandList>
-                              <CommandEmpty>
-                                Tidak ada role yang ditemukan.
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {roles.map((role) => {
-                                  const isSelected =
-                                    field.value?.includes(role.id) ?? false;
-                                  return (
-                                    <CommandItem
-                                      value={role.id}
-                                      key={role.id}
-                                      onSelect={() => {
-                                        const currentValue = field.value ?? [];
-                                        if (isSelected) {
-                                          field.onChange(
-                                            currentValue.filter(
-                                              (id) => id !== role.id,
-                                            ),
-                                          );
-                                        } else {
-                                          field.onChange([
-                                            ...currentValue,
-                                            role.id,
-                                          ]);
-                                        }
-                                      }}
-                                    >
-                                      {role.name}
-                                      <Check
-                                        className={cn(
-                                          "ml-auto",
-                                          isSelected
-                                            ? "opacity-100"
-                                            : "opacity-0",
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  );
-                                })}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={open}
+                          aria-invalid={fieldState.invalid}
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value?.length && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value?.length
+                            ? field.value.length === 1
+                              ? roles.find((role) => role.id === field.value[0])
+                                  ?.name
+                              : `${field.value.length} role dipilih`
+                            : "Pilih Role..."}
+                          <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="popover-content-width-full p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Cari Role..."
+                            className="h-9"
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              Tidak ada role yang ditemukan.
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {roles.map((role) => {
+                                const isSelected =
+                                  field.value?.includes(role.id) ?? false;
+                                return (
+                                  <CommandItem
+                                    value={role.id}
+                                    key={role.id}
+                                    onSelect={() => {
+                                      const currentValue = field.value ?? [];
+                                      if (isSelected) {
+                                        field.onChange(
+                                          currentValue.filter(
+                                            (id) => id !== role.id,
+                                          ),
+                                        );
+                                      } else {
+                                        field.onChange([
+                                          ...currentValue,
+                                          role.id,
+                                        ]);
+                                      }
+                                    }}
+                                  >
+                                    {role.name}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto",
+                                        isSelected
+                                          ? "opacity-100"
+                                          : "opacity-0",
+                                      )}
+                                    />
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="name"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Nama
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan nama lengkap"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nama lengkap"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="email"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Email
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Enter your email"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="email"
+                      placeholder="Masukkan email"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="address"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Alamat
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan alamat lengkap"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan alamat lengkap"
+                      className="h-10 text-sm"
+                      {...field}
+                      value={field.value ?? ""}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
-              <FormField
+
+              <Controller
                 control={form.control}
                 name="phone"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Telpon
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan nomor telepon"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nomor telepon"
+                      className="h-10 text-sm"
+                      {...field}
+                      value={field.value ?? ""}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="emailVerified"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Verifikasi Email
-                    </FormLabel>
-                    <FormControl>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                        <Label>Terverifikasi</Label>
-                      </div>
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <Label>Terverifikasi</Label>
+                    </div>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="emailVerifiedAt"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
-                      Email
-                    </FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground",
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pilih tanggal verifikasi email</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ?? undefined}
-                            onSelect={field.onChange}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Tanggal Verifikasi Email
+                    </FieldLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          aria-invalid={fieldState.invalid}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pilih tanggal verifikasi email</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ?? undefined}
+                          onSelect={field.onChange}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="password"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Password
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="Masukkan password Anda"
-                          type="text"
-                          className="h-10 pr-10 text-sm"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      placeholder="Masukkan password Anda"
+                      type="text"
+                      className="h-10 pr-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
 
@@ -384,8 +405,8 @@ function RouteComponent() {
                 ) : null}
                 Buat User
               </Button>
-            </form>
-          </Form>
+            </FieldGroup>
+          </form>
         </CardContent>
       </Card>
     </div>

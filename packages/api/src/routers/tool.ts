@@ -43,22 +43,22 @@ export const toolRouter = createTRPCRouter({
   deleteTool: withPermission("tools.delete")
     .input(
       z.object({
-        toolId: z.string().uuidv7(),
+        id: z.string().uuidv7(),
       })
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(toolsQureies.deleteTool(input.toolId))
+        await Effect.runPromise(toolsQureies.deleteTool(input.id))
     ),
 
   restoreTool: withPermission("tools.delete")
     .input(
       z.object({
-        toolId: z.string().uuidv7(),
+        id: z.string().uuidv7(),
       })
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(toolsQureies.restoreTool(input.toolId))
+        await Effect.runPromise(toolsQureies.restoreTool(input.id))
     ),
 });

@@ -1,7 +1,11 @@
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
+import * as z from "zod";
 import Loader from "./components/loader";
 import { routeTree } from "./routeTree.gen";
+
+// Set Zod locale to Indonesian
+z.config(z.locales.id());
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient, trpc } from "./utils/trpc";

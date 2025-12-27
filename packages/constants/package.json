@@ -2,7 +2,7 @@
   "name": "@tepian-k3/constants",
   "type": "module",
   "exports": {
-    "./constants": "./src/index.ts"
+    ".": "./src/index.ts"
   },
   "scripts": {},
   "devDependencies": {

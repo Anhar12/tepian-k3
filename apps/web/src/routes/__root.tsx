@@ -53,7 +53,7 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <div className="grid h-svh grid-rows-[auto_1fr]">
+        <div className="grid h-svh grid-rows-[auto_1fr] overflow-hidden">
           <NuqsAdapter>
             <Outlet />
           </NuqsAdapter>
