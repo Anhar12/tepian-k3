@@ -63,9 +63,9 @@ function RouteComponent() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Buat Alat Baru</CardTitle>
+          <CardTitle>Buat Role Baru</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk membuat alat baru.
+            Isi form di bawah untuk membuat role baru.
           </CardDescription>
         </CardHeader>
         <CardContent>
