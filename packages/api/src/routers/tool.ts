@@ -43,7 +43,7 @@ export const toolRouter = createTRPCRouter({
   deleteTool: withPermission("tools.delete")
     .input(
       z.object({
-        id: z.string().uuidv7(),
+        id: z.uuidv7(),
       })
     )
     .mutation(
@@ -54,7 +54,7 @@ export const toolRouter = createTRPCRouter({
   restoreTool: withPermission("tools.delete")
     .input(
       z.object({
-        id: z.string().uuidv7(),
+        id: z.uuidv7(),
       })
     )
     .mutation(
