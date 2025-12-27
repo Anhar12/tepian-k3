@@ -89,7 +89,7 @@ function RouteComponent() {
         globalSuccessToast("User berhasil diperbarui");
       },
       onError: (error) => {
-        globalErrorToast(error.message);
+        globalErrorToast("Gagal memperbarui user: " + error.message);
       },
     }),
   );

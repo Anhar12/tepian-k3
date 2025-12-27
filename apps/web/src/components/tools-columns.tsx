@@ -103,33 +103,43 @@ export default function getToolsColumns({
       ),
     },
     {
-      id: "name",
-      accessorKey: "name",
+      id: "toolCode",
+      accessorKey: "toolCode",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Nama" label="Nama" />
+        <DataTableColumnHeader
+          column={column}
+          title="Kode Alat"
+          label="Kode Alat"
+        />
       ),
       cell: ({ row }) => (
-        <div className="w-20 truncate">{row.getValue("name")}</div>
+        <div className="w-20 truncate">{row.getValue("toolCode")}</div>
       ),
       meta: {
-        label: "Nama",
-        placeholder: "Cari nama alat...",
+        label: "Kode Alat",
+        placeholder: "Cari kode alat...",
         variant: "text",
         icon: Text,
       },
       enableColumnFilter: true,
     },
     {
-      id: "email",
-      accessorKey: "email",
+      id: "toolName",
+      accessorKey: "toolName",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Email" label="Email" />
+        <DataTableColumnHeader
+          column={column}
+          title="Nama Alat"
+          label="Nama Alat"
+        />
       ),
       cell: ({ row }) => (
-        <div className="w-20 truncate">{row.getValue("email")}</div>
+        <div className="w-20 truncate">{row.getValue("toolName")}</div>
       ),
       meta: {
-        label: "Username",
+        placeholder: "Cari nama alat...",
+        variant: "text",
+        label: "Nama Alat",
         icon: Text,
       },
       enableColumnFilter: true,

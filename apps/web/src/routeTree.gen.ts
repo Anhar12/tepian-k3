@@ -24,6 +24,7 @@ import { Route as coreDashboardToolsIndexRouteImport } from './routes/(core)/das
 import { Route as coreDashboardUsersCreateRouteImport } from './routes/(core)/dashboard/users/create'
 import { Route as coreDashboardToolsCreateRouteImport } from './routes/(core)/dashboard/tools/create'
 import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
+import { Route as coreDashboardToolsToolIdEditRouteImport } from './routes/(core)/dashboard/tools/$toolId.edit'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -101,6 +102,12 @@ const coreDashboardUsersUserIdEditRoute =
     path: '/dashboard/users/$userId/edit',
     getParentRoute: () => coreRouteRoute,
   } as any)
+const coreDashboardToolsToolIdEditRoute =
+  coreDashboardToolsToolIdEditRouteImport.update({
+    id: '/dashboard/tools/$toolId/edit',
+    path: '/dashboard/tools/$toolId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
   '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -130,6 +138,7 @@ export interface FileRoutesByTo {
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
   '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesById {
@@ -148,6 +157,7 @@ export interface FileRoutesById {
   '/(core)/dashboard/users/create': typeof coreDashboardUsersCreateRoute
   '/(core)/dashboard/tools/': typeof coreDashboardToolsIndexRoute
   '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
+  '/(core)/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
   '/(core)/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRouteTypes {
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/dashboard/users/create'
     | '/dashboard/tools'
     | '/dashboard/users'
+    | '/dashboard/tools/$toolId/edit'
     | '/dashboard/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/dashboard/users/create'
     | '/dashboard/tools'
     | '/dashboard/users'
+    | '/dashboard/tools/$toolId/edit'
     | '/dashboard/users/$userId/edit'
   id:
     | '__root__'
@@ -197,6 +209,7 @@ export interface FileRouteTypes {
     | '/(core)/dashboard/users/create'
     | '/(core)/dashboard/tools/'
     | '/(core)/dashboard/users/'
+    | '/(core)/dashboard/tools/$toolId/edit'
     | '/(core)/dashboard/users/$userId/edit'
   fileRoutesById: FileRoutesById
 }
@@ -314,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardUsersUserIdEditRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/dashboard/tools/$toolId/edit': {
+      id: '/(core)/dashboard/tools/$toolId/edit'
+      path: '/dashboard/tools/$toolId/edit'
+      fullPath: '/dashboard/tools/$toolId/edit'
+      preLoaderRoute: typeof coreDashboardToolsToolIdEditRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
   }
 }
 
@@ -341,6 +361,7 @@ interface coreRouteRouteChildren {
   coreDashboardUsersCreateRoute: typeof coreDashboardUsersCreateRoute
   coreDashboardToolsIndexRoute: typeof coreDashboardToolsIndexRoute
   coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
+  coreDashboardToolsToolIdEditRoute: typeof coreDashboardToolsToolIdEditRoute
   coreDashboardUsersUserIdEditRoute: typeof coreDashboardUsersUserIdEditRoute
 }
 
@@ -352,6 +373,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreDashboardUsersCreateRoute: coreDashboardUsersCreateRoute,
   coreDashboardToolsIndexRoute: coreDashboardToolsIndexRoute,
   coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,
+  coreDashboardToolsToolIdEditRoute: coreDashboardToolsToolIdEditRoute,
   coreDashboardUsersUserIdEditRoute: coreDashboardUsersUserIdEditRoute,
 }
 

@@ -18,12 +18,12 @@ export const toolRouter = createTRPCRouter({
   getToolDetails: withPermission("tools.read")
     .input(
       z.object({
-        toolId: z.string().uuidv7(),
+        id: z.uuidv7(),
       })
     )
     .query(
       async ({ input }) =>
-        await Effect.runPromise(toolsQureies.getToolById(input.toolId))
+        await Effect.runPromise(toolsQureies.getToolById(input.id))
     ),
 
   createTool: withPermission("tools.create")
