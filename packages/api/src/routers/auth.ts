@@ -142,7 +142,7 @@ export const authRouter = createTRPCRouter({
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "User not found",
+        message: "Pengguna tidak ditemukan",
       });
     }
 
@@ -166,7 +166,7 @@ export const authRouter = createTRPCRouter({
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "User not found",
+        message: "Pengguna tidak ditemukan",
       });
     }
 
