@@ -1,55 +1,55 @@
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import type { ColumnDef, Row } from "@tanstack/react-table";
-import type { UsersWithoutFoto } from "@tepian-k3/types/users.types";
-import DataTableActionCell from "./data-table-action-cell";
+import type { Tools } from "@tepian-k3/types/tools.types";
+import DataTableActionCell from "../data-table-action-cell";
 import { ArchiveRestore, Text, Trash } from "lucide-react";
-import { DataTableColumnHeader } from "./data-table/data-table-column-header";
+import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 import { format } from "date-fns";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/users";
+import { Route } from "@/routes/(core)/dashboard/tools";
 
-interface UsersColumnsProps {
+interface ToolsColumnsProps {
   currentPage: number;
   perPage: number;
 }
 
-const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
+const ActionCell = ({ row }: { row: Row<Tools> }) => {
   const params = Route.useSearch();
 
   const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
-  const canEdit = profile.permissions.includes("users.update");
-  const canDelete = profile.permissions.includes("users.delete");
+  const canEdit = profile.permissions.includes("tools.update");
+  const canDelete = profile.permissions.includes("tools.delete");
 
-  const deleteUserMutation = useMutation(
-    trpc.user.deleteUser.mutationOptions({
+  const deleteMutation = useMutation(
+    trpc.tool.deleteTool.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Berhasil menghapus user");
+        globalSuccessToast("Berhasil menghapus alat");
 
         await queryClient.invalidateQueries(
-          trpc.user.getUserPaginated.queryOptions(params),
+          trpc.tool.getToolPaginated.queryOptions(params),
         );
       },
       onError: (error) => {
         globalErrorToast(
-          `Gagal menghapus user. ${error.message ?? "Silahkan coba lagi."}`,
+          `Gagal menghapus alat. ${error.message ?? "Silahkan coba lagi."}`,
         );
       },
     }),
   );
 
-  const restoreUserMutation = useMutation(
-    trpc.user.restoreUser.mutationOptions({
+  const restoreMutation = useMutation(
+    trpc.tool.restoreTool.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Berhasil mengembalikan user");
+        globalSuccessToast("Berhasil mengembalikan alat");
         await queryClient.invalidateQueries(
-          trpc.user.getUserPaginated.queryOptions(params),
+          trpc.tool.getToolPaginated.queryOptions(params),
         );
       },
       onError: (error) => {
         globalErrorToast(
-          `Gagal mengembalikan user. ${error.message ?? "Silahkan coba lagi."}`,
+          `Gagal mengembalikan alat. ${error.message ?? "Silahkan coba lagi."}`,
         );
       },
     }),
@@ -64,34 +64,34 @@ const ActionCell = ({ row }: { row: Row<UsersWithoutFoto> }) => {
           <Trash className="mr-4 size-4" />
         )
       }
-      isLoading={deleteUserMutation.isPending || restoreUserMutation.isPending}
+      isLoading={deleteMutation.isPending || restoreMutation.isPending}
       editText="Edit"
       triggerText={row.original.deletedAt ? "Kembalikan" : "Hapus"}
       dialogTitle={
-        row.original.deletedAt ? "Kembalikan data user" : "Hapus data user"
+        row.original.deletedAt ? "Kembalikan data alat" : "Hapus data alat"
       }
       dialogDescription={
         row.original.deletedAt
-          ? "Apakah anda yakin ingin mengembalikan data user ini?"
-          : "Apakah anda yakin ingin menghapus data user ini? Data yang sudah dihapus tidak dapat dikembalikan."
+          ? "Apakah anda yakin ingin mengembalikan data alat ini?"
+          : "Apakah anda yakin ingin menghapus data alat ini? Data yang sudah dihapus tidak dapat dikembalikan."
       }
       btnClassName="bg-red-600 text-white hover:bg-red-500"
-      onEditAction={`users/${row.original.id}/edit`}
+      onEditAction={`tools/${row.original.id}/edit`}
       showEdit={canEdit}
       showDelete={canDelete}
       onConfirm={() =>
         row.original.deletedAt
-          ? restoreUserMutation.mutate({ id: row.original.id })
-          : deleteUserMutation.mutate({ id: row.original.id })
+          ? restoreMutation.mutate({ id: row.original.id })
+          : deleteMutation.mutate({ id: row.original.id })
       }
     />
   );
 };
 
-export default function getUsersColumns({
+export default function getToolsColumns({
   currentPage,
   perPage,
-}: UsersColumnsProps): ColumnDef<UsersWithoutFoto>[] {
+}: ToolsColumnsProps): ColumnDef<Tools>[] {
   return [
     {
       id: "no",
@@ -103,33 +103,43 @@ export default function getUsersColumns({
       ),
     },
     {
-      id: "name",
-      accessorKey: "name",
+      id: "toolCode",
+      accessorKey: "toolCode",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Nama" label="Nama" />
+        <DataTableColumnHeader
+          column={column}
+          title="Kode Alat"
+          label="Kode Alat"
+        />
       ),
       cell: ({ row }) => (
-        <div className="w-20 truncate">{row.getValue("name")}</div>
+        <div className="w-20 truncate">{row.getValue("toolCode")}</div>
       ),
       meta: {
-        label: "Nama",
-        placeholder: "Cari nama...",
+        label: "Kode Alat",
+        placeholder: "Cari kode alat...",
         variant: "text",
         icon: Text,
       },
       enableColumnFilter: true,
     },
     {
-      id: "email",
-      accessorKey: "email",
+      id: "toolName",
+      accessorKey: "toolName",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Email" label="Email" />
+        <DataTableColumnHeader
+          column={column}
+          title="Nama Alat"
+          label="Nama Alat"
+        />
       ),
       cell: ({ row }) => (
-        <div className="w-20 truncate">{row.getValue("email")}</div>
+        <div className="w-20 truncate">{row.getValue("toolName")}</div>
       ),
       meta: {
-        label: "Username",
+        placeholder: "Cari nama alat...",
+        variant: "text",
+        label: "Nama Alat",
         icon: Text,
       },
       enableColumnFilter: true,

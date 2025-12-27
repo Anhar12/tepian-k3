@@ -2,6 +2,7 @@ import * as React from "react";
 import {
   IconDashboard,
   IconInnerShadowTop,
+  IconShieldCheckFilled,
   IconTools,
   IconUsers,
 } from "@tabler/icons-react";
@@ -40,6 +41,12 @@ const data: {
       url: "/dashboard/tools",
       icon: IconTools,
       permission: "tools.read",
+    },
+    {
+      title: "Roles",
+      url: "/dashboard/roles",
+      icon: IconShieldCheckFilled,
+      permission: "roles.read",
     },
   ],
 };

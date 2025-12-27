@@ -3,7 +3,7 @@ import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-m
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { PermissionGate } from "@/components/permission-gate";
-import getToolsColumns from "@/components/tools-columns";
+import getToolsColumns from "@/components/columns/tools-columns";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";

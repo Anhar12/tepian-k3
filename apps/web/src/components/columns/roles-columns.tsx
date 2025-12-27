@@ -1,55 +1,55 @@
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import type { ColumnDef, Row } from "@tanstack/react-table";
-import type { Tools } from "@tepian-k3/types/tools.types";
-import DataTableActionCell from "./data-table-action-cell";
+import type { Roles } from "@tepian-k3/types/roles.types";
+import DataTableActionCell from "../data-table-action-cell";
 import { ArchiveRestore, Text, Trash } from "lucide-react";
-import { DataTableColumnHeader } from "./data-table/data-table-column-header";
+import { DataTableColumnHeader } from "../data-table/data-table-column-header";
 import { format } from "date-fns";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/tools";
+import { Route } from "@/routes/(core)/dashboard/roles";
 
-interface ToolsColumnsProps {
+interface RolesColumnsProps {
   currentPage: number;
   perPage: number;
 }
 
-const ActionCell = ({ row }: { row: Row<Tools> }) => {
+const ActionCell = ({ row }: { row: Row<Roles> }) => {
   const params = Route.useSearch();
 
   const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
-  const canEdit = profile.permissions.includes("tools.update");
-  const canDelete = profile.permissions.includes("tools.delete");
+  const canEdit = profile.permissions.includes("roles.update");
+  const canDelete = profile.permissions.includes("roles.delete");
 
   const deleteMutation = useMutation(
-    trpc.tool.deleteTool.mutationOptions({
+    trpc.role.deleteRole.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Berhasil menghapus alat");
+        globalSuccessToast("Berhasil menghapus role");
 
         await queryClient.invalidateQueries(
-          trpc.tool.getToolPaginated.queryOptions(params),
+          trpc.role.getPaginatedRoles.queryOptions(params),
         );
       },
       onError: (error) => {
         globalErrorToast(
-          `Gagal menghapus alat. ${error.message ?? "Silahkan coba lagi."}`,
+          `Gagal menghapus role. ${error.message ?? "Silahkan coba lagi."}`,
         );
       },
     }),
   );
 
   const restoreMutation = useMutation(
-    trpc.tool.restoreTool.mutationOptions({
+    trpc.role.restoreRole.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Berhasil mengembalikan alat");
+        globalSuccessToast("Berhasil mengembalikan role");
         await queryClient.invalidateQueries(
-          trpc.tool.getToolPaginated.queryOptions(params),
+          trpc.role.getPaginatedRoles.queryOptions(params),
         );
       },
       onError: (error) => {
         globalErrorToast(
-          `Gagal mengembalikan alat. ${error.message ?? "Silahkan coba lagi."}`,
+          `Gagal mengembalikan role. ${error.message ?? "Silahkan coba lagi."}`,
         );
       },
     }),
@@ -68,15 +68,15 @@ const ActionCell = ({ row }: { row: Row<Tools> }) => {
       editText="Edit"
       triggerText={row.original.deletedAt ? "Kembalikan" : "Hapus"}
       dialogTitle={
-        row.original.deletedAt ? "Kembalikan data alat" : "Hapus data alat"
+        row.original.deletedAt ? "Kembalikan data role" : "Hapus data role"
       }
       dialogDescription={
         row.original.deletedAt
-          ? "Apakah anda yakin ingin mengembalikan data alat ini?"
-          : "Apakah anda yakin ingin menghapus data alat ini? Data yang sudah dihapus tidak dapat dikembalikan."
+          ? "Apakah anda yakin ingin mengembalikan data role ini?"
+          : "Apakah anda yakin ingin menghapus data role ini? Data yang sudah dihapus tidak dapat dikembalikan."
       }
       btnClassName="bg-red-600 text-white hover:bg-red-500"
-      onEditAction={`tools/${row.original.id}/edit`}
+      onEditAction={`roles/${row.original.id}/edit`}
       showEdit={canEdit}
       showDelete={canDelete}
       onConfirm={() =>
@@ -88,10 +88,10 @@ const ActionCell = ({ row }: { row: Row<Tools> }) => {
   );
 };
 
-export default function getToolsColumns({
+export default function getRolesColumns({
   currentPage,
   perPage,
-}: ToolsColumnsProps): ColumnDef<Tools>[] {
+}: RolesColumnsProps): ColumnDef<Roles>[] {
   return [
     {
       id: "no",
@@ -103,46 +103,39 @@ export default function getToolsColumns({
       ),
     },
     {
-      id: "toolCode",
-      accessorKey: "toolCode",
+      id: "name",
+      accessorKey: "name",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title="Kode Alat"
-          label="Kode Alat"
+          title="Nama Role"
+          label="Nama Role"
         />
       ),
       cell: ({ row }) => (
-        <div className="w-20 truncate">{row.getValue("toolCode")}</div>
+        <div className="w-20 truncate">{row.getValue("name")}</div>
       ),
       meta: {
-        label: "Kode Alat",
-        placeholder: "Cari kode alat...",
+        label: "Nama Role",
+        placeholder: "Cari nama role...",
         variant: "text",
         icon: Text,
       },
       enableColumnFilter: true,
     },
     {
-      id: "toolName",
-      accessorKey: "toolName",
+      id: "description",
+      accessorKey: "description",
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title="Nama Alat"
-          label="Nama Alat"
+          title="Deskripsi"
+          label="Deskripsi"
         />
       ),
       cell: ({ row }) => (
-        <div className="w-20 truncate">{row.getValue("toolName")}</div>
+        <div className="w-20 truncate">{row.getValue("description")}</div>
       ),
-      meta: {
-        placeholder: "Cari nama alat...",
-        variant: "text",
-        label: "Nama Alat",
-        icon: Text,
-      },
-      enableColumnFilter: true,
     },
     {
       id: "createdAt",

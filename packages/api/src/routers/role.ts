@@ -20,6 +20,13 @@ export const roleRouters = createTRPCRouter({
         await Effect.runPromise(rolesQueries.getRoleById(input.id))
     ),
 
+  getPaginatedRoles: withPermission("roles.read")
+    .input(rolesSchema.getAllRolesSchema)
+    .query(
+      async ({ input }) =>
+        await Effect.runPromise(rolesQueries.getOffsetPaginatedRoles(input))
+    ),
+
   createRole: withPermission("roles.create")
     .input(rolesSchema.createRoleSchema)
     .mutation(

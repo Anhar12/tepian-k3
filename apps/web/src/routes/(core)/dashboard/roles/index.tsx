@@ -1,3 +1,4 @@
+import getRolesColumns from "@/components/columns/roles-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
@@ -6,26 +7,25 @@ import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import getUsersColumns from "@/components/columns/users-columns";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import userSchema from "@tepian-k3/schema/users.schema";
+import rolesSchema from "@tepian-k3/schema/role.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/(core)/dashboard/users/")({
-  validateSearch: (search) => userSchema.getAllUsersSchema.parse(search),
+export const Route = createFileRoute("/(core)/dashboard/roles/")({
+  validateSearch: rolesSchema.getAllRolesSchema,
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "users.read" }),
+    await requirePermission(context, { permission: "roles.read" }),
   loaderDeps: (search) => ({
-    searchParams: userSchema.getAllUsersSchema.parse(search),
+    searchParams: rolesSchema.getAllRolesSchema.parse(search),
   }),
   loader: ({ context, deps }) => {
     return context.queryClient.ensureQueryData(
-      context.trpc.user.getUserPaginated.queryOptions(deps.searchParams),
+      context.trpc.role.getPaginatedRoles.queryOptions(deps.searchParams),
     );
   },
   component: RouteComponent,
@@ -35,15 +35,15 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: users } = useSuspenseQuery(
-    trpc.user.getUserPaginated.queryOptions(params),
+  const { data: roles } = useSuspenseQuery(
+    trpc.role.getPaginatedRoles.queryOptions(params),
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
   const columns = useMemo(
     () =>
-      getUsersColumns({
+      getRolesColumns({
         currentPage: params.page,
         perPage: params.perPage,
       }),
@@ -51,9 +51,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: users.data,
+    data: roles.data,
     columns,
-    pageCount: users.pageCount,
+    pageCount: roles.pageCount,
     initialState: {
       sorting: [{ id: "createdAt", desc: true }],
       pagination: {
@@ -73,7 +73,7 @@ function RouteComponent() {
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/users",
+                to: "/dashboard/roles",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -82,12 +82,12 @@ function RouteComponent() {
               setShowDeleted(Boolean(checked));
             }}
           />
-          <Label>Deleted Users</Label>
+          <Label>Deleted Roles</Label>
         </div>
-        <PermissionGate permission="users.create">
-          <Button onClick={() => navigate({ to: "/dashboard/users/create" })}>
+        <PermissionGate permission="roles.create">
+          <Button onClick={() => navigate({ to: "/dashboard/roles/create" })}>
             <PlusCircle className="size-4" />
-            Tambah Pengguna
+            Tambah Role
           </Button>
         </PermissionGate>
       </div>
