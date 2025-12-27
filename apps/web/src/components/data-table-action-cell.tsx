@@ -185,7 +185,7 @@ export default function DataTableActionCell({
           {showDelete && (
             <DropdownMenuItem className="focus:text-destructive-foreground focus:bg-destructive">
               <AlertDialogTrigger asChild onClick={() => setIsOpen(true)}>
-                <div className="flex flex-row items-center">
+                <div className="flex flex-row items-center gap-2">
                   {deleteIcon}
                   {deleteText}
                 </div>
