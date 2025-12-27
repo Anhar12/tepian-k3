@@ -1,6 +1,6 @@
-import { eq } from "@tepian-k3/db";
+import { and, eq, isNull } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
-import { roles } from "@tepian-k3/db/schema";
+import { roles, userRoles, users } from "@tepian-k3/db/schema";
 import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
@@ -46,6 +46,47 @@ const rolesQueries = {
             )
       )
     );
+  },
+
+  // Get all users with a specific role
+  getUsersByRole(roleName: string) {
+    return Effect.gen(function* () {
+      const role = yield* Effect.tryPromise({
+        try: () =>
+          db.query.roles.findFirst({
+            where: eq(roles.name, roleName),
+          }),
+        catch: (error) => {
+          logger.error("Error fetching role", { error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil data peran",
+          });
+        },
+      });
+
+      if (!role) return [];
+
+      const userRolesData = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .select({
+              user: users,
+            })
+            .from(userRoles)
+            .innerJoin(users, eq(userRoles.userId, users.id))
+            .where(and(eq(userRoles.roleId, role.id), isNull(users.deletedAt))),
+        catch: (error) => {
+          logger.error("Error fetching users by role", { error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil data user berdasarkan peran",
+          });
+        },
+      });
+
+      return userRolesData.map((ur) => ur.user);
+    });
   },
 };
 
