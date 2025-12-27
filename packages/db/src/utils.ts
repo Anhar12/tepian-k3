@@ -16,7 +16,7 @@ export const timestamps = {
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
     mode: "string",
-  }),
+  }).$onUpdateFn(() => sql`CURRENT_TIMESTAMP`),
 };
 
 /**
