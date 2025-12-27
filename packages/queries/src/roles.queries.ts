@@ -1,4 +1,14 @@
-import { and, eq, isNull } from "@tepian-k3/db";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  isNotNull,
+  isNull,
+} from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
 import { roles, userRoles, users } from "@tepian-k3/db/schema";
 import logger from "@tepian-k3/services/logger";
@@ -6,6 +16,8 @@ import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import type z from "zod";
 import rolesSchema from "@tepian-k3/schema/role.schema";
+import { filterColumns } from "@tepian-k3/utils/filter-column";
+import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 
 const rolesQueries = {
   getAllRoles() {
@@ -15,7 +27,7 @@ const rolesQueries = {
         logger.error("Error fetching roles:", error);
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch roles.",
+          message: "Gagal mengambil data peran.",
           cause: error,
         });
       },
@@ -32,7 +44,7 @@ const rolesQueries = {
         logger.error(`Error fetching role with ID ${roleId}:`, error);
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch role.",
+          message: "Gagal mengambil data peran.",
           cause: error,
         });
       },
@@ -43,11 +55,28 @@ const rolesQueries = {
           : Effect.fail(
               new TRPCError({
                 code: "NOT_FOUND",
-                message: `Role with ID ${roleId} not found.`,
+                message: `Peran dengan ID ${roleId} tidak ditemukan.`,
               })
             )
       )
     );
+  },
+
+  getDeletedRoleById(roleId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.roles.findFirst({
+          where: and(eq(roles.id, roleId), isNotNull(roles.deletedAt)),
+        }),
+      catch: (error) => {
+        logger.error(`Error fetching deleted role with ID ${roleId}:`, error);
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data peran yang dihapus.",
+          cause: error,
+        });
+      },
+    });
   },
 
   getRoleByName(roleName: string) {
@@ -109,6 +138,101 @@ const rolesQueries = {
       });
 
       return userRolesData.map((ur) => ur.user);
+    });
+  },
+
+  getOffsetPaginatedRoles(
+    input: z.infer<typeof rolesSchema.getAllRolesSchema>
+  ) {
+    return Effect.gen(function* () {
+      const offset = (input.page - 1) * input.perPage;
+      const advancedTable = input.filters && input.filters.length > 0;
+
+      const where = advancedTable
+        ? filterColumns({
+            table: roles,
+            filters: input.filters as ExtendedColumnFilter<typeof roles>[],
+            joinOperator: "and",
+          })
+        : and(
+            input.name ? ilike(roles.name, `%${input.name}%`) : undefined,
+            input.createdAt.length > 0
+              ? and(
+                  input.createdAt[0]
+                    ? gte(
+                        roles.createdAt,
+                        (() => {
+                          const date = new Date(input.createdAt[0]);
+                          date.setHours(0, 0, 0, 0);
+                          return date.toISOString();
+                        })()
+                      )
+                    : undefined,
+                  input.createdAt[1]
+                    ? gte(
+                        roles.createdAt,
+                        (() => {
+                          const date = new Date(input.createdAt[1]);
+                          date.setHours(23, 59, 59, 999);
+                          return date.toISOString();
+                        })()
+                      )
+                    : undefined
+                )
+              : undefined,
+            input.showDeleted
+              ? isNotNull(roles.deletedAt)
+              : isNull(roles.deletedAt)
+          );
+
+      const orderBy =
+        input.sort.length > 0
+          ? input.sort.map((item) =>
+              item.desc ? desc(roles[item.id]) : asc(roles[item.id])
+            )
+          : [desc(roles.createdAt)];
+
+      const { data, total } = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const data = await tx
+              .select()
+              .from(roles)
+              .limit(input.perPage)
+              .offset(offset)
+              .where(where)
+              .orderBy(...orderBy);
+
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(roles)
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
+
+            return { data, total };
+          }),
+        catch: (error) => {
+          logger.error("Error fetching paginated roles", {
+            error,
+            input,
+          });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal mengambil data roles`,
+            cause: error,
+          });
+        },
+      });
+
+      const pageCount = Math.ceil(total / input.perPage);
+
+      return {
+        data,
+        pageCount,
+      };
     });
   },
 
@@ -241,7 +365,7 @@ const rolesQueries = {
 
   restoreRole(roleId: string) {
     return Effect.gen(function* () {
-      const existingRole = yield* rolesQueries.getRoleById(roleId);
+      const existingRole = yield* rolesQueries.getDeletedRoleById(roleId);
 
       if (!existingRole) {
         return yield* Effect.fail(
