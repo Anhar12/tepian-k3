@@ -25,7 +25,15 @@ function getPageTitle(pathname: string): string {
   const lastSegment = segments[segments.length - 1];
 
   // Action words for routes
-  const actionWords = ["create", "edit", "new", "add", "update", "delete"];
+  const actionWords = [
+    "create",
+    "edit",
+    "new",
+    "add",
+    "update",
+    "delete",
+    "detail",
+  ];
 
   // Check if last segment is an action word (e.g., /users/$userId/edit)
   if (segments.length > 2 && actionWords.includes(lastSegment.toLowerCase())) {
