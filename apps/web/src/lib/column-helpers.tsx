@@ -1,4 +1,5 @@
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import type { Row } from "@tanstack/react-table";
 import type { ColumnDef, ColumnMeta, RowData } from "@tanstack/react-table";
 import type { FilterVariant } from "@tepian-k3/types/data-table.types";
 import { format } from "date-fns";
@@ -94,7 +95,7 @@ interface DateColumnOptions {
  * Creates a date column with consistent formatting
  */
 export function createDateColumn<T extends RowData>(
-  id: Extract<keyof T, string>,
+  id: Extract<NestedKeyOf<T>, string>,
   label: string,
   options: DateColumnOptions = {},
 ): ColumnDef<T> {
@@ -119,9 +120,7 @@ export function createDateColumn<T extends RowData>(
  * Creates an action column (header only, cell must be provided)
  */
 export function createActionColumn<T>(
-  cellRenderer: (props: {
-    row: import("@tanstack/react-table").Row<T>;
-  }) => React.ReactNode,
+  cellRenderer: (props: { row: Row<T> }) => React.ReactNode,
 ): ColumnDef<T> {
   return {
     id: "action",
