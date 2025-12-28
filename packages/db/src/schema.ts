@@ -245,3 +245,65 @@ export const tools = createTable(
     index("tool_tool_code_idx").using("btree", table.toolCode),
   ]
 );
+
+export const clusters = createTable(
+  "clusters",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    name: varchar("name", { length: 250 }).notNull().unique(),
+    description: text("description"),
+    ...timestamps,
+  },
+  (table) => [
+    index("cluster_id_idx").using("btree", table.id),
+    index("cluster_name_idx").using("btree", table.name),
+  ]
+);
+
+export const parameterCategories = createTable(
+  "parameter_categories",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    clusterId: uuid("cluster_id")
+      .notNull()
+      .references(() => clusters.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull().unique(),
+    description: text("description"),
+    ...timestamps,
+  },
+  (table) => [
+    index("parameter_category_id_idx").using("btree", table.id),
+    index("parameter_category_name_idx").using("btree", table.name),
+  ]
+);
+
+export const parameters = createTable(
+  "parameters",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    parameterCategoryId: uuid("parameter_category_id")
+      .notNull()
+      .references(() => parameterCategories.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    reference: text("reference"),
+    price: integer("price").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("parameter_id_idx").using("btree", table.id),
+    index("parameter_parameter_category_id_idx").using(
+      "btree",
+      table.parameterCategoryId
+    ),
+    index("parameter_name_idx").using("btree", table.name),
+  ]
+);

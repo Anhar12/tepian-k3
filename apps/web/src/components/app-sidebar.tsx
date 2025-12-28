@@ -2,6 +2,7 @@ import * as React from "react";
 import {
   IconDashboard,
   IconInnerShadowTop,
+  IconLayersSubtract,
   IconShieldCheckFilled,
   IconTools,
   IconUsers,
@@ -47,6 +48,12 @@ const data: {
       url: "/dashboard/roles",
       icon: IconShieldCheckFilled,
       permission: "roles.read",
+    },
+    {
+      title: "Clusters",
+      url: "/dashboard/clusters",
+      icon: IconLayersSubtract,
+      permission: "clusters.read",
     },
   ],
 };

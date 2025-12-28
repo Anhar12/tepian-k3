@@ -1,8 +1,15 @@
 import { hash } from "@node-rs/argon2";
-import { db } from "./client";
-import { permission, rolePermissions, roles, userRoles, users } from "./schema";
+import { db } from "../client";
+import {
+  permission,
+  rolePermissions,
+  roles,
+  userRoles,
+  users,
+} from "../schema";
 import { exit } from "process";
 import { eq } from "drizzle-orm";
+import seedClusters from "./clusters";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -318,6 +325,9 @@ async function seed() {
       { userId: regularUser.id, roleId: userRole.id },
     ])
     .onConflictDoNothing();
+
+  // seeding other data can go here...
+  await seedClusters();
 
   console.log("✅ User roles synced");
   console.log("\n🎉 Database seeding completed successfully!");

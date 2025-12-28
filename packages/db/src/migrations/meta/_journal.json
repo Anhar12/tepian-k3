@@ -22,6 +22,13 @@
       "when": 1766710254196,
       "tag": "0002_past_red_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766885569924,
+      "tag": "0003_mighty_mister_sinister",
+      "breakpoints": true
     }
   ]
 }

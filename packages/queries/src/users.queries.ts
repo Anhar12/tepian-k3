@@ -10,7 +10,7 @@ import {
   ilike,
   isNotNull,
   isNull,
-} from "@tepian-k3/db/index";
+} from "@tepian-k3/db";
 import { users } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import userSchema from "@tepian-k3/schema/users.schema";

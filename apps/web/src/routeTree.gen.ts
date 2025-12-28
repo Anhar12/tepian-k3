@@ -22,9 +22,11 @@ import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboar
 import { Route as coreDashboardUsersIndexRouteImport } from './routes/(core)/dashboard/users/index'
 import { Route as coreDashboardToolsIndexRouteImport } from './routes/(core)/dashboard/tools/index'
 import { Route as coreDashboardRolesIndexRouteImport } from './routes/(core)/dashboard/roles/index'
+import { Route as coreDashboardClustersIndexRouteImport } from './routes/(core)/dashboard/clusters/index'
 import { Route as coreDashboardUsersCreateRouteImport } from './routes/(core)/dashboard/users/create'
 import { Route as coreDashboardToolsCreateRouteImport } from './routes/(core)/dashboard/tools/create'
 import { Route as coreDashboardRolesCreateRouteImport } from './routes/(core)/dashboard/roles/create'
+import { Route as coreDashboardClustersCreateRouteImport } from './routes/(core)/dashboard/clusters/create'
 import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
 import { Route as coreDashboardToolsToolIdEditRouteImport } from './routes/(core)/dashboard/tools/$toolId.edit'
 import { Route as coreDashboardRolesRoleIdEditRouteImport } from './routes/(core)/dashboard/roles/$roleId.edit'
@@ -93,6 +95,12 @@ const coreDashboardRolesIndexRoute = coreDashboardRolesIndexRouteImport.update({
   path: '/dashboard/roles/',
   getParentRoute: () => coreRouteRoute,
 } as any)
+const coreDashboardClustersIndexRoute =
+  coreDashboardClustersIndexRouteImport.update({
+    id: '/dashboard/clusters/',
+    path: '/dashboard/clusters/',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 const coreDashboardUsersCreateRoute =
   coreDashboardUsersCreateRouteImport.update({
     id: '/dashboard/users/create',
@@ -109,6 +117,12 @@ const coreDashboardRolesCreateRoute =
   coreDashboardRolesCreateRouteImport.update({
     id: '/dashboard/roles/create',
     path: '/dashboard/roles/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardClustersCreateRoute =
+  coreDashboardClustersCreateRouteImport.update({
+    id: '/dashboard/clusters/create',
+    path: '/dashboard/clusters/create',
     getParentRoute: () => coreRouteRoute,
   } as any)
 const coreDashboardUsersUserIdEditRoute =
@@ -145,9 +159,11 @@ export interface FileRoutesByFullPath {
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
   '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/clusters': typeof coreDashboardClustersIndexRoute
   '/dashboard/roles': typeof coreDashboardRolesIndexRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
@@ -165,9 +181,11 @@ export interface FileRoutesByTo {
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
   '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/clusters': typeof coreDashboardClustersIndexRoute
   '/dashboard/roles': typeof coreDashboardRolesIndexRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
@@ -188,9 +206,11 @@ export interface FileRoutesById {
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
+  '/(core)/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/(core)/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
   '/(core)/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/(core)/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/(core)/dashboard/clusters/': typeof coreDashboardClustersIndexRoute
   '/(core)/dashboard/roles/': typeof coreDashboardRolesIndexRoute
   '/(core)/dashboard/tools/': typeof coreDashboardToolsIndexRoute
   '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
@@ -210,9 +230,11 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/dashboard'
+    | '/dashboard/clusters/create'
     | '/dashboard/roles/create'
     | '/dashboard/tools/create'
     | '/dashboard/users/create'
+    | '/dashboard/clusters'
     | '/dashboard/roles'
     | '/dashboard/tools'
     | '/dashboard/users'
@@ -230,9 +252,11 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/dashboard'
+    | '/dashboard/clusters/create'
     | '/dashboard/roles/create'
     | '/dashboard/tools/create'
     | '/dashboard/users/create'
+    | '/dashboard/clusters'
     | '/dashboard/roles'
     | '/dashboard/tools'
     | '/dashboard/users'
@@ -252,9 +276,11 @@ export interface FileRouteTypes {
     | '/(core)/profile'
     | '/(core)/settings'
     | '/(core)/dashboard/'
+    | '/(core)/dashboard/clusters/create'
     | '/(core)/dashboard/roles/create'
     | '/(core)/dashboard/tools/create'
     | '/(core)/dashboard/users/create'
+    | '/(core)/dashboard/clusters/'
     | '/(core)/dashboard/roles/'
     | '/(core)/dashboard/tools/'
     | '/(core)/dashboard/users/'
@@ -364,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardRolesIndexRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/dashboard/clusters/': {
+      id: '/(core)/dashboard/clusters/'
+      path: '/dashboard/clusters'
+      fullPath: '/dashboard/clusters'
+      preLoaderRoute: typeof coreDashboardClustersIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/dashboard/users/create': {
       id: '/(core)/dashboard/users/create'
       path: '/dashboard/users/create'
@@ -383,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/roles/create'
       fullPath: '/dashboard/roles/create'
       preLoaderRoute: typeof coreDashboardRolesCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/clusters/create': {
+      id: '/(core)/dashboard/clusters/create'
+      path: '/dashboard/clusters/create'
+      fullPath: '/dashboard/clusters/create'
+      preLoaderRoute: typeof coreDashboardClustersCreateRouteImport
       parentRoute: typeof coreRouteRoute
     }
     '/(core)/dashboard/users/$userId/edit': {
@@ -436,9 +476,11 @@ interface coreRouteRouteChildren {
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
   coreDashboardIndexRoute: typeof coreDashboardIndexRoute
+  coreDashboardClustersCreateRoute: typeof coreDashboardClustersCreateRoute
   coreDashboardRolesCreateRoute: typeof coreDashboardRolesCreateRoute
   coreDashboardToolsCreateRoute: typeof coreDashboardToolsCreateRoute
   coreDashboardUsersCreateRoute: typeof coreDashboardUsersCreateRoute
+  coreDashboardClustersIndexRoute: typeof coreDashboardClustersIndexRoute
   coreDashboardRolesIndexRoute: typeof coreDashboardRolesIndexRoute
   coreDashboardToolsIndexRoute: typeof coreDashboardToolsIndexRoute
   coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
@@ -452,9 +494,11 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
   coreDashboardIndexRoute: coreDashboardIndexRoute,
+  coreDashboardClustersCreateRoute: coreDashboardClustersCreateRoute,
   coreDashboardRolesCreateRoute: coreDashboardRolesCreateRoute,
   coreDashboardToolsCreateRoute: coreDashboardToolsCreateRoute,
   coreDashboardUsersCreateRoute: coreDashboardUsersCreateRoute,
+  coreDashboardClustersIndexRoute: coreDashboardClustersIndexRoute,
   coreDashboardRolesIndexRoute: coreDashboardRolesIndexRoute,
   coreDashboardToolsIndexRoute: coreDashboardToolsIndexRoute,
   coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,

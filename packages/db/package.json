@@ -5,18 +5,26 @@
     ".": {
       "default": "./src/index.ts"
     },
-    "./*": {
-      "default": "./src/*.ts"
+    "./client": {
+      "default": "./src/client.ts"
     },
-    "./seed": null
+    "./schema": {
+      "default": "./src/schema.ts"
+    },
+    "./utils": {
+      "default": "./src/utils.ts"
+    },
+    "./relations": {
+      "default": "./src/relations.ts"
+    }
   },
   "scripts": {
     "db:push": "pnpm with-env drizzle-kit push",
     "db:generate": "pnpm with-env drizzle-kit generate",
     "db:studio": "pnpm with-env drizzle-kit studio",
     "db:migrate": "pnpm with-env drizzle-kit migrate",
-    "db:seed": "pnpm with-env tsx ./src/seed.ts",
-    "db:reset": "pnpm with-env tsx ./src/reset.ts",
+    "db:seed": "pnpm with-env tsx ./src/seed/index.ts",
+    "db:reset": "pnpm with-env tsx ./src/reset/index.ts",
     "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {

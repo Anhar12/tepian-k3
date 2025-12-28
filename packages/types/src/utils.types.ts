@@ -4,7 +4,7 @@ import type {
   BuildQueryResult,
   DBQueryConfig,
   ExtractTablesWithRelations,
-} from "@tepian-k3/db/index";
+} from "@tepian-k3/db";
 import type * as relations from "@tepian-k3/db/relations";
 import type * as schema from "@tepian-k3/db/schema";
 
