@@ -94,6 +94,22 @@ function RouteComponent() {
     }),
   );
 
+  // Check if all permissions are selected
+  const allSelected = useMemo(
+    () =>
+      allPermissions.length > 0 &&
+      allPermissions.every((p) => selectedPermissions.has(p.name)),
+    [allPermissions, selectedPermissions],
+  );
+
+  function handleToggleAllPermissions() {
+    if (allSelected) {
+      setSelectedPermissions(new Set());
+    } else {
+      setSelectedPermissions(new Set(allPermissions.map((p) => p.name)));
+    }
+  }
+
   function handleOnPermissionChange(
     permissionName: string,
     isChecked: boolean,
@@ -140,7 +156,15 @@ function RouteComponent() {
               />
             </div>
 
-            <div className="flex max-h-90 flex-col gap-4 overflow-y-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToggleAllPermissions}
+            >
+              {allSelected ? "Hapus Semua" : "Pilih Semua"}
+            </Button>
+
+            <div className="flex max-h-78 flex-col gap-4 overflow-y-auto">
               {/* Permissions List */}
               {allPermissions.length > 0 ? (
                 allPermissions.map((permission) => (
