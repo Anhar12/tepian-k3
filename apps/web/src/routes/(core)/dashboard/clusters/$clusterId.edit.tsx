@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -44,7 +45,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { clusterId } = Route.useParams();
-  const router = useRouter();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const { data: cluster } = useSuspenseQuery(
     trpc.cluster.getClusterById.queryOptions({ id: clusterId }),
@@ -66,7 +67,7 @@ function RouteComponent() {
           trpc.cluster.getClusterById.queryOptions({ id: clusterId }),
         );
         globalSuccessToast("Berhasil memperbarui cluster");
-        router.history.back();
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal memperbarui cluster: " + error.message);

@@ -21,7 +21,7 @@ const getAllRolesSchema = z.object({
         desc: z.boolean(),
       })
     )
-    .default([{ id: "createdAt", desc: true }]),
+    .default([{ id: "createdAt", desc: false }]),
   name: z.string().default(""),
   createdAt: z.array(z.coerce.number()).default([]),
   filters: z.array(filterSchema).default([]),

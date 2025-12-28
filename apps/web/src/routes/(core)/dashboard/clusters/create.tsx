@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/(core)/dashboard/clusters/create")({
 });
 
 function RouteComponent() {
-  const router = useRouter();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const form = useForm<z.infer<typeof clusterSchema.createClusterSchema>>({
     resolver: zodResolver(clusterSchema.createClusterSchema),
@@ -44,10 +45,10 @@ function RouteComponent() {
 
   const createClusterMutation = useMutation(
     trpc.cluster.createCluster.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         globalSuccessToast("Berhasil membuat cluster");
         form.reset();
-        router.history.back();
+        await redirectBack(350);
       },
       onError: (error) => {
         globalErrorToast("Gagal membuat cluster: " + error.message);

@@ -11,93 +11,91 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { clusters } from "@tepian-k3/db/schema";
+import { parameterCategories } from "@tepian-k3/db/schema";
 import { z } from "zod";
-import clusterSchema from "@tepian-k3/schema/cluster.schema";
+import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
 import { Effect } from "effect";
 import { logger } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
-const clustersQueries = {
-  getAllClusters() {
+const parameterCategoriesQueries = {
+  getParameterCategoryById(id: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.clusters.findMany({
-          where: isNull(clusters.deletedAt),
+        db.query.parameterCategories.findFirst({
+          where: eq(parameterCategories.id, id),
         }),
       catch: (error) => {
-        logger.error("Error fetching all clusters", { error });
+        logger.error("Error fetching parameter category by ID", { error });
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil data cluster",
-        });
-      },
-    });
-  },
-
-  getClusterById(id: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db.query.clusters.findFirst({
-          where: eq(clusters.id, id),
-        }),
-      catch: (error) => {
-        logger.error("Error fetching cluster by ID", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil data cluster",
+          message: "Gagal mengambil data kategori parameter berdasarkan ID",
         });
       },
     }).pipe(
-      Effect.flatMap((cluster) =>
-        cluster ? Effect.succeed(cluster) : Effect.succeed(null)
+      Effect.flatMap((parameterCategory) =>
+        parameterCategory
+          ? Effect.succeed(parameterCategory)
+          : Effect.succeed(null)
       )
     );
   },
 
-  getDeletedClusterById(id: string) {
+  getDeletedParameterCategoryById(id: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.clusters.findFirst({
-          where: and(eq(clusters.id, id), isNotNull(clusters.deletedAt)),
+        db.query.parameterCategories.findFirst({
+          where: and(
+            eq(parameterCategories.id, id),
+            isNotNull(parameterCategories.deletedAt)
+          ),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted cluster by ID", { error });
+        logger.error("Error fetching deleted parameter category by ID", {
+          error,
+        });
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil data cluster yang dihapus",
+          message:
+            "Gagal mengambil data kategori parameter terhapus berdasarkan ID",
         });
       },
     }).pipe(
-      Effect.flatMap((cluster) =>
-        cluster ? Effect.succeed(cluster) : Effect.succeed(null)
+      Effect.flatMap((parameterCategory) =>
+        parameterCategory
+          ? Effect.succeed(parameterCategory)
+          : Effect.succeed(null)
       )
     );
   },
 
-  getClusterByName(name: string) {
+  getParameterCategoryByName(name: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.clusters.findFirst({
-          where: and(eq(clusters.name, name), isNull(clusters.deletedAt)),
+        db.query.parameterCategories.findFirst({
+          where: eq(parameterCategories.name, name),
         }),
       catch: (error) => {
-        logger.error("Error fetching cluster by name", { error });
+        logger.error("Error fetching parameter category by name", { error });
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil data cluster",
+          message: "Gagal mengambil data kategori parameter berdasarkan nama",
         });
       },
     }).pipe(
-      Effect.flatMap((cluster) =>
-        cluster ? Effect.succeed(cluster) : Effect.succeed(null)
+      Effect.flatMap((parameterCategory) =>
+        parameterCategory
+          ? Effect.succeed(parameterCategory)
+          : Effect.succeed(null)
       )
     );
   },
 
-  getOffsetPaginatedClusters(
-    input: z.infer<typeof clusterSchema.getAllClustersSchema>
+  getOffsetPaginatedParameterCategories(
+    input: z.infer<
+      typeof parameterCategoriesSchema.getAllParameterCategoriesSchema
+    >
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -105,17 +103,21 @@ const clustersQueries = {
 
       const where = advancedTable
         ? filterColumns({
-            table: clusters,
-            filters: input.filters as ExtendedColumnFilter<typeof clusters>[],
+            table: parameterCategories,
+            filters: input.filters as ExtendedColumnFilter<
+              typeof parameterCategories
+            >[],
             joinOperator: "and",
           })
         : and(
-            input.name ? ilike(clusters.name, `%${input.name}%`) : undefined,
+            input.name
+              ? ilike(parameterCategories.name, `%${input.name}%`)
+              : undefined,
             input.createdAt.length > 0
               ? and(
                   input.createdAt[0]
                     ? gte(
-                        clusters.createdAt,
+                        parameterCategories.createdAt,
                         (() => {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
@@ -125,7 +127,7 @@ const clustersQueries = {
                     : undefined,
                   input.createdAt[1]
                     ? gte(
-                        clusters.createdAt,
+                        parameterCategories.createdAt,
                         (() => {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
@@ -136,23 +138,25 @@ const clustersQueries = {
                 )
               : undefined,
             input.showDeleted
-              ? isNotNull(clusters.deletedAt)
-              : isNull(clusters.deletedAt)
+              ? isNotNull(parameterCategories.deletedAt)
+              : isNull(parameterCategories.deletedAt)
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(clusters[item.id]) : asc(clusters[item.id])
+              item.desc
+                ? desc(parameterCategories[item.id])
+                : asc(parameterCategories[item.id])
             )
-          : [desc(clusters.createdAt)];
+          : [desc(parameterCategories.createdAt)];
 
       const { data, total } = yield* Effect.tryPromise({
         try: () =>
           db.transaction(async (tx) => {
             const data = await tx
               .select()
-              .from(clusters)
+              .from(parameterCategories)
               .limit(input.perPage)
               .offset(offset)
               .where(where)
@@ -162,7 +166,7 @@ const clustersQueries = {
               .select({
                 count: count(),
               })
-              .from(clusters)
+              .from(parameterCategories)
               .where(where)
               .execute()
               .then((res) => res[0]?.count ?? 0);
@@ -191,186 +195,192 @@ const clustersQueries = {
     });
   },
 
-  createCluster(data: z.infer<typeof clusterSchema.createClusterSchema>) {
+  createParameterCategory(
+    data: z.infer<
+      typeof parameterCategoriesSchema.createParameterCategorySchema
+    >
+  ) {
     return Effect.gen(this, function* () {
-      const isExisting = yield* clustersQueries.getClusterByName(data.name);
+      const isExisting = yield* this.getParameterCategoryByName(data.name);
 
       if (isExisting) {
         return Effect.fail(
           new TRPCError({
             code: "CONFLICT",
-            message: "Cluster dengan nama tersebut sudah ada",
+            message: "Kategori parameter dengan nama tersebut sudah ada.",
           })
         );
       }
 
-      const [newCluster] = yield* Effect.tryPromise({
-        try: () => db.insert(clusters).values(data).returning(),
+      const [parameterCategory] = yield* Effect.tryPromise({
+        try: () => db.insert(parameterCategories).values(data).returning(),
         catch: (error) => {
-          logger.error("Error creating new cluster", { error, data });
+          logger.error("Error creating parameter category", { error, data });
           return new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat cluster baru",
+            message: "Gagal membuat kategori parameter baru",
           });
         },
       });
 
-      if (!newCluster) {
+      if (!parameterCategory) {
         return Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat cluster baru",
+            message: "Gagal membuat kategori parameter baru",
           })
         );
       }
 
-      return newCluster;
+      return parameterCategory;
     });
   },
 
-  updateCluster(data: z.infer<typeof clusterSchema.updateClusterSchema>) {
+  updateParameterCategory(
+    data: z.infer<
+      typeof parameterCategoriesSchema.updateParameterCategorySchema
+    >
+  ) {
     return Effect.gen(this, function* () {
-      const existingCluster = yield* clustersQueries.getClusterById(data.id);
+      const parameterCategory = yield* this.getParameterCategoryById(data.id);
 
-      if (!existingCluster) {
+      if (!parameterCategory) {
         return Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
-            message: "Cluster tidak ditemukan",
+            message: "Kategori parameter tidak ditemukan.",
           })
         );
       }
 
-      if (data.name && data.name !== existingCluster.name) {
-        const isNameTaken = yield* clustersQueries.getClusterByName(data.name);
+      if (data.name && data.name !== parameterCategory.name) {
+        const isNameTaken = yield* this.getParameterCategoryByName(data.name);
+
         if (isNameTaken) {
           return Effect.fail(
             new TRPCError({
               code: "CONFLICT",
-              message: "Cluster dengan nama tersebut sudah ada",
+              message: "Kategori parameter dengan nama tersebut sudah ada.",
             })
           );
         }
       }
 
-      const [updatedCluster] = yield* Effect.tryPromise({
+      const [updatedParameterCategory] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(clusters)
+            .update(parameterCategories)
             .set({
-              name: data.name ?? existingCluster.name,
-              description: data.description ?? existingCluster.description,
+              name: data.name ?? parameterCategory.name,
+              description: data.description ?? parameterCategory.description,
             })
-            .where(eq(clusters.id, data.id))
+            .where(eq(parameterCategories.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("Error updating cluster", { error, data });
+          logger.error("Error updating parameter category", { error, data });
           return new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal memperbarui cluster",
-            cause: error,
+            message: "Gagal memperbarui kategori parameter",
           });
         },
       });
 
-      if (!updatedCluster) {
+      if (!updatedParameterCategory) {
         return Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal memperbarui cluster",
+            message: "Gagal memperbarui kategori parameter",
           })
         );
       }
 
-      return updatedCluster;
+      return updatedParameterCategory;
     });
   },
 
-  deleteCluster(id: string) {
+  deleteParameterCategory(id: string) {
     return Effect.gen(this, function* () {
-      const existingCluster = yield* clustersQueries.getClusterById(id);
+      const isExisting = yield* this.getParameterCategoryById(id);
 
-      if (!existingCluster) {
+      if (!isExisting) {
         return Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
-            message: "Cluster tidak ditemukan",
+            message: "Kategori parameter tidak ditemukan.",
           })
         );
       }
 
-      const [deletedCluster] = yield* Effect.tryPromise({
+      const [deletedParameterCategory] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(clusters)
+            .update(parameterCategories)
             .set({ deletedAt: new Date().toISOString() })
-            .where(eq(clusters.id, id))
+            .where(eq(parameterCategories.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error deleting cluster", { error, id });
+          logger.error("Error deleting parameter category", { error, id });
           return new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menghapus cluster",
-            cause: error,
+            message: "Gagal menghapus kategori parameter",
           });
         },
       });
 
-      if (!deletedCluster) {
+      if (!deletedParameterCategory) {
         return Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menghapus cluster",
+            message: "Gagal menghapus kategori parameter",
           })
         );
       }
 
-      return deletedCluster;
+      return deletedParameterCategory;
     });
   },
 
-  restoreCluster(id: string) {
+  restoreParameterCategory(id: string) {
     return Effect.gen(this, function* () {
-      const deletedCluster = yield* clustersQueries.getDeletedClusterById(id);
+      const isExisting = yield* this.getDeletedParameterCategoryById(id);
 
-      if (!deletedCluster) {
+      if (!isExisting) {
         return Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
-            message: "Cluster yang dihapus tidak ditemukan",
+            message: "Kategori parameter terhapus tidak ditemukan.",
           })
         );
       }
 
-      const [restoredCluster] = yield* Effect.tryPromise({
+      const [restoredParameterCategory] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(clusters)
+            .update(parameterCategories)
             .set({ deletedAt: null })
-            .where(eq(clusters.id, id))
+            .where(eq(parameterCategories.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error restoring cluster", { error, id });
+          logger.error("Error restoring parameter category", { error, id });
           return new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengembalikan cluster",
-            cause: error,
+            message: "Gagal mengembalikan kategori parameter",
           });
         },
       });
 
-      if (!restoredCluster) {
+      if (!restoredParameterCategory) {
         return Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengembalikan cluster",
+            message: "Gagal mengembalikan kategori parameter",
           })
         );
       }
 
-      return restoredCluster;
+      return restoredParameterCategory;
     });
   },
 };
 
-export default clustersQueries;
+export default parameterCategoriesQueries;

@@ -29,6 +29,13 @@
       "when": 1766885569924,
       "tag": "0003_mighty_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1766898605248,
+      "tag": "0004_condemned_bucky",
+      "breakpoints": true
     }
   ]
 }

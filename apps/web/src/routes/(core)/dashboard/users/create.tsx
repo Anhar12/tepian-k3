@@ -47,6 +47,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
 import { requirePermission } from "@/utils/require-permission";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 
 export const Route = createFileRoute("/(core)/dashboard/users/create")({
   beforeLoad: async ({ context }) => {
@@ -60,7 +61,7 @@ export const Route = createFileRoute("/(core)/dashboard/users/create")({
 });
 
 function RouteComponent() {
-  const router = useRouter();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const { data: roles } = useSuspenseQuery(
     trpc.role.getAllRoles.queryOptions(),
@@ -77,10 +78,10 @@ function RouteComponent() {
 
   const createUserMutation = useMutation(
     trpc.user.createUser.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         globalSuccessToast("Pengguna berhasil dibuat");
         form.reset();
-        router.history.back();
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal membuat pengguna: " + error.message);

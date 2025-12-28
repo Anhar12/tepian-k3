@@ -1,22 +1,22 @@
-import { clusters } from "@tepian-k3/db/schema";
+import { parameterCategories } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
 import { filterSchema } from "./filter.schema";
 
-export const SORTABLE_CLUSTER_FIELDS = [
+export const SORTABLE_PARAMETER_CATEGORY_FIELDS = [
   "name",
   "createdAt",
   "updatedAt",
   "deletedAt",
-] as const satisfies readonly (keyof typeof clusters.$inferSelect)[];
+] as const satisfies readonly (keyof typeof parameterCategories.$inferSelect)[];
 
-const getAllClustersSchema = z.object({
+const getAllParameterCategoriesSchema = z.object({
   page: z.number().default(1),
   perPage: z.number().default(10),
   sort: z
     .array(
       z.object({
-        id: z.enum(SORTABLE_CLUSTER_FIELDS),
+        id: z.enum(SORTABLE_PARAMETER_CATEGORY_FIELDS),
         desc: z.boolean(),
       })
     )
@@ -28,21 +28,21 @@ const getAllClustersSchema = z.object({
   showDeleted: z.boolean().default(false),
 });
 
-const createClusterSchema = createInsertSchema(clusters, {
+const createParameterCategorySchema = createInsertSchema(parameterCategories, {
   name: z.string().min(1).max(256),
   description: z.optional(z.string().min(1).max(1000)),
 });
 
-const updateClusterSchema = createUpdateSchema(clusters, {
+const updateParameterCategorySchema = createUpdateSchema(parameterCategories, {
   id: z.uuidv7(),
-  name: z.optional(z.string().min(1).max(256)),
+  name: z.string().min(1).max(256),
   description: z.optional(z.string().min(1).max(1000)),
 });
 
-const clusterSchema = {
-  getAllClustersSchema,
-  createClusterSchema,
-  updateClusterSchema,
+const parameterCategoriesSchema = {
+  getAllParameterCategoriesSchema,
+  createParameterCategorySchema,
+  updateParameterCategorySchema,
 };
 
-export default clusterSchema;
+export default parameterCategoriesSchema;

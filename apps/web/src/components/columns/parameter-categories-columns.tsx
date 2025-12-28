@@ -37,7 +37,6 @@ export default function getParameterCategoriesColumns({
 }: ParameterCategoriesColumnsProps): ColumnDef<ParameterCategories>[] {
   return [
     createNumberColumn<ParameterCategories>(currentPage, perPage),
-    createTextColumn<ParameterCategories>("cluster.name", "Cluster"),
     createTextColumn<ParameterCategories>("name", "Nama Kategori Parameter", {
       width: "w-48",
       enableFilter: true,

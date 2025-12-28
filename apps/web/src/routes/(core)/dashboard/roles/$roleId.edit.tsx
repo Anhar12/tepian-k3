@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/(core)/dashboard/roles/$roleId/edit")({
 
 function RouteComponent() {
   const { roleId } = Route.useParams();
-  const router = useRouter();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const { data: role } = useSuspenseQuery(
     trpc.role.getRoleById.queryOptions({ id: roleId }),
@@ -62,7 +63,7 @@ function RouteComponent() {
           trpc.role.getRoleById.queryOptions({ id: roleId }),
         );
         globalSuccessToast("Berhasil memperbarui role");
-        router.history.back();
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal memperbarui role: " + error.message);

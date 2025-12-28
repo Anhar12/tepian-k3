@@ -6,6 +6,10 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const clusterRouter = createTRPCRouter({
+  getAllClusters: withPermission("clusters.read").query(
+    async () => await Effect.runPromise(clustersQueries.getAllClusters())
+  ),
+
   getPaginatedClusters: withPermission("clusters.read")
     .input(clusterSchema.getAllClustersSchema)
     .query(async ({ input }) => {

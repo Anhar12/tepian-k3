@@ -21,13 +21,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { format } from "date-fns";
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/(core)/dashboard/users/$userId/edit")({
 
 function RouteComponent() {
   const { userId } = Route.useParams();
-  const router = useRouter();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const { data: user } = useSuspenseQuery(
     trpc.user.getUserDetails.queryOptions({ userId }),
@@ -84,7 +84,7 @@ function RouteComponent() {
           trpc.user.getUserDetails.queryFilter({ userId: data.id }),
         );
         globalSuccessToast("User berhasil diperbarui");
-        router.history.back();
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal memperbarui user: " + error.message);

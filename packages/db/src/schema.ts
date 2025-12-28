@@ -270,9 +270,6 @@ export const parameterCategories = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    clusterId: uuid("cluster_id")
-      .notNull()
-      .references(() => clusters.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 250 }).notNull().unique(),
     description: text("description"),
     ...timestamps,
@@ -294,6 +291,9 @@ export const parameters = createTable(
       .notNull()
       .references(() => parameterCategories.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 250 }).notNull(),
+    clusterId: uuid("cluster_id")
+      .notNull()
+      .references(() => clusters.id, { onDelete: "cascade" }),
     reference: text("reference"),
     price: integer("price").notNull(),
     ...timestamps,

@@ -62,20 +62,21 @@ export const userPermissionsRelations = relations(
 );
 
 export const clustersRelations = relations(users, ({ many }) => ({
-  clusters: many(parameterCategories),
+  parameters: many(parameters),
 }));
 
 export const parameterCategoriesRelations = relations(
   parameterCategories,
-  ({ one }) => ({
-    cluster: one(clusters, {
-      fields: [parameterCategories.clusterId],
-      references: [clusters.id],
-    }),
+  ({ many }) => ({
+    parameters: many(parameters),
   })
 );
 
 export const parametersRelations = relations(parameters, ({ one }) => ({
+  cluster: one(clusters, {
+    fields: [parameters.clusterId],
+    references: [clusters.id],
+  }),
   category: one(parameterCategories, {
     fields: [parameters.parameterCategoryId],
     references: [parameterCategories.id],

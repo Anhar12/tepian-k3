@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   IconDashboard,
+  IconFolderCog,
   IconInnerShadowTop,
   IconLayersSubtract,
   IconShieldCheckFilled,
@@ -54,6 +55,12 @@ const data: {
       url: "/dashboard/clusters",
       icon: IconLayersSubtract,
       permission: "clusters.read",
+    },
+    {
+      title: "Parameter Categories",
+      url: "/dashboard/parameter-categories",
+      icon: IconFolderCog,
+      permission: "parameter-categories.read",
     },
   ],
 };
