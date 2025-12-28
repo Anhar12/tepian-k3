@@ -113,7 +113,7 @@ export function createCrudActionCell<
         onEditAction={`${resourcePath}/${row.original.id}/edit`}
         showEdit={canEdit}
         showDelete={canDelete}
-        showDetail={canSeeDetail}
+        showDetail={showDetail && canSeeDetail}
         onDetailAction={
           showDetail ? `${resourcePath}/${row.original.id}/detail` : undefined
         }
