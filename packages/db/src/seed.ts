@@ -23,6 +23,56 @@ async function seed() {
       { name: "permissions.update", resource: "permissions", action: "update" },
       { name: "permissions.delete", resource: "permissions", action: "delete" },
       { name: "permissions.manage", resource: "permissions", action: "manage" },
+      {
+        name: "role-permissions.create",
+        resource: "role-permissions",
+        action: "create",
+      },
+      {
+        name: "role-permissions.read",
+        resource: "role-permissions",
+        action: "read",
+      },
+      {
+        name: "role-permissions.update",
+        resource: "role-permissions",
+        action: "update",
+      },
+      {
+        name: "role-permissions.delete",
+        resource: "role-permissions",
+        action: "delete",
+      },
+      {
+        name: "role-permissions.manage",
+        resource: "role-permissions",
+        action: "manage",
+      },
+      {
+        name: "user-permissions.create",
+        resource: "user-permissions",
+        action: "create",
+      },
+      {
+        name: "user-permissions.read",
+        resource: "user-permissions",
+        action: "read",
+      },
+      {
+        name: "user-permissions.update",
+        resource: "user-permissions",
+        action: "update",
+      },
+      {
+        name: "user-permissions.delete",
+        resource: "user-permissions",
+        action: "delete",
+      },
+      {
+        name: "user-permissions.manage",
+        resource: "user-permissions",
+        action: "manage",
+      },
       { name: "tools.create", resource: "tools", action: "create" },
       { name: "tools.read", resource: "tools", action: "read" },
       { name: "tools.update", resource: "tools", action: "update" },

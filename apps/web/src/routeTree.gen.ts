@@ -28,6 +28,7 @@ import { Route as coreDashboardRolesCreateRouteImport } from './routes/(core)/da
 import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
 import { Route as coreDashboardToolsToolIdEditRouteImport } from './routes/(core)/dashboard/tools/$toolId.edit'
 import { Route as coreDashboardRolesRoleIdEditRouteImport } from './routes/(core)/dashboard/roles/$roleId.edit'
+import { Route as coreDashboardRolesRoleIdDetailRouteImport } from './routes/(core)/dashboard/roles/$roleId.detail'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -128,6 +129,12 @@ const coreDashboardRolesRoleIdEditRoute =
     path: '/dashboard/roles/$roleId/edit',
     getParentRoute: () => coreRouteRoute,
   } as any)
+const coreDashboardRolesRoleIdDetailRoute =
+  coreDashboardRolesRoleIdDetailRouteImport.update({
+    id: '/dashboard/roles/$roleId/detail',
+    path: '/dashboard/roles/$roleId/detail',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/roles': typeof coreDashboardRolesIndexRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
   '/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
   '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
   '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
@@ -163,6 +171,7 @@ export interface FileRoutesByTo {
   '/dashboard/roles': typeof coreDashboardRolesIndexRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
   '/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
   '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
   '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
@@ -185,6 +194,7 @@ export interface FileRoutesById {
   '/(core)/dashboard/roles/': typeof coreDashboardRolesIndexRoute
   '/(core)/dashboard/tools/': typeof coreDashboardToolsIndexRoute
   '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
+  '/(core)/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
   '/(core)/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
   '/(core)/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
   '/(core)/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/dashboard/roles'
     | '/dashboard/tools'
     | '/dashboard/users'
+    | '/dashboard/roles/$roleId/detail'
     | '/dashboard/roles/$roleId/edit'
     | '/dashboard/tools/$toolId/edit'
     | '/dashboard/users/$userId/edit'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/dashboard/roles'
     | '/dashboard/tools'
     | '/dashboard/users'
+    | '/dashboard/roles/$roleId/detail'
     | '/dashboard/roles/$roleId/edit'
     | '/dashboard/tools/$toolId/edit'
     | '/dashboard/users/$userId/edit'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
     | '/(core)/dashboard/roles/'
     | '/(core)/dashboard/tools/'
     | '/(core)/dashboard/users/'
+    | '/(core)/dashboard/roles/$roleId/detail'
     | '/(core)/dashboard/roles/$roleId/edit'
     | '/(core)/dashboard/tools/$toolId/edit'
     | '/(core)/dashboard/users/$userId/edit'
@@ -393,6 +406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardRolesRoleIdEditRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/dashboard/roles/$roleId/detail': {
+      id: '/(core)/dashboard/roles/$roleId/detail'
+      path: '/dashboard/roles/$roleId/detail'
+      fullPath: '/dashboard/roles/$roleId/detail'
+      preLoaderRoute: typeof coreDashboardRolesRoleIdDetailRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
   }
 }
 
@@ -422,6 +442,7 @@ interface coreRouteRouteChildren {
   coreDashboardRolesIndexRoute: typeof coreDashboardRolesIndexRoute
   coreDashboardToolsIndexRoute: typeof coreDashboardToolsIndexRoute
   coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
+  coreDashboardRolesRoleIdDetailRoute: typeof coreDashboardRolesRoleIdDetailRoute
   coreDashboardRolesRoleIdEditRoute: typeof coreDashboardRolesRoleIdEditRoute
   coreDashboardToolsToolIdEditRoute: typeof coreDashboardToolsToolIdEditRoute
   coreDashboardUsersUserIdEditRoute: typeof coreDashboardUsersUserIdEditRoute
@@ -437,6 +458,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreDashboardRolesIndexRoute: coreDashboardRolesIndexRoute,
   coreDashboardToolsIndexRoute: coreDashboardToolsIndexRoute,
   coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,
+  coreDashboardRolesRoleIdDetailRoute: coreDashboardRolesRoleIdDetailRoute,
   coreDashboardRolesRoleIdEditRoute: coreDashboardRolesRoleIdEditRoute,
   coreDashboardToolsToolIdEditRoute: coreDashboardToolsToolIdEditRoute,
   coreDashboardUsersUserIdEditRoute: coreDashboardUsersUserIdEditRoute,

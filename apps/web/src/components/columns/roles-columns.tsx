@@ -19,6 +19,7 @@ const ActionCell = ({ row }: { row: Row<Roles> }) => {
 
   const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
+  const canSeeDetail = profile.permissions.includes("roles.read");
   const canEdit = profile.permissions.includes("roles.update");
   const canDelete = profile.permissions.includes("roles.delete");
 
@@ -79,6 +80,8 @@ const ActionCell = ({ row }: { row: Row<Roles> }) => {
       onEditAction={`roles/${row.original.id}/edit`}
       showEdit={canEdit}
       showDelete={canDelete}
+      showDetail={canSeeDetail}
+      onDetailAction={`roles/${row.original.id}/detail`}
       onConfirm={() =>
         row.original.deletedAt
           ? restoreMutation.mutate({ id: row.original.id })

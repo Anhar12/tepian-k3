@@ -1,4 +1,4 @@
-import { eq, inArray } from "@tepian-k3/db";
+import { and, eq, inArray } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
 import {
   permission,
@@ -12,8 +12,28 @@ import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import type { Permission } from "@tepian-k3/types/permission.types";
+import rolesQueries from "./roles.queries";
 
 const permissionQueries = {
+  getAllPermissions() {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.permission.findMany({
+          columns: {
+            id: true,
+            name: true,
+          },
+        }),
+      catch: (error) => {
+        logger.error("Error fetching permissions", { error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data izin",
+        });
+      },
+    });
+  },
+
   getUserWithPermissions(userId: string) {
     return Effect.gen(function* () {
       const user = yield* Effect.tryPromise({
@@ -180,6 +200,101 @@ const permissionQueries = {
       return roleNames.every((roleName) => userRoleNames.includes(roleName));
     });
   },
-};
 
+  updateRolePermissions(
+    roleId: string,
+    addedPermissions: string[],
+    removedPermissions: string[]
+  ) {
+    return Effect.gen(function* () {
+      // Verify role exists
+      yield* rolesQueries.getRoleById(roleId);
+
+      // Remove permissions
+      if (removedPermissions.length > 0) {
+        // Get permission IDs for removed permissions
+        const permissionsToRemove = yield* Effect.tryPromise({
+          try: () =>
+            db.query.permission.findMany({
+              where: inArray(permission.name, removedPermissions),
+              columns: { id: true },
+            }),
+          catch: (error) => {
+            logger.error("Error fetching permissions to remove", { error });
+            return new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal mengambil data izin yang akan dihapus",
+            });
+          },
+        });
+
+        if (permissionsToRemove.length > 0) {
+          const permissionIdsToRemove = permissionsToRemove.map((p) => p.id);
+
+          yield* Effect.tryPromise({
+            try: () =>
+              db
+                .delete(rolePermissions)
+                .where(
+                  and(
+                    eq(rolePermissions.roleId, roleId),
+                    inArray(rolePermissions.permissionId, permissionIdsToRemove)
+                  )
+                ),
+            catch: (error) => {
+              logger.error("Error removing role permissions", { error });
+              return new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal menghapus izin dari role",
+              });
+            },
+          });
+        }
+      }
+
+      // Add new permissions
+      if (addedPermissions.length > 0) {
+        // Get permission IDs for added permissions
+        const permissionsToAdd = yield* Effect.tryPromise({
+          try: () =>
+            db.query.permission.findMany({
+              where: inArray(permission.name, addedPermissions),
+              columns: { id: true },
+            }),
+          catch: (error) => {
+            logger.error("Error fetching permissions to add", { error });
+            return new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal mengambil data izin yang akan ditambahkan",
+            });
+          },
+        });
+
+        if (permissionsToAdd.length > 0) {
+          const newRolePermissions = permissionsToAdd.map((p) => ({
+            roleId,
+            permissionId: p.id,
+          }));
+
+          yield* Effect.tryPromise({
+            try: () =>
+              db
+                .insert(rolePermissions)
+                .values(newRolePermissions)
+                .onConflictDoNothing(),
+            catch: (error) => {
+              logger.error("Error adding role permissions", { error });
+              return new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal menambahkan izin ke role",
+              });
+            },
+          });
+        }
+      }
+
+      return { success: true };
+    });
+  },
+};
 export default permissionQueries;

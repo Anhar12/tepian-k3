@@ -20,6 +20,19 @@ export const roleRouters = createTRPCRouter({
         await Effect.runPromise(rolesQueries.getRoleById(input.id))
     ),
 
+  getRoleWithPermissionsById: withPermission("roles.read")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      })
+    )
+    .query(
+      async ({ input }) =>
+        await Effect.runPromise(
+          rolesQueries.getRoleWithPermissionsById(input.id)
+        )
+    ),
+
   getPaginatedRoles: withPermission("roles.read")
     .input(rolesSchema.getAllRolesSchema)
     .query(

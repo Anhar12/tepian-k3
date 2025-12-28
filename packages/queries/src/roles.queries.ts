@@ -10,7 +10,13 @@ import {
   isNull,
 } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
-import { roles, userRoles, users } from "@tepian-k3/db/schema";
+import {
+  permission,
+  rolePermissions,
+  roles,
+  userRoles,
+  users,
+} from "@tepian-k3/db/schema";
 import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
@@ -18,6 +24,7 @@ import type z from "zod";
 import rolesSchema from "@tepian-k3/schema/role.schema";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
+import type { Permission } from "@tepian-k3/types/permission.types";
 
 const rolesQueries = {
   getAllRoles() {
@@ -60,6 +67,49 @@ const rolesQueries = {
             )
       )
     );
+  },
+
+  getRoleWithPermissionsById(roleId: string) {
+    return Effect.gen(function* () {
+      const role = yield* rolesQueries.getRoleById(roleId);
+
+      // get permission from role
+      let rolePerms: Permission[] = [];
+      yield* Effect.tryPromise({
+        try: async () => {
+          const rolePermsData = await db
+            .select({
+              permission: permission,
+            })
+            .from(rolePermissions)
+            .innerJoin(
+              permission,
+              eq(rolePermissions.permissionId, permission.id)
+            )
+            .where(eq(rolePermissions.roleId, role.id));
+
+          rolePerms = rolePermsData.map((rp) => rp.permission);
+        },
+        catch: (error) => {
+          logger.error("Error fetching role permissions", { error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil data izin peran",
+          });
+        },
+      });
+
+      const allPermissions = new Map<string, boolean>();
+
+      rolePerms.forEach((perm) => {
+        allPermissions.set(perm.name, true);
+      });
+
+      return {
+        ...role,
+        permissions: Array.from(allPermissions.keys()),
+      };
+    });
   },
 
   getDeletedRoleById(roleId: string) {
