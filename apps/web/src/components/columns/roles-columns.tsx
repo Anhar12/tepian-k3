@@ -26,6 +26,7 @@ const ActionCell = createCrudActionCell<
   restoreMutation: trpc.role.restoreRole,
   getQueryOptions: (params) => trpc.role.getPaginatedRoles.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
+  showDetail: true,
 });
 
 export default function getRolesColumns({
