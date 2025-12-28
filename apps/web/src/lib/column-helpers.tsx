@@ -5,6 +5,14 @@ import { format } from "date-fns";
 import type { LucideIcon } from "lucide-react";
 import { Text } from "lucide-react";
 
+type NestedKeyOf<T> = {
+  [K in keyof T & string]: T[K] extends object
+    ? T[K] extends any[]
+      ? K
+      : K | `${K}.${NestedKeyOf<T[K]>}`
+    : K;
+}[keyof T & string];
+
 /**
  * Creates a numbered row column (1, 2, 3...)
  */
@@ -38,7 +46,7 @@ interface TextColumnOptions {
  * Creates a text column with optional truncation and filtering
  */
 export function createTextColumn<T extends RowData>(
-  id: Extract<keyof T, string>,
+  id: Extract<NestedKeyOf<T>, string>,
   label: string,
   options: TextColumnOptions = {},
 ): ColumnDef<T> {
