@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  IconAdjustments,
   IconDashboard,
   IconFolderCog,
   IconInnerShadowTop,
@@ -61,6 +62,12 @@ const data: {
       url: "/dashboard/parameter-categories",
       icon: IconFolderCog,
       permission: "parameter-categories.read",
+    },
+    {
+      title: "Parameters",
+      url: "/dashboard/parameters",
+      icon: IconAdjustments,
+      permission: "parameters.read",
     },
   ],
 };

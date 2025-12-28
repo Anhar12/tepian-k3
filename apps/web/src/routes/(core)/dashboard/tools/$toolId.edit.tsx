@@ -27,7 +27,6 @@ import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import { TOOLS_AVAILABILITY, TOOLS_CONDITIONS } from "@tepian-k3/constants";
 import toolsSchema from "@tepian-k3/schema/tools.schema";

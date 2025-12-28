@@ -20,11 +20,30 @@ import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
 const parameterCategoriesQueries = {
+  getAllParameterCategories() {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.parameterCategories.findMany({
+          where: isNull(parameterCategories.deletedAt),
+        }),
+      catch: (error) => {
+        logger.error("Error fetching all parameter categories", { error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data semua kategori parameter",
+        });
+      },
+    });
+  },
+
   getParameterCategoryById(id: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.parameterCategories.findFirst({
-          where: eq(parameterCategories.id, id),
+          where: and(
+            eq(parameterCategories.id, id),
+            isNull(parameterCategories.deletedAt)
+          ),
         }),
       catch: (error) => {
         logger.error("Error fetching parameter category by ID", { error });
@@ -174,13 +193,13 @@ const parameterCategoriesQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated clusters", {
+          logger.error("Error fetching paginated parameter categories", {
             error,
             input,
           });
           return new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: `Gagal mengambil data cluster`,
+            message: `Gagal mengambil data kategori parameter`,
             cause: error,
           });
         },

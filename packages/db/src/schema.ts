@@ -304,6 +304,7 @@ export const parameters = createTable(
       "btree",
       table.parameterCategoryId
     ),
+    index("parameter_cluster_id_idx").using("btree", table.clusterId),
     index("parameter_name_idx").using("btree", table.name),
   ]
 );

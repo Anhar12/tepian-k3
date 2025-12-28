@@ -1,6 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from ".";
 import { authRouter } from "./routers/auth";
 import { clusterRouter } from "./routers/cluster";
+import { parameterRouter } from "./routers/parameter";
 import { parameterCategoriesRouter } from "./routers/parameter-categories";
 import { permissionRouters } from "./routers/permission";
 import { roleRouters } from "./routers/role";
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   tool: toolRouter,
   cluster: clusterRouter,
   parameterCategories: parameterCategoriesRouter,
+  parameter: parameterRouter,
 });
 
 // export type definition of API

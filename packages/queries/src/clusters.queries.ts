@@ -40,7 +40,7 @@ const clustersQueries = {
     return Effect.tryPromise({
       try: () =>
         db.query.clusters.findFirst({
-          where: eq(clusters.id, id),
+          where: and(eq(clusters.id, id), isNull(clusters.deletedAt)),
         }),
       catch: (error) => {
         logger.error("Error fetching cluster by ID", { error });

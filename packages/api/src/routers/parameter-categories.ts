@@ -6,6 +6,13 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const parameterCategoriesRouter = createTRPCRouter({
+  getAllParameterCategories: withPermission("parameter-categories.read").query(
+    async () =>
+      await Effect.runPromise(
+        parameterCategoriesQueries.getAllParameterCategories()
+      )
+  ),
+
   getPaginatedParameterCategories: withPermission("parameter-categories.read")
     .input(parameterCategoriesSchema.getAllParameterCategoriesSchema)
     .query(async ({ input }) => {
