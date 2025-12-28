@@ -13,11 +13,9 @@ interface CrudActionCellConfig<T, TParams> {
   resourcePath: string;
   /** Permission prefix (e.g., 'clusters', 'tools') */
   permissionPrefix: string;
-  /** Delete mutation from tRPC */
-  // biome-ignore lint/suspicious/noExplicitAny: tRPC mutation types are complex
+  /** Delete mutation from tRPC no type because tRPC mutation types are complex */
   deleteMutation: any;
-  /** Restore mutation from tRPC */
-  // biome-ignore lint/suspicious/noExplicitAny: tRPC mutation types are complex
+  /** Restore mutation from tRPC no type because tRPC mutation types are complex */
   restoreMutation: any;
   /** Query options to invalidate */
   getQueryOptions: (params: TParams) => { queryKey: QueryKey };
