@@ -1,6 +1,6 @@
 import { reset } from "drizzle-seed";
-import { db } from "./client";
-import * as schema from "./schema";
+import { db } from "../client";
+import * as schema from "../schema";
 import { exit } from "process";
 
 async function resetDB() {

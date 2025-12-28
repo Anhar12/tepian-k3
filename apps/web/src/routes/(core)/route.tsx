@@ -32,7 +32,13 @@ export const Route = createFileRoute("/(core)")({
     return null;
   },
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(trpc.auth.profile.queryOptions()),
+    context.queryClient.ensureQueryData({
+      ...trpc.auth.me.queryOptions(),
+      // 5 minutes cache
+      staleTime: 1000 * 60 * 5,
+      // Keep in cache for 30 minutes (even if unused)
+      gcTime: 1000 * 60 * 30,
+    }),
   component: RouteComponent,
 });
 
@@ -47,11 +53,11 @@ function RouteComponent() {
       }
     >
       <AppSidebar variant="inset" />
-      <SidebarInset className="overflow-hidden">
+      <SidebarInset className="overflow-hidden contain-inline-size">
         <SiteHeader />
-        <main className="container overflow-y-auto p-4">
+        <div className="container overflow-y-auto p-4">
           <Outlet />
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

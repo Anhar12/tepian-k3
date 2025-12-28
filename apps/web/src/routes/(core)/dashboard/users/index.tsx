@@ -55,7 +55,7 @@ function RouteComponent() {
     columns,
     pageCount: users.pageCount,
     initialState: {
-      sorting: [{ id: "createdAt", desc: true }],
+      sorting: [{ id: "createdAt", desc: false }],
       pagination: {
         pageSize: params.perPage,
         pageIndex: params.page - 1,

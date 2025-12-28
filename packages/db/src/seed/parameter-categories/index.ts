@@ -1,0 +1,70 @@
+import { db } from "../../client";
+import { parameterCategories } from "../../schema";
+
+type InsertParameterCategory = typeof parameterCategories.$inferInsert;
+
+const generateParameterCategories = async (): Promise<
+  InsertParameterCategory[]
+> => {
+  // const lingkunganHidupId = await db.query.clusters.findFirst({
+  //   where: (clusters, { eq }) => eq(clusters.name, "Lingkungan Hidup"),
+  //   columns: { id: true },
+  // });
+
+  // const lingkunganKerjaId = await db.query.clusters.findFirst({
+  //   where: (clusters, { eq }) => eq(clusters.name, "Lingkungan Kerja"),
+  //   columns: { id: true },
+  // });
+
+  // const keselamatanKerjaId = await db.query.clusters.findFirst({
+  //   where: (clusters, { eq }) => eq(clusters.name, "Keselamatan Kerja"),
+  //   columns: { id: true },
+  // });
+
+  // const kesehatanKerjaId = await db.query.clusters.findFirst({
+  //   where: (clusters, { eq }) => eq(clusters.name, "Kesehatan Kerja"),
+  //   columns: { id: true },
+  // });
+
+  // const biomarkerId = await db.query.clusters.findFirst({
+  //   where: (clusters, { eq }) => eq(clusters.name, "Biomarker"),
+  //   columns: { id: true },
+  // });
+
+  // if (
+  //   !lingkunganHidupId ||
+  //   !lingkunganKerjaId ||
+  //   !keselamatanKerjaId ||
+  //   !kesehatanKerjaId ||
+  //   !biomarkerId
+  // ) {
+  //   throw new Error("Required clusters not found. Please seed clusters first.");
+  // }
+
+  const categories: string[] = [
+    "Faktor Fisika",
+    "Faktor Kimia",
+    "Faktor Mikrobiologi",
+    "Faktor Kesehatan",
+    "KUDR",
+    "Pengujian Lain",
+    "Keselamatan",
+  ];
+
+  return categories.map((category) => ({ name: category }));
+};
+
+async function seedParameterCategories() {
+  const parameterCategoriesData = await generateParameterCategories();
+
+  await db.delete(parameterCategories).execute(); // Hapus semua data yang ada sebelum melakukan seed ulang
+
+  await db
+    .insert(parameterCategories)
+    .values(parameterCategoriesData)
+    .execute();
+
+  console.log("✅ Parameter Categories have been seeded");
+}
+
+export default seedParameterCategories;

@@ -21,6 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { requirePermission } from "@/utils/require-permission";
@@ -52,6 +53,7 @@ export const Route = createFileRoute("/(core)/dashboard/users/$userId/edit")({
 
 function RouteComponent() {
   const { userId } = Route.useParams();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const { data: user } = useSuspenseQuery(
     trpc.user.getUserDetails.queryOptions({ userId }),
@@ -78,15 +80,11 @@ function RouteComponent() {
   const updateUserMutation = useMutation(
     trpc.user.updateUser.mutationOptions({
       onSuccess: async (data) => {
-        // Invalidate user details query
         await queryClient.invalidateQueries(
           trpc.user.getUserDetails.queryFilter({ userId: data.id }),
         );
-        await queryClient.refetchQueries(
-          trpc.user.getUserDetails.queryFilter({ userId: data.id }),
-        );
-
         globalSuccessToast("User berhasil diperbarui");
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal memperbarui user: " + error.message);

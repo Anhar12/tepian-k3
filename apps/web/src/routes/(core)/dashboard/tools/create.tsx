@@ -21,12 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { TOOLS_AVAILABILITY, TOOLS_CONDITIONS } from "@tepian-k3/constants";
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { LoaderCircle } from "lucide-react";
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/(core)/dashboard/tools/create")({
 });
 
 function RouteComponent() {
-  const router = useRouter();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const form = useForm<z.infer<typeof toolsSchema.createToolSchema>>({
     resolver: zodResolver(toolsSchema.createToolSchema),
@@ -53,10 +54,10 @@ function RouteComponent() {
 
   const createToolMutation = useMutation(
     trpc.tool.createTool.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         globalSuccessToast("Alat berhasil dibuat");
         form.reset();
-        router.history.back();
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal membuat alat: " + error.message);

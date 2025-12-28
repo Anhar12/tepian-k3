@@ -1,5 +1,8 @@
 import { relations } from "drizzle-orm";
 import {
+  clusters,
+  parameterCategories,
+  parameters,
   permission,
   rolePermissions,
   roles,
@@ -57,3 +60,25 @@ export const userPermissionsRelations = relations(
     }),
   })
 );
+
+export const clustersRelations = relations(users, ({ many }) => ({
+  parameters: many(parameters),
+}));
+
+export const parameterCategoriesRelations = relations(
+  parameterCategories,
+  ({ many }) => ({
+    parameters: many(parameters),
+  })
+);
+
+export const parametersRelations = relations(parameters, ({ one }) => ({
+  cluster: one(clusters, {
+    fields: [parameters.clusterId],
+    references: [clusters.id],
+  }),
+  category: one(parameterCategories, {
+    fields: [parameters.parameterCategoryId],
+    references: [parameterCategories.id],
+  }),
+}));

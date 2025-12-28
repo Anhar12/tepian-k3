@@ -49,9 +49,13 @@ export async function requirePermission(
     redirectTo = "/unauthorized",
   } = options;
 
-  const profile = await context.queryClient.ensureQueryData(
-    context.trpc.auth.profile.queryOptions(),
-  );
+  const profile = await context.queryClient.ensureQueryData({
+    ...context.trpc.auth.profile.queryOptions(),
+    // 5 minutes cache
+    staleTime: 1000 * 60 * 5,
+    // Keep in cache for 30 minutes (even if unused)
+    gcTime: 1000 * 60 * 30,
+  });
 
   const permissions = Array.isArray(permission) ? permission : [permission];
 

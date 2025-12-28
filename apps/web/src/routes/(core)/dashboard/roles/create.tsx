@@ -14,12 +14,13 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import rolesSchema from "@tepian-k3/schema/role.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/(core)/dashboard/roles/create")({
 });
 
 function RouteComponent() {
-  const router = useRouter();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const form = useForm<z.infer<typeof rolesSchema.createRoleSchema>>({
     resolver: zodResolver(rolesSchema.createRoleSchema),
@@ -44,10 +45,10 @@ function RouteComponent() {
 
   const createRoleMutation = useMutation(
     trpc.role.createRole.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         globalSuccessToast("Berhasil membuat role");
         form.reset();
-        router.history.back();
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal membuat role: " + error.message);

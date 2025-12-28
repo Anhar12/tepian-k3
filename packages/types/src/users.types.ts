@@ -1,4 +1,4 @@
-import type { InferInsertModel } from "@tepian-k3/db/index";
+import type { InferInsertModel } from "@tepian-k3/db";
 import type { users } from "@tepian-k3/db/schema";
 
 import type { InferQueryModel } from "./utils.types";

@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -50,6 +51,7 @@ export const Route = createFileRoute("/(core)/dashboard/tools/$toolId/edit")({
 
 function RouteComponent() {
   const { toolId } = Route.useParams();
+  const redirectBack = useRedirectBackWithTimeout();
 
   const { data: tool } = useSuspenseQuery(
     trpc.tool.getToolDetails.queryOptions({
@@ -85,11 +87,8 @@ function RouteComponent() {
         await queryClient.invalidateQueries(
           trpc.tool.getToolDetails.queryFilter({ id: toolId }),
         );
-        await queryClient.refetchQueries(
-          trpc.tool.getToolDetails.queryFilter({ id: toolId }),
-        );
-
         globalSuccessToast("Alat berhasil diperbarui");
+        await redirectBack();
       },
       onError: (error) => {
         globalErrorToast("Gagal memperbarui alat: " + error.message);

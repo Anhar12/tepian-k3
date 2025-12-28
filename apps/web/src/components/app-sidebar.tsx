@@ -1,7 +1,10 @@
 import * as React from "react";
 import {
+  IconAdjustments,
   IconDashboard,
+  IconFolderCog,
   IconInnerShadowTop,
+  IconLayersSubtract,
   IconShieldCheckFilled,
   IconTools,
   IconUsers,
@@ -47,6 +50,24 @@ const data: {
       url: "/dashboard/roles",
       icon: IconShieldCheckFilled,
       permission: "roles.read",
+    },
+    {
+      title: "Clusters",
+      url: "/dashboard/clusters",
+      icon: IconLayersSubtract,
+      permission: "clusters.read",
+    },
+    {
+      title: "Parameter Categories",
+      url: "/dashboard/parameter-categories",
+      icon: IconFolderCog,
+      permission: "parameter-categories.read",
+    },
+    {
+      title: "Parameters",
+      url: "/dashboard/parameters",
+      icon: IconAdjustments,
+      permission: "parameters.read",
     },
   ],
 };
