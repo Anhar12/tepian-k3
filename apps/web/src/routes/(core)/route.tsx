@@ -32,7 +32,13 @@ export const Route = createFileRoute("/(core)")({
     return null;
   },
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(trpc.auth.profile.queryOptions()),
+    context.queryClient.ensureQueryData({
+      ...trpc.auth.me.queryOptions(),
+      // 5 minutes cache
+      staleTime: 1000 * 60 * 5,
+      // Keep in cache for 30 minutes (even if unused)
+      gcTime: 1000 * 60 * 30,
+    }),
   component: RouteComponent,
 });
 
