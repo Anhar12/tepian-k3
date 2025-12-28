@@ -16,58 +16,77 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
-import { trpc } from "@/utils/trpc";
+import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import clusterSchema from "@tepian-k3/schema/cluster.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/clusters/create")({
+export const Route = createFileRoute(
+  "/(core)/dashboard/clusters/$clusterId/edit",
+)({
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "clusters.create" }),
+    await requirePermission(context, { permission: "clusters.update" }),
+  params: z.object({
+    clusterId: z.uuidv7(),
+  }),
+  loader: async ({ context, params }) =>
+    context.queryClient.ensureQueryData(
+      context.trpc.cluster.getClusterById.queryOptions({
+        id: params.clusterId,
+      }),
+    ),
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { clusterId } = Route.useParams();
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof clusterSchema.createClusterSchema>>({
-    resolver: zodResolver(clusterSchema.createClusterSchema),
+  const { data: cluster } = useSuspenseQuery(
+    trpc.cluster.getClusterById.queryOptions({ id: clusterId }),
+  );
+
+  const form = useForm<z.infer<typeof clusterSchema.updateClusterSchema>>({
+    resolver: zodResolver(clusterSchema.updateClusterSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      id: cluster.id,
+      name: cluster.name,
+      description: cluster.description ?? undefined,
     },
   });
 
-  const createClusterMutation = useMutation(
-    trpc.cluster.createCluster.mutationOptions({
-      onSuccess: () => {
-        globalSuccessToast("Berhasil membuat cluster");
-        form.reset();
+  const updateClusterMutation = useMutation(
+    trpc.cluster.updateCluster.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.cluster.getClusterById.queryOptions({ id: clusterId }),
+        );
+        globalSuccessToast("Berhasil memperbarui cluster");
         router.history.back();
       },
       onError: (error) => {
-        globalErrorToast("Gagal membuat cluster: " + error.message);
+        globalErrorToast("Gagal memperbarui cluster: " + error.message);
       },
     }),
   );
 
   function handleSubmit(
-    data: z.infer<typeof clusterSchema.createClusterSchema>,
+    data: z.infer<typeof clusterSchema.updateClusterSchema>,
   ) {
-    createClusterMutation.mutate(data);
+    updateClusterMutation.mutate(data);
   }
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Buat Cluster Baru</CardTitle>
+          <CardTitle>Perbarui Cluster</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk membuat cluster baru.
+            Isi form di bawah untuk memperbarui cluster.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -128,12 +147,12 @@ function RouteComponent() {
               <Button
                 type="submit"
                 className="mt-2 h-10 w-full text-sm"
-                disabled={createClusterMutation.isPending}
+                disabled={updateClusterMutation.isPending}
               >
-                {createClusterMutation.isPending ? (
+                {updateClusterMutation.isPending ? (
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Buat Cluster
+                Perbarui Cluster
               </Button>
             </FieldGroup>
           </form>

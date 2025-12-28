@@ -3,6 +3,7 @@ import { createTRPCRouter, withPermission } from "..";
 import { Effect } from "effect";
 import clustersQueries from "@tepian-k3/queries/clusters.queries";
 import z from "zod";
+import { TRPCError } from "@trpc/server";
 
 export const clusterRouter = createTRPCRouter({
   getPaginatedClusters: withPermission("clusters.read")
@@ -21,10 +22,20 @@ export const clusterRouter = createTRPCRouter({
         id: z.uuidv7(),
       })
     )
-    .query(
-      async ({ input }) =>
-        await Effect.runPromise(clustersQueries.getClusterById(input.id))
-    ),
+    .query(async ({ input }) => {
+      const cluster = await Effect.runPromise(
+        clustersQueries.getClusterById(input.id)
+      );
+
+      if (!cluster) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Cluster tidak ditemukan",
+        });
+      }
+
+      return cluster;
+    }),
 
   createCluster: withPermission("clusters.create")
     .input(clusterSchema.createClusterSchema)
