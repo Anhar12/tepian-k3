@@ -10,6 +10,7 @@ import {
 import { exit } from "process";
 import { eq } from "drizzle-orm";
 import seedClusters from "./clusters";
+import seedParameterCategories from "./parameter-categories";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -328,6 +329,7 @@ async function seed() {
 
   // seeding other data can go here...
   await seedClusters();
+  await seedParameterCategories();
 
   console.log("✅ User roles synced");
   console.log("\n🎉 Database seeding completed successfully!");

@@ -5,13 +5,11 @@ type InsertCluster = typeof clusters.$inferInsert;
 
 const generateClusters = (): InsertCluster[] => {
   const clusters: string[] = [
-    "Faktor Fisika",
-    "Faktor Kimia",
-    "Faktor Mikrobiologi",
-    "Faktor Kesehatan",
-    "KUDR",
-    "Pengujian Lain",
-    "Keselamatan",
+    "Lingkungan Hidup",
+    "Lingkungan Kerja",
+    "Keselamatan Kerja",
+    "Kesehatan Kerja",
+    "Biomarker",
   ];
 
   return clusters.map((name) => ({ name }));
