@@ -19,7 +19,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import rolesSchema from "@tepian-k3/schema/role.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
@@ -40,6 +40,7 @@ export const Route = createFileRoute("/(core)/dashboard/roles/$roleId/edit")({
 
 function RouteComponent() {
   const { roleId } = Route.useParams();
+  const router = useRouter();
 
   const { data: role } = useSuspenseQuery(
     trpc.role.getRoleById.queryOptions({ id: roleId }),
@@ -60,12 +61,8 @@ function RouteComponent() {
         await queryClient.invalidateQueries(
           trpc.role.getRoleById.queryOptions({ id: roleId }),
         );
-
-        await queryClient.refetchQueries(
-          trpc.role.getRoleById.queryOptions({ id: roleId }),
-        );
-
         globalSuccessToast("Berhasil memperbarui role");
+        router.history.back();
       },
       onError: (error) => {
         globalErrorToast("Gagal memperbarui role: " + error.message);
