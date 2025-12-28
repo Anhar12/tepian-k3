@@ -9,16 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
-import { Route as coreDashboardRouteImport } from './routes/(core)/dashboard'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
+import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
+import { Route as coreDashboardUsersIndexRouteImport } from './routes/(core)/dashboard/users/index'
+import { Route as coreDashboardToolsIndexRouteImport } from './routes/(core)/dashboard/tools/index'
+import { Route as coreDashboardRolesIndexRouteImport } from './routes/(core)/dashboard/roles/index'
+import { Route as coreDashboardUsersCreateRouteImport } from './routes/(core)/dashboard/users/create'
+import { Route as coreDashboardToolsCreateRouteImport } from './routes/(core)/dashboard/tools/create'
+import { Route as coreDashboardRolesCreateRouteImport } from './routes/(core)/dashboard/roles/create'
+import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
+import { Route as coreDashboardToolsToolIdEditRouteImport } from './routes/(core)/dashboard/tools/$toolId.edit'
+import { Route as coreDashboardRolesRoleIdEditRouteImport } from './routes/(core)/dashboard/roles/$roleId.edit'
+import { Route as coreDashboardRolesRoleIdDetailRouteImport } from './routes/(core)/dashboard/roles/$roleId.detail'
 
+const UnauthorizedRoute = UnauthorizedRouteImport.update({
+  id: '/unauthorized',
+  path: '/unauthorized',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const coreRouteRoute = coreRouteRouteImport.update({
   id: '/(core)',
   getParentRoute: () => rootRouteImport,
@@ -42,11 +58,6 @@ const coreProfileRoute = coreProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => coreRouteRoute,
 } as any)
-const coreDashboardRoute = coreDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => coreRouteRoute,
-} as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
@@ -62,77 +73,213 @@ const authLoginRoute = authLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => authRouteRoute,
 } as any)
+const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDashboardUsersIndexRoute = coreDashboardUsersIndexRouteImport.update({
+  id: '/dashboard/users/',
+  path: '/dashboard/users/',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDashboardToolsIndexRoute = coreDashboardToolsIndexRouteImport.update({
+  id: '/dashboard/tools/',
+  path: '/dashboard/tools/',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDashboardRolesIndexRoute = coreDashboardRolesIndexRouteImport.update({
+  id: '/dashboard/roles/',
+  path: '/dashboard/roles/',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDashboardUsersCreateRoute =
+  coreDashboardUsersCreateRouteImport.update({
+    id: '/dashboard/users/create',
+    path: '/dashboard/users/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardToolsCreateRoute =
+  coreDashboardToolsCreateRouteImport.update({
+    id: '/dashboard/tools/create',
+    path: '/dashboard/tools/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardRolesCreateRoute =
+  coreDashboardRolesCreateRouteImport.update({
+    id: '/dashboard/roles/create',
+    path: '/dashboard/roles/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardUsersUserIdEditRoute =
+  coreDashboardUsersUserIdEditRouteImport.update({
+    id: '/dashboard/users/$userId/edit',
+    path: '/dashboard/users/$userId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardToolsToolIdEditRoute =
+  coreDashboardToolsToolIdEditRouteImport.update({
+    id: '/dashboard/tools/$toolId/edit',
+    path: '/dashboard/tools/$toolId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardRolesRoleIdEditRoute =
+  coreDashboardRolesRoleIdEditRouteImport.update({
+    id: '/dashboard/roles/$roleId/edit',
+    path: '/dashboard/roles/$roleId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardRolesRoleIdDetailRoute =
+  coreDashboardRolesRoleIdDetailRouteImport.update({
+    id: '/dashboard/roles/$roleId/detail',
+    path: '/dashboard/roles/$roleId/detail',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-email': typeof authVerifyEmailRoute
-  '/dashboard': typeof coreDashboardRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
+  '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
+  '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/roles': typeof coreDashboardRolesIndexRoute
+  '/dashboard/tools': typeof coreDashboardToolsIndexRoute
+  '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
+  '/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
+  '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
+  '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/unauthorized': typeof UnauthorizedRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-email': typeof authVerifyEmailRoute
-  '/dashboard': typeof coreDashboardRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/dashboard': typeof coreDashboardIndexRoute
+  '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
+  '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
+  '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/dashboard/roles': typeof coreDashboardRolesIndexRoute
+  '/dashboard/tools': typeof coreDashboardToolsIndexRoute
+  '/dashboard/users': typeof coreDashboardUsersIndexRoute
+  '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
+  '/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
+  '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
+  '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
+  '/unauthorized': typeof UnauthorizedRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
-  '/(core)/dashboard': typeof coreDashboardRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/(core)/dashboard/': typeof coreDashboardIndexRoute
+  '/(core)/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
+  '/(core)/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
+  '/(core)/dashboard/users/create': typeof coreDashboardUsersCreateRoute
+  '/(core)/dashboard/roles/': typeof coreDashboardRolesIndexRoute
+  '/(core)/dashboard/tools/': typeof coreDashboardToolsIndexRoute
+  '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
+  '/(core)/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
+  '/(core)/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
+  '/(core)/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
+  '/(core)/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/unauthorized'
     | '/login'
     | '/register'
     | '/verify-email'
-    | '/dashboard'
     | '/profile'
     | '/settings'
+    | '/dashboard'
+    | '/dashboard/roles/create'
+    | '/dashboard/tools/create'
+    | '/dashboard/users/create'
+    | '/dashboard/roles'
+    | '/dashboard/tools'
+    | '/dashboard/users'
+    | '/dashboard/roles/$roleId/detail'
+    | '/dashboard/roles/$roleId/edit'
+    | '/dashboard/tools/$toolId/edit'
+    | '/dashboard/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/unauthorized'
     | '/login'
     | '/register'
     | '/verify-email'
-    | '/dashboard'
     | '/profile'
     | '/settings'
+    | '/dashboard'
+    | '/dashboard/roles/create'
+    | '/dashboard/tools/create'
+    | '/dashboard/users/create'
+    | '/dashboard/roles'
+    | '/dashboard/tools'
+    | '/dashboard/users'
+    | '/dashboard/roles/$roleId/detail'
+    | '/dashboard/roles/$roleId/edit'
+    | '/dashboard/tools/$toolId/edit'
+    | '/dashboard/users/$userId/edit'
   id:
     | '__root__'
     | '/'
     | '/(auth)'
     | '/(core)'
+    | '/unauthorized'
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-email'
-    | '/(core)/dashboard'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/(core)/dashboard/'
+    | '/(core)/dashboard/roles/create'
+    | '/(core)/dashboard/tools/create'
+    | '/(core)/dashboard/users/create'
+    | '/(core)/dashboard/roles/'
+    | '/(core)/dashboard/tools/'
+    | '/(core)/dashboard/users/'
+    | '/(core)/dashboard/roles/$roleId/detail'
+    | '/(core)/dashboard/roles/$roleId/edit'
+    | '/(core)/dashboard/tools/$toolId/edit'
+    | '/(core)/dashboard/users/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
+  UnauthorizedRoute: typeof UnauthorizedRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unauthorized': {
+      id: '/unauthorized'
+      path: '/unauthorized'
+      fullPath: '/unauthorized'
+      preLoaderRoute: typeof UnauthorizedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(core)': {
       id: '/(core)'
       path: ''
@@ -168,13 +315,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreProfileRouteImport
       parentRoute: typeof coreRouteRoute
     }
-    '/(core)/dashboard': {
-      id: '/(core)/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof coreDashboardRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
     '/(auth)/verify-email': {
       id: '/(auth)/verify-email'
       path: '/verify-email'
@@ -196,6 +336,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLoginRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(core)/dashboard/': {
+      id: '/(core)/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof coreDashboardIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/users/': {
+      id: '/(core)/dashboard/users/'
+      path: '/dashboard/users'
+      fullPath: '/dashboard/users'
+      preLoaderRoute: typeof coreDashboardUsersIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/tools/': {
+      id: '/(core)/dashboard/tools/'
+      path: '/dashboard/tools'
+      fullPath: '/dashboard/tools'
+      preLoaderRoute: typeof coreDashboardToolsIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/roles/': {
+      id: '/(core)/dashboard/roles/'
+      path: '/dashboard/roles'
+      fullPath: '/dashboard/roles'
+      preLoaderRoute: typeof coreDashboardRolesIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/users/create': {
+      id: '/(core)/dashboard/users/create'
+      path: '/dashboard/users/create'
+      fullPath: '/dashboard/users/create'
+      preLoaderRoute: typeof coreDashboardUsersCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/tools/create': {
+      id: '/(core)/dashboard/tools/create'
+      path: '/dashboard/tools/create'
+      fullPath: '/dashboard/tools/create'
+      preLoaderRoute: typeof coreDashboardToolsCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/roles/create': {
+      id: '/(core)/dashboard/roles/create'
+      path: '/dashboard/roles/create'
+      fullPath: '/dashboard/roles/create'
+      preLoaderRoute: typeof coreDashboardRolesCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/users/$userId/edit': {
+      id: '/(core)/dashboard/users/$userId/edit'
+      path: '/dashboard/users/$userId/edit'
+      fullPath: '/dashboard/users/$userId/edit'
+      preLoaderRoute: typeof coreDashboardUsersUserIdEditRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/tools/$toolId/edit': {
+      id: '/(core)/dashboard/tools/$toolId/edit'
+      path: '/dashboard/tools/$toolId/edit'
+      fullPath: '/dashboard/tools/$toolId/edit'
+      preLoaderRoute: typeof coreDashboardToolsToolIdEditRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/roles/$roleId/edit': {
+      id: '/(core)/dashboard/roles/$roleId/edit'
+      path: '/dashboard/roles/$roleId/edit'
+      fullPath: '/dashboard/roles/$roleId/edit'
+      preLoaderRoute: typeof coreDashboardRolesRoleIdEditRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/roles/$roleId/detail': {
+      id: '/(core)/dashboard/roles/$roleId/detail'
+      path: '/dashboard/roles/$roleId/detail'
+      fullPath: '/dashboard/roles/$roleId/detail'
+      preLoaderRoute: typeof coreDashboardRolesRoleIdDetailRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
   }
 }
 
@@ -216,15 +433,35 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface coreRouteRouteChildren {
-  coreDashboardRoute: typeof coreDashboardRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
+  coreDashboardIndexRoute: typeof coreDashboardIndexRoute
+  coreDashboardRolesCreateRoute: typeof coreDashboardRolesCreateRoute
+  coreDashboardToolsCreateRoute: typeof coreDashboardToolsCreateRoute
+  coreDashboardUsersCreateRoute: typeof coreDashboardUsersCreateRoute
+  coreDashboardRolesIndexRoute: typeof coreDashboardRolesIndexRoute
+  coreDashboardToolsIndexRoute: typeof coreDashboardToolsIndexRoute
+  coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
+  coreDashboardRolesRoleIdDetailRoute: typeof coreDashboardRolesRoleIdDetailRoute
+  coreDashboardRolesRoleIdEditRoute: typeof coreDashboardRolesRoleIdEditRoute
+  coreDashboardToolsToolIdEditRoute: typeof coreDashboardToolsToolIdEditRoute
+  coreDashboardUsersUserIdEditRoute: typeof coreDashboardUsersUserIdEditRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
-  coreDashboardRoute: coreDashboardRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
+  coreDashboardIndexRoute: coreDashboardIndexRoute,
+  coreDashboardRolesCreateRoute: coreDashboardRolesCreateRoute,
+  coreDashboardToolsCreateRoute: coreDashboardToolsCreateRoute,
+  coreDashboardUsersCreateRoute: coreDashboardUsersCreateRoute,
+  coreDashboardRolesIndexRoute: coreDashboardRolesIndexRoute,
+  coreDashboardToolsIndexRoute: coreDashboardToolsIndexRoute,
+  coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,
+  coreDashboardRolesRoleIdDetailRoute: coreDashboardRolesRoleIdDetailRoute,
+  coreDashboardRolesRoleIdEditRoute: coreDashboardRolesRoleIdEditRoute,
+  coreDashboardToolsToolIdEditRoute: coreDashboardToolsToolIdEditRoute,
+  coreDashboardUsersUserIdEditRoute: coreDashboardUsersUserIdEditRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
@@ -235,6 +472,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
+  UnauthorizedRoute: UnauthorizedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

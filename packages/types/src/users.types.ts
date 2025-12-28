@@ -12,4 +12,15 @@ export type Users = InferQueryModel<
   }
 >;
 
+export type UsersWithoutFoto = InferQueryModel<
+  "users",
+  {
+    columns: {
+      profilePictureFileName: false;
+      profilePictureUrl: false;
+      password: false;
+    };
+  }
+>;
+
 export type InsertUser = InferInsertModel<typeof users>;

@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",
+    "@tepian-k3/constants": "workspace:*",
     "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/types": "workspace:*",
     "drizzle-zod": "^0.8.3",
     "zod": "catalog:",
     "zod-form-data": "catalog:"

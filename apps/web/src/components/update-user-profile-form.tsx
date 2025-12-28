@@ -38,8 +38,8 @@ export default function UpdateUserProfileForm({
     resolver: zodResolver(userSchema.updateUserSchema),
     defaultValues: {
       name: user.name,
-      address: user.address || "",
-      phone: user.phone || "",
+      address: user.address,
+      phone: user.phone,
     },
   });
 

@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull } from "@tepian-k3/db";
+import { and, eq, inArray } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
 import {
   permission,
@@ -12,8 +12,28 @@ import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import type { Permission } from "@tepian-k3/types/permission.types";
+import rolesQueries from "./roles.queries";
 
 const permissionQueries = {
+  getAllPermissions() {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.permission.findMany({
+          columns: {
+            id: true,
+            name: true,
+          },
+        }),
+      catch: (error) => {
+        logger.error("Error fetching permissions", { error });
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data izin",
+        });
+      },
+    });
+  },
+
   getUserWithPermissions(userId: string) {
     return Effect.gen(function* () {
       const user = yield* Effect.tryPromise({
@@ -181,208 +201,100 @@ const permissionQueries = {
     });
   },
 
-  // Assign role to user
-  assignRole(userId: string, roleId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db
-          .insert(userRoles)
-          .values({
-            userId,
-            roleId,
-          })
-          .onConflictDoNothing()
-          .returning(),
-      catch: (error) => {
-        logger.error("Error assigning role to user", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal menetapkan peran ke user",
-        });
-      },
-    });
-  },
-
-  // Assign multiple rols to user
-  assignRoles(userId: string, roleIds: string[]) {
-    if (roleIds.length === 0) return;
-
-    return Effect.tryPromise({
-      try: () =>
-        db
-          .insert(userRoles)
-          .values(
-            roleIds.map((roleId) => ({
-              userId,
-              roleId,
-            }))
-          )
-          .onConflictDoNothing()
-          .returning(),
-      catch: (error) => {
-        logger.error("Error assigning roles to user", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal menetapkan peran ke user",
-        });
-      },
-    });
-  },
-  // Remove role from user
-  removeRole(userId: string, roleId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db
-          .delete(userRoles)
-          .where(
-            and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId))
-          )
-          .returning(),
-      catch: (error) => {
-        logger.error("Error removing role from user", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal menghapus peran dari user",
-        });
-      },
-    });
-  },
-
-  // Remove all roles from user
-  removeAllRoles(userId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db.delete(userRoles).where(eq(userRoles.userId, userId)).returning(),
-      catch: (error) => {
-        logger.error("Error removing all roles from user", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal menghapus semua peran dari user",
-        });
-      },
-    });
-  },
-
-  // Replace user's roles (remove old, add new)
-  replaceRoles(userId: string, roleIds: string[]) {
-    return Effect.tryPromise({
-      try: () =>
-        db.transaction(async (tx) => {
-          // remove all existing roles
-          await tx.delete(userRoles).where(eq(userRoles.userId, userId));
-
-          // assign new roles
-          if (roleIds.length > 0) {
-            await tx.insert(userRoles).values(
-              roleIds.map((roleId) => ({
-                userId,
-                roleId,
-              }))
-            );
-          }
-        }),
-      catch: (error) => {
-        logger.error("Error replacing roles for user", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengganti peran user",
-        });
-      },
-    });
-  },
-
-  // Get all users with a specific role
-  getUsersByRole(roleName: string) {
+  updateRolePermissions(
+    roleId: string,
+    addedPermissions: string[],
+    removedPermissions: string[]
+  ) {
     return Effect.gen(function* () {
-      const role = yield* Effect.tryPromise({
-        try: () =>
-          db.query.roles.findFirst({
-            where: eq(roles.name, roleName),
-          }),
-        catch: (error) => {
-          logger.error("Error fetching role", { error });
-          return new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengambil data peran",
-          });
-        },
-      });
+      // Verify role exists
+      yield* rolesQueries.getRoleById(roleId);
 
-      if (!role) return [];
-
-      const userRolesData = yield* Effect.tryPromise({
-        try: () =>
-          db
-            .select({
-              user: users,
-            })
-            .from(userRoles)
-            .innerJoin(users, eq(userRoles.userId, users.id))
-            .where(and(eq(userRoles.roleId, role.id), isNull(users.deletedAt))),
-        catch: (error) => {
-          logger.error("Error fetching users by role", { error });
-          return new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengambil data user berdasarkan peran",
-          });
-        },
-      });
-
-      return userRolesData.map((ur) => ur.user);
-    });
-  },
-
-  // Grant permission to user (override)
-  grantPermission(userId: string, permissionId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db
-          .insert(userPermissions)
-          .values({
-            userId,
-            permissionId,
-            granted: true,
-          })
-          .onConflictDoUpdate({
-            target: [userPermissions.userId, userPermissions.permissionId],
-            set: { granted: true },
-          })
-          .returning(),
-      catch: (error) => {
-        logger.error("Error granting permission to user", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal memberikan izin ke user",
+      // Remove permissions
+      if (removedPermissions.length > 0) {
+        // Get permission IDs for removed permissions
+        const permissionsToRemove = yield* Effect.tryPromise({
+          try: () =>
+            db.query.permission.findMany({
+              where: inArray(permission.name, removedPermissions),
+              columns: { id: true },
+            }),
+          catch: (error) => {
+            logger.error("Error fetching permissions to remove", { error });
+            return new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal mengambil data izin yang akan dihapus",
+            });
+          },
         });
-      },
-    });
-  },
 
-  // Revoke permission from user (override)
-  revokePermission(userId: string, permissionId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db
-          .insert(userPermissions)
-          .values({
-            userId,
-            permissionId,
-            granted: false,
-          })
-          .onConflictDoUpdate({
-            target: [userPermissions.userId, userPermissions.permissionId],
-            set: { granted: false },
-          })
-          .returning(),
-      catch: (error) => {
-        logger.error("Error revoking permission from user", { error });
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mencabut izin dari user",
+        if (permissionsToRemove.length > 0) {
+          const permissionIdsToRemove = permissionsToRemove.map((p) => p.id);
+
+          yield* Effect.tryPromise({
+            try: () =>
+              db
+                .delete(rolePermissions)
+                .where(
+                  and(
+                    eq(rolePermissions.roleId, roleId),
+                    inArray(rolePermissions.permissionId, permissionIdsToRemove)
+                  )
+                ),
+            catch: (error) => {
+              logger.error("Error removing role permissions", { error });
+              return new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal menghapus izin dari role",
+              });
+            },
+          });
+        }
+      }
+
+      // Add new permissions
+      if (addedPermissions.length > 0) {
+        // Get permission IDs for added permissions
+        const permissionsToAdd = yield* Effect.tryPromise({
+          try: () =>
+            db.query.permission.findMany({
+              where: inArray(permission.name, addedPermissions),
+              columns: { id: true },
+            }),
+          catch: (error) => {
+            logger.error("Error fetching permissions to add", { error });
+            return new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal mengambil data izin yang akan ditambahkan",
+            });
+          },
         });
-      },
+
+        if (permissionsToAdd.length > 0) {
+          const newRolePermissions = permissionsToAdd.map((p) => ({
+            roleId,
+            permissionId: p.id,
+          }));
+
+          yield* Effect.tryPromise({
+            try: () =>
+              db
+                .insert(rolePermissions)
+                .values(newRolePermissions)
+                .onConflictDoNothing(),
+            catch: (error) => {
+              logger.error("Error adding role permissions", { error });
+              return new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal menambahkan izin ke role",
+              });
+            },
+          });
+        }
+      }
+
+      return { success: true };
     });
   },
 };
-
 export default permissionQueries;

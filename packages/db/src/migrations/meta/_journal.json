@@ -15,6 +15,13 @@
       "when": 1766475233023,
       "tag": "0001_pretty_harrier",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766710254196,
+      "tag": "0002_past_red_skull",
+      "breakpoints": true
     }
   ]
 }

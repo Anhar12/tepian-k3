@@ -4,11 +4,14 @@ packages:
 catalog:
   dotenv: ^17.2.2
   effect: ^3.19.13
+  date-fns: ^4.1.0
+  nuqs: ^2.8.6
   zod: ^4.1.13
   zod-form-data: ^3.0.1
   typescript: ^5
   hono: ^4.8.2
   uuid: ^13.0.0
+  "@tanstack/react-table": ^8.21.3
   "@trpc/server": ^11.7.2
   "@trpc/client": ^11.7.2
   "@node-rs/argon2": ^2.0.2

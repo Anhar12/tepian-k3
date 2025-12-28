@@ -10,17 +10,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/utils/trpc";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "./ui/form";
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -79,130 +72,153 @@ export function RegisterForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="grid gap-4"
-            >
-              <FormField
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="grid gap-4"
+          >
+            <FieldGroup>
+              <Controller
                 control={form.control}
                 name="name"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Nama
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan nama Anda"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nama Anda"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
-              <FormField
+              <Controller
                 control={form.control}
                 name="email"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Email
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan email Anda"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="email"
+                      placeholder="Masukkan email Anda"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
-              <FormField
+              <Controller
                 control={form.control}
                 name="address"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Alamat
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan alamat Anda"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan alamat Anda"
+                      className="h-10 text-sm"
+                      {...field}
+                      value={field.value ?? ""}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
-              <FormField
+              <Controller
                 control={form.control}
                 name="phone"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Telepon
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan telepon Anda"
-                        className="h-10 text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan telepon Anda"
+                      className="h-10 text-sm"
+                      {...field}
+                      value={field.value ?? ""}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
-              <FormField
+              <Controller
                 control={form.control}
                 name="password"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel className="ml-1 text-sm font-bold">
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
                       Password
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="Masukkan password Anda"
-                          type={type}
-                          className="h-10 pr-10 text-sm"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => {
-                            setType((prev) =>
-                              prev === "password" ? "text" : "password",
-                            );
-                          }}
-                        >
-                          {type === "password" ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage className="min-h-4 text-xs" />
-                  </FormItem>
+                    </FieldLabel>
+                    <div className="relative">
+                      <Input
+                        placeholder="Masukkan password Anda"
+                        type={type}
+                        className="h-10 pr-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => {
+                          setType((prev) =>
+                            prev === "password" ? "text" : "password",
+                          );
+                        }}
+                      >
+                        {type === "password" ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
               />
+
               <Button
                 type="submit"
                 className="mt-2 h-10 w-full text-sm"
@@ -220,8 +236,8 @@ export function RegisterForm({
               >
                 Sudah punya akun? Masuk di sini
               </Link>
-            </form>
-          </Form>
+            </FieldGroup>
+          </form>
         </CardContent>
       </Card>
     </div>

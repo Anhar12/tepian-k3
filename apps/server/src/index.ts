@@ -1,10 +1,14 @@
 import "dotenv/config";
+import * as z from "zod";
 import { trpcServer } from "@hono/trpc-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import fs from "fs/promises";
 import { lookup } from "mime-types";
+
+// Set Zod locale to Indonesian
+z.config(z.locales.id());
 
 const app = new Hono();
 

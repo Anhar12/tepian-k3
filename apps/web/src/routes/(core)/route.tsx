@@ -1,4 +1,7 @@
+import { AppSidebar } from "@/components/app-sidebar";
 import MainHeader from "@/components/main-header";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { trpc } from "@/utils/trpc";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
@@ -9,6 +12,8 @@ export const Route = createFileRoute("/(core)")({
       ...trpc.auth.me.queryOptions(),
       // 5 minutes cache
       staleTime: 1000 * 60 * 5,
+      // Keep in cache for 30 minutes (even if unused)
+      gcTime: 1000 * 60 * 30,
     });
 
     if (!user) {
@@ -16,18 +21,38 @@ export const Route = createFileRoute("/(core)")({
     }
 
     if (user && !user.emailVerified) {
-      throw redirect({ to: "/verify-email" });
+      throw redirect({
+        to: "/verify-email",
+        search: {
+          email: user.email,
+        },
+      });
     }
 
     return null;
   },
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(trpc.auth.profile.queryOptions()),
   component: RouteComponent,
 });
 
 function RouteComponent() {
   return (
-    <>
-      <Outlet />
-    </>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset className="overflow-hidden">
+        <SiteHeader />
+        <main className="container overflow-y-auto p-4">
+          <Outlet />
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

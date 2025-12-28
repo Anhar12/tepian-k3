@@ -1,5 +1,5 @@
 import authSchema from "@tepian-k3/schema/auth.schema";
-import { createTRPCRouter, publicProcedure } from "..";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "..";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import { TRPCError } from "@trpc/server";
 import { verify } from "@node-rs/argon2";
@@ -134,6 +134,26 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
+  profile: protectedProcedure.query(async ({ ctx }) => {
+    const user = await Effect.runPromise(
+      permissionQueries.getUserWithPermissions(ctx.user.id)
+    );
+
+    if (!user) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Pengguna tidak ditemukan",
+      });
+    }
+
+    return {
+      ...user,
+      profilePictureUrl: user.profilePictureUrl
+        ? storageService.getPublicUrl(user.profilePictureUrl)
+        : null,
+    };
+  }),
+
   me: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.user) {
       return null;
@@ -142,10 +162,11 @@ export const authRouter = createTRPCRouter({
     const user = await Effect.runPromise(
       permissionQueries.getUserWithPermissions(ctx.user.id)
     );
+
     if (!user) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "User not found",
+        message: "Pengguna tidak ditemukan",
       });
     }
 

@@ -13,6 +13,71 @@ async function seed() {
       { name: "users.update", resource: "users", action: "update" },
       { name: "users.delete", resource: "users", action: "delete" },
       { name: "users.manage", resource: "users", action: "manage" },
+      { name: "roles.create", resource: "roles", action: "create" },
+      { name: "roles.read", resource: "roles", action: "read" },
+      { name: "roles.update", resource: "roles", action: "update" },
+      { name: "roles.delete", resource: "roles", action: "delete" },
+      { name: "roles.manage", resource: "roles", action: "manage" },
+      { name: "permissions.create", resource: "permissions", action: "create" },
+      { name: "permissions.read", resource: "permissions", action: "read" },
+      { name: "permissions.update", resource: "permissions", action: "update" },
+      { name: "permissions.delete", resource: "permissions", action: "delete" },
+      { name: "permissions.manage", resource: "permissions", action: "manage" },
+      {
+        name: "role-permissions.create",
+        resource: "role-permissions",
+        action: "create",
+      },
+      {
+        name: "role-permissions.read",
+        resource: "role-permissions",
+        action: "read",
+      },
+      {
+        name: "role-permissions.update",
+        resource: "role-permissions",
+        action: "update",
+      },
+      {
+        name: "role-permissions.delete",
+        resource: "role-permissions",
+        action: "delete",
+      },
+      {
+        name: "role-permissions.manage",
+        resource: "role-permissions",
+        action: "manage",
+      },
+      {
+        name: "user-permissions.create",
+        resource: "user-permissions",
+        action: "create",
+      },
+      {
+        name: "user-permissions.read",
+        resource: "user-permissions",
+        action: "read",
+      },
+      {
+        name: "user-permissions.update",
+        resource: "user-permissions",
+        action: "update",
+      },
+      {
+        name: "user-permissions.delete",
+        resource: "user-permissions",
+        action: "delete",
+      },
+      {
+        name: "user-permissions.manage",
+        resource: "user-permissions",
+        action: "manage",
+      },
+      { name: "tools.create", resource: "tools", action: "create" },
+      { name: "tools.read", resource: "tools", action: "read" },
+      { name: "tools.update", resource: "tools", action: "update" },
+      { name: "tools.delete", resource: "tools", action: "delete" },
+      { name: "tools.manage", resource: "tools", action: "manage" },
     ])
     .returning();
 

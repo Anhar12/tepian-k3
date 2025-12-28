@@ -175,6 +175,14 @@ export const protectedProcedure = t.procedure
     });
   });
 
+/**
+ * The `withPermission` function checks if a user has a specific permission before allowing access to a
+ * protected procedure.
+ * @param {string} permission - The `permission` parameter in the `withPermission` function is a string
+ * that represents the specific permission that a user must have in order to access a particular
+ * resource or perform a certain action. This permission is checked against the user's permissions to
+ * determine if they have the necessary authorization.
+ */
 export const withPermission = (permission: string) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasPermission = await Effect.runPromise(
@@ -191,6 +199,12 @@ export const withPermission = (permission: string) =>
     return next();
   });
 
+/**
+ * The `withRole` function checks if a user has a specific role before allowing access to a protected
+ * procedure.
+ * @param {string} role - The `role` parameter in the `withRole` function is a string that represents
+ * the role that a user must have in order to access a specific resource or perform a specific action.
+ */
 export const withRole = (role: string) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
@@ -207,6 +221,12 @@ export const withRole = (role: string) =>
     return next();
   });
 
+/**
+ * The function `withAnyRole` checks if a user has any of the specified roles before allowing access to
+ * a protected procedure.
+ * @param {string[]} roleNames - The `roleNames` parameter is an array of strings that represent the
+ * roles that a user must have in order to access a particular resource or perform a specific action.
+ */
 export const withAnyRole = (roleNames: string[]) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
@@ -223,6 +243,14 @@ export const withAnyRole = (roleNames: string[]) =>
     return next();
   });
 
+/**
+ * The function `withAllRoles` checks if a user has all specified roles before allowing access to a
+ * protected procedure.
+ * @param {string[]} roleNames - The `roleNames` parameter is an array of strings that contains the
+ * names of roles that a user must have in order to access a specific resource or perform a specific
+ * action. The `withAllRoles` function checks if the user has all the specified roles before allowing
+ * them to proceed.
+ */
 export const withAllRoles = (roleNames: string[]) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(

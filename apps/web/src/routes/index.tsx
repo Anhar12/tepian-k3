@@ -19,47 +19,53 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { trpc } from "@/utils/trpc";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, type LinkProps } from "@tanstack/react-router";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(context.trpc.auth.me.queryOptions()),
   component: HomeComponent,
 });
 
-function HomeComponent() {
-  const navItems = [
-    { label: "Beranda", href: "#" },
-    { label: "Transaksi", href: "#" },
-    { label: "FAQ", href: "#faq" },
-    { label: "PPID", href: "#" },
-  ];
+const navItems = [
+  { label: "Beranda", href: "#" },
+  { label: "Transaksi", href: "#" },
+  { label: "FAQ", href: "#faq" },
+  { label: "PPID", href: "#" },
+];
 
-  const pusatLayananItems: {
-    imageSrc: string;
-    title: string;
-    to: LinkProps["to"];
-  }[] = [
-    {
-      imageSrc: "/assets/pengujian.jpg",
-      title: "Pengujian",
-      to: "/",
-    },
-    {
-      imageSrc: "/assets/pelatihan.jpg",
-      title: "Pelatihan",
-      to: "/",
-    },
-    {
-      imageSrc: "/assets/uji-kompetensi.jpg",
-      title: "Uji Kompetensi",
-      to: "/",
-    },
-    {
-      imageSrc: "/assets/konsultasi.jpg",
-      title: "Konsultasi",
-      to: "/",
-    },
-  ];
+const pusatLayananItems: {
+  imageSrc: string;
+  title: string;
+  to: LinkProps["to"];
+}[] = [
+  {
+    imageSrc: "/assets/pengujian.jpg",
+    title: "Pengujian",
+    to: "/",
+  },
+  {
+    imageSrc: "/assets/pelatihan.jpg",
+    title: "Pelatihan",
+    to: "/",
+  },
+  {
+    imageSrc: "/assets/uji-kompetensi.jpg",
+    title: "Uji Kompetensi",
+    to: "/",
+  },
+  {
+    imageSrc: "/assets/konsultasi.jpg",
+    title: "Konsultasi",
+    to: "/",
+  },
+];
+
+function HomeComponent() {
+  const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
 
   return (
     <div className="w-full bg-white dark:bg-neutral-950">
@@ -84,20 +90,29 @@ function HomeComponent() {
             </a>
           ))}
         </div>
-        <div className="flex items-center gap-4">
+        {user ? (
           <a
-            href="/login"
-            className="text-sm font-medium text-primary hover:underline"
+            href="/dashboard"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Login
+            Dashboard
           </a>
-          <a
-            href="/register"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Sign Up
-          </a>
-        </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <a
+              href="/login"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Login
+            </a>
+            <a
+              href="/register"
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Sign Up
+            </a>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
@@ -148,7 +163,7 @@ function HomeComponent() {
 
       {/* Pusat layanan kami */}
       <section
-        className="relative container flex min-h-screen flex-col bg-muted/50 px-10 py-16"
+        className="relative flex min-h-screen flex-col bg-muted/50 px-10 py-16"
         id="layanan"
       >
         <GridBackground />
@@ -184,7 +199,7 @@ function HomeComponent() {
 
       {/* Profile */}
       <section
-        className="relative container flex h-[60vh] flex-row gap-4 px-10 py-16"
+        className="relative flex h-[60vh] flex-row gap-4 px-10 py-16"
         id="profile"
       >
         {/* Logo */}
@@ -216,7 +231,7 @@ function HomeComponent() {
 
       {/* Informasi Kesalamatan & Kesehatan Kerja */}
       <section
-        className="relative container flex min-h-screen flex-col bg-accent/10 px-10 py-16"
+        className="relative flex min-h-screen flex-col bg-accent/10 px-10 py-16"
         id="informasi"
       >
         <GridBackground />
@@ -279,10 +294,7 @@ function HomeComponent() {
       </section>
 
       {/* FAQ */}
-      <section
-        className="relative container flex h-screen flex-col px-10 py-16"
-        id="faq"
-      >
+      <section className="relative flex h-screen flex-col px-10 py-16" id="faq">
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
           <h2 className="mb-2 w-137.5 text-center text-6xl font-semibold text-balance text-primary">
             Frequently Asked Questions
@@ -348,7 +360,7 @@ function HomeComponent() {
 
       {/* Stakeholder */}
       <section
-        className="relative container flex h-[75vh] flex-col bg-primary px-10 py-16"
+        className="relative flex h-[75vh] flex-col bg-primary px-10 py-16"
         id="stakeholder"
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">
@@ -383,7 +395,7 @@ function HomeComponent() {
       </section>
 
       {/* Footer */}
-      <footer className="relative container flex h-11 items-center justify-center bg-muted/50 px-10 py-4">
+      <footer className="relative flex h-11 items-center justify-center bg-muted/50 px-10 py-4">
         <p className="text-center text-sm font-normal text-foreground">
           &copy; 2025 Balai K3 Samarinda
         </p>
