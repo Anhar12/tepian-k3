@@ -10,15 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
+import { Route as TransaksiRouteImport } from './routes/transaksi'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as coreTestRouteImport } from './routes/(core)/test'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
+import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
+import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreDashboardUsersIndexRouteImport } from './routes/(core)/dashboard/users/index'
 import { Route as coreDashboardToolsIndexRouteImport } from './routes/(core)/dashboard/tools/index'
@@ -45,6 +47,11 @@ const UnauthorizedRoute = UnauthorizedRouteImport.update({
   path: '/unauthorized',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TransaksiRoute = TransaksiRouteImport.update({
+  id: '/transaksi',
+  path: '/transaksi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const coreRouteRoute = coreRouteRouteImport.update({
   id: '/(core)',
   getParentRoute: () => rootRouteImport,
@@ -57,11 +64,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const coreTestRoute = coreTestRouteImport.update({
-  id: '/test',
-  path: '/test',
-  getParentRoute: () => coreRouteRoute,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
   id: '/settings',
@@ -78,6 +80,11 @@ const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
   path: '/verify-email',
   getParentRoute: () => authRouteRoute,
 } as any)
+const authResetPasswordRoute = authResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => authRouteRoute,
+} as any)
 const authRegisterRoute = authRegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -86,6 +93,11 @@ const authRegisterRoute = authRegisterRouteImport.update({
 const authLoginRoute = authLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => authRouteRoute,
+} as any)
+const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => authRouteRoute,
 } as any)
 const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
@@ -207,13 +219,15 @@ const coreDashboardClustersClusterIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/test': typeof coreTestRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
@@ -237,13 +251,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/test': typeof coreTestRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
@@ -270,13 +286,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
+  '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
+  '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
-  '/(core)/test': typeof coreTestRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/(core)/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
@@ -302,13 +320,15 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/transaksi'
     | '/unauthorized'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/verify-email'
     | '/profile'
     | '/settings'
-    | '/test'
     | '/dashboard'
     | '/dashboard/clusters/create'
     | '/dashboard/parameter-categories/create'
@@ -332,13 +352,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/transaksi'
     | '/unauthorized'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/verify-email'
     | '/profile'
     | '/settings'
-    | '/test'
     | '/dashboard'
     | '/dashboard/clusters/create'
     | '/dashboard/parameter-categories/create'
@@ -364,13 +386,15 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/(core)'
+    | '/transaksi'
     | '/unauthorized'
+    | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/register'
+    | '/(auth)/reset-password'
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
-    | '/(core)/test'
     | '/(core)/dashboard/'
     | '/(core)/dashboard/clusters/create'
     | '/(core)/dashboard/parameter-categories/create'
@@ -397,6 +421,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
+  TransaksiRoute: typeof TransaksiRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
 }
 
@@ -407,6 +432,13 @@ declare module '@tanstack/react-router' {
       path: '/unauthorized'
       fullPath: '/unauthorized'
       preLoaderRoute: typeof UnauthorizedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transaksi': {
+      id: '/transaksi'
+      path: '/transaksi'
+      fullPath: '/transaksi'
+      preLoaderRoute: typeof TransaksiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)': {
@@ -430,13 +462,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(core)/test': {
-      id: '/(core)/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof coreTestRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
     '/(core)/settings': {
       id: '/(core)/settings'
       path: '/settings'
@@ -458,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authVerifyEmailRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(auth)/reset-password': {
+      id: '/(auth)/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof authResetPasswordRouteImport
+      parentRoute: typeof authRouteRoute
+    }
     '/(auth)/register': {
       id: '/(auth)/register'
       path: '/register'
@@ -470,6 +502,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof authLoginRouteImport
+      parentRoute: typeof authRouteRoute
+    }
+    '/(auth)/forgot-password': {
+      id: '/(auth)/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof authRouteRoute
     }
     '/(core)/dashboard/': {
@@ -616,14 +655,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface authRouteRouteChildren {
+  authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
+  authResetPasswordRoute: typeof authResetPasswordRoute
   authVerifyEmailRoute: typeof authVerifyEmailRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
+  authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
+  authResetPasswordRoute: authResetPasswordRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
 }
 
@@ -634,7 +677,6 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface coreRouteRouteChildren {
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
-  coreTestRoute: typeof coreTestRoute
   coreDashboardIndexRoute: typeof coreDashboardIndexRoute
   coreDashboardClustersCreateRoute: typeof coreDashboardClustersCreateRoute
   coreDashboardParameterCategoriesCreateRoute: typeof coreDashboardParameterCategoriesCreateRoute
@@ -660,7 +702,6 @@ interface coreRouteRouteChildren {
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
-  coreTestRoute: coreTestRoute,
   coreDashboardIndexRoute: coreDashboardIndexRoute,
   coreDashboardClustersCreateRoute: coreDashboardClustersCreateRoute,
   coreDashboardParameterCategoriesCreateRoute:
@@ -696,6 +737,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
+  TransaksiRoute: TransaksiRoute,
   UnauthorizedRoute: UnauthorizedRoute,
 }
 export const routeTree = rootRouteImport

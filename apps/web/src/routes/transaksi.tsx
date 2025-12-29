@@ -5,13 +5,13 @@ import { LocationSection } from "@/components/location-section";
 import { ParameterCategories } from "@/components/parameter-categories";
 import { ParameterTable } from "@/components/parameter-table";
 
-export const Route = createFileRoute("/(core)/test")({
+export const Route = createFileRoute("/transaksi")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F8FAFC]">
+    <div className="relative min-h-screen overflow-hidden overflow-y-auto bg-[#F8FAFC]">
       {/* Background Grid Pattern */}
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-[0.03]"
@@ -27,13 +27,13 @@ function RouteComponent() {
         <main className="mx-auto max-w-7xl space-y-12 px-4 py-12">
           <div className="space-y-8 text-center">
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold tracking-tight text-[#1E40AF] md:text-5xl">
-                layanan pengujian
+              <h1 className="mb-4 text-4xl font-bold tracking-tight text-[#1E40AF] md:text-5xl">
+                Layanan Pengujian
               </h1>
-              <div className="mx-auto h-1.5 w-64 rounded-full bg-linear-to-r from-transparent via-[#10B981] to-transparent" />
+              <div className="mx-auto h-2 w-115 bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
             </div>
 
-            <Stepper currentStep={2} />
+            <Stepper currentStep={1} />
           </div>
 
           <LocationSection />

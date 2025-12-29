@@ -1,6 +1,8 @@
 import { MapPin, Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 export function LocationSection() {
   return (
@@ -21,28 +23,28 @@ export function LocationSection() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-xs font-bold tracking-wider text-slate-700 uppercase">
+          <Label className="text-xs font-bold tracking-wider text-slate-700 uppercase">
             Nama Lokasi *
-          </label>
-          <input
+          </Label>
+          <Input
             className="h-12 w-full rounded-lg border border-blue-100 bg-white px-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
             placeholder="masukkan nama lokasi"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold tracking-wider text-slate-700 uppercase">
+          <Label className="text-xs font-bold tracking-wider text-slate-700 uppercase">
             Kota/Kabupaten *
-          </label>
-          <input
+          </Label>
+          <Input
             className="h-12 w-full rounded-lg border border-blue-100 bg-white px-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
             placeholder="masukkan kota/kabupaten"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold tracking-wider text-slate-700 uppercase">
+          <Label className="text-xs font-bold tracking-wider text-slate-700 uppercase">
             Kecamatan *
-          </label>
-          <input
+          </Label>
+          <Input
             className="h-12 w-full rounded-lg border border-blue-100 bg-white px-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
             placeholder="masukkan kecamatan"
           />

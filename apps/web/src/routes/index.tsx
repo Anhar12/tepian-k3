@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
 
 const navItems = [
   { label: "Beranda", href: "#" },
-  { label: "Transaksi", href: "#" },
+  { label: "Transaksi", href: "/transaksi" },
   { label: "FAQ", href: "#faq" },
   { label: "PPID", href: "#" },
 ];
@@ -68,7 +68,7 @@ function HomeComponent() {
   const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
 
   return (
-    <div className="w-full bg-white dark:bg-neutral-950">
+    <div className="w-full overflow-x-hidden overflow-y-scroll bg-white dark:bg-neutral-950">
       {/* Landing Page Navbar */}
       <nav className="sticky top-0 z-50 mx-auto flex h-16 max-h-16 min-h-16 w-full items-center justify-between bg-white/80 px-5 backdrop-blur-sm dark:bg-neutral-950/80">
         <a href="/" className="text-xl font-bold text-primary">
@@ -360,7 +360,7 @@ function HomeComponent() {
 
       {/* Stakeholder */}
       <section
-        className="relative flex h-[75vh] flex-col bg-primary px-10 py-16"
+        className="relative flex h-[50vh] flex-col bg-primary px-10 py-16"
         id="stakeholder"
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">

@@ -171,7 +171,7 @@ function RouteComponent() {
                             <CommandGroup>
                               {parameterCategories.map((category) => (
                                 <CommandItem
-                                  value={category.id}
+                                  value={category.name}
                                   key={category.id}
                                   onSelect={() => {
                                     field.onChange(category.id);

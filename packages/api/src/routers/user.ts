@@ -4,6 +4,8 @@ import { Effect } from "effect";
 import { storageService } from "@tepian-k3/services/storage";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import z from "zod";
+import permissionQueries from "@tepian-k3/queries/permission.queries";
+import { TRPCError } from "@trpc/server";
 
 export const userRouter = createTRPCRouter({
   getUserPaginated: withPermission("users.read")
@@ -32,9 +34,35 @@ export const userRouter = createTRPCRouter({
       })
     )
     .query(
-      async ({ ctx: { user } }) =>
-        await Effect.runPromise(usersQueries.getUserById(user.id))
+      async ({ input }) =>
+        await Effect.runPromise(usersQueries.getUserById(input.userId))
     ),
+
+  getUserDetailWithRolesAndPermissions: withPermission("users.read")
+    .input(
+      z.object({
+        userId: z.uuidv7(),
+      })
+    )
+    .query(async ({ input }) => {
+      const user = await Effect.runPromise(
+        permissionQueries.getUserWithPermissions(input.userId)
+      );
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Pengguna tidak ditemukan",
+        });
+      }
+
+      return {
+        ...user,
+        profilePictureUrl: user.profilePictureUrl
+          ? storageService.getPublicUrl(user.profilePictureUrl)
+          : null,
+      };
+    }),
 
   createUser: withPermission("users.create")
     .input(userSchema.adminCreateUserSchema)
@@ -80,6 +108,7 @@ export const userRouter = createTRPCRouter({
         })
       )
     ),
+
   updatePassword: protectedProcedure
     .input(userSchema.updateUserPasswordSchema)
     .mutation(async ({ input, ctx: { user } }) =>

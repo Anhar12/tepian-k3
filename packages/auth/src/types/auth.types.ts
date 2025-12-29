@@ -15,3 +15,11 @@ export interface JWTPayload extends JoseJWTPayload {
   createdAt: string;
   updatedAt: string | null;
 }
+
+export interface ResetTokenPayload {
+  userId: string;
+  email: string;
+  type: "password-reset";
+  iat?: number;
+  exp?: number;
+}

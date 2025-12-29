@@ -22,7 +22,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { trpc } from "@/utils/trpc";
+import { queryClient, trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
 
@@ -31,6 +31,15 @@ export function NavUser() {
   const { isMobile } = useSidebar();
 
   const { data: user } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+
+  function onLogout() {
+    localStorage.removeItem("token");
+
+    queryClient.invalidateQueries(trpc.auth.me.queryFilter());
+    queryClient.refetchQueries(trpc.auth.me.queryFilter());
+
+    navigate({ to: "/" });
+  }
 
   return (
     <SidebarMenu>
@@ -107,7 +116,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={onLogout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

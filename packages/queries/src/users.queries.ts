@@ -8,10 +8,11 @@ import {
   eq,
   gte,
   ilike,
+  inArray,
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { users } from "@tepian-k3/db/schema";
+import { userRoles, users } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { hash } from "@node-rs/argon2";
@@ -533,6 +534,61 @@ const usersQueries = {
             },
           })
         : undefined;
+
+      // Removed roles
+      if (data.deletedRoleIds && data.deletedRoleIds.length > 0) {
+        yield* Effect.tryPromise({
+          try: () =>
+            db
+              .delete(userRoles)
+              .where(
+                and(
+                  eq(userRoles.userId, id),
+                  inArray(userRoles.roleId, data.deletedRoleIds ?? [])
+                )
+              ),
+          catch: (error) => {
+            logger.error("Failed to remove roles from user", {
+              userId: id,
+              roleIds: data.deletedRoleIds,
+              error,
+            });
+            return new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: `Gagal menghapus role dari pengguna.`,
+              cause: error,
+            });
+          },
+        });
+      }
+
+      // Added roles
+      if (data.newRoleIds && data.newRoleIds.length > 0) {
+        yield* Effect.tryPromise({
+          try: () =>
+            db
+              .insert(userRoles)
+              .values(
+                data.newRoleIds!.map((roleId) => ({
+                  userId: id,
+                  roleId,
+                }))
+              )
+              .onConflictDoNothing(),
+          catch: (error) => {
+            logger.error("Failed to add roles to user", {
+              userId: id,
+              roleIds: data.newRoleIds,
+              error,
+            });
+            return new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: `Gagal menambahkan role ke pengguna.`,
+              cause: error,
+            });
+          },
+        });
+      }
 
       const { emailVerifiedAt, ...restData } = data;
 

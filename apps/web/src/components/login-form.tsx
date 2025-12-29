@@ -108,6 +108,12 @@ export function LoginForm({
                     <FieldLabel className="ml-1 text-sm font-bold">
                       Password
                     </FieldLabel>
+                    <Link
+                      to="/forgot-password"
+                      className="text-right text-xs text-primary hover:underline"
+                    >
+                      Lupa password?
+                    </Link>
                     <div className="relative">
                       <Input
                         placeholder="Masukkan password Anda"

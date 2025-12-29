@@ -83,16 +83,21 @@ const adminUpdateUserSchema = createUpdateSchema(users, {
   emailVerified: z.boolean(),
   emailVerifiedAt: z.date().nullable(),
   password: z.optional(z.string().min(6, "Password minimal 6 karakter")),
-}).pick({
-  id: true,
-  name: true,
-  address: true,
-  phone: true,
-  email: true,
-  emailVerified: true,
-  emailVerifiedAt: true,
-  password: true,
-});
+})
+  .pick({
+    id: true,
+    name: true,
+    address: true,
+    phone: true,
+    email: true,
+    emailVerified: true,
+    emailVerifiedAt: true,
+    password: true,
+  })
+  .extend({
+    deletedRoleIds: z.array(z.uuidv7()).optional(),
+    newRoleIds: z.array(z.uuidv7()).optional(),
+  });
 
 const updateUserSchema = createUpdateSchema(users, {
   name: z.string().min(1),
