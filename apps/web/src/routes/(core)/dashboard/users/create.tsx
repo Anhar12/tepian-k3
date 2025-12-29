@@ -158,7 +158,7 @@ function RouteComponent() {
                                   field.value?.includes(role.id) ?? false;
                                 return (
                                   <CommandItem
-                                    value={role.id}
+                                    value={role.name}
                                     key={role.id}
                                     onSelect={() => {
                                       const currentValue = field.value ?? [];

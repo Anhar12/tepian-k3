@@ -175,7 +175,7 @@ function RouteComponent() {
                             <CommandGroup>
                               {clusters.map((cluster) => (
                                 <CommandItem
-                                  value={cluster.id}
+                                  value={cluster.name}
                                   key={cluster.id}
                                   onSelect={() => {
                                     field.onChange(cluster.id);
@@ -252,7 +252,7 @@ function RouteComponent() {
                             <CommandGroup>
                               {parameterCategories.map((category) => (
                                 <CommandItem
-                                  value={category.id}
+                                  value={category.name}
                                   key={category.id}
                                   onSelect={() => {
                                     field.onChange(category.id);
