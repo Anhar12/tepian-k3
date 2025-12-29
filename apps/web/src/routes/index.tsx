@@ -68,7 +68,7 @@ function HomeComponent() {
   const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
 
   return (
-    <div className="w-full bg-white dark:bg-neutral-950">
+    <div className="w-full overflow-x-hidden overflow-y-scroll bg-white dark:bg-neutral-950">
       {/* Landing Page Navbar */}
       <nav className="sticky top-0 z-50 mx-auto flex h-16 max-h-16 min-h-16 w-full items-center justify-between bg-white/80 px-5 backdrop-blur-sm dark:bg-neutral-950/80">
         <a href="/" className="text-xl font-bold text-primary">
