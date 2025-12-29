@@ -32,8 +32,8 @@ export const userRouter = createTRPCRouter({
       })
     )
     .query(
-      async ({ ctx: { user } }) =>
-        await Effect.runPromise(usersQueries.getUserById(user.id))
+      async ({ input }) =>
+        await Effect.runPromise(usersQueries.getUserById(input.userId))
     ),
 
   createUser: withPermission("users.create")
@@ -80,6 +80,7 @@ export const userRouter = createTRPCRouter({
         })
       )
     ),
+
   updatePassword: protectedProcedure
     .input(userSchema.updateUserPasswordSchema)
     .mutation(async ({ input, ctx: { user } }) =>
