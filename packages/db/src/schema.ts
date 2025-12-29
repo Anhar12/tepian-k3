@@ -270,12 +270,16 @@ export const parameterCategories = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
+    clusterId: uuid("cluster_id")
+      .notNull()
+      .references(() => clusters.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 250 }).notNull().unique(),
     description: text("description"),
     ...timestamps,
   },
   (table) => [
     index("parameter_category_id_idx").using("btree", table.id),
+    index("parameter_category_cluster_id_idx").using("btree", table.clusterId),
     index("parameter_category_name_idx").using("btree", table.name),
   ]
 );
@@ -291,9 +295,6 @@ export const parameters = createTable(
       .notNull()
       .references(() => parameterCategories.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 250 }).notNull(),
-    clusterId: uuid("cluster_id")
-      .notNull()
-      .references(() => clusters.id, { onDelete: "cascade" }),
     reference: text("reference"),
     price: integer("price").notNull(),
     ...timestamps,
@@ -304,7 +305,6 @@ export const parameters = createTable(
       "btree",
       table.parameterCategoryId
     ),
-    index("parameter_cluster_id_idx").using("btree", table.clusterId),
     index("parameter_name_idx").using("btree", table.name),
   ]
 );
