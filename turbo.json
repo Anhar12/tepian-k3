@@ -81,6 +81,7 @@
     "RESEND_API_KEY",
     "ETHEREAL_USER",
     "ETHEREAL_PASSWORD",
+    "APP_URL",
     "DASHBOARD_URL"
   ],
   "globalPassThroughEnv": [
@@ -110,6 +111,7 @@
     "RESEND_API_KEY",
     "ETHEREAL_USER",
     "ETHEREAL_PASSWORD",
+    "APP_URL",
     "DASHBOARD_URL"
   ]
 }

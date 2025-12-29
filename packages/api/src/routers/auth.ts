@@ -10,6 +10,8 @@ import { OTPService } from "@tepian-k3/auth/services/otp";
 import { Effect } from "effect";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { storageService } from "@tepian-k3/services/storage";
+import z from "zod";
+import { PasswordResetService } from "@tepian-k3/auth/services/password-reset";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -134,6 +136,48 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
+  requestPasswordReset: publicProcedure
+    .input(
+      z.object({
+        email: z.email(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const result = await Effect.runPromise(
+        PasswordResetService.requestReset(input.email)
+      );
+
+      if (!result.status) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: result.message,
+        });
+      }
+
+      return result;
+    }),
+
+  verifyResetToken: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const result = await Effect.runPromise(
+        PasswordResetService.verifyResetToken(input.token)
+      );
+
+      if (!result.valid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: result.message,
+        });
+      }
+
+      return result;
+    }),
+
   profile: protectedProcedure.query(async ({ ctx }) => {
     const user = await Effect.runPromise(
       permissionQueries.getUserWithPermissions(ctx.user.id)
@@ -153,6 +197,30 @@ export const authRouter = createTRPCRouter({
         : null,
     };
   }),
+
+  resetPassword: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+        newPassword: z
+          .string()
+          .min(8, "Password harus terdiri dari minimal 8 karakter"),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const result = await Effect.runPromise(
+        PasswordResetService.resetPassword(input.token, input.newPassword)
+      );
+
+      if (!result.status) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: result.message,
+        });
+      }
+
+      return result;
+    }),
 
   me: publicProcedure.query(async ({ ctx }) => {
     if (!ctx.user) {

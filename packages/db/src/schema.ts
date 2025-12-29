@@ -95,6 +95,28 @@ export const otpCodes = createTable(
   ]
 );
 
+export const passwordResets = createTable("password_resets", {
+  id: uuid("id")
+    .primaryKey()
+    .notNull()
+    .$default(() => uuidv7()),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  used: boolean("used").notNull().default(false),
+  expiresAt: timestamp("expires_at", {
+    withTimezone: true,
+    mode: "string",
+  }).notNull(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "string",
+  })
+    .$default(() => sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
 export const userCompanies = createTable("user_companies", {
   id: uuid("id")
     .primaryKey()

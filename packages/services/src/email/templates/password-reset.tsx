@@ -45,7 +45,7 @@ export function PasswordResetEmail({
             <Section className="my-8 text-center">
               <Button
                 href={resetLink}
-                className="rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white no-underline hover:bg-blue-700"
+                className="rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white no-underline"
               >
                 Reset Password
               </Button>

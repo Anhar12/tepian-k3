@@ -43,6 +43,13 @@
       "when": 1767005596980,
       "tag": "0005_square_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1767008800583,
+      "tag": "0006_cute_luminals",
+      "breakpoints": true
     }
   ]
 }
