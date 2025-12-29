@@ -360,7 +360,7 @@ function HomeComponent() {
 
       {/* Stakeholder */}
       <section
-        className="relative flex h-[75vh] flex-col bg-primary px-10 py-16"
+        className="relative flex h-[50vh] flex-col bg-primary px-10 py-16"
         id="stakeholder"
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">
