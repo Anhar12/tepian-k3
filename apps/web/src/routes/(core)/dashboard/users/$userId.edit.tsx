@@ -9,6 +9,14 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Field,
   FieldError,
   FieldGroup,
@@ -31,23 +39,37 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { format } from "date-fns";
-import { CalendarIcon, Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import {
+  CalendarIcon,
+  Check,
+  ChevronsUpDown,
+  Eye,
+  EyeOff,
+  LoaderCircle,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/dashboard/users/$userId/edit")({
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "users.update" }),
+    await requirePermission(context, {
+      permission: ["users.update", "roles.read"],
+    }),
   params: z.object({
     userId: z.uuidv7(),
   }),
-  loader: ({ params, context }) =>
+  loader: ({ params, context }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.user.getUserDetails.queryOptions({
+      context.trpc.user.getUserDetailWithRolesAndPermissions.queryOptions({
         userId: params.userId,
       }),
-    ),
+    );
+
+    context.queryClient.ensureQueryData(
+      context.trpc.role.getAllRoles.queryOptions(),
+    );
+  },
   component: RouteComponent,
 });
 
@@ -55,11 +77,39 @@ function RouteComponent() {
   const { userId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
-  const { data: user } = useSuspenseQuery(
-    trpc.user.getUserDetails.queryOptions({ userId }),
+  const { data: roles } = useSuspenseQuery(
+    trpc.role.getAllRoles.queryOptions(),
   );
 
+  const { data: user } = useSuspenseQuery(
+    trpc.user.getUserDetailWithRolesAndPermissions.queryOptions({ userId }),
+  );
+
+  const [open, setOpen] = useState(false);
   const [type, setType] = useState<"text" | "password">("password");
+
+  // Store original user roles as a Set for O(1) lookups
+  const originalUserRoles = new Set(user.roles.map((role) => role.id) ?? []);
+
+  // Track current selected roles
+  const [selectedRoles, setSelectedRoles] = useState<Set<string>>(
+    () => new Set(user.roles.map((role) => role.id) ?? []),
+  );
+
+  // Derive added/removed roles when needed (e.g., for save button or dirty check)
+  const { addedRoles, removedRoles, hasChanges } = useMemo(() => {
+    const added = [...selectedRoles].filter(
+      (role) => !originalUserRoles.has(role),
+    );
+    const removed = [...originalUserRoles].filter(
+      (role) => !selectedRoles.has(role),
+    );
+    return {
+      addedRoles: added,
+      removedRoles: removed,
+      hasChanges: added.length > 0 || removed.length > 0,
+    };
+  }, [selectedRoles, originalUserRoles]);
 
   const form = useForm<z.infer<typeof userSchema.adminUpdateUserSchema>>({
     resolver: zodResolver(userSchema.adminUpdateUserSchema),
@@ -74,6 +124,8 @@ function RouteComponent() {
       emailVerifiedAt: new Date(
         user.emailVerified ? user.emailVerifiedAt! : Date.now(),
       ),
+      deletedRoleIds: [],
+      newRoleIds: [],
     },
   });
 
@@ -95,7 +147,11 @@ function RouteComponent() {
   function handleSubmit(
     values: z.infer<typeof userSchema.adminUpdateUserSchema>,
   ) {
-    updateUserMutation.mutate(values);
+    updateUserMutation.mutate({
+      ...values,
+      newRoleIds: addedRoles,
+      deletedRoleIds: removedRoles,
+    });
   }
 
   return (
@@ -113,6 +169,78 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
+              <div className="space-y-1">
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className={cn(
+                        "w-full justify-between",
+                        !selectedRoles.size && "text-muted-foreground",
+                      )}
+                    >
+                      {selectedRoles.size
+                        ? [...selectedRoles]
+                            .map((roleId) => {
+                              const role = roles.find((r) => r.id === roleId);
+                              return role ? role.name : "Unknown Role";
+                            })
+                            .join(", ")
+                        : "Pilih Role..."}
+                      <ChevronsUpDown className="opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="popover-content-width-full p-0">
+                    <Command>
+                      <CommandInput
+                        placeholder="Cari Role..."
+                        className="h-9"
+                      />
+                      <CommandList>
+                        <CommandEmpty>
+                          Tidak ada role yang ditemukan.
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {roles.map((role) => {
+                            const isSelected = selectedRoles.has(role.id);
+                            return (
+                              <CommandItem
+                                value={role.name}
+                                key={role.id}
+                                onSelect={() => {
+                                  const currentValue = [...selectedRoles];
+                                  if (isSelected) {
+                                    currentValue.splice(
+                                      currentValue.indexOf(role.id),
+                                      1,
+                                    );
+                                    setSelectedRoles(new Set(currentValue));
+                                  } else {
+                                    setSelectedRoles(
+                                      new Set([...currentValue, role.id]),
+                                    );
+                                  }
+                                }}
+                              >
+                                {role.name}
+                                <Check
+                                  className={cn(
+                                    "ml-auto",
+                                    isSelected ? "opacity-100" : "opacity-0",
+                                  )}
+                                />
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               <Controller
                 control={form.control}
                 name="name"

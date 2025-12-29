@@ -43,7 +43,7 @@ import {
   ChevronsUpDown,
   LoaderCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
 import { requirePermission } from "@/utils/require-permission";
@@ -99,9 +99,9 @@ function RouteComponent() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Perbarui User</CardTitle>
+          <CardTitle>Buat User</CardTitle>
           <CardDescription>
-            Perbarui informasi user di bawah ini
+            Isi informasi user di bawah ini untuk membuat user baru.
           </CardDescription>
         </CardHeader>
         <CardContent>
