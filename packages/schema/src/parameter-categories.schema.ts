@@ -30,12 +30,14 @@ const getAllParameterCategoriesSchema = z.object({
 
 const createParameterCategorySchema = createInsertSchema(parameterCategories, {
   name: z.string().min(1).max(256),
+  clusterId: z.uuidv7(),
   description: z.optional(z.string().min(1).max(1000)),
 });
 
 const updateParameterCategorySchema = createUpdateSchema(parameterCategories, {
   id: z.uuidv7(),
   name: z.string().min(1).max(256),
+  clusterId: z.uuidv7(),
   description: z.optional(z.string().min(1).max(1000)),
 });
 

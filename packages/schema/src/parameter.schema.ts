@@ -30,7 +30,6 @@ const getAllParametersSchema = z.object({
 
 const createParameterSchema = createInsertSchema(parameters, {
   name: z.string().min(1).max(256),
-  clusterId: z.uuidv7(),
   parameterCategoryId: z.uuidv7(),
   price: z.number().min(0),
   reference: z.string().min(1).max(512),
@@ -39,7 +38,6 @@ const createParameterSchema = createInsertSchema(parameters, {
 const updateParameterSchema = createUpdateSchema(parameters, {
   id: z.uuidv7(),
   name: z.string().min(1).max(256),
-  clusterId: z.uuidv7(),
   parameterCategoryId: z.uuidv7(),
   price: z.number().min(0),
   reference: z.string().min(1).max(512),

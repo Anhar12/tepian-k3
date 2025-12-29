@@ -35,9 +35,6 @@ export default function getPaginatedParametersColumns({
 }: PaginatedParametersColumnsProps): ColumnDef<PaginatedParameters>[] {
   return [
     createNumberColumn<PaginatedParameters>(currentPage, perPage),
-    createTextColumn<PaginatedParameters>("cluster.name", "Cluster", {
-      width: "w-64",
-    }),
     createTextColumn<PaginatedParameters>("category.name", "Kategori", {
       width: "w-64",
     }),

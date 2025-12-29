@@ -12,18 +12,13 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import {
-  clusters,
-  parameterCategories,
-  parameters,
-} from "@tepian-k3/db/schema";
+import { parameterCategories, parameters } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { Effect } from "effect";
 import { logger } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
-import clustersQueries from "./clusters.queries";
 import parameterCategoriesQueries from "./parameter-categories.queries";
 
 const parameterQueries = {
@@ -124,10 +119,6 @@ const parameterQueries = {
             const data = await tx
               .select({
                 ...getTableColumns(parameters),
-                cluster: {
-                  id: clusters.id,
-                  name: clusters.name,
-                },
                 category: {
                   id: parameterCategories.id,
                   name: parameterCategories.name,
@@ -137,7 +128,6 @@ const parameterQueries = {
               .limit(input.perPage)
               .offset(offset)
               .where(where)
-              .innerJoin(clusters, eq(parameters.clusterId, clusters.id))
               .innerJoin(
                 parameterCategories,
                 eq(parameters.parameterCategoryId, parameterCategories.id)
@@ -179,17 +169,6 @@ const parameterQueries = {
 
   createParameter(data: z.infer<typeof parameterSchema.createParameterSchema>) {
     return Effect.gen(function* () {
-      const isClusterExist = yield* clustersQueries.getClusterById(
-        data.clusterId
-      );
-
-      if (!isClusterExist) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cluster tidak ditemukan.",
-        });
-      }
-
       const isCategoryExist =
         yield* parameterCategoriesQueries.getParameterCategoryById(
           data.parameterCategoryId
@@ -237,17 +216,6 @@ const parameterQueries = {
         });
       }
 
-      const isClusterExist = yield* clustersQueries.getClusterById(
-        data.clusterId
-      );
-
-      if (!isClusterExist) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cluster tidak ditemukan.",
-        });
-      }
-
       const isCategoryExist =
         yield* parameterCategoriesQueries.getParameterCategoryById(
           data.parameterCategoryId
@@ -266,7 +234,6 @@ const parameterQueries = {
             .update(parameters)
             .set({
               name: data.name ?? existingParameter.name,
-              clusterId: data.clusterId ?? existingParameter.clusterId,
               parameterCategoryId:
                 data.parameterCategoryId ??
                 existingParameter.parameterCategoryId,
