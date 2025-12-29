@@ -7,22 +7,37 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
-import { LoaderCircle } from "lucide-react";
+import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -33,11 +48,21 @@ export const Route = createFileRoute(
     await requirePermission(context, {
       permission: "parameter-categories.create",
     }),
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(
+      context.trpc.cluster.getAllClusters.queryOptions(),
+    ),
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
+
+  const { data: clusters } = useSuspenseQuery(
+    trpc.cluster.getAllClusters.queryOptions(),
+  );
+
+  const [clusterOpen, setClusterOpen] = useState(false);
 
   const form = useForm<
     z.infer<typeof parameterCategoriesSchema.createParameterCategorySchema>
@@ -46,6 +71,7 @@ function RouteComponent() {
       parameterCategoriesSchema.createParameterCategorySchema,
     ),
     defaultValues: {
+      clusterId: "",
       name: "",
       description: "",
     },
@@ -87,7 +113,7 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
-              {/* <Controller
+              <Controller
                 control={form.control}
                 name="clusterId"
                 render={({ field, fieldState }) => (
@@ -98,12 +124,12 @@ function RouteComponent() {
                     <FieldLabel className="ml-1 text-sm font-bold">
                       Cluster
                     </FieldLabel>
-                    <Popover open={open} onOpenChange={setOpen}>
+                    <Popover open={clusterOpen} onOpenChange={setClusterOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           role="combobox"
-                          aria-expanded={open}
+                          aria-expanded={clusterOpen}
                           aria-invalid={fieldState.invalid}
                           className={cn(
                             "w-full justify-between",
@@ -133,7 +159,7 @@ function RouteComponent() {
                                   key={cluster.id}
                                   onSelect={() => {
                                     field.onChange(cluster.id);
-                                    setOpen(false);
+                                    setClusterOpen(false);
                                   }}
                                 >
                                   {cluster.name}
@@ -157,7 +183,7 @@ function RouteComponent() {
                     )}
                   </Field>
                 )}
-              /> */}
+              />
 
               <Controller
                 control={form.control}

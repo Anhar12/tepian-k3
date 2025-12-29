@@ -58,9 +58,6 @@ export const Route = createFileRoute(
       }),
     );
     context.queryClient.ensureQueryData(
-      context.trpc.cluster.getAllClusters.queryOptions(),
-    );
-    context.queryClient.ensureQueryData(
       context.trpc.parameterCategories.getAllParameterCategories.queryOptions(),
     );
   },
@@ -77,22 +74,16 @@ function RouteComponent() {
     }),
   );
 
-  const { data: clusters } = useSuspenseQuery(
-    trpc.cluster.getAllClusters.queryOptions(),
-  );
-
   const { data: parameterCategories } = useSuspenseQuery(
     trpc.parameterCategories.getAllParameterCategories.queryOptions(),
   );
 
-  const [clusterOpen, setClusterOpen] = useState(false);
   const [parameterCategoryOpen, setParameterCategoryOpen] = useState(false);
 
   const form = useForm<z.infer<typeof parameterSchema.updateParameterSchema>>({
     resolver: zodResolver(parameterSchema.updateParameterSchema),
     defaultValues: {
       id: parameter.id,
-      clusterId: parameter.clusterId,
       parameterCategoryId: parameter.parameterCategoryId,
       name: parameter.name,
       price: parameter.price,
@@ -133,78 +124,6 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
-              <Controller
-                control={form.control}
-                name="clusterId"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="space-y-1"
-                  >
-                    <FieldLabel className="ml-1 text-sm font-bold">
-                      Cluster
-                    </FieldLabel>
-                    <Popover open={clusterOpen} onOpenChange={setClusterOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={clusterOpen}
-                          aria-invalid={fieldState.invalid}
-                          className={cn(
-                            "w-full justify-between",
-                            !field.value && "text-muted-foreground",
-                          )}
-                        >
-                          {field.value
-                            ? clusters.find((c) => c.id === field.value)?.name
-                            : "Pilih cluster..."}
-                          <ChevronsUpDown className="opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="popover-content-width-full p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="Cari cluster..."
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>
-                              Tidak ada cluster yang ditemukan.
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {clusters.map((cluster) => (
-                                <CommandItem
-                                  value={cluster.id}
-                                  key={cluster.id}
-                                  onSelect={() => {
-                                    field.onChange(cluster.id);
-                                    setClusterOpen(false);
-                                  }}
-                                >
-                                  {cluster.name}
-                                  <Check
-                                    className={cn(
-                                      "ml-auto",
-                                      field.value === cluster.id
-                                        ? "opacity-100"
-                                        : "opacity-0",
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
               <Controller
                 control={form.control}
                 name="parameterCategoryId"

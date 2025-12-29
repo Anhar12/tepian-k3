@@ -13,6 +13,7 @@ import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as coreTestRouteImport } from './routes/(core)/test'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
@@ -56,6 +57,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const coreTestRoute = coreTestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => coreRouteRoute,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
   id: '/settings',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/test': typeof coreTestRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/test': typeof coreTestRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
@@ -268,6 +276,7 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/(core)/test': typeof coreTestRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
   '/(core)/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/test'
     | '/dashboard'
     | '/dashboard/clusters/create'
     | '/dashboard/parameter-categories/create'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/test'
     | '/dashboard'
     | '/dashboard/clusters/create'
     | '/dashboard/parameter-categories/create'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/(core)/test'
     | '/(core)/dashboard/'
     | '/(core)/dashboard/clusters/create'
     | '/(core)/dashboard/parameter-categories/create'
@@ -417,6 +429,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(core)/test': {
+      id: '/(core)/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof coreTestRouteImport
+      parentRoute: typeof coreRouteRoute
     }
     '/(core)/settings': {
       id: '/(core)/settings'
@@ -615,6 +634,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 interface coreRouteRouteChildren {
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
+  coreTestRoute: typeof coreTestRoute
   coreDashboardIndexRoute: typeof coreDashboardIndexRoute
   coreDashboardClustersCreateRoute: typeof coreDashboardClustersCreateRoute
   coreDashboardParameterCategoriesCreateRoute: typeof coreDashboardParameterCategoriesCreateRoute
@@ -640,6 +660,7 @@ interface coreRouteRouteChildren {
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
+  coreTestRoute: coreTestRoute,
   coreDashboardIndexRoute: coreDashboardIndexRoute,
   coreDashboardClustersCreateRoute: coreDashboardClustersCreateRoute,
   coreDashboardParameterCategoriesCreateRoute:
