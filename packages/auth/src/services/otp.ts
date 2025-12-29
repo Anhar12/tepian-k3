@@ -7,6 +7,7 @@ import usersQueries from "@tepian-k3/queries/users.queries";
 import { encrypt } from "..";
 import logger from "@tepian-k3/services/logger";
 import { Data, Effect, Option } from "effect";
+import permissionQueries from "@tepian-k3/queries/permission.queries";
 
 class OTPError extends Data.TaggedError("OTPError")<{
   status: boolean;
@@ -110,13 +111,26 @@ export class OTPService {
         yield* otpQueries.markOTPAsVerified(otp.id);
         yield* usersQueries.markUserEmailAsVerified(otp.userId);
 
-        const user = yield* usersQueries.getUserById(otp.userId);
+        const user = yield* permissionQueries.getUserWithPermissions(
+          otp.userId
+        );
+
+        if (!user) {
+          return yield* Effect.fail(
+            new OTPError({
+              status: false,
+              message: "Pengguna tidak ditemukan.",
+            })
+          );
+        }
 
         const token = yield* Effect.tryPromise({
           try: () =>
             encrypt({
               id: user.id,
               email: user.email,
+              permissions: user.permissions,
+              roles: user.roles.map((role) => role.name),
               createdAt: user.createdAt,
               updatedAt: user.updatedAt,
               exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
