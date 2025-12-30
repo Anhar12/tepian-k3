@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {},
   "exports": {
-    "./*": "./src/*.ts"
+    "./*": "./src/*.ts",
+    "./indonesian-countries": "./src/indonesiaon-countries/index.ts"
   },
   "dependencies": {
     "@tepian-k3/db": "workspace:*",
