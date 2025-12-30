@@ -11,94 +11,122 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { regencies } from "@tepian-k3/db/schema";
+import { userCompanyTestingLocation } from "@tepian-k3/db/schema";
 import { z } from "zod";
-import regencySchema from "@tepian-k3/schema/regency.schema";
+import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
 import { Effect } from "effect";
 import { logger } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
-const regencyQueries = {
-  getAllRegencies() {
+const userCompanyTestingLocationQueries = {
+  getAllUserCompanyTestingLocations() {
     return Effect.tryPromise({
       try: () =>
-        db.query.regencies.findMany({
-          where: isNull(regencies.deletedAt),
+        db.query.userCompanyTestingLocation.findMany({
+          where: isNull(userCompanyTestingLocation.deletedAt),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getAllRegencies", { error });
+        logger.error(
+          "userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil data Kabupaten/Kota",
+          message: "Gagal mengambil data Lokasi Pengujian Perusahaan",
         });
       },
     });
   },
 
-  getRegencyById(id: string) {
+  getUserCompanyTestingLocationById(id: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.regencies.findFirst({
-          where: and(eq(regencies.id, id), isNull(regencies.deletedAt)),
+        db.query.userCompanyTestingLocation.findFirst({
+          where: and(
+            eq(userCompanyTestingLocation.id, id),
+            isNull(userCompanyTestingLocation.deletedAt)
+          ),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getRegencyById", { error });
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil data Kabupaten/Kota berdasarkan ID",
-        });
-      },
-    }).pipe(
-      Effect.flatMap((regency) =>
-        regency ? Effect.succeed(regency) : Effect.succeed(null)
-      )
-    );
-  },
-
-  getDeletedRegencyById(id: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db.query.regencies.findFirst({
-          where: and((eq(regencies.id, id), isNotNull(regencies.deletedAt))),
-        }),
-      catch: (error) => {
-        logger.error("regencyQueries.getDeletedRegencyById", { error });
+        logger.error(
+          "userCompanyTestingLocationQueries.getUserCompanyTestingLocationById",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
-            "Gagal mengambil data Kabupaten/Kota yang sudah dihapus berdasarkan ID",
+            "Gagal mengambil data Lokasi Pengujian Perusahaan berdasarkan ID",
         });
       },
     }).pipe(
-      Effect.flatMap((regency) =>
-        regency ? Effect.succeed(regency) : Effect.succeed(null)
+      Effect.flatMap((userCompanyTestingLocation) =>
+        userCompanyTestingLocation
+          ? Effect.succeed(userCompanyTestingLocation)
+          : Effect.succeed(null)
       )
     );
   },
 
-  getRegencyByName(name: string) {
+  getDeletedUserCompanyTestingLocationById(id: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.regencies.findFirst({
-          where: eq(regencies.name, name),
+        db.query.userCompanyTestingLocation.findFirst({
+          where: and(
+            (eq(userCompanyTestingLocation.id, id),
+            isNotNull(userCompanyTestingLocation.deletedAt))
+          ),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getRegencyByName", { error });
+        logger.error(
+          "userCompanyTestingLocationQueries.getDeletedUserCompanyTestingLocationById",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil data Kabupaten/Kota berdasarkan nama",
+          message:
+            "Gagal mengambil data Lokasi Pengujian Perusahaan yang sudah dihapus berdasarkan ID",
         });
       },
     }).pipe(
-      Effect.flatMap((regency) =>
-        regency ? Effect.succeed(regency) : Effect.succeed(null)
+      Effect.flatMap((userCompanyTestingLocation) =>
+        userCompanyTestingLocation
+          ? Effect.succeed(userCompanyTestingLocation)
+          : Effect.succeed(null)
       )
     );
   },
 
-  getOffsetPaginationRegencies(
-    input: z.infer<typeof regencySchema.getAllRegenciesSchema>
+  getUserCompanyTestingLocationByName(name: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.userCompanyTestingLocation.findFirst({
+          where: eq(userCompanyTestingLocation.name, name),
+        }),
+      catch: (error) => {
+        logger.error(
+          "userCompanyTestingLocationQueries.getUserCompanyTestingLocationByName",
+          { error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Gagal mengambil data Lokasi Pengujian Perusahaan berdasarkan nama",
+        });
+      },
+    }).pipe(
+      Effect.flatMap((userCompanyTestingLocation) =>
+        userCompanyTestingLocation
+          ? Effect.succeed(userCompanyTestingLocation)
+          : Effect.succeed(null)
+      )
+    );
+  },
+
+  getOffsetPaginationUserCompanyTestingLocations(
+    input: z.infer<
+      typeof userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema
+    >
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -106,17 +134,21 @@ const regencyQueries = {
 
       const where = advancedTable
         ? filterColumns({
-            table: regencies,
-            filters: input.filters as ExtendedColumnFilter<typeof regencies>[],
+            table: userCompanyTestingLocation,
+            filters: input.filters as ExtendedColumnFilter<
+              typeof userCompanyTestingLocation
+            >[],
             joinOperator: "and",
           })
         : and(
-            input.name ? ilike(regencies.name, `%${input.name}%`) : undefined,
+            input.name
+              ? ilike(userCompanyTestingLocation.name, `%${input.name}%`)
+              : undefined,
             input.createdAt.length > 0
               ? and(
                   input.createdAt[0]
                     ? gte(
-                        regencies.createdAt,
+                        userCompanyTestingLocation.createdAt,
                         (() => {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
@@ -126,7 +158,7 @@ const regencyQueries = {
                     : undefined,
                   input.createdAt[1]
                     ? gte(
-                        regencies.createdAt,
+                        userCompanyTestingLocation.createdAt,
                         (() => {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
@@ -137,23 +169,25 @@ const regencyQueries = {
                 )
               : undefined,
             input.showDeleted
-              ? isNotNull(regencies.deletedAt)
-              : isNull(regencies.deletedAt)
+              ? isNotNull(userCompanyTestingLocation.deletedAt)
+              : isNull(userCompanyTestingLocation.deletedAt)
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(regencies[item.id]) : asc(regencies[item.id])
+              item.desc
+                ? desc(userCompanyTestingLocation[item.id])
+                : asc(userCompanyTestingLocation[item.id])
             )
-          : [desc(regencies.createdAt)];
+          : [desc(userCompanyTestingLocation.createdAt)];
 
       const { data, total } = yield* Effect.tryPromise({
         try: () =>
           db.transaction(async (tx) => {
             const data = await tx
               .select()
-              .from(regencies)
+              .from(userCompanyTestingLocation)
               .limit(input.perPage)
               .offset(offset)
               .where(where)
@@ -163,7 +197,7 @@ const regencyQueries = {
               .select({
                 count: count(),
               })
-              .from(regencies)
+              .from(userCompanyTestingLocation)
               .where(where)
               .execute()
               .then((res) => res[0]?.count ?? 0);
@@ -171,7 +205,7 @@ const regencyQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated regencies", {
+          logger.error("Error fetching paginated userCompanyTestingLocation", {
             error,
             input,
           });
@@ -192,9 +226,16 @@ const regencyQueries = {
     });
   },
 
-  createRegency(data: z.infer<typeof regencySchema.createRegencySchema>) {
+  createUserCompanyTestingLocation(
+    data: z.infer<
+      typeof userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
+    >
+  ) {
     return Effect.gen(this, function* () {
-      const isExisting = yield* regencyQueries.getRegencyByName(data.name);
+      const isExisting =
+        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationByName(
+          data.name
+        );
 
       if (isExisting) {
         return yield* Effect.fail(
@@ -206,17 +247,14 @@ const regencyQueries = {
         );
       }
 
-      const [createdRegency] = yield* Effect.tryPromise({
+      const [createdUserCompanyTestingLocation] = yield* Effect.tryPromise({
         try: () =>
-          db
-            .insert(regencies)
-            .values({
-              name: data.name,
-              provinceId: data.provinceId,
-            })
-            .returning(),
+          db.insert(userCompanyTestingLocation).values(data).returning(),
         catch: (error) => {
-          logger.error("regencyQueries.createRegency", { error, data });
+          logger.error(
+            "userCompanyTestingLocationQueries.createUserCompanyTestingLocation",
+            { error, data }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data Kabupaten/Kota.",
@@ -224,7 +262,7 @@ const regencyQueries = {
         },
       });
 
-      if (!createdRegency) {
+      if (!createdUserCompanyTestingLocation) {
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -233,15 +271,22 @@ const regencyQueries = {
         );
       }
 
-      return createdRegency;
+      return createdUserCompanyTestingLocation;
     });
   },
 
-  updateRegency(data: z.infer<typeof regencySchema.updateRegencySchema>) {
+  updateUserCompanyTestingLocation(
+    data: z.infer<
+      typeof userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
+    >
+  ) {
     return Effect.gen(this, function* () {
-      const existingRegency = yield* regencyQueries.getRegencyById(data.id);
+      const existingUserCompanyTestingLocation =
+        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
+          data.id
+        );
 
-      if (!existingRegency) {
+      if (!existingUserCompanyTestingLocation) {
         return yield* Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
@@ -250,18 +295,18 @@ const regencyQueries = {
         );
       }
 
-      const [updatedRegency] = yield* Effect.tryPromise({
+      const [updatedUserCompanyTestingLocation] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(regencies)
-            .set({
-              name: data.name,
-              provinceId: data.provinceId,
-            })
-            .where(eq(regencies.id, data.id))
+            .update(userCompanyTestingLocation)
+            .set(data)
+            .where(eq(userCompanyTestingLocation.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("regencyQueries.updateRegency", { error, data });
+          logger.error(
+            "userCompanyTestingLocationQueries.updateUserCompanyTestingLocation",
+            { error, data }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data Kabupaten/Kota.",
@@ -269,7 +314,7 @@ const regencyQueries = {
         },
       });
 
-      if (!updatedRegency) {
+      if (!updatedUserCompanyTestingLocation) {
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -278,15 +323,18 @@ const regencyQueries = {
         );
       }
 
-      return updatedRegency;
+      return updatedUserCompanyTestingLocation;
     });
   },
 
-  deleteRegency(id: string) {
+  deleteUserCompanyTestingLocation(id: string) {
     return Effect.gen(this, function* () {
-      const existingRegency = yield* regencyQueries.getRegencyById(id);
+      const existingUserCompanyTestingLocation =
+        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
+          id
+        );
 
-      if (!existingRegency) {
+      if (!existingUserCompanyTestingLocation) {
         return yield* Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
@@ -295,17 +343,20 @@ const regencyQueries = {
         );
       }
 
-      const [deletedRegency] = yield* Effect.tryPromise({
+      const [deletedUserCompanyTestingLocation] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(regencies)
+            .update(userCompanyTestingLocation)
             .set({
               deletedAt: new Date().toISOString(),
             })
-            .where(eq(regencies.id, id))
+            .where(eq(userCompanyTestingLocation.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("regencyQueries.deleteRegency", { error, id });
+          logger.error(
+            "userCompanyTestingLocationQueries.deleteUserCompanyTestingLocation",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data Kabupaten/Kota.",
@@ -313,7 +364,7 @@ const regencyQueries = {
         },
       });
 
-      if (!deletedRegency) {
+      if (!deletedUserCompanyTestingLocation) {
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -322,15 +373,18 @@ const regencyQueries = {
         );
       }
 
-      return deletedRegency;
+      return deletedUserCompanyTestingLocation;
     });
   },
 
-  restoreRegency(id: string) {
+  restoreUserCompanyTestingLocation(id: string) {
     return Effect.gen(this, function* () {
-      const deletedRegency = yield* regencyQueries.getDeletedRegencyById(id);
+      const deletedUserCompanyTestingLocation =
+        yield* userCompanyTestingLocationQueries.getDeletedUserCompanyTestingLocationById(
+          id
+        );
 
-      if (!deletedRegency) {
+      if (!deletedUserCompanyTestingLocation) {
         return yield* Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
@@ -339,18 +393,21 @@ const regencyQueries = {
         );
       }
 
-      const [restoredRegency] = yield* Effect.tryPromise({
+      const [restoredUserCompanyTestingLocation] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(regencies)
+            .update(userCompanyTestingLocation)
             .set({
               deletedAt: null,
             })
-            .where(eq(regencies.id, id))
+            .where(eq(userCompanyTestingLocation.id, id))
             .returning(),
 
         catch: (error) => {
-          logger.error("regencyQueries.restoreRegency", { error, id });
+          logger.error(
+            "userCompanyTestingLocationQueries.restoreUserCompanyTestingLocation",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data Kabupaten/Kota yang dihapus.",
@@ -358,7 +415,7 @@ const regencyQueries = {
         },
       });
 
-      if (!restoredRegency) {
+      if (!restoredUserCompanyTestingLocation) {
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -367,9 +424,9 @@ const regencyQueries = {
         );
       }
 
-      return restoredRegency;
+      return restoredUserCompanyTestingLocation;
     });
   },
 };
 
-export default regencyQueries;
+export default userCompanyTestingLocationQueries;

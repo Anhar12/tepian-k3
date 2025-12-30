@@ -17,11 +17,17 @@ CREATE TABLE "districts" (
 	"old_regency_id" bigserial NOT NULL,
 	"regency_id" uuid NOT NULL,
 	"name" varchar(250) NOT NULL,
-	"alt_name" varchar(250) NOT NULL,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
-	"updated_at" timestamp with time zone,
-	CONSTRAINT "districts_old_id_unique" UNIQUE("old_id")
+	"updated_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "kblis" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"name" varchar(250) NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "otp_codes" (
@@ -83,11 +89,9 @@ CREATE TABLE "provinces" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"old_id" bigserial NOT NULL,
 	"name" varchar(250) NOT NULL,
-	"alt_name" varchar(250) NOT NULL,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
-	"updated_at" timestamp with time zone,
-	CONSTRAINT "provinces_old_id_unique" UNIQUE("old_id")
+	"updated_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "regencies" (
@@ -96,11 +100,9 @@ CREATE TABLE "regencies" (
 	"province_id" uuid NOT NULL,
 	"old_province_id" bigserial NOT NULL,
 	"name" varchar(250) NOT NULL,
-	"alt_name" varchar(250) NOT NULL,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
-	"updated_at" timestamp with time zone,
-	CONSTRAINT "regencies_old_id_unique" UNIQUE("old_id")
+	"updated_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "role_permissions" (
@@ -147,8 +149,33 @@ CREATE TABLE "tools" (
 CREATE TABLE "user_companies" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" uuid NOT NULL,
-	"company_name" varchar(250) NOT NULL,
-	"company_address" text NOT NULL,
+	"name" varchar(250) NOT NULL,
+	"kbli_id" uuid NOT NULL,
+	"address" text NOT NULL,
+	"maleWorkers" integer DEFAULT 0 NOT NULL,
+	"femaleWorkers" integer DEFAULT 0 NOT NULL,
+	"healthFacilityAvailable" boolean DEFAULT false NOT NULL,
+	"provinceId" uuid NOT NULL,
+	"districtId" uuid NOT NULL,
+	"regencyId" uuid NOT NULL,
+	"villageId" uuid NOT NULL,
+	"responsible_testing_person" varchar(250) NOT NULL,
+	"responsible_testing_person_phone" varchar(50) NOT NULL,
+	"responsible_testing_person_email" varchar(250) NOT NULL,
+	"email" varchar(250) NOT NULL,
+	"wlkp_status" boolean DEFAULT false NOT NULL,
+	"wlkp" text NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "user_company_testing_locations" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"user_company_id" uuid NOT NULL,
+	"name" text NOT NULL,
+	"regency_id" uuid NOT NULL,
+	"district_id" uuid NOT NULL,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
 	"updated_at" timestamp with time zone
@@ -194,8 +221,7 @@ CREATE TABLE "villages" (
 	"name" varchar(250) NOT NULL,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
-	"updated_at" timestamp with time zone,
-	CONSTRAINT "villages_old_id_unique" UNIQUE("old_id")
+	"updated_at" timestamp with time zone
 );
 --> statement-breakpoint
 ALTER TABLE "districts" ADD CONSTRAINT "districts_regency_id_regencies_id_fk" FOREIGN KEY ("regency_id") REFERENCES "public"."regencies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -207,6 +233,14 @@ ALTER TABLE "regencies" ADD CONSTRAINT "regencies_province_id_provinces_id_fk" F
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_kbli_id_kblis_id_fk" FOREIGN KEY ("kbli_id") REFERENCES "public"."kblis"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_provinceId_provinces_id_fk" FOREIGN KEY ("provinceId") REFERENCES "public"."provinces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_districtId_districts_id_fk" FOREIGN KEY ("districtId") REFERENCES "public"."districts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_regencyId_regencies_id_fk" FOREIGN KEY ("regencyId") REFERENCES "public"."regencies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_villageId_villages_id_fk" FOREIGN KEY ("villageId") REFERENCES "public"."villages"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_company_testing_locations" ADD CONSTRAINT "user_company_testing_locations_user_company_id_user_companies_id_fk" FOREIGN KEY ("user_company_id") REFERENCES "public"."user_companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_company_testing_locations" ADD CONSTRAINT "user_company_testing_locations_regency_id_regencies_id_fk" FOREIGN KEY ("regency_id") REFERENCES "public"."regencies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_company_testing_locations" ADD CONSTRAINT "user_company_testing_locations_district_id_districts_id_fk" FOREIGN KEY ("district_id") REFERENCES "public"."districts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_permissions" ADD CONSTRAINT "user_permissions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_permissions" ADD CONSTRAINT "user_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -218,6 +252,7 @@ CREATE INDEX "district_name_idx" ON "districts" USING btree ("name");--> stateme
 CREATE INDEX "district_regency_id_idx" ON "districts" USING btree ("regency_id");--> statement-breakpoint
 CREATE INDEX "district_old_id_idx" ON "districts" USING btree ("old_id");--> statement-breakpoint
 CREATE INDEX "district_old_regency_id_idx" ON "districts" USING btree ("old_regency_id");--> statement-breakpoint
+CREATE INDEX "kbli_id_idx" ON "kblis" USING btree ("id");--> statement-breakpoint
 CREATE INDEX "otp_code_user_id_idx" ON "otp_codes" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "otp_code_email_idx" ON "otp_codes" USING btree ("email");--> statement-breakpoint
 CREATE INDEX "parameter_category_id_idx" ON "parameter_categories" USING btree ("id");--> statement-breakpoint
@@ -238,6 +273,8 @@ CREATE INDEX "role_permission_permission_id_idx" ON "role_permissions" USING btr
 CREATE INDEX "role_name_idx" ON "roles" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "tool_id_idx" ON "tools" USING btree ("id");--> statement-breakpoint
 CREATE INDEX "tool_tool_code_idx" ON "tools" USING btree ("tool_code");--> statement-breakpoint
+CREATE INDEX "user_company_testing_location_id_idx" ON "user_company_testing_locations" USING btree ("id");--> statement-breakpoint
+CREATE INDEX "user_company_testing_location_user_company_id_idx" ON "user_company_testing_locations" USING btree ("user_company_id");--> statement-breakpoint
 CREATE INDEX "user_permission_user_id_idx" ON "user_permissions" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "user_permission_permission_id_idx" ON "user_permissions" USING btree ("permission_id");--> statement-breakpoint
 CREATE INDEX "user_role_user_id_idx" ON "user_roles" USING btree ("user_id");--> statement-breakpoint

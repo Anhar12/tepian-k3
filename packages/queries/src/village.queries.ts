@@ -40,7 +40,7 @@ const villageQueries = {
     return Effect.tryPromise({
       try: () =>
         db.query.villages.findFirst({
-          where: and((eq(villages.id, id), isNull(villages.deletedAt))),
+          where: and(eq(villages.id, id), isNull(villages.deletedAt)),
         }),
       catch: (error) => {
         logger.error("villageQueries.getVillageById", { error });

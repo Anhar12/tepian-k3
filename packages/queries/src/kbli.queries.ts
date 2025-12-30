@@ -11,93 +11,93 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { districts } from "@tepian-k3/db/schema";
+import { kblis } from "@tepian-k3/db/schema";
 import { z } from "zod";
-import districSchema from "@tepian-k3/schema/district.schema";
+import districSchema from "@tepian-k3/schema/kbli.schema";
 import { Effect } from "effect";
 import { logger } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
-const districtQueries = {
-  getAllDistricts() {
+const kbliQueries = {
+  getAllKblis() {
     return Effect.tryPromise({
       try: () =>
-        db.query.districts.findMany({
-          where: isNull(districts.deletedAt),
+        db.query.kblis.findMany({
+          where: isNull(kblis.deletedAt),
         }),
       catch: (error) => {
-        logger.error("Error fetching districts", { error });
+        logger.error("Error fetching kblis", { error });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch districts",
+          message: "Failed to fetch kblis",
         });
       },
     });
   },
 
-  getDistrictById(id: string) {
+  getKbliById(id: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.districts.findFirst({
-          where: and(eq(districts.id, id), isNull(districts.deletedAt)),
+        db.query.kblis.findFirst({
+          where: and(eq(kblis.id, id), isNull(kblis.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching district by ID", { error });
+        logger.error("Error fetching kbli by ID", { error });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch district by ID",
+          message: "Failed to fetch kbli by ID",
         });
       },
     }).pipe(
-      Effect.flatMap((district) =>
-        district ? Effect.succeed(district) : Effect.succeed(null)
+      Effect.flatMap((kbli) =>
+        kbli ? Effect.succeed(kbli) : Effect.succeed(null)
       )
     );
   },
 
-  getDeletedDistrictById(id: string) {
+  getDeletedKbliById(id: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.districts.findFirst({
-          where: and((eq(districts.id, id), isNotNull(districts.deletedAt))),
+        db.query.kblis.findFirst({
+          where: and((eq(kblis.id, id), isNotNull(kblis.deletedAt))),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted district by ID", { error });
+        logger.error("Error fetching deleted kbli by ID", { error });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch deleted district by ID",
+          message: "Failed to fetch deleted kbli by ID",
         });
       },
     }).pipe(
-      Effect.flatMap((district) =>
-        district ? Effect.succeed(district) : Effect.succeed(null)
+      Effect.flatMap((kbli) =>
+        kbli ? Effect.succeed(kbli) : Effect.succeed(null)
       )
     );
   },
 
-  getDistrictByName(name: string) {
+  getKbliByName(name: string) {
     return Effect.tryPromise({
       try: () =>
-        db.query.districts.findFirst({
-          where: eq(districts.name, name),
+        db.query.kblis.findFirst({
+          where: eq(kblis.name, name),
         }),
       catch: (error) => {
-        logger.error("Error fetching district by name", { error });
+        logger.error("Error fetching kbli by name", { error });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch district by name",
+          message: "Failed to fetch kbli by name",
         });
       },
     }).pipe(
-      Effect.flatMap((district) =>
-        district ? Effect.succeed(district) : Effect.succeed(null)
+      Effect.flatMap((kbli) =>
+        kbli ? Effect.succeed(kbli) : Effect.succeed(null)
       )
     );
   },
 
-  getOffsetPaginatedDistricts(
-    input: z.infer<typeof districSchema.getAllDistrictsSchema>
+  getOffsetPaginatedKblis(
+    input: z.infer<typeof districSchema.getAllKBLISchema>
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -105,17 +105,17 @@ const districtQueries = {
 
       const where = advancedTable
         ? filterColumns({
-            table: districts,
-            filters: input.filters as ExtendedColumnFilter<typeof districts>[],
+            table: kblis,
+            filters: input.filters as ExtendedColumnFilter<typeof kblis>[],
             joinOperator: "and",
           })
         : and(
-            input.name ? ilike(districts.name, `%${input.name}%`) : undefined,
+            input.name ? ilike(kblis.name, `%${input.name}%`) : undefined,
             input.createdAt.length > 0
               ? and(
                   input.createdAt[0]
                     ? gte(
-                        districts.createdAt,
+                        kblis.createdAt,
                         (() => {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
@@ -125,7 +125,7 @@ const districtQueries = {
                     : undefined,
                   input.createdAt[1]
                     ? gte(
-                        districts.createdAt,
+                        kblis.createdAt,
                         (() => {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
@@ -136,23 +136,23 @@ const districtQueries = {
                 )
               : undefined,
             input.showDeleted
-              ? isNotNull(districts.deletedAt)
-              : isNull(districts.deletedAt)
+              ? isNotNull(kblis.deletedAt)
+              : isNull(kblis.deletedAt)
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(districts[item.id]) : asc(districts[item.id])
+              item.desc ? desc(kblis[item.id]) : asc(kblis[item.id])
             )
-          : [desc(districts.createdAt)];
+          : [desc(kblis.createdAt)];
 
       const { data, total } = yield* Effect.tryPromise({
         try: () =>
           db.transaction(async (tx) => {
             const data = await tx
               .select()
-              .from(districts)
+              .from(kblis)
               .limit(input.perPage)
               .offset(offset)
               .where(where)
@@ -162,7 +162,7 @@ const districtQueries = {
               .select({
                 count: count(),
               })
-              .from(districts)
+              .from(kblis)
               .where(where)
               .execute()
               .then((res) => res[0]?.count ?? 0);
@@ -170,13 +170,13 @@ const districtQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated districts", {
+          logger.error("Error fetching paginated kblis", {
             error,
             input,
           });
           return new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: `Gagal mengambil data district`,
+            message: `Gagal mengambil data kbli`,
             cause: error,
           });
         },
@@ -191,9 +191,9 @@ const districtQueries = {
     });
   },
 
-  createDistrict(data: z.infer<typeof districSchema.createDistrictSchema>) {
+  createKbli(data: z.infer<typeof districSchema.createKBLISchema>) {
     return Effect.gen(this, function* () {
-      const isExisting = yield* districtQueries.getDistrictByName(data.name);
+      const isExisting = yield* kbliQueries.getKbliByName(data.name);
 
       if (isExisting) {
         throw new TRPCError({
@@ -203,19 +203,10 @@ const districtQueries = {
         });
       }
 
-      const [district] = yield* Effect.tryPromise({
-        try: () =>
-          db
-            .insert(districts)
-            .values({
-              name: data.name,
-              regencyId: data.regencyId,
-              oldRegencyId: Number(data.oldRegencyId),
-            })
-            .returning()
-            .execute(),
+      const [kbli] = yield* Effect.tryPromise({
+        try: () => db.insert(kblis).values(data).returning().execute(),
         catch: (error) => {
-          logger.error("Error creating district", { error, data });
+          logger.error("Error creating kbli", { error, data });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data daerah",
@@ -223,45 +214,38 @@ const districtQueries = {
         },
       });
 
-      if (!district) {
+      if (!kbli) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal membuat data daerah",
         });
       }
 
-      return district;
+      return kbli;
     });
   },
 
-  updateDistrict(data: z.infer<typeof districSchema.updateDistrictSchema>) {
+  updateKbli(data: z.infer<typeof districSchema.updateKBLISchema>) {
     return Effect.gen(this, function* () {
-      const existingDistrict = yield* districtQueries.getDistrictById(data.id);
+      const existingKbli = yield* kbliQueries.getKbliById(data.id);
 
-      if (!existingDistrict) {
+      if (!existingKbli) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Daerah tidak ditemukan.",
         });
       }
 
-      const [updatedDistrict] = yield* Effect.tryPromise({
+      const [updatedKbli] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(districts)
-            .set({
-              name: data.name ?? existingDistrict.name,
-              regencyId: data.regencyId ?? existingDistrict.regencyId,
-              oldRegencyId:
-                data.oldRegencyId !== undefined
-                  ? Number(data.oldRegencyId)
-                  : existingDistrict.oldRegencyId,
-            })
-            .where(eq(districts.id, data.id))
+            .update(kblis)
+            .set(data)
+            .where(eq(kblis.id, data.id))
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error updating district", { error, data });
+          logger.error("Error updating kbli", { error, data });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data daerah",
@@ -269,38 +253,38 @@ const districtQueries = {
         },
       });
 
-      if (!updatedDistrict) {
+      if (!updatedKbli) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memperbarui data daerah",
         });
       }
 
-      return updatedDistrict;
+      return updatedKbli;
     });
   },
 
-  deleteDistrict(id: string) {
+  deleteKbli(id: string) {
     return Effect.gen(this, function* () {
-      const existingDistrict = yield* districtQueries.getDistrictById(id);
+      const existingKbli = yield* kbliQueries.getKbliById(id);
 
-      if (!existingDistrict) {
+      if (!existingKbli) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Daerah tidak ditemukan.",
         });
       }
 
-      const [deletedDistrict] = yield* Effect.tryPromise({
+      const [deletedKbli] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(districts)
+            .update(kblis)
             .set({ deletedAt: new Date().toISOString() })
-            .where(eq(districts.id, id))
+            .where(eq(kblis.id, id))
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error deleting district", { error, id });
+          logger.error("Error deleting kbli", { error, id });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data daerah",
@@ -308,38 +292,38 @@ const districtQueries = {
         },
       });
 
-      if (!deletedDistrict) {
+      if (!deletedKbli) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus data daerah",
         });
       }
 
-      return deletedDistrict;
+      return deletedKbli;
     });
   },
 
-  restoreDistrict(id: string) {
+  restoreKbli(id: string) {
     return Effect.gen(this, function* () {
-      const deletedDistrict = yield* districtQueries.getDeletedDistrictById(id);
+      const deletedKbli = yield* kbliQueries.getDeletedKbliById(id);
 
-      if (!deletedDistrict) {
+      if (!deletedKbli) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Daerah yang dihapus tidak ditemukan.",
         });
       }
 
-      const [restoredDistrict] = yield* Effect.tryPromise({
+      const [restoredKbli] = yield* Effect.tryPromise({
         try: () =>
           db
-            .update(districts)
+            .update(kblis)
             .set({ deletedAt: null })
-            .where(eq(districts.id, id))
+            .where(eq(kblis.id, id))
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error restoring district", { error, id });
+          logger.error("Error restoring kbli", { error, id });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data daerah",
@@ -347,16 +331,16 @@ const districtQueries = {
         },
       });
 
-      if (!restoredDistrict) {
+      if (!restoredKbli) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengembalikan data daerah",
         });
       }
 
-      return restoredDistrict;
+      return restoredKbli;
     });
   },
 };
 
-export default districtQueries;
+export default kbliQueries;

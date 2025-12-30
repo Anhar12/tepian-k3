@@ -118,6 +118,19 @@ export const passwordResets = createTable("password_resets", {
     .notNull(),
 });
 
+export const kblis = createTable(
+  "kblis",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    name: varchar("name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [index("kbli_id_idx").using("btree", table.id)]
+);
+
 export const userCompanies = createTable("user_companies", {
   id: uuid("id")
     .primaryKey()
@@ -126,10 +139,70 @@ export const userCompanies = createTable("user_companies", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  companyName: varchar("company_name", { length: 250 }).notNull(),
-  companyAddress: text("company_address").notNull(),
+  name: varchar("name", { length: 250 }).notNull(),
+  kbliId: uuid("kbli_id")
+    .notNull()
+    .references(() => kblis.id, { onDelete: "cascade" }),
+  address: text("address").notNull(),
+  maleWorkers: integer("maleWorkers").notNull().default(0),
+  femaleWorkers: integer("femaleWorkers").notNull().default(0),
+  healthFacilityAvailable: boolean("healthFacilityAvailable")
+    .notNull()
+    .default(false),
+  provinceId: uuid("provinceId")
+    .notNull()
+    .references(() => provinces.id, { onDelete: "cascade" }),
+  districtId: uuid("districtId")
+    .notNull()
+    .references(() => districts.id, { onDelete: "cascade" }),
+  regencyId: uuid("regencyId")
+    .notNull()
+    .references(() => regencies.id, { onDelete: "cascade" }),
+  villageId: uuid("villageId")
+    .notNull()
+    .references(() => villages.id, { onDelete: "cascade" }),
+  responsibleTestingPerson: varchar("responsible_testing_person", {
+    length: 250,
+  }).notNull(),
+  responsibleTestingPersonPhone: varchar("responsible_testing_person_phone", {
+    length: 50,
+  }).notNull(),
+  responsibleTestingPersonEmail: varchar("responsible_testing_person_email", {
+    length: 250,
+  }).notNull(),
+  email: varchar("email", { length: 250 }).notNull(),
+  wlkpStatus: boolean("wlkp_status").notNull().default(false),
+  wlkp: text("wlkp").notNull(),
   ...timestamps,
 });
+
+export const userCompanyTestingLocation = createTable(
+  "user_company_testing_locations",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userCompanyId: uuid("user_company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    regencyId: uuid("regency_id")
+      .notNull()
+      .references(() => regencies.id, { onDelete: "cascade" }),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => districts.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("user_company_testing_location_id_idx").using("btree", table.id),
+    index("user_company_testing_location_user_company_id_idx").using(
+      "btree",
+      table.userCompanyId
+    ),
+  ]
+);
 
 export const userRoles = createTable(
   "user_roles",
