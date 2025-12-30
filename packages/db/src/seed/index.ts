@@ -11,6 +11,10 @@ import { exit } from "process";
 import { eq } from "drizzle-orm";
 import seedClusters from "./clusters";
 import seedParameterCategories from "./parameter-categories";
+import seedProvinces from "./provinces";
+import seedRegencies from "./regencies";
+import seedDistricts from "./districts";
+import seedVillages from "./villages";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -330,6 +334,10 @@ async function seed() {
   // seeding other data can go here...
   await seedClusters();
   await seedParameterCategories();
+  await seedProvinces();
+  await seedRegencies();
+  await seedDistricts();
+  await seedVillages();
 
   console.log("✅ User roles synced");
   console.log("\n🎉 Database seeding completed successfully!");

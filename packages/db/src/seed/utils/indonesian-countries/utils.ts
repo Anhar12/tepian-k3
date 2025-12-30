@@ -8,7 +8,11 @@ async function readJsonFile<T>(
 ): Promise<T> {
   try {
     const currentDir = process.cwd();
-    const fullPath = path.join(currentDir, filePath);
+    const fullPath = path.join(
+      currentDir,
+      "src/seed/utils/indonesian-countries/",
+      filePath
+    );
 
     const text = await readFile(fullPath, "utf-8");
     const data = JSON.parse(text);

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigserial,
   boolean,
   index,
   integer,
@@ -328,5 +329,95 @@ export const parameters = createTable(
       table.parameterCategoryId
     ),
     index("parameter_name_idx").using("btree", table.name),
+  ]
+);
+
+export const provinces = createTable(
+  "provinces",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
+    name: varchar("name", { length: 250 }).notNull(),
+    altName: varchar("alt_name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+
+  (table) => [
+    index("province_name_idx").using("btree", table.name),
+    index("province_old_id_idx").using("btree", table.oldId),
+  ]
+);
+
+export const regencies = createTable(
+  "regencies",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
+    provinceId: uuid("province_id")
+      .notNull()
+      .references(() => provinces.id, { onDelete: "cascade" }),
+    oldProvinceId: bigserial("old_province_id", { mode: "number" }).notNull(),
+    name: varchar("name", { length: 250 }).notNull(),
+    altName: varchar("alt_name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("regency_name_idx").using("btree", table.name),
+    index("regency_province_id_idx").using("btree", table.provinceId),
+    index("regency_old_id_idx").using("btree", table.oldId),
+    index("regency_old_province_id_idx").using("btree", table.oldProvinceId),
+  ]
+);
+
+export const districts = createTable(
+  "districts",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
+    oldRegencyId: bigserial("old_regency_id", { mode: "number" }).notNull(),
+    regencyId: uuid("regency_id")
+      .notNull()
+      .references(() => regencies.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    altName: varchar("alt_name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("district_name_idx").using("btree", table.name),
+    index("district_regency_id_idx").using("btree", table.regencyId),
+    index("district_old_id_idx").using("btree", table.oldId),
+    index("district_old_regency_id_idx").using("btree", table.oldRegencyId),
+  ]
+);
+
+export const villages = createTable(
+  "villages",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
+    oldDistrictId: bigserial("old_district_id", { mode: "number" }).notNull(),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => districts.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("village_name_idx").using("btree", table.name),
+    index("village_district_id_idx").using("btree", table.districtId),
+    index("village_old_id_idx").using("btree", table.oldId),
+    index("village_old_district_id_idx").using("btree", table.oldDistrictId),
   ]
 );
