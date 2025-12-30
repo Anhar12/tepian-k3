@@ -10,7 +10,6 @@ const generateProvinces = async (): Promise<InsertProvince[]> => {
   return provinces.map((province) => ({
     oldId: Number(province.id),
     name: province.name,
-    altName: province.alt_name,
   }));
 };
 

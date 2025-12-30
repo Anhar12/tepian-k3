@@ -37,7 +37,6 @@ const generateRegencies = async (): Promise<InsertRegency[]> => {
       provinceId,
       oldProvinceId,
       name: regency.name,
-      altName: regency.alt_name,
     };
   });
 };

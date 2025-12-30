@@ -339,9 +339,8 @@ export const provinces = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
+    oldId: bigserial("old_id", { mode: "number" }),
     name: varchar("name", { length: 250 }).notNull(),
-    altName: varchar("alt_name", { length: 250 }).notNull(),
     ...timestamps,
   },
 
@@ -358,13 +357,12 @@ export const regencies = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
+    oldId: bigserial("old_id", { mode: "number" }),
     provinceId: uuid("province_id")
       .notNull()
       .references(() => provinces.id, { onDelete: "cascade" }),
-    oldProvinceId: bigserial("old_province_id", { mode: "number" }).notNull(),
+    oldProvinceId: bigserial("old_province_id", { mode: "number" }),
     name: varchar("name", { length: 250 }).notNull(),
-    altName: varchar("alt_name", { length: 250 }).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -382,13 +380,12 @@ export const districts = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
-    oldRegencyId: bigserial("old_regency_id", { mode: "number" }).notNull(),
+    oldId: bigserial("old_id", { mode: "number" }),
+    oldRegencyId: bigserial("old_regency_id", { mode: "number" }),
     regencyId: uuid("regency_id")
       .notNull()
       .references(() => regencies.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 250 }).notNull(),
-    altName: varchar("alt_name", { length: 250 }).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -406,8 +403,8 @@ export const villages = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    oldId: bigserial("old_id", { mode: "number" }).notNull().unique(),
-    oldDistrictId: bigserial("old_district_id", { mode: "number" }).notNull(),
+    oldId: bigserial("old_id", { mode: "number" }),
+    oldDistrictId: bigserial("old_district_id", { mode: "number" }),
     districtId: uuid("district_id")
       .notNull()
       .references(() => districts.id, { onDelete: "cascade" }),

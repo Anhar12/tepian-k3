@@ -35,7 +35,6 @@ const generateDistricts = async (): Promise<InsertDistrict[]> => {
       regencyId,
       oldRegencyId,
       name: district.name,
-      altName: district.alt_name,
     };
   });
 };

@@ -8,6 +8,20 @@
       "when": 1767061382049,
       "tag": "0000_misty_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1767063639613,
+      "tag": "0001_closed_changeling",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767063899909,
+      "tag": "0002_jittery_violations",
+      "breakpoints": true
     }
   ]
 }
