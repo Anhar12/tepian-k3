@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as TransaksiRouteImport } from './routes/transaksi'
+import { Route as PengujianRouteImport } from './routes/pengujian'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -50,6 +51,11 @@ const UnauthorizedRoute = UnauthorizedRouteImport.update({
 const TransaksiRoute = TransaksiRouteImport.update({
   id: '/transaksi',
   path: '/transaksi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PengujianRoute = PengujianRouteImport.update({
+  id: '/pengujian',
+  path: '/pengujian',
   getParentRoute: () => rootRouteImport,
 } as any)
 const coreRouteRoute = coreRouteRouteImport.update({
@@ -219,6 +225,7 @@ const coreDashboardClustersClusterIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/forgot-password': typeof authForgotPasswordRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/forgot-password': typeof authForgotPasswordRoute
@@ -286,6 +294,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
+  '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
@@ -320,6 +329,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
     | '/forgot-password'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
     | '/forgot-password'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/(core)'
+    | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
     | '/(auth)/forgot-password'
@@ -421,6 +433,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
+  PengujianRoute: typeof PengujianRoute
   TransaksiRoute: typeof TransaksiRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
 }
@@ -439,6 +452,13 @@ declare module '@tanstack/react-router' {
       path: '/transaksi'
       fullPath: '/transaksi'
       preLoaderRoute: typeof TransaksiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pengujian': {
+      id: '/pengujian'
+      path: '/pengujian'
+      fullPath: '/pengujian'
+      preLoaderRoute: typeof PengujianRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)': {
@@ -737,6 +757,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
+  PengujianRoute: PengujianRoute,
   TransaksiRoute: TransaksiRoute,
   UnauthorizedRoute: UnauthorizedRoute,
 }
