@@ -36,6 +36,25 @@ const districtQueries = {
     });
   },
 
+  getAllDistrictsByRegencyId(regencyId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.districts.findMany({
+          where: and(
+            eq(districts.regencyId, regencyId),
+            isNull(districts.deletedAt)
+          ),
+        }),
+      catch: (error) => {
+        logger.error("Error fetching districts by regency ID", { error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch districts by regency ID",
+        });
+      },
+    });
+  },
+
   getDistrictById(id: string) {
     return Effect.tryPromise({
       try: () =>

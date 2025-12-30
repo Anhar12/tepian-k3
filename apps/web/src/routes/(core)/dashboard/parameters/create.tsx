@@ -61,7 +61,6 @@ function RouteComponent() {
     trpc.parameterCategories.getAllParameterCategories.queryOptions(),
   );
 
-  const [clusterOpen, setClusterOpen] = useState(false);
   const [parameterCategoryOpen, setParameterCategoryOpen] = useState(false);
 
   const form = useForm<z.infer<typeof parameterSchema.createParameterSchema>>({

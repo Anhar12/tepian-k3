@@ -40,8 +40,8 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
   email: z.email().max(256),
   femaleWorkers: z.string().regex(/^\d+$/).max(10),
   maleWorkers: z.string().regex(/^\d+$/).max(10),
-  healthFacilityAvailable: z.boolean().default(false),
-  wlkpStatus: z.boolean().default(false),
+  healthFacilityAvailable: z.boolean(),
+  wlkpStatus: z.boolean(),
   wlkp: z.string().regex(/^\d+$/).max(10),
   responsibleTestingPerson: z.string().min(1).max(256),
   responsibleTestingPersonEmail: z.email().max(256),
@@ -49,8 +49,8 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
 });
 
 const updateUserCompanySchema = createUpdateSchema(userCompanies, {
-  id: z.uuidv7(),
   userId: z.optional(z.uuidv7()),
+  id: z.uuidv7(),
   kbliId: z.optional(z.uuidv7()),
   provinceId: z.optional(z.uuidv7()),
   districtId: z.optional(z.uuidv7()),

@@ -13,6 +13,25 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       )
   ),
 
+  getAllUserCompanyTestingLocationsByCompanyIdAndUserId: withPermission(
+    "user-company-testing-location.read"
+  )
+    .input(
+      z.object({
+        companyId: z.string().uuidv7(),
+        showDeleted: z.boolean().optional(),
+      })
+    )
+    .query(async ({ input, ctx: { user } }) => {
+      return await Effect.runPromise(
+        userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
+          input.companyId,
+          user.id,
+          input.showDeleted ?? false
+        )
+      );
+    }),
+
   getPaginatedUserCompanyTestingLocations: withPermission(
     "user-company-testing-location.read"
   )
@@ -54,6 +73,22 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       return userCompanyTestingLocation;
     }),
 
+  userCreateUserCompanyTestingLocation: withPermission(
+    "user-company-testing-location.create"
+  )
+    .input(
+      userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
+    )
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyTestingLocationQueries.userCreateUserCompanyTestingLocation(
+            user.id,
+            input
+          )
+        )
+    ),
+
   createUserCompanyTestingLocation: withPermission(
     "user-company-testing-location.create"
   )
@@ -64,6 +99,22 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       async ({ input }) =>
         await Effect.runPromise(
           userCompanyTestingLocationQueries.createUserCompanyTestingLocation(
+            input
+          )
+        )
+    ),
+
+  userUpdateUserCompanyTestingLocation: withPermission(
+    "user-company-testing-location.update"
+  )
+    .input(
+      userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
+    )
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyTestingLocationQueries.userUpdateUserCompanyTestingLocation(
+            user.id,
             input
           )
         )
@@ -84,6 +135,24 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
+  userDeleteUserCompanyTestingLocation: withPermission(
+    "user-company-testing-location.delete"
+  )
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      })
+    )
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyTestingLocationQueries.userDeleteUserCompanyTestingLocation(
+            user.id,
+            input.id
+          )
+        )
+    ),
+
   deleteUserCompanyTestingLocation: withPermission(
     "user-company-testing-location.delete"
   )
@@ -96,6 +165,24 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       async ({ input }) =>
         await Effect.runPromise(
           userCompanyTestingLocationQueries.deleteUserCompanyTestingLocation(
+            input.id
+          )
+        )
+    ),
+
+  userRestoreUserCompanyTestingLocation: withPermission(
+    "user-company-testing-location.delete"
+  )
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      })
+    )
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyTestingLocationQueries.userRestoreUserCompanyTestingLocation(
+            user.id,
             input.id
           )
         )

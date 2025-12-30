@@ -10,6 +10,19 @@ export const districtRouter = createTRPCRouter({
     async () => await Effect.runPromise(districtQueries.getAllDistricts())
   ),
 
+  getAllDistrictsByRegencyId: publicProcedure
+    .input(
+      z.object({
+        regencyId: z.uuidv7(),
+      })
+    )
+    .query(
+      async ({ input }) =>
+        await Effect.runPromise(
+          districtQueries.getAllDistrictsByRegencyId(input.regencyId)
+        )
+    ),
+
   getPaginatedDistricts: withPermission("district.read")
     .input(districtSchema.getAllDistrictsSchema)
     .query(async ({ input }) => {

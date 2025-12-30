@@ -11,6 +11,19 @@ export const userCompanyRouter = createTRPCRouter({
       await Effect.runPromise(userCompanyQueries.getAllUserCompanies())
   ),
 
+  getPaginatedUserCompaniesByUserId: withPermission("user-company.create")
+    .input(userCompanySchema.getAllUserCompaniesSchema)
+    .query(async ({ input, ctx: { user } }) => {
+      const { data, pageCount } = await Effect.runPromise(
+        userCompanyQueries.getOffsetPaginatedUserCompaniesByUserId(
+          user.id,
+          input
+        )
+      );
+
+      return { data, pageCount };
+    }),
+
   getPaginatedUserCompanies: withPermission("user-company.read")
     .input(userCompanySchema.getAllUserCompaniesSchema)
     .query(async ({ input }) => {
@@ -42,6 +55,36 @@ export const userCompanyRouter = createTRPCRouter({
       return userCompany;
     }),
 
+  getUserCompanyByIdAndUserId: withPermission("user-company.read")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      })
+    )
+    .query(async ({ input, ctx: { user } }) => {
+      const userCompany = await Effect.runPromise(
+        userCompanyQueries.getUserCompanyDetailsByUserIdAndId(user.id, input.id)
+      );
+
+      if (!userCompany) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Perusahaan tidak ditemukan",
+        });
+      }
+
+      return userCompany;
+    }),
+
+  userCreateUserCompany: withPermission("user-company.create")
+    .input(userCompanySchema.createUserCompanySchema)
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyQueries.userCreateUserCompany(user.id, input)
+        )
+    ),
+
   createUserCompany: withPermission("user-company.create")
     .input(userCompanySchema.createUserCompanySchema)
     .mutation(
@@ -49,11 +92,33 @@ export const userCompanyRouter = createTRPCRouter({
         await Effect.runPromise(userCompanyQueries.createUserCompany(input))
     ),
 
+  userUpdateUserCompany: withPermission("user-company.update")
+    .input(userCompanySchema.updateUserCompanySchema)
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyQueries.userUpdateUserCompany(user.id, input)
+        )
+    ),
+
   updateUserCompany: withPermission("user-company.update")
     .input(userCompanySchema.updateUserCompanySchema)
     .mutation(
       async ({ input }) =>
         await Effect.runPromise(userCompanyQueries.updateUserCompany(input))
+    ),
+
+  userDeleteUserCompany: withPermission("user-company.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      })
+    )
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyQueries.userDeleteUserCompany(user.id, input.id)
+        )
     ),
 
   deleteUserCompany: withPermission("user-company.delete")
@@ -65,6 +130,19 @@ export const userCompanyRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await Effect.runPromise(userCompanyQueries.deleteUserCompany(input.id))
+    ),
+
+  userRestoreUserCompany: withPermission("user-company.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      })
+    )
+    .mutation(
+      async ({ input, ctx: { user } }) =>
+        await Effect.runPromise(
+          userCompanyQueries.userRestoreUserCompany(user.id, input.id)
+        )
     ),
 
   restoreUserCompany: withPermission("user-company.delete")

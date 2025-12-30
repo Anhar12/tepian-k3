@@ -193,6 +193,9 @@ export const userCompanyTestingLocation = createTable(
     districtId: uuid("district_id")
       .notNull()
       .references(() => districts.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     ...timestamps,
   },
   (table) => [
