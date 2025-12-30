@@ -36,7 +36,7 @@ const districtQueries = {
     });
   },
 
-  getClusterById(id: string) {
+  getDistrictById(id: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.districts.findFirst({
@@ -236,7 +236,7 @@ const districtQueries = {
 
   updateDistrict(data: z.infer<typeof districSchema.updateDistrictSchema>) {
     return Effect.gen(this, function* () {
-      const existingDistrict = yield* districtQueries.getClusterById(data.id);
+      const existingDistrict = yield* districtQueries.getDistrictById(data.id);
 
       if (!existingDistrict) {
         throw new TRPCError({
@@ -282,7 +282,7 @@ const districtQueries = {
 
   deleteDistrict(id: string) {
     return Effect.gen(this, function* () {
-      const existingDistrict = yield* districtQueries.getClusterById(id);
+      const existingDistrict = yield* districtQueries.getDistrictById(id);
 
       if (!existingDistrict) {
         throw new TRPCError({
