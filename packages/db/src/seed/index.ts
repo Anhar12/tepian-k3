@@ -11,6 +11,10 @@ import { exit } from "process";
 import { eq } from "drizzle-orm";
 import seedClusters from "./clusters";
 import seedParameterCategories from "./parameter-categories";
+import seedProvinces from "./provinces";
+import seedRegencies from "./regencies";
+import seedDistricts from "./districts";
+import seedVillages from "./villages";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -122,6 +126,26 @@ async function seed() {
     { name: "parameters.update", resource: "parameters", action: "update" },
     { name: "parameters.delete", resource: "parameters", action: "delete" },
     { name: "parameters.manage", resource: "parameters", action: "manage" },
+    { name: "provinces.create", resource: "provinces", action: "create" },
+    { name: "provinces.read", resource: "provinces", action: "read" },
+    { name: "provinces.update", resource: "provinces", action: "update" },
+    { name: "provinces.delete", resource: "provinces", action: "delete" },
+    { name: "provinces.manage", resource: "provinces", action: "manage" },
+    { name: "regency.create", resource: "regency", action: "create" },
+    { name: "regency.read", resource: "regency", action: "read" },
+    { name: "regency.update", resource: "regency", action: "update" },
+    { name: "regency.delete", resource: "regency", action: "delete" },
+    { name: "regency.manage", resource: "regency", action: "manage" },
+    { name: "district.create", resource: "districts", action: "create" },
+    { name: "district.read", resource: "districts", action: "read" },
+    { name: "district.update", resource: "districts", action: "update" },
+    { name: "district.delete", resource: "districts", action: "delete" },
+    { name: "district.manage", resource: "districts", action: "manage" },
+    { name: "village.create", resource: "village", action: "create" },
+    { name: "village.read", resource: "village", action: "read" },
+    { name: "village.update", resource: "village", action: "update" },
+    { name: "village.delete", resource: "village", action: "delete" },
+    { name: "village.manage", resource: "village", action: "manage" },
   ] as const;
 
   // Create or get all permissions
@@ -330,6 +354,10 @@ async function seed() {
   // seeding other data can go here...
   await seedClusters();
   await seedParameterCategories();
+  await seedProvinces();
+  await seedRegencies();
+  await seedDistricts();
+  await seedVillages();
 
   console.log("✅ User roles synced");
   console.log("\n🎉 Database seeding completed successfully!");

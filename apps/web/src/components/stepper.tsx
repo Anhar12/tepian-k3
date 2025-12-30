@@ -1,50 +1,60 @@
 import { Check } from "lucide-react";
 
+interface StepperProps {
+  currentStep: number;
+}
+
 const steps = [
-  { id: 1, label: "Parameter Pengujian", title: "Tahap 1" },
-  { id: 2, label: "Kaji Ulang", title: "Tahap 2" },
-  { id: 3, label: "Status Pengajuan", title: "Tahap 3" },
-  { id: 4, label: "Informasi Pembayaran", title: "Tahap 4" },
+  { id: 1, label: "Parameter", title: "Tahap 1" },
+  { id: 2, label: "Data Perusahaan", title: "Tahap 2" },
+  { id: 3, label: "Status pengajuan", title: "Tahap 3" },
+  { id: 4, label: "Informasi pembayaran", title: "Tahap 4" },
 ];
 
-export function Stepper({ currentStep }: { currentStep: number }) {
+export function Stepper({ currentStep }: StepperProps) {
   return (
-    <div className="mx-auto flex max-w-4xl items-center justify-center gap-4 overflow-x-auto px-2 py-4">
-      {steps.map((step, idx) => (
-        <div key={step.id} className="flex items-center">
-          <div className="flex min-w-30 flex-col items-center gap-2">
+    <div className="mx-auto flex w-full max-w-4xl items-center justify-center py-8">
+      {steps.map((step, index) => (
+        <div key={step.id} className="flex flex-1 items-center last:flex-none">
+          <div className="group relative flex flex-col items-center">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
                 step.id === currentStep
-                  ? "border-[#1E40AF] bg-[#1E40AF] text-white shadow-lg shadow-blue-200"
+                  ? "bg-[#0056B3] text-white shadow-lg ring-4 shadow-blue-200 ring-blue-50"
                   : step.id < currentStep
-                    ? "border-emerald-500 bg-emerald-500 text-white"
-                    : "border-blue-100 bg-white text-[#1E40AF]"
+                    ? "bg-emerald-500 text-white"
+                    : "border-2 border-slate-200 bg-white text-slate-400"
               }`}
             >
               {step.id < currentStep ? <Check className="h-5 w-5" /> : step.id}
             </div>
-            <div className="text-center">
-              <span className="mb-1 block rounded-full bg-[#1E40AF] px-2 py-0.5 text-[10px] font-bold text-white">
-                {step.title}
-              </span>
-              <span
-                className={`text-[11px] font-semibold whitespace-nowrap ${
-                  step.id <= currentStep ? "text-slate-700" : "text-slate-400"
-                }`}
-              >
-                {step.label}
-              </span>
+            <div className="absolute top-1 left-12 whitespace-nowrap">
+              <div className="flex flex-col">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                    step.id === currentStep
+                      ? "bg-[#0056B3] text-white"
+                      : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {step.title}
+                </span>
+                <span
+                  className={`mt-0.5 text-xs font-semibold ${
+                    step.id === currentStep
+                      ? "text-slate-900"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </div>
             </div>
           </div>
-          {idx < steps.length - 1 && (
-            <div className="mx-2 mb-8 flex h-0.5 w-16 gap-1">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={`flex-1 rounded-full ${step.id < currentStep ? "bg-emerald-500" : "bg-blue-100"}`}
-                />
-              ))}
+
+          {index < steps.length - 1 && (
+            <div className="mx-4 flex flex-1 items-center justify-center">
+              <div className="w-full border-t-2 border-dashed border-slate-200" />
             </div>
           )}
         </div>

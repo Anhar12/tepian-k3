@@ -5,50 +5,22 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1766473733248,
-      "tag": "0000_boring_liz_osborn",
+      "when": 1767061382049,
+      "tag": "0000_misty_jimmy_woo",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1766475233023,
-      "tag": "0001_pretty_harrier",
+      "when": 1767063639613,
+      "tag": "0001_closed_changeling",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1766710254196,
-      "tag": "0002_past_red_skull",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1766885569924,
-      "tag": "0003_mighty_mister_sinister",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1766898605248,
-      "tag": "0004_condemned_bucky",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1767005596980,
-      "tag": "0005_square_clea",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1767008800583,
-      "tag": "0006_cute_luminals",
+      "when": 1767063899909,
+      "tag": "0002_jittery_violations",
       "breakpoints": true
     }
   ]

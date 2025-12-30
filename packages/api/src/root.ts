@@ -1,12 +1,16 @@
 import { createCallerFactory, createTRPCRouter } from ".";
 import { authRouter } from "./routers/auth";
 import { clusterRouter } from "./routers/cluster";
+import { districtRouter } from "./routers/district";
 import { parameterRouter } from "./routers/parameter";
 import { parameterCategoriesRouter } from "./routers/parameter-categories";
 import { permissionRouters } from "./routers/permission";
+import { provinceRouter } from "./routers/province";
+import { regencyRouter } from "./routers/regency";
 import { roleRouters } from "./routers/role";
 import { toolRouter } from "./routers/tool";
 import { userRouter } from "./routers/user";
+import { villageRouter } from "./routers/village";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +26,10 @@ export const appRouter = createTRPCRouter({
   cluster: clusterRouter,
   parameterCategories: parameterCategoriesRouter,
   parameter: parameterRouter,
+  province: provinceRouter,
+  regency: regencyRouter,
+  district: districtRouter,
+  village: villageRouter,
 });
 
 // export type definition of API
