@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
-import { trpc } from "@/utils/trpc";
+import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
@@ -35,12 +35,22 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/company/create")({
+export const Route = createFileRoute(
+  "/(core)/dashboard/company/$companyId/edit",
+)({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: "user-company.create",
+      permission: "user-company.update",
     }),
-  loader: async ({ context }) => {
+  params: z.object({
+    companyId: z.uuidv7(),
+  }),
+  loader: async ({ context, params }) => {
+    context.queryClient.ensureQueryData(
+      context.trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+        id: params.companyId,
+      }),
+    );
     context.queryClient.ensureQueryData(
       context.trpc.kbli.getAllKblis.queryOptions(),
     );
@@ -52,6 +62,7 @@ export const Route = createFileRoute("/(core)/dashboard/company/create")({
 });
 
 function RouteComponent() {
+  const { companyId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
   const [kbliOpen, setKbliOpen] = useState(false);
@@ -60,34 +71,63 @@ function RouteComponent() {
   const [districtOpen, setDistrictOpen] = useState(false);
   const [villageOpen, setVillageOpen] = useState(false);
 
+  const { data: company } = useSuspenseQuery(
+    trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+      id: companyId,
+    }),
+  );
+
   const form = useForm<
-    z.infer<typeof userCompanySchema.createUserCompanySchema>
+    z.infer<typeof userCompanySchema.updateUserCompanySchema>
   >({
-    resolver: zodResolver(userCompanySchema.createUserCompanySchema),
-    defaultValues: {},
+    resolver: zodResolver(userCompanySchema.updateUserCompanySchema),
+    defaultValues: {
+      id: company.id,
+      name: company.name,
+      address: company.address,
+      provinceId: company.provinceId,
+      regencyId: company.regencyId,
+      districtId: company.districtId,
+      villageId: company.villageId,
+      kbliId: company.kbliId,
+      wlkpStatus: company.wlkpStatus,
+      wlkp: company.wlkp,
+      email: company.email,
+      femaleWorkers: String(company.femaleWorkers),
+      healthFacilityAvailable: company.healthFacilityAvailable,
+      maleWorkers: String(company.maleWorkers),
+      responsibleTestingPerson: company.responsibleTestingPerson,
+      responsibleTestingPersonEmail: company.responsibleTestingPersonEmail,
+      responsibleTestingPersonPhone: company.responsibleTestingPersonPhone,
+    },
   });
 
-  const provinceId = form.watch("provinceId");
-  const regencyId = form.watch("regencyId");
-  const districtId = form.watch("districtId");
-  const wlkpStatus = form.watch("wlkpStatus");
+  const provinceId = form.watch("provinceId") || "";
+  const regencyId = form.watch("regencyId") || "";
+  const districtId = form.watch("districtId") || "";
+  const wlkpStatus = form.watch("wlkpStatus") || false;
 
-  const createUserCompanyMutation = useMutation(
-    trpc.userCompany.userCreateUserCompany.mutationOptions({
+  const updateUserCompanyMutation = useMutation(
+    trpc.userCompany.userUpdateUserCompany.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Berhasil membuat data perusahaan.");
+        await queryClient.invalidateQueries(
+          trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+            id: companyId,
+          }),
+        );
+        globalSuccessToast("Berhasil memperbarui data perusahaan");
         await redirectBack();
       },
       onError: (error) => {
-        globalErrorToast(`Gagal membuat data perusahaan: ${error.message}`);
+        globalErrorToast("Gagal memperbarui data perusahaan: " + error.message);
       },
     }),
   );
 
   const handleSubmit = (
-    data: z.infer<typeof userCompanySchema.createUserCompanySchema>,
+    data: z.infer<typeof userCompanySchema.updateUserCompanySchema>,
   ) => {
-    createUserCompanyMutation.mutate(data);
+    updateUserCompanyMutation.mutate(data);
   };
 
   const { data: kbli } = useSuspenseQuery(trpc.kbli.getAllKblis.queryOptions());
@@ -117,9 +157,9 @@ function RouteComponent() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Buat Perusahaan Baru</CardTitle>
+          <CardTitle>Perbarui Perusahaan</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk membuat perusahaan baru.
+            Isi form di bawah untuk memperbarui perusahaan.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -218,7 +258,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <ComboBox
                         options={province}
-                        value={field.value}
+                        value={field.value ?? ""}
                         onChange={field.onChange}
                         placeholder="Pilih provinsi..."
                         searchPlaceholder="Cari provinsi..."
@@ -248,7 +288,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <ComboBox
                         options={regency || []}
-                        value={field.value}
+                        value={field.value ?? ""}
                         onChange={field.onChange}
                         placeholder="Pilih kabupaten/kota..."
                         searchPlaceholder="Cari kabupaten/kota..."
@@ -278,7 +318,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <ComboBox
                         options={district || []}
-                        value={field.value}
+                        value={field.value ?? ""}
                         onChange={field.onChange}
                         placeholder="Pilih kecamatan..."
                         searchPlaceholder="Cari kecamatan..."
@@ -308,7 +348,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <ComboBox
                         options={village || []}
-                        value={field.value}
+                        value={field.value ?? ""}
                         onChange={field.onChange}
                         placeholder="Pilih desa/kelurahan..."
                         searchPlaceholder="Cari desa/kelurahan..."
@@ -339,7 +379,7 @@ function RouteComponent() {
                     </FieldLabel>
                     <ComboBox
                       options={kbli}
-                      value={field.value}
+                      value={field.value ?? ""}
                       onChange={field.onChange}
                       placeholder="Pilih kategori KBLI..."
                       searchPlaceholder="Cari kategori KBLI..."
@@ -667,12 +707,12 @@ function RouteComponent() {
               <Button
                 type="submit"
                 className="mt-2 h-10 w-full text-sm"
-                disabled={createUserCompanyMutation.isPending}
+                disabled={updateUserCompanyMutation.isPending}
               >
-                {createUserCompanyMutation.isPending ? (
+                {updateUserCompanyMutation.isPending ? (
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Buat Perusahaan
+                Perbarui Perusahaan
               </Button>
             </FieldGroup>
           </form>

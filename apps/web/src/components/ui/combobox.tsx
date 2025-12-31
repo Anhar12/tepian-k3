@@ -23,6 +23,7 @@ interface ComboBoxProps {
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
   invalid?: boolean;
+  className?: string;
 }
 
 function ComboBox({
@@ -36,6 +37,7 @@ function ComboBox({
   onOpenChange,
   disabled,
   invalid,
+  className,
 }: ComboBoxProps) {
   const selectedOption = useMemo(
     () => options?.find((opt) => opt.id === value),
@@ -62,6 +64,7 @@ function ComboBox({
           className={cn(
             "w-full justify-between",
             !value && "text-muted-foreground",
+            className,
           )}
         >
           {selectedOption?.name || placeholder}

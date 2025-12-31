@@ -85,13 +85,6 @@ export const userCompanyRouter = createTRPCRouter({
         )
     ),
 
-  createUserCompany: withPermission("user-company.create")
-    .input(userCompanySchema.createUserCompanySchema)
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(userCompanyQueries.createUserCompany(input))
-    ),
-
   userUpdateUserCompany: withPermission("user-company.update")
     .input(userCompanySchema.updateUserCompanySchema)
     .mutation(
@@ -99,13 +92,6 @@ export const userCompanyRouter = createTRPCRouter({
         await Effect.runPromise(
           userCompanyQueries.userUpdateUserCompany(user.id, input)
         )
-    ),
-
-  updateUserCompany: withPermission("user-company.update")
-    .input(userCompanySchema.updateUserCompanySchema)
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(userCompanyQueries.updateUserCompany(input))
     ),
 
   userDeleteUserCompany: withPermission("user-company.delete")
@@ -121,17 +107,6 @@ export const userCompanyRouter = createTRPCRouter({
         )
     ),
 
-  deleteUserCompany: withPermission("user-company.delete")
-    .input(
-      z.object({
-        id: z.uuidv7(),
-      })
-    )
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(userCompanyQueries.deleteUserCompany(input.id))
-    ),
-
   userRestoreUserCompany: withPermission("user-company.delete")
     .input(
       z.object({
@@ -143,16 +118,5 @@ export const userCompanyRouter = createTRPCRouter({
         await Effect.runPromise(
           userCompanyQueries.userRestoreUserCompany(user.id, input.id)
         )
-    ),
-
-  restoreUserCompany: withPermission("user-company.delete")
-    .input(
-      z.object({
-        id: z.uuidv7(),
-      })
-    )
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(userCompanyQueries.restoreUserCompany(input.id))
     ),
 });

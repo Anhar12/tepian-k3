@@ -29,7 +29,6 @@ const getAllUserCompaniesSchema = z.object({
 });
 
 const createUserCompanySchema = createInsertSchema(userCompanies, {
-  userId: z.uuidv7(),
   kbliId: z.uuidv7(),
   provinceId: z.uuidv7(),
   districtId: z.uuidv7(),
@@ -46,10 +45,9 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
   responsibleTestingPerson: z.string().min(1).max(256),
   responsibleTestingPersonEmail: z.email().max(256),
   responsibleTestingPersonPhone: z.string().min(1).max(20),
-});
+}).omit({ createdAt: true, updatedAt: true, deletedAt: true, userId: true });
 
 const updateUserCompanySchema = createUpdateSchema(userCompanies, {
-  userId: z.optional(z.uuidv7()),
   id: z.uuidv7(),
   kbliId: z.optional(z.uuidv7()),
   provinceId: z.optional(z.uuidv7()),
@@ -67,7 +65,7 @@ const updateUserCompanySchema = createUpdateSchema(userCompanies, {
   responsibleTestingPerson: z.optional(z.string().min(1).max(256)),
   responsibleTestingPersonEmail: z.optional(z.email().max(256)),
   responsibleTestingPersonPhone: z.optional(z.string().min(1).max(20)),
-});
+}).omit({ createdAt: true, updatedAt: true, deletedAt: true, userId: true });
 
 const userCompanySchema = {
   getAllUserCompaniesSchema,

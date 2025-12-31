@@ -46,6 +46,7 @@ import { Route as coreDashboardRolesRoleIdDetailRouteImport } from './routes/(co
 import { Route as coreDashboardParametersParameterIdEditRouteImport } from './routes/(core)/dashboard/parameters/$parameterId.edit'
 import { Route as coreDashboardParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/dashboard/parameter-categories/$parameterCategoriesId.edit'
 import { Route as coreDashboardKblisKbliIdEditRouteImport } from './routes/(core)/dashboard/kblis/$kbliId.edit'
+import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
 import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
 import { Route as coreDashboardClustersClusterIdEditRouteImport } from './routes/(core)/dashboard/clusters/$clusterId.edit'
 
@@ -251,6 +252,12 @@ const coreDashboardKblisKbliIdEditRoute =
     path: '/dashboard/kblis/$kbliId/edit',
     getParentRoute: () => coreRouteRoute,
   } as any)
+const coreDashboardCompanyCompanyIdEditRoute =
+  coreDashboardCompanyCompanyIdEditRouteImport.update({
+    id: '/dashboard/company/$companyId/edit',
+    path: '/dashboard/company/$companyId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 const coreDashboardCompanyCompanyIdDetailRoute =
   coreDashboardCompanyCompanyIdDetailRouteImport.update({
     id: '/dashboard/company/$companyId/detail',
@@ -295,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
   '/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
+  '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
   '/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
   '/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   '/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
@@ -334,6 +342,7 @@ export interface FileRoutesByTo {
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
   '/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
+  '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
   '/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
   '/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   '/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
@@ -376,6 +385,7 @@ export interface FileRoutesById {
   '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
   '/(core)/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
   '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
+  '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
   '/(core)/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
   '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   '/(core)/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/dashboard/users'
     | '/dashboard/clusters/$clusterId/edit'
     | '/dashboard/company/$companyId/detail'
+    | '/dashboard/company/$companyId/edit'
     | '/dashboard/kblis/$kbliId/edit'
     | '/dashboard/parameter-categories/$parameterCategoriesId/edit'
     | '/dashboard/parameters/$parameterId/edit'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/dashboard/users'
     | '/dashboard/clusters/$clusterId/edit'
     | '/dashboard/company/$companyId/detail'
+    | '/dashboard/company/$companyId/edit'
     | '/dashboard/kblis/$kbliId/edit'
     | '/dashboard/parameter-categories/$parameterCategoriesId/edit'
     | '/dashboard/parameters/$parameterId/edit'
@@ -497,6 +509,7 @@ export interface FileRouteTypes {
     | '/(core)/dashboard/users/'
     | '/(core)/dashboard/clusters/$clusterId/edit'
     | '/(core)/dashboard/company/$companyId/detail'
+    | '/(core)/dashboard/company/$companyId/edit'
     | '/(core)/dashboard/kblis/$kbliId/edit'
     | '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit'
     | '/(core)/dashboard/parameters/$parameterId/edit'
@@ -776,6 +789,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardKblisKbliIdEditRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/dashboard/company/$companyId/edit': {
+      id: '/(core)/dashboard/company/$companyId/edit'
+      path: '/dashboard/company/$companyId/edit'
+      fullPath: '/dashboard/company/$companyId/edit'
+      preLoaderRoute: typeof coreDashboardCompanyCompanyIdEditRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/dashboard/company/$companyId/detail': {
       id: '/(core)/dashboard/company/$companyId/detail'
       path: '/dashboard/company/$companyId/detail'
@@ -835,6 +855,7 @@ interface coreRouteRouteChildren {
   coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
   coreDashboardClustersClusterIdEditRoute: typeof coreDashboardClustersClusterIdEditRoute
   coreDashboardCompanyCompanyIdDetailRoute: typeof coreDashboardCompanyCompanyIdDetailRoute
+  coreDashboardCompanyCompanyIdEditRoute: typeof coreDashboardCompanyCompanyIdEditRoute
   coreDashboardKblisKbliIdEditRoute: typeof coreDashboardKblisKbliIdEditRoute
   coreDashboardParameterCategoriesParameterCategoriesIdEditRoute: typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   coreDashboardParametersParameterIdEditRoute: typeof coreDashboardParametersParameterIdEditRoute
@@ -870,6 +891,8 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
     coreDashboardClustersClusterIdEditRoute,
   coreDashboardCompanyCompanyIdDetailRoute:
     coreDashboardCompanyCompanyIdDetailRoute,
+  coreDashboardCompanyCompanyIdEditRoute:
+    coreDashboardCompanyCompanyIdEditRoute,
   coreDashboardKblisKbliIdEditRoute: coreDashboardKblisKbliIdEditRoute,
   coreDashboardParameterCategoriesParameterCategoriesIdEditRoute:
     coreDashboardParameterCategoriesParameterCategoriesIdEditRoute,
