@@ -17,7 +17,7 @@ interface KBLIColumnsProps {
 
 const ActionCell = createCrudActionCell<
   KBLI,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "kbli",
   resourcePath: "kblis",

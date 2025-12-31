@@ -17,7 +17,7 @@ interface ClustersColumnsProps {
 
 const ActionCell = createCrudActionCell<
   Clusters,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "cluster",
   resourcePath: "clusters",

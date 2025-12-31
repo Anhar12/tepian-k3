@@ -17,7 +17,7 @@ interface ToolsColumnsProps {
 
 const ActionCell = createCrudActionCell<
   Tools,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "tool",
   resourcePath: "tools",
