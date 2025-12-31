@@ -108,21 +108,6 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  createUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.create"
-  )
-    .input(
-      userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
-    )
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(
-          userCompanyTestingLocationQueries.createUserCompanyTestingLocation(
-            input
-          )
-        )
-    ),
-
   userUpdateUserCompanyTestingLocation: withPermission(
     "user-company-testing-location.update"
   )
@@ -134,21 +119,6 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         await Effect.runPromise(
           userCompanyTestingLocationQueries.userUpdateUserCompanyTestingLocation(
             user.id,
-            input
-          )
-        )
-    ),
-
-  updateUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.update"
-  )
-    .input(
-      userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
-    )
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(
-          userCompanyTestingLocationQueries.updateUserCompanyTestingLocation(
             input
           )
         )
@@ -172,23 +142,6 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  deleteUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.delete"
-  )
-    .input(
-      z.object({
-        id: z.uuidv7(),
-      })
-    )
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(
-          userCompanyTestingLocationQueries.deleteUserCompanyTestingLocation(
-            input.id
-          )
-        )
-    ),
-
   userRestoreUserCompanyTestingLocation: withPermission(
     "user-company-testing-location.delete"
   )
@@ -202,23 +155,6 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         await Effect.runPromise(
           userCompanyTestingLocationQueries.userRestoreUserCompanyTestingLocation(
             user.id,
-            input.id
-          )
-        )
-    ),
-
-  restoreUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.delete"
-  )
-    .input(
-      z.object({
-        id: z.uuidv7(),
-      })
-    )
-    .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(
-          userCompanyTestingLocationQueries.restoreUserCompanyTestingLocation(
             input.id
           )
         )

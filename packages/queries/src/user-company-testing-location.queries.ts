@@ -538,55 +538,6 @@ const userCompanyTestingLocationQueries = {
     });
   },
 
-  createUserCompanyTestingLocation(
-    data: z.infer<
-      typeof userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
-    >
-  ) {
-    return Effect.gen(this, function* () {
-      const isExisting =
-        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationByName(
-          data.name
-        );
-
-      if (isExisting) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "CONFLICT",
-            message:
-              "Kabupaten/Kota dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
-          })
-        );
-      }
-
-      const [createdUserCompanyTestingLocation] = yield* Effect.tryPromise({
-        try: () =>
-          db.insert(userCompanyTestingLocation).values(data).returning(),
-        catch: (error) => {
-          logger.error(
-            "userCompanyTestingLocationQueries.createUserCompanyTestingLocation",
-            { error, data }
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat data Kabupaten/Kota.",
-          });
-        },
-      });
-
-      if (!createdUserCompanyTestingLocation) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat data Kabupaten/Kota.",
-          })
-        );
-      }
-
-      return createdUserCompanyTestingLocation;
-    });
-  },
-
   userUpdateUserCompanyTestingLocation(
     userId: string,
     data: z.infer<
@@ -626,58 +577,6 @@ const userCompanyTestingLocationQueries = {
               ...data,
               userId,
             })
-            .where(eq(userCompanyTestingLocation.id, data.id))
-            .returning(),
-        catch: (error) => {
-          logger.error(
-            "userCompanyTestingLocationQueries.updateUserCompanyTestingLocation",
-            { error, data }
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal memperbarui data Kabupaten/Kota.",
-          });
-        },
-      });
-
-      if (!updatedUserCompanyTestingLocation) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal memperbarui data Kabupaten/Kota.",
-          })
-        );
-      }
-
-      return updatedUserCompanyTestingLocation;
-    });
-  },
-
-  updateUserCompanyTestingLocation(
-    data: z.infer<
-      typeof userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
-    >
-  ) {
-    return Effect.gen(this, function* () {
-      const existingUserCompanyTestingLocation =
-        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
-          data.id
-        );
-
-      if (!existingUserCompanyTestingLocation) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "NOT_FOUND",
-            message: "Kabupaten/Kota tidak ditemukan.",
-          })
-        );
-      }
-
-      const [updatedUserCompanyTestingLocation] = yield* Effect.tryPromise({
-        try: () =>
-          db
-            .update(userCompanyTestingLocation)
-            .set(data)
             .where(eq(userCompanyTestingLocation.id, data.id))
             .returning(),
         catch: (error) => {
@@ -765,56 +664,6 @@ const userCompanyTestingLocationQueries = {
     });
   },
 
-  deleteUserCompanyTestingLocation(id: string) {
-    return Effect.gen(this, function* () {
-      const existingUserCompanyTestingLocation =
-        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
-          id
-        );
-
-      if (!existingUserCompanyTestingLocation) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "NOT_FOUND",
-            message: "Kabupaten/Kota tidak ditemukan.",
-          })
-        );
-      }
-
-      const [deletedUserCompanyTestingLocation] = yield* Effect.tryPromise({
-        try: () =>
-          db
-            .update(userCompanyTestingLocation)
-            .set({
-              deletedAt: new Date().toISOString(),
-            })
-            .where(eq(userCompanyTestingLocation.id, id))
-            .returning(),
-        catch: (error) => {
-          logger.error(
-            "userCompanyTestingLocationQueries.deleteUserCompanyTestingLocation",
-            { error, id }
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menghapus data Kabupaten/Kota.",
-          });
-        },
-      });
-
-      if (!deletedUserCompanyTestingLocation) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menghapus data Kabupaten/Kota.",
-          })
-        );
-      }
-
-      return deletedUserCompanyTestingLocation;
-    });
-  },
-
   userRestoreUserCompanyTestingLocation(userId: string, id: string) {
     return Effect.gen(this, function* () {
       const deletedUserCompanyTestingLocation =
@@ -837,57 +686,6 @@ const userCompanyTestingLocationQueries = {
             code: "FORBIDDEN",
             message:
               "Anda tidak memiliki izin untuk mengembalikan Kabupaten/Kota ini.",
-          })
-        );
-      }
-
-      const [restoredUserCompanyTestingLocation] = yield* Effect.tryPromise({
-        try: () =>
-          db
-            .update(userCompanyTestingLocation)
-            .set({
-              deletedAt: null,
-            })
-            .where(eq(userCompanyTestingLocation.id, id))
-            .returning(),
-
-        catch: (error) => {
-          logger.error(
-            "userCompanyTestingLocationQueries.restoreUserCompanyTestingLocation",
-            { error, id }
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengembalikan data Kabupaten/Kota yang dihapus.",
-          });
-        },
-      });
-
-      if (!restoredUserCompanyTestingLocation) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengembalikan data Kabupaten/Kota yang dihapus.",
-          })
-        );
-      }
-
-      return restoredUserCompanyTestingLocation;
-    });
-  },
-
-  restoreUserCompanyTestingLocation(id: string) {
-    return Effect.gen(this, function* () {
-      const deletedUserCompanyTestingLocation =
-        yield* userCompanyTestingLocationQueries.getDeletedUserCompanyTestingLocationById(
-          id
-        );
-
-      if (!deletedUserCompanyTestingLocation) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "NOT_FOUND",
-            message: "Kabupaten/Kota yang dihapus tidak ditemukan.",
           })
         );
       }
