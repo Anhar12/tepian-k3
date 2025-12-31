@@ -1,6 +1,7 @@
 import {
   IconCreditCard,
   IconDotsVertical,
+  IconHome,
   IconLogout,
   IconNotification,
   IconUserCircle,
@@ -103,22 +104,22 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={() => navigate({ to: "/" })}>
+                <IconHome />
+                Beranda
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => navigate({ to: "/profile" })}>
                 <IconUserCircle />
-                Profile
+                Profil Saya
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <ModeToggle />
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onLogout}>
               <IconLogout />
-              Log out
+              Keluar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
