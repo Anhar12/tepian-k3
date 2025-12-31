@@ -77,6 +77,26 @@ const userCompanyTestingLocationQueries = {
               ? isNotNull(userCompanyTestingLocation.deletedAt)
               : isNull(userCompanyTestingLocation.deletedAt)
           ),
+          with: {
+            regency: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+            district: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+            userCompany: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+          },
         }),
       catch: (error) => {
         logger.error(
@@ -87,6 +107,33 @@ const userCompanyTestingLocationQueries = {
           code: "INTERNAL_SERVER_ERROR",
           message:
             "Gagal mengambil data Lokasi Pengujian Perusahaan berdasarkan Company ID dan User ID",
+        });
+      },
+    });
+  },
+
+  getUserCompanyTestingLocationByUserIdAndCompanyId(
+    userId: string,
+    companyId: string
+  ) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.userCompanyTestingLocation.findMany({
+          where: and(
+            eq(userCompanyTestingLocation.userId, userId),
+            eq(userCompanyTestingLocation.userCompanyId, companyId),
+            isNull(userCompanyTestingLocation.deletedAt)
+          ),
+        }),
+      catch: (error) => {
+        logger.error(
+          "userCompanyTestingLocationQueries.getUserCompanyTestingLocationById",
+          { error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Gagal mengambil data Lokasi Pengujian Perusahaan berdasarkan ID",
         });
       },
     });

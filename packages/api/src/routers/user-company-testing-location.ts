@@ -18,7 +18,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
   )
     .input(
       z.object({
-        companyId: z.string().uuidv7(),
+        companyId: z.uuidv7(),
         showDeleted: z.boolean().optional(),
       })
     )
@@ -46,6 +46,25 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       );
 
       return { data, pageCount };
+    }),
+
+  getUserCompanyTestingLocationByUserIdAndCompanyId: withPermission(
+    "user-company-testing-location.read"
+  )
+    .input(
+      z.object({
+        companyId: z.uuidv7(),
+      })
+    )
+    .query(async ({ input, ctx: { user } }) => {
+      const userCompanyTestingLocation = await Effect.runPromise(
+        userCompanyTestingLocationQueries.getUserCompanyTestingLocationByUserIdAndCompanyId(
+          user.id,
+          input.companyId
+        )
+      );
+
+      return userCompanyTestingLocation;
     }),
 
   getUserCompanyTestingLocationById: withPermission(

@@ -98,6 +98,12 @@ const userCompanyQueries = {
                 name: true,
               },
             },
+            village: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
           },
         }),
       catch: (error) => {

@@ -36,7 +36,9 @@ const createUserCompanyTestingLocationSchema = createInsertSchema(
     districtId: z.uuidv7(),
     regencyId: z.uuidv7(),
   }
-);
+).omit({
+  userId: true,
+});
 
 const updateUserCompanyTestingLocationSchema = createUpdateSchema(
   userCompanyTestingLocation,
@@ -47,7 +49,9 @@ const updateUserCompanyTestingLocationSchema = createUpdateSchema(
     districtId: z.optional(z.uuidv7()),
     regencyId: z.optional(z.uuidv7()),
   }
-);
+).omit({
+  userId: true,
+});
 
 const userCompanyTestingLocationSchema = {
   getAllUserCompanyTestingLocationSchema,

@@ -20,7 +20,7 @@ const ActionCell = createCrudActionCell<
   ReturnType<typeof Route.useSearch>
 >({
   resourceName: "company",
-  resourcePath: "user-company",
+  resourcePath: "company",
   permissionPrefix: "user-company",
   deleteMutation: trpc.userCompany.userDeleteUserCompany,
   restoreMutation: trpc.userCompany.userRestoreUserCompany,
