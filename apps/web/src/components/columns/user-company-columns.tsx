@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { UserCompaniesWithRelations } from "@tepian-k3/types/user-company.types";
-import { trpc } from "@/utils/trpc";
+import { queryClient, trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/dashboard/company";
 import {
   createNumberColumn,
@@ -17,7 +17,7 @@ interface UserCompanyColumnsProps {
 
 const ActionCell = createCrudActionCell<
   UserCompaniesWithRelations,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "company",
   resourcePath: "company",
@@ -28,6 +28,17 @@ const ActionCell = createCrudActionCell<
     trpc.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
+  onHoverDetail: (id) => {
+    console.log("hover detail", id);
+    queryClient.prefetchQuery(
+      trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({ id }),
+    );
+  },
+  onHoverEdit: (id) => {
+    queryClient.prefetchQuery(
+      trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({ id }),
+    );
+  },
 });
 
 export default function getUserCompanyColumns({
