@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ParameterCategories } from "@tepian-k3/types/parameter-categories.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/parameter-categories";
+import { Route } from "@/routes/(core)/back-office/parameter-categories";
 import {
   createNumberColumn,
   createTextColumn,
