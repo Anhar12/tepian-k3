@@ -1,16 +1,16 @@
 import { and, eq } from "@tepian-k3/db";
-import { db } from "@tepian-k3/db/client";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import { roles, userRoles } from "@tepian-k3/db/schema";
 import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 
 const userRolesQueries = {
-  assingDefaultRoleToUser(userId: string) {
+  assingDefaultRoleToUser(userId: string, tx: DBorTx = db) {
     return Effect.gen(function* () {
       const defaultRole = yield* Effect.tryPromise({
         try: () =>
-          db.query.roles.findFirst({
+          tx.query.roles.findFirst({
             where: eq(roles.name, "user"),
           }),
         catch: (error) => {
@@ -32,13 +32,17 @@ const userRolesQueries = {
         );
       }
 
-      return yield* userRolesQueries.assignRoleToUser(userId, defaultRole.id);
+      return yield* userRolesQueries.assignRoleToUser(
+        userId,
+        defaultRole.id,
+        tx
+      );
     });
   },
 
-  assignRoleToUser(userId: string, roleId: string) {
+  assignRoleToUser(userId: string, roleId: string, tx: DBorTx = db) {
     return Effect.tryPromise({
-      try: () => db.insert(userRoles).values({ userId, roleId }).returning(),
+      try: () => tx.insert(userRoles).values({ userId, roleId }).returning(),
       catch: (error) => {
         logger.error(
           `Error assigning role ${roleId} to user ${userId}:`,
@@ -54,10 +58,10 @@ const userRolesQueries = {
   },
 
   // Assign role to user
-  assignRole(userId: string, roleId: string) {
+  assignRole(userId: string, roleId: string, tx: DBorTx = db) {
     return Effect.tryPromise({
       try: () =>
-        db
+        tx
           .insert(userRoles)
           .values({
             userId,
@@ -76,12 +80,12 @@ const userRolesQueries = {
   },
 
   // Assign multiple rols to user
-  assignRoles(userId: string, roleIds: string[]) {
+  assignRoles(userId: string, roleIds: string[], tx: DBorTx = db) {
     if (roleIds.length === 0) return;
 
     return Effect.tryPromise({
       try: () =>
-        db
+        tx
           .insert(userRoles)
           .values(
             roleIds.map((roleId) => ({
@@ -102,10 +106,10 @@ const userRolesQueries = {
   },
 
   // Remove role from user
-  removeRole(userId: string, roleId: string) {
+  removeRole(userId: string, roleId: string, tx: DBorTx = db) {
     return Effect.tryPromise({
       try: () =>
-        db
+        tx
           .delete(userRoles)
           .where(
             and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId))
@@ -122,10 +126,10 @@ const userRolesQueries = {
   },
 
   // Remove all roles from user
-  removeAllRoles(userId: string) {
+  removeAllRoles(userId: string, tx: DBorTx = db) {
     return Effect.tryPromise({
       try: () =>
-        db.delete(userRoles).where(eq(userRoles.userId, userId)).returning(),
+        tx.delete(userRoles).where(eq(userRoles.userId, userId)).returning(),
       catch: (error) => {
         logger.error("Error removing all roles from user", { error });
         return new TRPCError({

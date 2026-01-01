@@ -8,6 +8,7 @@ import { encrypt } from "..";
 import logger from "@tepian-k3/services/logger";
 import { Data, Effect, Option } from "effect";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
+import { db } from "@tepian-k3/db/client";
 
 class OTPError extends Data.TaggedError("OTPError")<{
   status: boolean;
@@ -29,20 +30,42 @@ export class OTPService {
 
         const user = yield* userQueries.getUserByEmail(email);
 
-        yield* otpQueries.invalidateOTPsByEmail(email);
-
         const code = OTPService.generateOTP();
         const expiresAt = new Date(
           Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000
         ).toISOString();
 
-        yield* otpQueries.createOTP({
-          userId: user.id,
-          code,
-          email,
-          expiresAt,
-          attempts: 0,
-          verified: false,
+        yield* Effect.tryPromise({
+          try: () =>
+            db.transaction(async (tx) => {
+              await Effect.runPromise(
+                otpQueries.invalidateOTPsByEmail(email, tx)
+              );
+
+              await Effect.runPromise(
+                otpQueries.createOTP(
+                  {
+                    userId: user.id,
+                    code,
+                    email,
+                    expiresAt,
+                    attempts: 0,
+                    verified: false,
+                  },
+                  tx
+                )
+              );
+            }),
+          catch: (error) => {
+            logger.error("Failed to create OTP in transaction", {
+              email,
+              error,
+            });
+            return new OTPError({
+              status: false,
+              message: "Gagal membuat kode OTP.",
+            });
+          },
         });
 
         yield* Effect.tryPromise({
@@ -108,8 +131,26 @@ export class OTPService {
           );
         }
 
-        yield* otpQueries.markOTPAsVerified(otp.id);
-        yield* usersQueries.markUserEmailAsVerified(otp.userId);
+        yield* Effect.tryPromise({
+          try: () =>
+            db.transaction(async (tx) => {
+              await Effect.runPromise(otpQueries.markOTPAsVerified(otp.id, tx));
+
+              await Effect.runPromise(
+                usersQueries.markUserEmailAsVerified(otp.userId, tx)
+              );
+            }),
+          catch: (error) => {
+            logger.error("Failed to mark OTP as verified", {
+              otpId: otp.id,
+              error,
+            });
+            return new OTPError({
+              status: false,
+              message: "Gagal memverifikasi kode OTP.",
+            });
+          },
+        });
 
         const user = yield* permissionQueries.getUserWithPermissions(
           otp.userId
@@ -189,20 +230,40 @@ export class OTPService {
           }
         }
 
-        yield* otpQueries.invalidateOTPsByEmail(email);
-
         const code = OTPService.generateOTP();
         const expiresAt = new Date(
           Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000
         ).toISOString();
 
-        yield* otpQueries.createOTP({
-          userId: user.id,
-          code,
-          email,
-          expiresAt,
-          attempts: 0,
-          verified: false,
+        yield* Effect.tryPromise({
+          try: () =>
+            db.transaction(async (tx) => {
+              await Effect.runPromise(otpQueries.invalidateOTPsByEmail(email));
+
+              await Effect.runPromise(
+                otpQueries.createOTP(
+                  {
+                    userId: user.id,
+                    code,
+                    email,
+                    expiresAt,
+                    attempts: 0,
+                    verified: false,
+                  },
+                  tx
+                )
+              );
+            }),
+          catch: (error) => {
+            logger.error("Failed to create OTP in transaction", {
+              email,
+              error,
+            });
+            return new OTPError({
+              status: false,
+              message: "Gagal membuat kode OTP.",
+            });
+          },
         });
 
         yield* Effect.tryPromise({

@@ -17,6 +17,7 @@
   "dependencies": {
     "@node-rs/argon2": "catalog:",
     "@t3-oss/env-core": "^0.13.10",
+    "@tepian-k3/db": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/queries": "workspace:*",
     "@tepian-k3/services": "workspace:*",
