@@ -1,4 +1,4 @@
-import getRolesColumns from "@/components/columns/roles-columns";
+import getKBLIColumns from "@/components/columns/kbli-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
@@ -12,20 +12,22 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import rolesSchema from "@tepian-k3/schema/role.schema";
+import kbliSchema from "@tepian-k3/schema/kbli.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/(core)/dashboard/roles/")({
-  validateSearch: rolesSchema.getAllRolesSchema,
+export const Route = createFileRoute("/(core)/back-office/kblis/")({
+  validateSearch: kbliSchema.getAllKBLISchema,
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "roles.read" }),
+    await requirePermission(context, {
+      permission: "parameters.read",
+    }),
   loaderDeps: (search) => ({
-    searchParams: rolesSchema.getAllRolesSchema.parse(search),
+    searchParams: kbliSchema.getAllKBLISchema.parse(search),
   }),
   loader: ({ context, deps }) => {
     return context.queryClient.ensureQueryData(
-      context.trpc.role.getPaginatedRoles.queryOptions(deps.searchParams),
+      context.trpc.kbli.getPaginatedKblis.queryOptions(deps.searchParams),
     );
   },
   component: RouteComponent,
@@ -35,15 +37,15 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: roles } = useSuspenseQuery(
-    trpc.role.getPaginatedRoles.queryOptions(params),
+  const { data: kblis } = useSuspenseQuery(
+    trpc.kbli.getPaginatedKblis.queryOptions(params),
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
   const columns = useMemo(
     () =>
-      getRolesColumns({
+      getKBLIColumns({
         currentPage: params.page,
         perPage: params.perPage,
       }),
@@ -51,9 +53,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: roles.data,
+    data: kblis.data,
     columns,
-    pageCount: roles.pageCount,
+    pageCount: kblis.pageCount,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -69,11 +71,11 @@ function RouteComponent() {
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex flex-row gap-2">
           <Checkbox
-            id="show-deleted-users"
+            id="show-deleted-parameter"
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/roles",
+                to: "/dashboard/kblis",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -82,12 +84,12 @@ function RouteComponent() {
               setShowDeleted(Boolean(checked));
             }}
           />
-          <Label>Deleted Roles</Label>
+          <Label>Deleted KBLIs</Label>
         </div>
-        <PermissionGate permission="roles.create">
-          <Button onClick={() => navigate({ to: "/dashboard/roles/create" })}>
+        <PermissionGate permission="kbli.create">
+          <Button onClick={() => navigate({ to: "/dashboard/kblis/create" })}>
             <PlusCircle className="size-4" />
-            Tambah Role
+            Tambah KBLIs
           </Button>
         </PermissionGate>
       </div>

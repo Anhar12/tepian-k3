@@ -51,7 +51,7 @@ import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/users/$userId/edit")({
+export const Route = createFileRoute("/(core)/back-office/users/$userId/edit")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: ["users.update", "roles.read"],

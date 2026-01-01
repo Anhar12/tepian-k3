@@ -13,60 +13,75 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
-import { trpc } from "@/utils/trpc";
+import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import rolesSchema from "@tepian-k3/schema/role.schema";
+import kbliSchema from "@tepian-k3/schema/kbli.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/roles/create")({
+export const Route = createFileRoute("/(core)/back-office/kblis/$kbliId/edit")({
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "roles.create" }),
+    await requirePermission(context, { permission: "kbli.update" }),
+  params: z.object({
+    kbliId: z.uuidv7(),
+  }),
+  loader: async ({ context, params }) =>
+    context.queryClient.ensureQueryData(
+      context.trpc.kbli.getKbliById.queryOptions({
+        id: params.kbliId,
+      }),
+    ),
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { kbliId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
-  const form = useForm<z.infer<typeof rolesSchema.createRoleSchema>>({
-    resolver: zodResolver(rolesSchema.createRoleSchema),
+  const { data: kbli } = useSuspenseQuery(
+    trpc.kbli.getKbliById.queryOptions({ id: kbliId }),
+  );
+
+  const form = useForm<z.infer<typeof kbliSchema.updateKBLISchema>>({
+    resolver: zodResolver(kbliSchema.updateKBLISchema),
     defaultValues: {
-      name: "",
-      description: "",
+      id: kbli.id,
+      name: kbli.name,
     },
   });
 
-  const createRoleMutation = useMutation(
-    trpc.role.createRole.mutationOptions({
+  const updateKBLIMutation = useMutation(
+    trpc.kbli.updateKbli.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Berhasil membuat role");
-        form.reset();
+        await queryClient.invalidateQueries(
+          trpc.kbli.getKbliById.queryOptions({ id: kbliId }),
+        );
+        globalSuccessToast("Berhasil memperbarui KBLI");
         await redirectBack();
       },
       onError: (error) => {
-        globalErrorToast("Gagal membuat role: " + error.message);
+        globalErrorToast("Gagal memperbarui KBLI: " + error.message);
       },
     }),
   );
 
-  function handleSubmit(data: z.infer<typeof rolesSchema.createRoleSchema>) {
-    createRoleMutation.mutate(data);
+  function handleSubmit(data: z.infer<typeof kbliSchema.updateKBLISchema>) {
+    updateKBLIMutation.mutate(data);
   }
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Buat Role Baru</CardTitle>
+          <CardTitle>Perbarui KBLI</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk membuat role baru.
+            Isi form di bawah untuk memperbarui KBLI.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -84,35 +99,11 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nama Role
+                      Nama KBLI
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nama role"
-                      className="h-10 text-sm"
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                control={form.control}
-                name="description"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="space-y-1"
-                  >
-                    <FieldLabel className="ml-1 text-sm font-bold">
-                      Deskripsi Role
-                    </FieldLabel>
-                    <Textarea
-                      placeholder="Masukkan deskripsi role"
+                      placeholder="Masukkan nama KBLI"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -127,12 +118,12 @@ function RouteComponent() {
               <Button
                 type="submit"
                 className="mt-2 h-10 w-full text-sm"
-                disabled={createRoleMutation.isPending}
+                disabled={updateKBLIMutation.isPending}
               >
-                {createRoleMutation.isPending ? (
+                {updateKBLIMutation.isPending ? (
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Buat Role
+                Perbarui KBLI
               </Button>
             </FieldGroup>
           </form>

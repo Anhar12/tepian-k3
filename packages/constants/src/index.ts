@@ -6,6 +6,8 @@ export const PERMISSION_ACTION = [
   "manage",
 ] as const;
 
+export const USER_STATUS = ["Active", "Inactive", "Banned"] as const;
+
 export const TOOLS_CONDITIONS = [
   "Baik",
   "Rusak",
@@ -24,3 +26,13 @@ export const TOOLS_AVAILABILITY = [
 ] as const;
 
 export type ToolsAvailability = (typeof TOOLS_AVAILABILITY)[number];
+
+export const ORDER_STATUS = [
+  "Pending",
+  "Confirmed",
+  "In Progress",
+  "Completed",
+  "Cancelled",
+] as const;
+
+export type OrderStatus = (typeof ORDER_STATUS)[number];

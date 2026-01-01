@@ -49,7 +49,7 @@ import type z from "zod";
 import { requirePermission } from "@/utils/require-permission";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 
-export const Route = createFileRoute("/(core)/dashboard/users/create")({
+export const Route = createFileRoute("/(core)/back-office/users/create")({
   beforeLoad: async ({ context }) => {
     await requirePermission(context, { permission: "users.create" });
   },

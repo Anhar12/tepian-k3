@@ -16,7 +16,7 @@ import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 
-export const Route = createFileRoute("/(core)/dashboard/parameter-categories/")(
+export const Route = createFileRoute("/(core)/back-office/parameter-categories/")(
   {
     validateSearch: parameterCategoriesSchema.getAllParameterCategoriesSchema,
     beforeLoad: async ({ context }) =>

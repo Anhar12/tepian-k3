@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { PaginatedParameters } from "@tepian-k3/types/parameters.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/parameters";
+import { Route } from "@/routes/(core)/back-office/parameters";
 import {
   createNumberColumn,
   createTextColumn,

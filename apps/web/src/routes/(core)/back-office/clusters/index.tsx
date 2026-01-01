@@ -1,4 +1,4 @@
-import getKBLIColumns from "@/components/columns/kbli-columns";
+import getClustersColumns from "@/components/columns/clusters-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
@@ -12,22 +12,20 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import kbliSchema from "@tepian-k3/schema/kbli.schema";
+import clusterSchema from "@tepian-k3/schema/cluster.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/(core)/dashboard/kblis/")({
-  validateSearch: kbliSchema.getAllKBLISchema,
+export const Route = createFileRoute("/(core)/back-office/clusters/")({
+  validateSearch: clusterSchema.getAllClustersSchema,
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "parameters.read",
-    }),
+    await requirePermission(context, { permission: "clusters.read" }),
   loaderDeps: (search) => ({
-    searchParams: kbliSchema.getAllKBLISchema.parse(search),
+    searchParams: clusterSchema.getAllClustersSchema.parse(search),
   }),
   loader: ({ context, deps }) => {
     return context.queryClient.ensureQueryData(
-      context.trpc.kbli.getPaginatedKblis.queryOptions(deps.searchParams),
+      context.trpc.cluster.getPaginatedClusters.queryOptions(deps.searchParams),
     );
   },
   component: RouteComponent,
@@ -37,15 +35,15 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: kblis } = useSuspenseQuery(
-    trpc.kbli.getPaginatedKblis.queryOptions(params),
+  const { data: clusters } = useSuspenseQuery(
+    trpc.cluster.getPaginatedClusters.queryOptions(params),
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
   const columns = useMemo(
     () =>
-      getKBLIColumns({
+      getClustersColumns({
         currentPage: params.page,
         perPage: params.perPage,
       }),
@@ -53,9 +51,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: kblis.data,
+    data: clusters.data,
     columns,
-    pageCount: kblis.pageCount,
+    pageCount: clusters.pageCount,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -71,11 +69,11 @@ function RouteComponent() {
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex flex-row gap-2">
           <Checkbox
-            id="show-deleted-parameter"
+            id="show-deleted-clusters"
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/kblis",
+                to: "/dashboard/clusters",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -84,12 +82,14 @@ function RouteComponent() {
               setShowDeleted(Boolean(checked));
             }}
           />
-          <Label>Deleted KBLIs</Label>
+          <Label>Deleted Clusters</Label>
         </div>
-        <PermissionGate permission="kbli.create">
-          <Button onClick={() => navigate({ to: "/dashboard/kblis/create" })}>
+        <PermissionGate permission="clusters.create">
+          <Button
+            onClick={() => navigate({ to: "/dashboard/clusters/create" })}
+          >
             <PlusCircle className="size-4" />
-            Tambah KBLIs
+            Tambah Cluster
           </Button>
         </PermissionGate>
       </div>

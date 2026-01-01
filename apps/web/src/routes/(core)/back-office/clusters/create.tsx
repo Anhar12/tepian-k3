@@ -26,7 +26,7 @@ import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/clusters/create")({
+export const Route = createFileRoute("/(core)/back-office/clusters/create")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "clusters.create" }),
   component: RouteComponent,

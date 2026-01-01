@@ -1,4 +1,3 @@
-import getClustersColumns from "@/components/columns/clusters-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
@@ -7,25 +6,26 @@ import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import getUsersColumns from "@/components/columns/users-columns";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import clusterSchema from "@tepian-k3/schema/cluster.schema";
+import userSchema from "@tepian-k3/schema/users.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/(core)/dashboard/clusters/")({
-  validateSearch: clusterSchema.getAllClustersSchema,
+export const Route = createFileRoute("/(core)/back-office/users/")({
+  validateSearch: (search) => userSchema.getAllUsersSchema.parse(search),
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "clusters.read" }),
+    await requirePermission(context, { permission: "users.read" }),
   loaderDeps: (search) => ({
-    searchParams: clusterSchema.getAllClustersSchema.parse(search),
+    searchParams: userSchema.getAllUsersSchema.parse(search),
   }),
   loader: ({ context, deps }) => {
     return context.queryClient.ensureQueryData(
-      context.trpc.cluster.getPaginatedClusters.queryOptions(deps.searchParams),
+      context.trpc.user.getUserPaginated.queryOptions(deps.searchParams),
     );
   },
   component: RouteComponent,
@@ -35,15 +35,15 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: clusters } = useSuspenseQuery(
-    trpc.cluster.getPaginatedClusters.queryOptions(params),
+  const { data: users } = useSuspenseQuery(
+    trpc.user.getUserPaginated.queryOptions(params),
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
   const columns = useMemo(
     () =>
-      getClustersColumns({
+      getUsersColumns({
         currentPage: params.page,
         perPage: params.perPage,
       }),
@@ -51,9 +51,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: clusters.data,
+    data: users.data,
     columns,
-    pageCount: clusters.pageCount,
+    pageCount: users.pageCount,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -69,11 +69,11 @@ function RouteComponent() {
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex flex-row gap-2">
           <Checkbox
-            id="show-deleted-clusters"
+            id="show-deleted-users"
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/clusters",
+                to: "/dashboard/users",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -82,14 +82,12 @@ function RouteComponent() {
               setShowDeleted(Boolean(checked));
             }}
           />
-          <Label>Deleted Clusters</Label>
+          <Label>Deleted Users</Label>
         </div>
-        <PermissionGate permission="clusters.create">
-          <Button
-            onClick={() => navigate({ to: "/dashboard/clusters/create" })}
-          >
+        <PermissionGate permission="users.create">
+          <Button onClick={() => navigate({ to: "/dashboard/users/create" })}>
             <PlusCircle className="size-4" />
-            Tambah Cluster
+            Tambah Pengguna
           </Button>
         </PermissionGate>
       </div>

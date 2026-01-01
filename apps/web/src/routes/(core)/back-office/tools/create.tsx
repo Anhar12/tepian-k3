@@ -34,7 +34,7 @@ import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/tools/create")({
+export const Route = createFileRoute("/(core)/back-office/tools/create")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "tools.create" }),
   component: RouteComponent,

@@ -17,71 +17,56 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
-import { queryClient, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import rolesSchema from "@tepian-k3/schema/role.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/roles/$roleId/edit")({
+export const Route = createFileRoute("/(core)/back-office/roles/create")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "roles.create" }),
-  params: z.object({
-    roleId: z.uuidv7(),
-  }),
-  loader: async ({ context, params }) =>
-    context.queryClient.ensureQueryData(
-      context.trpc.role.getRoleById.queryOptions({ id: params.roleId }),
-    ),
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { roleId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
-  const { data: role } = useSuspenseQuery(
-    trpc.role.getRoleById.queryOptions({ id: roleId }),
-  );
-
-  const form = useForm<z.infer<typeof rolesSchema.updateRoleSchema>>({
-    resolver: zodResolver(rolesSchema.updateRoleSchema),
+  const form = useForm<z.infer<typeof rolesSchema.createRoleSchema>>({
+    resolver: zodResolver(rolesSchema.createRoleSchema),
     defaultValues: {
-      id: role.id,
-      name: role.name,
-      description: role.description ?? undefined,
+      name: "",
+      description: "",
     },
   });
 
-  const updateRoleMutation = useMutation(
-    trpc.role.updateRole.mutationOptions({
+  const createRoleMutation = useMutation(
+    trpc.role.createRole.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.role.getRoleById.queryOptions({ id: roleId }),
-        );
-        globalSuccessToast("Berhasil memperbarui role");
+        globalSuccessToast("Berhasil membuat role");
+        form.reset();
         await redirectBack();
       },
       onError: (error) => {
-        globalErrorToast("Gagal memperbarui role: " + error.message);
+        globalErrorToast("Gagal membuat role: " + error.message);
       },
     }),
   );
 
-  function handleSubmit(data: z.infer<typeof rolesSchema.updateRoleSchema>) {
-    updateRoleMutation.mutate(data);
+  function handleSubmit(data: z.infer<typeof rolesSchema.createRoleSchema>) {
+    createRoleMutation.mutate(data);
   }
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Role</CardTitle>
+          <CardTitle>Buat Role Baru</CardTitle>
           <CardDescription>
-            Perbarui informasi role di bawah ini.
+            Isi form di bawah untuk membuat role baru.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -142,12 +127,12 @@ function RouteComponent() {
               <Button
                 type="submit"
                 className="mt-2 h-10 w-full text-sm"
-                disabled={updateRoleMutation.isPending}
+                disabled={createRoleMutation.isPending}
               >
-                {updateRoleMutation.isPending ? (
+                {createRoleMutation.isPending ? (
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Perbarui Role
+                Buat Role
               </Button>
             </FieldGroup>
           </form>

@@ -1,9 +1,9 @@
+import getPaginatedParametersColumns from "@/components/columns/parameters-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { PermissionGate } from "@/components/permission-gate";
-import getToolsColumns from "@/components/columns/tools-columns";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -12,21 +12,26 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import toolsSchema from "@tepian-k3/schema/tools.schema";
+import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export const Route = createFileRoute("/(core)/dashboard/tools/")({
-  validateSearch: toolsSchema.getAllToolsSchema,
+export const Route = createFileRoute("/(core)/back-office/parameters/")({
+  validateSearch: parameterSchema.getAllParametersSchema,
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "tools.read" }),
+    await requirePermission(context, {
+      permission: "parameters.read",
+    }),
   loaderDeps: (search) => ({
-    searchParams: toolsSchema.getAllToolsSchema.parse(search),
+    searchParams: parameterSchema.getAllParametersSchema.parse(search),
   }),
-  loader: ({ context, deps }) =>
-    context.queryClient.ensureQueryData(
-      context.trpc.tool.getToolPaginated.queryOptions(deps.searchParams),
-    ),
+  loader: ({ context, deps }) => {
+    return context.queryClient.ensureQueryData(
+      context.trpc.parameter.getPaginatedParameters.queryOptions(
+        deps.searchParams,
+      ),
+    );
+  },
   component: RouteComponent,
 });
 
@@ -34,15 +39,15 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: tools } = useSuspenseQuery(
-    trpc.tool.getToolPaginated.queryOptions(params),
+  const { data: parameters } = useSuspenseQuery(
+    trpc.parameter.getPaginatedParameters.queryOptions(params),
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
   const columns = useMemo(
     () =>
-      getToolsColumns({
+      getPaginatedParametersColumns({
         currentPage: params.page,
         perPage: params.perPage,
       }),
@@ -50,9 +55,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: tools.data,
+    data: parameters.data,
     columns,
-    pageCount: tools.pageCount,
+    pageCount: parameters.pageCount,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -68,11 +73,11 @@ function RouteComponent() {
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex flex-row gap-2">
           <Checkbox
-            id="show-deleted-users"
+            id="show-deleted-parameter"
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/tools",
+                to: "/dashboard/parameters",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -81,12 +86,14 @@ function RouteComponent() {
               setShowDeleted(Boolean(checked));
             }}
           />
-          <Label>Deleted Tools</Label>
+          <Label>Deleted Parameters</Label>
         </div>
-        <PermissionGate permission="tools.create">
-          <Button onClick={() => navigate({ to: "/dashboard/tools/create" })}>
+        <PermissionGate permission="parameters.create">
+          <Button
+            onClick={() => navigate({ to: "/dashboard/parameters/create" })}
+          >
             <PlusCircle className="size-4" />
-            Tambah Alat
+            Tambah Parameter
           </Button>
         </PermissionGate>
       </div>

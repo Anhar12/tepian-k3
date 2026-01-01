@@ -14,6 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   Field,
   FieldError,
@@ -26,109 +27,95 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { requirePermission } from "@/utils/require-permission";
-import { queryClient, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
+import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute(
-  "/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit",
+  "/(core)/back-office/parameters/$parameterId/edit",
 )({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: "parameter-categories.update",
+      permission: "parameters.update",
     }),
   params: z.object({
-    parameterCategoriesId: z.uuidv7(),
+    parameterId: z.uuidv7(),
   }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.parameterCategories.getParameterCategoryById.queryOptions({
-        id: params.parameterCategoriesId,
+      context.trpc.parameter.getParameterById.queryOptions({
+        id: params.parameterId,
       }),
     );
     context.queryClient.ensureQueryData(
-      context.trpc.cluster.getAllClusters.queryOptions(),
+      context.trpc.parameterCategories.getAllParameterCategories.queryOptions(),
     );
   },
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { parameterCategoriesId } = Route.useParams();
+  const { parameterId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
-  const { data: parameterCategory } = useSuspenseQuery(
-    trpc.parameterCategories.getParameterCategoryById.queryOptions({
-      id: parameterCategoriesId,
+  const { data: parameter } = useSuspenseQuery(
+    trpc.parameter.getParameterById.queryOptions({
+      id: parameterId,
     }),
   );
 
-  const { data: clusters } = useSuspenseQuery(
-    trpc.cluster.getAllClusters.queryOptions(),
+  const { data: parameterCategories } = useSuspenseQuery(
+    trpc.parameterCategories.getAllParameterCategories.queryOptions(),
   );
 
-  const [clusterOpen, setClusterOpen] = useState(false);
+  const [parameterCategoryOpen, setParameterCategoryOpen] = useState(false);
 
-  const form = useForm<
-    z.infer<typeof parameterCategoriesSchema.updateParameterCategorySchema>
-  >({
-    resolver: zodResolver(
-      parameterCategoriesSchema.updateParameterCategorySchema,
-    ),
+  const form = useForm<z.infer<typeof parameterSchema.updateParameterSchema>>({
+    resolver: zodResolver(parameterSchema.updateParameterSchema),
     defaultValues: {
-      id: parameterCategory.id,
-      clusterId: parameterCategory.clusterId,
-      name: parameterCategory.name,
-      description: parameterCategory.description ?? undefined,
+      id: parameter.id,
+      parameterCategoryId: parameter.parameterCategoryId,
+      name: parameter.name,
+      price: parameter.price,
+      reference: parameter.reference ?? undefined,
     },
   });
 
-  const updateParameterCategoryMutation = useMutation(
-    trpc.parameterCategories.updateParameterCategory.mutationOptions({
+  const updateParameterMutation = useMutation(
+    trpc.parameter.updateParameter.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.parameterCategories.getParameterCategoryById.queryOptions({
-            id: parameterCategoriesId,
-          }),
-        );
-        globalSuccessToast("Berhasil memperbarui parameter category");
-
+        globalSuccessToast("Berhasil memperbarui parameter");
         await redirectBack();
       },
       onError: (error) => {
-        globalErrorToast(
-          "Gagal memperbarui parameter category: " + error.message,
-        );
+        globalErrorToast("Gagal memperbarui parameter: " + error.message);
       },
     }),
   );
 
   function handleSubmit(
-    data: z.infer<
-      typeof parameterCategoriesSchema.updateParameterCategorySchema
-    >,
+    data: z.infer<typeof parameterSchema.updateParameterSchema>,
   ) {
-    updateParameterCategoryMutation.mutate(data);
+    updateParameterMutation.mutate(data);
   }
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Perbarui Kategori Parameter</CardTitle>
+          <CardTitle>Perbarui Parameter</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk memperbarui kategori parameter.
+            Isi form di bawah untuk memperbarui parameter.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -139,21 +126,24 @@ function RouteComponent() {
             <FieldGroup>
               <Controller
                 control={form.control}
-                name="clusterId"
+                name="parameterCategoryId"
                 render={({ field, fieldState }) => (
                   <Field
                     data-invalid={fieldState.invalid}
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Cluster
+                      Kategori Parameter
                     </FieldLabel>
-                    <Popover open={clusterOpen} onOpenChange={setClusterOpen}>
+                    <Popover
+                      open={parameterCategoryOpen}
+                      onOpenChange={setParameterCategoryOpen}
+                    >
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           role="combobox"
-                          aria-expanded={clusterOpen}
+                          aria-expanded={parameterCategoryOpen}
                           aria-invalid={fieldState.invalid}
                           className={cn(
                             "w-full justify-between",
@@ -161,36 +151,38 @@ function RouteComponent() {
                           )}
                         >
                           {field.value
-                            ? clusters.find((c) => c.id === field.value)?.name
-                            : "Pilih cluster..."}
+                            ? parameterCategories.find(
+                                (c) => c.id === field.value,
+                              )?.name
+                            : "Pilih kategori parameter..."}
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="popover-content-width-full p-0">
                         <Command>
                           <CommandInput
-                            placeholder="Cari cluster..."
+                            placeholder="Cari kategori parameter..."
                             className="h-9"
                           />
                           <CommandList>
                             <CommandEmpty>
-                              Tidak ada cluster yang ditemukan.
+                              Tidak ada kategori parameter yang ditemukan.
                             </CommandEmpty>
                             <CommandGroup>
-                              {clusters.map((cluster) => (
+                              {parameterCategories.map((category) => (
                                 <CommandItem
-                                  value={cluster.id}
-                                  key={cluster.id}
+                                  value={category.name}
+                                  key={category.id}
                                   onSelect={() => {
-                                    field.onChange(cluster.id);
-                                    setClusterOpen(false);
+                                    field.onChange(category.id);
+                                    setParameterCategoryOpen(false);
                                   }}
                                 >
-                                  {cluster.name}
+                                  {category.name}
                                   <Check
                                     className={cn(
                                       "ml-auto",
-                                      field.value === cluster.id
+                                      field.value === category.id
                                         ? "opacity-100"
                                         : "opacity-0",
                                     )}
@@ -218,11 +210,11 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nama Kategori Parameter
+                      Nama Parameter
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nama kategori parameter"
+                      placeholder="Masukkan nama parameter"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -236,17 +228,41 @@ function RouteComponent() {
 
               <Controller
                 control={form.control}
-                name="description"
+                name="price"
                 render={({ field, fieldState }) => (
                   <Field
                     data-invalid={fieldState.invalid}
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Deskripsi Kategori Parameter
+                      Harga Parameter
                     </FieldLabel>
-                    <Textarea
-                      placeholder="Masukkan deskripsi kategori parameter"
+                    <CurrencyInput
+                      placeholder="Masukkan harga parameter"
+                      className="h-10 text-left text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="reference"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Referensi Parameter
+                    </FieldLabel>
+                    <Input
+                      placeholder="Masukkan referensi parameter"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -261,12 +277,12 @@ function RouteComponent() {
               <Button
                 type="submit"
                 className="mt-2 h-10 w-full text-sm"
-                disabled={updateParameterCategoryMutation.isPending}
+                disabled={updateParameterMutation.isPending}
               >
-                {updateParameterCategoryMutation.isPending ? (
+                {updateParameterMutation.isPending ? (
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Perbarui Kategori Parameter
+                Perbarui Parameter
               </Button>
             </FieldGroup>
           </form>

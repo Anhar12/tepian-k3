@@ -3,6 +3,7 @@ import {
   createTRPCRouter,
   formDataInput,
   formDataProcedure,
+  protectedProcedure,
   publicProcedure,
   withPermission,
 } from "..";
@@ -18,7 +19,7 @@ export const userCompanyRouter = createTRPCRouter({
       await Effect.runPromise(userCompanyQueries.getAllUserCompanies())
   ),
 
-  getPaginatedUserCompaniesByUserId: withPermission("user-company.create")
+  getPaginatedUserCompaniesByUserId: protectedProcedure
     .input(userCompanySchema.getAllUserCompaniesSchema)
     .query(async ({ input, ctx: { user } }) => {
       const { data, pageCount } = await Effect.runPromise(
@@ -62,7 +63,7 @@ export const userCompanyRouter = createTRPCRouter({
       return userCompany;
     }),
 
-  getUserCompanyByIdAndUserId: withPermission("user-company.read")
+  getUserCompanyByIdAndUserId: protectedProcedure
     .input(
       z.object({
         id: z.uuidv7(),
@@ -88,7 +89,7 @@ export const userCompanyRouter = createTRPCRouter({
       };
     }),
 
-  userCreateUserCompany: withPermission("user-company.create")
+  userCreateUserCompany: protectedProcedure
     .input(formDataInput)
     .use(formDataProcedure(userCompanySchema.createUserCompanySchema))
     .mutation(async ({ ctx }) =>
@@ -118,7 +119,7 @@ export const userCompanyRouter = createTRPCRouter({
       )
     ),
 
-  userUpdateUserCompany: withPermission("user-company.update")
+  userUpdateUserCompany: protectedProcedure
     .input(formDataInput)
     .use(formDataProcedure(userCompanySchema.updateUserCompanySchema))
     .mutation(async ({ ctx: { user, input } }) =>
@@ -152,7 +153,7 @@ export const userCompanyRouter = createTRPCRouter({
       )
     ),
 
-  userDeleteUserCompany: withPermission("user-company.delete")
+  userDeleteUserCompany: protectedProcedure
     .input(
       z.object({
         id: z.uuidv7(),
@@ -165,7 +166,7 @@ export const userCompanyRouter = createTRPCRouter({
         )
     ),
 
-  userRestoreUserCompany: withPermission("user-company.delete")
+  userRestoreUserCompany: protectedProcedure
     .input(
       z.object({
         id: z.uuidv7(),

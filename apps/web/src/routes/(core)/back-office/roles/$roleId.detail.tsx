@@ -18,7 +18,7 @@ import { LoaderCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/dashboard/roles/$roleId/detail")({
+export const Route = createFileRoute("/(core)/back-office/roles/$roleId/detail")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "roles.read" }),
   params: z.object({

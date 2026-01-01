@@ -27,7 +27,7 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute(
-  "/(core)/dashboard/clusters/$clusterId/edit",
+  "/(core)/back-office/clusters/$clusterId/edit",
 )({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "clusters.update" }),
