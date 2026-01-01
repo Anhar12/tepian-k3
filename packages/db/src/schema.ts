@@ -131,50 +131,59 @@ export const kblis = createTable(
   (table) => [index("kbli_id_idx").using("btree", table.id)]
 );
 
-export const userCompanies = createTable("user_companies", {
-  id: uuid("id")
-    .primaryKey()
-    .notNull()
-    .$default(() => uuidv7()),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  name: varchar("name", { length: 250 }).notNull(),
-  kbliId: uuid("kbli_id")
-    .notNull()
-    .references(() => kblis.id, { onDelete: "cascade" }),
-  address: text("address").notNull(),
-  maleWorkers: integer("maleWorkers").notNull().default(0),
-  femaleWorkers: integer("femaleWorkers").notNull().default(0),
-  healthFacilityAvailable: boolean("healthFacilityAvailable")
-    .notNull()
-    .default(false),
-  provinceId: uuid("provinceId")
-    .notNull()
-    .references(() => provinces.id, { onDelete: "cascade" }),
-  districtId: uuid("districtId")
-    .notNull()
-    .references(() => districts.id, { onDelete: "cascade" }),
-  regencyId: uuid("regencyId")
-    .notNull()
-    .references(() => regencies.id, { onDelete: "cascade" }),
-  villageId: uuid("villageId")
-    .notNull()
-    .references(() => villages.id, { onDelete: "cascade" }),
-  responsibleTestingPerson: varchar("responsible_testing_person", {
-    length: 250,
-  }).notNull(),
-  responsibleTestingPersonPhone: varchar("responsible_testing_person_phone", {
-    length: 50,
-  }).notNull(),
-  responsibleTestingPersonEmail: varchar("responsible_testing_person_email", {
-    length: 250,
-  }).notNull(),
-  email: varchar("email", { length: 250 }).notNull(),
-  wlkpStatus: boolean("wlkp_status").notNull().default(false),
-  wlkp: text("wlkp").notNull(),
-  ...timestamps,
-});
+export const userCompanies = createTable(
+  "user_companies",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    kbliId: uuid("kbli_id")
+      .notNull()
+      .references(() => kblis.id, { onDelete: "cascade" }),
+    address: text("address").notNull(),
+    maleWorkers: integer("maleWorkers").notNull().default(0),
+    femaleWorkers: integer("femaleWorkers").notNull().default(0),
+    healthFacilityAvailable: boolean("healthFacilityAvailable")
+      .notNull()
+      .default(false),
+    provinceId: uuid("provinceId")
+      .notNull()
+      .references(() => provinces.id, { onDelete: "cascade" }),
+    districtId: uuid("districtId")
+      .notNull()
+      .references(() => districts.id, { onDelete: "cascade" }),
+    regencyId: uuid("regencyId")
+      .notNull()
+      .references(() => regencies.id, { onDelete: "cascade" }),
+    villageId: uuid("villageId")
+      .notNull()
+      .references(() => villages.id, { onDelete: "cascade" }),
+    responsibleTestingPerson: varchar("responsible_testing_person", {
+      length: 250,
+    }).notNull(),
+    responsibleTestingPersonPhone: varchar("responsible_testing_person_phone", {
+      length: 50,
+    }).notNull(),
+    responsibleTestingPersonEmail: varchar("responsible_testing_person_email", {
+      length: 250,
+    }).notNull(),
+    email: varchar("email", { length: 250 }).notNull(),
+    wlkpStatus: boolean("wlkp_status").notNull().default(false),
+    wlkp: text("wlkp").notNull(),
+    companyPictureFileName: text("company_picture_file_name").notNull(),
+    companyPictureUrl: text("company_picture_url").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("user_company_id_idx").using("btree", table.id),
+    index("user_company_user_id_idx").using("btree", table.userId),
+  ]
+);
 
 export const userCompanyTestingLocation = createTable(
   "user_company_testing_locations",

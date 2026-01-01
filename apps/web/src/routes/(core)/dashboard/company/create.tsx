@@ -20,11 +20,13 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { RadioGroup } from "@/components/ui/radio-group";
+import SingleImageUpload from "@/components/ui/single-image-upload";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
+import { toFormData } from "@/utils/form-data-mapper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
@@ -87,7 +89,12 @@ function RouteComponent() {
   const handleSubmit = (
     data: z.infer<typeof userCompanySchema.createUserCompanySchema>,
   ) => {
-    createUserCompanyMutation.mutate(data);
+    const formData = toFormData(data);
+
+    // FormData is sent as raw input, cast to bypass TypeScript's void type
+    (createUserCompanyMutation.mutate as unknown as (data: FormData) => void)(
+      formData,
+    );
   };
 
   const { data: kbli } = useSuspenseQuery(trpc.kbli.getAllKblis.queryOptions());
@@ -128,6 +135,17 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
+              <Controller
+                control={form.control}
+                name="picture"
+                render={({ field, fieldState }) => (
+                  <SingleImageUpload
+                    {...field}
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+
               <div className="flex flex-row gap-2">
                 <Controller
                   control={form.control}

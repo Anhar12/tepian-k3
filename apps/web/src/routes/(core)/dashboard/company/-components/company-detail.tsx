@@ -43,6 +43,22 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
+            <div className="flex justify-start">
+              {company.companyPictureUrl ? (
+                // If company has a logo, display it
+                <img
+                  src={company.companyPictureUrl}
+                  alt="Logo Perusahaan"
+                  className="h-32 w-32 rounded-lg object-cover"
+                />
+              ) : (
+                // Placeholder for companies without a logo
+                <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gray-200">
+                  <span className="text-gray-500">No Logo</span>
+                </div>
+              )}
+            </div>
+
             <FieldGroup>
               <Field className="space-y-1">
                 <FieldLabel className="ml-1 text-sm font-bold">

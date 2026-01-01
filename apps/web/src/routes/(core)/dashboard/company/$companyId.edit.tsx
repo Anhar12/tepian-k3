@@ -20,9 +20,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { RadioGroup } from "@/components/ui/radio-group";
+import SingleImageUpload from "@/components/ui/single-image-upload";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { toFormData } from "@/utils/form-data-mapper";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -127,7 +129,11 @@ function RouteComponent() {
   const handleSubmit = (
     data: z.infer<typeof userCompanySchema.updateUserCompanySchema>,
   ) => {
-    updateUserCompanyMutation.mutate(data);
+    const formData = toFormData(data);
+
+    (updateUserCompanyMutation.mutate as unknown as (data: FormData) => void)(
+      formData,
+    );
   };
 
   const { data: kbli } = useSuspenseQuery(trpc.kbli.getAllKblis.queryOptions());
@@ -168,6 +174,33 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
+              <div className="flex justify-start">
+                {company.companyPictureUrl ? (
+                  // If company has a logo, display it
+                  <img
+                    src={company.companyPictureUrl}
+                    alt="Logo Perusahaan"
+                    className="h-32 w-32 rounded-lg object-cover"
+                  />
+                ) : (
+                  // Placeholder for companies without a logo
+                  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gray-200">
+                    <span className="text-gray-500">No Logo</span>
+                  </div>
+                )}
+              </div>
+
+              <Controller
+                control={form.control}
+                name="picture"
+                render={({ field, fieldState }) => (
+                  <SingleImageUpload
+                    {...field}
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+
               <div className="flex flex-row gap-2">
                 <Controller
                   control={form.control}

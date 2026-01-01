@@ -45,7 +45,18 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
   responsibleTestingPerson: z.string().min(1).max(256),
   responsibleTestingPersonEmail: z.email().max(256),
   responsibleTestingPersonPhone: z.string().min(1).max(20),
-}).omit({ createdAt: true, updatedAt: true, deletedAt: true, userId: true });
+})
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+    userId: true,
+    companyPictureFileName: true,
+    companyPictureUrl: true,
+  })
+  .extend({
+    picture: z.file().max(2 * 1024 * 1024),
+  });
 
 const updateUserCompanySchema = createUpdateSchema(userCompanies, {
   id: z.uuidv7(),
@@ -65,7 +76,18 @@ const updateUserCompanySchema = createUpdateSchema(userCompanies, {
   responsibleTestingPerson: z.optional(z.string().min(1).max(256)),
   responsibleTestingPersonEmail: z.optional(z.email().max(256)),
   responsibleTestingPersonPhone: z.optional(z.string().min(1).max(20)),
-}).omit({ createdAt: true, updatedAt: true, deletedAt: true, userId: true });
+})
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+    userId: true,
+    companyPictureFileName: true,
+    companyPictureUrl: true,
+  })
+  .extend({
+    picture: z.optional(z.file().max(2 * 1024 * 1024)),
+  });
 
 const userCompanySchema = {
   getAllUserCompaniesSchema,

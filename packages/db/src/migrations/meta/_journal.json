@@ -15,6 +15,13 @@
       "when": 1767092769694,
       "tag": "0001_sad_moonstone",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767235870573,
+      "tag": "0002_mighty_wallop",
+      "breakpoints": true
     }
   ]
 }

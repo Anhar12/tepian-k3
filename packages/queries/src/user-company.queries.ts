@@ -26,6 +26,7 @@ import { Effect } from "effect";
 import { logger } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
+import { storageService } from "@tepian-k3/services/storage";
 
 const userCompanyQueries = {
   getAllUserCompanies() {
@@ -426,7 +427,9 @@ const userCompanyQueries = {
 
   userCreateUserCompany(
     userId: string,
-    data: z.infer<typeof userCompanySchema.createUserCompanySchema>
+    data: z.infer<typeof userCompanySchema.createUserCompanySchema>,
+    filename: string,
+    url: string
   ) {
     return Effect.gen(this, function* () {
       const isExisting = yield* userCompanyQueries.getUserCompanyNameByUserId(
@@ -464,6 +467,8 @@ const userCompanyQueries = {
               responsibleTestingPerson: data.responsibleTestingPerson,
               responsibleTestingPersonEmail: data.responsibleTestingPersonEmail,
               responsibleTestingPersonPhone: data.responsibleTestingPersonPhone,
+              companyPictureFileName: filename,
+              companyPictureUrl: url,
             })
             .returning()
             .execute(),
@@ -489,7 +494,9 @@ const userCompanyQueries = {
 
   userUpdateUserCompany(
     userId: string,
-    data: z.infer<typeof userCompanySchema.updateUserCompanySchema>
+    data: z.infer<typeof userCompanySchema.updateUserCompanySchema>,
+    filename?: string,
+    url?: string
   ) {
     return Effect.gen(this, function* () {
       const existingUserCompany = yield* userCompanyQueries.getUserCompanyById(
@@ -532,6 +539,15 @@ const userCompanyQueries = {
         );
       }
 
+      if (
+        existingUserCompany.companyPictureFileName &&
+        existingUserCompany.companyPictureUrl
+      ) {
+        yield* storageService.delete(
+          `company-pictures/${existingUserCompany.companyPictureFileName}`
+        );
+      }
+
       const [updatedUserCompany] = yield* Effect.tryPromise({
         try: () =>
           db
@@ -568,6 +584,9 @@ const userCompanyQueries = {
               responsibleTestingPersonPhone:
                 data.responsibleTestingPersonPhone ??
                 existingUserCompany.responsibleTestingPersonPhone,
+              companyPictureFileName:
+                filename ?? existingUserCompany.companyPictureFileName,
+              companyPictureUrl: url ?? existingUserCompany.companyPictureUrl,
             })
             .where(eq(userCompanies.id, data.id))
             .returning()

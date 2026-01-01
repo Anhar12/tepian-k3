@@ -13,6 +13,7 @@ import { ZodError, z } from "zod";
 import type { Context as HonoContext } from "hono";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { Effect } from "effect";
+import { parseAndValidateSafe } from "./utils/form-data-parser";
 
 /**
  * Isomorphic Session getter for API requests
@@ -176,6 +177,45 @@ export const protectedProcedure = t.procedure
   });
 
 /**
+ * Custom tRPC procedure that accepts FormData
+ * Use this instead of .input() for FormData endpoints
+ */
+export const formDataProcedure = <T extends z.ZodTypeAny>(schema: T) =>
+  t.middleware(async (opts) => {
+    const { getRawInput, next } = opts;
+    const rawInput = await getRawInput();
+
+    if (!(rawInput instanceof FormData)) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Expected FormData input",
+      });
+    }
+
+    const parsed = parseAndValidateSafe(rawInput, schema);
+
+    if (!parsed.success) {
+      // Format Zod errors into user-friendly messages
+      const errors = parsed.error.issues.map((err) => {
+        const field = err.path.join(".");
+        return field ? `${field}: ${err.message}` : err.message;
+      });
+
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: errors.join(", "),
+        cause: parsed.error,
+      });
+    }
+
+    return next({
+      ctx: {
+        input: parsed,
+      },
+    });
+  });
+
+/**
  * The `withPermission` function checks if a user has a specific permission before allowing access to a
  * protected procedure.
  * @param {string} permission - The `permission` parameter in the `withPermission` function is a string
@@ -196,7 +236,9 @@ export const withPermission = (permission: string) =>
       });
     }
 
-    return next();
+    return next({
+      ctx,
+    });
   });
 
 /**
@@ -218,7 +260,9 @@ export const withRole = (role: string) =>
       });
     }
 
-    return next();
+    return next({
+      ctx,
+    });
   });
 
 /**
@@ -240,7 +284,9 @@ export const withAnyRole = (roleNames: string[]) =>
       });
     }
 
-    return next();
+    return next({
+      ctx,
+    });
   });
 
 /**
@@ -264,5 +310,7 @@ export const withAllRoles = (roleNames: string[]) =>
       });
     }
 
-    return next();
+    return next({
+      ctx,
+    });
   });
