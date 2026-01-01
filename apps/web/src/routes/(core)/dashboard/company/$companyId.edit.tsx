@@ -130,10 +130,7 @@ function RouteComponent() {
     data: z.infer<typeof userCompanySchema.updateUserCompanySchema>,
   ) => {
     const formData = toFormData(data);
-
-    (updateUserCompanyMutation.mutate as unknown as (data: FormData) => void)(
-      formData,
-    );
+    updateUserCompanyMutation.mutate(formData);
   };
 
   const { data: kbli } = useSuspenseQuery(trpc.kbli.getAllKblis.queryOptions());

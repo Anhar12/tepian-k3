@@ -216,6 +216,15 @@ export const formDataProcedure = <T extends z.ZodTypeAny>(schema: T) =>
   });
 
 /**
+ * FormData input schema for tRPC procedures
+ * This allows tRPC to properly type mutations that accept FormData
+ */
+export const formDataInput = z.custom<FormData>(
+  (val) => val instanceof FormData,
+  { message: "Expected FormData input" },
+);
+
+/**
  * The `withPermission` function checks if a user has a specific permission before allowing access to a
  * protected procedure.
  * @param {string} permission - The `permission` parameter in the `withPermission` function is a string

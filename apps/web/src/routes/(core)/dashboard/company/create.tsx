@@ -90,11 +90,7 @@ function RouteComponent() {
     data: z.infer<typeof userCompanySchema.createUserCompanySchema>,
   ) => {
     const formData = toFormData(data);
-
-    // FormData is sent as raw input, cast to bypass TypeScript's void type
-    (createUserCompanyMutation.mutate as unknown as (data: FormData) => void)(
-      formData,
-    );
+    createUserCompanyMutation.mutate(formData);
   };
 
   const { data: kbli } = useSuspenseQuery(trpc.kbli.getAllKblis.queryOptions());

@@ -1,6 +1,7 @@
 import userCompanySchema from "@tepian-k3/schema/user-company.schema";
 import {
   createTRPCRouter,
+  formDataInput,
   formDataProcedure,
   publicProcedure,
   withPermission,
@@ -88,6 +89,7 @@ export const userCompanyRouter = createTRPCRouter({
     }),
 
   userCreateUserCompany: withPermission("user-company.create")
+    .input(formDataInput)
     .use(formDataProcedure(userCompanySchema.createUserCompanySchema))
     .mutation(async ({ ctx }) =>
       Effect.runPromise(
@@ -117,6 +119,7 @@ export const userCompanyRouter = createTRPCRouter({
     ),
 
   userUpdateUserCompany: withPermission("user-company.update")
+    .input(formDataInput)
     .use(formDataProcedure(userCompanySchema.updateUserCompanySchema))
     .mutation(async ({ ctx: { user, input } }) =>
       Effect.runPromise(
