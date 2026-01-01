@@ -28,8 +28,10 @@ export const Route = createFileRoute("/(core)/back-office")({
       });
     }
 
-    if (user.roles.find((role) => role.name === "user")) {
-      throw redirect({ to: "/" });
+    // Prevent regular users from accessing back office
+    const hasUserRole = user.roles.some((role) => role.name === "user");
+    if (hasUserRole) {
+      throw redirect({ to: "/dashboard" });
     }
 
     return null;
