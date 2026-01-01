@@ -10,6 +10,11 @@ export const cartRouter = createTRPCRouter({
       await Effect.runPromise(cartQueries.getUserCartList(ctx.user.id))
   ),
 
+  getCartItemCount: protectedProcedure.query(
+    async ({ ctx }) =>
+      await Effect.runPromise(cartQueries.getUserCartCount(ctx.user.id))
+  ),
+
   insertCartItem: protectedProcedure
     .input(cartSchema.createCartSchema)
     .mutation(

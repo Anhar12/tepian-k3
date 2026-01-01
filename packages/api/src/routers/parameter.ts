@@ -1,11 +1,23 @@
 import parameterSchema from "@tepian-k3/schema/parameter.schema";
-import { createTRPCRouter, withPermission } from "..";
+import { createTRPCRouter, publicProcedure, withPermission } from "..";
 import { Effect } from "effect";
 import parameterQueries from "@tepian-k3/queries/parameter.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const parameterRouter = createTRPCRouter({
+  getOffsetPaginatedParametersByClusterIdAndCategoryId: publicProcedure
+    .input(parameterSchema.getByClusterAndParameterCategorySchema)
+    .query(async ({ input }) => {
+      const { data, pageCount } = await Effect.runPromise(
+        parameterQueries.getOffsetPaginatedParametersByClusterIdAndCategoryId(
+          input
+        )
+      );
+
+      return { data, pageCount };
+    }),
+
   getPaginatedParameters: withPermission("parameters.read")
     .input(parameterSchema.getAllParametersSchema)
     .query(async ({ input }) => {

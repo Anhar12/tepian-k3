@@ -28,6 +28,14 @@ const getAllParametersSchema = z.object({
   showDeleted: z.boolean().default(false),
 });
 
+const getByClusterAndParameterCategorySchema = z.object({
+  page: z.number().default(1),
+  perPage: z.number().default(10),
+  clusterId: z.string().default(""),
+  parameterCategoryId: z.string().default(""),
+  name: z.string().default(""),
+});
+
 const createParameterSchema = createInsertSchema(parameters, {
   name: z.string().min(1).max(256),
   parameterCategoryId: z.uuidv7(),
@@ -47,6 +55,7 @@ const updateParameterSchema = createUpdateSchema(parameters, {
 
 const parameterSchema = {
   getAllParametersSchema,
+  getByClusterAndParameterCategorySchema,
   createParameterSchema,
   updateParameterSchema,
 };
