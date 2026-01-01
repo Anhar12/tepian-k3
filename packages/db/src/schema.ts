@@ -504,3 +504,34 @@ export const villages = createTable(
     index("village_old_district_id_idx").using("btree", table.oldDistrictId),
   ]
 );
+
+export const cart = createTable(
+  "cart",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    price: integer("price").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("cart_user_id_idx").using("btree", table.userId),
+    index("cart_company_id_idx").using("btree", table.companyId),
+    index("cart_location_id_idx").using("btree", table.locationId),
+    index("cart_parameter_id_idx").using("btree", table.parameterId),
+  ]
+);

@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  cart,
   clusters,
   districts,
   kblis,
@@ -21,6 +22,7 @@ import {
 export const userRelations = relations(users, ({ many }) => ({
   userCompanies: many(userCompanies),
   roles: many(userRoles),
+  cart: many(cart),
 }));
 
 export const kbliRelations = relations(kblis, ({ many }) => ({
@@ -167,5 +169,24 @@ export const villageRelations = relations(villages, ({ one }) => ({
   district: one(districts, {
     fields: [villages.districtId],
     references: [districts.id],
+  }),
+}));
+
+export const cartRelations = relations(cart, ({ one }) => ({
+  user: one(users, {
+    fields: [cart.userId],
+    references: [users.id],
+  }),
+  company: one(userCompanies, {
+    fields: [cart.companyId],
+    references: [userCompanies.id],
+  }),
+  location: one(userCompanyTestingLocation, {
+    fields: [cart.locationId],
+    references: [userCompanyTestingLocation.id],
+  }),
+  parameter: one(parameters, {
+    fields: [cart.parameterId],
+    references: [parameters.id],
   }),
 }));

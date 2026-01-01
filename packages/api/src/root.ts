@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from ".";
 import { authRouter } from "./routers/auth";
+import { cartRouter } from "./routers/cart";
 import { clusterRouter } from "./routers/cluster";
 import { districtRouter } from "./routers/district";
 import { kbliRouter } from "./routers/kbli";
@@ -36,6 +37,7 @@ export const appRouter = createTRPCRouter({
   kbli: kbliRouter,
   userCompany: userCompanyRouter,
   userCompanyTestingLocation: userCompanyTestingLocationRouter,
+  cart: cartRouter,
 });
 
 // export type definition of API
