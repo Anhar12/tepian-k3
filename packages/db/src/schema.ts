@@ -405,6 +405,7 @@ export const parameters = createTable(
     name: varchar("name", { length: 250 }).notNull(),
     reference: text("reference"),
     price: integer("price").notNull(),
+    unit: varchar("unit", { length: 255 }).notNull(),
     ...timestamps,
   },
   (table) => [

@@ -1,0 +1,478 @@
+[
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Kebisingan - Sesaat/Ambien",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "dB(A)",
+    "harga": 850000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Kebisingan - 24 Jam",
+    "cluster": "Lingkungan Hidup Kepmen Lh 48 Tahun 1996",
+    "satuan": "dB(A)",
+    "harga": 1500000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Kebisingan - Lingker",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "dB(A)",
+    "harga": 900000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Kebisingan - Personal",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "dB(A)",
+    "harga": 1200000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Kebisingan - Noise Contour",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "dB(A)",
+    "harga": 2500000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Pencahayaan Umum",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "Lux",
+    "harga": 750000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Pencahayaan Lokal",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "Lux",
+    "harga": 650000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Iklim Kerja",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "°C",
+    "harga": 800000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Getaran Seluruh Tubuh",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "m/s²",
+    "harga": 1800000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Getaran Lengan/Tangan",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "m/s²",
+    "harga": 1600000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Getaran Mekanik",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "m/s²",
+    "harga": 1750000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "Radiasi UV",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "W/m²",
+    "harga": 1400000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "EMF - Gelombang EM",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "V/m",
+    "harga": 2200000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "EMF - Magnet",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "µT",
+    "harga": 2100000
+  },
+  {
+    "kategoriParameter": "Faktor Fisika",
+    "parameter": "EMF - Radio & Mikro",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "W/m²",
+    "harga": 2400000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Debu - TSP",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "mg/m³",
+    "harga": 950000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Debu - Inhalabel",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "mg/m³",
+    "harga": 1100000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Debu Respirabel",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "mg/m³",
+    "harga": 1250000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Debu - PM 10",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "µg/m³",
+    "harga": 1300000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Debu - PM 2.5",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "µg/m³",
+    "harga": 1450000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Debu - Pb",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "µg/m³",
+    "harga": 1850000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Ambien - CO",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1050000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Ambien - NO2",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1150000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Ambien - SO2",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1200000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Ambien - O3",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1350000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Ambien - NH3",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1100000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Ambien - H2S",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1250000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Kendaraan - Opasitas",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "%",
+    "harga": 700000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Kendaraan - HC",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 800000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Kendaraan - CO",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 750000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Genset - CO",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1400000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Genset - NOx",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1500000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Genset - SOx",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1550000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Genset - Partikulat",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "mg/m³",
+    "harga": 1650000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Genset - Opasitas",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "%",
+    "harga": 1300000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - CO",
+    "cluster": "Lingkup Hidup",
+    "satuan": "ppm",
+    "harga": 1600000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - NOx",
+    "cluster": "Lingkup Hidup",
+    "satuan": "ppm",
+    "harga": 1700000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - SOx",
+    "cluster": "Lingkup Hidup",
+    "satuan": "ppm",
+    "harga": 1750000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - NH3",
+    "cluster": "Lingkup Hidup",
+    "satuan": "ppm",
+    "harga": 1650000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - Cl2",
+    "cluster": "Lingkup Hidup",
+    "satuan": "ppm",
+    "harga": 1800000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - H2S",
+    "cluster": "Lingkup Hidup",
+    "satuan": "ppm",
+    "harga": 1700000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - Partikulat",
+    "cluster": "Lingkup Hidup",
+    "satuan": "mg/m³",
+    "harga": 1900000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Emisi Boiler - Opasitas",
+    "cluster": "Lingkup Hidup",
+    "satuan": "%",
+    "harga": 1500000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Hidrokarbon - Benzene",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 2200000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Hidrokarbon - Toluene",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 2100000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Hidrokarbon - Xylene",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 2150000
+  },
+  {
+    "kategoriParameter": "Faktor Kimia",
+    "parameter": "Hidrokarbon - HC Total",
+    "cluster": "Lingkungan Hidup",
+    "satuan": "ppm",
+    "harga": 1950000
+  },
+  {
+    "kategoriParameter": "Faktor Mikrobiologi",
+    "parameter": "Mikrobiologi Udara - Bakteri",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "CFU/m³",
+    "harga": 1800000
+  },
+  {
+    "kategoriParameter": "Faktor Mikrobiologi",
+    "parameter": "Mikrobiologi Udara - Jamur",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "CFU/m³",
+    "harga": 1750000
+  },
+  {
+    "kategoriParameter": "Faktor Kesehatan",
+    "parameter": "Ergonomi",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "unknownn",
+    "harga": 2500000
+  },
+  {
+    "kategoriParameter": "Faktor Kesehatan",
+    "parameter": "Kelelahan",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "unknownn",
+    "harga": 1200000
+  },
+  {
+    "kategoriParameter": "Faktor Kesehatan",
+    "parameter": "Audiometri",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "dB",
+    "harga": 350000
+  },
+  {
+    "kategoriParameter": "Faktor Kesehatan",
+    "parameter": "Spirometri",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "L",
+    "harga": 400000
+  },
+  {
+    "kategoriParameter": "Faktor Kesehatan",
+    "parameter": "Cholinesteras",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "U/L",
+    "harga": 450000
+  },
+  {
+    "kategoriParameter": "Faktor Kesehatan",
+    "parameter": "Kalori Makanan/Gizi Kerja",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "kcal",
+    "harga": 1500000
+  },
+  {
+    "kategoriParameter": "KUDR",
+    "parameter": "HCHO",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 1650000
+  },
+  {
+    "kategoriParameter": "KUDR",
+    "parameter": "TVOC",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 1800000
+  },
+  {
+    "kategoriParameter": "KUDR",
+    "parameter": "CO",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 1100000
+  },
+  {
+    "kategoriParameter": "KUDR",
+    "parameter": "CO2",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 1200000
+  },
+  {
+    "kategoriParameter": "KUDR",
+    "parameter": "PM 10",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "µg/m³",
+    "harga": 1400000
+  },
+  {
+    "kategoriParameter": "KUDR",
+    "parameter": "Ox",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 1350000
+  },
+  {
+    "kategoriParameter": "KUDR",
+    "parameter": "NO",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "ppm",
+    "harga": 1250000
+  },
+  {
+    "kategoriParameter": "Pengujian Lain",
+    "parameter": "Psikologi",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "unknown",
+    "harga": 3500000
+  },
+  {
+    "kategoriParameter": "Pengujian Lain",
+    "parameter": "Pemerikaan Pola Konsumsi Makanan & Rekomendasi Asupan Sesuai Beban Kerja",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "unknown",
+    "harga": 2800000
+  },
+  {
+    "kategoriParameter": "Pengujian Lain",
+    "parameter": "Psikososial",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "unknown",
+    "harga": 3200000
+  },
+  {
+    "kategoriParameter": "Pengujian Lain",
+    "parameter": "Sanitasi Toilet",
+    "cluster": "Lingkungan Kerja",
+    "satuan": "unknown",
+    "harga": 1800000
+  },
+  {
+    "kategoriParameter": "Pengujian Lain",
+    "parameter": "Antropometri Tenaga Kerja & Rekomendasi Alat Sarana Kerja",
+    "cluster": "Kesehatan Kerja",
+    "satuan": "cm",
+    "harga": 2500000
+  },
+  {
+    "kategoriParameter": "Keselamatan",
+    "parameter": "Instalasi Penyalur Petir",
+    "cluster": "Keselamatan",
+    "satuan": "Ohm",
+    "harga": 4500000
+  }
+]

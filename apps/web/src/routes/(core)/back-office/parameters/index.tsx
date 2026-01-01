@@ -77,7 +77,7 @@ function RouteComponent() {
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/parameters",
+                to: "/back-office/parameters",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -90,7 +90,7 @@ function RouteComponent() {
         </div>
         <PermissionGate permission="parameters.create">
           <Button
-            onClick={() => navigate({ to: "/dashboard/parameters/create" })}
+            onClick={() => navigate({ to: "/back-office/parameters/create" })}
           >
             <PlusCircle className="size-4" />
             Tambah Parameter

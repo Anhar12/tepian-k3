@@ -6,12 +6,13 @@ import {
   count,
   desc,
   eq,
+  getTableColumns,
   gte,
   ilike,
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { parameterCategories } from "@tepian-k3/db/schema";
+import { clusters, parameterCategories } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
 import { Effect } from "effect";
@@ -174,11 +175,21 @@ const parameterCategoriesQueries = {
         try: () =>
           db.transaction(async (tx) => {
             const data = await tx
-              .select()
+              .select({
+                ...getTableColumns(parameterCategories),
+                cluster: {
+                  id: clusters.id,
+                  name: clusters.name,
+                },
+              })
               .from(parameterCategories)
               .limit(input.perPage)
               .offset(offset)
               .where(where)
+              .leftJoin(
+                clusters,
+                eq(parameterCategories.clusterId, clusters.id)
+              )
               .orderBy(...orderBy);
 
             const total = await tx

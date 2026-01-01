@@ -75,7 +75,7 @@ function RouteComponent() {
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/kblis",
+                to: "/back-office/kblis",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -87,7 +87,7 @@ function RouteComponent() {
           <Label>Deleted KBLIs</Label>
         </div>
         <PermissionGate permission="kbli.create">
-          <Button onClick={() => navigate({ to: "/dashboard/kblis/create" })}>
+          <Button onClick={() => navigate({ to: "/back-office/kblis/create" })}>
             <PlusCircle className="size-4" />
             Tambah KBLIs
           </Button>

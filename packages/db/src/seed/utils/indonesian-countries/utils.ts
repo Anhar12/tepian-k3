@@ -4,13 +4,14 @@ import { z } from "zod";
 
 async function readJsonFile<T>(
   filePath: string,
-  schema?: z.ZodSchema<T>
+  schema?: z.ZodSchema<T>,
+  setDirectory?: string
 ): Promise<T> {
   try {
     const currentDir = process.cwd();
     const fullPath = path.join(
       currentDir,
-      "src/seed/utils/indonesian-countries/",
+      setDirectory ?? "src/seed/utils/indonesian-countries/",
       filePath
     );
 
