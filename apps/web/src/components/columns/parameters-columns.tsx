@@ -7,6 +7,7 @@ import {
   createTextColumn,
   createDateColumn,
   createActionColumn,
+  createPriceColumn,
 } from "@/lib/column-helpers";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
 
@@ -42,6 +43,12 @@ export default function getPaginatedParametersColumns({
       width: "w-48",
       enableFilter: true,
       placeholder: "Cari nama parameter...",
+    }),
+    createTextColumn<PaginatedParameters>("unit", "Satuan", {
+      width: "w-32",
+    }),
+    createPriceColumn<PaginatedParameters>("price", "Harga", {
+      width: "w-32",
     }),
     createDateColumn<PaginatedParameters>("createdAt", "Dibuat"),
     createDateColumn<PaginatedParameters>("updatedAt", "Diubah", {
