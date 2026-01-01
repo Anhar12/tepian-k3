@@ -14,3 +14,5 @@ export const db = drizzle(env.POSTGRES_URL, {
 export type DB = typeof db;
 
 export type DBType = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export type DBorTx = DB | DBType;

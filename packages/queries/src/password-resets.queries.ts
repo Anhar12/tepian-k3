@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import { and, eq, gt } from "@tepian-k3/db";
-import { db } from "@tepian-k3/db/client";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import { passwordResets } from "@tepian-k3/db/schema";
 import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
@@ -64,11 +64,11 @@ const passwordResetsQueries = {
     });
   },
 
-  validateResetToken(token: string) {
+  validateResetToken(token: string, tx: DBorTx = db) {
     return Effect.gen(this, function* () {
       const [result] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .select()
             .from(passwordResets)
             .where(
@@ -96,11 +96,11 @@ const passwordResetsQueries = {
     });
   },
 
-  markTokenAsUsed(token: string) {
+  markTokenAsUsed(token: string, tx: DBorTx = db) {
     return Effect.gen(this, function* () {
       const [result] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .update(passwordResets)
             .set({ used: true })
             .where(eq(passwordResets.token, token))
@@ -157,10 +157,10 @@ const passwordResetsQueries = {
     });
   },
 
-  invalidateUserResets(userId: string) {
+  invalidateUserResets(userId: string, tx: DBorTx = db) {
     return Effect.tryPromise({
       try: () =>
-        db
+        tx
           .update(passwordResets)
           .set({ used: true })
           .where(eq(passwordResets.userId, userId))

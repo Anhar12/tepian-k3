@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { KBLI } from "@tepian-k3/types/kbli.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/kblis";
+import { Route } from "@/routes/(core)/back-office/kblis";
 import {
   createNumberColumn,
   createTextColumn,

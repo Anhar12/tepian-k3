@@ -459,6 +459,9 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.2.1)
+      '@tepian-k3/db':
+        specifier: workspace:*
+        version: link:../db
       '@tepian-k3/queries':
         specifier: workspace:*
         version: link:../queries

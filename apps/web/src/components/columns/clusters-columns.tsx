@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Clusters } from "@tepian-k3/types/clusters.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/clusters";
+import { Route } from "@/routes/(core)/back-office/clusters";
 import {
   createNumberColumn,
   createTextColumn,

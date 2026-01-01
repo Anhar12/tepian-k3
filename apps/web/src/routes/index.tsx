@@ -1,5 +1,5 @@
 import GridBackground from "@/components/grid-background";
-import LandingNavbar from "@/components/landing-navbar";
+import LandingNavbar from "@/components/navbar";
 import {
   Accordion,
   AccordionContent,

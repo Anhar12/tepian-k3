@@ -22,33 +22,36 @@ import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-pas
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
+import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
-import { Route as coreDashboardUsersIndexRouteImport } from './routes/(core)/dashboard/users/index'
-import { Route as coreDashboardToolsIndexRouteImport } from './routes/(core)/dashboard/tools/index'
-import { Route as coreDashboardRolesIndexRouteImport } from './routes/(core)/dashboard/roles/index'
-import { Route as coreDashboardParametersIndexRouteImport } from './routes/(core)/dashboard/parameters/index'
-import { Route as coreDashboardParameterCategoriesIndexRouteImport } from './routes/(core)/dashboard/parameter-categories/index'
-import { Route as coreDashboardKblisIndexRouteImport } from './routes/(core)/dashboard/kblis/index'
+import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
-import { Route as coreDashboardClustersIndexRouteImport } from './routes/(core)/dashboard/clusters/index'
-import { Route as coreDashboardUsersCreateRouteImport } from './routes/(core)/dashboard/users/create'
-import { Route as coreDashboardToolsCreateRouteImport } from './routes/(core)/dashboard/tools/create'
-import { Route as coreDashboardRolesCreateRouteImport } from './routes/(core)/dashboard/roles/create'
-import { Route as coreDashboardParametersCreateRouteImport } from './routes/(core)/dashboard/parameters/create'
-import { Route as coreDashboardParameterCategoriesCreateRouteImport } from './routes/(core)/dashboard/parameter-categories/create'
-import { Route as coreDashboardKblisCreateRouteImport } from './routes/(core)/dashboard/kblis/create'
+import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
+import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
+import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
+import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
+import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './routes/(core)/back-office/parameter-categories/index'
+import { Route as coreBackOfficeKblisIndexRouteImport } from './routes/(core)/back-office/kblis/index'
+import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)/back-office/clusters/index'
 import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
-import { Route as coreDashboardClustersCreateRouteImport } from './routes/(core)/dashboard/clusters/create'
-import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
-import { Route as coreDashboardToolsToolIdEditRouteImport } from './routes/(core)/dashboard/tools/$toolId.edit'
-import { Route as coreDashboardRolesRoleIdEditRouteImport } from './routes/(core)/dashboard/roles/$roleId.edit'
-import { Route as coreDashboardRolesRoleIdDetailRouteImport } from './routes/(core)/dashboard/roles/$roleId.detail'
-import { Route as coreDashboardParametersParameterIdEditRouteImport } from './routes/(core)/dashboard/parameters/$parameterId.edit'
-import { Route as coreDashboardParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/dashboard/parameter-categories/$parameterCategoriesId.edit'
-import { Route as coreDashboardKblisKbliIdEditRouteImport } from './routes/(core)/dashboard/kblis/$kbliId.edit'
+import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
+import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
+import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/back-office/roles/create'
+import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(core)/back-office/parameters/create'
+import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from './routes/(core)/back-office/parameter-categories/create'
+import { Route as coreBackOfficeKblisCreateRouteImport } from './routes/(core)/back-office/kblis/create'
+import { Route as coreBackOfficeClustersCreateRouteImport } from './routes/(core)/back-office/clusters/create'
 import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
 import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
-import { Route as coreDashboardClustersClusterIdEditRouteImport } from './routes/(core)/dashboard/clusters/$clusterId.edit'
+import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
+import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.edit'
+import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
+import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(core)/back-office/roles/$roleId.detail'
+import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './routes/(core)/back-office/parameters/$parameterId.edit'
+import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
+import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
+import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -113,162 +116,181 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => authRouteRoute,
 } as any)
+const coreDashboardRouteRoute = coreDashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreBackOfficeRouteRoute = coreBackOfficeRouteRouteImport.update({
+  id: '/back-office',
+  path: '/back-office',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
-  getParentRoute: () => coreRouteRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => coreDashboardRouteRoute,
 } as any)
-const coreDashboardUsersIndexRoute = coreDashboardUsersIndexRouteImport.update({
-  id: '/dashboard/users/',
-  path: '/dashboard/users/',
-  getParentRoute: () => coreRouteRoute,
-} as any)
-const coreDashboardToolsIndexRoute = coreDashboardToolsIndexRouteImport.update({
-  id: '/dashboard/tools/',
-  path: '/dashboard/tools/',
-  getParentRoute: () => coreRouteRoute,
-} as any)
-const coreDashboardRolesIndexRoute = coreDashboardRolesIndexRouteImport.update({
-  id: '/dashboard/roles/',
-  path: '/dashboard/roles/',
-  getParentRoute: () => coreRouteRoute,
-} as any)
-const coreDashboardParametersIndexRoute =
-  coreDashboardParametersIndexRouteImport.update({
-    id: '/dashboard/parameters/',
-    path: '/dashboard/parameters/',
-    getParentRoute: () => coreRouteRoute,
-  } as any)
-const coreDashboardParameterCategoriesIndexRoute =
-  coreDashboardParameterCategoriesIndexRouteImport.update({
-    id: '/dashboard/parameter-categories/',
-    path: '/dashboard/parameter-categories/',
-    getParentRoute: () => coreRouteRoute,
-  } as any)
-const coreDashboardKblisIndexRoute = coreDashboardKblisIndexRouteImport.update({
-  id: '/dashboard/kblis/',
-  path: '/dashboard/kblis/',
-  getParentRoute: () => coreRouteRoute,
+const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => coreBackOfficeRouteRoute,
 } as any)
 const coreDashboardCompanyIndexRoute =
   coreDashboardCompanyIndexRouteImport.update({
-    id: '/dashboard/company/',
-    path: '/dashboard/company/',
-    getParentRoute: () => coreRouteRoute,
+    id: '/company/',
+    path: '/company/',
+    getParentRoute: () => coreDashboardRouteRoute,
   } as any)
-const coreDashboardClustersIndexRoute =
-  coreDashboardClustersIndexRouteImport.update({
-    id: '/dashboard/clusters/',
-    path: '/dashboard/clusters/',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeUsersIndexRoute =
+  coreBackOfficeUsersIndexRouteImport.update({
+    id: '/users/',
+    path: '/users/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardUsersCreateRoute =
-  coreDashboardUsersCreateRouteImport.update({
-    id: '/dashboard/users/create',
-    path: '/dashboard/users/create',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeToolsIndexRoute =
+  coreBackOfficeToolsIndexRouteImport.update({
+    id: '/tools/',
+    path: '/tools/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardToolsCreateRoute =
-  coreDashboardToolsCreateRouteImport.update({
-    id: '/dashboard/tools/create',
-    path: '/dashboard/tools/create',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeRolesIndexRoute =
+  coreBackOfficeRolesIndexRouteImport.update({
+    id: '/roles/',
+    path: '/roles/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardRolesCreateRoute =
-  coreDashboardRolesCreateRouteImport.update({
-    id: '/dashboard/roles/create',
-    path: '/dashboard/roles/create',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeParametersIndexRoute =
+  coreBackOfficeParametersIndexRouteImport.update({
+    id: '/parameters/',
+    path: '/parameters/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardParametersCreateRoute =
-  coreDashboardParametersCreateRouteImport.update({
-    id: '/dashboard/parameters/create',
-    path: '/dashboard/parameters/create',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeParameterCategoriesIndexRoute =
+  coreBackOfficeParameterCategoriesIndexRouteImport.update({
+    id: '/parameter-categories/',
+    path: '/parameter-categories/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardParameterCategoriesCreateRoute =
-  coreDashboardParameterCategoriesCreateRouteImport.update({
-    id: '/dashboard/parameter-categories/create',
-    path: '/dashboard/parameter-categories/create',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeKblisIndexRoute =
+  coreBackOfficeKblisIndexRouteImport.update({
+    id: '/kblis/',
+    path: '/kblis/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardKblisCreateRoute =
-  coreDashboardKblisCreateRouteImport.update({
-    id: '/dashboard/kblis/create',
-    path: '/dashboard/kblis/create',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeClustersIndexRoute =
+  coreBackOfficeClustersIndexRouteImport.update({
+    id: '/clusters/',
+    path: '/clusters/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreDashboardCompanyCreateRoute =
   coreDashboardCompanyCreateRouteImport.update({
-    id: '/dashboard/company/create',
-    path: '/dashboard/company/create',
-    getParentRoute: () => coreRouteRoute,
+    id: '/company/create',
+    path: '/company/create',
+    getParentRoute: () => coreDashboardRouteRoute,
   } as any)
-const coreDashboardClustersCreateRoute =
-  coreDashboardClustersCreateRouteImport.update({
-    id: '/dashboard/clusters/create',
-    path: '/dashboard/clusters/create',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeUsersCreateRoute =
+  coreBackOfficeUsersCreateRouteImport.update({
+    id: '/users/create',
+    path: '/users/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardUsersUserIdEditRoute =
-  coreDashboardUsersUserIdEditRouteImport.update({
-    id: '/dashboard/users/$userId/edit',
-    path: '/dashboard/users/$userId/edit',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeToolsCreateRoute =
+  coreBackOfficeToolsCreateRouteImport.update({
+    id: '/tools/create',
+    path: '/tools/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardToolsToolIdEditRoute =
-  coreDashboardToolsToolIdEditRouteImport.update({
-    id: '/dashboard/tools/$toolId/edit',
-    path: '/dashboard/tools/$toolId/edit',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeRolesCreateRoute =
+  coreBackOfficeRolesCreateRouteImport.update({
+    id: '/roles/create',
+    path: '/roles/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardRolesRoleIdEditRoute =
-  coreDashboardRolesRoleIdEditRouteImport.update({
-    id: '/dashboard/roles/$roleId/edit',
-    path: '/dashboard/roles/$roleId/edit',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeParametersCreateRoute =
+  coreBackOfficeParametersCreateRouteImport.update({
+    id: '/parameters/create',
+    path: '/parameters/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardRolesRoleIdDetailRoute =
-  coreDashboardRolesRoleIdDetailRouteImport.update({
-    id: '/dashboard/roles/$roleId/detail',
-    path: '/dashboard/roles/$roleId/detail',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeParameterCategoriesCreateRoute =
+  coreBackOfficeParameterCategoriesCreateRouteImport.update({
+    id: '/parameter-categories/create',
+    path: '/parameter-categories/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardParametersParameterIdEditRoute =
-  coreDashboardParametersParameterIdEditRouteImport.update({
-    id: '/dashboard/parameters/$parameterId/edit',
-    path: '/dashboard/parameters/$parameterId/edit',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeKblisCreateRoute =
+  coreBackOfficeKblisCreateRouteImport.update({
+    id: '/kblis/create',
+    path: '/kblis/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreDashboardParameterCategoriesParameterCategoriesIdEditRoute =
-  coreDashboardParameterCategoriesParameterCategoriesIdEditRouteImport.update({
-    id: '/dashboard/parameter-categories/$parameterCategoriesId/edit',
-    path: '/dashboard/parameter-categories/$parameterCategoriesId/edit',
-    getParentRoute: () => coreRouteRoute,
-  } as any)
-const coreDashboardKblisKbliIdEditRoute =
-  coreDashboardKblisKbliIdEditRouteImport.update({
-    id: '/dashboard/kblis/$kbliId/edit',
-    path: '/dashboard/kblis/$kbliId/edit',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeClustersCreateRoute =
+  coreBackOfficeClustersCreateRouteImport.update({
+    id: '/clusters/create',
+    path: '/clusters/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreDashboardCompanyCompanyIdEditRoute =
   coreDashboardCompanyCompanyIdEditRouteImport.update({
-    id: '/dashboard/company/$companyId/edit',
-    path: '/dashboard/company/$companyId/edit',
-    getParentRoute: () => coreRouteRoute,
+    id: '/company/$companyId/edit',
+    path: '/company/$companyId/edit',
+    getParentRoute: () => coreDashboardRouteRoute,
   } as any)
 const coreDashboardCompanyCompanyIdDetailRoute =
   coreDashboardCompanyCompanyIdDetailRouteImport.update({
-    id: '/dashboard/company/$companyId/detail',
-    path: '/dashboard/company/$companyId/detail',
-    getParentRoute: () => coreRouteRoute,
+    id: '/company/$companyId/detail',
+    path: '/company/$companyId/detail',
+    getParentRoute: () => coreDashboardRouteRoute,
   } as any)
-const coreDashboardClustersClusterIdEditRoute =
-  coreDashboardClustersClusterIdEditRouteImport.update({
-    id: '/dashboard/clusters/$clusterId/edit',
-    path: '/dashboard/clusters/$clusterId/edit',
-    getParentRoute: () => coreRouteRoute,
+const coreBackOfficeUsersUserIdEditRoute =
+  coreBackOfficeUsersUserIdEditRouteImport.update({
+    id: '/users/$userId/edit',
+    path: '/users/$userId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeToolsToolIdEditRoute =
+  coreBackOfficeToolsToolIdEditRouteImport.update({
+    id: '/tools/$toolId/edit',
+    path: '/tools/$toolId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeRolesRoleIdEditRoute =
+  coreBackOfficeRolesRoleIdEditRouteImport.update({
+    id: '/roles/$roleId/edit',
+    path: '/roles/$roleId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeRolesRoleIdDetailRoute =
+  coreBackOfficeRolesRoleIdDetailRouteImport.update({
+    id: '/roles/$roleId/detail',
+    path: '/roles/$roleId/detail',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeParametersParameterIdEditRoute =
+  coreBackOfficeParametersParameterIdEditRouteImport.update({
+    id: '/parameters/$parameterId/edit',
+    path: '/parameters/$parameterId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute =
+  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport.update({
+    id: '/parameter-categories/$parameterCategoriesId/edit',
+    path: '/parameter-categories/$parameterCategoriesId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeKblisKbliIdEditRoute =
+  coreBackOfficeKblisKbliIdEditRouteImport.update({
+    id: '/kblis/$kbliId/edit',
+    path: '/kblis/$kbliId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeClustersClusterIdEditRoute =
+  coreBackOfficeClustersClusterIdEditRouteImport.update({
+    id: '/clusters/$clusterId/edit',
+    path: '/clusters/$clusterId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -276,6 +298,8 @@ export interface FileRoutesByFullPath {
   '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/back-office': typeof coreBackOfficeRouteRouteWithChildren
+  '/dashboard': typeof coreDashboardRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -283,33 +307,34 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/dashboard': typeof coreDashboardIndexRoute
-  '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
+  '/back-office/': typeof coreBackOfficeIndexRoute
+  '/dashboard/': typeof coreDashboardIndexRoute
+  '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
+  '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
+  '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
+  '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
+  '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
+  '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
-  '/dashboard/kblis/create': typeof coreDashboardKblisCreateRoute
-  '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
-  '/dashboard/parameters/create': typeof coreDashboardParametersCreateRoute
-  '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
-  '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
-  '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
-  '/dashboard/clusters': typeof coreDashboardClustersIndexRoute
+  '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
+  '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
+  '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
+  '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
+  '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
+  '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
-  '/dashboard/kblis': typeof coreDashboardKblisIndexRoute
-  '/dashboard/parameter-categories': typeof coreDashboardParameterCategoriesIndexRoute
-  '/dashboard/parameters': typeof coreDashboardParametersIndexRoute
-  '/dashboard/roles': typeof coreDashboardRolesIndexRoute
-  '/dashboard/tools': typeof coreDashboardToolsIndexRoute
-  '/dashboard/users': typeof coreDashboardUsersIndexRoute
-  '/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
+  '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
+  '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
+  '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
+  '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
+  '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
+  '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
-  '/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
-  '/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
-  '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
-  '/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
-  '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
-  '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -323,33 +348,34 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
-  '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
+  '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
+  '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
+  '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
+  '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
+  '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
+  '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
-  '/dashboard/kblis/create': typeof coreDashboardKblisCreateRoute
-  '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
-  '/dashboard/parameters/create': typeof coreDashboardParametersCreateRoute
-  '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
-  '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
-  '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
-  '/dashboard/clusters': typeof coreDashboardClustersIndexRoute
+  '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
+  '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
+  '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
+  '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
+  '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
+  '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
-  '/dashboard/kblis': typeof coreDashboardKblisIndexRoute
-  '/dashboard/parameter-categories': typeof coreDashboardParameterCategoriesIndexRoute
-  '/dashboard/parameters': typeof coreDashboardParametersIndexRoute
-  '/dashboard/roles': typeof coreDashboardRolesIndexRoute
-  '/dashboard/tools': typeof coreDashboardToolsIndexRoute
-  '/dashboard/users': typeof coreDashboardUsersIndexRoute
-  '/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
+  '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
+  '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
+  '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
+  '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
+  '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
+  '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
-  '/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
-  '/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
-  '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
-  '/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
-  '/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
-  '/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -359,6 +385,8 @@ export interface FileRoutesById {
   '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
+  '/(core)/dashboard': typeof coreDashboardRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
@@ -366,33 +394,34 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
-  '/(core)/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
+  '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
+  '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
+  '/(core)/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
+  '/(core)/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
+  '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
+  '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
-  '/(core)/dashboard/kblis/create': typeof coreDashboardKblisCreateRoute
-  '/(core)/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
-  '/(core)/dashboard/parameters/create': typeof coreDashboardParametersCreateRoute
-  '/(core)/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
-  '/(core)/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
-  '/(core)/dashboard/users/create': typeof coreDashboardUsersCreateRoute
-  '/(core)/dashboard/clusters/': typeof coreDashboardClustersIndexRoute
+  '/(core)/back-office/clusters/': typeof coreBackOfficeClustersIndexRoute
+  '/(core)/back-office/kblis/': typeof coreBackOfficeKblisIndexRoute
+  '/(core)/back-office/parameter-categories/': typeof coreBackOfficeParameterCategoriesIndexRoute
+  '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
+  '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
+  '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
+  '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
   '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
-  '/(core)/dashboard/kblis/': typeof coreDashboardKblisIndexRoute
-  '/(core)/dashboard/parameter-categories/': typeof coreDashboardParameterCategoriesIndexRoute
-  '/(core)/dashboard/parameters/': typeof coreDashboardParametersIndexRoute
-  '/(core)/dashboard/roles/': typeof coreDashboardRolesIndexRoute
-  '/(core)/dashboard/tools/': typeof coreDashboardToolsIndexRoute
-  '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
-  '/(core)/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
+  '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
+  '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  '/(core)/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
+  '/(core)/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
+  '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
+  '/(core)/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
+  '/(core)/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/(core)/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
-  '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
-  '/(core)/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
-  '/(core)/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
-  '/(core)/dashboard/roles/$roleId/edit': typeof coreDashboardRolesRoleIdEditRoute
-  '/(core)/dashboard/tools/$toolId/edit': typeof coreDashboardToolsToolIdEditRoute
-  '/(core)/dashboard/users/$userId/edit': typeof coreDashboardUsersUserIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -401,6 +430,8 @@ export interface FileRouteTypes {
     | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
+    | '/back-office'
+    | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -408,33 +439,34 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
-    | '/dashboard'
-    | '/dashboard/clusters/create'
+    | '/back-office/'
+    | '/dashboard/'
+    | '/back-office/clusters/create'
+    | '/back-office/kblis/create'
+    | '/back-office/parameter-categories/create'
+    | '/back-office/parameters/create'
+    | '/back-office/roles/create'
+    | '/back-office/tools/create'
+    | '/back-office/users/create'
     | '/dashboard/company/create'
-    | '/dashboard/kblis/create'
-    | '/dashboard/parameter-categories/create'
-    | '/dashboard/parameters/create'
-    | '/dashboard/roles/create'
-    | '/dashboard/tools/create'
-    | '/dashboard/users/create'
-    | '/dashboard/clusters'
+    | '/back-office/clusters'
+    | '/back-office/kblis'
+    | '/back-office/parameter-categories'
+    | '/back-office/parameters'
+    | '/back-office/roles'
+    | '/back-office/tools'
+    | '/back-office/users'
     | '/dashboard/company'
-    | '/dashboard/kblis'
-    | '/dashboard/parameter-categories'
-    | '/dashboard/parameters'
-    | '/dashboard/roles'
-    | '/dashboard/tools'
-    | '/dashboard/users'
-    | '/dashboard/clusters/$clusterId/edit'
+    | '/back-office/clusters/$clusterId/edit'
+    | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/parameter-categories/$parameterCategoriesId/edit'
+    | '/back-office/parameters/$parameterId/edit'
+    | '/back-office/roles/$roleId/detail'
+    | '/back-office/roles/$roleId/edit'
+    | '/back-office/tools/$toolId/edit'
+    | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
-    | '/dashboard/kblis/$kbliId/edit'
-    | '/dashboard/parameter-categories/$parameterCategoriesId/edit'
-    | '/dashboard/parameters/$parameterId/edit'
-    | '/dashboard/roles/$roleId/detail'
-    | '/dashboard/roles/$roleId/edit'
-    | '/dashboard/tools/$toolId/edit'
-    | '/dashboard/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -448,33 +480,34 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/back-office'
     | '/dashboard'
-    | '/dashboard/clusters/create'
+    | '/back-office/clusters/create'
+    | '/back-office/kblis/create'
+    | '/back-office/parameter-categories/create'
+    | '/back-office/parameters/create'
+    | '/back-office/roles/create'
+    | '/back-office/tools/create'
+    | '/back-office/users/create'
     | '/dashboard/company/create'
-    | '/dashboard/kblis/create'
-    | '/dashboard/parameter-categories/create'
-    | '/dashboard/parameters/create'
-    | '/dashboard/roles/create'
-    | '/dashboard/tools/create'
-    | '/dashboard/users/create'
-    | '/dashboard/clusters'
+    | '/back-office/clusters'
+    | '/back-office/kblis'
+    | '/back-office/parameter-categories'
+    | '/back-office/parameters'
+    | '/back-office/roles'
+    | '/back-office/tools'
+    | '/back-office/users'
     | '/dashboard/company'
-    | '/dashboard/kblis'
-    | '/dashboard/parameter-categories'
-    | '/dashboard/parameters'
-    | '/dashboard/roles'
-    | '/dashboard/tools'
-    | '/dashboard/users'
-    | '/dashboard/clusters/$clusterId/edit'
+    | '/back-office/clusters/$clusterId/edit'
+    | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/parameter-categories/$parameterCategoriesId/edit'
+    | '/back-office/parameters/$parameterId/edit'
+    | '/back-office/roles/$roleId/detail'
+    | '/back-office/roles/$roleId/edit'
+    | '/back-office/tools/$toolId/edit'
+    | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
-    | '/dashboard/kblis/$kbliId/edit'
-    | '/dashboard/parameter-categories/$parameterCategoriesId/edit'
-    | '/dashboard/parameters/$parameterId/edit'
-    | '/dashboard/roles/$roleId/detail'
-    | '/dashboard/roles/$roleId/edit'
-    | '/dashboard/tools/$toolId/edit'
-    | '/dashboard/users/$userId/edit'
   id:
     | '__root__'
     | '/'
@@ -483,6 +516,8 @@ export interface FileRouteTypes {
     | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
+    | '/(core)/back-office'
+    | '/(core)/dashboard'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/register'
@@ -490,33 +525,34 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/(core)/back-office/'
     | '/(core)/dashboard/'
-    | '/(core)/dashboard/clusters/create'
+    | '/(core)/back-office/clusters/create'
+    | '/(core)/back-office/kblis/create'
+    | '/(core)/back-office/parameter-categories/create'
+    | '/(core)/back-office/parameters/create'
+    | '/(core)/back-office/roles/create'
+    | '/(core)/back-office/tools/create'
+    | '/(core)/back-office/users/create'
     | '/(core)/dashboard/company/create'
-    | '/(core)/dashboard/kblis/create'
-    | '/(core)/dashboard/parameter-categories/create'
-    | '/(core)/dashboard/parameters/create'
-    | '/(core)/dashboard/roles/create'
-    | '/(core)/dashboard/tools/create'
-    | '/(core)/dashboard/users/create'
-    | '/(core)/dashboard/clusters/'
+    | '/(core)/back-office/clusters/'
+    | '/(core)/back-office/kblis/'
+    | '/(core)/back-office/parameter-categories/'
+    | '/(core)/back-office/parameters/'
+    | '/(core)/back-office/roles/'
+    | '/(core)/back-office/tools/'
+    | '/(core)/back-office/users/'
     | '/(core)/dashboard/company/'
-    | '/(core)/dashboard/kblis/'
-    | '/(core)/dashboard/parameter-categories/'
-    | '/(core)/dashboard/parameters/'
-    | '/(core)/dashboard/roles/'
-    | '/(core)/dashboard/tools/'
-    | '/(core)/dashboard/users/'
-    | '/(core)/dashboard/clusters/$clusterId/edit'
+    | '/(core)/back-office/clusters/$clusterId/edit'
+    | '/(core)/back-office/kblis/$kbliId/edit'
+    | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
+    | '/(core)/back-office/parameters/$parameterId/edit'
+    | '/(core)/back-office/roles/$roleId/detail'
+    | '/(core)/back-office/roles/$roleId/edit'
+    | '/(core)/back-office/tools/$toolId/edit'
+    | '/(core)/back-office/users/$userId/edit'
     | '/(core)/dashboard/company/$companyId/detail'
     | '/(core)/dashboard/company/$companyId/edit'
-    | '/(core)/dashboard/kblis/$kbliId/edit'
-    | '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit'
-    | '/(core)/dashboard/parameters/$parameterId/edit'
-    | '/(core)/dashboard/roles/$roleId/detail'
-    | '/(core)/dashboard/roles/$roleId/edit'
-    | '/(core)/dashboard/tools/$toolId/edit'
-    | '/(core)/dashboard/users/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -621,194 +657,215 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof authRouteRoute
     }
-    '/(core)/dashboard/': {
-      id: '/(core)/dashboard/'
+    '/(core)/dashboard': {
+      id: '/(core)/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
+      preLoaderRoute: typeof coreDashboardRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/back-office': {
+      id: '/(core)/back-office'
+      path: '/back-office'
+      fullPath: '/back-office'
+      preLoaderRoute: typeof coreBackOfficeRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/': {
+      id: '/(core)/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
       preLoaderRoute: typeof coreDashboardIndexRouteImport
-      parentRoute: typeof coreRouteRoute
+      parentRoute: typeof coreDashboardRouteRoute
     }
-    '/(core)/dashboard/users/': {
-      id: '/(core)/dashboard/users/'
-      path: '/dashboard/users'
-      fullPath: '/dashboard/users'
-      preLoaderRoute: typeof coreDashboardUsersIndexRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/dashboard/tools/': {
-      id: '/(core)/dashboard/tools/'
-      path: '/dashboard/tools'
-      fullPath: '/dashboard/tools'
-      preLoaderRoute: typeof coreDashboardToolsIndexRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/dashboard/roles/': {
-      id: '/(core)/dashboard/roles/'
-      path: '/dashboard/roles'
-      fullPath: '/dashboard/roles'
-      preLoaderRoute: typeof coreDashboardRolesIndexRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/dashboard/parameters/': {
-      id: '/(core)/dashboard/parameters/'
-      path: '/dashboard/parameters'
-      fullPath: '/dashboard/parameters'
-      preLoaderRoute: typeof coreDashboardParametersIndexRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/dashboard/parameter-categories/': {
-      id: '/(core)/dashboard/parameter-categories/'
-      path: '/dashboard/parameter-categories'
-      fullPath: '/dashboard/parameter-categories'
-      preLoaderRoute: typeof coreDashboardParameterCategoriesIndexRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/dashboard/kblis/': {
-      id: '/(core)/dashboard/kblis/'
-      path: '/dashboard/kblis'
-      fullPath: '/dashboard/kblis'
-      preLoaderRoute: typeof coreDashboardKblisIndexRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/': {
+      id: '/(core)/back-office/'
+      path: '/'
+      fullPath: '/back-office/'
+      preLoaderRoute: typeof coreBackOfficeIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/dashboard/company/': {
       id: '/(core)/dashboard/company/'
-      path: '/dashboard/company'
+      path: '/company'
       fullPath: '/dashboard/company'
       preLoaderRoute: typeof coreDashboardCompanyIndexRouteImport
-      parentRoute: typeof coreRouteRoute
+      parentRoute: typeof coreDashboardRouteRoute
     }
-    '/(core)/dashboard/clusters/': {
-      id: '/(core)/dashboard/clusters/'
-      path: '/dashboard/clusters'
-      fullPath: '/dashboard/clusters'
-      preLoaderRoute: typeof coreDashboardClustersIndexRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/users/': {
+      id: '/(core)/back-office/users/'
+      path: '/users'
+      fullPath: '/back-office/users'
+      preLoaderRoute: typeof coreBackOfficeUsersIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/users/create': {
-      id: '/(core)/dashboard/users/create'
-      path: '/dashboard/users/create'
-      fullPath: '/dashboard/users/create'
-      preLoaderRoute: typeof coreDashboardUsersCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/tools/': {
+      id: '/(core)/back-office/tools/'
+      path: '/tools'
+      fullPath: '/back-office/tools'
+      preLoaderRoute: typeof coreBackOfficeToolsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/tools/create': {
-      id: '/(core)/dashboard/tools/create'
-      path: '/dashboard/tools/create'
-      fullPath: '/dashboard/tools/create'
-      preLoaderRoute: typeof coreDashboardToolsCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/roles/': {
+      id: '/(core)/back-office/roles/'
+      path: '/roles'
+      fullPath: '/back-office/roles'
+      preLoaderRoute: typeof coreBackOfficeRolesIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/roles/create': {
-      id: '/(core)/dashboard/roles/create'
-      path: '/dashboard/roles/create'
-      fullPath: '/dashboard/roles/create'
-      preLoaderRoute: typeof coreDashboardRolesCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/parameters/': {
+      id: '/(core)/back-office/parameters/'
+      path: '/parameters'
+      fullPath: '/back-office/parameters'
+      preLoaderRoute: typeof coreBackOfficeParametersIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/parameters/create': {
-      id: '/(core)/dashboard/parameters/create'
-      path: '/dashboard/parameters/create'
-      fullPath: '/dashboard/parameters/create'
-      preLoaderRoute: typeof coreDashboardParametersCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/parameter-categories/': {
+      id: '/(core)/back-office/parameter-categories/'
+      path: '/parameter-categories'
+      fullPath: '/back-office/parameter-categories'
+      preLoaderRoute: typeof coreBackOfficeParameterCategoriesIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/parameter-categories/create': {
-      id: '/(core)/dashboard/parameter-categories/create'
-      path: '/dashboard/parameter-categories/create'
-      fullPath: '/dashboard/parameter-categories/create'
-      preLoaderRoute: typeof coreDashboardParameterCategoriesCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/kblis/': {
+      id: '/(core)/back-office/kblis/'
+      path: '/kblis'
+      fullPath: '/back-office/kblis'
+      preLoaderRoute: typeof coreBackOfficeKblisIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/kblis/create': {
-      id: '/(core)/dashboard/kblis/create'
-      path: '/dashboard/kblis/create'
-      fullPath: '/dashboard/kblis/create'
-      preLoaderRoute: typeof coreDashboardKblisCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/clusters/': {
+      id: '/(core)/back-office/clusters/'
+      path: '/clusters'
+      fullPath: '/back-office/clusters'
+      preLoaderRoute: typeof coreBackOfficeClustersIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/dashboard/company/create': {
       id: '/(core)/dashboard/company/create'
-      path: '/dashboard/company/create'
+      path: '/company/create'
       fullPath: '/dashboard/company/create'
       preLoaderRoute: typeof coreDashboardCompanyCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+      parentRoute: typeof coreDashboardRouteRoute
     }
-    '/(core)/dashboard/clusters/create': {
-      id: '/(core)/dashboard/clusters/create'
-      path: '/dashboard/clusters/create'
-      fullPath: '/dashboard/clusters/create'
-      preLoaderRoute: typeof coreDashboardClustersCreateRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/users/create': {
+      id: '/(core)/back-office/users/create'
+      path: '/users/create'
+      fullPath: '/back-office/users/create'
+      preLoaderRoute: typeof coreBackOfficeUsersCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/users/$userId/edit': {
-      id: '/(core)/dashboard/users/$userId/edit'
-      path: '/dashboard/users/$userId/edit'
-      fullPath: '/dashboard/users/$userId/edit'
-      preLoaderRoute: typeof coreDashboardUsersUserIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/tools/create': {
+      id: '/(core)/back-office/tools/create'
+      path: '/tools/create'
+      fullPath: '/back-office/tools/create'
+      preLoaderRoute: typeof coreBackOfficeToolsCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/tools/$toolId/edit': {
-      id: '/(core)/dashboard/tools/$toolId/edit'
-      path: '/dashboard/tools/$toolId/edit'
-      fullPath: '/dashboard/tools/$toolId/edit'
-      preLoaderRoute: typeof coreDashboardToolsToolIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/roles/create': {
+      id: '/(core)/back-office/roles/create'
+      path: '/roles/create'
+      fullPath: '/back-office/roles/create'
+      preLoaderRoute: typeof coreBackOfficeRolesCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/roles/$roleId/edit': {
-      id: '/(core)/dashboard/roles/$roleId/edit'
-      path: '/dashboard/roles/$roleId/edit'
-      fullPath: '/dashboard/roles/$roleId/edit'
-      preLoaderRoute: typeof coreDashboardRolesRoleIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/parameters/create': {
+      id: '/(core)/back-office/parameters/create'
+      path: '/parameters/create'
+      fullPath: '/back-office/parameters/create'
+      preLoaderRoute: typeof coreBackOfficeParametersCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/roles/$roleId/detail': {
-      id: '/(core)/dashboard/roles/$roleId/detail'
-      path: '/dashboard/roles/$roleId/detail'
-      fullPath: '/dashboard/roles/$roleId/detail'
-      preLoaderRoute: typeof coreDashboardRolesRoleIdDetailRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/parameter-categories/create': {
+      id: '/(core)/back-office/parameter-categories/create'
+      path: '/parameter-categories/create'
+      fullPath: '/back-office/parameter-categories/create'
+      preLoaderRoute: typeof coreBackOfficeParameterCategoriesCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/parameters/$parameterId/edit': {
-      id: '/(core)/dashboard/parameters/$parameterId/edit'
-      path: '/dashboard/parameters/$parameterId/edit'
-      fullPath: '/dashboard/parameters/$parameterId/edit'
-      preLoaderRoute: typeof coreDashboardParametersParameterIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/kblis/create': {
+      id: '/(core)/back-office/kblis/create'
+      path: '/kblis/create'
+      fullPath: '/back-office/kblis/create'
+      preLoaderRoute: typeof coreBackOfficeKblisCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit': {
-      id: '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit'
-      path: '/dashboard/parameter-categories/$parameterCategoriesId/edit'
-      fullPath: '/dashboard/parameter-categories/$parameterCategoriesId/edit'
-      preLoaderRoute: typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/dashboard/kblis/$kbliId/edit': {
-      id: '/(core)/dashboard/kblis/$kbliId/edit'
-      path: '/dashboard/kblis/$kbliId/edit'
-      fullPath: '/dashboard/kblis/$kbliId/edit'
-      preLoaderRoute: typeof coreDashboardKblisKbliIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/clusters/create': {
+      id: '/(core)/back-office/clusters/create'
+      path: '/clusters/create'
+      fullPath: '/back-office/clusters/create'
+      preLoaderRoute: typeof coreBackOfficeClustersCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/dashboard/company/$companyId/edit': {
       id: '/(core)/dashboard/company/$companyId/edit'
-      path: '/dashboard/company/$companyId/edit'
+      path: '/company/$companyId/edit'
       fullPath: '/dashboard/company/$companyId/edit'
       preLoaderRoute: typeof coreDashboardCompanyCompanyIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
+      parentRoute: typeof coreDashboardRouteRoute
     }
     '/(core)/dashboard/company/$companyId/detail': {
       id: '/(core)/dashboard/company/$companyId/detail'
-      path: '/dashboard/company/$companyId/detail'
+      path: '/company/$companyId/detail'
       fullPath: '/dashboard/company/$companyId/detail'
       preLoaderRoute: typeof coreDashboardCompanyCompanyIdDetailRouteImport
-      parentRoute: typeof coreRouteRoute
+      parentRoute: typeof coreDashboardRouteRoute
     }
-    '/(core)/dashboard/clusters/$clusterId/edit': {
-      id: '/(core)/dashboard/clusters/$clusterId/edit'
-      path: '/dashboard/clusters/$clusterId/edit'
-      fullPath: '/dashboard/clusters/$clusterId/edit'
-      preLoaderRoute: typeof coreDashboardClustersClusterIdEditRouteImport
-      parentRoute: typeof coreRouteRoute
+    '/(core)/back-office/users/$userId/edit': {
+      id: '/(core)/back-office/users/$userId/edit'
+      path: '/users/$userId/edit'
+      fullPath: '/back-office/users/$userId/edit'
+      preLoaderRoute: typeof coreBackOfficeUsersUserIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/tools/$toolId/edit': {
+      id: '/(core)/back-office/tools/$toolId/edit'
+      path: '/tools/$toolId/edit'
+      fullPath: '/back-office/tools/$toolId/edit'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/roles/$roleId/edit': {
+      id: '/(core)/back-office/roles/$roleId/edit'
+      path: '/roles/$roleId/edit'
+      fullPath: '/back-office/roles/$roleId/edit'
+      preLoaderRoute: typeof coreBackOfficeRolesRoleIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/roles/$roleId/detail': {
+      id: '/(core)/back-office/roles/$roleId/detail'
+      path: '/roles/$roleId/detail'
+      fullPath: '/back-office/roles/$roleId/detail'
+      preLoaderRoute: typeof coreBackOfficeRolesRoleIdDetailRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/parameters/$parameterId/edit': {
+      id: '/(core)/back-office/parameters/$parameterId/edit'
+      path: '/parameters/$parameterId/edit'
+      fullPath: '/back-office/parameters/$parameterId/edit'
+      preLoaderRoute: typeof coreBackOfficeParametersParameterIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': {
+      id: '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
+      path: '/parameter-categories/$parameterCategoriesId/edit'
+      fullPath: '/back-office/parameter-categories/$parameterCategoriesId/edit'
+      preLoaderRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/kblis/$kbliId/edit': {
+      id: '/(core)/back-office/kblis/$kbliId/edit'
+      path: '/kblis/$kbliId/edit'
+      fullPath: '/back-office/kblis/$kbliId/edit'
+      preLoaderRoute: typeof coreBackOfficeKblisKbliIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/clusters/$clusterId/edit': {
+      id: '/(core)/back-office/clusters/$clusterId/edit'
+      path: '/clusters/$clusterId/edit'
+      fullPath: '/back-office/clusters/$clusterId/edit'
+      preLoaderRoute: typeof coreBackOfficeClustersClusterIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
   }
 }
@@ -833,75 +890,99 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
 
-interface coreRouteRouteChildren {
-  coreProfileRoute: typeof coreProfileRoute
-  coreSettingsRoute: typeof coreSettingsRoute
-  coreDashboardIndexRoute: typeof coreDashboardIndexRoute
-  coreDashboardClustersCreateRoute: typeof coreDashboardClustersCreateRoute
-  coreDashboardCompanyCreateRoute: typeof coreDashboardCompanyCreateRoute
-  coreDashboardKblisCreateRoute: typeof coreDashboardKblisCreateRoute
-  coreDashboardParameterCategoriesCreateRoute: typeof coreDashboardParameterCategoriesCreateRoute
-  coreDashboardParametersCreateRoute: typeof coreDashboardParametersCreateRoute
-  coreDashboardRolesCreateRoute: typeof coreDashboardRolesCreateRoute
-  coreDashboardToolsCreateRoute: typeof coreDashboardToolsCreateRoute
-  coreDashboardUsersCreateRoute: typeof coreDashboardUsersCreateRoute
-  coreDashboardClustersIndexRoute: typeof coreDashboardClustersIndexRoute
-  coreDashboardCompanyIndexRoute: typeof coreDashboardCompanyIndexRoute
-  coreDashboardKblisIndexRoute: typeof coreDashboardKblisIndexRoute
-  coreDashboardParameterCategoriesIndexRoute: typeof coreDashboardParameterCategoriesIndexRoute
-  coreDashboardParametersIndexRoute: typeof coreDashboardParametersIndexRoute
-  coreDashboardRolesIndexRoute: typeof coreDashboardRolesIndexRoute
-  coreDashboardToolsIndexRoute: typeof coreDashboardToolsIndexRoute
-  coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
-  coreDashboardClustersClusterIdEditRoute: typeof coreDashboardClustersClusterIdEditRoute
-  coreDashboardCompanyCompanyIdDetailRoute: typeof coreDashboardCompanyCompanyIdDetailRoute
-  coreDashboardCompanyCompanyIdEditRoute: typeof coreDashboardCompanyCompanyIdEditRoute
-  coreDashboardKblisKbliIdEditRoute: typeof coreDashboardKblisKbliIdEditRoute
-  coreDashboardParameterCategoriesParameterCategoriesIdEditRoute: typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
-  coreDashboardParametersParameterIdEditRoute: typeof coreDashboardParametersParameterIdEditRoute
-  coreDashboardRolesRoleIdDetailRoute: typeof coreDashboardRolesRoleIdDetailRoute
-  coreDashboardRolesRoleIdEditRoute: typeof coreDashboardRolesRoleIdEditRoute
-  coreDashboardToolsToolIdEditRoute: typeof coreDashboardToolsToolIdEditRoute
-  coreDashboardUsersUserIdEditRoute: typeof coreDashboardUsersUserIdEditRoute
+interface coreBackOfficeRouteRouteChildren {
+  coreBackOfficeIndexRoute: typeof coreBackOfficeIndexRoute
+  coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute
+  coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute
+  coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
+  coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute
+  coreBackOfficeRolesCreateRoute: typeof coreBackOfficeRolesCreateRoute
+  coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
+  coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
+  coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute
+  coreBackOfficeKblisIndexRoute: typeof coreBackOfficeKblisIndexRoute
+  coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute
+  coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
+  coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
+  coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
+  coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
+  coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
+  coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
+  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute
+  coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
+  coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
+  coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
+  coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
 }
 
-const coreRouteRouteChildren: coreRouteRouteChildren = {
-  coreProfileRoute: coreProfileRoute,
-  coreSettingsRoute: coreSettingsRoute,
+const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
+  coreBackOfficeIndexRoute: coreBackOfficeIndexRoute,
+  coreBackOfficeClustersCreateRoute: coreBackOfficeClustersCreateRoute,
+  coreBackOfficeKblisCreateRoute: coreBackOfficeKblisCreateRoute,
+  coreBackOfficeParameterCategoriesCreateRoute:
+    coreBackOfficeParameterCategoriesCreateRoute,
+  coreBackOfficeParametersCreateRoute: coreBackOfficeParametersCreateRoute,
+  coreBackOfficeRolesCreateRoute: coreBackOfficeRolesCreateRoute,
+  coreBackOfficeToolsCreateRoute: coreBackOfficeToolsCreateRoute,
+  coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
+  coreBackOfficeClustersIndexRoute: coreBackOfficeClustersIndexRoute,
+  coreBackOfficeKblisIndexRoute: coreBackOfficeKblisIndexRoute,
+  coreBackOfficeParameterCategoriesIndexRoute:
+    coreBackOfficeParameterCategoriesIndexRoute,
+  coreBackOfficeParametersIndexRoute: coreBackOfficeParametersIndexRoute,
+  coreBackOfficeRolesIndexRoute: coreBackOfficeRolesIndexRoute,
+  coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
+  coreBackOfficeUsersIndexRoute: coreBackOfficeUsersIndexRoute,
+  coreBackOfficeClustersClusterIdEditRoute:
+    coreBackOfficeClustersClusterIdEditRoute,
+  coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
+  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute:
+    coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute,
+  coreBackOfficeParametersParameterIdEditRoute:
+    coreBackOfficeParametersParameterIdEditRoute,
+  coreBackOfficeRolesRoleIdDetailRoute: coreBackOfficeRolesRoleIdDetailRoute,
+  coreBackOfficeRolesRoleIdEditRoute: coreBackOfficeRolesRoleIdEditRoute,
+  coreBackOfficeToolsToolIdEditRoute: coreBackOfficeToolsToolIdEditRoute,
+  coreBackOfficeUsersUserIdEditRoute: coreBackOfficeUsersUserIdEditRoute,
+}
+
+const coreBackOfficeRouteRouteWithChildren =
+  coreBackOfficeRouteRoute._addFileChildren(coreBackOfficeRouteRouteChildren)
+
+interface coreDashboardRouteRouteChildren {
+  coreDashboardIndexRoute: typeof coreDashboardIndexRoute
+  coreDashboardCompanyCreateRoute: typeof coreDashboardCompanyCreateRoute
+  coreDashboardCompanyIndexRoute: typeof coreDashboardCompanyIndexRoute
+  coreDashboardCompanyCompanyIdDetailRoute: typeof coreDashboardCompanyCompanyIdDetailRoute
+  coreDashboardCompanyCompanyIdEditRoute: typeof coreDashboardCompanyCompanyIdEditRoute
+}
+
+const coreDashboardRouteRouteChildren: coreDashboardRouteRouteChildren = {
   coreDashboardIndexRoute: coreDashboardIndexRoute,
-  coreDashboardClustersCreateRoute: coreDashboardClustersCreateRoute,
   coreDashboardCompanyCreateRoute: coreDashboardCompanyCreateRoute,
-  coreDashboardKblisCreateRoute: coreDashboardKblisCreateRoute,
-  coreDashboardParameterCategoriesCreateRoute:
-    coreDashboardParameterCategoriesCreateRoute,
-  coreDashboardParametersCreateRoute: coreDashboardParametersCreateRoute,
-  coreDashboardRolesCreateRoute: coreDashboardRolesCreateRoute,
-  coreDashboardToolsCreateRoute: coreDashboardToolsCreateRoute,
-  coreDashboardUsersCreateRoute: coreDashboardUsersCreateRoute,
-  coreDashboardClustersIndexRoute: coreDashboardClustersIndexRoute,
   coreDashboardCompanyIndexRoute: coreDashboardCompanyIndexRoute,
-  coreDashboardKblisIndexRoute: coreDashboardKblisIndexRoute,
-  coreDashboardParameterCategoriesIndexRoute:
-    coreDashboardParameterCategoriesIndexRoute,
-  coreDashboardParametersIndexRoute: coreDashboardParametersIndexRoute,
-  coreDashboardRolesIndexRoute: coreDashboardRolesIndexRoute,
-  coreDashboardToolsIndexRoute: coreDashboardToolsIndexRoute,
-  coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,
-  coreDashboardClustersClusterIdEditRoute:
-    coreDashboardClustersClusterIdEditRoute,
   coreDashboardCompanyCompanyIdDetailRoute:
     coreDashboardCompanyCompanyIdDetailRoute,
   coreDashboardCompanyCompanyIdEditRoute:
     coreDashboardCompanyCompanyIdEditRoute,
-  coreDashboardKblisKbliIdEditRoute: coreDashboardKblisKbliIdEditRoute,
-  coreDashboardParameterCategoriesParameterCategoriesIdEditRoute:
-    coreDashboardParameterCategoriesParameterCategoriesIdEditRoute,
-  coreDashboardParametersParameterIdEditRoute:
-    coreDashboardParametersParameterIdEditRoute,
-  coreDashboardRolesRoleIdDetailRoute: coreDashboardRolesRoleIdDetailRoute,
-  coreDashboardRolesRoleIdEditRoute: coreDashboardRolesRoleIdEditRoute,
-  coreDashboardToolsToolIdEditRoute: coreDashboardToolsToolIdEditRoute,
-  coreDashboardUsersUserIdEditRoute: coreDashboardUsersUserIdEditRoute,
+}
+
+const coreDashboardRouteRouteWithChildren =
+  coreDashboardRouteRoute._addFileChildren(coreDashboardRouteRouteChildren)
+
+interface coreRouteRouteChildren {
+  coreBackOfficeRouteRoute: typeof coreBackOfficeRouteRouteWithChildren
+  coreDashboardRouteRoute: typeof coreDashboardRouteRouteWithChildren
+  coreProfileRoute: typeof coreProfileRoute
+  coreSettingsRoute: typeof coreSettingsRoute
+}
+
+const coreRouteRouteChildren: coreRouteRouteChildren = {
+  coreBackOfficeRouteRoute: coreBackOfficeRouteRouteWithChildren,
+  coreDashboardRouteRoute: coreDashboardRouteRouteWithChildren,
+  coreProfileRoute: coreProfileRoute,
+  coreSettingsRoute: coreSettingsRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
