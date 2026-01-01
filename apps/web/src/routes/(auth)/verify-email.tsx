@@ -22,10 +22,12 @@ import { ArrowLeft, CheckCircle2, Loader2, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import z from "zod";
 
+const validateEmailSchema = z.object({
+  email: z.email().optional(),
+});
+
 export const Route = createFileRoute("/(auth)/verify-email")({
-  validateSearch: z.object({
-    email: z.email().optional(),
-  }),
+  validateSearch: validateEmailSchema,
   component: VerifyEmailComponent,
 });
 
@@ -65,7 +67,7 @@ function VerifyEmailComponent() {
 
         setTimeout(() => {
           navigate({ to: "/dashboard" });
-        }, 2000);
+        }, 350);
       },
       onError: (error) => {
         globalErrorToast(error.message);
@@ -88,9 +90,9 @@ function VerifyEmailComponent() {
   );
 
   const handleSendOTP = (): void => {
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    const res = validateEmailSchema.safeParse({ email });
+
+    if (!res.success) {
       globalErrorToast("Tolong masukkan email yang valid.");
       return;
     }

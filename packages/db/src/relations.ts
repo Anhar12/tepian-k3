@@ -88,7 +88,7 @@ export const userRoleRelations = relations(userRoles, ({ one }) => ({
 }));
 
 export const roleRelations = relations(roles, ({ many }) => ({
-  users: many(users),
+  users: many(userRoles),
   rolePermissions: many(rolePermissions),
 }));
 

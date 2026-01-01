@@ -46,7 +46,11 @@ export function LoginForm({
 
         globalSuccessToast("Login berhasil");
 
-        navigate({ to: "/dashboard" });
+        if (data.user.roles?.find((role) => role.name === "user")) {
+          navigate({ to: "/dashboard" });
+        } else {
+          navigate({ to: "/back-office" });
+        }
       },
       onError: (error) => {
         globalErrorToast(error.message);
