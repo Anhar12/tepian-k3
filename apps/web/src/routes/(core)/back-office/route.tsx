@@ -31,7 +31,7 @@ export const Route = createFileRoute("/(core)/back-office")({
     // Prevent regular users from accessing back office
     const hasUserRole = user.roles.some((role) => role.name === "user");
     if (hasUserRole) {
-      throw redirect({ to: "/dashboard" });
+      throw redirect({ to: "/unauthorized" });
     }
 
     return null;

@@ -27,9 +27,6 @@ function UnauthorizedPage() {
           <Button variant="outline" onClick={() => router.history.back()}>
             Kembali
           </Button>
-          <Button onClick={() => router.navigate({ to: "/dashboard" })}>
-            Ke Dashboard
-          </Button>
         </div>
       </div>
     </div>
