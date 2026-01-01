@@ -9,21 +9,6 @@ import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/transaksi")({
   validateSearch: parameterSchema.getByClusterAndParameterCategorySchema,
-  loaderDeps: (search) => ({
-    searchParams:
-      parameterSchema.getByClusterAndParameterCategorySchema.parse(search),
-  }),
-  loader: ({ context, deps }) => {
-    context.queryClient.ensureQueryData(
-      context.trpc.cluster.getAllClusters.queryOptions(),
-    );
-
-    context.queryClient.ensureQueryData(
-      context.trpc.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
-        deps.searchParams,
-      ),
-    );
-  },
   component: RouteComponent,
 });
 

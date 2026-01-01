@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -24,12 +26,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
-import { Route } from "../transaksi";
-import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import useDebounced from "@/hooks/use-debounced";
 
 const data = [
   {
@@ -102,13 +105,21 @@ interface TestingTableProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function TestingTable(props: TestingTableProps) {
-  const params = Route.useSearch();
+  const transaksiApi = getRouteApi("/transaksi");
+  const params = transaksiApi.useSearch();
   const navigate = useNavigate();
 
-  const { data: parameters } = useSuspenseQuery(
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounced(searchTerm, 500);
+
+  const { data: parameters, isLoading } = useQuery(
     trpc.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
       params,
     ),
+  );
+
+  const { data: categories, isLoading: isLoadingCategories } = useQuery(
+    trpc.parameterCategories.getAllParameterCategories.queryOptions(),
   );
 
   const goToPage = (page: number) => {
@@ -117,6 +128,17 @@ export function TestingTable(props: TestingTableProps) {
       search: { ...params, page },
     });
   };
+
+  // set parameters data to filtered data based on debouncedSearchTerm
+  useEffect(() => {
+    navigate({
+      to: "/transaksi",
+      search: (old) => ({
+        ...old,
+        name: debouncedSearchTerm,
+      }),
+    });
+  }, [debouncedSearchTerm]);
 
   return (
     <div
@@ -138,21 +160,45 @@ export function TestingTable(props: TestingTableProps) {
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row">
-        <Select>
-          <SelectTrigger className="h-11 w-full rounded-full border-slate-200 bg-slate-50/50 md:w-60">
-            <SelectValue placeholder="Pilih kategori" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="fisika">Faktor Fisika</SelectItem>
-            <SelectItem value="kimia">Faktor Kimia</SelectItem>
-          </SelectContent>
-        </Select>
+        {isLoadingCategories ? (
+          <Skeleton className="h-10 w-48 rounded-full" />
+        ) : (
+          <Select
+            value={params.parameterCategoryId || undefined}
+            onValueChange={(value) => {
+              navigate({
+                to: "/transaksi",
+                search: (old) => ({
+                  ...old,
+                  parameterCategoryId: value || undefined,
+                  page: 1,
+                }),
+              });
+            }}
+          >
+            <SelectTrigger className="h-11! w-full rounded-full border-slate-200 bg-slate-50/50 md:w-60">
+              <SelectValue placeholder="Pilih kategori" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Kategori Parameter</SelectLabel>
+                {categories?.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        )}
 
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             className="h-11 w-full rounded-full border-slate-200 bg-slate-50/50 pl-11"
             placeholder="Cari Parameter..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
@@ -179,63 +225,96 @@ export function TestingTable(props: TestingTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {parameters.data.map((row) => (
-              <TableRow key={row.id} className="group border-slate-100">
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
-                      )}
-                    >
-                      <TestTube2 className="h-4 w-4" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-700">
-                        {row.category.name}
-                      </span>
-                      <span className="text-[10px] font-medium text-slate-400">
-                        {row.cluster.name}
-                      </span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
-                  >
-                    {row.name}
-                  </Badge>
-                </TableCell>
-                <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
-                  <div className="font-bold text-slate-700">
-                    {row.reference?.split(" ")[0]}{" "}
-                    {row.reference?.split(" ")[1]}
-                  </div>
-                  <div>{row.reference?.split(" ").slice(2).join(" ")}</div>
-                </TableCell>
-                <TableCell className="text-sm font-bold text-slate-800">
-                  Rp {row.price.toLocaleString("id-ID")}
-                </TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    defaultValue={1}
-                    className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
-                  />
-                </TableCell>
-                <TableCell className="text-sm font-bold text-[#0056B3]">
-                  Rp {row.price.toLocaleString("id-ID")}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg">
-                    <ShoppingCart className="h-4 w-4" />
-                    Add to Cart
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index} className="border-slate-100">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <div className="flex flex-col gap-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-28 rounded-full" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="mb-2 h-4 w-40" />
+                      <Skeleton className="h-3 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-10 w-16 rounded-xl" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              : parameters?.data.map((row) => (
+                  <TableRow key={row.id} className="group border-slate-100">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={cn(
+                            `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
+                          )}
+                        >
+                          <TestTube2 className="h-4 w-4" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-700">
+                            {row.category.name}
+                          </span>
+                          <span className="text-[10px] font-medium text-slate-400">
+                            {row.cluster.name}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
+                      >
+                        {row.name}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
+                      <div className="font-bold text-slate-700">
+                        {row.reference?.split(" ")[0]}{" "}
+                        {row.reference?.split(" ")[1]}
+                      </div>
+                      <div>{row.reference?.split(" ").slice(2).join(" ")}</div>
+                    </TableCell>
+                    <TableCell className="text-sm font-bold text-slate-800">
+                      Rp {row.price.toLocaleString("id-ID")}
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        defaultValue={1}
+                        className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
+                      />
+                    </TableCell>
+                    <TableCell className="text-sm font-bold text-[#0056B3]">
+                      Rp {row.price.toLocaleString("id-ID")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg">
+                        <ShoppingCart className="h-4 w-4" />
+                        Add to Cart
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </div>
@@ -245,7 +324,7 @@ export function TestingTable(props: TestingTableProps) {
           variant="ghost"
           size="icon"
           className="h-8 w-8 rounded-lg text-slate-400"
-          disabled={params.page === 1}
+          disabled={params.page === 1 || isLoading}
           onClick={() => goToPage(params.page - 1)}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -287,7 +366,7 @@ export function TestingTable(props: TestingTableProps) {
         </Button>
 
         {/* Next page */}
-        {params.page < parameters.pageCount && (
+        {parameters?.pageCount && params.page < parameters.pageCount && (
           <Button
             variant="ghost"
             className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
@@ -298,12 +377,12 @@ export function TestingTable(props: TestingTableProps) {
         )}
 
         {/* Ellipsis after current page */}
-        {params.page < parameters.pageCount - 2 && (
+        {parameters?.pageCount && params.page < parameters.pageCount - 2 && (
           <span className="px-2 text-xs text-slate-400">...</span>
         )}
 
         {/* Last page */}
-        {params.page < parameters.pageCount - 1 && (
+        {parameters?.pageCount && params.page < parameters.pageCount - 1 && (
           <Button
             variant="ghost"
             className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
@@ -317,7 +396,11 @@ export function TestingTable(props: TestingTableProps) {
           variant="ghost"
           size="sm"
           className="gap-1 text-slate-500 transition-colors hover:text-slate-900"
-          disabled={params.page === parameters.pageCount}
+          disabled={
+            !parameters?.pageCount ||
+            params.page === parameters.pageCount ||
+            isLoading
+          }
           onClick={() => goToPage(params.page + 1)}
         >
           <span className="text-xs font-bold">Next</span>
