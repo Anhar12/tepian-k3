@@ -1,6 +1,6 @@
 {
-  "id": "d518ee76-cca8-485e-b69b-c515f8c94892",
-  "prevId": "b1617c94-b797-462a-8812-3519bb48e04a",
+  "id": "a123e3de-ff39-4e16-b926-4aa2c36cd9bf",
+  "prevId": "b86e1a5f-54b7-4262-ba64-42a935de4663",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -222,6 +222,65 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.kblis": {
+      "name": "kblis",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "kbli_id_idx": {
+          "name": "kbli_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1327,14 +1386,114 @@
           "primaryKey": false,
           "notNull": true
         },
-        "company_name": {
-          "name": "company_name",
+        "name": {
+          "name": "name",
           "type": "varchar(250)",
           "primaryKey": false,
           "notNull": true
         },
-        "company_address": {
-          "name": "company_address",
+        "kbli_id": {
+          "name": "kbli_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maleWorkers": {
+          "name": "maleWorkers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "femaleWorkers": {
+          "name": "femaleWorkers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "healthFacilityAvailable": {
+          "name": "healthFacilityAvailable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "provinceId": {
+          "name": "provinceId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "districtId": {
+          "name": "districtId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "regencyId": {
+          "name": "regencyId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "villageId": {
+          "name": "villageId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "responsible_testing_person": {
+          "name": "responsible_testing_person",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "responsible_testing_person_phone": {
+          "name": "responsible_testing_person_phone",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "responsible_testing_person_email": {
+          "name": "responsible_testing_person_email",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "wlkp_status": {
+          "name": "wlkp_status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "wlkp": {
+          "name": "wlkp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "company_picture_file_name": {
+          "name": "company_picture_file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "company_picture_url": {
+          "name": "company_picture_url",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -1358,11 +1517,258 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_company_id_idx": {
+          "name": "user_company_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_company_user_id_idx": {
+          "name": "user_company_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "user_companies_user_id_users_id_fk": {
           "name": "user_companies_user_id_users_id_fk",
           "tableFrom": "user_companies",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_companies_kbli_id_kblis_id_fk": {
+          "name": "user_companies_kbli_id_kblis_id_fk",
+          "tableFrom": "user_companies",
+          "tableTo": "kblis",
+          "columnsFrom": [
+            "kbli_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_companies_provinceId_provinces_id_fk": {
+          "name": "user_companies_provinceId_provinces_id_fk",
+          "tableFrom": "user_companies",
+          "tableTo": "provinces",
+          "columnsFrom": [
+            "provinceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_companies_districtId_districts_id_fk": {
+          "name": "user_companies_districtId_districts_id_fk",
+          "tableFrom": "user_companies",
+          "tableTo": "districts",
+          "columnsFrom": [
+            "districtId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_companies_regencyId_regencies_id_fk": {
+          "name": "user_companies_regencyId_regencies_id_fk",
+          "tableFrom": "user_companies",
+          "tableTo": "regencies",
+          "columnsFrom": [
+            "regencyId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_companies_villageId_villages_id_fk": {
+          "name": "user_companies_villageId_villages_id_fk",
+          "tableFrom": "user_companies",
+          "tableTo": "villages",
+          "columnsFrom": [
+            "villageId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_company_testing_locations": {
+      "name": "user_company_testing_locations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_company_id": {
+          "name": "user_company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "regency_id": {
+          "name": "regency_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "district_id": {
+          "name": "district_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "user_company_testing_location_id_idx": {
+          "name": "user_company_testing_location_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_company_testing_location_user_company_id_idx": {
+          "name": "user_company_testing_location_user_company_id_idx",
+          "columns": [
+            {
+              "expression": "user_company_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_company_testing_locations_user_company_id_user_companies_id_fk": {
+          "name": "user_company_testing_locations_user_company_id_user_companies_id_fk",
+          "tableFrom": "user_company_testing_locations",
+          "tableTo": "user_companies",
+          "columnsFrom": [
+            "user_company_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_company_testing_locations_regency_id_regencies_id_fk": {
+          "name": "user_company_testing_locations_regency_id_regencies_id_fk",
+          "tableFrom": "user_company_testing_locations",
+          "tableTo": "regencies",
+          "columnsFrom": [
+            "regency_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_company_testing_locations_district_id_districts_id_fk": {
+          "name": "user_company_testing_locations_district_id_districts_id_fk",
+          "tableFrom": "user_company_testing_locations",
+          "tableTo": "districts",
+          "columnsFrom": [
+            "district_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_company_testing_locations_user_id_users_id_fk": {
+          "name": "user_company_testing_locations_user_id_users_id_fk",
+          "tableFrom": "user_company_testing_locations",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"

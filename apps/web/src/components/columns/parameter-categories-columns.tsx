@@ -17,7 +17,7 @@ interface ParameterCategoriesColumnsProps {
 
 const ActionCell = createCrudActionCell<
   ParameterCategories,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "parameter-category",
   resourcePath: "parameter-categories",

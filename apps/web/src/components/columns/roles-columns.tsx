@@ -17,7 +17,7 @@ interface RolesColumnsProps {
 
 const ActionCell = createCrudActionCell<
   Roles,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "role",
   resourcePath: "roles",

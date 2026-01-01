@@ -36,11 +36,30 @@ const villageQueries = {
     });
   },
 
+  getAllVillagesByDistrictId(districtId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.villages.findMany({
+          where: and(
+            eq(villages.districtId, districtId),
+            isNull(villages.deletedAt)
+          ),
+        }),
+      catch: (error) => {
+        logger.error("villageQueries.getAllVillagesByDistrictId", { error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data Desa berdasarkan Kecamatan",
+        });
+      },
+    });
+  },
+
   getVillageById(id: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.villages.findFirst({
-          where: and((eq(villages.id, id), isNull(villages.deletedAt))),
+          where: and(eq(villages.id, id), isNull(villages.deletedAt)),
         }),
       catch: (error) => {
         logger.error("villageQueries.getVillageById", { error });

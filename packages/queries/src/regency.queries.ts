@@ -36,11 +36,31 @@ const regencyQueries = {
     });
   },
 
+  getAllRegenciesByProvinceId(provinceId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.regencies.findMany({
+          where: and(
+            eq(regencies.provinceId, provinceId),
+            isNull(regencies.deletedAt)
+          ),
+        }),
+      catch: (error) => {
+        logger.error("regencyQueries.getAllRegenciesByProvinceId", { error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Gagal mengambil data Kabupaten/Kota berdasarkan ID Provinsi",
+        });
+      },
+    });
+  },
+
   getRegencyById(id: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.regencies.findFirst({
-          where: and((eq(regencies.id, id), isNull(regencies.deletedAt))),
+          where: and(eq(regencies.id, id), isNull(regencies.deletedAt)),
         }),
       catch: (error) => {
         logger.error("regencyQueries.getRegencyById", { error });

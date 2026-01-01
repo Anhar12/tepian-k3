@@ -55,7 +55,7 @@ function RouteComponent() {
       <AppSidebar variant="inset" />
       <SidebarInset className="overflow-hidden contain-inline-size">
         <SiteHeader />
-        <div className="container overflow-y-auto p-4">
+        <div className="overflow-y-auto p-4">
           <Outlet />
         </div>
       </SidebarInset>

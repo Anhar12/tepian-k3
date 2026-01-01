@@ -200,7 +200,7 @@ const userCompaniesQueries = {
     });
   },
 
-  deleteUserCompany(companyId: string, userId: string) {
+  deleteUserCompany(companyuserId: string, id: string) {
     return Effect.gen(function* () {
       const existingCompany = yield* Effect.tryPromise({
         try: () =>

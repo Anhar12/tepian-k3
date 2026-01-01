@@ -28,12 +28,16 @@ import { Route as coreDashboardToolsIndexRouteImport } from './routes/(core)/das
 import { Route as coreDashboardRolesIndexRouteImport } from './routes/(core)/dashboard/roles/index'
 import { Route as coreDashboardParametersIndexRouteImport } from './routes/(core)/dashboard/parameters/index'
 import { Route as coreDashboardParameterCategoriesIndexRouteImport } from './routes/(core)/dashboard/parameter-categories/index'
+import { Route as coreDashboardKblisIndexRouteImport } from './routes/(core)/dashboard/kblis/index'
+import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
 import { Route as coreDashboardClustersIndexRouteImport } from './routes/(core)/dashboard/clusters/index'
 import { Route as coreDashboardUsersCreateRouteImport } from './routes/(core)/dashboard/users/create'
 import { Route as coreDashboardToolsCreateRouteImport } from './routes/(core)/dashboard/tools/create'
 import { Route as coreDashboardRolesCreateRouteImport } from './routes/(core)/dashboard/roles/create'
 import { Route as coreDashboardParametersCreateRouteImport } from './routes/(core)/dashboard/parameters/create'
 import { Route as coreDashboardParameterCategoriesCreateRouteImport } from './routes/(core)/dashboard/parameter-categories/create'
+import { Route as coreDashboardKblisCreateRouteImport } from './routes/(core)/dashboard/kblis/create'
+import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
 import { Route as coreDashboardClustersCreateRouteImport } from './routes/(core)/dashboard/clusters/create'
 import { Route as coreDashboardUsersUserIdEditRouteImport } from './routes/(core)/dashboard/users/$userId.edit'
 import { Route as coreDashboardToolsToolIdEditRouteImport } from './routes/(core)/dashboard/tools/$toolId.edit'
@@ -41,6 +45,9 @@ import { Route as coreDashboardRolesRoleIdEditRouteImport } from './routes/(core
 import { Route as coreDashboardRolesRoleIdDetailRouteImport } from './routes/(core)/dashboard/roles/$roleId.detail'
 import { Route as coreDashboardParametersParameterIdEditRouteImport } from './routes/(core)/dashboard/parameters/$parameterId.edit'
 import { Route as coreDashboardParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/dashboard/parameter-categories/$parameterCategoriesId.edit'
+import { Route as coreDashboardKblisKbliIdEditRouteImport } from './routes/(core)/dashboard/kblis/$kbliId.edit'
+import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
+import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
 import { Route as coreDashboardClustersClusterIdEditRouteImport } from './routes/(core)/dashboard/clusters/$clusterId.edit'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -138,6 +145,17 @@ const coreDashboardParameterCategoriesIndexRoute =
     path: '/dashboard/parameter-categories/',
     getParentRoute: () => coreRouteRoute,
   } as any)
+const coreDashboardKblisIndexRoute = coreDashboardKblisIndexRouteImport.update({
+  id: '/dashboard/kblis/',
+  path: '/dashboard/kblis/',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDashboardCompanyIndexRoute =
+  coreDashboardCompanyIndexRouteImport.update({
+    id: '/dashboard/company/',
+    path: '/dashboard/company/',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 const coreDashboardClustersIndexRoute =
   coreDashboardClustersIndexRouteImport.update({
     id: '/dashboard/clusters/',
@@ -172,6 +190,18 @@ const coreDashboardParameterCategoriesCreateRoute =
   coreDashboardParameterCategoriesCreateRouteImport.update({
     id: '/dashboard/parameter-categories/create',
     path: '/dashboard/parameter-categories/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardKblisCreateRoute =
+  coreDashboardKblisCreateRouteImport.update({
+    id: '/dashboard/kblis/create',
+    path: '/dashboard/kblis/create',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardCompanyCreateRoute =
+  coreDashboardCompanyCreateRouteImport.update({
+    id: '/dashboard/company/create',
+    path: '/dashboard/company/create',
     getParentRoute: () => coreRouteRoute,
   } as any)
 const coreDashboardClustersCreateRoute =
@@ -216,6 +246,24 @@ const coreDashboardParameterCategoriesParameterCategoriesIdEditRoute =
     path: '/dashboard/parameter-categories/$parameterCategoriesId/edit',
     getParentRoute: () => coreRouteRoute,
   } as any)
+const coreDashboardKblisKbliIdEditRoute =
+  coreDashboardKblisKbliIdEditRouteImport.update({
+    id: '/dashboard/kblis/$kbliId/edit',
+    path: '/dashboard/kblis/$kbliId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardCompanyCompanyIdEditRoute =
+  coreDashboardCompanyCompanyIdEditRouteImport.update({
+    id: '/dashboard/company/$companyId/edit',
+    path: '/dashboard/company/$companyId/edit',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
+const coreDashboardCompanyCompanyIdDetailRoute =
+  coreDashboardCompanyCompanyIdDetailRouteImport.update({
+    id: '/dashboard/company/$companyId/detail',
+    path: '/dashboard/company/$companyId/detail',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 const coreDashboardClustersClusterIdEditRoute =
   coreDashboardClustersClusterIdEditRouteImport.update({
     id: '/dashboard/clusters/$clusterId/edit',
@@ -237,18 +285,25 @@ export interface FileRoutesByFullPath {
   '/settings': typeof coreSettingsRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
+  '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/dashboard/kblis/create': typeof coreDashboardKblisCreateRoute
   '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
   '/dashboard/parameters/create': typeof coreDashboardParametersCreateRoute
   '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
   '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
   '/dashboard/clusters': typeof coreDashboardClustersIndexRoute
+  '/dashboard/company': typeof coreDashboardCompanyIndexRoute
+  '/dashboard/kblis': typeof coreDashboardKblisIndexRoute
   '/dashboard/parameter-categories': typeof coreDashboardParameterCategoriesIndexRoute
   '/dashboard/parameters': typeof coreDashboardParametersIndexRoute
   '/dashboard/roles': typeof coreDashboardRolesIndexRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
   '/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
+  '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
+  '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
+  '/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
   '/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   '/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
   '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
@@ -270,18 +325,25 @@ export interface FileRoutesByTo {
   '/settings': typeof coreSettingsRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
+  '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/dashboard/kblis/create': typeof coreDashboardKblisCreateRoute
   '/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
   '/dashboard/parameters/create': typeof coreDashboardParametersCreateRoute
   '/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
   '/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/dashboard/users/create': typeof coreDashboardUsersCreateRoute
   '/dashboard/clusters': typeof coreDashboardClustersIndexRoute
+  '/dashboard/company': typeof coreDashboardCompanyIndexRoute
+  '/dashboard/kblis': typeof coreDashboardKblisIndexRoute
   '/dashboard/parameter-categories': typeof coreDashboardParameterCategoriesIndexRoute
   '/dashboard/parameters': typeof coreDashboardParametersIndexRoute
   '/dashboard/roles': typeof coreDashboardRolesIndexRoute
   '/dashboard/tools': typeof coreDashboardToolsIndexRoute
   '/dashboard/users': typeof coreDashboardUsersIndexRoute
   '/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
+  '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
+  '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
+  '/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
   '/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   '/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
   '/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
@@ -306,18 +368,25 @@ export interface FileRoutesById {
   '/(core)/settings': typeof coreSettingsRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/dashboard/clusters/create': typeof coreDashboardClustersCreateRoute
+  '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/(core)/dashboard/kblis/create': typeof coreDashboardKblisCreateRoute
   '/(core)/dashboard/parameter-categories/create': typeof coreDashboardParameterCategoriesCreateRoute
   '/(core)/dashboard/parameters/create': typeof coreDashboardParametersCreateRoute
   '/(core)/dashboard/roles/create': typeof coreDashboardRolesCreateRoute
   '/(core)/dashboard/tools/create': typeof coreDashboardToolsCreateRoute
   '/(core)/dashboard/users/create': typeof coreDashboardUsersCreateRoute
   '/(core)/dashboard/clusters/': typeof coreDashboardClustersIndexRoute
+  '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
+  '/(core)/dashboard/kblis/': typeof coreDashboardKblisIndexRoute
   '/(core)/dashboard/parameter-categories/': typeof coreDashboardParameterCategoriesIndexRoute
   '/(core)/dashboard/parameters/': typeof coreDashboardParametersIndexRoute
   '/(core)/dashboard/roles/': typeof coreDashboardRolesIndexRoute
   '/(core)/dashboard/tools/': typeof coreDashboardToolsIndexRoute
   '/(core)/dashboard/users/': typeof coreDashboardUsersIndexRoute
   '/(core)/dashboard/clusters/$clusterId/edit': typeof coreDashboardClustersClusterIdEditRoute
+  '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
+  '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
+  '/(core)/dashboard/kblis/$kbliId/edit': typeof coreDashboardKblisKbliIdEditRoute
   '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit': typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   '/(core)/dashboard/parameters/$parameterId/edit': typeof coreDashboardParametersParameterIdEditRoute
   '/(core)/dashboard/roles/$roleId/detail': typeof coreDashboardRolesRoleIdDetailRoute
@@ -341,18 +410,25 @@ export interface FileRouteTypes {
     | '/settings'
     | '/dashboard'
     | '/dashboard/clusters/create'
+    | '/dashboard/company/create'
+    | '/dashboard/kblis/create'
     | '/dashboard/parameter-categories/create'
     | '/dashboard/parameters/create'
     | '/dashboard/roles/create'
     | '/dashboard/tools/create'
     | '/dashboard/users/create'
     | '/dashboard/clusters'
+    | '/dashboard/company'
+    | '/dashboard/kblis'
     | '/dashboard/parameter-categories'
     | '/dashboard/parameters'
     | '/dashboard/roles'
     | '/dashboard/tools'
     | '/dashboard/users'
     | '/dashboard/clusters/$clusterId/edit'
+    | '/dashboard/company/$companyId/detail'
+    | '/dashboard/company/$companyId/edit'
+    | '/dashboard/kblis/$kbliId/edit'
     | '/dashboard/parameter-categories/$parameterCategoriesId/edit'
     | '/dashboard/parameters/$parameterId/edit'
     | '/dashboard/roles/$roleId/detail'
@@ -374,18 +450,25 @@ export interface FileRouteTypes {
     | '/settings'
     | '/dashboard'
     | '/dashboard/clusters/create'
+    | '/dashboard/company/create'
+    | '/dashboard/kblis/create'
     | '/dashboard/parameter-categories/create'
     | '/dashboard/parameters/create'
     | '/dashboard/roles/create'
     | '/dashboard/tools/create'
     | '/dashboard/users/create'
     | '/dashboard/clusters'
+    | '/dashboard/company'
+    | '/dashboard/kblis'
     | '/dashboard/parameter-categories'
     | '/dashboard/parameters'
     | '/dashboard/roles'
     | '/dashboard/tools'
     | '/dashboard/users'
     | '/dashboard/clusters/$clusterId/edit'
+    | '/dashboard/company/$companyId/detail'
+    | '/dashboard/company/$companyId/edit'
+    | '/dashboard/kblis/$kbliId/edit'
     | '/dashboard/parameter-categories/$parameterCategoriesId/edit'
     | '/dashboard/parameters/$parameterId/edit'
     | '/dashboard/roles/$roleId/detail'
@@ -409,18 +492,25 @@ export interface FileRouteTypes {
     | '/(core)/settings'
     | '/(core)/dashboard/'
     | '/(core)/dashboard/clusters/create'
+    | '/(core)/dashboard/company/create'
+    | '/(core)/dashboard/kblis/create'
     | '/(core)/dashboard/parameter-categories/create'
     | '/(core)/dashboard/parameters/create'
     | '/(core)/dashboard/roles/create'
     | '/(core)/dashboard/tools/create'
     | '/(core)/dashboard/users/create'
     | '/(core)/dashboard/clusters/'
+    | '/(core)/dashboard/company/'
+    | '/(core)/dashboard/kblis/'
     | '/(core)/dashboard/parameter-categories/'
     | '/(core)/dashboard/parameters/'
     | '/(core)/dashboard/roles/'
     | '/(core)/dashboard/tools/'
     | '/(core)/dashboard/users/'
     | '/(core)/dashboard/clusters/$clusterId/edit'
+    | '/(core)/dashboard/company/$companyId/detail'
+    | '/(core)/dashboard/company/$companyId/edit'
+    | '/(core)/dashboard/kblis/$kbliId/edit'
     | '/(core)/dashboard/parameter-categories/$parameterCategoriesId/edit'
     | '/(core)/dashboard/parameters/$parameterId/edit'
     | '/(core)/dashboard/roles/$roleId/detail'
@@ -573,6 +663,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardParameterCategoriesIndexRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/dashboard/kblis/': {
+      id: '/(core)/dashboard/kblis/'
+      path: '/dashboard/kblis'
+      fullPath: '/dashboard/kblis'
+      preLoaderRoute: typeof coreDashboardKblisIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/company/': {
+      id: '/(core)/dashboard/company/'
+      path: '/dashboard/company'
+      fullPath: '/dashboard/company'
+      preLoaderRoute: typeof coreDashboardCompanyIndexRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/dashboard/clusters/': {
       id: '/(core)/dashboard/clusters/'
       path: '/dashboard/clusters'
@@ -613,6 +717,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/parameter-categories/create'
       fullPath: '/dashboard/parameter-categories/create'
       preLoaderRoute: typeof coreDashboardParameterCategoriesCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/kblis/create': {
+      id: '/(core)/dashboard/kblis/create'
+      path: '/dashboard/kblis/create'
+      fullPath: '/dashboard/kblis/create'
+      preLoaderRoute: typeof coreDashboardKblisCreateRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/company/create': {
+      id: '/(core)/dashboard/company/create'
+      path: '/dashboard/company/create'
+      fullPath: '/dashboard/company/create'
+      preLoaderRoute: typeof coreDashboardCompanyCreateRouteImport
       parentRoute: typeof coreRouteRoute
     }
     '/(core)/dashboard/clusters/create': {
@@ -664,6 +782,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/dashboard/kblis/$kbliId/edit': {
+      id: '/(core)/dashboard/kblis/$kbliId/edit'
+      path: '/dashboard/kblis/$kbliId/edit'
+      fullPath: '/dashboard/kblis/$kbliId/edit'
+      preLoaderRoute: typeof coreDashboardKblisKbliIdEditRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/company/$companyId/edit': {
+      id: '/(core)/dashboard/company/$companyId/edit'
+      path: '/dashboard/company/$companyId/edit'
+      fullPath: '/dashboard/company/$companyId/edit'
+      preLoaderRoute: typeof coreDashboardCompanyCompanyIdEditRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/dashboard/company/$companyId/detail': {
+      id: '/(core)/dashboard/company/$companyId/detail'
+      path: '/dashboard/company/$companyId/detail'
+      fullPath: '/dashboard/company/$companyId/detail'
+      preLoaderRoute: typeof coreDashboardCompanyCompanyIdDetailRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/dashboard/clusters/$clusterId/edit': {
       id: '/(core)/dashboard/clusters/$clusterId/edit'
       path: '/dashboard/clusters/$clusterId/edit'
@@ -699,18 +838,25 @@ interface coreRouteRouteChildren {
   coreSettingsRoute: typeof coreSettingsRoute
   coreDashboardIndexRoute: typeof coreDashboardIndexRoute
   coreDashboardClustersCreateRoute: typeof coreDashboardClustersCreateRoute
+  coreDashboardCompanyCreateRoute: typeof coreDashboardCompanyCreateRoute
+  coreDashboardKblisCreateRoute: typeof coreDashboardKblisCreateRoute
   coreDashboardParameterCategoriesCreateRoute: typeof coreDashboardParameterCategoriesCreateRoute
   coreDashboardParametersCreateRoute: typeof coreDashboardParametersCreateRoute
   coreDashboardRolesCreateRoute: typeof coreDashboardRolesCreateRoute
   coreDashboardToolsCreateRoute: typeof coreDashboardToolsCreateRoute
   coreDashboardUsersCreateRoute: typeof coreDashboardUsersCreateRoute
   coreDashboardClustersIndexRoute: typeof coreDashboardClustersIndexRoute
+  coreDashboardCompanyIndexRoute: typeof coreDashboardCompanyIndexRoute
+  coreDashboardKblisIndexRoute: typeof coreDashboardKblisIndexRoute
   coreDashboardParameterCategoriesIndexRoute: typeof coreDashboardParameterCategoriesIndexRoute
   coreDashboardParametersIndexRoute: typeof coreDashboardParametersIndexRoute
   coreDashboardRolesIndexRoute: typeof coreDashboardRolesIndexRoute
   coreDashboardToolsIndexRoute: typeof coreDashboardToolsIndexRoute
   coreDashboardUsersIndexRoute: typeof coreDashboardUsersIndexRoute
   coreDashboardClustersClusterIdEditRoute: typeof coreDashboardClustersClusterIdEditRoute
+  coreDashboardCompanyCompanyIdDetailRoute: typeof coreDashboardCompanyCompanyIdDetailRoute
+  coreDashboardCompanyCompanyIdEditRoute: typeof coreDashboardCompanyCompanyIdEditRoute
+  coreDashboardKblisKbliIdEditRoute: typeof coreDashboardKblisKbliIdEditRoute
   coreDashboardParameterCategoriesParameterCategoriesIdEditRoute: typeof coreDashboardParameterCategoriesParameterCategoriesIdEditRoute
   coreDashboardParametersParameterIdEditRoute: typeof coreDashboardParametersParameterIdEditRoute
   coreDashboardRolesRoleIdDetailRoute: typeof coreDashboardRolesRoleIdDetailRoute
@@ -724,6 +870,8 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreSettingsRoute: coreSettingsRoute,
   coreDashboardIndexRoute: coreDashboardIndexRoute,
   coreDashboardClustersCreateRoute: coreDashboardClustersCreateRoute,
+  coreDashboardCompanyCreateRoute: coreDashboardCompanyCreateRoute,
+  coreDashboardKblisCreateRoute: coreDashboardKblisCreateRoute,
   coreDashboardParameterCategoriesCreateRoute:
     coreDashboardParameterCategoriesCreateRoute,
   coreDashboardParametersCreateRoute: coreDashboardParametersCreateRoute,
@@ -731,6 +879,8 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreDashboardToolsCreateRoute: coreDashboardToolsCreateRoute,
   coreDashboardUsersCreateRoute: coreDashboardUsersCreateRoute,
   coreDashboardClustersIndexRoute: coreDashboardClustersIndexRoute,
+  coreDashboardCompanyIndexRoute: coreDashboardCompanyIndexRoute,
+  coreDashboardKblisIndexRoute: coreDashboardKblisIndexRoute,
   coreDashboardParameterCategoriesIndexRoute:
     coreDashboardParameterCategoriesIndexRoute,
   coreDashboardParametersIndexRoute: coreDashboardParametersIndexRoute,
@@ -739,6 +889,11 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreDashboardUsersIndexRoute: coreDashboardUsersIndexRoute,
   coreDashboardClustersClusterIdEditRoute:
     coreDashboardClustersClusterIdEditRoute,
+  coreDashboardCompanyCompanyIdDetailRoute:
+    coreDashboardCompanyCompanyIdDetailRoute,
+  coreDashboardCompanyCompanyIdEditRoute:
+    coreDashboardCompanyCompanyIdEditRoute,
+  coreDashboardKblisKbliIdEditRoute: coreDashboardKblisKbliIdEditRoute,
   coreDashboardParameterCategoriesParameterCategoriesIdEditRoute:
     coreDashboardParameterCategoriesParameterCategoriesIdEditRoute,
   coreDashboardParametersParameterIdEditRoute:

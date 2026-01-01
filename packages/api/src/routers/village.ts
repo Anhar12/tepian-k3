@@ -10,6 +10,19 @@ export const villageRouter = createTRPCRouter({
     async () => await Effect.runPromise(villageQueries.getAllVillages())
   ),
 
+  getAllVillagesByDistrictId: publicProcedure
+    .input(
+      z.object({
+        districtId: z.uuidv7(),
+      })
+    )
+    .query(
+      async ({ input }) =>
+        await Effect.runPromise(
+          villageQueries.getAllVillagesByDistrictId(input.districtId)
+        )
+    ),
+
   getPaginatedVillages: withPermission("village.read")
     .input(villageSchema.getAllVillagesSchema)
     .query(async ({ input }) => {

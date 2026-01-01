@@ -17,7 +17,7 @@ interface UsersColumnsProps {
 
 const ActionCell = createCrudActionCell<
   UsersWithoutFoto,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "user",
   resourcePath: "users",

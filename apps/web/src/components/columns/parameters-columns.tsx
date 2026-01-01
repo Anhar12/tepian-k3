@@ -17,7 +17,7 @@ interface PaginatedParametersColumnsProps {
 
 const ActionCell = createCrudActionCell<
   PaginatedParameters,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "cluster",
   resourcePath: "parameters",

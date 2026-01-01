@@ -36,11 +36,30 @@ const districtQueries = {
     });
   },
 
+  getAllDistrictsByRegencyId(regencyId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.districts.findMany({
+          where: and(
+            eq(districts.regencyId, regencyId),
+            isNull(districts.deletedAt)
+          ),
+        }),
+      catch: (error) => {
+        logger.error("Error fetching districts by regency ID", { error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch districts by regency ID",
+        });
+      },
+    });
+  },
+
   getDistrictById(id: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.districts.findFirst({
-          where: and((eq(districts.id, id), isNull(districts.deletedAt))),
+          where: and(eq(districts.id, id), isNull(districts.deletedAt)),
         }),
       catch: (error) => {
         logger.error("Error fetching district by ID", { error });
@@ -56,7 +75,7 @@ const districtQueries = {
     );
   },
 
-  getDeletedClusterById(id: string) {
+  getDeletedDistrictById(id: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.districts.findFirst({
@@ -76,7 +95,7 @@ const districtQueries = {
     );
   },
 
-  getClusterByName(name: string) {
+  getDistrictByName(name: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.districts.findFirst({
@@ -193,7 +212,7 @@ const districtQueries = {
 
   createDistrict(data: z.infer<typeof districSchema.createDistrictSchema>) {
     return Effect.gen(this, function* () {
-      const isExisting = yield* districtQueries.getClusterByName(data.name);
+      const isExisting = yield* districtQueries.getDistrictByName(data.name);
 
       if (isExisting) {
         throw new TRPCError({
@@ -321,7 +340,7 @@ const districtQueries = {
 
   restoreDistrict(id: string) {
     return Effect.gen(this, function* () {
-      const deletedDistrict = yield* districtQueries.getDeletedClusterById(id);
+      const deletedDistrict = yield* districtQueries.getDeletedDistrictById(id);
 
       if (!deletedDistrict) {
         throw new TRPCError({

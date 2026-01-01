@@ -10,6 +10,19 @@ export const regencyRouter = createTRPCRouter({
     async () => await Effect.runPromise(regencyQueries.getAllRegencies())
   ),
 
+  getAllRegenciesByProvinceId: publicProcedure
+    .input(
+      z.object({
+        provinceId: z.uuidv7(),
+      })
+    )
+    .query(
+      async ({ input }) =>
+        await Effect.runPromise(
+          regencyQueries.getAllRegenciesByProvinceId(input.provinceId)
+        )
+    ),
+
   getPaginatedRegencies: withPermission("regency.read")
     .input(regencySchema.getAllRegenciesSchema)
     .query(async ({ input }) => {

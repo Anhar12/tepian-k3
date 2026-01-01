@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Navbar } from "@/components/navbar";
 import { Stepper } from "@/components/stepper";
 import { LocationSection } from "@/components/location-section";
 import { ParameterCategories } from "@/components/parameter-categories";
 import { TestingTable } from "@/components/testing-table";
+import LandingNavbar from "@/components/landing-navbar";
 
 export const Route = createFileRoute("/transaksi")({
   component: RouteComponent,
@@ -22,7 +22,7 @@ function RouteComponent() {
       />
 
       <div className="relative z-10">
-        <Navbar />
+        <LandingNavbar />
 
         <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
           {/* Page Title */}

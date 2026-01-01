@@ -1,6 +1,8 @@
 import * as React from "react";
 import {
   IconAdjustments,
+  IconBook,
+  IconBuilding,
   IconDashboard,
   IconFolderCog,
   IconInnerShadowTop,
@@ -68,6 +70,18 @@ const data: {
       url: "/dashboard/parameters",
       icon: IconAdjustments,
       permission: "parameters.read",
+    },
+    {
+      title: "KBLIs",
+      url: "/dashboard/kblis",
+      icon: IconBook,
+      permission: "kbli.read",
+    },
+    {
+      title: "Company",
+      url: "/dashboard/company",
+      icon: IconBuilding,
+      permission: "user-company.read",
     },
   ],
 };
