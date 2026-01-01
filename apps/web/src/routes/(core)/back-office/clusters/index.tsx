@@ -73,7 +73,7 @@ function RouteComponent() {
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/clusters",
+                to: "/back-office/clusters",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -86,7 +86,7 @@ function RouteComponent() {
         </div>
         <PermissionGate permission="clusters.create">
           <Button
-            onClick={() => navigate({ to: "/dashboard/clusters/create" })}
+            onClick={() => navigate({ to: "/back-office/clusters/create" })}
           >
             <PlusCircle className="size-4" />
             Tambah Cluster

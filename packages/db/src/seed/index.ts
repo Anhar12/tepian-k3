@@ -16,6 +16,7 @@ import seedRegencies from "./regencies";
 import seedDistricts from "./districts";
 import seedVillages from "./villages";
 import seedKblis from "./kblis";
+import seedParameters from "./parameter";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -429,6 +430,7 @@ async function seed() {
   // seeding other data can go here...
   await seedClusters();
   await seedParameterCategories();
+  await seedParameters();
   await seedProvinces();
   await seedRegencies();
   await seedDistricts();

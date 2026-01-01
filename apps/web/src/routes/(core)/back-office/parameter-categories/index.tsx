@@ -15,28 +15,29 @@ import { DataTable } from "@/components/data-table/data-table";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
+import type { ParameterCategories } from "@tepian-k3/types/parameter-categories.types";
 
-export const Route = createFileRoute("/(core)/back-office/parameter-categories/")(
-  {
-    validateSearch: parameterCategoriesSchema.getAllParameterCategoriesSchema,
-    beforeLoad: async ({ context }) =>
-      await requirePermission(context, {
-        permission: "parameter-categories.read",
-      }),
-    loaderDeps: (search) => ({
-      searchParams:
-        parameterCategoriesSchema.getAllParameterCategoriesSchema.parse(search),
+export const Route = createFileRoute(
+  "/(core)/back-office/parameter-categories/",
+)({
+  validateSearch: parameterCategoriesSchema.getAllParameterCategoriesSchema,
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: "parameter-categories.read",
     }),
-    loader: ({ context, deps }) => {
-      return context.queryClient.ensureQueryData(
-        context.trpc.parameterCategories.getPaginatedParameterCategories.queryOptions(
-          deps.searchParams,
-        ),
-      );
-    },
-    component: RouteComponent,
+  loaderDeps: (search) => ({
+    searchParams:
+      parameterCategoriesSchema.getAllParameterCategoriesSchema.parse(search),
+  }),
+  loader: ({ context, deps }) => {
+    return context.queryClient.ensureQueryData(
+      context.trpc.parameterCategories.getPaginatedParameterCategories.queryOptions(
+        deps.searchParams,
+      ),
+    );
   },
-);
+  component: RouteComponent,
+});
 
 function RouteComponent() {
   const params = Route.useSearch();
@@ -61,7 +62,7 @@ function RouteComponent() {
 
   const { table } = useDataTable({
     data: parameterCategories.data,
-    columns,
+    columns: columns as ParameterCategories[],
     pageCount: parameterCategories.pageCount,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
@@ -82,7 +83,7 @@ function RouteComponent() {
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/parameter-categories",
+                to: "/back-office/parameter-categories",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -96,7 +97,7 @@ function RouteComponent() {
         <PermissionGate permission="parameter-categories.create">
           <Button
             onClick={() =>
-              navigate({ to: "/dashboard/parameter-categories/create" })
+              navigate({ to: "/back-office/parameter-categories/create" })
             }
           >
             <PlusCircle className="size-4" />

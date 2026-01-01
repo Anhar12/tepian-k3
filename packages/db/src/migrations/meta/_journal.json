@@ -22,6 +22,20 @@
       "when": 1767235870573,
       "tag": "0002_mighty_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1767264346630,
+      "tag": "0003_foamy_grey_gargoyle",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767264372397,
+      "tag": "0004_wandering_mysterio",
+      "breakpoints": true
     }
   ]
 }

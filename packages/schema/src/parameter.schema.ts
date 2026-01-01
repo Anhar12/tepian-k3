@@ -32,6 +32,7 @@ const createParameterSchema = createInsertSchema(parameters, {
   name: z.string().min(1).max(256),
   parameterCategoryId: z.uuidv7(),
   price: z.number().min(0),
+  unit: z.string().min(1).max(255),
   reference: z.string().min(1).max(512),
 });
 
@@ -40,6 +41,7 @@ const updateParameterSchema = createUpdateSchema(parameters, {
   name: z.string().min(1).max(256),
   parameterCategoryId: z.uuidv7(),
   price: z.number().min(0),
+  unit: z.string().min(1).max(255),
   reference: z.string().min(1).max(512),
 });
 

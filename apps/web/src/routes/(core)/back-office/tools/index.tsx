@@ -72,7 +72,7 @@ function RouteComponent() {
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({
-                to: "/dashboard/tools",
+                to: "/back-office/tools",
                 search: {
                   ...params,
                   showDeleted: Boolean(checked),
@@ -84,7 +84,7 @@ function RouteComponent() {
           <Label>Deleted Tools</Label>
         </div>
         <PermissionGate permission="tools.create">
-          <Button onClick={() => navigate({ to: "/dashboard/tools/create" })}>
+          <Button onClick={() => navigate({ to: "/back-office/tools/create" })}>
             <PlusCircle className="size-4" />
             Tambah Alat
           </Button>

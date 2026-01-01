@@ -1,0 +1,1 @@
+ALTER TABLE "parameters" ADD COLUMN "unit" varchar(255);

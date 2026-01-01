@@ -88,6 +88,7 @@ function RouteComponent() {
       name: parameter.name,
       price: parameter.price,
       reference: parameter.reference ?? undefined,
+      unit: parameter.unit,
     },
   });
 
@@ -263,6 +264,30 @@ function RouteComponent() {
                     </FieldLabel>
                     <Input
                       placeholder="Masukkan referensi parameter"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="unit"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Satuan Parameter
+                    </FieldLabel>
+                    <Input
+                      placeholder="Masukkan satuan parameter"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
