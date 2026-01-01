@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import kbliSchema from "@tepian-k3/schema/kbli.schema";
 import { PlusCircle } from "lucide-react";
@@ -22,14 +22,6 @@ export const Route = createFileRoute("/(core)/back-office/kblis/")({
     await requirePermission(context, {
       permission: "parameters.read",
     }),
-  loaderDeps: (search) => ({
-    searchParams: kbliSchema.getAllKBLISchema.parse(search),
-  }),
-  loader: ({ context, deps }) => {
-    return context.queryClient.ensureQueryData(
-      context.trpc.kbli.getPaginatedKblis.queryOptions(deps.searchParams),
-    );
-  },
   component: RouteComponent,
 });
 
@@ -37,9 +29,11 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: kblis } = useSuspenseQuery(
-    trpc.kbli.getPaginatedKblis.queryOptions(params),
-  );
+  const {
+    data: kblis,
+    isLoading,
+    error,
+  } = useQuery(trpc.kbli.getPaginatedKblis.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
@@ -53,9 +47,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: kblis.data,
+    data: kblis?.data ?? [],
     columns,
-    pageCount: kblis.pageCount,
+    pageCount: kblis?.pageCount ?? 0,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -93,7 +87,12 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
-      <DataTable table={table}>
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="Tidak ada kbli ditemukan."
+      >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />

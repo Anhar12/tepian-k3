@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import userCompanySchema from "@tepian-k3/schema/user-company.schema";
 import type { UserCompaniesWithRelations } from "@tepian-k3/types/user-company.types";
@@ -21,16 +21,6 @@ export const Route = createFileRoute("/(core)/dashboard/company/")({
   validateSearch: userCompanySchema.getAllUserCompaniesSchema,
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "user-company.read" }),
-  loaderDeps: (search) => ({
-    searchParams: userCompanySchema.getAllUserCompaniesSchema.parse(search),
-  }),
-  loader: ({ context, deps }) => {
-    return context.queryClient.ensureQueryData(
-      context.trpc.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(
-        deps.searchParams,
-      ),
-    );
-  },
   component: RouteComponent,
 });
 
@@ -38,7 +28,11 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: company } = useSuspenseQuery(
+  const {
+    data: company,
+    isLoading,
+    error,
+  } = useQuery(
     trpc.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(params),
   );
 
@@ -54,9 +48,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: company.data,
+    data: company?.data ?? [],
     columns: columns as UserCompaniesWithRelations[],
-    pageCount: company.pageCount,
+    pageCount: company?.pageCount ?? 0,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -94,7 +88,12 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
-      <DataTable table={table}>
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="Tidak ada perusahaan ditemukan."
+      >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />

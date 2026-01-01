@@ -10,7 +10,7 @@ import getUsersColumns from "@/components/columns/users-columns";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { PlusCircle } from "lucide-react";
@@ -20,14 +20,6 @@ export const Route = createFileRoute("/(core)/back-office/users/")({
   validateSearch: (search) => userSchema.getAllUsersSchema.parse(search),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "users.read" }),
-  loaderDeps: (search) => ({
-    searchParams: userSchema.getAllUsersSchema.parse(search),
-  }),
-  loader: ({ context, deps }) => {
-    return context.queryClient.ensureQueryData(
-      context.trpc.user.getUserPaginated.queryOptions(deps.searchParams),
-    );
-  },
   component: RouteComponent,
 });
 
@@ -35,9 +27,11 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: users } = useSuspenseQuery(
-    trpc.user.getUserPaginated.queryOptions(params),
-  );
+  const {
+    data: users,
+    isLoading,
+    error,
+  } = useQuery(trpc.user.getUserPaginated.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
@@ -51,9 +45,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: users.data,
+    data: users?.data ?? [],
     columns,
-    pageCount: users.pageCount,
+    pageCount: users?.pageCount ?? 0,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -91,7 +85,13 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
-      <DataTable table={table}>
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="Tidak ada pengguna ditemukan."
+        emptyDescription="Coba sesuaikan filter atau kata kunci pencarian Anda."
+      >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />

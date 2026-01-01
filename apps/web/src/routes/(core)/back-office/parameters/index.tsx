@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { PlusCircle } from "lucide-react";
@@ -22,16 +22,6 @@ export const Route = createFileRoute("/(core)/back-office/parameters/")({
     await requirePermission(context, {
       permission: "parameters.read",
     }),
-  loaderDeps: (search) => ({
-    searchParams: parameterSchema.getAllParametersSchema.parse(search),
-  }),
-  loader: ({ context, deps }) => {
-    return context.queryClient.ensureQueryData(
-      context.trpc.parameter.getPaginatedParameters.queryOptions(
-        deps.searchParams,
-      ),
-    );
-  },
   component: RouteComponent,
 });
 
@@ -39,9 +29,11 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: parameters } = useSuspenseQuery(
-    trpc.parameter.getPaginatedParameters.queryOptions(params),
-  );
+  const {
+    data: parameters,
+    isLoading,
+    error,
+  } = useQuery(trpc.parameter.getPaginatedParameters.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
@@ -55,9 +47,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: parameters.data,
+    data: parameters?.data ?? [],
     columns,
-    pageCount: parameters.pageCount,
+    pageCount: parameters?.pageCount ?? 0,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -97,7 +89,13 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
-      <DataTable table={table}>
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="Tidak ada parameter yang ditemukan"
+        emptyDescription="Coba sesuaikan filter atau kata kunci pencarian Anda."
+      >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />

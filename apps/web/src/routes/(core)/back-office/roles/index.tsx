@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import rolesSchema from "@tepian-k3/schema/role.schema";
 import { PlusCircle } from "lucide-react";
@@ -20,14 +20,6 @@ export const Route = createFileRoute("/(core)/back-office/roles/")({
   validateSearch: rolesSchema.getAllRolesSchema,
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "roles.read" }),
-  loaderDeps: (search) => ({
-    searchParams: rolesSchema.getAllRolesSchema.parse(search),
-  }),
-  loader: ({ context, deps }) => {
-    return context.queryClient.ensureQueryData(
-      context.trpc.role.getPaginatedRoles.queryOptions(deps.searchParams),
-    );
-  },
   component: RouteComponent,
 });
 
@@ -35,9 +27,11 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: roles } = useSuspenseQuery(
-    trpc.role.getPaginatedRoles.queryOptions(params),
-  );
+  const {
+    data: roles,
+    isLoading,
+    error,
+  } = useQuery(trpc.role.getPaginatedRoles.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
@@ -51,9 +45,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: roles.data,
+    data: roles?.data ?? [],
     columns,
-    pageCount: roles.pageCount,
+    pageCount: roles?.pageCount ?? 0,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -91,7 +85,13 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
-      <DataTable table={table}>
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="Tidak ada role yang ditemukan."
+        emptyDescription="Coba sesuaikan filter atau tambahkan role baru."
+      >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />
