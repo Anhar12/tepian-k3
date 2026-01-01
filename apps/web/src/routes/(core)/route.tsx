@@ -25,12 +25,7 @@ export const Route = createFileRoute("/(core)")({
       });
     }
 
-    if (user.roles.find((role) => role.name === "user")) {
-      throw redirect({ to: "/" });
-    }
-
-    // If user is admin or moderator, redirect to back-office
-    throw redirect({ to: "/back-office" });
+    return null;
   },
   component: () => <Outlet />,
 });

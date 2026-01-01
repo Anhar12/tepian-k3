@@ -25,6 +25,7 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
 import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
+import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
@@ -129,6 +130,11 @@ const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => coreDashboardRouteRoute,
+} as any)
+const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => coreBackOfficeRouteRoute,
 } as any)
 const coreDashboardCompanyIndexRoute =
   coreDashboardCompanyIndexRouteImport.update({
@@ -301,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
@@ -334,7 +341,6 @@ export interface FileRoutesByTo {
   '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
-  '/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -342,6 +348,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
@@ -387,6 +394,7 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
@@ -431,6 +439,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/back-office/'
     | '/dashboard/'
     | '/back-office/clusters/create'
     | '/back-office/kblis/create'
@@ -464,7 +473,6 @@ export interface FileRouteTypes {
     | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
-    | '/back-office'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -472,6 +480,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/back-office'
     | '/dashboard'
     | '/back-office/clusters/create'
     | '/back-office/kblis/create'
@@ -516,6 +525,7 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/(core)/back-office/'
     | '/(core)/dashboard/'
     | '/(core)/back-office/clusters/create'
     | '/(core)/back-office/kblis/create'
@@ -667,6 +677,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof coreDashboardIndexRouteImport
       parentRoute: typeof coreDashboardRouteRoute
+    }
+    '/(core)/back-office/': {
+      id: '/(core)/back-office/'
+      path: '/'
+      fullPath: '/back-office/'
+      preLoaderRoute: typeof coreBackOfficeIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/dashboard/company/': {
       id: '/(core)/dashboard/company/'
@@ -874,6 +891,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface coreBackOfficeRouteRouteChildren {
+  coreBackOfficeIndexRoute: typeof coreBackOfficeIndexRoute
   coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute
   coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute
   coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -899,6 +917,7 @@ interface coreBackOfficeRouteRouteChildren {
 }
 
 const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
+  coreBackOfficeIndexRoute: coreBackOfficeIndexRoute,
   coreBackOfficeClustersCreateRoute: coreBackOfficeClustersCreateRoute,
   coreBackOfficeKblisCreateRoute: coreBackOfficeKblisCreateRoute,
   coreBackOfficeParameterCategoriesCreateRoute:

@@ -397,6 +397,9 @@ const usersQueries = {
         );
       }
 
+      // Assign default role to user
+      yield* userRolesQueries.assingDefaultRoleToUser(user.id);
+
       return user;
     });
   },

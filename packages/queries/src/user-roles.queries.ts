@@ -1,11 +1,41 @@
 import { and, eq } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
-import { userRoles } from "@tepian-k3/db/schema";
+import { roles, userRoles } from "@tepian-k3/db/schema";
 import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 
 const userRolesQueries = {
+  assingDefaultRoleToUser(userId: string) {
+    return Effect.gen(function* () {
+      const defaultRole = yield* Effect.tryPromise({
+        try: () =>
+          db.query.roles.findFirst({
+            where: eq(roles.name, "user"),
+          }),
+        catch: (error) => {
+          logger.error("Error fetching default role", { error });
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to fetch default role.",
+            cause: error,
+          });
+        },
+      });
+
+      if (!defaultRole) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Default role not found.",
+          })
+        );
+      }
+
+      return yield* userRolesQueries.assignRoleToUser(userId, defaultRole.id);
+    });
+  },
+
   assignRoleToUser(userId: string, roleId: string) {
     return Effect.tryPromise({
       try: () => db.insert(userRoles).values({ userId, roleId }).returning(),

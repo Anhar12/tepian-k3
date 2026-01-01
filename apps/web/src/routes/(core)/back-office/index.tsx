@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/(core)/dashboard/")({
+export const Route = createFileRoute("/(core)/back-office/")({
   component: RouteComponent,
 });
 
