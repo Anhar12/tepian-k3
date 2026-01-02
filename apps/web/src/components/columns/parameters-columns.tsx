@@ -28,6 +28,7 @@ const ActionCell = createCrudActionCell<
   getQueryOptions: (params) =>
     trpc.parameter.getPaginatedParameters.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
+  showDetail: true,
 });
 
 export default function getPaginatedParametersColumns({

@@ -27,6 +27,14 @@ const parameterQueries = {
       try: () =>
         db.query.parameters.findFirst({
           where: and(eq(parameters.id, id), isNull(parameters.deletedAt)),
+          with: {
+            category: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+          },
         }),
       catch: (error) => {
         logger.error("Error in getParameterById:", error);

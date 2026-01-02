@@ -5,11 +5,13 @@ import {
   kblis,
   parameterCategories,
   parameters,
+  parameterTools,
   permission,
   provinces,
   regencies,
   rolePermissions,
   roles,
+  tools,
   userCompanies,
   userCompanyTestingLocation,
   userPermissions,
@@ -120,6 +122,10 @@ export const userPermissionsRelations = relations(
   })
 );
 
+export const toolsRelations = relations(tools, ({ many }) => ({
+  parameterTools: many(parameterTools),
+}));
+
 export const clustersRelations = relations(users, ({ many }) => ({
   parameterCategories: many(parameterCategories),
   parameters: many(parameters),
@@ -136,10 +142,22 @@ export const parameterCategoriesRelations = relations(
   })
 );
 
-export const parametersRelations = relations(parameters, ({ one }) => ({
+export const parametersRelations = relations(parameters, ({ one, many }) => ({
   category: one(parameterCategories, {
     fields: [parameters.parameterCategoryId],
     references: [parameterCategories.id],
+  }),
+  tools: many(parameterTools),
+}));
+
+export const parameterToolsRelations = relations(parameterTools, ({ one }) => ({
+  parameter: one(parameters, {
+    fields: [parameterTools.parameterId],
+    references: [parameters.id],
+  }),
+  tool: one(tools, {
+    fields: [parameterTools.toolId],
+    references: [tools.id],
   }),
 }));
 

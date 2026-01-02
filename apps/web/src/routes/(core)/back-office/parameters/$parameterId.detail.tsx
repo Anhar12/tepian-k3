@@ -1,0 +1,62 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { requirePermission } from "@/utils/require-permission";
+import { createFileRoute } from "@tanstack/react-router";
+import z from "zod";
+import ParameterDetail from "./-components/parameter-detail";
+
+export const Route = createFileRoute(
+  "/(core)/back-office/parameters/$parameterId/detail",
+)({
+  validateSearch: z.object({
+    tabs: z.enum(["parameter", "tool"]).default("parameter"),
+  }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: ["parameter.read", "parameter-tool.read"],
+    }),
+  params: z.object({
+    parameterId: z.string(),
+  }),
+  loader: async ({ context, params }) => {
+    context.queryClient.ensureQueryData(
+      context.trpc.parameter.getParameterById.queryOptions({
+        id: params.parameterId,
+      }),
+    );
+  },
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  const { parameterId } = Route.useParams();
+  const { tabs } = Route.useSearch();
+
+  const navigate = Route.useNavigate();
+
+  return (
+    <div className="flex flex-col gap-6">
+      <Tabs
+        defaultValue={tabs}
+        onValueChange={(value) => {
+          navigate({
+            search: (old) => ({
+              ...old,
+              tabs: value as "parameter" | "tool",
+            }),
+          });
+        }}
+      >
+        <TabsList>
+          <TabsTrigger value="parameter">Parameter</TabsTrigger>
+          <TabsTrigger value="tool">Tool</TabsTrigger>
+        </TabsList>
+        <TabsContent value="parameter">
+          <ParameterDetail parameterId={parameterId} />
+        </TabsContent>
+        <TabsContent value="tool">
+          <h1>Tool Content for Parameter ID: {parameterId}</h1>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
