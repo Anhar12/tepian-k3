@@ -5,7 +5,7 @@ import parameterToolQueries from "@tepian-k3/queries/parameter-tool.queries";
 import z from "zod";
 
 export const parameterToolRouter = createTRPCRouter({
-  getAllParameterToolsByParameterId: withPermission("parameter-tools.read")
+  getAllParameterToolsByParameterId: withPermission("parameter-tool.read")
     .input(
       z.object({
         parameterId: z.uuidv7(),
@@ -18,7 +18,7 @@ export const parameterToolRouter = createTRPCRouter({
         )
     ),
 
-  getParameterToolById: withPermission("parameter-tools.read")
+  getParameterToolById: withPermission("parameter-tool.read")
     .input(
       z.object({
         id: z.uuidv7(),
@@ -31,7 +31,7 @@ export const parameterToolRouter = createTRPCRouter({
         )
     ),
 
-  assignToolsToParameter: withPermission("parameter-tools.create")
+  assignToolsToParameter: withPermission("parameter-tool.create")
     .input(parameterToolSchema.createParameterToolSchema)
     .mutation(
       async ({ input }) =>
@@ -40,14 +40,14 @@ export const parameterToolRouter = createTRPCRouter({
         )
     ),
 
-  updateParameterTool: withPermission("parameter-tools.update")
+  updateParameterTool: withPermission("parameter-tool.update")
     .input(parameterToolSchema.updateParameterToolSchema)
     .mutation(
       async ({ input }) =>
         await Effect.runPromise(parameterToolQueries.updateParameterTool(input))
     ),
 
-  deleteParameterTool: withPermission("parameter-tools.delete")
+  deleteParameterTool: withPermission("parameter-tool.delete")
     .input(
       z.object({
         id: z.string().uuidv7(),
