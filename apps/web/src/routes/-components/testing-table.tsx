@@ -109,8 +109,28 @@ export function TestingTable(props: TestingTableProps) {
   const params = transaksiApi.useSearch();
   const navigate = useNavigate();
 
+  const [cart, setCart] = useState<
+    Map<
+      string,
+      {
+        quantity: number;
+        price: number;
+      }
+    >
+  >(
+    new Map<
+      string,
+      {
+        quantity: number;
+        price: number;
+      }
+    >(),
+  );
+
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounced(searchTerm, 500);
+
+  const { data: me } = useQuery(trpc.auth.me.queryOptions());
 
   const { data: parameters, isLoading } = useQuery(
     trpc.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
@@ -121,6 +141,13 @@ export function TestingTable(props: TestingTableProps) {
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
     trpc.parameterCategories.getAllParameterCategories.queryOptions(),
   );
+
+  const handleAddToCart = (parameterId: string) => {
+    if (!me) return;
+
+    // Implement add to cart functionality here
+    console.log(`Adding parameter ${parameterId} to cart`);
+  };
 
   const goToPage = (page: number) => {
     navigate({
@@ -302,13 +329,34 @@ export function TestingTable(props: TestingTableProps) {
                         type="number"
                         defaultValue={1}
                         className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
+                        min={1}
+                        onChange={(e) => {
+                          const quantity = parseInt(e.target.value, 10);
+                          if (quantity < 1) return;
+                          // update cart
+                          setCart((oldCart) => {
+                            const newCart = new Map(oldCart);
+                            newCart.set(row.id, {
+                              quantity,
+                              price: row.price,
+                            });
+                            return newCart;
+                          });
+                        }}
                       />
                     </TableCell>
                     <TableCell className="text-sm font-bold text-[#0056B3]">
-                      Rp {row.price.toLocaleString("id-ID")}
+                      Rp
+                      {(
+                        (cart.get(row.id)?.quantity || 1) * row.price
+                      ).toLocaleString("id-ID")}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg">
+                      <Button
+                        className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg"
+                        disabled={!me}
+                        onClick={() => handleAddToCart(row.id)}
+                      >
                         <ShoppingCart className="h-4 w-4" />
                         Add to Cart
                       </Button>
