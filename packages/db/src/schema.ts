@@ -5,6 +5,7 @@ import {
   index,
   integer,
   pgEnum,
+  pgSequence,
   pgTableCreator,
   primaryKey,
   text,
@@ -533,5 +534,67 @@ export const cart = createTable(
     index("cart_company_id_idx").using("btree", table.companyId),
     index("cart_location_id_idx").using("btree", table.locationId),
     index("cart_parameter_id_idx").using("btree", table.parameterId),
+  ]
+);
+
+export const testingSequence = pgSequence("testing_sequence_seq");
+
+export const orderNumberSequence = pgSequence("order_number_seq");
+
+export const testing = createTable(
+  "testing",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    orderNumber: varchar("order_number", { length: 100 }).notNull().unique(),
+    testingNumber: varchar("testing_number", { length: 100 })
+      .notNull()
+      .unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    note: text("note"),
+    ...timestamps,
+  },
+  (table) => [
+    index("testing_id_idx").using("btree", table.id),
+    index("testing_order_number_idx").using("btree", table.orderNumber),
+    index("testing_testing_number_idx").using("btree", table.testingNumber),
+    index("testing_user_id_idx").using("btree", table.userId),
+    index("testing_company_id_idx").using("btree", table.companyId),
+    index("testing_location_id_idx").using("btree", table.locationId),
+  ]
+);
+
+export const testingItem = createTable(
+  "testing_item",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    testingId: uuid("testing_id")
+      .notNull()
+      .references(() => testing.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    price: integer("price").notNull(),
+    result: text("result"),
+    note: text("note"),
+    ...timestamps,
+  },
+  (table) => [
+    index("testing_item_id_idx").using("btree", table.id),
+    index("testing_item_testing_id_idx").using("btree", table.testingId),
   ]
 );
