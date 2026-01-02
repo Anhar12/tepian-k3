@@ -15,6 +15,14 @@ const parameterToolQueries = {
       try: () =>
         db.query.parameterTools.findMany({
           where: eq(parameterTools.parameterId, parameterId),
+          with: {
+            tool: {
+              columns: {
+                id: true,
+                toolName: true,
+              },
+            },
+          },
         }),
       catch: (error) => {
         logger.error("Error fetching tools by parameter ID", {

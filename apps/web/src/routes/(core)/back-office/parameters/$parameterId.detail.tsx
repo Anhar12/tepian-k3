@@ -3,6 +3,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import ParameterDetail from "./-components/parameter-detail";
+import ParameterTools from "./-components/parameter-tool";
 
 export const Route = createFileRoute(
   "/(core)/back-office/parameters/$parameterId/detail",
@@ -54,7 +55,7 @@ function RouteComponent() {
           <ParameterDetail parameterId={parameterId} />
         </TabsContent>
         <TabsContent value="tool">
-          <h1>Tool Content for Parameter ID: {parameterId}</h1>
+          <ParameterTools parameterId={parameterId} />
         </TabsContent>
       </Tabs>
     </div>
