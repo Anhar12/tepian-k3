@@ -18,7 +18,9 @@ import {
 import { v7 as uuidv7 } from "uuid";
 import { timestamps } from "./utils";
 import {
+  ORDER_SEQUENCE_NAME,
   PERMISSION_ACTION,
+  TESTING_SEQUENCE_NAME,
   TOOLS_AVAILABILITY,
   TOOLS_CONDITIONS,
 } from "@tepian-k3/constants";
@@ -559,9 +561,9 @@ export const cart = createTable(
   ]
 );
 
-export const testingSequence = pgSequence("testing_sequence_seq");
+export const testingSequence = pgSequence(TESTING_SEQUENCE_NAME);
 
-export const orderNumberSequence = pgSequence("order_number_seq");
+export const orderNumberSequence = pgSequence(ORDER_SEQUENCE_NAME);
 
 export const testing = createTable(
   "testing",

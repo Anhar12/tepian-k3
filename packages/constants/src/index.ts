@@ -36,3 +36,7 @@ export const ORDER_STATUS = [
 ] as const;
 
 export type OrderStatus = (typeof ORDER_STATUS)[number];
+
+export const TESTING_SEQUENCE_NAME = "testing_number_seq";
+
+export const ORDER_SEQUENCE_NAME = "order_number_seq";

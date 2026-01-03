@@ -2,6 +2,10 @@ import { sql } from "drizzle-orm";
 import { timestamp } from "drizzle-orm/pg-core";
 import { type AnyColumn } from "drizzle-orm";
 import type { DBType } from "./client";
+import {
+  ORDER_SEQUENCE_NAME,
+  TESTING_SEQUENCE_NAME,
+} from "@tepian-k3/constants";
 
 export const timestamps = {
   deletedAt: timestamp("deleted_at", {
@@ -51,13 +55,32 @@ export function isEmpty<TColumn extends AnyColumn>(column: TColumn) {
   `;
 }
 
+export async function generateTestingNumberWithSequence(
+  db: DBType,
+  prefix: string = "TEST"
+): Promise<string> {
+  // PostgreSQL sequences are atomic - handles race conditions automatically
+  const result = await db.execute(
+    sql`SELECT nextval('${sql.raw(TESTING_SEQUENCE_NAME)}')`
+  );
+
+  const sequence = Number(result[0]?.sequence);
+
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${prefix}-${year}${month}${day}-${String(sequence).padStart(6, "0")}`;
+}
+
 export async function generateOrderNumberWithSequence(
   db: DBType,
   prefix: string = "ORD"
 ): Promise<string> {
   // PostgreSQL sequences are atomic - handles race conditions automatically
   const result = await db.execute(
-    sql`SELECT nextval('order_number_seq') as sequence`
+    sql`SELECT nextval('${sql.raw(ORDER_SEQUENCE_NAME)}')`
   );
 
   const sequence = Number(result[0]?.sequence);
