@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as TransaksiRouteImport } from './routes/transaksi'
 import { Route as PengujianRouteImport } from './routes/pengujian'
+import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -67,6 +68,11 @@ const TransaksiRoute = TransaksiRouteImport.update({
 const PengujianRoute = PengujianRouteImport.update({
   id: '/pengujian',
   path: '/pengujian',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KatalogRoute = KatalogRouteImport.update({
+  id: '/katalog',
+  path: '/katalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const coreRouteRoute = coreRouteRouteImport.update({
@@ -302,6 +308,7 @@ const coreBackOfficeClustersClusterIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/katalog': typeof KatalogRoute
   '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/katalog': typeof KatalogRoute
   '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
@@ -391,6 +399,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
+  '/katalog': typeof KatalogRoute
   '/pengujian': typeof PengujianRoute
   '/transaksi': typeof TransaksiRoute
   '/unauthorized': typeof UnauthorizedRoute
@@ -437,6 +446,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/katalog'
     | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
@@ -481,6 +491,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/katalog'
     | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
@@ -525,6 +536,7 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/(core)'
+    | '/katalog'
     | '/pengujian'
     | '/transaksi'
     | '/unauthorized'
@@ -572,6 +584,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
+  KatalogRoute: typeof KatalogRoute
   PengujianRoute: typeof PengujianRoute
   TransaksiRoute: typeof TransaksiRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
@@ -598,6 +611,13 @@ declare module '@tanstack/react-router' {
       path: '/pengujian'
       fullPath: '/pengujian'
       preLoaderRoute: typeof PengujianRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/katalog': {
+      id: '/katalog'
+      path: '/katalog'
+      fullPath: '/katalog'
+      preLoaderRoute: typeof KatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)': {
@@ -1016,6 +1036,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
+  KatalogRoute: KatalogRoute,
   PengujianRoute: PengujianRoute,
   TransaksiRoute: TransaksiRoute,
   UnauthorizedRoute: UnauthorizedRoute,

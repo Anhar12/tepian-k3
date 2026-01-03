@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   TestTube2,
+  AlertCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,86 +28,31 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
 import { cn } from "@/lib/utils";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import useDebounced from "@/hooks/use-debounced";
 
-const data = [
-  {
-    id: 1,
-    cat: "Faktor Fisika",
-    sub: "Lingkungan Kerja",
-    param: "Temperatur (°C)",
-    standard: "SNI 16-7063-2004",
-    price: 150000,
-    color: "text-emerald-500 bg-emerald-50",
-  },
-  {
-    id: 2,
-    cat: "Kebisingan",
-    sub: "Lingkungan Kerja",
-    param: "Intensitas (dB)",
-    standard: "KEP-48/MEN/VIII/2016",
-    price: 200000,
-    color: "text-orange-500 bg-orange-50",
-  },
-  {
-    id: 3,
-    cat: "Suhu Ruangan",
-    sub: "Lingkungan Kerja",
-    param: "Temperatur (°C)",
-    standard: "SNI 16-7063-2004",
-    price: 150000,
-    color: "text-emerald-500 bg-emerald-50",
-  },
-  {
-    id: 4,
-    cat: "Suhu Ruangan",
-    sub: "Lingkungan Kerja",
-    param: "Temperatur (°C)",
-    standard: "SNI 16-7063-2004",
-    price: 150000,
-    color: "text-emerald-500 bg-emerald-50",
-  },
-  {
-    id: 5,
-    cat: "Suhu Ruangan",
-    sub: "Lingkungan Kerja",
-    param: "Temperatur (°C)",
-    standard: "SNI 16-7063-2004",
-    price: 150000,
-    color: "text-emerald-500 bg-emerald-50",
-  },
-  {
-    id: 6,
-    cat: "Timbal dalam Darah",
-    sub: "Biomarker",
-    param: "Pb Blood (μg/dL)",
-    standard: "ACGIH BEI",
-    price: 350000,
-    color: "text-violet-500 bg-violet-50",
-  },
-  {
-    id: 7,
-    cat: "Kualitas Air Limbah",
-    sub: "Lingkungan Hidup",
-    param: "pH, BOD, COD",
-    standard: "Permen LH No. 5/2014",
-    price: 500000,
-    color: "text-emerald-400 bg-emerald-50/50",
-  },
-];
-
 interface TestingTableProps extends React.HTMLAttributes<HTMLDivElement> {
   ref: React.Ref<HTMLDivElement>;
+  route: "/transaksi" | "/katalog";
+  showCart?: boolean;
 }
 
-export function TestingTable(props: TestingTableProps) {
-  const transaksiApi = getRouteApi("/transaksi");
-  const params = transaksiApi.useSearch();
+export function TestingTable({
+  route,
+  showCart = true,
+  ...props
+}: TestingTableProps) {
+  const params = useSearch({ strict: false }) as {
+    clusterId?: string;
+    parameterCategoryId?: string;
+    page?: number;
+    perPage?: number;
+    name?: string;
+  };
   const navigate = useNavigate();
 
   const [cart, setCart] = useState<
@@ -117,26 +63,28 @@ export function TestingTable(props: TestingTableProps) {
         price: number;
       }
     >
-  >(
-    new Map<
-      string,
-      {
-        quantity: number;
-        price: number;
-      }
-    >(),
-  );
+  >(new Map());
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(params.name || "");
   const debouncedSearchTerm = useDebounced(searchTerm, 500);
 
   const { data: me } = useQuery(trpc.auth.me.queryOptions());
 
-  const { data: parameters, isLoading } = useQuery(
-    trpc.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
-      params,
+  const hasClusterId =
+    params.clusterId !== undefined && params.clusterId !== null;
+
+  const { data: parameters, isLoading } = useQuery({
+    ...trpc.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
+      {
+        clusterId: params.clusterId,
+        parameterCategoryId: params.parameterCategoryId,
+        page: params?.page ?? 1,
+        perPage: params?.perPage ?? 10,
+        name: params.name,
+      },
     ),
-  );
+    enabled: hasClusterId,
+  });
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
     trpc.parameterCategories.getAllParameterCategories.queryOptions(),
@@ -151,21 +99,23 @@ export function TestingTable(props: TestingTableProps) {
 
   const goToPage = (page: number) => {
     navigate({
-      to: "/transaksi",
-      search: { ...params, page },
+      to: route,
+      search: (old) => ({ ...old, page }),
     });
   };
 
   // set parameters data to filtered data based on debouncedSearchTerm
   useEffect(() => {
     navigate({
-      to: "/transaksi",
+      to: route,
       search: (old) => ({
         ...old,
-        name: debouncedSearchTerm,
+        name: debouncedSearchTerm || undefined,
       }),
     });
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, navigate, route]);
+
+  const currentPage = params.page || 1;
 
   return (
     <div
@@ -181,7 +131,9 @@ export function TestingTable(props: TestingTableProps) {
             Daftar Jenis Pengujian
           </h3>
           <p className="text-sm text-slate-500">
-            Kelola parameter dan biaya pengujian
+            {showCart
+              ? "Kelola parameter dan biaya pengujian"
+              : "Lihat daftar parameter pengujian"}
           </p>
         </div>
       </div>
@@ -194,7 +146,7 @@ export function TestingTable(props: TestingTableProps) {
             value={params.parameterCategoryId || undefined}
             onValueChange={(value) => {
               navigate({
-                to: "/transaksi",
+                to: route,
                 search: (old) => ({
                   ...old,
                   parameterCategoryId: value || undefined,
@@ -235,7 +187,7 @@ export function TestingTable(props: TestingTableProps) {
           <TableHeader className="bg-slate-50/50">
             <TableRow className="border-slate-100 hover:bg-transparent">
               <TableHead className="font-bold text-slate-600">
-                kategori Parameter
+                Kategori Parameter
               </TableHead>
               <TableHead className="font-bold text-slate-600">
                 Parameter
@@ -244,11 +196,17 @@ export function TestingTable(props: TestingTableProps) {
                 Acuan Standar
               </TableHead>
               <TableHead className="font-bold text-slate-600">Biaya</TableHead>
-              <TableHead className="font-bold text-slate-600">Jumlah</TableHead>
-              <TableHead className="font-bold text-slate-600">
-                Subtotal
-              </TableHead>
-              <TableHead className="text-right"></TableHead>
+              {showCart && (
+                <>
+                  <TableHead className="font-bold text-slate-600">
+                    Jumlah
+                  </TableHead>
+                  <TableHead className="font-bold text-slate-600">
+                    Subtotal
+                  </TableHead>
+                  <TableHead className="text-right"></TableHead>
+                </>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -274,15 +232,19 @@ export function TestingTable(props: TestingTableProps) {
                     <TableCell>
                       <Skeleton className="h-4 w-24" />
                     </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-10 w-16 rounded-xl" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
-                    </TableCell>
+                    {showCart && (
+                      <>
+                        <TableCell>
+                          <Skeleton className="h-10 w-16 rounded-xl" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                 ))
               : parameters?.data.map((row) => (
@@ -324,43 +286,46 @@ export function TestingTable(props: TestingTableProps) {
                     <TableCell className="text-sm font-bold text-slate-800">
                       Rp {row.price.toLocaleString("id-ID")}
                     </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        defaultValue={1}
-                        className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
-                        min={1}
-                        onChange={(e) => {
-                          const quantity = parseInt(e.target.value, 10);
-                          if (quantity < 1) return;
-                          // update cart
-                          setCart((oldCart) => {
-                            const newCart = new Map(oldCart);
-                            newCart.set(row.id, {
-                              quantity,
-                              price: row.price,
-                            });
-                            return newCart;
-                          });
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell className="text-sm font-bold text-[#0056B3]">
-                      Rp
-                      {(
-                        (cart.get(row.id)?.quantity || 1) * row.price
-                      ).toLocaleString("id-ID")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg"
-                        disabled={!me}
-                        onClick={() => handleAddToCart(row.id)}
-                      >
-                        <ShoppingCart className="h-4 w-4" />
-                        Add to Cart
-                      </Button>
-                    </TableCell>
+                    {showCart && (
+                      <>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            defaultValue={1}
+                            className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
+                            min={1}
+                            onChange={(e) => {
+                              const quantity = parseInt(e.target.value, 10);
+                              if (quantity < 1) return;
+                              setCart((oldCart) => {
+                                const newCart = new Map(oldCart);
+                                newCart.set(row.id, {
+                                  quantity,
+                                  price: row.price,
+                                });
+                                return newCart;
+                              });
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell className="text-sm font-bold text-[#0056B3]">
+                          Rp{" "}
+                          {(
+                            (cart.get(row.id)?.quantity || 1) * row.price
+                          ).toLocaleString("id-ID")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg"
+                            disabled={!me}
+                            onClick={() => handleAddToCart(row.id)}
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            Add to Cart
+                          </Button>
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                 ))}
           </TableBody>
@@ -372,14 +337,14 @@ export function TestingTable(props: TestingTableProps) {
           variant="ghost"
           size="icon"
           className="h-8 w-8 rounded-lg text-slate-400"
-          disabled={params.page === 1 || isLoading}
-          onClick={() => goToPage(params.page - 1)}
+          disabled={currentPage === 1 || isLoading}
+          onClick={() => goToPage(currentPage - 1)}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
         {/* First page */}
-        {params.page > 2 && (
+        {currentPage > 2 && (
           <Button
             variant="ghost"
             className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
@@ -390,18 +355,18 @@ export function TestingTable(props: TestingTableProps) {
         )}
 
         {/* Ellipsis before current page */}
-        {params.page > 3 && (
+        {currentPage > 3 && (
           <span className="px-2 text-xs text-slate-400">...</span>
         )}
 
         {/* Previous page */}
-        {params.page > 1 && (
+        {currentPage > 1 && (
           <Button
             variant="ghost"
             className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
-            onClick={() => goToPage(params.page - 1)}
+            onClick={() => goToPage(currentPage - 1)}
           >
-            {params.page - 1}
+            {currentPage - 1}
           </Button>
         )}
 
@@ -410,27 +375,27 @@ export function TestingTable(props: TestingTableProps) {
           variant="secondary"
           className="h-8 w-8 rounded-lg bg-[#333] p-0 text-xs font-bold text-white hover:bg-slate-800"
         >
-          {params.page}
+          {currentPage}
         </Button>
 
         {/* Next page */}
-        {parameters?.pageCount && params.page < parameters.pageCount && (
+        {parameters?.pageCount && currentPage < parameters.pageCount && (
           <Button
             variant="ghost"
             className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
-            onClick={() => goToPage(params.page + 1)}
+            onClick={() => goToPage(currentPage + 1)}
           >
-            {params.page + 1}
+            {currentPage + 1}
           </Button>
         )}
 
         {/* Ellipsis after current page */}
-        {parameters?.pageCount && params.page < parameters.pageCount - 2 && (
+        {parameters?.pageCount && currentPage < parameters.pageCount - 2 && (
           <span className="px-2 text-xs text-slate-400">...</span>
         )}
 
         {/* Last page */}
-        {parameters?.pageCount && params.page < parameters.pageCount - 1 && (
+        {parameters?.pageCount && currentPage < parameters.pageCount - 1 && (
           <Button
             variant="ghost"
             className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
@@ -446,10 +411,10 @@ export function TestingTable(props: TestingTableProps) {
           className="gap-1 text-slate-500 transition-colors hover:text-slate-900"
           disabled={
             !parameters?.pageCount ||
-            params.page === parameters.pageCount ||
+            currentPage === parameters.pageCount ||
             isLoading
           }
-          onClick={() => goToPage(params.page + 1)}
+          onClick={() => goToPage(currentPage + 1)}
         >
           <span className="text-xs font-bold">Next</span>
           <ChevronRight className="h-4 w-4" />

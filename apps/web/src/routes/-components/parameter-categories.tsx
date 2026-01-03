@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
   Building2,
   ShieldCheck,
@@ -11,7 +11,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { createElement } from "react";
-import { Route } from "../transaksi";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const categories = [
@@ -47,10 +46,13 @@ const categories = [
   },
 ];
 
-export function Clusters() {
-  const { clusterId } = Route.useSearch();
+interface ClustersProps {
+  route: "/transaksi" | "/katalog";
+}
 
+export function Clusters({ route }: ClustersProps) {
   const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as { clusterId?: number };
 
   const {
     data: clusters,
@@ -98,12 +100,12 @@ export function Clusters() {
                   "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
                   categories.find((c) => c.label === cluster.name)?.color ||
                     "from-gray-400 to-gray-600",
-                  // if selected it should zoom in
-                  clusterId === cluster.id && "scale-110 ring-4 ring-white",
+                  search.clusterId === Number(cluster.id) &&
+                    "scale-110 ring-4 ring-white",
                 )}
                 onClick={() => {
                   navigate({
-                    to: "/transaksi",
+                    to: route,
                     search: (old) => ({
                       ...old,
                       clusterId: cluster.id,

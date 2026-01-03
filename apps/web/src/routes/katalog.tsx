@@ -1,14 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Stepper } from "@/routes/-components/stepper";
-import { LocationSection } from "@/routes/-components/location-section";
-import { Clusters } from "@/routes/-components/parameter-categories";
-import { TestingTable } from "@/routes/-components/testing-table";
 import Navbar from "@/components/navbar";
-import parameterSchema from "@tepian-k3/schema/parameter.schema";
+import { createFileRoute } from "@tanstack/react-router";
+import { Clusters } from "./-components/parameter-categories";
+import { TestingTable } from "./-components/testing-table";
 import { useEffect, useRef } from "react";
 
-export const Route = createFileRoute("/transaksi")({
-  validateSearch: parameterSchema.getByClusterAndParameterCategorySchema,
+export const Route = createFileRoute("/katalog")({
   component: RouteComponent,
 });
 
@@ -56,22 +52,16 @@ function RouteComponent() {
           {/* Page Title */}
           <div className="space-y-4 text-center">
             <h1 className="text-4xl font-bold tracking-tight text-[#0056B3]">
-              Layanan Pengujian
+              Katalog Pengujian
             </h1>
             <div className="mx-auto h-2 w-96 bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
           </div>
 
-          {/* Stepper */}
-          <Stepper currentStep={1} />
-
-          {/* Location Section */}
-          <LocationSection />
-
           {/* Clusters */}
-          <Clusters route="/transaksi" />
+          <Clusters route="/katalog" />
 
           {/* Testing Table */}
-          <TestingTable ref={tableRef} route="/transaksi" />
+          <TestingTable ref={tableRef} route="/katalog" />
         </div>
       </div>
     </div>

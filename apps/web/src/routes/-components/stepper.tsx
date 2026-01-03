@@ -5,8 +5,8 @@ interface StepperProps {
 }
 
 const steps = [
-  { id: 1, label: "Parameter", title: "Tahap 1" },
-  { id: 2, label: "Data Perusahaan", title: "Tahap 2" },
+  { id: 1, label: "Data Perusahaan", title: "Tahap 1" },
+  { id: 2, label: "Parameter", title: "Tahap 2" },
   { id: 3, label: "Status pengajuan", title: "Tahap 3" },
   { id: 4, label: "Informasi pembayaran", title: "Tahap 4" },
 ];
