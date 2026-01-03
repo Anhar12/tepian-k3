@@ -16,9 +16,16 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { v7 as uuidv7 } from "uuid";
-import { timestamps } from "./utils";
 import {
+  createFileColumns,
+  createRequiredFileColumns,
+  timestamps,
+} from "./utils";
+import {
+  ORDER_APPROVAL_STATUSES,
+  ORDER_PAYMENT_STATUSES,
   ORDER_SEQUENCE_NAME,
+  ORDER_STATUS,
   PERMISSION_ACTION,
   TESTING_SEQUENCE_NAME,
   TOOLS_AVAILABILITY,
@@ -30,6 +37,18 @@ export const createTable = pgTableCreator((name) => `${name}`);
 export const permissionActionEnum = pgEnum("action", PERMISSION_ACTION);
 
 export const ToolsConditionEnum = pgEnum("tools_condition", TOOLS_CONDITIONS);
+
+export const orderStatusEnum = pgEnum("order_status", ORDER_STATUS);
+
+export const approvalStatusEnum = pgEnum(
+  "approval_status",
+  ORDER_APPROVAL_STATUSES
+);
+
+export const paymentStatusEnum = pgEnum(
+  "payment_status",
+  ORDER_PAYMENT_STATUSES
+);
 
 export const ToolsAvailabilityEnum = pgEnum(
   "tools_availability",
@@ -53,8 +72,7 @@ export const users = createTable(
       withTimezone: true,
       mode: "string",
     }),
-    profilePictureFileName: text("profile_picture_file_name"),
-    profilePictureUrl: text("profile_picture_url"),
+    ...createFileColumns("profile_picture"),
     ...timestamps,
   },
   (table) => [
@@ -178,8 +196,7 @@ export const userCompanies = createTable(
     email: varchar("email", { length: 250 }).notNull(),
     wlkpStatus: boolean("wlkp_status").notNull().default(false),
     wlkp: text("wlkp").notNull(),
-    companyPictureFileName: text("company_picture_file_name").notNull(),
-    companyPictureUrl: text("company_picture_url").notNull(),
+    ...createRequiredFileColumns("companyPicture"),
     ...timestamps,
   },
   (table) => [
@@ -613,6 +630,7 @@ export const testingItem = createTable(
       .references(() => parameters.id, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
     price: integer("price").notNull(),
+    subTotal: integer("sub_total").notNull(),
     result: text("result"),
     note: text("note"),
     ...timestamps,
@@ -620,5 +638,77 @@ export const testingItem = createTable(
   (table) => [
     index("testing_item_id_idx").using("btree", table.id),
     index("testing_item_testing_id_idx").using("btree", table.testingId),
+  ]
+);
+
+export const order = createTable(
+  "orders",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    orderNumber: varchar("order_number", { length: 100 }).notNull().unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    testingId: uuid("testing_id")
+      .notNull()
+      .references(() => testing.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    status: orderStatusEnum("status").notNull().default("pending"),
+    totalAmount: integer("total_amount").notNull(),
+    ...createFileColumns("offeringDocument"),
+    ...createFileColumns("offeringUserDocument"),
+    approvalStatus: approvalStatusEnum("approval_status")
+      .notNull()
+      .default("pending"),
+    approvalRejectReason: text("approval_reject_reason"),
+    ...createFileColumns("invoice"),
+    ...createFileColumns("proofOfPayment"),
+    paymentStatus: paymentStatusEnum("payment_status")
+      .notNull()
+      .default("unpaid"),
+    paymentRejectedReason: text("payment_rejected_reason"),
+    ...createFileColumns("assignmentLetter"),
+    ...timestamps,
+  },
+  (table) => [
+    index("order_id_idx").using("btree", table.id),
+    index("order_order_number_idx").using("btree", table.orderNumber),
+    index("order_user_id_idx").using("btree", table.userId),
+    index("order_company_id_idx").using("btree", table.companyId),
+    index("order_testing_id_idx").using("btree", table.testingId),
+  ]
+);
+
+export const orderItem = createTable(
+  "order_items",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    price: integer("price").notNull(),
+    subTotal: integer("sub_total").notNull(),
+  },
+  (table) => [
+    index("order_item_id_idx").using("btree", table.id),
+    index("order_item_order_id_idx").using("btree", table.orderId),
   ]
 );

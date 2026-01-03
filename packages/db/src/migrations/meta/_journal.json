@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1767076392242,
-      "tag": "0000_tense_hellfire_club",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1767092769694,
-      "tag": "0001_sad_moonstone",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1767235870573,
-      "tag": "0002_mighty_wallop",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1767264346630,
-      "tag": "0003_foamy_grey_gargoyle",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1767264372397,
-      "tag": "0004_wandering_mysterio",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1767272107546,
-      "tag": "0005_cold_darkhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1767404112569,
-      "tag": "0006_new_killraven",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1767406786009,
-      "tag": "0007_deep_beast",
+      "when": 1767410233190,
+      "tag": "0000_wakeful_runaways",
       "breakpoints": true
     }
   ]

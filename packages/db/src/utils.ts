@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { timestamp } from "drizzle-orm/pg-core";
+import { text, timestamp } from "drizzle-orm/pg-core";
 import { type AnyColumn } from "drizzle-orm";
 import type { DBType } from "./client";
 import {
@@ -55,13 +55,25 @@ export function isEmpty<TColumn extends AnyColumn>(column: TColumn) {
   `;
 }
 
-export async function generateTestingNumberWithSequence(
+// ...existing code...
+
+/**
+ * Generic function to generate sequential numbers with date prefix
+ * @param db - Database instance
+ * @param sequenceName - Name of the PostgreSQL sequence
+ * @param prefix - Prefix for the generated number (e.g., 'TEST', 'ORD')
+ * @param padLength - Length to pad the sequence number (default: 6)
+ * @returns Generated number in format: PREFIX-YYYYMMDD-NNNNNN
+ */
+export async function generateSequentialNumber(
   db: DBType,
-  prefix: string = "TEST"
+  sequenceName: string,
+  prefix: string,
+  padLength: number = 6
 ): Promise<string> {
   // PostgreSQL sequences are atomic - handles race conditions automatically
   const result = await db.execute(
-    sql`SELECT nextval('${sql.raw(TESTING_SEQUENCE_NAME)}')`
+    sql`SELECT nextval('${sql.raw(sequenceName)}')`
   );
 
   const sequence = Number(result[0]?.sequence);
@@ -71,24 +83,58 @@ export async function generateTestingNumberWithSequence(
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
 
-  return `${prefix}-${year}${month}${day}-${String(sequence).padStart(6, "0")}`;
+  return `${prefix}-${year}${month}${day}-${String(sequence).padStart(
+    padLength,
+    "0"
+  )}`;
+}
+
+// Refactor existing functions to use the generic one
+export async function generateTestingNumberWithSequence(
+  db: DBType,
+  prefix: string = "TEST"
+): Promise<string> {
+  return generateSequentialNumber(db, TESTING_SEQUENCE_NAME, prefix);
 }
 
 export async function generateOrderNumberWithSequence(
   db: DBType,
   prefix: string = "ORD"
 ): Promise<string> {
-  // PostgreSQL sequences are atomic - handles race conditions automatically
-  const result = await db.execute(
-    sql`SELECT nextval('${sql.raw(ORDER_SEQUENCE_NAME)}')`
-  );
+  return generateSequentialNumber(db, ORDER_SEQUENCE_NAME, prefix);
+}
 
-  const sequence = Number(result[0]?.sequence);
+/**
+ * Converts camelCase to snake_case
+ * @param str - The camelCase string to convert
+ * @returns The snake_case version of the string
+ */
+function toSnakeCase(str: string): string {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+}
 
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+/**
+ * Creates a pair of columns for file uploads (fileName and url)
+ * @param columnPrefix - The prefix for the column names in camelCase (e.g., 'offeringDocument', 'profilePicture')
+ * @returns Object with fileName and url columns
+ */
+export function createFileColumns(columnPrefix: string) {
+  const snakeCase = toSnakeCase(columnPrefix);
+  return {
+    [`${columnPrefix}FileName`]: text(`${snakeCase}_file_name`),
+    [`${columnPrefix}Url`]: text(`${snakeCase}_url`),
+  };
+}
 
-  return `${prefix}-${year}${month}${day}-${String(sequence).padStart(6, "0")}`;
+/**
+ * Creates a pair of required/non-null columns for file uploads
+ * @param columnPrefix - The prefix for the column names in camelCase (e.g., 'offeringDocument', 'profilePicture')
+ * @returns Object with required fileName and url columns
+ */
+export function createRequiredFileColumns(columnPrefix: string) {
+  const snakeCase = toSnakeCase(columnPrefix);
+  return {
+    [`${columnPrefix}FileName`]: text(`${snakeCase}_file_name`).notNull(),
+    [`${columnPrefix}Url`]: text(`${snakeCase}_url`).notNull(),
+  };
 }
