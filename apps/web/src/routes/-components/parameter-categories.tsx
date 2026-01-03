@@ -47,7 +47,7 @@ const categories = [
 ];
 
 interface ClustersProps {
-  route: "/transaksi" | "/katalog";
+  route: "/transaksi/1" | "/katalog";
 }
 
 export function Clusters({ route }: ClustersProps) {

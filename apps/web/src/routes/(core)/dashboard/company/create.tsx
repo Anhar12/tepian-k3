@@ -421,7 +421,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <FieldLabel htmlFor={`form-wlkp-radiogroup-yes`}>
                         <Field
-                          orientation="vertical"
+                          orientation="horizontal"
                           data-invalid={fieldState.invalid}
                         >
                           <FieldContent>
@@ -577,7 +577,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <FieldLabel htmlFor={`form-rhf-radiogroup-yes`}>
                         <Field
-                          orientation="vertical"
+                          orientation="horizontal"
                           data-invalid={fieldState.invalid}
                         >
                           <FieldContent>

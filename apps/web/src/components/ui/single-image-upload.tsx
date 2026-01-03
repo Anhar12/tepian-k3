@@ -228,7 +228,7 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
     const displayError = error || uploadError;
 
     return (
-      <div ref={ref} className={cn("w-full max-w-4xl", className)}>
+      <div ref={ref} className={cn("w-full", className)}>
         {/* Image Preview */}
         {preview && (
           <div className="mb-6">
