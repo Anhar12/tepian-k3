@@ -75,7 +75,7 @@ export const users = createTable(
       withTimezone: true,
       mode: "string",
     }),
-    ...createFileColumns("profile_picture"),
+    ...createFileColumns("profilePicture"),
     ...timestamps,
   },
   (table) => [
