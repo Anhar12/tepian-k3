@@ -307,7 +307,7 @@ const userCompanyQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data userCompany`,
             cause: error,
@@ -408,7 +408,7 @@ const userCompanyQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data userCompany`,
             cause: error,

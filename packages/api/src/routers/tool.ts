@@ -5,6 +5,10 @@ import toolsQureies from "@tepian-k3/queries/tools.queries";
 import z from "zod";
 
 export const toolRouter = createTRPCRouter({
+  getAllUnassignedTools: withPermission("tools.read").query(
+    async () => await Effect.runPromise(toolsQureies.getAllUnassignedTools())
+  ),
+
   getToolPaginated: withPermission("tools.read")
     .input(toolsSchema.getAllToolsSchema)
     .query(async ({ input }) => {

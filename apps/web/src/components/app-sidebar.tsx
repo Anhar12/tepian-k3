@@ -1,16 +1,5 @@
 import * as React from "react";
-import {
-  IconAdjustments,
-  IconBook,
-  IconBuilding,
-  IconDashboard,
-  IconFolderCog,
-  IconInnerShadowTop,
-  IconLayersSubtract,
-  IconShieldCheckFilled,
-  IconTools,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconInnerShadowTop } from "@tabler/icons-react";
 
 import { NavMain, type NavMainProps } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -31,17 +20,23 @@ import { userMenu } from "@/lib/user-menu";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
-  // Use userMenu if user has 'user' role, otherwise use backOfficeMenu
   const hasUserRole = profile.roles.some((role) => role.name === "user");
-  const menu = hasUserRole ? userMenu : backOfficeMenu;
 
-  // Only filter by permissions for back office menu, user menu shows all items
-  const filteredNavMain = hasUserRole
-    ? menu.navMain
-    : menu.navMain.filter(
-        (item) =>
-          !item.permission || profile.permissions.includes(item.permission),
-      );
+  // Separate user dashboard and back office menus
+  const filteredNavMain = React.useMemo(() => {
+    // For regular users: only show user dashboard menu
+    if (hasUserRole) {
+      return userMenu.navMain;
+    }
+
+    // For back office users: only show back office menu items based on permissions
+    const backOfficeItems = backOfficeMenu.navMain.filter(
+      (item) =>
+        !item.permission || profile.permissions.includes(item.permission),
+    );
+
+    return backOfficeItems;
+  }, [hasUserRole, profile.permissions]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

@@ -1,5 +1,5 @@
 import Navbar from "@/components/navbar";
-import { Stepper } from "@/components/stepper";
+import { Stepper } from "@/routes/-components/stepper";
 import { FormSection } from "@/components/form-section";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import ParameterDetail from "./-components/parameter-detail";
 import ParameterTools from "./-components/parameter-tool";
+import CreateParameterToolDialog from "./-components/create-parameter-tool-dialog";
 
 export const Route = createFileRoute(
   "/(core)/back-office/parameters/$parameterId/detail",
@@ -58,6 +59,7 @@ function RouteComponent() {
           <ParameterTools parameterId={parameterId} />
         </TabsContent>
       </Tabs>
+      <CreateParameterToolDialog parameterId={parameterId} />
     </div>
   );
 }

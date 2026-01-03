@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { PlusCircle } from "lucide-react";
@@ -20,13 +20,6 @@ export const Route = createFileRoute("/(core)/back-office/tools/")({
   validateSearch: toolsSchema.getAllToolsSchema,
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "tools.read" }),
-  loaderDeps: (search) => ({
-    searchParams: toolsSchema.getAllToolsSchema.parse(search),
-  }),
-  loader: ({ context, deps }) =>
-    context.queryClient.ensureQueryData(
-      context.trpc.tool.getToolPaginated.queryOptions(deps.searchParams),
-    ),
   component: RouteComponent,
 });
 
@@ -34,9 +27,11 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: tools } = useSuspenseQuery(
-    trpc.tool.getToolPaginated.queryOptions(params),
-  );
+  const {
+    data: tools,
+    isLoading,
+    error,
+  } = useQuery(trpc.tool.getToolPaginated.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
@@ -50,9 +45,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: tools.data,
+    data: tools?.data ?? [],
     columns,
-    pageCount: tools.pageCount,
+    pageCount: tools?.pageCount ?? 0,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -90,7 +85,13 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
-      <DataTable table={table}>
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="Tidak ada alat ditemukan."
+        emptyDescription="Coba sesuaikan filter atau kata kunci pencarian Anda."
+      >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />

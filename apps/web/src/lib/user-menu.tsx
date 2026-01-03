@@ -17,7 +17,6 @@ export const userMenu: {
       title: "Company",
       url: `${urlStarter}/company`,
       icon: IconBuilding,
-      permission: "user-company.read",
     },
   ],
 };

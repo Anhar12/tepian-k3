@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import getParameterCategoriesColumns from "@/components/columns/parameter-categories-columns";
 import { useDataTable } from "@/hooks/use-data-table";
@@ -25,17 +25,7 @@ export const Route = createFileRoute(
     await requirePermission(context, {
       permission: "parameter-categories.read",
     }),
-  loaderDeps: (search) => ({
-    searchParams:
-      parameterCategoriesSchema.getAllParameterCategoriesSchema.parse(search),
-  }),
-  loader: ({ context, deps }) => {
-    return context.queryClient.ensureQueryData(
-      context.trpc.parameterCategories.getPaginatedParameterCategories.queryOptions(
-        deps.searchParams,
-      ),
-    );
-  },
+
   component: RouteComponent,
 });
 
@@ -43,7 +33,11 @@ function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const { data: parameterCategories } = useSuspenseQuery(
+  const {
+    data: parameterCategories,
+    isLoading,
+    error,
+  } = useQuery(
     trpc.parameterCategories.getPaginatedParameterCategories.queryOptions(
       params,
     ),
@@ -61,9 +55,9 @@ function RouteComponent() {
   );
 
   const { table } = useDataTable({
-    data: parameterCategories.data,
+    data: parameterCategories?.data ?? [],
     columns: columns as ParameterCategories[],
-    pageCount: parameterCategories.pageCount,
+    pageCount: parameterCategories?.pageCount ?? 0,
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
       pagination: {
@@ -105,7 +99,12 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
-      <DataTable table={table}>
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="Tidak ada kategori parameter ditemukan."
+      >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />

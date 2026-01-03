@@ -11,6 +11,7 @@ import {
   CommandItem,
   CommandList,
 } from "./command";
+import { Skeleton } from "./skeleton";
 
 interface ComboBoxProps {
   options: Array<{ id: string; name: string }>;
@@ -24,6 +25,7 @@ interface ComboBoxProps {
   disabled?: boolean;
   invalid?: boolean;
   className?: string;
+  isLoading?: boolean;
 }
 
 function ComboBox({
@@ -38,6 +40,7 @@ function ComboBox({
   disabled,
   invalid,
   className,
+  isLoading = false,
 }: ComboBoxProps) {
   const selectedOption = useMemo(
     () => options?.find((opt) => opt.id === value),
@@ -60,14 +63,18 @@ function ComboBox({
           role="combobox"
           aria-expanded={open}
           aria-invalid={invalid}
-          disabled={disabled}
+          disabled={disabled || isLoading}
           className={cn(
             "w-full justify-between",
             !value && "text-muted-foreground",
             className,
           )}
         >
-          {selectedOption?.name || placeholder}
+          {isLoading ? (
+            <Skeleton className="h-4 w-32" />
+          ) : (
+            selectedOption?.name || placeholder
+          )}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -75,24 +82,35 @@ function ComboBox({
         <Command>
           <CommandInput placeholder={searchPlaceholder} className="h-9" />
           <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
-            <CommandGroup>
-              {options?.map((option) => (
-                <CommandItem
-                  value={option.name}
-                  key={option.id}
-                  onSelect={() => handleSelect(option.id)}
-                >
-                  {option.name}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      value === option.id ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {isLoading ? (
+              <div className="space-y-2 p-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+              </div>
+            ) : (
+              <>
+                <CommandEmpty>{emptyMessage}</CommandEmpty>
+                <CommandGroup>
+                  {options?.map((option) => (
+                    <CommandItem
+                      value={option.name}
+                      key={option.id}
+                      onSelect={() => handleSelect(option.id)}
+                    >
+                      {option.name}
+                      <Check
+                        className={cn(
+                          "ml-auto",
+                          value === option.id ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

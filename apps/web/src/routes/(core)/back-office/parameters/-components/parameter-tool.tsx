@@ -15,6 +15,8 @@ import {
 import { trpc } from "@/utils/trpc";
 import { IconTools } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import ParameterToolCard from "./parameter-tool-card";
+import { useParameterToolDialogStore } from "@/stores/parameter-tool-dialog.stores";
 
 interface ParameterToolsProps {
   parameterId: string;
@@ -25,6 +27,10 @@ export default function ParameterTools({ parameterId }: ParameterToolsProps) {
     trpc.parameterTool.getAllParameterToolsByParameterId.queryOptions({
       parameterId,
     }),
+  );
+
+  const setIsCreateDialogOpen = useParameterToolDialogStore(
+    (state) => state.setIsCreateDialogOpen,
   );
 
   return (
@@ -39,7 +45,9 @@ export default function ParameterTools({ parameterId }: ParameterToolsProps) {
           </div>
         </div>
         <CardContent className="flex flex-col gap-4">
-          <Button onClick={() => {}}>Tambah Alat</Button>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            Tambah Alat
+          </Button>
           {tools && tools.length === 0 ? (
             <Empty>
               <EmptyHeader>
@@ -57,7 +65,10 @@ export default function ParameterTools({ parameterId }: ParameterToolsProps) {
           ) : (
             <div className="flex flex-row flex-wrap gap-4">
               {tools?.map((paramTool) => (
-                <div key={paramTool.id}>{paramTool.tool.toolName}</div>
+                <ParameterToolCard
+                  key={paramTool.id}
+                  parameterTool={paramTool}
+                />
               ))}
             </div>
           )}
