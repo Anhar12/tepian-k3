@@ -419,6 +419,28 @@ export const parameters = createTable(
   ]
 );
 
+export const parameterTools = createTable(
+  "parameter_tools",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    toolId: uuid("tool_id")
+      .notNull()
+      .references(() => tools.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("parameter_tool_id_idx").using("btree", table.id),
+    index("parameter_tool_parameter_id_idx").using("btree", table.parameterId),
+    index("parameter_tool_tool_id_idx").using("btree", table.toolId),
+  ]
+);
+
 export const provinces = createTable(
   "provinces",
   {

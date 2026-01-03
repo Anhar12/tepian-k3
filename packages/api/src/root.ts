@@ -6,6 +6,7 @@ import { districtRouter } from "./routers/district";
 import { kbliRouter } from "./routers/kbli";
 import { parameterRouter } from "./routers/parameter";
 import { parameterCategoriesRouter } from "./routers/parameter-categories";
+import { parameterToolRouter } from "./routers/parameter-tool";
 import { permissionRouters } from "./routers/permission";
 import { provinceRouter } from "./routers/province";
 import { regencyRouter } from "./routers/regency";
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   cluster: clusterRouter,
   parameterCategories: parameterCategoriesRouter,
   parameter: parameterRouter,
+  parameterTool: parameterToolRouter,
   province: provinceRouter,
   regency: regencyRouter,
   district: districtRouter,

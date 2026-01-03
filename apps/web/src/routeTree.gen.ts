@@ -49,6 +49,7 @@ import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(cor
 import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
 import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(core)/back-office/roles/$roleId.detail'
 import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './routes/(core)/back-office/parameters/$parameterId.edit'
+import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from './routes/(core)/back-office/parameters/$parameterId.detail'
 import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
 import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
@@ -274,6 +275,12 @@ const coreBackOfficeParametersParameterIdEditRoute =
     path: '/parameters/$parameterId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeParametersParameterIdDetailRoute =
+  coreBackOfficeParametersParameterIdDetailRouteImport.update({
+    id: '/parameters/$parameterId/detail',
+    path: '/parameters/$parameterId/detail',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute =
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport.update({
     id: '/parameter-categories/$parameterCategoriesId/edit',
@@ -328,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
@@ -369,6 +377,7 @@ export interface FileRoutesByTo {
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
@@ -415,6 +424,7 @@ export interface FileRoutesById {
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
   '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  '/(core)/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/(core)/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/(core)/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/kblis/$kbliId/edit'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
+    | '/back-office/parameters/$parameterId/detail'
     | '/back-office/parameters/$parameterId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
@@ -501,6 +512,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/kblis/$kbliId/edit'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
+    | '/back-office/parameters/$parameterId/detail'
     | '/back-office/parameters/$parameterId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
@@ -546,6 +558,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
     | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
+    | '/(core)/back-office/parameters/$parameterId/detail'
     | '/(core)/back-office/parameters/$parameterId/edit'
     | '/(core)/back-office/roles/$roleId/detail'
     | '/(core)/back-office/roles/$roleId/edit'
@@ -846,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeParametersParameterIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/parameters/$parameterId/detail': {
+      id: '/(core)/back-office/parameters/$parameterId/detail'
+      path: '/parameters/$parameterId/detail'
+      fullPath: '/back-office/parameters/$parameterId/detail'
+      preLoaderRoute: typeof coreBackOfficeParametersParameterIdDetailRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': {
       id: '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
       path: '/parameter-categories/$parameterCategoriesId/edit'
@@ -909,6 +929,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
+  coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute
   coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute
   coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
   coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
@@ -939,6 +960,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute:
     coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute,
+  coreBackOfficeParametersParameterIdDetailRoute:
+    coreBackOfficeParametersParameterIdDetailRoute,
   coreBackOfficeParametersParameterIdEditRoute:
     coreBackOfficeParametersParameterIdEditRoute,
   coreBackOfficeRolesRoleIdDetailRoute: coreBackOfficeRolesRoleIdDetailRoute,

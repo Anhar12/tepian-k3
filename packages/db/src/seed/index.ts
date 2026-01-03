@@ -128,6 +128,31 @@ async function seed() {
     { name: "parameters.update", resource: "parameters", action: "update" },
     { name: "parameters.delete", resource: "parameters", action: "delete" },
     { name: "parameters.manage", resource: "parameters", action: "manage" },
+    {
+      name: "parameter-tool.create",
+      resource: "parameter-tool",
+      action: "create",
+    },
+    {
+      name: "parameter-tool.read",
+      resource: "parameter-tool",
+      action: "read",
+    },
+    {
+      name: "parameter-tool.update",
+      resource: "parameter-tool",
+      action: "update",
+    },
+    {
+      name: "parameter-tool.delete",
+      resource: "parameter-tool",
+      action: "delete",
+    },
+    {
+      name: "parameter-tool.manage",
+      resource: "parameter-tool",
+      action: "manage",
+    },
     { name: "provinces.create", resource: "provinces", action: "create" },
     { name: "provinces.read", resource: "provinces", action: "read" },
     { name: "provinces.update", resource: "provinces", action: "update" },
