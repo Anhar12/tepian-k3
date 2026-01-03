@@ -256,7 +256,7 @@ export const orderRelations = relations(order, ({ one, many }) => ({
     fields: [order.locationId],
     references: [userCompanyTestingLocation.id],
   }),
-  item: many(orderItem),
+  items: many(orderItem),
   statusHistory: many(orderStatusHistory),
 }));
 
@@ -268,6 +268,10 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
   parameter: one(parameters, {
     fields: [orderItem.parameterId],
     references: [parameters.id],
+  }),
+  location: one(userCompanyTestingLocation, {
+    fields: [orderItem.locationId],
+    references: [userCompanyTestingLocation.id],
   }),
 }));
 

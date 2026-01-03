@@ -728,7 +728,7 @@ export const orderStatusHistory = createTable(
     changedAt: timestamp("changed_at", {
       withTimezone: true,
       mode: "string",
-    }),
+    }).$default(() => sql`CURRENT_TIMESTAMP`),
     changedBy: uuid("changed_by")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
