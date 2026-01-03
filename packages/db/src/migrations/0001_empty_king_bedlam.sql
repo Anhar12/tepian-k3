@@ -1,0 +1,2 @@
+CREATE TYPE "public"."testing_status" AS ENUM('start_testing', 'sample_submission', 'sample_analysis', 'report_generation', 'report_publishing', 'completed');--> statement-breakpoint
+ALTER TABLE "testing" ADD COLUMN "status" "testing_status" DEFAULT 'start_testing' NOT NULL;

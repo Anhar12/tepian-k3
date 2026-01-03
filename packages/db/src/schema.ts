@@ -28,6 +28,7 @@ import {
   ORDER_STATUS,
   PERMISSION_ACTION,
   TESTING_SEQUENCE_NAME,
+  TESTING_STATUSES,
   TOOLS_AVAILABILITY,
   TOOLS_CONDITIONS,
 } from "@tepian-k3/constants";
@@ -39,6 +40,8 @@ export const permissionActionEnum = pgEnum("action", PERMISSION_ACTION);
 export const ToolsConditionEnum = pgEnum("tools_condition", TOOLS_CONDITIONS);
 
 export const orderStatusEnum = pgEnum("order_status", ORDER_STATUS);
+
+export const testingStatusEnum = pgEnum("testing_status", TESTING_STATUSES);
 
 export const approvalStatusEnum = pgEnum(
   "approval_status",
@@ -683,6 +686,7 @@ export const testing = createTable(
     testingType: uuid("testing_type")
       .notNull()
       .references(() => parameterCategories.id, { onDelete: "cascade" }),
+    status: testingStatusEnum("status").notNull().default("start_testing"),
     note: text("note"),
     ...timestamps,
   },

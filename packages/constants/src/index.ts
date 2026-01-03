@@ -98,3 +98,23 @@ export const ORDER_PAYMENT_STATUS_LABELS: Record<OrderPaymentStatus, string> = {
 export const TESTING_SEQUENCE_NAME = "testing_number_seq";
 
 export const ORDER_SEQUENCE_NAME = "order_number_seq";
+
+export const TESTING_STATUSES = [
+  "start_testing",
+  "sample_submission",
+  "sample_analysis",
+  "report_generation",
+  "report_publishing",
+  "completed",
+] as const;
+
+export type TestingStatus = (typeof TESTING_STATUSES)[number];
+
+export const TESTING_STATUS_LABELS: Record<TestingStatus, string> = {
+  start_testing: "Start Testing",
+  sample_submission: "Sample Submission",
+  sample_analysis: "Sample Analysis",
+  report_generation: "Report Generation",
+  report_publishing: "Report Publishing",
+  completed: "Completed",
+};
