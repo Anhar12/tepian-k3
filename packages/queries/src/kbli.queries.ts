@@ -174,7 +174,7 @@ const kbliQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data kbli`,
             cause: error,

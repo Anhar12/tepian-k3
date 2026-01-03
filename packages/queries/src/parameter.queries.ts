@@ -146,7 +146,7 @@ const parameterQueries = {
               input,
             }
           );
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data parameter`,
             cause: error,
@@ -251,7 +251,7 @@ const parameterQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data parameter`,
             cause: error,

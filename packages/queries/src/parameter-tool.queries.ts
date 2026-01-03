@@ -20,6 +20,13 @@ const parameterToolQueries = {
               columns: {
                 id: true,
                 toolName: true,
+                toolCode: true,
+              },
+            },
+            parameter: {
+              columns: {
+                id: true,
+                name: true,
               },
             },
           },
@@ -29,7 +36,7 @@ const parameterToolQueries = {
           error,
           parameterId,
         });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch tools for the given parameter ID.",
         });
@@ -59,7 +66,7 @@ const parameterToolQueries = {
         }),
       catch: (error) => {
         logger.error("Error fetching parameter tool by ID", { error, id });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch parameter tool for the given ID.",
         });
@@ -114,7 +121,7 @@ const parameterToolQueries = {
         try: () => db.insert(parameterTools).values(data).returning(),
         catch: (error) => {
           logger.error("Error assigning tool to parameter", { error, data });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to assign tool to parameter.",
           });
@@ -183,7 +190,7 @@ const parameterToolQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error updating parameter tool", { error, data });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to update parameter tool.",
           });
@@ -226,7 +233,7 @@ const parameterToolQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error removing tool from parameter", { error, id });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to remove tool from parameter.",
           });

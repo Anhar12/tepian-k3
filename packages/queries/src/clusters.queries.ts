@@ -28,7 +28,7 @@ const clustersQueries = {
         }),
       catch: (error) => {
         logger.error("Error fetching all clusters", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster",
         });
@@ -44,7 +44,7 @@ const clustersQueries = {
         }),
       catch: (error) => {
         logger.error("Error fetching cluster by ID", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster",
         });
@@ -64,7 +64,7 @@ const clustersQueries = {
         }),
       catch: (error) => {
         logger.error("Error fetching deleted cluster by ID", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster yang dihapus",
         });
@@ -84,7 +84,7 @@ const clustersQueries = {
         }),
       catch: (error) => {
         logger.error("Error fetching cluster by name", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster",
         });
@@ -174,7 +174,7 @@ const clustersQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data cluster`,
             cause: error,
@@ -208,7 +208,7 @@ const clustersQueries = {
         try: () => db.insert(clusters).values(data).returning(),
         catch: (error) => {
           logger.error("Error creating new cluster", { error, data });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat cluster baru",
           });
@@ -265,7 +265,7 @@ const clustersQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error updating cluster", { error, data });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui cluster",
             cause: error,
@@ -308,7 +308,7 @@ const clustersQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error deleting cluster", { error, id });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus cluster",
             cause: error,
@@ -351,7 +351,7 @@ const clustersQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error restoring cluster", { error, id });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan cluster",
             cause: error,

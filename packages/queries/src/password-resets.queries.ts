@@ -12,7 +12,7 @@ const passwordResetsQueries = {
       try: () => hash(token),
       catch: (error) => {
         logger.error("Failed to hash reset token", { token, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memproses token pengaturan ulang kata sandi.",
           cause: error,
@@ -39,7 +39,7 @@ const passwordResetsQueries = {
             userId,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat catatan pengaturan ulang kata sandi.",
             cause: error,
@@ -84,7 +84,7 @@ const passwordResetsQueries = {
             token,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memvalidasi token pengaturan ulang kata sandi.",
             cause: error,
@@ -110,7 +110,7 @@ const passwordResetsQueries = {
             token,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message:
               "Gagal menandai token pengaturan ulang kata sandi sebagai terpakai.",
@@ -147,7 +147,7 @@ const passwordResetsQueries = {
         logger.error("Failed to delete expired password reset tokens", {
           error,
         });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
             "Gagal menghapus token pengaturan ulang kata sandi yang kedaluwarsa.",
@@ -170,7 +170,7 @@ const passwordResetsQueries = {
           userId,
           error,
         });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
             "Gagal menonaktifkan token pengaturan ulang kata sandi pengguna.",

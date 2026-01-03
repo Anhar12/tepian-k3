@@ -6,12 +6,14 @@ import {
   count,
   desc,
   eq,
+  getTableColumns,
   gte,
   ilike,
   isNotNull,
   isNull,
+  sql,
 } from "@tepian-k3/db";
-import { tools } from "@tepian-k3/db/schema";
+import { parameterTools, tools } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { Effect } from "effect";
@@ -20,6 +22,35 @@ import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
 const toolsQueries = {
+  getAllUnassignedTools() {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .select({
+            ...getTableColumns(tools),
+          })
+          .from(tools)
+          .where(
+            and(
+              sql`NOT EXISTS (
+              SELECT 1 FROM ${parameterTools} 
+              WHERE ${parameterTools.toolId} = ${tools.id}
+            )`,
+              isNull(tools.deletedAt)
+            )
+          ),
+      catch: (error) => {
+        logger.error("Error fetching unassigned tools", {
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data alat yang belum ditugaskan.",
+        });
+      },
+    });
+  },
+
   getToolById(toolId: string) {
     return Effect.tryPromise({
       try: () =>
@@ -183,7 +214,7 @@ const toolsQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data alat`,
             cause: error,

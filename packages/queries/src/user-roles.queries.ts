@@ -15,7 +15,7 @@ const userRolesQueries = {
           }),
         catch: (error) => {
           logger.error("Error fetching default role", { error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to fetch default role.",
             cause: error,
@@ -48,7 +48,7 @@ const userRolesQueries = {
           `Error assigning role ${roleId} to user ${userId}:`,
           error
         );
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to assign role to user.",
           cause: error,
@@ -71,7 +71,7 @@ const userRolesQueries = {
           .returning(),
       catch: (error) => {
         logger.error("Error assigning role to user", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menetapkan peran ke user",
         });
@@ -97,7 +97,7 @@ const userRolesQueries = {
           .returning(),
       catch: (error) => {
         logger.error("Error assigning roles to user", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menetapkan peran ke user",
         });
@@ -117,7 +117,7 @@ const userRolesQueries = {
           .returning(),
       catch: (error) => {
         logger.error("Error removing role from user", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus peran dari user",
         });
@@ -132,7 +132,7 @@ const userRolesQueries = {
         tx.delete(userRoles).where(eq(userRoles.userId, userId)).returning(),
       catch: (error) => {
         logger.error("Error removing all roles from user", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus semua peran dari user",
         });
@@ -160,7 +160,7 @@ const userRolesQueries = {
         }),
       catch: (error) => {
         logger.error("Error replacing roles for user", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengganti peran user",
         });

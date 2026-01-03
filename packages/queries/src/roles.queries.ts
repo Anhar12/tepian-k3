@@ -32,7 +32,7 @@ const rolesQueries = {
       try: () => db.query.roles.findMany(),
       catch: (error) => {
         logger.error("Error fetching roles:", error);
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data peran.",
           cause: error,
@@ -49,7 +49,7 @@ const rolesQueries = {
         }),
       catch: (error) => {
         logger.error(`Error fetching role with ID ${roleId}:`, error);
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data peran.",
           cause: error,
@@ -92,7 +92,7 @@ const rolesQueries = {
         },
         catch: (error) => {
           logger.error("Error fetching role permissions", { error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data izin peran",
           });
@@ -120,7 +120,7 @@ const rolesQueries = {
         }),
       catch: (error) => {
         logger.error(`Error fetching deleted role with ID ${roleId}:`, error);
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data peran yang dihapus.",
           cause: error,
@@ -137,7 +137,7 @@ const rolesQueries = {
         }),
       catch: (error) => {
         logger.error(`Error fetching role with name ${roleName}:`, error);
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch role.",
           cause: error,
@@ -160,7 +160,7 @@ const rolesQueries = {
           }),
         catch: (error) => {
           logger.error("Error fetching role", { error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data peran",
           });
@@ -180,7 +180,7 @@ const rolesQueries = {
             .where(and(eq(userRoles.roleId, role.id), isNull(users.deletedAt))),
         catch: (error) => {
           logger.error("Error fetching users by role", { error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data user berdasarkan peran",
           });
@@ -269,7 +269,7 @@ const rolesQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data roles`,
             cause: error,
@@ -303,7 +303,7 @@ const rolesQueries = {
         try: () => db.insert(roles).values(data).returning(),
         catch: (error) => {
           logger.error("Error creating role:", error);
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat peran.",
             cause: error,
@@ -349,7 +349,7 @@ const rolesQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error updating role:", error);
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui peran.",
             cause: error,
@@ -392,7 +392,7 @@ const rolesQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error deleting role:", error);
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus peran.",
             cause: error,
@@ -435,7 +435,7 @@ const rolesQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error restoring role:", error);
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan peran.",
             cause: error,

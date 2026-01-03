@@ -17,7 +17,7 @@ const userCompaniesQueries = {
       catch: (error) => {
         logger.error("Error fetching all user companies", { error });
 
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data perusahaan.",
           cause: error,
@@ -38,7 +38,7 @@ const userCompaniesQueries = {
           }),
         catch: (error) => {
           logger.error("Error fetching user company detail", { error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil detail perusahaan.",
             cause: error,
@@ -74,7 +74,7 @@ const userCompaniesQueries = {
           userId,
           error,
         });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data perusahaan pengguna.",
           cause: error,
@@ -99,7 +99,7 @@ const userCompaniesQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Error creating user company", { userId, data, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat perusahaan pengguna.",
             cause: error,
@@ -140,7 +140,7 @@ const userCompaniesQueries = {
             companyId,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui perusahaan.",
             cause: error,
@@ -179,7 +179,7 @@ const userCompaniesQueries = {
             data,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui perusahaan.",
             cause: error,
@@ -216,7 +216,7 @@ const userCompaniesQueries = {
             companyId,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal menghapus perusahaan.`,
             cause: error,
@@ -253,7 +253,7 @@ const userCompaniesQueries = {
             userId,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal menghapus perusahaan.`,
             cause: error,
