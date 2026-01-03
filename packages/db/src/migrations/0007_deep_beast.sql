@@ -1,0 +1,1 @@
+ALTER SEQUENCE "public"."testing_sequence_seq" RENAME TO "testing_number_seq";

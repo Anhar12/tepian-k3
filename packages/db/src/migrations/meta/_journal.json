@@ -50,6 +50,13 @@
       "when": 1767404112569,
       "tag": "0006_new_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1767406786009,
+      "tag": "0007_deep_beast",
+      "breakpoints": true
     }
   ]
 }
