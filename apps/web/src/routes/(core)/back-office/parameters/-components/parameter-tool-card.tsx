@@ -15,16 +15,10 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import {
-  Building2,
-  Calendar,
-  Edit2,
-  LoaderCircle,
-  MapPin,
-  Trash2,
-} from "lucide-react";
+import { Calendar, LoaderCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { ParameterTools } from "@tepian-k3/types/parameter-tool.types";
+import { IconTools } from "@tabler/icons-react";
 
 interface ParameterToolCardProps extends React.HTMLAttributes<HTMLDivElement> {
   parameterTool: ParameterTools;
@@ -71,28 +65,6 @@ export default function ParameterToolCard({
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
-            {/* {!isDeleted && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  queryClient.prefetchQuery(
-                    trpc.userCompanyParameterTool.getUserCompanyParameterToolById.queryOptions(
-                      {
-                        id: parameterTool.id,
-                      },
-                    ),
-                  );
-                  setEditingParameterToolId(parameterTool.id);
-                  setIsEditDialogOpen(true);
-                }}
-                className="h-8 w-8 p-0"
-                title="Edit location"
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-            )} */}
-
             <AlertDialog
               open={openDeleteDialog}
               onOpenChange={setOpenDeleteDialog}
@@ -141,16 +113,9 @@ export default function ParameterToolCard({
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <IconTools className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="truncate text-xs text-foreground">
               {parameterTool.tool.toolCode} - {parameterTool.tool.toolName}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <p className="truncate font-mono text-xs text-foreground">
-              ID: {parameterTool.id}
             </p>
           </div>
 
