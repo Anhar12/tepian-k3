@@ -22,21 +22,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const hasUserRole = profile.roles.some((role) => role.name === "user");
 
-  // Merge menus: always include user menu items + filtered back office items for non-user roles
+  // Separate user dashboard and back office menus
   const filteredNavMain = React.useMemo(() => {
-    // Always include user menu items (no permission needed)
-    const items = [...userMenu.navMain];
-
-    // If not a regular user, add back office menu items based on permissions
-    if (!hasUserRole) {
-      const backOfficeItems = backOfficeMenu.navMain.filter(
-        (item) =>
-          !item.permission || profile.permissions.includes(item.permission),
-      );
-      items.push(...backOfficeItems);
+    // For regular users: only show user dashboard menu
+    if (hasUserRole) {
+      return userMenu.navMain;
     }
 
-    return items;
+    // For back office users: only show back office menu items based on permissions
+    const backOfficeItems = backOfficeMenu.navMain.filter(
+      (item) =>
+        !item.permission || profile.permissions.includes(item.permission),
+    );
+
+    return backOfficeItems;
   }, [hasUserRole, profile.permissions]);
 
   return (
