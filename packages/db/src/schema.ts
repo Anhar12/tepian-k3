@@ -712,3 +712,32 @@ export const orderItem = createTable(
     index("order_item_order_id_idx").using("btree", table.orderId),
   ]
 );
+
+export const orderStatusHistory = createTable(
+  "order_status_history",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    previousStatus: orderStatusEnum("previous_status").notNull(),
+    newStatus: orderStatusEnum("new_status").notNull(),
+    changedAt: timestamp("changed_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    changedBy: uuid("changed_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    note: text("note"),
+    ...timestamps,
+  },
+
+  (table) => [
+    index("order_status_history_id_idx").using("btree", table.id),
+    index("order_status_history_order_id_idx").using("btree", table.orderId),
+  ]
+);
