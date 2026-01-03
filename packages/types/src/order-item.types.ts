@@ -13,6 +13,12 @@ export type OrderItemWithRelations = InferQueryModel<
           name: true;
         };
       };
+      order: {
+        columns: {
+          id: true;
+          orderNumber: true;
+        };
+      };
       location: {
         columns: {
           id: true;

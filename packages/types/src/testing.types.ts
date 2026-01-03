@@ -7,6 +7,12 @@ export type TestingWithRelations = InferQueryModel<
   "testing",
   {
     with: {
+      order: {
+        columns: {
+          id: true;
+          orderNumber: true;
+        };
+      };
       user: {
         columns: {
           id: true;
@@ -19,7 +25,7 @@ export type TestingWithRelations = InferQueryModel<
           name: true;
         };
       };
-      location: {
+      type: {
         columns: {
           id: true;
           name: true;

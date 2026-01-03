@@ -19,12 +19,7 @@ export type OrderWithRelations = InferQueryModel<
           name: true;
         };
       };
-      location: {
-        columns: {
-          id: true;
-          name: true;
-        };
-      };
+      testing: true;
       items: true;
       statusHistory: true;
     };

@@ -1,5 +1,5 @@
 {
-  "id": "d83cc0d1-7743-4481-9864-157acdc0770f",
+  "id": "808d8ce7-35c7-4fd9-9b4c-6e78c4ed6011",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -503,18 +503,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "testing_id": {
-          "name": "testing_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "location_id": {
-          "name": "location_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "status": {
           "name": "status",
           "type": "order_status",
@@ -617,6 +605,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "approved_at": {
+          "name": "approved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "paid_at": {
+          "name": "paid_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelled_at": {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "deleted_at": {
           "name": "deleted_at",
           "type": "timestamp with time zone",
@@ -696,21 +708,6 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "order_testing_id_idx": {
-          "name": "order_testing_id_idx",
-          "columns": [
-            {
-              "expression": "testing_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
@@ -733,32 +730,6 @@
           "tableTo": "user_companies",
           "columnsFrom": [
             "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "orders_testing_id_testing_id_fk": {
-          "name": "orders_testing_id_testing_id_fk",
-          "tableFrom": "orders",
-          "tableTo": "testing",
-          "columnsFrom": [
-            "testing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "orders_location_id_user_company_testing_locations_id_fk": {
-          "name": "orders_location_id_user_company_testing_locations_id_fk",
-          "tableFrom": "orders",
-          "tableTo": "user_company_testing_locations",
-          "columnsFrom": [
-            "location_id"
           ],
           "columnsTo": [
             "id"
@@ -827,6 +798,24 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -894,6 +883,133 @@
           "tableTo": "user_company_testing_locations",
           "columnsFrom": [
             "location_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.order_status_history": {
+      "name": "order_status_history",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previous_status": {
+          "name": "previous_status",
+          "type": "order_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "new_status": {
+          "name": "new_status",
+          "type": "order_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "changed_by": {
+          "name": "changed_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "order_status_history_id_idx": {
+          "name": "order_status_history_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "order_status_history_order_id_idx": {
+          "name": "order_status_history_order_id_idx",
+          "columns": [
+            {
+              "expression": "order_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "order_status_history_order_id_orders_id_fk": {
+          "name": "order_status_history_order_id_orders_id_fk",
+          "tableFrom": "order_status_history",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "order_status_history_changed_by_users_id_fk": {
+          "name": "order_status_history_changed_by_users_id_fk",
+          "tableFrom": "order_status_history",
+          "tableTo": "users",
+          "columnsFrom": [
+            "changed_by"
           ],
           "columnsTo": [
             "id"
@@ -1955,15 +2071,15 @@
           "primaryKey": true,
           "notNull": true
         },
-        "order_number": {
-          "name": "order_number",
+        "testing_number": {
+          "name": "testing_number",
           "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
-        "testing_number": {
-          "name": "testing_number",
-          "type": "varchar(100)",
+        "order_id": {
+          "name": "order_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1979,8 +2095,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "location_id": {
-          "name": "location_id",
+        "testing_type": {
+          "name": "testing_type",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -2026,11 +2142,11 @@
           "method": "btree",
           "with": {}
         },
-        "testing_order_number_idx": {
-          "name": "testing_order_number_idx",
+        "testing_testing_number_idx": {
+          "name": "testing_testing_number_idx",
           "columns": [
             {
-              "expression": "order_number",
+              "expression": "testing_number",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2041,11 +2157,11 @@
           "method": "btree",
           "with": {}
         },
-        "testing_testing_number_idx": {
-          "name": "testing_testing_number_idx",
+        "testing_testing_type_idx": {
+          "name": "testing_testing_type_idx",
           "columns": [
             {
-              "expression": "testing_number",
+              "expression": "testing_type",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2085,24 +2201,22 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "testing_location_id_idx": {
-          "name": "testing_location_id_idx",
-          "columns": [
-            {
-              "expression": "location_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
+        "testing_order_id_orders_id_fk": {
+          "name": "testing_order_id_orders_id_fk",
+          "tableFrom": "testing",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "testing_user_id_users_id_fk": {
           "name": "testing_user_id_users_id_fk",
           "tableFrom": "testing",
@@ -2129,12 +2243,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "testing_location_id_user_company_testing_locations_id_fk": {
-          "name": "testing_location_id_user_company_testing_locations_id_fk",
+        "testing_testing_type_parameter_categories_id_fk": {
+          "name": "testing_testing_type_parameter_categories_id_fk",
           "tableFrom": "testing",
-          "tableTo": "user_company_testing_locations",
+          "tableTo": "parameter_categories",
           "columnsFrom": [
-            "location_id"
+            "testing_type"
           ],
           "columnsTo": [
             "id"
@@ -2145,13 +2259,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "testing_order_number_unique": {
-          "name": "testing_order_number_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "order_number"
-          ]
-        },
         "testing_testing_number_unique": {
           "name": "testing_testing_number_unique",
           "nullsNotDistinct": false,
@@ -2180,8 +2287,20 @@
           "primaryKey": false,
           "notNull": true
         },
+        "order_item_id": {
+          "name": "order_item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "parameter_id": {
           "name": "parameter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_id": {
+          "name": "location_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -2266,6 +2385,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "testing_item_parameter_id_idx": {
+          "name": "testing_item_parameter_id_idx",
+          "columns": [
+            {
+              "expression": "parameter_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -2282,12 +2416,38 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
+        "testing_item_order_item_id_order_items_id_fk": {
+          "name": "testing_item_order_item_id_order_items_id_fk",
+          "tableFrom": "testing_item",
+          "tableTo": "order_items",
+          "columnsFrom": [
+            "order_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "testing_item_parameter_id_parameters_id_fk": {
           "name": "testing_item_parameter_id_parameters_id_fk",
           "tableFrom": "testing_item",
           "tableTo": "parameters",
           "columnsFrom": [
             "parameter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "testing_item_location_id_user_company_testing_locations_id_fk": {
+          "name": "testing_item_location_id_user_company_testing_locations_id_fk",
+          "tableFrom": "testing_item",
+          "tableTo": "user_company_testing_locations",
+          "columnsFrom": [
+            "location_id"
           ],
           "columnsTo": [
             "id"

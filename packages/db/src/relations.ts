@@ -216,33 +216,6 @@ export const cartRelations = relations(cart, ({ one }) => ({
   }),
 }));
 
-export const testingRelations = relations(testing, ({ one, many }) => ({
-  user: one(users, {
-    fields: [testing.userId],
-    references: [users.id],
-  }),
-  company: one(userCompanies, {
-    fields: [testing.companyId],
-    references: [userCompanies.id],
-  }),
-  location: one(userCompanyTestingLocation, {
-    fields: [testing.locationId],
-    references: [userCompanyTestingLocation.id],
-  }),
-  items: many(testingItem),
-}));
-
-export const testingItemRelations = relations(testingItem, ({ one }) => ({
-  testing: one(testing, {
-    fields: [testingItem.testingId],
-    references: [testing.id],
-  }),
-  parameter: one(parameters, {
-    fields: [testingItem.parameterId],
-    references: [parameters.id],
-  }),
-}));
-
 export const orderRelations = relations(order, ({ one, many }) => ({
   user: one(users, {
     fields: [order.userId],
@@ -252,10 +225,7 @@ export const orderRelations = relations(order, ({ one, many }) => ({
     fields: [order.companyId],
     references: [userCompanies.id],
   }),
-  location: one(userCompanyTestingLocation, {
-    fields: [order.locationId],
-    references: [userCompanyTestingLocation.id],
-  }),
+  testing: many(testing),
   items: many(orderItem),
   statusHistory: many(orderStatusHistory),
 }));
@@ -271,6 +241,45 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
   }),
   location: one(userCompanyTestingLocation, {
     fields: [orderItem.locationId],
+    references: [userCompanyTestingLocation.id],
+  }),
+}));
+
+export const testingRelations = relations(testing, ({ one, many }) => ({
+  order: one(order, {
+    fields: [testing.orderId],
+    references: [order.id],
+  }),
+  user: one(users, {
+    fields: [testing.userId],
+    references: [users.id],
+  }),
+  company: one(userCompanies, {
+    fields: [testing.companyId],
+    references: [userCompanies.id],
+  }),
+  type: one(parameterCategories, {
+    fields: [testing.testingType],
+    references: [parameterCategories.id],
+  }),
+  items: many(testingItem),
+}));
+
+export const testingItemRelations = relations(testingItem, ({ one }) => ({
+  testing: one(testing, {
+    fields: [testingItem.testingId],
+    references: [testing.id],
+  }),
+  orderItem: one(orderItem, {
+    fields: [testingItem.orderItemId],
+    references: [orderItem.id],
+  }),
+  parameter: one(parameters, {
+    fields: [testingItem.parameterId],
+    references: [parameters.id],
+  }),
+  location: one(userCompanyTestingLocation, {
+    fields: [testingItem.locationId],
     references: [userCompanyTestingLocation.id],
   }),
 }));

@@ -53,8 +53,6 @@ CREATE TABLE "orders" (
 	"order_number" varchar(100) NOT NULL,
 	"user_id" uuid NOT NULL,
 	"company_id" uuid NOT NULL,
-	"testing_id" uuid NOT NULL,
-	"location_id" uuid NOT NULL,
 	"status" "order_status" DEFAULT 'pending' NOT NULL,
 	"total_amount" integer NOT NULL,
 	"offering_document_file_name" text,
@@ -71,6 +69,10 @@ CREATE TABLE "orders" (
 	"payment_rejected_reason" text,
 	"assignment_letter_file_name" text,
 	"assignment_letter_url" text,
+	"approved_at" timestamp with time zone,
+	"paid_at" timestamp with time zone,
+	"completed_at" timestamp with time zone,
+	"cancelled_at" timestamp with time zone,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
 	"updated_at" timestamp with time zone,
@@ -84,7 +86,22 @@ CREATE TABLE "order_items" (
 	"location_id" uuid NOT NULL,
 	"quantity" integer DEFAULT 1 NOT NULL,
 	"price" integer NOT NULL,
-	"sub_total" integer NOT NULL
+	"sub_total" integer NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "order_status_history" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"order_id" uuid NOT NULL,
+	"previous_status" "order_status" NOT NULL,
+	"new_status" "order_status" NOT NULL,
+	"changed_by" uuid NOT NULL,
+	"note" text,
+	"deleted_at" timestamp with time zone,
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "otp_codes" (
@@ -191,23 +208,24 @@ CREATE TABLE "roles" (
 --> statement-breakpoint
 CREATE TABLE "testing" (
 	"id" uuid PRIMARY KEY NOT NULL,
-	"order_number" varchar(100) NOT NULL,
 	"testing_number" varchar(100) NOT NULL,
+	"order_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"company_id" uuid NOT NULL,
-	"location_id" uuid NOT NULL,
+	"testing_type" uuid NOT NULL,
 	"note" text,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
 	"updated_at" timestamp with time zone,
-	CONSTRAINT "testing_order_number_unique" UNIQUE("order_number"),
 	CONSTRAINT "testing_testing_number_unique" UNIQUE("testing_number")
 );
 --> statement-breakpoint
 CREATE TABLE "testing_item" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"testing_id" uuid NOT NULL,
+	"order_item_id" uuid NOT NULL,
 	"parameter_id" uuid NOT NULL,
+	"location_id" uuid NOT NULL,
 	"quantity" integer DEFAULT 1 NOT NULL,
 	"price" integer NOT NULL,
 	"sub_total" integer NOT NULL,
@@ -330,11 +348,11 @@ ALTER TABLE "cart" ADD CONSTRAINT "cart_parameter_id_parameters_id_fk" FOREIGN K
 ALTER TABLE "districts" ADD CONSTRAINT "districts_regency_id_regencies_id_fk" FOREIGN KEY ("regency_id") REFERENCES "public"."regencies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_company_id_user_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."user_companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "orders" ADD CONSTRAINT "orders_testing_id_testing_id_fk" FOREIGN KEY ("testing_id") REFERENCES "public"."testing"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "orders" ADD CONSTRAINT "orders_location_id_user_company_testing_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."user_company_testing_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_parameter_id_parameters_id_fk" FOREIGN KEY ("parameter_id") REFERENCES "public"."parameters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_location_id_user_company_testing_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."user_company_testing_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_changed_by_users_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "otp_codes" ADD CONSTRAINT "otp_codes_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "parameter_categories" ADD CONSTRAINT "parameter_categories_cluster_id_clusters_id_fk" FOREIGN KEY ("cluster_id") REFERENCES "public"."clusters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "parameter_tools" ADD CONSTRAINT "parameter_tools_parameter_id_parameters_id_fk" FOREIGN KEY ("parameter_id") REFERENCES "public"."parameters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -344,11 +362,14 @@ ALTER TABLE "password_resets" ADD CONSTRAINT "password_resets_user_id_users_id_f
 ALTER TABLE "regencies" ADD CONSTRAINT "regencies_province_id_provinces_id_fk" FOREIGN KEY ("province_id") REFERENCES "public"."provinces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "testing" ADD CONSTRAINT "testing_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "testing" ADD CONSTRAINT "testing_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "testing" ADD CONSTRAINT "testing_company_id_user_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."user_companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "testing" ADD CONSTRAINT "testing_location_id_user_company_testing_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."user_company_testing_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "testing" ADD CONSTRAINT "testing_testing_type_parameter_categories_id_fk" FOREIGN KEY ("testing_type") REFERENCES "public"."parameter_categories"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "testing_item" ADD CONSTRAINT "testing_item_testing_id_testing_id_fk" FOREIGN KEY ("testing_id") REFERENCES "public"."testing"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "testing_item" ADD CONSTRAINT "testing_item_order_item_id_order_items_id_fk" FOREIGN KEY ("order_item_id") REFERENCES "public"."order_items"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "testing_item" ADD CONSTRAINT "testing_item_parameter_id_parameters_id_fk" FOREIGN KEY ("parameter_id") REFERENCES "public"."parameters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "testing_item" ADD CONSTRAINT "testing_item_location_id_user_company_testing_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."user_company_testing_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_kbli_id_kblis_id_fk" FOREIGN KEY ("kbli_id") REFERENCES "public"."kblis"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_companies" ADD CONSTRAINT "user_companies_provinceId_provinces_id_fk" FOREIGN KEY ("provinceId") REFERENCES "public"."provinces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -379,9 +400,10 @@ CREATE INDEX "order_id_idx" ON "orders" USING btree ("id");--> statement-breakpo
 CREATE INDEX "order_order_number_idx" ON "orders" USING btree ("order_number");--> statement-breakpoint
 CREATE INDEX "order_user_id_idx" ON "orders" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "order_company_id_idx" ON "orders" USING btree ("company_id");--> statement-breakpoint
-CREATE INDEX "order_testing_id_idx" ON "orders" USING btree ("testing_id");--> statement-breakpoint
 CREATE INDEX "order_item_id_idx" ON "order_items" USING btree ("id");--> statement-breakpoint
 CREATE INDEX "order_item_order_id_idx" ON "order_items" USING btree ("order_id");--> statement-breakpoint
+CREATE INDEX "order_status_history_id_idx" ON "order_status_history" USING btree ("id");--> statement-breakpoint
+CREATE INDEX "order_status_history_order_id_idx" ON "order_status_history" USING btree ("order_id");--> statement-breakpoint
 CREATE INDEX "otp_code_user_id_idx" ON "otp_codes" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "otp_code_email_idx" ON "otp_codes" USING btree ("email");--> statement-breakpoint
 CREATE INDEX "parameter_category_id_idx" ON "parameter_categories" USING btree ("id");--> statement-breakpoint
@@ -404,13 +426,13 @@ CREATE INDEX "role_permission_role_id_idx" ON "role_permissions" USING btree ("r
 CREATE INDEX "role_permission_permission_id_idx" ON "role_permissions" USING btree ("permission_id");--> statement-breakpoint
 CREATE INDEX "role_name_idx" ON "roles" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "testing_id_idx" ON "testing" USING btree ("id");--> statement-breakpoint
-CREATE INDEX "testing_order_number_idx" ON "testing" USING btree ("order_number");--> statement-breakpoint
 CREATE INDEX "testing_testing_number_idx" ON "testing" USING btree ("testing_number");--> statement-breakpoint
+CREATE INDEX "testing_testing_type_idx" ON "testing" USING btree ("testing_type");--> statement-breakpoint
 CREATE INDEX "testing_user_id_idx" ON "testing" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "testing_company_id_idx" ON "testing" USING btree ("company_id");--> statement-breakpoint
-CREATE INDEX "testing_location_id_idx" ON "testing" USING btree ("location_id");--> statement-breakpoint
 CREATE INDEX "testing_item_id_idx" ON "testing_item" USING btree ("id");--> statement-breakpoint
 CREATE INDEX "testing_item_testing_id_idx" ON "testing_item" USING btree ("testing_id");--> statement-breakpoint
+CREATE INDEX "testing_item_parameter_id_idx" ON "testing_item" USING btree ("parameter_id");--> statement-breakpoint
 CREATE INDEX "tool_id_idx" ON "tools" USING btree ("id");--> statement-breakpoint
 CREATE INDEX "tool_tool_code_idx" ON "tools" USING btree ("tool_code");--> statement-breakpoint
 CREATE INDEX "user_company_id_idx" ON "user_companies" USING btree ("id");--> statement-breakpoint

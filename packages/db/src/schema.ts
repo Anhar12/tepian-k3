@@ -578,68 +578,9 @@ export const cart = createTable(
   ]
 );
 
-export const testingSequence = pgSequence(TESTING_SEQUENCE_NAME);
-
 export const orderNumberSequence = pgSequence(ORDER_SEQUENCE_NAME);
 
-export const testing = createTable(
-  "testing",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .notNull()
-      .$default(() => uuidv7()),
-    orderNumber: varchar("order_number", { length: 100 }).notNull().unique(),
-    testingNumber: varchar("testing_number", { length: 100 })
-      .notNull()
-      .unique(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    companyId: uuid("company_id")
-      .notNull()
-      .references(() => userCompanies.id, { onDelete: "cascade" }),
-    locationId: uuid("location_id")
-      .notNull()
-      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
-    note: text("note"),
-    ...timestamps,
-  },
-  (table) => [
-    index("testing_id_idx").using("btree", table.id),
-    index("testing_order_number_idx").using("btree", table.orderNumber),
-    index("testing_testing_number_idx").using("btree", table.testingNumber),
-    index("testing_user_id_idx").using("btree", table.userId),
-    index("testing_company_id_idx").using("btree", table.companyId),
-    index("testing_location_id_idx").using("btree", table.locationId),
-  ]
-);
-
-export const testingItem = createTable(
-  "testing_item",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .notNull()
-      .$default(() => uuidv7()),
-    testingId: uuid("testing_id")
-      .notNull()
-      .references(() => testing.id, { onDelete: "cascade" }),
-    parameterId: uuid("parameter_id")
-      .notNull()
-      .references(() => parameters.id, { onDelete: "cascade" }),
-    quantity: integer("quantity").notNull().default(1),
-    price: integer("price").notNull(),
-    subTotal: integer("sub_total").notNull(),
-    result: text("result"),
-    note: text("note"),
-    ...timestamps,
-  },
-  (table) => [
-    index("testing_item_id_idx").using("btree", table.id),
-    index("testing_item_testing_id_idx").using("btree", table.testingId),
-  ]
-);
+export const testingSequence = pgSequence(TESTING_SEQUENCE_NAME);
 
 export const order = createTable(
   "orders",
@@ -655,12 +596,6 @@ export const order = createTable(
     companyId: uuid("company_id")
       .notNull()
       .references(() => userCompanies.id, { onDelete: "cascade" }),
-    testingId: uuid("testing_id")
-      .notNull()
-      .references(() => testing.id, { onDelete: "cascade" }),
-    locationId: uuid("location_id")
-      .notNull()
-      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
     status: orderStatusEnum("status").notNull().default("pending"),
     totalAmount: integer("total_amount").notNull(),
     ...createFileColumns("offeringDocument"),
@@ -676,6 +611,19 @@ export const order = createTable(
       .default("unpaid"),
     paymentRejectedReason: text("payment_rejected_reason"),
     ...createFileColumns("assignmentLetter"),
+    approvedAt: timestamp("approved_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    paidAt: timestamp("paid_at", { withTimezone: true, mode: "string" }),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    cancelledAt: timestamp("cancelled_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
     ...timestamps,
   },
   (table) => [
@@ -683,7 +631,6 @@ export const order = createTable(
     index("order_order_number_idx").using("btree", table.orderNumber),
     index("order_user_id_idx").using("btree", table.userId),
     index("order_company_id_idx").using("btree", table.companyId),
-    index("order_testing_id_idx").using("btree", table.testingId),
   ]
 );
 
@@ -706,10 +653,78 @@ export const orderItem = createTable(
     quantity: integer("quantity").notNull().default(1),
     price: integer("price").notNull(),
     subTotal: integer("sub_total").notNull(),
+    ...timestamps,
   },
   (table) => [
     index("order_item_id_idx").using("btree", table.id),
     index("order_item_order_id_idx").using("btree", table.orderId),
+  ]
+);
+
+export const testing = createTable(
+  "testing",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    testingNumber: varchar("testing_number", { length: 100 })
+      .notNull()
+      .unique(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    testingType: uuid("testing_type")
+      .notNull()
+      .references(() => parameterCategories.id, { onDelete: "cascade" }),
+    note: text("note"),
+    ...timestamps,
+  },
+  (table) => [
+    index("testing_id_idx").using("btree", table.id),
+    index("testing_testing_number_idx").using("btree", table.testingNumber),
+    index("testing_testing_type_idx").using("btree", table.testingType),
+    index("testing_user_id_idx").using("btree", table.userId),
+    index("testing_company_id_idx").using("btree", table.companyId),
+  ]
+);
+
+export const testingItem = createTable(
+  "testing_item",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    testingId: uuid("testing_id")
+      .notNull()
+      .references(() => testing.id, { onDelete: "cascade" }),
+    orderItemId: uuid("order_item_id")
+      .notNull()
+      .references(() => orderItem.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    price: integer("price").notNull(),
+    subTotal: integer("sub_total").notNull(),
+    result: text("result"),
+    note: text("note"),
+    ...timestamps,
+  },
+  (table) => [
+    index("testing_item_id_idx").using("btree", table.id),
+    index("testing_item_testing_id_idx").using("btree", table.testingId),
+    index("testing_item_parameter_id_idx").using("btree", table.parameterId),
   ]
 );
 
@@ -725,10 +740,6 @@ export const orderStatusHistory = createTable(
       .references(() => order.id, { onDelete: "cascade" }),
     previousStatus: orderStatusEnum("previous_status").notNull(),
     newStatus: orderStatusEnum("new_status").notNull(),
-    changedAt: timestamp("changed_at", {
-      withTimezone: true,
-      mode: "string",
-    }).$default(() => sql`CURRENT_TIMESTAMP`),
     changedBy: uuid("changed_by")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
