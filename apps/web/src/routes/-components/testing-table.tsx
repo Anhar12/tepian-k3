@@ -210,124 +210,146 @@ export function TestingTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading
-              ? Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={index} className="border-slate-100">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                        <div className="flex flex-col gap-2">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-3 w-24" />
-                        </div>
+            {!hasClusterId ? (
+              <TableRow className="border-slate-100">
+                <TableCell
+                  colSpan={showCart ? 7 : 4}
+                  className="h-32 text-center"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <AlertCircle className="h-8 w-8 text-amber-500" />
+                    <div>
+                      <p className="font-bold text-slate-700">
+                        Pilih Kategori Parameter
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Silakan pilih salah satu kategori parameter pengujian di
+                        atas untuk melihat daftar parameter
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow key={index} className="border-slate-100">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-8 w-8 rounded-lg" />
+                      <div className="flex flex-col gap-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-28 rounded-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="mb-2 h-4 w-40" />
-                      <Skeleton className="h-3 w-32" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    {showCart && (
-                      <>
-                        <TableCell>
-                          <Skeleton className="h-10 w-16 rounded-xl" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
-                        </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                ))
-              : parameters?.data.map((row) => (
-                  <TableRow key={row.id} className="group border-slate-100">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
-                          )}
-                        >
-                          <TestTube2 className="h-4 w-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-slate-700">
-                            {row.category.name}
-                          </span>
-                          <span className="text-[10px] font-medium text-slate-400">
-                            {row.cluster.name}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-28 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="mb-2 h-4 w-40" />
+                    <Skeleton className="h-3 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  {showCart && (
+                    <>
+                      <TableCell>
+                        <Skeleton className="h-10 w-16 rounded-xl" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-24" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              ))
+            ) : (
+              parameters?.data.map((row) => (
+                <TableRow key={row.id} className="group border-slate-100">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={cn(
+                          `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
+                        )}
                       >
-                        {row.name}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
-                      <div className="font-bold text-slate-700">
-                        {row.reference?.split(" ")[0]}{" "}
-                        {row.reference?.split(" ")[1]}
+                        <TestTube2 className="h-4 w-4" />
                       </div>
-                      <div>{row.reference?.split(" ").slice(2).join(" ")}</div>
-                    </TableCell>
-                    <TableCell className="text-sm font-bold text-slate-800">
-                      Rp {row.price.toLocaleString("id-ID")}
-                    </TableCell>
-                    {showCart && (
-                      <>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            defaultValue={1}
-                            className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
-                            min={1}
-                            onChange={(e) => {
-                              const quantity = parseInt(e.target.value, 10);
-                              if (quantity < 1) return;
-                              setCart((oldCart) => {
-                                const newCart = new Map(oldCart);
-                                newCart.set(row.id, {
-                                  quantity,
-                                  price: row.price,
-                                });
-                                return newCart;
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-700">
+                          {row.category.name}
+                        </span>
+                        <span className="text-[10px] font-medium text-slate-400">
+                          {row.cluster.name}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="secondary"
+                      className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
+                    >
+                      {row.name}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
+                    <div className="font-bold text-slate-700">
+                      {row.reference?.split(" ")[0]}{" "}
+                      {row.reference?.split(" ")[1]}
+                    </div>
+                    <div>{row.reference?.split(" ").slice(2).join(" ")}</div>
+                  </TableCell>
+                  <TableCell className="text-sm font-bold text-slate-800">
+                    Rp {row.price.toLocaleString("id-ID")}
+                  </TableCell>
+                  {showCart && (
+                    <>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          defaultValue={1}
+                          className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
+                          min={1}
+                          onChange={(e) => {
+                            const quantity = parseInt(e.target.value, 10);
+                            if (quantity < 1) return;
+                            setCart((oldCart) => {
+                              const newCart = new Map(oldCart);
+                              newCart.set(row.id, {
+                                quantity,
+                                price: row.price,
                               });
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell className="text-sm font-bold text-[#0056B3]">
-                          Rp{" "}
-                          {(
-                            (cart.get(row.id)?.quantity || 1) * row.price
-                          ).toLocaleString("id-ID")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg"
-                            disabled={!me}
-                            onClick={() => handleAddToCart(row.id)}
-                          >
-                            <ShoppingCart className="h-4 w-4" />
-                            Add to Cart
-                          </Button>
-                        </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                ))}
+                              return newCart;
+                            });
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell className="text-sm font-bold text-[#0056B3]">
+                        Rp{" "}
+                        {(
+                          (cart.get(row.id)?.quantity || 1) * row.price
+                        ).toLocaleString("id-ID")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg"
+                          disabled={!me}
+                          onClick={() => handleAddToCart(row.id)}
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                          Add to Cart
+                        </Button>
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
