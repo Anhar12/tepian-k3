@@ -60,6 +60,9 @@ export default function CreateParameterToolDialog({
             parameterId,
           }),
         );
+        await queryClient.invalidateQueries(
+          trpc.tool.getAllUnassignedTools.queryOptions(),
+        );
         form.reset();
         globalSuccessToast("Alat berhasil ditambahkan ke parameter.");
         setIsCreateDialogOpen(false);
