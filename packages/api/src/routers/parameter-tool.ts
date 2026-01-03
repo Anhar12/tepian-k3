@@ -1,8 +1,8 @@
 import parameterToolSchema from "@tepian-k3/schema/parameter-tool.schema";
 import { createTRPCRouter, withPermission } from "..";
-import { Effect } from "effect";
 import parameterToolQueries from "@tepian-k3/queries/parameter-tool.queries";
 import z from "zod";
+import { runEffect } from "../utils/run-effect";
 
 export const parameterToolRouter = createTRPCRouter({
   getAllParameterToolsByParameterId: withPermission("parameter-tool.read")
@@ -13,7 +13,7 @@ export const parameterToolRouter = createTRPCRouter({
     )
     .query(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           parameterToolQueries.getAllToolsByParameterId(input.parameterId)
         )
     ),
@@ -26,25 +26,21 @@ export const parameterToolRouter = createTRPCRouter({
     )
     .query(
       async ({ input }) =>
-        await Effect.runPromise(
-          parameterToolQueries.getParameterToolById(input.id)
-        )
+        await runEffect(parameterToolQueries.getParameterToolById(input.id))
     ),
 
   assignToolsToParameter: withPermission("parameter-tool.create")
     .input(parameterToolSchema.createParameterToolSchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(
-          parameterToolQueries.assignToolToParameter(input)
-        )
+        await runEffect(parameterToolQueries.assignToolToParameter(input))
     ),
 
   updateParameterTool: withPermission("parameter-tool.update")
     .input(parameterToolSchema.updateParameterToolSchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(parameterToolQueries.updateParameterTool(input))
+        await runEffect(parameterToolQueries.updateParameterTool(input))
     ),
 
   deleteParameterTool: withPermission("parameter-tool.delete")
@@ -55,8 +51,6 @@ export const parameterToolRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(
-          parameterToolQueries.removeToolFromParameter(input.id)
-        )
+        await runEffect(parameterToolQueries.removeToolFromParameter(input.id))
     ),
 });

@@ -719,9 +719,15 @@ importers:
       '@tepian-k3/types':
         specifier: workspace:*
         version: link:../types
+      '@trpc/server':
+        specifier: 'catalog:'
+        version: 11.8.0(typescript@5.9.3)
       date-fns:
         specifier: 'catalog:'
         version: 4.1.0
+      effect:
+        specifier: 'catalog:'
+        version: 3.19.13
       nuqs:
         specifier: 'catalog:'
         version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)

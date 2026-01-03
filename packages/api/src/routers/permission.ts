@@ -1,11 +1,11 @@
 import permissionsQueries from "@tepian-k3/queries/permission.queries";
 import { createTRPCRouter, withPermission } from "..";
-import { Effect } from "effect";
 import z from "zod";
+import { runEffect } from "../utils/run-effect";
 
 export const permissionRouters = createTRPCRouter({
   getAllPermissions: withPermission("permissions.read").query(async () => {
-    return await Effect.runPromise(permissionsQueries.getAllPermissions());
+    return await runEffect(permissionsQueries.getAllPermissions());
   }),
 
   updateRolePermissions: withPermission("roles.update")
@@ -18,7 +18,7 @@ export const permissionRouters = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           permissionsQueries.updateRolePermissions(
             input.roleId,
             input.addedPermissions,

@@ -1,14 +1,14 @@
 import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
 import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
 import userCompanyTestingLocationQueries from "@tepian-k3/queries/user-company-testing-location.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
 
 export const userCompanyTestingLocationRouter = createTRPCRouter({
   getAllUserCompanyTestingLocations: publicProcedure.query(
     async () =>
-      await Effect.runPromise(
+      await runEffect(
         userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations()
       )
   ),
@@ -23,7 +23,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx: { user } }) => {
-      return await Effect.runPromise(
+      return await runEffect(
         userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
           input.companyId,
           user.id,
@@ -39,7 +39,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema
     )
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         userCompanyTestingLocationQueries.getOffsetPaginationUserCompanyTestingLocations(
           input
         )
@@ -57,7 +57,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx: { user } }) => {
-      const userCompanyTestingLocation = await Effect.runPromise(
+      const userCompanyTestingLocation = await runEffect(
         userCompanyTestingLocationQueries.getUserCompanyTestingLocationByUserIdAndCompanyId(
           user.id,
           input.companyId
@@ -76,7 +76,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const userCompanyTestingLocation = await Effect.runPromise(
+      const userCompanyTestingLocation = await runEffect(
         userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
           input.id
         )
@@ -100,7 +100,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userCreateUserCompanyTestingLocation(
             user.id,
             input
@@ -116,7 +116,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userUpdateUserCompanyTestingLocation(
             user.id,
             input
@@ -134,7 +134,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userDeleteUserCompanyTestingLocation(
             user.id,
             input.id
@@ -152,7 +152,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userRestoreUserCompanyTestingLocation(
             user.id,
             input.id

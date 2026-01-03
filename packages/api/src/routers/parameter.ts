@@ -1,15 +1,15 @@
 import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
 import parameterQueries from "@tepian-k3/queries/parameter.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
 
 export const parameterRouter = createTRPCRouter({
   getOffsetPaginatedParametersByClusterIdAndCategoryId: publicProcedure
     .input(parameterSchema.getByClusterAndParameterCategorySchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         parameterQueries.getOffsetPaginatedParametersByClusterIdAndCategoryId(
           input
         )
@@ -21,7 +21,7 @@ export const parameterRouter = createTRPCRouter({
   getPaginatedParameters: withPermission("parameters.read")
     .input(parameterSchema.getAllParametersSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         parameterQueries.getOffsetPaginatedParameters(input)
       );
 
@@ -35,7 +35,7 @@ export const parameterRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const parameter = await Effect.runPromise(
+      const parameter = await runEffect(
         parameterQueries.getParameterById(input.id)
       );
 
@@ -53,14 +53,14 @@ export const parameterRouter = createTRPCRouter({
     .input(parameterSchema.createParameterSchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(parameterQueries.createParameter(input))
+        await runEffect(parameterQueries.createParameter(input))
     ),
 
   updateParameter: withPermission("parameters.update")
     .input(parameterSchema.updateParameterSchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(parameterQueries.updateParameter(input))
+        await runEffect(parameterQueries.updateParameter(input))
     ),
 
   deleteParameter: withPermission("parameters.delete")
@@ -71,7 +71,7 @@ export const parameterRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(parameterQueries.deleteParameter(input.id))
+        await runEffect(parameterQueries.deleteParameter(input.id))
     ),
 
   restoreParameter: withPermission("parameters.delete")
@@ -82,6 +82,6 @@ export const parameterRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(parameterQueries.restoreParameter(input.id))
+        await runEffect(parameterQueries.restoreParameter(input.id))
     ),
 });

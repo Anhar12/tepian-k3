@@ -1,22 +1,20 @@
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
 import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
 import parameterCategoriesQueries from "@tepian-k3/queries/parameter-categories.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
 
 export const parameterCategoriesRouter = createTRPCRouter({
   getAllParameterCategories: publicProcedure.query(
     async () =>
-      await Effect.runPromise(
-        parameterCategoriesQueries.getAllParameterCategories()
-      )
+      await runEffect(parameterCategoriesQueries.getAllParameterCategories())
   ),
 
   getPaginatedParameterCategories: withPermission("parameter-categories.read")
     .input(parameterCategoriesSchema.getAllParameterCategoriesSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         parameterCategoriesQueries.getOffsetPaginatedParameterCategories(input)
       );
 
@@ -30,7 +28,7 @@ export const parameterCategoriesRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const parameterCategory = await Effect.runPromise(
+      const parameterCategory = await runEffect(
         parameterCategoriesQueries.getParameterCategoryById(input.id)
       );
 
@@ -48,7 +46,7 @@ export const parameterCategoriesRouter = createTRPCRouter({
     .input(parameterCategoriesSchema.createParameterCategorySchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           parameterCategoriesQueries.createParameterCategory(input)
         )
     ),
@@ -57,7 +55,7 @@ export const parameterCategoriesRouter = createTRPCRouter({
     .input(parameterCategoriesSchema.updateParameterCategorySchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           parameterCategoriesQueries.updateParameterCategory(input)
         )
     ),
@@ -70,7 +68,7 @@ export const parameterCategoriesRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           parameterCategoriesQueries.deleteParameterCategory(input.id)
         )
     ),
@@ -83,7 +81,7 @@ export const parameterCategoriesRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           parameterCategoriesQueries.restoreParameterCategory(input.id)
         )
     ),

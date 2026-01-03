@@ -1,4 +1,4 @@
-import { TRPCError } from "@trpc/server";
+import { TRPCError } from "@tepian-k3/utils/error";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
   and,
@@ -32,7 +32,7 @@ const usersQueries = {
         }),
       catch: (error) => {
         logger.error("Failed to get user by email", { email, error });
-        throw new TRPCError({
+        return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Gagal mengambil data pengguna.`,
           cause: error,

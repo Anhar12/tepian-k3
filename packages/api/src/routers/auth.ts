@@ -12,12 +12,12 @@ import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { storageService } from "@tepian-k3/services/storage";
 import z from "zod";
 import { PasswordResetService } from "@tepian-k3/auth/services/password-reset";
+import { runEffect } from "../utils/run-effect";
 
 export const authRouter = createTRPCRouter({
-  login: publicProcedure
-    .input(authSchema.loginSchema)
-    .mutation(async ({ input }) => {
-      return Effect.runPromise(
+  login: publicProcedure.input(authSchema.loginSchema).mutation(
+    async ({ input }) =>
+      await runEffect(
         Effect.gen(function* () {
           const user = yield* usersQueries.getUserByEmail(input.email);
 
@@ -82,13 +82,13 @@ export const authRouter = createTRPCRouter({
             },
           };
         })
-      );
-    }),
+      )
+  ),
 
   register: publicProcedure
     .input(userSchema.createUserSchema)
     .mutation(async ({ input }) => {
-      return Effect.runPromise(usersQueries.createUser(input));
+      return runEffect(usersQueries.createUser(input));
     }),
 
   sendOTP: publicProcedure
@@ -143,7 +143,7 @@ export const authRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const result = await Effect.runPromise(
+      const result = await runEffect(
         PasswordResetService.requestReset(input.email)
       );
 
@@ -164,7 +164,7 @@ export const authRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const result = await Effect.runPromise(
+      const result = await runEffect(
         PasswordResetService.verifyResetToken(input.token)
       );
 
@@ -179,7 +179,7 @@ export const authRouter = createTRPCRouter({
     }),
 
   profile: protectedProcedure.query(async ({ ctx }) => {
-    const user = await Effect.runPromise(
+    const user = await runEffect(
       permissionQueries.getUserWithPermissions(ctx.user.id)
     );
 
@@ -208,7 +208,7 @@ export const authRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const result = await Effect.runPromise(
+      const result = await runEffect(
         PasswordResetService.resetPassword(input.token, input.newPassword)
       );
 
@@ -227,7 +227,7 @@ export const authRouter = createTRPCRouter({
       return null;
     }
 
-    const user = await Effect.runPromise(
+    const user = await runEffect(
       permissionQueries.getUserWithPermissions(ctx.user.id)
     );
 

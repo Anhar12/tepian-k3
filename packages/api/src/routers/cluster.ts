@@ -1,19 +1,19 @@
 import clusterSchema from "@tepian-k3/schema/cluster.schema";
 import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
 import clustersQueries from "@tepian-k3/queries/clusters.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
 
 export const clusterRouter = createTRPCRouter({
   getAllClusters: publicProcedure.query(
-    async () => await Effect.runPromise(clustersQueries.getAllClusters())
+    async () => await runEffect(clustersQueries.getAllClusters())
   ),
 
   getPaginatedClusters: withPermission("clusters.read")
     .input(clusterSchema.getAllClustersSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         clustersQueries.getOffsetPaginatedClusters(input)
       );
 
@@ -27,9 +27,7 @@ export const clusterRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const cluster = await Effect.runPromise(
-        clustersQueries.getClusterById(input.id)
-      );
+      const cluster = await runEffect(clustersQueries.getClusterById(input.id));
 
       if (!cluster) {
         throw new TRPCError({
@@ -44,15 +42,13 @@ export const clusterRouter = createTRPCRouter({
   createCluster: withPermission("clusters.create")
     .input(clusterSchema.createClusterSchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(clustersQueries.createCluster(input))
+      async ({ input }) => await runEffect(clustersQueries.createCluster(input))
     ),
 
   updateCluster: withPermission("clusters.update")
     .input(clusterSchema.updateClusterSchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(clustersQueries.updateCluster(input))
+      async ({ input }) => await runEffect(clustersQueries.updateCluster(input))
     ),
 
   deleteCluster: withPermission("clusters.delete")
@@ -63,7 +59,7 @@ export const clusterRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(clustersQueries.deleteCluster(input.id))
+        await runEffect(clustersQueries.deleteCluster(input.id))
     ),
 
   restoreCluster: withPermission("clusters.delete")
@@ -74,6 +70,6 @@ export const clusterRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(clustersQueries.restoreCluster(input.id))
+        await runEffect(clustersQueries.restoreCluster(input.id))
     ),
 });

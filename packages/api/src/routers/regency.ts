@@ -1,13 +1,13 @@
 import regencySchema from "@tepian-k3/schema/regency.schema";
 import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
 import regencyQueries from "@tepian-k3/queries/regency.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
 
 export const regencyRouter = createTRPCRouter({
   getAllRegencies: publicProcedure.query(
-    async () => await Effect.runPromise(regencyQueries.getAllRegencies())
+    async () => await runEffect(regencyQueries.getAllRegencies())
   ),
 
   getAllRegenciesByProvinceId: publicProcedure
@@ -18,7 +18,7 @@ export const regencyRouter = createTRPCRouter({
     )
     .query(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           regencyQueries.getAllRegenciesByProvinceId(input.provinceId)
         )
     ),
@@ -26,7 +26,7 @@ export const regencyRouter = createTRPCRouter({
   getPaginatedRegencies: withPermission("regency.read")
     .input(regencySchema.getAllRegenciesSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         regencyQueries.getOffsetPaginationRegencies(input)
       );
 
@@ -40,9 +40,7 @@ export const regencyRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const regency = await Effect.runPromise(
-        regencyQueries.getRegencyById(input.id)
-      );
+      const regency = await runEffect(regencyQueries.getRegencyById(input.id));
 
       if (!regency) {
         throw new TRPCError({
@@ -57,15 +55,13 @@ export const regencyRouter = createTRPCRouter({
   createRegency: withPermission("regency.create")
     .input(regencySchema.createRegencySchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(regencyQueries.createRegency(input))
+      async ({ input }) => await runEffect(regencyQueries.createRegency(input))
     ),
 
   updateRegency: withPermission("regency.update")
     .input(regencySchema.updateRegencySchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(regencyQueries.updateRegency(input))
+      async ({ input }) => await runEffect(regencyQueries.updateRegency(input))
     ),
 
   deleteRegency: withPermission("regency.delete")
@@ -76,7 +72,7 @@ export const regencyRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(regencyQueries.deleteRegency(input.id))
+        await runEffect(regencyQueries.deleteRegency(input.id))
     ),
 
   restoreRegency: withPermission("regency.delete")
@@ -87,6 +83,6 @@ export const regencyRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(regencyQueries.restoreRegency(input.id))
+        await runEffect(regencyQueries.restoreRegency(input.id))
     ),
 });

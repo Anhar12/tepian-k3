@@ -1,19 +1,19 @@
 import kbliSchema from "@tepian-k3/schema/kbli.schema";
 import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
 import kbliQueries from "@tepian-k3/queries/kbli.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
 
 export const kbliRouter = createTRPCRouter({
   getAllKblis: publicProcedure.query(
-    async () => await Effect.runPromise(kbliQueries.getAllKblis())
+    async () => await runEffect(kbliQueries.getAllKblis())
   ),
 
   getPaginatedKblis: withPermission("kbli.read")
     .input(kbliSchema.getAllKBLISchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         kbliQueries.getOffsetPaginatedKblis(input)
       );
 
@@ -27,7 +27,7 @@ export const kbliRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const kbli = await Effect.runPromise(kbliQueries.getKbliById(input.id));
+      const kbli = await runEffect(kbliQueries.getKbliById(input.id));
 
       if (!kbli) {
         throw new TRPCError({
@@ -42,15 +42,13 @@ export const kbliRouter = createTRPCRouter({
   createKbli: withPermission("kbli.create")
     .input(kbliSchema.createKBLISchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(kbliQueries.createKbli(input))
+      async ({ input }) => await runEffect(kbliQueries.createKbli(input))
     ),
 
   updateKbli: withPermission("kbli.update")
     .input(kbliSchema.updateKBLISchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(kbliQueries.updateKbli(input))
+      async ({ input }) => await runEffect(kbliQueries.updateKbli(input))
     ),
 
   deleteKbli: withPermission("kbli.delete")
@@ -60,8 +58,7 @@ export const kbliRouter = createTRPCRouter({
       })
     )
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(kbliQueries.deleteKbli(input.id))
+      async ({ input }) => await runEffect(kbliQueries.deleteKbli(input.id))
     ),
 
   restoreKbli: withPermission("kbli.delete")
@@ -71,7 +68,6 @@ export const kbliRouter = createTRPCRouter({
       })
     )
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(kbliQueries.restoreKbli(input.id))
+      async ({ input }) => await runEffect(kbliQueries.restoreKbli(input.id))
     ),
 });

@@ -1,18 +1,18 @@
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { createTRPCRouter, withPermission } from "..";
-import { Effect } from "effect";
 import toolsQureies from "@tepian-k3/queries/tools.queries";
 import z from "zod";
+import { runEffect } from "../utils/run-effect";
 
 export const toolRouter = createTRPCRouter({
   getAllUnassignedTools: withPermission("tools.read").query(
-    async () => await Effect.runPromise(toolsQureies.getAllUnassignedTools())
+    async () => await runEffect(toolsQureies.getAllUnassignedTools())
   ),
 
   getToolPaginated: withPermission("tools.read")
     .input(toolsSchema.getAllToolsSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         toolsQureies.getOffsetPaginatedTools(input)
       );
 
@@ -26,22 +26,19 @@ export const toolRouter = createTRPCRouter({
       })
     )
     .query(
-      async ({ input }) =>
-        await Effect.runPromise(toolsQureies.getToolById(input.id))
+      async ({ input }) => await runEffect(toolsQureies.getToolById(input.id))
     ),
 
   createTool: withPermission("tools.create")
     .input(toolsSchema.createToolSchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(toolsQureies.createTool(input))
+      async ({ input }) => await runEffect(toolsQureies.createTool(input))
     ),
 
   updateTool: withPermission("tools.update")
     .input(toolsSchema.updateToolSchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(toolsQureies.updateTool(input))
+      async ({ input }) => await runEffect(toolsQureies.updateTool(input))
     ),
 
   deleteTool: withPermission("tools.delete")
@@ -51,8 +48,7 @@ export const toolRouter = createTRPCRouter({
       })
     )
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(toolsQureies.deleteTool(input.id))
+      async ({ input }) => await runEffect(toolsQureies.deleteTool(input.id))
     ),
 
   restoreTool: withPermission("tools.delete")
@@ -62,7 +58,6 @@ export const toolRouter = createTRPCRouter({
       })
     )
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(toolsQureies.restoreTool(input.id))
+      async ({ input }) => await runEffect(toolsQureies.restoreTool(input.id))
     ),
 });
