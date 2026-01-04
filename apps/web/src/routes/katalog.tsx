@@ -1,7 +1,7 @@
 import Navbar from "@/components/navbar";
 import { createFileRoute } from "@tanstack/react-router";
-import { Clusters } from "./-components/parameter-categories";
-import { TestingTable } from "./-components/testing-table";
+import { Clusters } from "./(core)/-components/parameter-categories";
+import { TestingTable } from "./(core)/-components/testing-table";
 import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/katalog")({
@@ -61,7 +61,7 @@ function RouteComponent() {
           <Clusters route="/katalog" />
 
           {/* Testing Table */}
-          <TestingTable ref={tableRef} route="/katalog" />
+          <TestingTable route="/katalog" />
         </div>
       </div>
     </div>

@@ -68,16 +68,25 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
         setPreview(value);
         setImage(null);
       } else if (value instanceof File) {
-        // File object provided
-        if (!image || image.file !== value) {
-          const newPreview = URL.createObjectURL(value);
-          setImage({
-            file: value,
-            preview: newPreview,
-            progress: 100,
-            status: "completed",
-          });
-          setPreview(newPreview);
+        // Only handle non-empty File objects
+        if (value.size > 0) {
+          if (!image || image.file !== value) {
+            const newPreview = URL.createObjectURL(value);
+            setImage({
+              file: value,
+              preview: newPreview,
+              progress: 100,
+              status: "completed",
+            });
+            setPreview(newPreview);
+          }
+        } else {
+          // Empty file - clear the preview
+          if (image) {
+            URL.revokeObjectURL(image.preview);
+          }
+          setImage(null);
+          setPreview(null);
         }
       }
     }, [value]);

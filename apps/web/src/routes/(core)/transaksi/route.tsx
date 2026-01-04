@@ -7,10 +7,13 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { Stepper } from "../-components/stepper";
+import GridBackground from "@/components/grid-background";
+import { useTestingFormStore } from "@/stores/testing-form.stores";
+import { useEffect } from "react";
 
-export const Route = createFileRoute("/transaksi")({
+export const Route = createFileRoute("/(core)/transaksi")({
   beforeLoad: ({ location }) => {
-    // Only redirect if exactly on /transaksi (no child route)
+    // Redirect to step 1 if on base /transaksi route
     if (
       location.pathname === "/transaksi" ||
       location.pathname === "/transaksi/"
@@ -23,29 +26,21 @@ export const Route = createFileRoute("/transaksi")({
 
 function RouteComponent() {
   const matchRoute = useMatchRoute();
-  const navigate = useNavigate();
+  const currentStep = useTestingFormStore((state) => state.currentStep);
+  const setCurrentStep = useTestingFormStore((state) => state.setCurrentStep);
 
-  // Determine current step based on route
-  const getCurrentStep = () => {
-    if (matchRoute({ to: "/transaksi/1" })) return 1;
-    if (matchRoute({ to: "/transaksi/2" })) return 2;
-    if (matchRoute({ to: "/transaksi/3" })) return 3;
-    if (matchRoute({ to: "/transaksi/4" })) return 4;
-    return 1;
-  };
-
-  const currentStep = getCurrentStep();
+  // Sync Zustand currentStep with actual route
+  useEffect(() => {
+    if (matchRoute({ to: "/transaksi/1" })) setCurrentStep(1);
+    else if (matchRoute({ to: "/transaksi/2" })) setCurrentStep(2);
+    else if (matchRoute({ to: "/transaksi/3" })) setCurrentStep(3);
+    else if (matchRoute({ to: "/transaksi/4" })) setCurrentStep(4);
+  }, [matchRoute, setCurrentStep]);
 
   return (
-    <div className="bg-primary-foreground">
+    <div className="h-screen overflow-scroll bg-primary-foreground">
       {/* Background Grid Pattern */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
-        style={{
-          backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
-      />
+      <GridBackground />
 
       <div className="relative z-10">
         <Navbar />

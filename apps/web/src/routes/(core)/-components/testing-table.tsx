@@ -36,8 +36,7 @@ import { useEffect, useState } from "react";
 import useDebounced from "@/hooks/use-debounced";
 
 interface TestingTableProps extends React.HTMLAttributes<HTMLDivElement> {
-  ref: React.Ref<HTMLDivElement>;
-  route: "/transaksi/1" | "/katalog";
+  route: "/transaksi/2" | "/katalog";
   showCart?: boolean;
 }
 

@@ -4,7 +4,6 @@ import {
   formDataInput,
   formDataProcedure,
   protectedProcedure,
-  publicProcedure,
   withPermission,
 } from "..";
 import userCompanyQueries from "@tepian-k3/queries/user-company.queries";
@@ -15,8 +14,9 @@ import { runEffect } from "../utils/run-effect";
 import { Effect } from "effect";
 
 export const userCompanyRouter = createTRPCRouter({
-  getAllUserCompanies: publicProcedure.query(
-    async () => await runEffect(userCompanyQueries.getAllUserCompanies())
+  getAllUserCompaniesByUserId: protectedProcedure.query(
+    async ({ ctx: { user } }) =>
+      await runEffect(userCompanyQueries.getAllUserCompaniesByUserId(user.id))
   ),
 
   getPaginatedUserCompaniesByUserId: protectedProcedure

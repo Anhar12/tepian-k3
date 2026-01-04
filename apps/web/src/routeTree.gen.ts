@@ -11,14 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as KatalogRouteImport } from './routes/katalog'
-import { Route as TransaksiRouteRouteImport } from './routes/transaksi/route'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as Transaksi4RouteImport } from './routes/transaksi/4'
-import { Route as Transaksi3RouteImport } from './routes/transaksi/3'
-import { Route as Transaksi2RouteImport } from './routes/transaksi/2'
-import { Route as Transaksi1RouteImport } from './routes/transaksi/1'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
@@ -26,10 +21,15 @@ import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-pas
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as coreTransaksiRouteRouteImport } from './routes/(core)/transaksi/route'
 import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
 import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
+import { Route as coreTransaksi4RouteImport } from './routes/(core)/transaksi/4'
+import { Route as coreTransaksi3RouteImport } from './routes/(core)/transaksi/3'
+import { Route as coreTransaksi2RouteImport } from './routes/(core)/transaksi/2'
+import { Route as coreTransaksi1RouteImport } from './routes/(core)/transaksi/1'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
@@ -68,11 +68,6 @@ const KatalogRoute = KatalogRouteImport.update({
   path: '/katalog',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TransaksiRouteRoute = TransaksiRouteRouteImport.update({
-  id: '/transaksi',
-  path: '/transaksi',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const coreRouteRoute = coreRouteRouteImport.update({
   id: '/(core)',
   getParentRoute: () => rootRouteImport,
@@ -85,26 +80,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const Transaksi4Route = Transaksi4RouteImport.update({
-  id: '/4',
-  path: '/4',
-  getParentRoute: () => TransaksiRouteRoute,
-} as any)
-const Transaksi3Route = Transaksi3RouteImport.update({
-  id: '/3',
-  path: '/3',
-  getParentRoute: () => TransaksiRouteRoute,
-} as any)
-const Transaksi2Route = Transaksi2RouteImport.update({
-  id: '/2',
-  path: '/2',
-  getParentRoute: () => TransaksiRouteRoute,
-} as any)
-const Transaksi1Route = Transaksi1RouteImport.update({
-  id: '/1',
-  path: '/1',
-  getParentRoute: () => TransaksiRouteRoute,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
   id: '/settings',
@@ -141,6 +116,11 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => authRouteRoute,
 } as any)
+const coreTransaksiRouteRoute = coreTransaksiRouteRouteImport.update({
+  id: '/transaksi',
+  path: '/transaksi',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 const coreDashboardRouteRoute = coreDashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -160,6 +140,26 @@ const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => coreBackOfficeRouteRoute,
+} as any)
+const coreTransaksi4Route = coreTransaksi4RouteImport.update({
+  id: '/4',
+  path: '/4',
+  getParentRoute: () => coreTransaksiRouteRoute,
+} as any)
+const coreTransaksi3Route = coreTransaksi3RouteImport.update({
+  id: '/3',
+  path: '/3',
+  getParentRoute: () => coreTransaksiRouteRoute,
+} as any)
+const coreTransaksi2Route = coreTransaksi2RouteImport.update({
+  id: '/2',
+  path: '/2',
+  getParentRoute: () => coreTransaksiRouteRoute,
+} as any)
+const coreTransaksi1Route = coreTransaksi1RouteImport.update({
+  id: '/1',
+  path: '/1',
+  getParentRoute: () => coreTransaksiRouteRoute,
 } as any)
 const coreDashboardCompanyIndexRoute =
   coreDashboardCompanyIndexRouteImport.update({
@@ -326,11 +326,11 @@ const coreBackOfficeClustersClusterIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/transaksi': typeof TransaksiRouteRouteWithChildren
   '/katalog': typeof KatalogRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/dashboard': typeof coreDashboardRouteRouteWithChildren
+  '/transaksi': typeof coreTransaksiRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -338,10 +338,10 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/transaksi/1': typeof Transaksi1Route
-  '/transaksi/2': typeof Transaksi2Route
-  '/transaksi/3': typeof Transaksi3Route
-  '/transaksi/4': typeof Transaksi4Route
+  '/transaksi/1': typeof coreTransaksi1Route
+  '/transaksi/2': typeof coreTransaksi2Route
+  '/transaksi/3': typeof coreTransaksi3Route
+  '/transaksi/4': typeof coreTransaksi4Route
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
@@ -374,9 +374,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/transaksi': typeof TransaksiRouteRouteWithChildren
   '/katalog': typeof KatalogRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/transaksi': typeof coreTransaksiRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -384,10 +384,10 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/transaksi/1': typeof Transaksi1Route
-  '/transaksi/2': typeof Transaksi2Route
-  '/transaksi/3': typeof Transaksi3Route
-  '/transaksi/4': typeof Transaksi4Route
+  '/transaksi/1': typeof coreTransaksi1Route
+  '/transaksi/2': typeof coreTransaksi2Route
+  '/transaksi/3': typeof coreTransaksi3Route
+  '/transaksi/4': typeof coreTransaksi4Route
   '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
@@ -423,11 +423,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
-  '/transaksi': typeof TransaksiRouteRouteWithChildren
   '/katalog': typeof KatalogRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/(core)/dashboard': typeof coreDashboardRouteRouteWithChildren
+  '/(core)/transaksi': typeof coreTransaksiRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
@@ -435,10 +435,10 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
-  '/transaksi/1': typeof Transaksi1Route
-  '/transaksi/2': typeof Transaksi2Route
-  '/transaksi/3': typeof Transaksi3Route
-  '/transaksi/4': typeof Transaksi4Route
+  '/(core)/transaksi/1': typeof coreTransaksi1Route
+  '/(core)/transaksi/2': typeof coreTransaksi2Route
+  '/(core)/transaksi/3': typeof coreTransaksi3Route
+  '/(core)/transaksi/4': typeof coreTransaksi4Route
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
@@ -473,11 +473,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/transaksi'
     | '/katalog'
     | '/unauthorized'
     | '/back-office'
     | '/dashboard'
+    | '/transaksi'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -521,9 +521,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/transaksi'
     | '/katalog'
     | '/unauthorized'
+    | '/transaksi'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -569,11 +569,11 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/(core)'
-    | '/transaksi'
     | '/katalog'
     | '/unauthorized'
     | '/(core)/back-office'
     | '/(core)/dashboard'
+    | '/(core)/transaksi'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/register'
@@ -581,10 +581,10 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
-    | '/transaksi/1'
-    | '/transaksi/2'
-    | '/transaksi/3'
-    | '/transaksi/4'
+    | '/(core)/transaksi/1'
+    | '/(core)/transaksi/2'
+    | '/(core)/transaksi/3'
+    | '/(core)/transaksi/4'
     | '/(core)/back-office/'
     | '/(core)/dashboard/'
     | '/(core)/back-office/clusters/create'
@@ -620,7 +620,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
-  TransaksiRouteRoute: typeof TransaksiRouteRouteWithChildren
   KatalogRoute: typeof KatalogRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
 }
@@ -639,13 +638,6 @@ declare module '@tanstack/react-router' {
       path: '/katalog'
       fullPath: '/katalog'
       preLoaderRoute: typeof KatalogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/transaksi': {
-      id: '/transaksi'
-      path: '/transaksi'
-      fullPath: '/transaksi'
-      preLoaderRoute: typeof TransaksiRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)': {
@@ -668,34 +660,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/transaksi/4': {
-      id: '/transaksi/4'
-      path: '/4'
-      fullPath: '/transaksi/4'
-      preLoaderRoute: typeof Transaksi4RouteImport
-      parentRoute: typeof TransaksiRouteRoute
-    }
-    '/transaksi/3': {
-      id: '/transaksi/3'
-      path: '/3'
-      fullPath: '/transaksi/3'
-      preLoaderRoute: typeof Transaksi3RouteImport
-      parentRoute: typeof TransaksiRouteRoute
-    }
-    '/transaksi/2': {
-      id: '/transaksi/2'
-      path: '/2'
-      fullPath: '/transaksi/2'
-      preLoaderRoute: typeof Transaksi2RouteImport
-      parentRoute: typeof TransaksiRouteRoute
-    }
-    '/transaksi/1': {
-      id: '/transaksi/1'
-      path: '/1'
-      fullPath: '/transaksi/1'
-      preLoaderRoute: typeof Transaksi1RouteImport
-      parentRoute: typeof TransaksiRouteRoute
     }
     '/(core)/settings': {
       id: '/(core)/settings'
@@ -746,6 +710,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(core)/transaksi': {
+      id: '/(core)/transaksi'
+      path: '/transaksi'
+      fullPath: '/transaksi'
+      preLoaderRoute: typeof coreTransaksiRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/dashboard': {
       id: '/(core)/dashboard'
       path: '/dashboard'
@@ -773,6 +744,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/back-office/'
       preLoaderRoute: typeof coreBackOfficeIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/transaksi/4': {
+      id: '/(core)/transaksi/4'
+      path: '/4'
+      fullPath: '/transaksi/4'
+      preLoaderRoute: typeof coreTransaksi4RouteImport
+      parentRoute: typeof coreTransaksiRouteRoute
+    }
+    '/(core)/transaksi/3': {
+      id: '/(core)/transaksi/3'
+      path: '/3'
+      fullPath: '/transaksi/3'
+      preLoaderRoute: typeof coreTransaksi3RouteImport
+      parentRoute: typeof coreTransaksiRouteRoute
+    }
+    '/(core)/transaksi/2': {
+      id: '/(core)/transaksi/2'
+      path: '/2'
+      fullPath: '/transaksi/2'
+      preLoaderRoute: typeof coreTransaksi2RouteImport
+      parentRoute: typeof coreTransaksiRouteRoute
+    }
+    '/(core)/transaksi/1': {
+      id: '/(core)/transaksi/1'
+      path: '/1'
+      fullPath: '/transaksi/1'
+      preLoaderRoute: typeof coreTransaksi1RouteImport
+      parentRoute: typeof coreTransaksiRouteRoute
     }
     '/(core)/dashboard/company/': {
       id: '/(core)/dashboard/company/'
@@ -1070,9 +1069,27 @@ const coreDashboardRouteRouteChildren: coreDashboardRouteRouteChildren = {
 const coreDashboardRouteRouteWithChildren =
   coreDashboardRouteRoute._addFileChildren(coreDashboardRouteRouteChildren)
 
+interface coreTransaksiRouteRouteChildren {
+  coreTransaksi1Route: typeof coreTransaksi1Route
+  coreTransaksi2Route: typeof coreTransaksi2Route
+  coreTransaksi3Route: typeof coreTransaksi3Route
+  coreTransaksi4Route: typeof coreTransaksi4Route
+}
+
+const coreTransaksiRouteRouteChildren: coreTransaksiRouteRouteChildren = {
+  coreTransaksi1Route: coreTransaksi1Route,
+  coreTransaksi2Route: coreTransaksi2Route,
+  coreTransaksi3Route: coreTransaksi3Route,
+  coreTransaksi4Route: coreTransaksi4Route,
+}
+
+const coreTransaksiRouteRouteWithChildren =
+  coreTransaksiRouteRoute._addFileChildren(coreTransaksiRouteRouteChildren)
+
 interface coreRouteRouteChildren {
   coreBackOfficeRouteRoute: typeof coreBackOfficeRouteRouteWithChildren
   coreDashboardRouteRoute: typeof coreDashboardRouteRouteWithChildren
+  coreTransaksiRouteRoute: typeof coreTransaksiRouteRouteWithChildren
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
 }
@@ -1080,6 +1097,7 @@ interface coreRouteRouteChildren {
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreBackOfficeRouteRoute: coreBackOfficeRouteRouteWithChildren,
   coreDashboardRouteRoute: coreDashboardRouteRouteWithChildren,
+  coreTransaksiRouteRoute: coreTransaksiRouteRouteWithChildren,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
 }
@@ -1088,29 +1106,10 @@ const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
   coreRouteRouteChildren,
 )
 
-interface TransaksiRouteRouteChildren {
-  Transaksi1Route: typeof Transaksi1Route
-  Transaksi2Route: typeof Transaksi2Route
-  Transaksi3Route: typeof Transaksi3Route
-  Transaksi4Route: typeof Transaksi4Route
-}
-
-const TransaksiRouteRouteChildren: TransaksiRouteRouteChildren = {
-  Transaksi1Route: Transaksi1Route,
-  Transaksi2Route: Transaksi2Route,
-  Transaksi3Route: Transaksi3Route,
-  Transaksi4Route: Transaksi4Route,
-}
-
-const TransaksiRouteRouteWithChildren = TransaksiRouteRoute._addFileChildren(
-  TransaksiRouteRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
-  TransaksiRouteRoute: TransaksiRouteRouteWithChildren,
   KatalogRoute: KatalogRoute,
   UnauthorizedRoute: UnauthorizedRoute,
 }

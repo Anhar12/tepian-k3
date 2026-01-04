@@ -29,11 +29,14 @@ import { filterColumns } from "@tepian-k3/utils/filter-column";
 import { storageService } from "@tepian-k3/services/storage";
 
 const userCompanyQueries = {
-  getAllUserCompanies() {
+  getAllUserCompaniesByUserId(userId: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findMany({
-          where: isNull(userCompanies.deletedAt),
+          where: and(
+            eq(userCompanies.userId, userId),
+            isNull(userCompanies.deletedAt)
+          ),
         }),
       catch: (error) => {
         logger.error("Error fetching userCompanies", { error });
@@ -42,7 +45,22 @@ const userCompanyQueries = {
           message: "Failed to fetch userCompanies",
         });
       },
-    });
+    }).pipe(
+      Effect.flatMap((userCompanies) =>
+        userCompanies
+          ? Effect.succeed(
+              userCompanies.map((uc) => {
+                return {
+                  ...uc,
+                  companyPictureUrl: uc.companyPictureUrl
+                    ? storageService.getPublicUrl(uc.companyPictureUrl)
+                    : null,
+                };
+              })
+            )
+          : Effect.succeed([])
+      )
+    );
   },
 
   getUserCompanyById(id: string) {

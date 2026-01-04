@@ -9,12 +9,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -26,7 +21,7 @@ const navItems: {
   href: string | LinkProps["to"];
 }[] = [
   { label: "Beranda", href: "/" },
-  { label: "Transaksi", href: "/transaksi" },
+  { label: "Katalog", href: "/katalog" },
   { label: "FAQ", href: "/#faq" },
   { label: "PPID", href: "#" },
 ];
