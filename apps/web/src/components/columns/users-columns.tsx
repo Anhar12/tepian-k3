@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { UsersWithoutFoto } from "@tepian-k3/types/users.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/users";
+import { Route } from "@/routes/(core)/back-office/users";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
 import {
   createActionColumn,
@@ -17,7 +17,7 @@ interface UsersColumnsProps {
 
 const ActionCell = createCrudActionCell<
   UsersWithoutFoto,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "user",
   resourcePath: "users",

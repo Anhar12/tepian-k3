@@ -12,7 +12,11 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { parameterCategories, parameters } from "@tepian-k3/db/schema";
+import {
+  clusters,
+  parameterCategories,
+  parameters,
+} from "@tepian-k3/db/schema";
 import { z } from "zod";
 import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { Effect } from "effect";
@@ -27,6 +31,14 @@ const parameterQueries = {
       try: () =>
         db.query.parameters.findFirst({
           where: and(eq(parameters.id, id), isNull(parameters.deletedAt)),
+          with: {
+            category: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+          },
         }),
       catch: (error) => {
         logger.error("Error in getParameterById:", error);
@@ -60,6 +72,95 @@ const parameterQueries = {
         parameter ? Effect.succeed(parameter) : Effect.succeed(null)
       )
     );
+  },
+
+  getOffsetPaginatedParametersByClusterIdAndCategoryId(
+    input: z.infer<
+      typeof parameterSchema.getByClusterAndParameterCategorySchema
+    >
+  ) {
+    return Effect.gen(function* () {
+      const offset = (input.page - 1) * input.perPage;
+
+      const where = and(
+        input.clusterId
+          ? eq(parameterCategories.clusterId, input.clusterId)
+          : undefined,
+        input.parameterCategoryId
+          ? eq(parameters.parameterCategoryId, input.parameterCategoryId)
+          : undefined,
+        input.name ? ilike(parameters.name, `%${input.name}%`) : undefined,
+        isNull(parameters.deletedAt)
+      );
+
+      const { data, total } = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const data = await tx
+              .select({
+                ...getTableColumns(parameters),
+                category: {
+                  id: parameterCategories.id,
+                  clusterId: parameterCategories.clusterId,
+                  name: parameterCategories.name,
+                },
+                cluster: {
+                  id: clusters.id,
+                  name: clusters.name,
+                },
+              })
+              .from(parameters)
+              .limit(input.perPage)
+              .offset(offset)
+              .where(where)
+              .innerJoin(
+                parameterCategories,
+                eq(parameters.parameterCategoryId, parameterCategories.id)
+              )
+              .innerJoin(
+                clusters,
+                eq(parameterCategories.clusterId, clusters.id)
+              )
+              .orderBy(desc(parameters.createdAt));
+
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(parameters)
+              .innerJoin(
+                parameterCategories,
+                eq(parameters.parameterCategoryId, parameterCategories.id)
+              )
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
+
+            return { data, total };
+          }),
+        catch: (error) => {
+          logger.error(
+            "Error fetching paginated parameters by cluster and category",
+            {
+              error,
+              input,
+            }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Gagal mengambil data parameter`,
+            cause: error,
+          });
+        },
+      });
+
+      const pageCount = Math.ceil(total / input.perPage);
+
+      return {
+        data,
+        pageCount,
+      };
+    });
   },
 
   getOffsetPaginatedParameters(
@@ -150,7 +251,7 @@ const parameterQueries = {
             error,
             input,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data parameter`,
             cause: error,

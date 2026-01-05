@@ -1,7 +1,7 @@
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import type { Roles } from "@tepian-k3/types/roles.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/roles";
+import { Route } from "@/routes/(core)/back-office/roles";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
 import {
   createActionColumn,
@@ -17,7 +17,7 @@ interface RolesColumnsProps {
 
 const ActionCell = createCrudActionCell<
   Roles,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "role",
   resourcePath: "roles",

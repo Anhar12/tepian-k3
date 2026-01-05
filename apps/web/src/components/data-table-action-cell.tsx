@@ -38,11 +38,13 @@ type DataTableActionCellProps = {
   isLoading?: boolean;
   btnClassName?: string;
   onEditAction?: string | (() => void);
+  onHoverEdit?: () => void;
   onConfirm: () => void;
   showDetail?: boolean;
   detailIcon?: React.ReactNode;
   detailText?: string;
   onDetailAction?: string | (() => void);
+  onHoverDetail?: () => void;
   showPrint?: boolean;
   printIcon?: React.ReactNode;
   printText?: string;
@@ -68,11 +70,13 @@ export default function DataTableActionCell({
   isLoading = false,
   btnClassName,
   onEditAction,
+  onHoverEdit,
   onConfirm,
   showDetail = false,
   detailIcon = <Eye className="mr-4 size-4" />,
   detailText = "Lihat Detail",
   onDetailAction,
+  onHoverDetail,
   showPrint = false,
   printIcon = <Printer className="mr-4 size-4" />,
   printText = "Cetak PDF",
@@ -133,13 +137,20 @@ export default function DataTableActionCell({
             onDetailAction &&
             (typeof onDetailAction === "string" ? (
               <DropdownMenuItem asChild>
-                <a href={onDetailAction} className="flex flex-row">
+                <a
+                  href={onDetailAction}
+                  className="flex flex-row"
+                  onMouseEnter={() => onHoverDetail && onHoverDetail()}
+                >
                   {detailIcon}
                   {detailText}
                 </a>
               </DropdownMenuItem>
             ) : (
-              <DropdownMenuItem onClick={() => onDetailAction()}>
+              <DropdownMenuItem
+                onClick={() => onDetailAction()}
+                onMouseEnter={() => onHoverDetail && onHoverDetail()}
+              >
                 <div className="flex flex-row items-center">
                   {detailIcon}
                   {detailText}
@@ -152,13 +163,20 @@ export default function DataTableActionCell({
             onEditAction &&
             (typeof onEditAction === "string" ? (
               <DropdownMenuItem asChild>
-                <a href={onEditAction} className="flex flex-row">
+                <a
+                  href={onEditAction}
+                  className="flex flex-row"
+                  onMouseEnter={() => onHoverEdit && onHoverEdit()}
+                >
                   {editIcon}
                   {editText}
                 </a>
               </DropdownMenuItem>
             ) : (
-              <DropdownMenuItem onClick={() => onEditAction()}>
+              <DropdownMenuItem
+                onClick={() => onEditAction()}
+                onMouseEnter={() => onHoverEdit && onHoverEdit()}
+              >
                 <div className="flex flex-row items-center">
                   {editIcon}
                   {editText}

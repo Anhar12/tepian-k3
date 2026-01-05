@@ -84,6 +84,52 @@ export function createTextColumn<T extends RowData>(
   };
 }
 
+export function createPriceColumn<T extends RowData>(
+  id: Extract<NestedKeyOf<T>, string>,
+  label: string,
+  options: TextColumnOptions = {},
+): ColumnDef<T> {
+  const {
+    width = "w-48",
+    enableFilter = false,
+    placeholder = `Cari ${label.toLowerCase()}...`,
+    variant = "text",
+    icon = Text,
+  } = options;
+
+  const meta: ColumnMeta<T, unknown> | undefined = enableFilter
+    ? {
+        label,
+        placeholder,
+        variant,
+        icon,
+      }
+    : undefined;
+
+  return {
+    id,
+    accessorKey: id,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={label} label={label} />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue(id);
+      const formattedPrice = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(Number(value));
+      return (
+        <div className={`${width} truncate`} title={formattedPrice}>
+          {formattedPrice}
+        </div>
+      );
+    },
+    meta,
+    enableColumnFilter: enableFilter,
+  };
+}
+
 interface DateColumnOptions {
   /** Whether the date can be null */
   nullable?: boolean;

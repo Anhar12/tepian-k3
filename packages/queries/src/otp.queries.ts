@@ -1,5 +1,5 @@
 import { and, eq, gt, gte } from "@tepian-k3/db";
-import { db } from "@tepian-k3/db/client";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import { otpCodes } from "@tepian-k3/db/schema";
 import type z from "zod";
 import otpSchema from "@tepian-k3/schema/otp.schema";
@@ -8,10 +8,10 @@ import { Effect, Option } from "effect";
 import logger from "@tepian-k3/services/logger";
 
 const otpQueries = {
-  invalidateOTPsByEmail(email: string) {
+  invalidateOTPsByEmail(email: string, tx: DBorTx = db) {
     return Effect.tryPromise({
       try: () => {
-        const res = db
+        const res = tx
           .update(otpCodes)
           .set({ verified: true })
           .where(and(eq(otpCodes.email, email), eq(otpCodes.verified, false)))
@@ -21,7 +21,7 @@ const otpQueries = {
       },
       catch: (error) => {
         logger.error("Failed to invalidate OTPs by email", { email, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menonaktifkan kode OTP.",
           cause: error,
@@ -30,13 +30,13 @@ const otpQueries = {
     });
   },
 
-  createOTP(data: z.infer<typeof otpSchema.insertOtpSchema>) {
+  createOTP(data: z.infer<typeof otpSchema.insertOtpSchema>, tx: DBorTx = db) {
     return Effect.gen(function* () {
       const [result] = yield* Effect.tryPromise({
-        try: () => db.insert(otpCodes).values(data).returning(),
+        try: () => tx.insert(otpCodes).values(data).returning(),
         catch: (error) => {
           logger.error("Failed to create OTP", { data, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat kode OTP.",
             cause: error,
@@ -54,7 +54,7 @@ const otpQueries = {
         );
       }
 
-      return Effect.succeed(result);
+      return result;
     });
   },
 
@@ -70,7 +70,7 @@ const otpQueries = {
         }),
       catch: (error) => {
         logger.error("Failed to find valid OTP", { email, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil kode OTP yang valid.",
           cause: error,
@@ -88,7 +88,7 @@ const otpQueries = {
         }),
       catch: (error) => {
         logger.error("Failed to find last OTP by email", { email, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil kode OTP terakhir.",
           cause: error,
@@ -108,7 +108,7 @@ const otpQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Failed to increment OTP attempts", { id, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menambah percobaan kode OTP.",
             cause: error,
@@ -132,10 +132,10 @@ const otpQueries = {
     });
   },
 
-  markOTPAsVerified(id: string) {
+  markOTPAsVerified(id: string, tx: DBorTx = db) {
     return Effect.tryPromise({
       try: () => {
-        const res = db
+        const res = tx
           .update(otpCodes)
           .set({ verified: true })
           .where(eq(otpCodes.id, id))
@@ -144,7 +144,7 @@ const otpQueries = {
       },
       catch: (error) => {
         logger.error("Failed to mark OTP as verified", { id, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menandai kode OTP sebagai terverifikasi.",
           cause: error,
@@ -165,7 +165,7 @@ const otpQueries = {
       },
       catch: (error) => {
         logger.error("Failed to delete expired OTPs", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus kode OTP yang kedaluwarsa.",
           cause: error,
@@ -186,7 +186,7 @@ const otpQueries = {
       },
       catch: (error) => {
         logger.error("Failed to delete OTPs by email", { email, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus kode OTP.",
           cause: error,

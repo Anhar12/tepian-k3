@@ -77,7 +77,7 @@ export const authRouter = createTRPCRouter({
           return {
             token,
             user: {
-              ...user,
+              ...permission,
               password: undefined,
             },
           };

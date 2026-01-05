@@ -86,7 +86,8 @@
     "vaul": "^1.1.2",
     "vite-plugin-pwa": "^1.0.1",
     "zod": "catalog:",
-    "zod-form-data": "catalog:"
+    "zod-form-data": "catalog:",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.91.1",

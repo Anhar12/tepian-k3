@@ -11,6 +11,12 @@ import { exit } from "process";
 import { eq } from "drizzle-orm";
 import seedClusters from "./clusters";
 import seedParameterCategories from "./parameter-categories";
+import seedProvinces from "./provinces";
+import seedRegencies from "./regencies";
+import seedDistricts from "./districts";
+import seedVillages from "./villages";
+import seedKblis from "./kblis";
+import seedParameters from "./parameter";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -122,6 +128,106 @@ async function seed() {
     { name: "parameters.update", resource: "parameters", action: "update" },
     { name: "parameters.delete", resource: "parameters", action: "delete" },
     { name: "parameters.manage", resource: "parameters", action: "manage" },
+    {
+      name: "parameter-tool.create",
+      resource: "parameter-tool",
+      action: "create",
+    },
+    {
+      name: "parameter-tool.read",
+      resource: "parameter-tool",
+      action: "read",
+    },
+    {
+      name: "parameter-tool.update",
+      resource: "parameter-tool",
+      action: "update",
+    },
+    {
+      name: "parameter-tool.delete",
+      resource: "parameter-tool",
+      action: "delete",
+    },
+    {
+      name: "parameter-tool.manage",
+      resource: "parameter-tool",
+      action: "manage",
+    },
+    { name: "provinces.create", resource: "provinces", action: "create" },
+    { name: "provinces.read", resource: "provinces", action: "read" },
+    { name: "provinces.update", resource: "provinces", action: "update" },
+    { name: "provinces.delete", resource: "provinces", action: "delete" },
+    { name: "provinces.manage", resource: "provinces", action: "manage" },
+    { name: "regency.create", resource: "regency", action: "create" },
+    { name: "regency.read", resource: "regency", action: "read" },
+    { name: "regency.update", resource: "regency", action: "update" },
+    { name: "regency.delete", resource: "regency", action: "delete" },
+    { name: "regency.manage", resource: "regency", action: "manage" },
+    { name: "district.create", resource: "districts", action: "create" },
+    { name: "district.read", resource: "districts", action: "read" },
+    { name: "district.update", resource: "districts", action: "update" },
+    { name: "district.delete", resource: "districts", action: "delete" },
+    { name: "district.manage", resource: "districts", action: "manage" },
+    { name: "village.create", resource: "village", action: "create" },
+    { name: "village.read", resource: "village", action: "read" },
+    { name: "village.update", resource: "village", action: "update" },
+    { name: "village.delete", resource: "village", action: "delete" },
+    { name: "village.manage", resource: "village", action: "manage" },
+    { name: "kbli.create", resource: "kbli", action: "create" },
+    { name: "kbli.read", resource: "kbli", action: "read" },
+    { name: "kbli.update", resource: "kbli", action: "update" },
+    { name: "kbli.delete", resource: "kbli", action: "delete" },
+    { name: "kbli.manage", resource: "kbli", action: "manage" },
+    {
+      name: "user-company.create",
+      resource: "user-company",
+      action: "create",
+    },
+    {
+      name: "user-company.read",
+      resource: "user-company",
+      action: "read",
+    },
+    {
+      name: "user-company.update",
+      resource: "user-company",
+      action: "update",
+    },
+    {
+      name: "user-company.delete",
+      resource: "user-company",
+      action: "delete",
+    },
+    {
+      name: "user-company.manage",
+      resource: "user-company",
+      action: "manage",
+    },
+    {
+      name: "user-company-testing-location.create",
+      resource: "user-company-testing-location",
+      action: "create",
+    },
+    {
+      name: "user-company-testing-location.read",
+      resource: "user-company-testing-location",
+      action: "read",
+    },
+    {
+      name: "user-company-testing-location.update",
+      resource: "user-company-testing-location",
+      action: "update",
+    },
+    {
+      name: "user-company-testing-location.delete",
+      resource: "user-company-testing-location",
+      action: "delete",
+    },
+    {
+      name: "user-company-testing-location.manage",
+      resource: "user-company-testing-location",
+      action: "manage",
+    },
   ] as const;
 
   // Create or get all permissions
@@ -233,6 +339,25 @@ async function seed() {
     }
   }
 
+  // User role gets only user-company and user-company-testing-location permissions
+  const userPermissionResources = [
+    "user-company",
+    "user-company-testing-location",
+  ];
+  const userPermissions = allPerms.filter((perm) =>
+    userPermissionResources.includes(perm.resource)
+  );
+
+  for (const perm of userPermissions) {
+    const userKey = `${userRole.id}-${perm.id}`;
+    if (!existingRolePermSet.has(userKey)) {
+      rolePermissionsToAdd.push({
+        roleId: userRole.id,
+        permissionId: perm.id,
+      });
+    }
+  }
+
   if (rolePermissionsToAdd.length > 0) {
     console.log(
       `   ➕ Adding ${rolePermissionsToAdd.length} role-permission assignments...`
@@ -330,6 +455,12 @@ async function seed() {
   // seeding other data can go here...
   await seedClusters();
   await seedParameterCategories();
+  await seedParameters();
+  await seedProvinces();
+  await seedRegencies();
+  await seedDistricts();
+  await seedVillages();
+  await seedKblis();
 
   console.log("✅ User roles synced");
   console.log("\n🎉 Database seeding completed successfully!");

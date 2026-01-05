@@ -1,12 +1,12 @@
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
-import { createTRPCRouter, withPermission } from "..";
+import { createTRPCRouter, publicProcedure, withPermission } from "..";
 import { Effect } from "effect";
 import parameterCategoriesQueries from "@tepian-k3/queries/parameter-categories.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const parameterCategoriesRouter = createTRPCRouter({
-  getAllParameterCategories: withPermission("parameter-categories.read").query(
+  getAllParameterCategories: publicProcedure.query(
     async () =>
       await Effect.runPromise(
         parameterCategoriesQueries.getAllParameterCategories()

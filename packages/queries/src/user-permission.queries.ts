@@ -23,7 +23,7 @@ const userPermissionsQueries = {
           .returning(),
       catch: (error) => {
         logger.error("Error granting permission to user", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memberikan izin ke user",
         });
@@ -49,7 +49,7 @@ const userPermissionsQueries = {
           .returning(),
       catch: (error) => {
         logger.error("Error revoking permission from user", { error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mencabut izin dari user",
         });

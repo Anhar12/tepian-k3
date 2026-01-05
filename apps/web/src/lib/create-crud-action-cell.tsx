@@ -23,6 +23,10 @@ interface CrudActionCellConfig<T, TParams> {
   useSearchParams: () => TParams;
   /** Show detail action button */
   showDetail?: boolean;
+  /** Action on hover for edit button */
+  onHoverEdit?: (id: string) => void;
+  /** Action on hover for detail button */
+  onHoverDetail?: (id: string) => void;
 }
 
 /**
@@ -41,6 +45,8 @@ export function createCrudActionCell<
     getQueryOptions,
     useSearchParams,
     showDetail = false,
+    onHoverEdit,
+    onHoverDetail,
   } = config;
 
   return function ActionCell({ row }: { row: Row<T> }) {
@@ -109,12 +115,14 @@ export function createCrudActionCell<
         }
         btnClassName="bg-red-600 text-white hover:bg-red-500"
         onEditAction={`${resourcePath}/${row.original.id}/edit`}
+        onHoverEdit={() => onHoverEdit && onHoverEdit(row.original.id)}
         showEdit={canEdit}
         showDelete={canDelete}
         showDetail={showDetail && canSeeDetail}
         onDetailAction={
           showDetail ? `${resourcePath}/${row.original.id}/detail` : undefined
         }
+        onHoverDetail={() => onHoverDetail && onHoverDetail(row.original.id)}
         onConfirm={() =>
           row.original.deletedAt
             ? (restoreMut.mutate as unknown as (input: { id: string }) => void)(

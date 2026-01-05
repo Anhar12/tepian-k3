@@ -10,12 +10,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { getCommonPinningStyles } from "@tepian-k3/utils/data-table";
 import { cn } from "@/lib/utils";
+import { IconAlertCircle } from "@tabler/icons-react";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import type { AppRouter } from "@tepian-k3/api/root";
 
 interface DataTableProps<TData> extends React.ComponentProps<"div"> {
   table: TanstackTable<TData>;
   actionBar?: React.ReactNode;
+  isLoading?: boolean;
+  error?: TRPCClientErrorLike<AppRouter> | null;
+  emptyMessage?: string;
+  emptyDescription?: string;
 }
 
 export function DataTable<TData>({
@@ -23,8 +38,14 @@ export function DataTable<TData>({
   actionBar,
   children,
   className,
+  isLoading = false,
+  error = null,
+  emptyMessage = "Tidak ada data ditemukan.",
+  emptyDescription = "Coba sesuaikan filter atau kata kunci pencarian Anda.",
   ...props
 }: DataTableProps<TData>) {
+  const columnCount = table.getAllColumns().length;
+
   return (
     <div
       className={cn("flex w-full flex-col gap-2.5 overflow-auto", className)}
@@ -56,7 +77,33 @@ export function DataTable<TData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              Array.from({ length: 10 }).map((_, index) => (
+                <TableRow key={index}>
+                  {Array.from({ length: columnCount }).map((_, cellIndex) => (
+                    <TableCell key={cellIndex}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={columnCount} className="h-64">
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <IconAlertCircle />
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        {error.data?.code || "Terjadi Kesalahan"}
+                      </EmptyTitle>
+                      <EmptyDescription>{error.message}</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -79,11 +126,16 @@ export function DataTable<TData>({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={table.getAllColumns().length}
-                  className="h-24 text-center"
-                >
-                  No results.
+                <TableCell colSpan={columnCount} className="h-64">
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <IconAlertCircle />
+                      </EmptyMedia>
+                      <EmptyTitle>{emptyMessage}</EmptyTitle>
+                      <EmptyDescription>{emptyDescription}</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}

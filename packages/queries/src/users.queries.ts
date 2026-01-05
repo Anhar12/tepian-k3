@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { db } from "@tepian-k3/db/client";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
   and,
   asc,
@@ -32,7 +32,7 @@ const usersQueries = {
         }),
       catch: (error) => {
         logger.error("Failed to get user by email", { email, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Gagal mengambil data pengguna.`,
           cause: error,
@@ -67,7 +67,7 @@ const usersQueries = {
       catch: (error) => {
         console.log(error);
         logger.error("Failed to get user by ID", { userId, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Gagal mengambil data pengguna.`,
           cause: error,
@@ -103,7 +103,7 @@ const usersQueries = {
           userId,
           error,
         });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Gagal mengambil data pengguna.`,
           cause: error,
@@ -207,7 +207,7 @@ const usersQueries = {
           }),
         catch: (error) => {
           logger.error("Failed to get all users", { input, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data pengguna.`,
             cause: error,
@@ -308,7 +308,7 @@ const usersQueries = {
           }),
         catch: (error) => {
           logger.error("Failed to get all users", { input, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data pengguna.`,
             cause: error,
@@ -337,7 +337,7 @@ const usersQueries = {
             email: data.email,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memeriksa email pengguna.`,
             cause: error,
@@ -361,7 +361,7 @@ const usersQueries = {
             email: data.email,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengenkripsi password.`,
             cause: error,
@@ -369,33 +369,40 @@ const usersQueries = {
         },
       });
 
-      const [user] = yield* Effect.tryPromise({
+      const user = yield* Effect.tryPromise({
         try: () =>
-          db
-            .insert(users)
-            .values({
-              ...data,
-              password: hashedPassword,
-            })
-            .returning(),
+          db.transaction(async (tx) => {
+            const [newUser] = await tx
+              .insert(users)
+              .values({
+                ...data,
+                password: hashedPassword,
+              })
+              .returning();
+
+            if (!newUser) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: `Gagal membuat pengguna.`,
+              });
+            }
+
+            // Assign default role to user
+            await Effect.runPromise(
+              userRolesQueries.assingDefaultRoleToUser(user.id)
+            );
+
+            return newUser;
+          }),
         catch: (error) => {
           logger.error("Failed to create user", { data, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal membuat pengguna.`,
             cause: error,
           });
         },
       });
-
-      if (!user) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Gagal membuat pengguna.`,
-          })
-        );
-      }
 
       return user;
     });
@@ -414,7 +421,7 @@ const usersQueries = {
             email: data.email,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memeriksa email pengguna.`,
             cause: error,
@@ -439,7 +446,7 @@ const usersQueries = {
             email: data.email,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengenkripsi password.`,
             cause: error,
@@ -475,40 +482,23 @@ const usersQueries = {
               });
             }
 
+            data.roleId.forEach(async (roleId) => {
+              await Effect.runPromise(
+                userRolesQueries.assignRoleToUser(user.id, roleId, tx)
+              );
+            });
+
             return user;
           }),
         catch: (error) => {
           logger.error("Failed to create user", { data, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal membuat pengguna.`,
             cause: error,
           });
         },
       });
-
-      // Assign roles to user using Effect.all for parallel execution
-      yield* Effect.all(
-        data.roleId.map((roleId) =>
-          userRolesQueries.assignRoleToUser(newUser.id, roleId)
-        ),
-        { concurrency: "unbounded" }
-      ).pipe(
-        Effect.catchAll((error) => {
-          logger.error("Failed to assign roles to user", {
-            userId: newUser.id,
-            roleIds: data.roleId,
-            error,
-          });
-          return Effect.fail(
-            new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: `Gagal menetapkan role ke pengguna.`,
-              cause: error,
-            })
-          );
-        })
-      );
 
       return newUser;
     });
@@ -526,7 +516,7 @@ const usersQueries = {
             try: () => hash(data.password!),
             catch: (error) => {
               logger.error("Failed to hash password", { id, error });
-              return new TRPCError({
+              throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: `Gagal mengenkripsi password.`,
                 cause: error,
@@ -535,98 +525,72 @@ const usersQueries = {
           })
         : undefined;
 
-      // Removed roles
-      if (data.deletedRoleIds && data.deletedRoleIds.length > 0) {
-        yield* Effect.tryPromise({
-          try: () =>
-            db
-              .delete(userRoles)
-              .where(
-                and(
-                  eq(userRoles.userId, id),
-                  inArray(userRoles.roleId, data.deletedRoleIds ?? [])
-                )
-              ),
-          catch: (error) => {
-            logger.error("Failed to remove roles from user", {
-              userId: id,
-              roleIds: data.deletedRoleIds,
-              error,
-            });
-            return new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: `Gagal menghapus role dari pengguna.`,
-              cause: error,
-            });
-          },
-        });
-      }
-
-      // Added roles
-      if (data.newRoleIds && data.newRoleIds.length > 0) {
-        yield* Effect.tryPromise({
-          try: () =>
-            db
-              .insert(userRoles)
-              .values(
-                data.newRoleIds!.map((roleId) => ({
-                  userId: id,
-                  roleId,
-                }))
-              )
-              .onConflictDoNothing(),
-          catch: (error) => {
-            logger.error("Failed to add roles to user", {
-              userId: id,
-              roleIds: data.newRoleIds,
-              error,
-            });
-            return new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: `Gagal menambahkan role ke pengguna.`,
-              cause: error,
-            });
-          },
-        });
-      }
-
       const { emailVerifiedAt, ...restData } = data;
 
-      const [user] = yield* Effect.tryPromise({
+      const user = yield* Effect.tryPromise({
         try: () =>
-          db
-            .update(users)
-            .set({
-              ...restData,
-              emailVerified: data.emailVerified
-                ? data.emailVerified
-                : existingUser.emailVerified,
-              password: data.password ? hashedPassword : existingUser.password,
-              emailVerifiedAt: emailVerifiedAt
-                ? emailVerifiedAt.toISOString()
-                : existingUser.emailVerifiedAt,
-            })
-            .where(eq(users.id, id))
-            .returning(),
+          db.transaction(async (tx) => {
+            // Removed roles
+            if (data.deletedRoleIds && data.deletedRoleIds.length > 0) {
+              await tx
+                .delete(userRoles)
+                .where(
+                  and(
+                    eq(userRoles.userId, id),
+                    inArray(userRoles.roleId, data.deletedRoleIds ?? [])
+                  )
+                );
+            }
+
+            // Added roles
+            if (data.newRoleIds && data.newRoleIds.length > 0) {
+              await tx
+                .insert(userRoles)
+                .values(
+                  data.newRoleIds!.map((roleId) => ({
+                    userId: id,
+                    roleId,
+                  }))
+                )
+                .onConflictDoNothing();
+            }
+
+            const [updatedUser] = await tx
+              .update(users)
+              .set({
+                ...restData,
+                emailVerified: data.emailVerified
+                  ? data.emailVerified
+                  : existingUser.emailVerified,
+                password: data.password
+                  ? hashedPassword
+                  : existingUser.password,
+                emailVerifiedAt: emailVerifiedAt
+                  ? emailVerifiedAt.toISOString()
+                  : existingUser.emailVerifiedAt,
+              })
+              .where(eq(users.id, id))
+              .returning();
+
+            if (!updatedUser) {
+              tx.rollback();
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: `Gagal memperbarui data pengguna.`,
+              });
+            }
+
+            return updatedUser;
+          }),
         catch: (error) => {
           logger.error("Failed to update user", { id, data, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui data pengguna.`,
             cause: error,
           });
         },
       });
-
-      if (!user) {
-        logger.error("No user returned after update", { id, data });
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: `Gagal memperbarui data pengguna.`,
-          })
-        );
-      }
 
       return user;
     });
@@ -644,7 +608,7 @@ const usersQueries = {
           db.update(users).set(data).where(eq(users.id, id)).returning(),
         catch: (error) => {
           logger.error("Failed to update user profile", { id, data, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui profil pengguna.`,
             cause: error,
@@ -670,11 +634,6 @@ const usersQueries = {
     return Effect.gen(this, function* () {
       const user = yield* this.getUserById(id);
 
-      // this should remove previous profile picture from storage if user had one
-      if (user.profilePictureFileName && user.profilePictureUrl) {
-        yield* storageService.delete(`avatars/${user.profilePictureFileName}`);
-      }
-
       const [updatedUser] = yield* Effect.tryPromise({
         try: () =>
           db
@@ -687,7 +646,7 @@ const usersQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Failed to update user profile", { id, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui profil pengguna.`,
             cause: error,
@@ -705,11 +664,16 @@ const usersQueries = {
         );
       }
 
+      // this should remove previous profile picture from storage if user had one
+      if (user.profilePictureFileName && user.profilePictureUrl) {
+        yield* storageService.delete(`avatars/${user.profilePictureFileName}`);
+      }
+
       return updatedUser;
     });
   },
 
-  updateUserPassword(userId: string, newPassword: string) {
+  updateUserPassword(userId: string, newPassword: string, tx: DBorTx = db) {
     return Effect.gen(this, function* () {
       yield* this.getUserById(userId);
 
@@ -717,7 +681,7 @@ const usersQueries = {
         try: () => hash(newPassword),
         catch: (error) => {
           logger.error("Failed to hash new password", { userId, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengenkripsi password baru.`,
             cause: error,
@@ -727,7 +691,7 @@ const usersQueries = {
 
       const [user] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .update(users)
             .set({
               password: hashedPassword,
@@ -736,7 +700,7 @@ const usersQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Failed to update user password", { userId, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui password pengguna.`,
             cause: error,
@@ -758,13 +722,13 @@ const usersQueries = {
     });
   },
 
-  markUserEmailAsVerified(userId: string) {
+  markUserEmailAsVerified(userId: string, tx: DBorTx = db) {
     return Effect.gen(this, function* () {
       yield* this.getUserById(userId);
 
       const [user] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .update(users)
             .set({
               emailVerified: true,
@@ -777,7 +741,7 @@ const usersQueries = {
             userId,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui status verifikasi email pengguna.`,
             cause: error,
@@ -816,7 +780,7 @@ const usersQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Failed to delete user", { userId, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal menghapus pengguna.`,
             cause: error,
@@ -850,7 +814,7 @@ const usersQueries = {
             userId,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memeriksa data pengguna.`,
             cause: error,
@@ -878,7 +842,7 @@ const usersQueries = {
             .returning(),
         catch: (error) => {
           logger.error("Failed to restore user", { userId, error });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengembalikan pengguna.`,
             cause: error,

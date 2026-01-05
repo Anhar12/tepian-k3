@@ -1,21 +1,84 @@
 import { relations } from "drizzle-orm";
 import {
+  cart,
   clusters,
+  districts,
+  kblis,
   parameterCategories,
   parameters,
+  parameterTools,
   permission,
+  provinces,
+  regencies,
   rolePermissions,
   roles,
+  tools,
   userCompanies,
+  userCompanyTestingLocation,
   userPermissions,
   userRoles,
   users,
+  villages,
 } from "./schema";
 
 export const userRelations = relations(users, ({ many }) => ({
   userCompanies: many(userCompanies),
   roles: many(userRoles),
+  cart: many(cart),
 }));
+
+export const kbliRelations = relations(kblis, ({ many }) => ({
+  userCompanies: many(userCompanies),
+}));
+
+export const userCompanyRelations = relations(
+  userCompanies,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [userCompanies.userId],
+      references: [users.id],
+    }),
+    kbli: one(kblis, {
+      fields: [userCompanies.kbliId],
+      references: [kblis.id],
+    }),
+    province: one(provinces, {
+      fields: [userCompanies.provinceId],
+      references: [provinces.id],
+    }),
+    district: one(districts, {
+      fields: [userCompanies.districtId],
+      references: [districts.id],
+    }),
+    regency: one(regencies, {
+      fields: [userCompanies.regencyId],
+      references: [regencies.id],
+    }),
+    village: one(villages, {
+      fields: [userCompanies.villageId],
+      references: [villages.id],
+    }),
+    testingLocation: many(userCompanyTestingLocation),
+  })
+);
+
+export const userCompanyTestingLocationRelations = relations(
+  userCompanyTestingLocation,
+  ({ one }) => ({
+    userCompany: one(userCompanies, {
+      fields: [userCompanyTestingLocation.userCompanyId],
+      references: [userCompanies.id],
+    }),
+    regency: one(regencies, {
+      fields: [userCompanyTestingLocation.regencyId],
+      references: [regencies.id],
+    }),
+    district: one(districts, {
+      fields: [userCompanyTestingLocation.districtId],
+      references: [districts.id],
+    }),
+  })
+);
 
 export const userRoleRelations = relations(userRoles, ({ one }) => ({
   user: one(users, {
@@ -29,7 +92,7 @@ export const userRoleRelations = relations(userRoles, ({ one }) => ({
 }));
 
 export const roleRelations = relations(roles, ({ many }) => ({
-  users: many(users),
+  users: many(userRoles),
   rolePermissions: many(rolePermissions),
 }));
 
@@ -61,6 +124,10 @@ export const userPermissionsRelations = relations(
   })
 );
 
+export const toolsRelations = relations(tools, ({ many }) => ({
+  parameterTools: many(parameterTools),
+}));
+
 export const clustersRelations = relations(users, ({ many }) => ({
   parameterCategories: many(parameterCategories),
   parameters: many(parameters),
@@ -77,9 +144,67 @@ export const parameterCategoriesRelations = relations(
   })
 );
 
-export const parametersRelations = relations(parameters, ({ one }) => ({
+export const parametersRelations = relations(parameters, ({ one, many }) => ({
   category: one(parameterCategories, {
     fields: [parameters.parameterCategoryId],
     references: [parameterCategories.id],
+  }),
+  tools: many(parameterTools),
+}));
+
+export const parameterToolsRelations = relations(parameterTools, ({ one }) => ({
+  parameter: one(parameters, {
+    fields: [parameterTools.parameterId],
+    references: [parameters.id],
+  }),
+  tool: one(tools, {
+    fields: [parameterTools.toolId],
+    references: [tools.id],
+  }),
+}));
+
+export const provinceRelations = relations(provinces, ({ many }) => ({
+  regencies: many(regencies),
+}));
+
+export const regencyRelations = relations(regencies, ({ one, many }) => ({
+  province: one(provinces, {
+    fields: [regencies.provinceId],
+    references: [provinces.id],
+  }),
+  districts: many(districts),
+}));
+
+export const districtRelations = relations(districts, ({ one, many }) => ({
+  regency: one(regencies, {
+    fields: [districts.regencyId],
+    references: [regencies.id],
+  }),
+  villages: many(villages),
+}));
+
+export const villageRelations = relations(villages, ({ one }) => ({
+  district: one(districts, {
+    fields: [villages.districtId],
+    references: [districts.id],
+  }),
+}));
+
+export const cartRelations = relations(cart, ({ one }) => ({
+  user: one(users, {
+    fields: [cart.userId],
+    references: [users.id],
+  }),
+  company: one(userCompanies, {
+    fields: [cart.companyId],
+    references: [userCompanies.id],
+  }),
+  location: one(userCompanyTestingLocation, {
+    fields: [cart.locationId],
+    references: [userCompanyTestingLocation.id],
+  }),
+  parameter: one(parameters, {
+    fields: [cart.parameterId],
+    references: [parameters.id],
   }),
 }));

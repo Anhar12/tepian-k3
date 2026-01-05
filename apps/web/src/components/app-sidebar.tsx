@@ -1,14 +1,5 @@
 import * as React from "react";
-import {
-  IconAdjustments,
-  IconDashboard,
-  IconFolderCog,
-  IconInnerShadowTop,
-  IconLayersSubtract,
-  IconShieldCheckFilled,
-  IconTools,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconInnerShadowTop } from "@tabler/icons-react";
 
 import { NavMain, type NavMainProps } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -23,61 +14,29 @@ import {
 } from "@/components/ui/sidebar";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
-
-const data: {
-  navMain: NavMainProps["items"];
-} = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: IconDashboard,
-    },
-    {
-      title: "Users",
-      url: "/dashboard/users",
-      icon: IconUsers,
-      permission: "users.read",
-    },
-    {
-      title: "Tools",
-      url: "/dashboard/tools",
-      icon: IconTools,
-      permission: "tools.read",
-    },
-    {
-      title: "Roles",
-      url: "/dashboard/roles",
-      icon: IconShieldCheckFilled,
-      permission: "roles.read",
-    },
-    {
-      title: "Clusters",
-      url: "/dashboard/clusters",
-      icon: IconLayersSubtract,
-      permission: "clusters.read",
-    },
-    {
-      title: "Parameter Categories",
-      url: "/dashboard/parameter-categories",
-      icon: IconFolderCog,
-      permission: "parameter-categories.read",
-    },
-    {
-      title: "Parameters",
-      url: "/dashboard/parameters",
-      icon: IconAdjustments,
-      permission: "parameters.read",
-    },
-  ],
-};
+import { backOfficeMenu } from "@/lib/back-office-menu";
+import { userMenu } from "@/lib/user-menu";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
-  const filteredNavMain = data.navMain.filter(
-    (item) => !item.permission || profile.permissions.includes(item.permission),
-  );
+  const hasUserRole = profile.roles.some((role) => role.name === "user");
+
+  // Separate user dashboard and back office menus
+  const filteredNavMain = React.useMemo(() => {
+    // For regular users: only show user dashboard menu
+    if (hasUserRole) {
+      return userMenu.navMain;
+    }
+
+    // For back office users: only show back office menu items based on permissions
+    const backOfficeItems = backOfficeMenu.navMain.filter(
+      (item) =>
+        !item.permission || profile.permissions.includes(item.permission),
+    );
+
+    return backOfficeItems;
+  }, [hasUserRole, profile.permissions]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

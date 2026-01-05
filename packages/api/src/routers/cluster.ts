@@ -1,12 +1,12 @@
 import clusterSchema from "@tepian-k3/schema/cluster.schema";
-import { createTRPCRouter, withPermission } from "..";
+import { createTRPCRouter, publicProcedure, withPermission } from "..";
 import { Effect } from "effect";
 import clustersQueries from "@tepian-k3/queries/clusters.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const clusterRouter = createTRPCRouter({
-  getAllClusters: withPermission("clusters.read").query(
+  getAllClusters: publicProcedure.query(
     async () => await Effect.runPromise(clustersQueries.getAllClusters())
   ),
 

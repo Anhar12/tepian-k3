@@ -1,9 +1,11 @@
 import { sql } from "drizzle-orm";
 import {
+  bigserial,
   boolean,
   index,
   integer,
   pgEnum,
+  pgSequence,
   pgTableCreator,
   primaryKey,
   text,
@@ -117,18 +119,103 @@ export const passwordResets = createTable("password_resets", {
     .notNull(),
 });
 
-export const userCompanies = createTable("user_companies", {
-  id: uuid("id")
-    .primaryKey()
-    .notNull()
-    .$default(() => uuidv7()),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  companyName: varchar("company_name", { length: 250 }).notNull(),
-  companyAddress: text("company_address").notNull(),
-  ...timestamps,
-});
+export const kblis = createTable(
+  "kblis",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    name: varchar("name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [index("kbli_id_idx").using("btree", table.id)]
+);
+
+export const userCompanies = createTable(
+  "user_companies",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    kbliId: uuid("kbli_id")
+      .notNull()
+      .references(() => kblis.id, { onDelete: "cascade" }),
+    address: text("address").notNull(),
+    maleWorkers: integer("maleWorkers").notNull().default(0),
+    femaleWorkers: integer("femaleWorkers").notNull().default(0),
+    healthFacilityAvailable: boolean("healthFacilityAvailable")
+      .notNull()
+      .default(false),
+    provinceId: uuid("provinceId")
+      .notNull()
+      .references(() => provinces.id, { onDelete: "cascade" }),
+    districtId: uuid("districtId")
+      .notNull()
+      .references(() => districts.id, { onDelete: "cascade" }),
+    regencyId: uuid("regencyId")
+      .notNull()
+      .references(() => regencies.id, { onDelete: "cascade" }),
+    villageId: uuid("villageId")
+      .notNull()
+      .references(() => villages.id, { onDelete: "cascade" }),
+    responsibleTestingPerson: varchar("responsible_testing_person", {
+      length: 250,
+    }).notNull(),
+    responsibleTestingPersonPhone: varchar("responsible_testing_person_phone", {
+      length: 50,
+    }).notNull(),
+    responsibleTestingPersonEmail: varchar("responsible_testing_person_email", {
+      length: 250,
+    }).notNull(),
+    email: varchar("email", { length: 250 }).notNull(),
+    wlkpStatus: boolean("wlkp_status").notNull().default(false),
+    wlkp: text("wlkp").notNull(),
+    companyPictureFileName: text("company_picture_file_name").notNull(),
+    companyPictureUrl: text("company_picture_url").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("user_company_id_idx").using("btree", table.id),
+    index("user_company_user_id_idx").using("btree", table.userId),
+  ]
+);
+
+export const userCompanyTestingLocation = createTable(
+  "user_company_testing_locations",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userCompanyId: uuid("user_company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    regencyId: uuid("regency_id")
+      .notNull()
+      .references(() => regencies.id, { onDelete: "cascade" }),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => districts.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("user_company_testing_location_id_idx").using("btree", table.id),
+    index("user_company_testing_location_user_company_id_idx").using(
+      "btree",
+      table.userCompanyId
+    ),
+  ]
+);
 
 export const userRoles = createTable(
   "user_roles",
@@ -319,6 +406,7 @@ export const parameters = createTable(
     name: varchar("name", { length: 250 }).notNull(),
     reference: text("reference"),
     price: integer("price").notNull(),
+    unit: varchar("unit", { length: 255 }).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -328,5 +416,207 @@ export const parameters = createTable(
       table.parameterCategoryId
     ),
     index("parameter_name_idx").using("btree", table.name),
+  ]
+);
+
+export const parameterTools = createTable(
+  "parameter_tools",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    toolId: uuid("tool_id")
+      .notNull()
+      .references(() => tools.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("parameter_tool_id_idx").using("btree", table.id),
+    index("parameter_tool_parameter_id_idx").using("btree", table.parameterId),
+    index("parameter_tool_tool_id_idx").using("btree", table.toolId),
+  ]
+);
+
+export const provinces = createTable(
+  "provinces",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+
+  (table) => [
+    index("province_name_idx").using("btree", table.name),
+    index("province_old_id_idx").using("btree", table.oldId),
+  ]
+);
+
+export const regencies = createTable(
+  "regencies",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }),
+    provinceId: uuid("province_id")
+      .notNull()
+      .references(() => provinces.id, { onDelete: "cascade" }),
+    oldProvinceId: bigserial("old_province_id", { mode: "number" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("regency_name_idx").using("btree", table.name),
+    index("regency_province_id_idx").using("btree", table.provinceId),
+    index("regency_old_id_idx").using("btree", table.oldId),
+    index("regency_old_province_id_idx").using("btree", table.oldProvinceId),
+  ]
+);
+
+export const districts = createTable(
+  "districts",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }),
+    oldRegencyId: bigserial("old_regency_id", { mode: "number" }),
+    regencyId: uuid("regency_id")
+      .notNull()
+      .references(() => regencies.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("district_name_idx").using("btree", table.name),
+    index("district_regency_id_idx").using("btree", table.regencyId),
+    index("district_old_id_idx").using("btree", table.oldId),
+    index("district_old_regency_id_idx").using("btree", table.oldRegencyId),
+  ]
+);
+
+export const villages = createTable(
+  "villages",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    oldId: bigserial("old_id", { mode: "number" }),
+    oldDistrictId: bigserial("old_district_id", { mode: "number" }),
+    districtId: uuid("district_id")
+      .notNull()
+      .references(() => districts.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("village_name_idx").using("btree", table.name),
+    index("village_district_id_idx").using("btree", table.districtId),
+    index("village_old_id_idx").using("btree", table.oldId),
+    index("village_old_district_id_idx").using("btree", table.oldDistrictId),
+  ]
+);
+
+export const cart = createTable(
+  "cart",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    price: integer("price").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("cart_user_id_idx").using("btree", table.userId),
+    index("cart_company_id_idx").using("btree", table.companyId),
+    index("cart_location_id_idx").using("btree", table.locationId),
+    index("cart_parameter_id_idx").using("btree", table.parameterId),
+  ]
+);
+
+export const testingSequence = pgSequence("testing_sequence_seq");
+
+export const orderNumberSequence = pgSequence("order_number_seq");
+
+export const testing = createTable(
+  "testing",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    orderNumber: varchar("order_number", { length: 100 }).notNull().unique(),
+    testingNumber: varchar("testing_number", { length: 100 })
+      .notNull()
+      .unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    note: text("note"),
+    ...timestamps,
+  },
+  (table) => [
+    index("testing_id_idx").using("btree", table.id),
+    index("testing_order_number_idx").using("btree", table.orderNumber),
+    index("testing_testing_number_idx").using("btree", table.testingNumber),
+    index("testing_user_id_idx").using("btree", table.userId),
+    index("testing_company_id_idx").using("btree", table.companyId),
+    index("testing_location_id_idx").using("btree", table.locationId),
+  ]
+);
+
+export const testingItem = createTable(
+  "testing_item",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    testingId: uuid("testing_id")
+      .notNull()
+      .references(() => testing.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    price: integer("price").notNull(),
+    result: text("result"),
+    note: text("note"),
+    ...timestamps,
+  },
+  (table) => [
+    index("testing_item_id_idx").using("btree", table.id),
+    index("testing_item_testing_id_idx").using("btree", table.testingId),
   ]
 );

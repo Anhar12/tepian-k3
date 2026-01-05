@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import { and, eq, gt } from "@tepian-k3/db";
-import { db } from "@tepian-k3/db/client";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import { passwordResets } from "@tepian-k3/db/schema";
 import logger from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
@@ -12,7 +12,7 @@ const passwordResetsQueries = {
       try: () => hash(token),
       catch: (error) => {
         logger.error("Failed to hash reset token", { token, error });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memproses token pengaturan ulang kata sandi.",
           cause: error,
@@ -39,7 +39,7 @@ const passwordResetsQueries = {
             userId,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat catatan pengaturan ulang kata sandi.",
             cause: error,
@@ -64,11 +64,11 @@ const passwordResetsQueries = {
     });
   },
 
-  validateResetToken(token: string) {
+  validateResetToken(token: string, tx: DBorTx = db) {
     return Effect.gen(this, function* () {
       const [result] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .select()
             .from(passwordResets)
             .where(
@@ -84,7 +84,7 @@ const passwordResetsQueries = {
             token,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memvalidasi token pengaturan ulang kata sandi.",
             cause: error,
@@ -96,11 +96,11 @@ const passwordResetsQueries = {
     });
   },
 
-  markTokenAsUsed(token: string) {
+  markTokenAsUsed(token: string, tx: DBorTx = db) {
     return Effect.gen(this, function* () {
       const [result] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .update(passwordResets)
             .set({ used: true })
             .where(eq(passwordResets.token, token))
@@ -110,7 +110,7 @@ const passwordResetsQueries = {
             token,
             error,
           });
-          return new TRPCError({
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message:
               "Gagal menandai token pengaturan ulang kata sandi sebagai terpakai.",
@@ -147,7 +147,7 @@ const passwordResetsQueries = {
         logger.error("Failed to delete expired password reset tokens", {
           error,
         });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
             "Gagal menghapus token pengaturan ulang kata sandi yang kedaluwarsa.",
@@ -157,10 +157,10 @@ const passwordResetsQueries = {
     });
   },
 
-  invalidateUserResets(userId: string) {
+  invalidateUserResets(userId: string, tx: DBorTx = db) {
     return Effect.tryPromise({
       try: () =>
-        db
+        tx
           .update(passwordResets)
           .set({ used: true })
           .where(eq(passwordResets.userId, userId))
@@ -170,7 +170,7 @@ const passwordResetsQueries = {
           userId,
           error,
         });
-        return new TRPCError({
+        throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
             "Gagal menonaktifkan token pengaturan ulang kata sandi pengguna.",

@@ -43,7 +43,12 @@ export function LoginForm({
         localStorage.setItem("token", data.token);
         await queryClient.refetchQueries(trpc.auth.me.queryFilter());
         globalSuccessToast("Login berhasil");
-        navigate({ to: "/dashboard" });
+
+        if (data.user.roles?.find((role) => role.name === "user")) {
+          navigate({ to: "/dashboard" });
+        } else {
+          navigate({ to: "/back-office" });
+        }
       },
       onError: (error) => {
         globalErrorToast(error.message);

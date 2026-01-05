@@ -5,7 +5,12 @@ export type ParameterCategories = InferQueryModel<
   "parameterCategories",
   {
     with: {
-      cluster: true;
+      cluster: {
+        columns: {
+          id: true;
+          name: true;
+        };
+      };
     };
   }
 >;

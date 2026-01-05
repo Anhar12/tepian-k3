@@ -5,6 +5,7 @@ import logger from "@tepian-k3/services/logger";
 import passwordResetsQueries from "@tepian-k3/queries/password-resets.queries";
 import { env } from "../../env";
 import { emailService } from "@tepian-k3/services/email";
+import { db } from "@tepian-k3/db/client";
 
 class PasswordResetError extends Data.TaggedError("PasswordResetError")<{
   status: boolean;
@@ -138,15 +139,42 @@ export class PasswordResetService {
         );
       }
 
-      // Its already hashed in the usersQueries.updateUserPassword
-      // Update user's password
-      yield* usersQueries.updateUserPassword(verification.userId, newPassword);
+      yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            // Its already hashed in the usersQueries.updateUserPassword
+            // Update user's password
+            await Effect.runPromise(
+              usersQueries.updateUserPassword(
+                verification.userId,
+                newPassword,
+                tx
+              )
+            );
 
-      // Mark token as used
-      yield* passwordResetsQueries.markTokenAsUsed(token);
+            await Effect.runPromise(
+              passwordResetsQueries.markTokenAsUsed(token, tx)
+            );
 
-      // Invalidate all other reset tokens for this user
-      yield* passwordResetsQueries.invalidateUserResets(verification.userId);
+            // Invalidate all other reset tokens for this user
+            await Effect.runPromise(
+              passwordResetsQueries.invalidateUserResets(
+                verification.userId,
+                tx
+              )
+            );
+          }),
+        catch: (error) => {
+          logger.error("Failed to reset password", {
+            userId: verification.userId,
+            error,
+          });
+          return new PasswordResetError({
+            status: false,
+            message: "Gagal mereset password.",
+          });
+        },
+      });
 
       return { status: true, message: "Password berhasil direset." };
     });

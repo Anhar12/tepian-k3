@@ -1,12 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import type { PaginatedParameters } from "@tepian-k3/types/parameters.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/dashboard/parameters";
+import { Route } from "@/routes/(core)/back-office/parameters";
 import {
   createNumberColumn,
   createTextColumn,
   createDateColumn,
   createActionColumn,
+  createPriceColumn,
 } from "@/lib/column-helpers";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
 
@@ -17,7 +18,7 @@ interface PaginatedParametersColumnsProps {
 
 const ActionCell = createCrudActionCell<
   PaginatedParameters,
-  ReturnType<typeof Route.useSearch>
+  (typeof Route)["types"]["searchSchema"]
 >({
   resourceName: "cluster",
   resourcePath: "parameters",
@@ -27,6 +28,7 @@ const ActionCell = createCrudActionCell<
   getQueryOptions: (params) =>
     trpc.parameter.getPaginatedParameters.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
+  showDetail: true,
 });
 
 export default function getPaginatedParametersColumns({
@@ -42,6 +44,12 @@ export default function getPaginatedParametersColumns({
       width: "w-48",
       enableFilter: true,
       placeholder: "Cari nama parameter...",
+    }),
+    createTextColumn<PaginatedParameters>("unit", "Satuan", {
+      width: "w-32",
+    }),
+    createPriceColumn<PaginatedParameters>("price", "Harga", {
+      width: "w-32",
     }),
     createDateColumn<PaginatedParameters>("createdAt", "Dibuat"),
     createDateColumn<PaginatedParameters>("updatedAt", "Diubah", {

@@ -23,10 +23,12 @@ import z from "zod";
 import { cn } from "@/lib/utils"; 
 import { Separator } from "@/components/ui/separator"; 
 
+const validateEmailSchema = z.object({
+  email: z.email().optional(),
+});
+
 export const Route = createFileRoute("/(auth)/verify-email")({
-  validateSearch: z.object({
-    email: z.email().optional(),
-  }),
+  validateSearch: validateEmailSchema,
   component: VerifyEmailComponent,
 });
 
@@ -65,7 +67,7 @@ function VerifyEmailComponent() {
         await queryClient.refetchQueries(trpc.auth.me.queryFilter());
         setTimeout(() => {
           navigate({ to: "/dashboard" });
-        }, 2000);
+        }, 350);
       },
       onError: (error) => {
         globalErrorToast(error.message);
@@ -86,8 +88,9 @@ function VerifyEmailComponent() {
   );
 
   const handleSendOTP = (): void => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    const res = validateEmailSchema.safeParse({ email });
+
+    if (!res.success) {
       globalErrorToast("Tolong masukkan email yang valid.");
       return;
     }
