@@ -1,4 +1,3 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +20,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2, Loader2, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import z from "zod";
+import { cn } from "@/lib/utils"; 
+import { Separator } from "@/components/ui/separator"; 
 
 const validateEmailSchema = z.object({
   email: z.email().optional(),
@@ -30,6 +31,8 @@ export const Route = createFileRoute("/(auth)/verify-email")({
   validateSearch: validateEmailSchema,
   component: VerifyEmailComponent,
 });
+
+const BannerImage = "/assets/banner-auth.png";
 
 type Step = "email" | "otp" | "success";
 
@@ -58,13 +61,10 @@ function VerifyEmailComponent() {
     trpc.auth.verifyOTP.mutationOptions({
       onSuccess: async (data) => {
         setStep("success");
-
         if (data.token) {
           localStorage.setItem("token", data.token);
         }
-
         await queryClient.refetchQueries(trpc.auth.me.queryFilter());
-
         setTimeout(() => {
           navigate({ to: "/dashboard" });
         }, 350);
@@ -78,9 +78,7 @@ function VerifyEmailComponent() {
   const resendMutation = useMutation(
     trpc.auth.resendOTP.mutationOptions({
       onSuccess: () => {
-        globalSuccessToast(
-          "Kode verifikasi telah dikirim ulang ke email Anda.",
-        );
+        globalSuccessToast("Kode verifikasi telah dikirim ulang.");
         setCode("");
       },
       onError: (error) => {
@@ -96,14 +94,11 @@ function VerifyEmailComponent() {
       globalErrorToast("Tolong masukkan email yang valid.");
       return;
     }
-
     sendOTPMutation.mutate({ email });
   };
 
   const handleCodeChange = (value: string): void => {
     setCode(value);
-
-    // Auto-submit when all 6 digits entered
     if (value.length === 6) {
       handleVerify(value);
     }
@@ -114,7 +109,6 @@ function VerifyEmailComponent() {
       globalErrorToast("Tolong masukkan kode verifikasi 6 digit.");
       return;
     }
-
     verifyMutation.mutate({ email, code: codeValue });
   };
 
@@ -136,252 +130,215 @@ function VerifyEmailComponent() {
     if (emailFromSearch) {
       setEmail(emailFromSearch);
       setStep("otp");
-      handleSendOTP();
+      // Opsional: Uncomment jika ingin auto-send saat redirect dari register
+      // handleSendOTP(); 
     }
   }, [emailFromSearch]);
 
-  // Success Screen
-  if (step === "success") {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-8 pb-10 text-center">
-            <div className="mb-6 flex justify-center">
-              <div className="rounded-full bg-primary p-4">
-                <CheckCircle2 className="h-14 w-14 text-primary-foreground" />
-              </div>
-            </div>
-            <h2 className="mb-3 text-3xl font-bold text-foreground">
-              Email Verified!
-            </h2>
-            <p className="mb-8 text-lg text-muted-foreground">
-              Your email has been successfully verified.
-              <br />
-              Redirecting to your dashboard...
-            </p>
-            <div className="flex justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // OTP Verification Screen
-  if (step === "otp") {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-3 pb-6 text-center">
-            <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary">
-              <Mail className="h-10 w-10 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-3xl font-bold">
-              Verify Your Email
-            </CardTitle>
-            <CardDescription className="text-base">
-              We've sent a 6-digit verification code to
-              <br />
-              <span className="text-lg font-semibold text-foreground">
-                {email}
-              </span>
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <label className="block text-center text-base font-medium text-foreground">
-                  Enter verification code
-                </label>
-                <div className="flex justify-center">
-                  <InputOTP
-                    maxLength={6}
-                    value={code}
-                    onChange={handleCodeChange}
-                    disabled={verifyMutation.isPending}
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} className="h-14 w-12 text-xl" />
-                      <InputOTPSlot index={1} className="h-14 w-12 text-xl" />
-                      <InputOTPSlot index={2} className="h-14 w-12 text-xl" />
-                      <InputOTPSlot index={3} className="h-14 w-12 text-xl" />
-                      <InputOTPSlot index={4} className="h-14 w-12 text-xl" />
-                      <InputOTPSlot index={5} className="h-14 w-12 text-xl" />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-                <p className="text-center text-sm text-muted-foreground">
-                  Enter the 6-digit code sent to your email
-                </p>
-              </div>
-
-              <Button
-                onClick={() => handleVerify()}
-                disabled={verifyMutation.isPending || code.length !== 6}
-                className="h-12 w-full text-base font-semibold"
-                size="lg"
-              >
-                {verifyMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  "Verify Email"
-                )}
-              </Button>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Having trouble?
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-center">
-              <p className="text-sm text-muted-foreground">
-                Didn't receive the code?
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleResend}
-                disabled={resendMutation.isPending}
-                className="h-11 w-full font-medium"
-              >
-                {resendMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Resend Verification Code"
-                )}
-              </Button>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col space-y-4 pt-2">
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={handleBackToEmail}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Change Email
-            </Button>
-
-            <p className="text-center text-xs text-muted-foreground">
-              By verifying your email, you agree to our Terms of Service and
-              Privacy Policy
-            </p>
-          </CardFooter>
-        </Card>
-
-        <div className="fixed right-4 bottom-4 max-w-xs rounded-lg border bg-card p-4 shadow-lg">
-          <p className="mb-2 text-sm font-semibold text-foreground">
-            💡 Demo Instructions
-          </p>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            Enter{" "}
-            <span className="rounded bg-muted px-1.5 py-0.5 font-mono font-bold text-foreground">
-              123456
-            </span>{" "}
-            to verify successfully.
+  const renderHeader = () => {
+    if (step === "success") {
+      return (
+        <div className="flex flex-col gap-1 text-center md:text-left">
+          <h1 className="text-[#242321] text-[32px] font-semibold font-['Poppins'] leading-12">
+            Berhasil!
+          </h1>
+          <p className="text-[#242321] text-[14px] font-medium font-['Poppins'] leading-5.25">
+            Akun Anda telah diverifikasi.
           </p>
         </div>
+      );
+    }
+    return (
+      <div className="flex flex-col gap-1 text-center md:text-left">
+        <h1 className="text-[#242321] text-[32px] font-semibold font-['Poppins'] leading-12">
+          Verifikasi Email
+        </h1>
+        <p className="text-[#242321] text-[14px] font-medium font-['Poppins'] leading-5.25">
+          {step === "otp" ? "Masukkan kode keamanan" : "Amankan akun Anda"}
+        </p>
       </div>
     );
-  }
+  };
 
-  // Email Input Screen (Default)
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-3 pb-6 text-center">
-          <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary">
-            <Mail className="h-10 w-10 text-primary-foreground" />
-          </div>
-          <CardTitle className="text-3xl font-bold">
-            Verify Your Email
-          </CardTitle>
-          <CardDescription className="text-base">
-            Enter your email address to receive a verification code
-          </CardDescription>
-        </CardHeader>
+    <div className="grid min-h-svh lg:grid-cols-2 font-['Inter'] bg-[#F4F4F4]">
+      
+      <div className="hidden lg:block relative bg-[#F4F4F4] overflow-hidden">
+        <img
+          src={BannerImage}
+          alt="Banner"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent to-[#F4F4F4]/20 pointer-events-none" />
+      </div>
 
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-foreground"
-            >
-              Email Address
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="john@example.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSendOTP();
-                }
-              }}
-              disabled={sendOTPMutation.isPending}
-              className="h-12 text-base"
-            />
-            <p className="text-xs text-muted-foreground">
-              We'll send a 6-digit verification code to this email
-            </p>
-          </div>
+      <div className="flex flex-col gap-4 p-6 md:p-10 items-center justify-center bg-[#F4F4F4] bg-grid-pattern relative border-l border-slate-200/50 min-h-svh lg:min-h-0">
 
-          <Button
-            onClick={handleSendOTP}
-            disabled={sendOTPMutation.isPending || !email}
-            className="h-12 w-full text-base font-semibold"
-            size="lg"
-          >
-            {sendOTPMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Sending Code...
-              </>
-            ) : (
-              "Send Verification Code"
+        <div className="w-full max-w-100 flex flex-col gap-6">
+          
+          {renderHeader()}
+
+          <Card className="border-slate-200 shadow-sm bg-white rounded-lg">
+            
+            {step === "success" && (
+              <CardContent className="pt-10 pb-10 text-center flex flex-col items-center gap-6">
+                <div className="rounded-full bg-green-50 p-4">
+                  <CheckCircle2 className="h-14 w-14 text-green-600" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-[20px] font-semibold text-[#4D4D4D] font-['Poppins']">
+                    Email Terverifikasi!
+                  </h2>
+                  <p className="text-[14px] text-[#64748B] font-['Poppins']">
+                    Terima kasih telah memverifikasi email Anda. <br />
+                    Mengalihkan ke dashboard...
+                  </p>
+                </div>
+                <Loader2 className="h-8 w-8 animate-spin text-[#1061D6]" />
+              </CardContent>
             )}
-          </Button>
-        </CardContent>
 
-        <CardFooter className="flex flex-col space-y-4 pt-2">
-          <Button variant="ghost" className="w-full" onClick={handleBack}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Sign Up
-          </Button>
+            {step === "otp" && (
+              <>
+                <CardHeader className="pb-6 pt-6 px-6 space-y-1">
+                  <CardTitle className="text-[#4D4D4D] text-[20px] font-semibold font-['Poppins'] leading-6">
+                    Masukkan Kode OTP
+                  </CardTitle>
+                  <CardDescription className="text-[#64748B] text-[14px] font-normal font-['Poppins'] leading-5.25">
+                    Kami telah mengirimkan 6 digit kode ke <span className="font-semibold text-[#4D4D4D]">{email}</span>
+                  </CardDescription>
+                </CardHeader>
 
-          <p className="text-center text-xs text-muted-foreground">
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </p>
-        </CardFooter>
-      </Card>
+                <CardContent className="px-6 pb-6 space-y-6">
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={code}
+                      onChange={handleCodeChange}
+                      disabled={verifyMutation.isPending}
+                    >
+                      <InputOTPGroup className="gap-2">
+                        {[0, 1, 2, 3, 4, 5].map((index) => (
+                          <InputOTPSlot 
+                            key={index}
+                            index={index} 
+                            className="h-12 w-10 text-lg border-slate-200 rounded-md focus:border-[#1061D6] focus:ring-[#1061D6]" 
+                          />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
 
-      <div className="fixed right-4 bottom-4 max-w-xs rounded-lg border bg-card p-4 shadow-lg">
-        <p className="mb-2 text-sm font-semibold text-foreground">
-          💡 Demo Instructions
-        </p>
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Enter any valid email format to proceed to the OTP screen.
-        </p>
+                  <Button
+                    onClick={() => handleVerify()}
+                    disabled={verifyMutation.isPending || code.length !== 6}
+                    className="w-full bg-[#1061D6] hover:bg-blue-700 text-[#F8FAFC] text-[16px] font-semibold font-['Poppins'] h-10 rounded-lg"
+                  >
+                    {verifyMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Memverifikasi...
+                      </>
+                    ) : (
+                      "Verifikasi Email"
+                    )}
+                  </Button>
+
+                  <div className="flex flex-col gap-3">
+                    <Separator className="bg-slate-100" />
+                    <div className="text-center text-[14px] font-['Poppins'] text-[#64748B]">
+                      Tidak menerima kode?{" "}
+                      <button
+                        type="button"
+                        onClick={handleResend}
+                        disabled={resendMutation.isPending}
+                        className="text-[#1061D6] font-medium hover:underline disabled:opacity-50"
+                      >
+                        {resendMutation.isPending ? "Mengirim..." : "Kirim Ulang"}
+                      </button>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={handleBackToEmail}
+                      className="w-full text-[#64748B] hover:text-[#4D4D4D] font-['Poppins'] text-sm h-auto py-2"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Ganti alamat email
+                    </Button>
+                  </div>
+                </CardContent>
+              </>
+            )}
+
+            {step === "email" && (
+              <>
+                <CardHeader className="pb-6 pt-6 px-6 space-y-1">
+                  <CardTitle className="text-[#4D4D4D] text-[20px] font-semibold font-['Poppins'] leading-6">
+                    Alamat Email
+                  </CardTitle>
+                  <CardDescription className="text-[#64748B] text-[14px] font-normal font-['Poppins'] leading-5.25">
+                    Masukkan email Anda untuk menerima kode verifikasi
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="px-6 pb-6 space-y-5">
+                  <div className="space-y-1.5">
+                    <label htmlFor="email" className="text-[#4D4D4D] text-[16px] font-medium font-['Poppins']">
+                      Email
+                    </label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="contoh@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSendOTP();
+                      }}
+                      disabled={sendOTPMutation.isPending}
+                      className="h-9 border-slate-200 rounded-lg focus-visible:ring-offset-0 focus-visible:ring-[#1061D6] font-['Poppins'] text-[14px]"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleSendOTP}
+                    disabled={sendOTPMutation.isPending || !email}
+                    className="w-full bg-[#1061D6] hover:bg-blue-700 text-[#F8FAFC] text-[16px] font-semibold font-['Poppins'] h-9 rounded-lg"
+                  >
+                    {sendOTPMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Mengirim...
+                      </>
+                    ) : (
+                      "Kirim Kode Verifikasi"
+                    )}
+                  </Button>
+
+                  <div className="flex flex-col gap-3 pt-2">
+                    <Separator className="bg-slate-100" />
+                    <div className="text-center">
+                      <Button 
+                        variant="link" 
+                        className="text-[#64748B] hover:text-[#1061D6] font-['Poppins'] text-sm no-underline hover:underline p-0 h-auto"
+                        onClick={handleBack}
+                      >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Kembali ke Halaman Daftar
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </>
+            )}
+
+          </Card>
+
+          <div className="text-center text-xs text-slate-400 mt-2 font-['Inter']">
+            💡 Hint: Gunakan email valid untuk menerima kode OTP.
+          </div>
+
+        </div>
       </div>
     </div>
   );
