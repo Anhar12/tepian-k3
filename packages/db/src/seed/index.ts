@@ -228,6 +228,46 @@ async function seed() {
       resource: "user-company-testing-location",
       action: "manage",
     },
+    {
+      name: "order.create",
+      resource: "order",
+      action: "create",
+    },
+    {
+      name: "order.read",
+      resource: "order",
+      action: "read",
+    },
+    {
+      name: "order.update",
+      resource: "order",
+      action: "update",
+    },
+    {
+      name: "order.delete",
+      resource: "order",
+      action: "delete",
+    },
+    {
+      name: "order-status-history.create",
+      resource: "order-status-history",
+      action: "create",
+    },
+    {
+      name: "order-status-history.read",
+      resource: "order-status-history",
+      action: "read",
+    },
+    {
+      name: "order-status-history.update",
+      resource: "order-status-history",
+      action: "update",
+    },
+    {
+      name: "order-status-history.delete",
+      resource: "order-status-history",
+      action: "delete",
+    },
   ] as const;
 
   // Create or get all permissions

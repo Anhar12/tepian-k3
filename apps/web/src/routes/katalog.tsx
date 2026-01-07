@@ -1,7 +1,7 @@
 import Navbar from "@/components/navbar";
 import { createFileRoute } from "@tanstack/react-router";
-import { Clusters } from "./(core)/-components/parameter-categories";
-import { TestingTable } from "./(core)/-components/testing-table";
+import { Clusters } from "./(core)/pengujian/-components/parameter-categories";
+import { TestingTable } from "./(core)/pengujian/-components/testing-table";
 import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/katalog")({

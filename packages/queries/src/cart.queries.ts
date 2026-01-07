@@ -6,6 +6,7 @@ import { z } from "zod";
 import cartSchema from "@tepian-k3/schema/cart.schema";
 import { Effect } from "effect";
 import { logger } from "@tepian-k3/services/logger";
+import parameterQueries from "./parameter.queries";
 
 const cartQueries = {
   getUserCartList(userId: string) {
@@ -121,6 +122,19 @@ const cartQueries = {
     data: z.infer<typeof cartSchema.createCartSchema>
   ) {
     return Effect.gen(this, function* () {
+      const isParameterExisting = yield* parameterQueries.getParameterById(
+        data.parameterId
+      );
+
+      if (!isParameterExisting) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Parameter does not exist",
+          })
+        );
+      }
+
       const existingCartItem = yield* this.getCartItemByParameterId(
         userId,
         data.parameterId

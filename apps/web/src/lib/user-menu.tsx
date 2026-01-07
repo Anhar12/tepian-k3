@@ -14,7 +14,7 @@ export const userMenu: {
     },
 
     {
-      title: "Company",
+      title: "Data Perusahaan",
       url: `${urlStarter}/company`,
       icon: IconBuilding,
     },

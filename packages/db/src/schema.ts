@@ -742,8 +742,7 @@ export const orderStatusHistory = createTable(
     orderId: uuid("order_id")
       .notNull()
       .references(() => order.id, { onDelete: "cascade" }),
-    previousStatus: orderStatusEnum("previous_status").notNull(),
-    newStatus: orderStatusEnum("new_status").notNull(),
+    status: orderStatusEnum("status").notNull(),
     changedBy: uuid("changed_by")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

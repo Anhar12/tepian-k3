@@ -22,7 +22,11 @@ import {
 } from "@/components/ui/carousel";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, type LinkProps } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  type LinkProps,
+} from "@tanstack/react-router";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -39,7 +43,7 @@ const pusatLayananItems: {
   {
     imageSrc: "/assets/pengujian.jpg",
     title: "Pengujian",
-    to: "/",
+    to: "/pengujian",
   },
   {
     imageSrc: "/assets/pelatihan.jpg",
@@ -59,7 +63,7 @@ const pusatLayananItems: {
 ];
 
 function HomeComponent() {
-  const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
+  const navigate = useNavigate();
 
   return (
     <div className="w-full overflow-x-hidden overflow-y-scroll bg-white dark:bg-neutral-950">
@@ -127,7 +131,11 @@ function HomeComponent() {
         <div className="relative z-10 mt-12 flex flex-row flex-wrap items-center justify-center gap-6">
           {/* Service Cards */}
           {pusatLayananItems.map((item) => (
-            <Card key={item.title} className="w-64 overflow-hidden rounded-4xl">
+            <Card
+              key={item.title}
+              className="w-64 overflow-hidden rounded-4xl"
+              onClick={() => navigate({ to: item.to })}
+            >
               <CardHeader>
                 <img
                   src={item.imageSrc}
@@ -136,10 +144,7 @@ function HomeComponent() {
                 />
               </CardHeader>
               <CardFooter className="flex flex-row items-center">
-                <a
-                  href={item.to}
-                  className="w-full text-center text-2xl font-semibold text-primary"
-                >
+                <a className="w-full text-center text-2xl font-semibold text-primary">
                   {item.title}
                 </a>
               </CardFooter>

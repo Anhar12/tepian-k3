@@ -553,6 +553,9 @@ importers:
       '@node-rs/argon2':
         specifier: 'catalog:'
         version: 2.0.2
+      '@tepian-k3/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@tepian-k3/db':
         specifier: workspace:*
         version: link:../db

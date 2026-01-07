@@ -25,6 +25,7 @@ const getAllParametersSchema = z.object({
   createdAt: z.array(z.coerce.number()).default([]),
   filters: z.array(filterSchema).default([]),
   joinOperator: z.enum(["and", "or"]).default("and"),
+  companyId: z.optional(z.uuidv7()),
   showDeleted: z.boolean().default(false),
 });
 

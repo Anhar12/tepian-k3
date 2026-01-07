@@ -4,6 +4,7 @@ import { cartRouter } from "./routers/cart";
 import { clusterRouter } from "./routers/cluster";
 import { districtRouter } from "./routers/district";
 import { kbliRouter } from "./routers/kbli";
+import { orderRouter } from "./routers/order";
 import { parameterRouter } from "./routers/parameter";
 import { parameterCategoriesRouter } from "./routers/parameter-categories";
 import { parameterToolRouter } from "./routers/parameter-tool";
@@ -40,6 +41,7 @@ export const appRouter = createTRPCRouter({
   userCompany: userCompanyRouter,
   userCompanyTestingLocation: userCompanyTestingLocationRouter,
   cart: cartRouter,
+  order: orderRouter,
 });
 
 // export type definition of API
