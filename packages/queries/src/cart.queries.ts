@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { and, count, eq } from "@tepian-k3/db";
-import { cart } from "@tepian-k3/db/schema";
+import { cart, parameters, userCompanies } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import cartSchema from "@tepian-k3/schema/cart.schema";
 import { Effect } from "effect";
@@ -15,6 +15,12 @@ const cartQueries = {
         db.query.cart.findMany({
           where: eq(cart.userId, userId),
           with: {
+            location: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
             parameter: {
               columns: {
                 id: true,
@@ -94,13 +100,18 @@ const cartQueries = {
     });
   },
 
-  getCartItemByParameterId(userId: string, parameterId: string) {
+  getCartItemByParameterId(
+    userId: string,
+    parameterId: string,
+    locationId: string
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.cart.findFirst({
           where: and(
             eq(cart.userId, userId),
-            eq(cart.parameterId, parameterId)
+            eq(cart.parameterId, parameterId),
+            eq(cart.locationId, locationId)
           ),
         }),
       catch: (error) => {
@@ -135,9 +146,79 @@ const cartQueries = {
         );
       }
 
-      const existingCartItem = yield* this.getCartItemByParameterId(
+      // 2. Validate company ownership
+      const company = yield* Effect.tryPromise({
+        try: () =>
+          db.query.userCompanies.findFirst({
+            where: and(
+              eq(userCompanies.id, data.companyId),
+              eq(userCompanies.userId, userId)
+            ),
+          }),
+        catch: (error) => {
+          logger.error("Failed to validate company ownership", {
+            error,
+            userId,
+            companyId: data.companyId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to validate company",
+          });
+        },
+      });
+
+      if (!company) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "FORBIDDEN",
+            message: "Company not found or you don't have access",
+          })
+        );
+      }
+
+      // 5. Validate parameters and prices
+      const params = yield* Effect.tryPromise({
+        try: () =>
+          db.query.parameters.findFirst({
+            where: eq(parameters.id, data.parameterId),
+          }),
+        catch: (error) => {
+          logger.error("Failed to validate parameters", {
+            error,
+            parameterId: data.parameterId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to validate parameters",
+          });
+        },
+      });
+
+      if (!params) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Parameter not found",
+          })
+        );
+      }
+
+      // 6. Validate price matches
+      const invalidPrice = params.price !== data.price;
+      if (invalidPrice) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Price mismatch detected. Please refresh and try again.",
+          })
+        );
+      }
+
+      const existingCartItem = yield* cartQueries.getCartItemByParameterId(
         userId,
-        data.parameterId
+        data.parameterId,
+        data.locationId
       );
 
       const result = yield* Effect.tryPromise({

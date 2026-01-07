@@ -26,20 +26,26 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import MultiComboBox from "@/components/ui/multi-combobox";
+import { useCartStore } from "@/stores/cart.stores";
 
 export function LocationSection() {
   const routeApi = getRouteApi("/(core)/pengujian/");
-  const { companyId } = routeApi.useSearch();
-  const navigate = useNavigate();
+  const { companyId, locationId } = routeApi.useSearch();
+  const navigate = routeApi.useNavigate();
 
   const [companyOpen, setCompanyOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<string | null>(
     companyId || null,
   );
   const [locationOpen, setLocationOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
-  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string[]>(
+    locationId ? [locationId] : [],
+  );
+  const [currentLocation, setCurrentLocation] = useState<string | null>(
+    locationId || null,
+  );
 
+  const setCartItems = useCartStore((state) => state.setCartItems);
   const setIsCreateDialogOpen = useTestingLocationDialogStore(
     (state) => state.setIsCreateDialogOpen,
   );
@@ -81,9 +87,7 @@ export function LocationSection() {
             setSelectedCompany(id);
             navigate({
               to: "/pengujian",
-              search: {
-                companyId: id,
-              },
+              search: (old) => ({ ...old, companyId: id }),
             });
           }}
           placeholder="Pilih perusahaan..."
@@ -191,11 +195,26 @@ export function LocationSection() {
 
                     if (currentLocation === area.id) {
                       setCurrentLocation(null);
+                      navigate({
+                        to: "/pengujian",
+                        search: (old) => ({
+                          ...old,
+                          companyId: selectedCompany || "",
+                        }),
+                      });
                     } else {
                       setCurrentLocation(area.id);
+                      navigate({
+                        to: "/pengujian",
+                        search: (old) => ({
+                          ...old,
+                          companyId: selectedCompany || "",
+                          locationId: area.id,
+                        }),
+                      });
                     }
 
-                    // setStep2Data(arrayOfObjects);
+                    setCartItems(arrayOfObjects);
                   }}
                 >
                   <Card

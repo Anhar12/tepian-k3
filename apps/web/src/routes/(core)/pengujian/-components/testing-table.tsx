@@ -6,6 +6,7 @@ import {
   ChevronRight,
   TestTube2,
   AlertCircle,
+  LoaderCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,12 +29,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient, trpc } from "@/utils/trpc";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import useDebounced from "@/hooks/use-debounced";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 
 interface TestingTableProps extends React.HTMLAttributes<HTMLDivElement> {
   route: "/pengujian" | "/katalog";
@@ -51,6 +53,8 @@ export function TestingTable({
     page?: number;
     perPage?: number;
     name?: string;
+    companyId?: string;
+    locationId?: string;
   };
   const navigate = useNavigate();
 
@@ -63,6 +67,11 @@ export function TestingTable({
       }
     >
   >(new Map());
+
+  // Add loading state map
+  const [addingToCart, setAddingToCart] = useState<Map<string, boolean>>(
+    new Map(),
+  );
 
   const [searchTerm, setSearchTerm] = useState(params.name || "");
   const debouncedSearchTerm = useDebounced(searchTerm, 500);
@@ -89,11 +98,58 @@ export function TestingTable({
     trpc.parameterCategories.getAllParameterCategories.queryOptions(),
   );
 
-  const handleAddToCart = (parameterId: string) => {
+  const addToCartMutation = useMutation(
+    trpc.cart.insertCartItem.mutationOptions({
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(
+          trpc.cart.getAllCartItems.queryOptions(),
+        );
+        globalSuccessToast("Parameter berhasil ditambahkan ke keranjang");
+
+        // Remove loading state for this specific parameter
+        setAddingToCart((prev) => {
+          const next = new Map(prev);
+          next.delete(data.parameterId);
+          return next;
+        });
+      },
+      onError: (error, variables) => {
+        globalErrorToast(
+          `Gagal menambahkan parameter ke keranjang: ${error.message}`,
+        );
+        // Remove loading state for this specific parameter
+        setAddingToCart((prev) => {
+          const next = new Map(prev);
+          next.delete(variables.parameterId);
+          return next;
+        });
+      },
+    }),
+  );
+
+  const handleAddToCart = (parameterId: string, qty: number, price: number) => {
     if (!me) return;
 
+    if (!params.companyId || !params.locationId) {
+      globalErrorToast("Perusahaan dan lokasi harus dipilih terlebih dahulu");
+      return;
+    }
+
+    // Set loading state for this specific parameter
+    setAddingToCart((prev) => {
+      const next = new Map(prev);
+      next.set(parameterId, true);
+      return next;
+    });
+
     // Implement add to cart functionality here
-    console.log(`Adding parameter ${parameterId} to cart`);
+    addToCartMutation.mutate({
+      companyId: params.companyId!,
+      locationId: params.locationId!,
+      parameterId,
+      quantity: qty,
+      price,
+    });
   };
 
   const goToPage = (page: number) => {
@@ -337,11 +393,26 @@ export function TestingTable({
                       <TableCell className="text-right">
                         <Button
                           className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg"
-                          disabled={!me}
-                          onClick={() => handleAddToCart(row.id)}
+                          disabled={!me || addingToCart.get(row.id)}
+                          onClick={() =>
+                            handleAddToCart(
+                              row.id,
+                              cart.get(row.id)?.quantity || 1,
+                              row.price,
+                            )
+                          }
                         >
-                          <ShoppingCart className="h-4 w-4" />
-                          Add to Cart
+                          {addingToCart.get(row.id) ? (
+                            <>
+                              <LoaderCircle className="h-4 w-4 animate-spin" />
+                              Adding...
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart className="h-4 w-4" />
+                              Add to Cart
+                            </>
+                          )}
                         </Button>
                       </TableCell>
                     </>
