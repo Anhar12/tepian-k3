@@ -48,17 +48,17 @@ const pusatLayananItems: {
   {
     imageSrc: "/assets/pelatihan.jpg",
     title: "Pelatihan",
-    to: "/",
+    to: "/pelatihan",
   },
   {
     imageSrc: "/assets/uji-kompetensi.jpg",
     title: "Uji Kompetensi",
-    to: "/",
+    to: "/uji-kompetensi",
   },
   {
     imageSrc: "/assets/konsultasi.jpg",
     title: "Konsultasi",
-    to: "/",
+    to: "/konsultasi",
   },
 ];
 

@@ -21,7 +21,10 @@ import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-pas
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as coreUjiKompetensiRouteRouteImport } from './routes/(core)/uji-kompetensi/route'
 import { Route as corePengujianRouteRouteImport } from './routes/(core)/pengujian/route'
+import { Route as corePelatihanRouteRouteImport } from './routes/(core)/pelatihan/route'
+import { Route as coreKonsultasiRouteRouteImport } from './routes/(core)/konsultasi/route'
 import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
 import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
@@ -113,9 +116,24 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => authRouteRoute,
 } as any)
+const coreUjiKompetensiRouteRoute = coreUjiKompetensiRouteRouteImport.update({
+  id: '/uji-kompetensi',
+  path: '/uji-kompetensi',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 const corePengujianRouteRoute = corePengujianRouteRouteImport.update({
   id: '/pengujian',
   path: '/pengujian',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const corePelatihanRouteRoute = corePelatihanRouteRouteImport.update({
+  id: '/pelatihan',
+  path: '/pelatihan',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreKonsultasiRouteRoute = coreKonsultasiRouteRouteImport.update({
+  id: '/konsultasi',
+  path: '/konsultasi',
   getParentRoute: () => coreRouteRoute,
 } as any)
 const coreDashboardRouteRoute = coreDashboardRouteRouteImport.update({
@@ -312,7 +330,10 @@ export interface FileRoutesByFullPath {
   '/unauthorized': typeof UnauthorizedRoute
   '/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/dashboard': typeof coreDashboardRouteRouteWithChildren
+  '/konsultasi': typeof coreKonsultasiRouteRoute
+  '/pelatihan': typeof corePelatihanRouteRoute
   '/pengujian': typeof corePengujianRouteRouteWithChildren
+  '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -355,6 +376,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/katalog': typeof KatalogRoute
   '/unauthorized': typeof UnauthorizedRoute
+  '/konsultasi': typeof coreKonsultasiRouteRoute
+  '/pelatihan': typeof corePelatihanRouteRoute
+  '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -402,7 +426,10 @@ export interface FileRoutesById {
   '/unauthorized': typeof UnauthorizedRoute
   '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/(core)/dashboard': typeof coreDashboardRouteRouteWithChildren
+  '/(core)/konsultasi': typeof coreKonsultasiRouteRoute
+  '/(core)/pelatihan': typeof corePelatihanRouteRoute
   '/(core)/pengujian': typeof corePengujianRouteRouteWithChildren
+  '/(core)/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
@@ -449,7 +476,10 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/back-office'
     | '/dashboard'
+    | '/konsultasi'
+    | '/pelatihan'
     | '/pengujian'
+    | '/uji-kompetensi'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -492,6 +522,9 @@ export interface FileRouteTypes {
     | '/'
     | '/katalog'
     | '/unauthorized'
+    | '/konsultasi'
+    | '/pelatihan'
+    | '/uji-kompetensi'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -538,7 +571,10 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/(core)/back-office'
     | '/(core)/dashboard'
+    | '/(core)/konsultasi'
+    | '/(core)/pelatihan'
     | '/(core)/pengujian'
+    | '/(core)/uji-kompetensi'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/register'
@@ -672,11 +708,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(core)/uji-kompetensi': {
+      id: '/(core)/uji-kompetensi'
+      path: '/uji-kompetensi'
+      fullPath: '/uji-kompetensi'
+      preLoaderRoute: typeof coreUjiKompetensiRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/pengujian': {
       id: '/(core)/pengujian'
       path: '/pengujian'
       fullPath: '/pengujian'
       preLoaderRoute: typeof corePengujianRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/pelatihan': {
+      id: '/(core)/pelatihan'
+      path: '/pelatihan'
+      fullPath: '/pelatihan'
+      preLoaderRoute: typeof corePelatihanRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/konsultasi': {
+      id: '/(core)/konsultasi'
+      path: '/konsultasi'
+      fullPath: '/konsultasi'
+      preLoaderRoute: typeof coreKonsultasiRouteRouteImport
       parentRoute: typeof coreRouteRoute
     }
     '/(core)/dashboard': {
@@ -1024,7 +1081,10 @@ const corePengujianRouteRouteWithChildren =
 interface coreRouteRouteChildren {
   coreBackOfficeRouteRoute: typeof coreBackOfficeRouteRouteWithChildren
   coreDashboardRouteRoute: typeof coreDashboardRouteRouteWithChildren
+  coreKonsultasiRouteRoute: typeof coreKonsultasiRouteRoute
+  corePelatihanRouteRoute: typeof corePelatihanRouteRoute
   corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
+  coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
 }
@@ -1032,7 +1092,10 @@ interface coreRouteRouteChildren {
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreBackOfficeRouteRoute: coreBackOfficeRouteRouteWithChildren,
   coreDashboardRouteRoute: coreDashboardRouteRouteWithChildren,
+  coreKonsultasiRouteRoute: coreKonsultasiRouteRoute,
+  corePelatihanRouteRoute: corePelatihanRouteRoute,
   corePengujianRouteRoute: corePengujianRouteRouteWithChildren,
+  coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
 }
