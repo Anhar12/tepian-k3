@@ -10,51 +10,73 @@ import parameterQueries from "./parameter.queries";
 
 const cartQueries = {
   getUserCartList(userId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db.query.cart.findMany({
-          where: eq(cart.userId, userId),
-          with: {
-            location: {
-              columns: {
-                id: true,
-                name: true,
+    return Effect.gen(this, function* () {
+      const cartItems = yield* Effect.tryPromise({
+        try: () =>
+          db.query.cart.findMany({
+            where: eq(cart.userId, userId),
+            with: {
+              location: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
               },
-            },
-            parameter: {
-              columns: {
-                id: true,
-                name: true,
-              },
-              with: {
-                category: {
-                  columns: {
-                    id: true,
-                    name: true,
-                  },
-                  with: {
-                    cluster: {
-                      columns: {
-                        id: true,
-                        name: true,
+              parameter: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
+                with: {
+                  category: {
+                    columns: {
+                      id: true,
+                      name: true,
+                    },
+                    with: {
+                      cluster: {
+                        columns: {
+                          id: true,
+                          name: true,
+                        },
                       },
                     },
                   },
                 },
               },
             },
-          },
-        }),
-      catch: (error) => {
-        logger.error("Error fetching user cart list", {
-          error,
-          userId,
-        });
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch user cart list",
-        });
-      },
+          }),
+        catch: (error) => {
+          logger.error("Error fetching user cart list", {
+            error,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to fetch user cart list",
+          });
+        },
+      });
+
+      // Group cart items by location
+      const groupedByLocation = cartItems.reduce((acc, item) => {
+        const locationId = item.location.id;
+
+        if (!acc[locationId]) {
+          acc[locationId] = {
+            id: item.location.id,
+            name: item.location.name,
+            items: [],
+          };
+        }
+
+        acc[locationId].items.push(item);
+
+        return acc;
+      }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+
+      // Convert to array format
+      return Object.values(groupedByLocation);
     });
   },
 
