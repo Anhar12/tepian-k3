@@ -55,4 +55,15 @@ export const cartRouter = createTRPCRouter({
         cartQueries.updateCartItemQuantity(input.cartItemId, input.quantity)
       );
     }),
+
+  deleteCartItem: protectedProcedure
+    .input(
+      z.object({
+        cartItemId: z.string(),
+      })
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(cartQueries.deleteCartItem(input.cartItemId))
+    ),
 });

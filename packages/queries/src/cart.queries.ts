@@ -75,8 +75,31 @@ const cartQueries = {
         return acc;
       }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
 
-      // Convert to array format
-      return Object.values(groupedByLocation);
+      // Convert to array and group items by cluster within each location
+      return Object.values(groupedByLocation).map((location) => {
+        // Group items by cluster
+        const groupedByCluster = location.items.reduce((acc, item) => {
+          const clusterId = item.parameter.category.cluster.id;
+
+          if (!acc[clusterId]) {
+            acc[clusterId] = {
+              id: item.parameter.category.cluster.id,
+              name: item.parameter.category.cluster.name,
+              items: [],
+            };
+          }
+
+          acc[clusterId].items.push(item);
+
+          return acc;
+        }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+
+        return {
+          id: location.id,
+          name: location.name,
+          items: Object.values(groupedByCluster),
+        };
+      });
     });
   },
 

@@ -1,3 +1,4 @@
+import CartSheet from "@/components/cart-sheet";
 import PengujianNavbar from "@/components/pengujian-navbar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
@@ -15,6 +16,7 @@ function RouteComponent() {
           <Outlet />
         </div>
       </div>
+      <CartSheet />
     </div>
   );
 }

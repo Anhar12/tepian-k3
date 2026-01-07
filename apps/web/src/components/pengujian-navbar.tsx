@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { IconHome, IconLogout, IconUserCircle } from "@tabler/icons-react";
 import { ModeToggle } from "./mode-toggle";
+import { useCartSheetStore } from "@/stores/cart-sheet.stores";
 
 const navItems: {
   label: string;
@@ -26,6 +27,8 @@ const navItems: {
 
 export default function PengujianNavbar() {
   const navigate = useNavigate();
+
+  const setIsOpenCartSheet = useCartSheetStore((state) => state.setIsOpen);
 
   const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
 
@@ -67,7 +70,10 @@ export default function PengujianNavbar() {
       {user ? (
         <div className="flex flex-row gap-10">
           <div className="flex flex-row gap-4">
-            <Button className="relative flex size-9 items-center justify-center rounded-full">
+            <Button
+              className="relative flex size-9 items-center justify-center rounded-full"
+              onClick={() => setIsOpenCartSheet(true)}
+            >
               {cartCount !== undefined && cartCount > 0 && (
                 <div className="absolute -top-1 -right-2 flex size-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-semibold text-white">
                   {isCartMoreThan99 ? "99+" : cartCount}

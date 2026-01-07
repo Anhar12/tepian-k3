@@ -1,4 +1,3 @@
-import type userCompanySchema from "@tepian-k3/schema/user-company.schema";
 import orderItemSchema from "@tepian-k3/schema/order-item.schema";
 import z from "zod";
 import { create } from "zustand";

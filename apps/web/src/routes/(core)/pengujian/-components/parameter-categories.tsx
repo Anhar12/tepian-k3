@@ -12,39 +12,7 @@ import {
 } from "lucide-react";
 import { createElement } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const categories = [
-  {
-    id: 1,
-    label: "Lingkungan Kerja",
-    color: "from-emerald-400 to-emerald-600",
-    icon: Building2,
-  },
-  {
-    id: 2,
-    label: "Keselamatan Kerja",
-    color: "from-orange-400 to-orange-600",
-    icon: ShieldCheck,
-  },
-  {
-    id: 3,
-    label: "Kesehatan Kerja",
-    color: "from-violet-400 to-violet-600",
-    icon: Headphones,
-  },
-  {
-    id: 4,
-    label: "Biomarker",
-    color: "from-rose-400 to-rose-600",
-    icon: TestTube2,
-  },
-  {
-    id: 5,
-    label: "Lingkungan Hidup",
-    color: "from-blue-400 to-blue-600",
-    icon: Globe2,
-  },
-];
+import { getClusterColor, getClusterIcon } from "@/lib/cluster-colors";
 
 interface ClustersProps {
   route: "/pengujian" | "/katalog";
@@ -98,8 +66,7 @@ export function Clusters({ route }: ClustersProps) {
                 key={cluster.id}
                 className={cn(
                   "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
-                  categories.find((c) => c.label === cluster.name)?.color ||
-                    "from-gray-400 to-gray-600",
+                  getClusterColor(cluster.name),
                   search.clusterId === cluster.id &&
                     "scale-110 ring-4 ring-white",
                 )}
@@ -114,11 +81,9 @@ export function Clusters({ route }: ClustersProps) {
                 }}
               >
                 <div className="mb-4 transform transition-transform group-hover:scale-110">
-                  {createElement(
-                    categories.find((c) => c.label === cluster.name)?.icon ||
-                      Globe2,
-                    { className: "size-8" },
-                  )}
+                  {createElement(getClusterIcon(cluster.name) || Globe2, {
+                    className: "size-8",
+                  })}
                 </div>
                 <span className="max-w-20 text-center text-sm leading-tight font-bold uppercase">
                   {cluster.name}
