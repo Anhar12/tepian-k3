@@ -1,0 +1,95 @@
+# tepian-k3
+
+> A modern, type-safe TypeScript monorepo for K3 safety management, built with Better-T-Stack, Turborepo, and pnpm workspaces.
+
+## Project Overview
+
+tepian-k3 is a full-stack TypeScript application featuring end-to-end type safety from database to UI using tRPC, Drizzle ORM, and Zod validation schemas.
+
+## Tech Stack
+
+- **Frontend**: React, TanStack Router, TailwindCSS, shadcn/ui, PWA
+- **Backend**: Hono, tRPC, Node.js, Effect
+- **Database**: PostgreSQL, Drizzle ORM
+- **Monorepo**: Turborepo, pnpm workspaces
+- **Type Safety**: TypeScript 5+, Zod
+- **Code Quality**: ESLint, Prettier, Husky
+
+## Project Structure
+
+```
+tepian-k3/
+├── apps/
+│   ├── web/          # React frontend with TanStack Router
+│   └── server/       # Hono backend with tRPC
+├── packages/
+│   ├── api/          # tRPC routers & procedures
+│   ├── auth/         # Authentication logic & middleware
+│   ├── db/           # Drizzle schema & database client
+│   ├── queries/      # Reusable database queries
+│   ├── schema/       # Zod validation schemas
+│   ├── services/     # External services (email, storage, logger)
+│   ├── types/        # Shared TypeScript types
+│   ├── utils/        # Utility functions
+│   ├── constants/    # App-wide constants
+│   ├── config/       # Shared configs
+│   └── shared/       # Cross-app utilities
+```
+
+## Package Namespace
+
+All packages use `@tepian-k3/*` namespace:
+- `@tepian-k3/api` - tRPC API definition
+- `@tepian-k3/db` - Database schema & client
+- `@tepian-k3/auth` - Authentication
+- `@tepian-k3/schema` - Zod schemas
+- `@tepian-k3/queries` - Database queries
+- `@tepian-k3/services` - External services
+- `@tepian-k3/types` - TypeScript types
+- `@tepian-k3/utils` - Utilities
+- `@tepian-k3/constants` - Constants
+
+## Type Safety Flow
+
+Database Schema (Drizzle) → Zod Schemas → tRPC Routers → Frontend Client
+
+## Dependency Order
+
+constants → types → schema → db → queries → services → api → apps
+
+## Key Commands
+
+- `pnpm dev` - Start development servers
+- `pnpm build` - Build all packages
+- `pnpm check-types` - Type check monorepo
+- `pnpm lint` - Lint all packages
+- `pnpm db:push` - Push schema to database
+- `pnpm db:migrate` - Run migrations
+- `pnpm db:studio` - Open Drizzle Studio
+
+## Environment Variables
+
+Required:
+- `DATABASE_URL` - PostgreSQL connection string
+- `PORT` - Server port (default: 3000)
+- `NODE_ENV` - Environment (development/production)
+- `JWT_SECRET` - Authentication secret
+
+Optional:
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` - Email service
+- `STORAGE_PATH` - File upload path
+- `LOG_LEVEL` - Logging level
+
+## Development URLs
+
+- Web App: http://localhost:3001
+- API Server: http://localhost:3000
+
+## Code Conventions
+
+- Use TypeScript strict mode
+- Define types in `@tepian-k3/types`
+- Validate inputs with Zod schemas from `@tepian-k3/schema`
+- Database queries go in `@tepian-k3/queries`
+- API routes defined as tRPC procedures in `@tepian-k3/api`
+- Frontend uses tRPC client for type-safe API calls
