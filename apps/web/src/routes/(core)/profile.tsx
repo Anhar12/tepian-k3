@@ -34,13 +34,13 @@ function RouteComponent() {
   const uploadAvatarMutation = useMutation(
     trpc.user.updateAvatar.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Avatar uploaded successfully");
+        globalSuccessToast("Avatar berhasil diunggah");
         setSelectedFile(null);
         setPreviewUrl(null);
         await refetch();
       },
-      onError: () => {
-        globalErrorToast("Failed to upload avatar");
+      onError: (error) => {
+        globalErrorToast(`Gagal mengunggah avatar: ${error.message}`);
       },
     }),
   );
@@ -49,12 +49,12 @@ function RouteComponent() {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        globalErrorToast("File size must be less than 5MB");
+        globalErrorToast("Ukuran file harus kurang dari 5MB");
         return;
       }
 
       if (!file.type.startsWith("image/")) {
-        globalErrorToast("Please select an image file");
+        globalErrorToast("Harap pilih file gambar");
         return;
       }
 
