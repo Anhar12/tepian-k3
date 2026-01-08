@@ -4,6 +4,7 @@ import path from "path";
 import { v7 as uuidv7 } from "uuid";
 import type { UploadOptions, UploadResult } from "../types";
 import { UploadFailedError, FileNotFoundError } from "../types";
+import { generateDateBasedPath } from "../utils";
 
 export class FileSystemProvider {
   private uploadsDir: string;
@@ -43,15 +44,16 @@ export class FileSystemProvider {
     // Clean filename: remove special chars, keep only alphanumeric, dash, underscore
     const cleanName = name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase();
 
-    // Format: uploads/[folderName]/[cleanName]-[uuid].[ext]
+    // Format: [folder]/[year]/[month]/[day]/[cleanName]-[uuid].[ext]
     const generatedFileName = `${cleanName}-${uniqueId}${ext}`;
 
-    // Always use a folder (default to 'general' if not provided)
+    // Use date-based path with folder prefix (default to 'general' if not provided)
     const folderName = folder || "general";
+    const dateBasedPath = generateDateBasedPath(folderName);
 
     return {
       filename: generatedFileName,
-      key: `${folderName}/${generatedFileName}`,
+      key: `${dateBasedPath}/${generatedFileName}`,
     };
   }
 

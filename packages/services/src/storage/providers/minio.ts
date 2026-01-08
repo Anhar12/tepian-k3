@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 import path from "path";
 import type { UploadOptions, UploadResult } from "../types";
 import { UploadFailedError, FileNotFoundError } from "../types";
+import { generateDateBasedPath } from "../utils";
 
 export class MinioProvider {
   private client: Minio.Client;
@@ -50,11 +51,20 @@ export class MinioProvider {
     const ext = filename ? path.extname(filename) : "";
     const name = filename ? path.basename(filename, ext) : "file";
     const uniqueId = uuidv7();
-    const key = `${name}-${uniqueId}${ext}`;
+
+    // Clean filename: remove special chars, keep only alphanumeric, dash, underscore
+    const cleanName = name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase();
+
+    // Format: [folder]/[year]/[month]/[day]/[cleanName]-[uuid].[ext]
+    const generatedFileName = `${cleanName}-${uniqueId}${ext}`;
+
+    // Use date-based path with folder prefix (default to 'general' if not provided)
+    const folderName = folder || "general";
+    const dateBasedPath = generateDateBasedPath(folderName);
 
     return {
-      filename: key,
-      key: folder ? `${folder}/${key}` : key,
+      filename: generatedFileName,
+      key: `${dateBasedPath}/${generatedFileName}`,
     };
   }
 
