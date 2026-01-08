@@ -561,9 +561,24 @@ const userCompanyQueries = {
         existingUserCompany.companyPictureFileName &&
         existingUserCompany.companyPictureUrl
       ) {
-        yield* storageService.delete(
-          `company-pictures/${existingUserCompany.companyPictureFileName}`
+        const key = storageService.getKeyFromUrl(
+          existingUserCompany.companyPictureUrl
         );
+
+        if (!key) {
+          logger.warn(
+            "Failed to extract key from existing company picture URL",
+            { url: existingUserCompany.companyPictureUrl }
+          );
+          return yield* Effect.fail(
+            new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal memperbarui data perusahaan",
+            })
+          );
+        }
+
+        yield* storageService.delete(key);
       }
 
       const [updatedUserCompany] = yield* Effect.tryPromise({

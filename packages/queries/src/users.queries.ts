@@ -666,7 +666,22 @@ const usersQueries = {
 
       // this should remove previous profile picture from storage if user had one
       if (user.profilePictureFileName && user.profilePictureUrl) {
-        yield* storageService.delete(`avatars/${user.profilePictureFileName}`);
+        const key = storageService.getKeyFromUrl(user.profilePictureUrl);
+
+        if (!key) {
+          logger.warn(
+            "Failed to extract key from existing company picture URL",
+            { url: user.profilePictureUrl }
+          );
+          return yield* Effect.fail(
+            new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal menghapus gambar profil sebelumnya.",
+            })
+          );
+        }
+
+        yield* storageService.delete(key);
       }
 
       return updatedUser;

@@ -138,4 +138,55 @@ export class MinioProvider {
     const protocol = this.useSSL ? "https" : "http";
     return `${protocol}://${this.endpoint}:${this.port}/${this.bucket}/${key}`;
   }
+
+  /**
+   * Extracts the folder path from a public URL
+   * @param url - The public URL (e.g., http://localhost:9000/uploads/avatars/2026/01/09/file.jpg)
+   * @returns The folder path (e.g., avatars/2026/01/09)
+   */
+  getFolderFromUrl(url: string): string | null {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      // Remove the bucket prefix (e.g., /uploads/)
+      const bucketPrefix = `/${this.bucket}/`;
+      if (!pathname.startsWith(bucketPrefix)) {
+        return null;
+      }
+
+      const key = pathname.slice(bucketPrefix.length);
+
+      // Get directory path (remove filename)
+      const lastSlashIndex = key.lastIndexOf("/");
+      if (lastSlashIndex === -1) {
+        return null;
+      }
+
+      return key.slice(0, lastSlashIndex);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Extracts the key (full path including filename) from a public URL
+   * @param url - The public URL
+   * @returns The key (e.g., avatars/2026/01/09/file.jpg)
+   */
+  getKeyFromUrl(url: string): string | null {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      const bucketPrefix = `/${this.bucket}/`;
+      if (!pathname.startsWith(bucketPrefix)) {
+        return null;
+      }
+
+      return pathname.slice(bucketPrefix.length);
+    } catch {
+      return null;
+    }
+  }
 }

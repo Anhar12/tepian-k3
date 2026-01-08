@@ -54,6 +54,14 @@ class StorageService {
   getPublicUrl(key: string): string {
     return this.provider.getPublicUrl(key);
   }
+
+  getFolderFromUrl(url: string): string | null {
+    return this.provider.getFolderFromUrl(url);
+  }
+
+  getKeyFromUrl(url: string): string | null {
+    return this.provider.getKeyFromUrl(url);
+  }
 }
 
 export const storageService = new StorageService();

@@ -111,4 +111,55 @@ export class FileSystemProvider {
   getPublicUrl(key: string): string {
     return `${this.baseUrl}/api/uploads/${key}`;
   }
+
+  /**
+   * Extracts the folder path from a public URL
+   * @param url - The public URL (e.g., http://localhost:3000/api/uploads/avatars/2026/01/09/file.jpg)
+   * @returns The folder path (e.g., avatars/2026/01/09)
+   */
+  getFolderFromUrl(url: string): string | null {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      // Remove the /api/uploads/ prefix
+      const uploadsPrefix = "/api/uploads/";
+      if (!pathname.startsWith(uploadsPrefix)) {
+        return null;
+      }
+
+      const key = pathname.slice(uploadsPrefix.length);
+
+      // Get directory path (remove filename)
+      const lastSlashIndex = key.lastIndexOf("/");
+      if (lastSlashIndex === -1) {
+        return null;
+      }
+
+      return key.slice(0, lastSlashIndex);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Extracts the key (full path including filename) from a public URL
+   * @param url - The public URL
+   * @returns The key (e.g., avatars/2026/01/09/file.jpg)
+   */
+  getKeyFromUrl(url: string): string | null {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      const uploadsPrefix = "/api/uploads/";
+      if (!pathname.startsWith(uploadsPrefix)) {
+        return null;
+      }
+
+      return pathname.slice(uploadsPrefix.length);
+    } catch {
+      return null;
+    }
+  }
 }
