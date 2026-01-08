@@ -139,13 +139,18 @@ function RouteComponent() {
   }, [cartItems, currentLocation]);
 
   const totalPrice = useMemo(() => {
-    return mappedItems.reduce((total, cluster) => {
-      const clusterTotal = cluster.items.reduce((clusterSum, item) => {
-        return clusterSum + item.price * item.quantity;
+    if (!cartItems) return 0;
+
+    return cartItems.reduce((total, location) => {
+      const locationTotal = location.items.reduce((locSum, cluster) => {
+        const clusterTotal = cluster.items.reduce((clusterSum, item) => {
+          return clusterSum + item.price * item.quantity;
+        }, 0);
+        return locSum + clusterTotal;
       }, 0);
-      return total + clusterTotal;
+      return total + locationTotal;
     }, 0);
-  }, [mappedItems]);
+  }, [cartItems]);
 
   return (
     <div className="flex flex-col gap-4">
