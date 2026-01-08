@@ -30,6 +30,7 @@ import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-of
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
+import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
@@ -160,6 +161,11 @@ const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => coreBackOfficeRouteRoute,
+} as any)
+const corePengujianCheckoutRoute = corePengujianCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => corePengujianRouteRoute,
 } as any)
 const coreDashboardCompanyIndexRoute =
   coreDashboardCompanyIndexRouteImport.update({
@@ -341,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
@@ -386,6 +393,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
@@ -437,6 +445,7 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
@@ -487,6 +496,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/pengujian/checkout'
     | '/back-office/'
     | '/dashboard/'
     | '/pengujian/'
@@ -532,6 +542,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/pengujian/checkout'
     | '/back-office'
     | '/dashboard'
     | '/pengujian'
@@ -582,6 +593,7 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/(core)/pengujian/checkout'
     | '/(core)/back-office/'
     | '/(core)/dashboard/'
     | '/(core)/pengujian/'
@@ -770,6 +782,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/back-office/'
       preLoaderRoute: typeof coreBackOfficeIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/pengujian/checkout': {
+      id: '/(core)/pengujian/checkout'
+      path: '/checkout'
+      fullPath: '/pengujian/checkout'
+      preLoaderRoute: typeof corePengujianCheckoutRouteImport
+      parentRoute: typeof corePengujianRouteRoute
     }
     '/(core)/dashboard/company/': {
       id: '/(core)/dashboard/company/'
@@ -1068,10 +1087,12 @@ const coreDashboardRouteRouteWithChildren =
   coreDashboardRouteRoute._addFileChildren(coreDashboardRouteRouteChildren)
 
 interface corePengujianRouteRouteChildren {
+  corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute
   corePengujianIndexRoute: typeof corePengujianIndexRoute
 }
 
 const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
+  corePengujianCheckoutRoute: corePengujianCheckoutRoute,
   corePengujianIndexRoute: corePengujianIndexRoute,
 }
 

@@ -31,8 +31,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "./ui/empty";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function CartSheet() {
+  const navigate = useNavigate();
+
   const isOpen = useCartSheetStore((state) => state.isOpen);
   const setIsOpen = useCartSheetStore((state) => state.setIsOpen);
 
@@ -288,7 +291,17 @@ export default function CartSheet() {
           </div>
         </div>
         <SheetFooter>
-          <Button>Checkout</Button>
+          <Button
+            disabled={!cartItems || cartItems.length === 0}
+            onClick={() => {
+              setIsOpen(false);
+              navigate({
+                to: "/pengujian/checkout",
+              });
+            }}
+          >
+            Checkout
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
