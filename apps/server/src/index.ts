@@ -37,15 +37,16 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
-app.get("/api/uploads/:folder/:filename", async (c) => {
-  const folder = c.req.param("folder");
-  const filename = c.req.param("filename");
+app.get("/api/uploads/*", async (c) => {
+  // Get the full path after /api/uploads/
+  const fullPath = c.req.path.replace("/api/uploads/", "");
 
-  if (folder.includes("..") || filename.includes("..")) {
+  // Security check: prevent directory traversal
+  if (fullPath.includes("..")) {
     return c.text("Invalid path", 400);
   }
 
-  const filePath = path.join(uploadsDir, folder, filename);
+  const filePath = path.join(uploadsDir, fullPath);
 
   try {
     await fs.access(filePath);
