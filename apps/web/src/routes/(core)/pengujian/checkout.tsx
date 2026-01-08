@@ -180,122 +180,120 @@ function RouteComponent() {
         </SelectContent>
       </Select>
       <div className="flex flex-row gap-2">
-        <div className="flex max-h-[calc(100vh-240px)] flex-1 flex-col space-y-6 overflow-y-scroll">
-          <Card>
-            <CardContent>
-              {mappedItems.length > 0 ? (
-                mappedItems.map((cluster) => (
-                  <div key={cluster.id}>
-                    {/* Header */}
-                    <div
-                      className={cn(
-                        getClusterColor(cluster.name),
-                        "rounded-t-2xl px-6 py-4 text-white",
-                      )}
-                    >
-                      <h1 className="text-center text-xl font-semibold text-white">
-                        {cluster.name}
-                      </h1>
-                    </div>
+        <Card className="flex max-h-[calc(100vh-240px)] flex-1 flex-col space-y-6 overflow-y-auto">
+          <CardContent className="space-y-6">
+            {mappedItems.length > 0 ? (
+              mappedItems.map((cluster) => (
+                <div key={cluster.id}>
+                  {/* Header */}
+                  <div
+                    className={cn(
+                      getClusterColor(cluster.name),
+                      "rounded-t-2xl px-6 py-4 text-white",
+                    )}
+                  >
+                    <h1 className="text-center text-xl font-semibold text-white">
+                      {cluster.name}
+                    </h1>
+                  </div>
 
-                    {/* Cart Items */}
-                    <Card className="rounded-t-none rounded-b-2xl">
-                      <div className="divide-y">
-                        {cluster.items.map((item) => {
-                          const isLoading = loadingItems.has(item.id);
+                  {/* Cart Items */}
+                  <Card className="rounded-t-none rounded-b-2xl">
+                    <div className="divide-y">
+                      {cluster.items.map((item) => {
+                        const isLoading = loadingItems.has(item.id);
 
-                          return (
-                            <div key={item.id} className="p-6">
-                              <div className="flex items-start justify-between">
-                                <div className="max-w-[calc(100%-325px)]">
-                                  <h3 className="truncate text-lg font-semibold text-gray-900">
-                                    {item.parameter.name}
-                                  </h3>
-                                  <p className="mt-1 text-sm text-gray-500">
-                                    {item.parameter.category.name}
-                                  </p>
-                                </div>
+                        return (
+                          <div key={item.id} className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div className="max-w-[calc(100%-325px)]">
+                                <h3 className="truncate text-lg font-semibold text-gray-900">
+                                  {item.parameter.name}
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  {item.parameter.category.name}
+                                </p>
+                              </div>
 
-                                <div className="ml-4 flex items-center gap-4">
-                                  {/* Quantity Controls */}
-                                  <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2">
-                                    <button
-                                      onClick={() =>
-                                        decrementCartItemQuantity.mutate({
-                                          cartItemId: item.id,
-                                        })
-                                      }
-                                      disabled={isLoading}
-                                      className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
-                                    >
-                                      <Minus className="h-4 w-4" />
-                                    </button>
-                                    <span className="flex min-w-6 items-center justify-center font-semibold text-blue-600">
-                                      {isLoading ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                      ) : (
-                                        item.quantity
-                                      )}
-                                    </span>
-                                    <button
-                                      onClick={() =>
-                                        incrementCartItemQuantity.mutate({
-                                          cartItemId: item.id,
-                                        })
-                                      }
-                                      disabled={isLoading}
-                                      className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
-                                    >
-                                      <Plus className="h-4 w-4" />
-                                    </button>
-                                  </div>
-
-                                  {/* Price */}
-                                  <span className="min-w-25 text-right font-semibold text-gray-900">
-                                    Rp {item.price.toLocaleString("id-ID")}
-                                  </span>
-
-                                  {/* Delete Button */}
+                              <div className="ml-4 flex items-center gap-4">
+                                {/* Quantity Controls */}
+                                <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2">
                                   <button
                                     onClick={() =>
-                                      deleteCartItem.mutate({
+                                      decrementCartItemQuantity.mutate({
                                         cartItemId: item.id,
                                       })
                                     }
                                     disabled={isLoading}
-                                    className="text-red-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
                                   >
-                                    {deleteLoadingItems.has(item.id) ? (
+                                    <Minus className="h-4 w-4" />
+                                  </button>
+                                  <span className="flex min-w-6 items-center justify-center font-semibold text-blue-600">
+                                    {isLoading ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
                                     ) : (
-                                      <Trash2 className="h-4 w-4" />
+                                      item.quantity
                                     )}
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      incrementCartItemQuantity.mutate({
+                                        cartItemId: item.id,
+                                      })
+                                    }
+                                    disabled={isLoading}
+                                    className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    <Plus className="h-4 w-4" />
                                   </button>
                                 </div>
+
+                                {/* Price */}
+                                <span className="min-w-25 text-right font-semibold text-gray-900">
+                                  Rp {item.price.toLocaleString("id-ID")}
+                                </span>
+
+                                {/* Delete Button */}
+                                <button
+                                  onClick={() =>
+                                    deleteCartItem.mutate({
+                                      cartItemId: item.id,
+                                    })
+                                  }
+                                  disabled={isLoading}
+                                  className="text-red-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {deleteLoadingItems.has(item.id) ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </button>
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </Card>
-                  </div>
-                ))
-              ) : (
-                <Empty>
-                  <EmptyMedia>
-                    <ShoppingCart className="h-12 w-12 text-slate-300" />
-                  </EmptyMedia>
-                  <EmptyHeader>
-                    <EmptyTitle>Tidak ada item di keranjang</EmptyTitle>
-                    <EmptyDescription>
-                      Silakan tambahkan parameter pengujian dari daftar
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                </div>
+              ))
+            ) : (
+              <Empty>
+                <EmptyMedia>
+                  <ShoppingCart className="h-12 w-12 text-slate-300" />
+                </EmptyMedia>
+                <EmptyHeader>
+                  <EmptyTitle>Tidak ada item di keranjang</EmptyTitle>
+                  <EmptyDescription>
+                    Silakan tambahkan parameter pengujian dari daftar
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+          </CardContent>
+        </Card>
         <div className="w-96 shrink-0">
           <Card className="sticky top-4 space-y-6 border-0 p-6 shadow-sm">
             {/* Transportasi Section */}

@@ -177,7 +177,7 @@ export default function CartSheet() {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <div className="flex max-h-[calc(100vh-240px)] flex-col space-y-6 overflow-y-scroll">
+          <div className="flex max-h-[calc(100vh-240px)] flex-col space-y-6 overflow-y-auto">
             {mappedItems.length > 0 ? (
               mappedItems.map((cluster) => (
                 <div key={cluster.id}>

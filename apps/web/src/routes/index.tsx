@@ -66,7 +66,7 @@ function HomeComponent() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full overflow-x-hidden overflow-y-scroll bg-white dark:bg-neutral-950">
+    <div className="w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
       {/* Landing Page Navbar */}
       <LandingNavbar />
 
