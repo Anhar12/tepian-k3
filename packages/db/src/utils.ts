@@ -114,6 +114,30 @@ function toSnakeCase(str: string): string {
 }
 
 /**
+ * Creates a key-value for file upload columns
+ * @param columnPrefix - The prefix for the column names in camelCase (e.g., 'offeringDocument', 'profilePicture')
+ * @returns Object with only url column
+ */
+export function createFileUrlColumn<T extends string>(columnPrefix: T) {
+  const snakeCase = toSnakeCase(columnPrefix);
+  return {
+    [`${columnPrefix}Url`]: text(`${snakeCase}_url`),
+  } as Record<`${T}Url`, ReturnType<typeof text>>;
+}
+
+/**
+ * Creates a key-value for NOT NULL file upload columns
+ * @param columnPrefix - The prefix for the column names in camelCase (e.g., 'offeringDocument', 'profilePicture')
+ * @returns Object with only NOT NULL url column
+ */
+export function createRequiredFileUrlColumn<T extends string>(columnPrefix: T) {
+  const snakeCase = toSnakeCase(columnPrefix);
+  return {
+    [`${columnPrefix}Url`]: text(`${snakeCase}_url`).notNull(),
+  } as Record<`${T}Url`, ReturnType<typeof text>>;
+}
+
+/**
  * Creates a pair of columns for file uploads (fileName and url)
  * @param columnPrefix - The prefix for the column names in camelCase (e.g., 'offeringDocument', 'profilePicture')
  * @returns Object with fileName and url columns

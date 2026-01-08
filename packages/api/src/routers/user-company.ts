@@ -110,7 +110,6 @@ export const userCompanyRouter = createTRPCRouter({
           const result = yield* userCompanyQueries.userCreateUserCompany(
             ctx.user.id,
             ctx.input.data,
-            uploadedFile.filename,
             uploadedFile.key
           );
 
@@ -144,7 +143,6 @@ export const userCompanyRouter = createTRPCRouter({
           const result = yield* userCompanyQueries.userUpdateUserCompany(
             user.id,
             input.data,
-            uploadedFile?.filename,
             uploadedFile?.key
           );
 

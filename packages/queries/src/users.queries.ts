@@ -630,7 +630,7 @@ const usersQueries = {
     });
   },
 
-  updateUserAvatar(id: string, filename: string, url: string) {
+  updateUserAvatar(id: string, url: string) {
     return Effect.gen(this, function* () {
       const user = yield* this.getUserById(id);
 
@@ -639,7 +639,6 @@ const usersQueries = {
           db
             .update(users)
             .set({
-              profilePictureFileName: filename,
               profilePictureUrl: url,
             })
             .where(eq(users.id, id))
@@ -665,7 +664,7 @@ const usersQueries = {
       }
 
       // this should remove previous profile picture from storage if user had one
-      if (user.profilePictureFileName && user.profilePictureUrl) {
+      if (user.profilePictureUrl) {
         const key = storageService.getKeyFromUrl(user.profilePictureUrl);
 
         if (!key) {

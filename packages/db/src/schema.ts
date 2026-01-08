@@ -17,8 +17,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { v7 as uuidv7 } from "uuid";
 import {
-  createFileColumns,
-  createRequiredFileColumns,
+  createFileUrlColumn,
+  createRequiredFileUrlColumn,
   timestamps,
 } from "./utils";
 import {
@@ -75,7 +75,7 @@ export const users = createTable(
       withTimezone: true,
       mode: "string",
     }),
-    ...createFileColumns("profilePicture"),
+    ...createFileUrlColumn("profilePicture"),
     ...timestamps,
   },
   (table) => [
@@ -199,7 +199,7 @@ export const userCompanies = createTable(
     email: varchar("email", { length: 250 }).notNull(),
     wlkpStatus: boolean("wlkp_status").notNull().default(false),
     wlkp: text("wlkp").notNull(),
-    ...createRequiredFileColumns("companyPicture"),
+    ...createRequiredFileUrlColumn("companyPicture"),
     ...timestamps,
   },
   (table) => [
@@ -601,19 +601,19 @@ export const order = createTable(
       .references(() => userCompanies.id, { onDelete: "cascade" }),
     status: orderStatusEnum("status").notNull().default("pending"),
     totalAmount: integer("total_amount").notNull(),
-    ...createFileColumns("offeringDocument"),
-    ...createFileColumns("offeringUserDocument"),
+    ...createFileUrlColumn("offeringDocument"),
+    ...createFileUrlColumn("offeringUserDocument"),
     approvalStatus: approvalStatusEnum("approval_status")
       .notNull()
       .default("pending"),
     approvalRejectReason: text("approval_reject_reason"),
-    ...createFileColumns("invoice"),
-    ...createFileColumns("proofOfPayment"),
+    ...createFileUrlColumn("invoice"),
+    ...createFileUrlColumn("proofOfPayment"),
     paymentStatus: paymentStatusEnum("payment_status")
       .notNull()
       .default("unpaid"),
     paymentRejectedReason: text("payment_rejected_reason"),
-    ...createFileColumns("assignmentLetter"),
+    ...createFileUrlColumn("assignmentLetter"),
     approvedAt: timestamp("approved_at", {
       withTimezone: true,
       mode: "string",

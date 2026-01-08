@@ -100,11 +100,7 @@ export const userRouter = createTRPCRouter({
             folder: "avatars",
           });
 
-          yield* usersQueries.updateUserAvatar(
-            user.id,
-            uploadedFile.filename,
-            uploadedFile.key
-          );
+          yield* usersQueries.updateUserAvatar(user.id, uploadedFile.key);
         })
       )
     ),

@@ -446,7 +446,6 @@ const userCompanyQueries = {
   userCreateUserCompany(
     userId: string,
     data: z.infer<typeof userCompanySchema.createUserCompanySchema>,
-    filename: string,
     url: string
   ) {
     return Effect.gen(this, function* () {
@@ -485,7 +484,6 @@ const userCompanyQueries = {
               responsibleTestingPerson: data.responsibleTestingPerson,
               responsibleTestingPersonEmail: data.responsibleTestingPersonEmail,
               responsibleTestingPersonPhone: data.responsibleTestingPersonPhone,
-              companyPictureFileName: filename,
               companyPictureUrl: url,
             })
             .returning()
@@ -513,7 +511,6 @@ const userCompanyQueries = {
   userUpdateUserCompany(
     userId: string,
     data: z.infer<typeof userCompanySchema.updateUserCompanySchema>,
-    filename?: string,
     url?: string
   ) {
     return Effect.gen(this, function* () {
@@ -557,10 +554,7 @@ const userCompanyQueries = {
         );
       }
 
-      if (
-        existingUserCompany.companyPictureFileName &&
-        existingUserCompany.companyPictureUrl
-      ) {
+      if (existingUserCompany.companyPictureUrl) {
         const key = storageService.getKeyFromUrl(
           existingUserCompany.companyPictureUrl
         );
@@ -617,8 +611,6 @@ const userCompanyQueries = {
               responsibleTestingPersonPhone:
                 data.responsibleTestingPersonPhone ??
                 existingUserCompany.responsibleTestingPersonPhone,
-              companyPictureFileName:
-                filename ?? existingUserCompany.companyPictureFileName,
               companyPictureUrl: url ?? existingUserCompany.companyPictureUrl,
             })
             .where(eq(userCompanies.id, data.id))
