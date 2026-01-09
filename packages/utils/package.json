@@ -7,12 +7,14 @@
   },
   "dependencies": {
     "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/shared": "workspace:*",
     "@tepian-k3/types": "workspace:*",
     "@tanstack/react-table": "catalog:",
     "@trpc/server": "catalog:",
     "date-fns": "catalog:",
     "effect": "catalog:",
+    "eventemitter3": "catalog:",
     "nuqs": "catalog:",
     "zod": "catalog:"
   },

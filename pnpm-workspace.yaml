@@ -3,6 +3,7 @@ packages:
   - packages/*
 catalog:
   dotenv: ^17.2.2
+  eventemitter3: ^5.0.1
   effect: ^3.19.13
   date-fns: ^4.1.0
   nuqs: ^2.8.6
