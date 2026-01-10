@@ -42,7 +42,10 @@ export const env = createEnv({
     RESEND_API_KEY: z.string().optional(),
     ETHEREAL_USER: z.string().optional(),
     ETHEREAL_PASSWORD: z.string().optional(),
-    DASHBOARD_URL: z.string().url().optional(),
+    DASHBOARD_URL: z.url().optional(),
+    MEMURAI_HOST: z.string().default("localhost"),
+    MEMURAI_PORT: z.string().default("6379"),
+    MEMURAI_PASSWORD: z.string().default(""),
   },
 
   /**

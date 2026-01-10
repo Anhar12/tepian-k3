@@ -93,6 +93,9 @@ importers:
       '@tepian-k3/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@tepian-k3/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.8.0(typescript@5.9.3)
@@ -306,7 +309,7 @@ importers:
         version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       nuqs:
         specifier: 'catalog:'
-        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       radix-ui:
         specifier: ^1.4.2
         version: 1.4.3(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -630,6 +633,9 @@ importers:
       '@react-email/render':
         specifier: ^2.0.0
         version: 2.0.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@tepian-k3/constants':
+        specifier: workspace:*
+        version: link:../constants
       ioredis:
         specifier: ^5.9.1
         version: 5.9.1
@@ -667,6 +673,9 @@ importers:
       '@tepian-k3/schema':
         specifier: workspace:*
         version: link:../schema
+      '@tepian-k3/types':
+        specifier: workspace:*
+        version: link:../types
       '@tepian-k3/utils':
         specifier: workspace:*
         version: link:../utils
@@ -709,6 +718,9 @@ importers:
       '@tepian-k3/shared':
         specifier: workspace:*
         version: link:../shared
+      jose:
+        specifier: ^6.1.3
+        version: 6.1.3
     devDependencies:
       '@tepian-k3/config':
         specifier: workspace:*
@@ -751,7 +763,7 @@ importers:
         version: 5.0.1
       nuqs:
         specifier: 'catalog:'
-        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       zod:
         specifier: 'catalog:'
         version: 4.2.1
@@ -12009,7 +12021,7 @@ snapshots:
 
   normalize-path@3.0.0: {}
 
-  nuqs@2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
+  nuqs@2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
     dependencies:
       '@standard-schema/spec': 1.0.0
       react: 19.2.3

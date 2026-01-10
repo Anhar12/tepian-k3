@@ -23,6 +23,7 @@
   "dependencies": {
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
+    "@tepian-k3/constants": "workspace:*",
     "ioredis": "^5.9.1",
     "logform": "^2.7.0",
     "minio": "^8.0.6",
@@ -38,6 +39,7 @@
     "@tepian-k3/config": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/utils": "workspace:*",
+    "@tepian-k3/types": "workspace:*",
     "@types/nodemailer": "^7.0.4",
     "@types/react": "19.2.3",
     "dotenv-cli": "^11.0.0",

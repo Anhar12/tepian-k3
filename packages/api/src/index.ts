@@ -14,6 +14,7 @@ import type { Context as HonoContext } from "hono";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { Effect } from "effect";
 import { parseAndValidateSafe } from "./utils/form-data-parser";
+import { getEventBus } from "@tepian-k3/services/notifications";
 
 /**
  * Isomorphic Session getter for API requests
@@ -63,9 +64,13 @@ export const createTRPCContext = async (context: HonoContext) => {
   const Authorization = context.req.header("Authorization") || "";
 
   const data = await isomorphicGetSession(Authorization);
+
+  const eventBus = getEventBus();
+
   return {
     session: data?.session,
     user: data?.user,
+    eventBus,
   };
 };
 
@@ -221,7 +226,7 @@ export const formDataProcedure = <T extends z.ZodTypeAny>(schema: T) =>
  */
 export const formDataInput = z.custom<FormData>(
   (val) => val instanceof FormData,
-  { message: "Expected FormData input" },
+  { message: "Expected FormData input" }
 );
 
 /**

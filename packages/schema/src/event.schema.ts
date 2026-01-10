@@ -38,3 +38,28 @@ export type EventMap = {
 };
 
 export type EventName = keyof EventMap;
+
+export enum EventTypes {
+  NOTIFICATION = "notification",
+  ORDER_STATUS_CHANGED = "orderStatusChanged",
+  // Add more event types as needed
+}
+
+export type EventChannel = `${EventTypes}:${string}`;
+
+export function createChannel(type: EventTypes, userId: string): EventChannel {
+  return `${type}:${userId}`;
+}
+
+export function parseChannel(
+  channel: string
+): { type: EventTypes; userId: string } | null {
+  const [type, userId] = channel.split(":");
+  if (!type || !userId) return null;
+
+  if (!Object.values(EventTypes).includes(type as EventTypes)) {
+    return null;
+  }
+
+  return { type: type as EventTypes, userId };
+}

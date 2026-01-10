@@ -6,6 +6,26 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import fs from "fs/promises";
 import { lookup } from "mime-types";
+import { serve } from "@hono/node-server";
+import { env } from "env";
+import { createTRPCContext } from "@tepian-k3/api";
+import { appRouter } from "@tepian-k3/api/root";
+import path from "path";
+import {
+  initializeEventBus,
+  shutdownEventBus,
+} from "@tepian-k3/services/notifications";
+
+const redisConfig = {
+  host: env.MEMURAI_HOST,
+  port: parseInt(env.MEMURAI_PORT, 10),
+  password: env.MEMURAI_PASSWORD,
+  maxRetriesPerRequest: 3,
+  enableReadyCheck: true,
+  connectTimeout: 10000,
+};
+
+initializeEventBus(redisConfig);
 
 // Set Zod locale to Indonesian
 z.config(z.locales.id());
@@ -65,12 +85,6 @@ app.get("/api/uploads/*", async (c) => {
   }
 });
 
-import { serve } from "@hono/node-server";
-import { env } from "env";
-import { createTRPCContext } from "@tepian-k3/api";
-import { appRouter } from "@tepian-k3/api/root";
-import path from "path";
-
 serve(
   {
     fetch: app.fetch,
@@ -81,3 +95,16 @@ serve(
     console.log(`Server is running on http://localhost:${info.port}`);
   }
 );
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("Shutting down...");
+  await shutdownEventBus();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  console.log("Shutting down...");
+  await shutdownEventBus();
+  process.exit(0);
+});

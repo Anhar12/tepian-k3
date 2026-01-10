@@ -118,3 +118,5 @@ export const TESTING_STATUS_LABELS: Record<TestingStatus, string> = {
   report_publishing: "Report Publishing",
   completed: "Completed",
 };
+
+export const REDIS_CHANNEL = "tepian-k3-events";
