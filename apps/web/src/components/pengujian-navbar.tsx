@@ -21,6 +21,7 @@ const navItems: {
   label: string;
   href: string | LinkProps["to"];
 }[] = [
+  { label: "Order", href: "/pengujian" },
   { label: "Transaksi", href: "/pengujian/transaksi" },
   { label: "Riwayat", href: "/pengujian/riwayat" },
 ];

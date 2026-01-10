@@ -4,6 +4,7 @@ import { ChevronRight, FileText } from "lucide-react";
 import type { Order } from "@tepian-k3/types/order.types";
 import { useNavigate } from "@tanstack/react-router";
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from "@tepian-k3/constants";
+import { cn } from "@/lib/utils";
 
 interface OrderCardProps {
   order: Order;
@@ -27,6 +28,10 @@ function formatCurrency(amount: number): string {
 
 export function OrderCard({ order }: OrderCardProps) {
   const navigate = useNavigate();
+
+  const badgeColorClass =
+    ORDER_STATUS_COLORS[order.status] || "bg-gray-200 text-gray-800";
+
   return (
     <button
       onClick={() =>
@@ -51,7 +56,7 @@ export function OrderCard({ order }: OrderCardProps) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Badge className={`${ORDER_STATUS_COLORS[order.status]} border-0`}>
+            <Badge className={cn(`border-0`, badgeColorClass)}>
               {ORDER_STATUS_LABELS[order.status]}
             </Badge>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
