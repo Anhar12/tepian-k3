@@ -120,3 +120,19 @@ export const TESTING_STATUS_LABELS: Record<TestingStatus, string> = {
 };
 
 export const REDIS_CHANNEL = "tepian-k3-events";
+
+export const AUDIT_ACTIONS = [
+  "create",
+  "update",
+  "delete",
+  "status_change",
+] as const;
+
+export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+
+export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
+  create: "Create",
+  update: "Update",
+  delete: "Delete",
+  status_change: "Status Change",
+};

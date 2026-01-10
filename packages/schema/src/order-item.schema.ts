@@ -8,6 +8,7 @@ const createOrderItemSchema = createInsertSchema(orderItem, {
   price: z.number().min(0),
   quantity: z.number().min(1),
 }).omit({
+  orderId: true,
   locationId: true,
   subTotal: true,
 });

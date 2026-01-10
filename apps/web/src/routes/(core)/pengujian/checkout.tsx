@@ -34,6 +34,7 @@ export const Route = createFileRoute("/(core)/pengujian/checkout")({
 });
 
 function RouteComponent() {
+  const [currentCompany, setCurrentCompany] = useState<string | null>(null);
   const [currentLocation, setCurrentLocation] = useState<string | null>(null);
   const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
   const [deleteLoadingItems, setDeleteLoadingItems] = useState<Set<string>>(
@@ -120,172 +121,315 @@ function RouteComponent() {
     }),
   );
 
-  const mappedLocationFromCartItem = useMemo(() => {
+  const mappedCompanyFromCartItem = useMemo(() => {
     if (cartItems) {
-      return cartItems.map((location) => ({
-        id: location.id,
-        name: location.name,
+      return cartItems.map((company) => ({
+        id: company.id,
+        name: company.name,
       }));
     }
     return [];
   }, [cartItems]);
 
-  const mappedItems = useMemo(() => {
-    if (cartItems && currentLocation) {
-      const location = cartItems.find((loc) => loc.id === currentLocation);
-      return location?.items ?? [];
+  const mappedLocationFromCartItem = useMemo(() => {
+    if (cartItems && currentCompany) {
+      const company = cartItems.find((comp) => comp.id === currentCompany);
+      return (
+        company?.locations.map((location) => ({
+          id: location.id,
+          name: location.name,
+        })) ?? []
+      );
     }
-    return cartItems?.flatMap((loc) => loc.items) ?? [];
+    return cartItems
+      ? cartItems.flatMap((comp) =>
+          comp.locations.map((location) => ({
+            id: location.id,
+            name: location.name,
+          })),
+        )
+      : [];
+  }, [cartItems, currentCompany]);
+
+  const mappedItems = useMemo(() => {
+    if (cartItems) {
+      let filteredItems = cartItems;
+      if (currentCompany) {
+        filteredItems = filteredItems.filter(
+          (company) => company.id === currentCompany,
+        );
+      }
+      if (currentLocation) {
+        filteredItems = filteredItems
+          .map((company) => ({
+            ...company,
+            locations: company.locations.filter(
+              (location) => location.id === currentLocation,
+            ),
+          }))
+          .filter((company) => company.locations.length > 0);
+      }
+      return filteredItems.flatMap((company) =>
+        company.locations.flatMap((location) => location.clusters),
+      );
+    }
+    return [];
   }, [cartItems, currentLocation]);
 
   const totalPrice = useMemo(() => {
     if (!cartItems) return 0;
 
-    return cartItems.reduce((total, location) => {
-      const locationTotal = location.items.reduce((locSum, cluster) => {
-        const clusterTotal = cluster.items.reduce((clusterSum, item) => {
-          return clusterSum + item.price * item.quantity;
-        }, 0);
-        return locSum + clusterTotal;
-      }, 0);
-      return total + locationTotal;
+    return cartItems.reduce((companyAcc, company) => {
+      return (
+        companyAcc +
+        company.locations.reduce((locationAcc, location) => {
+          return (
+            locationAcc +
+            location.clusters.reduce((clusterAcc, cluster) => {
+              return (
+                clusterAcc +
+                cluster.items.reduce((itemAcc, item) => {
+                  return itemAcc + item.price * item.quantity;
+                }, 0)
+              );
+            }, 0)
+          );
+        }, 0)
+      );
     }, 0);
   }, [cartItems]);
 
+  const createOrderMutation = useMutation(
+    trpc.order.createOrder.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.cart.getAllCartItems.queryOptions(),
+        );
+        await queryClient.invalidateQueries(
+          trpc.order.getAllOrders.queryOptions(),
+        );
+        await queryClient.invalidateQueries(
+          trpc.cart.getCartItemCount.queryOptions(),
+        );
+        globalSuccessToast("Order berhasil dibuat");
+
+        setCurrentCompany(null);
+        setCurrentLocation(null);
+        setIsConfirmed(false);
+      },
+      onError: (error) => {
+        globalErrorToast(`Gagal membuat order: ${error.message}`);
+      },
+    }),
+  );
+
+  const handleOrderCreate = () => {
+    if (!isConfirmed) {
+      globalErrorToast(
+        "Silakan konfirmasi bahwa data yang dimasukkan sudah benar sebelum melakukan order.",
+      );
+      return;
+    }
+
+    if (!cartItems) return;
+
+    const orderItems = cartItems
+      .map((company) =>
+        company.locations.map((location) => ({
+          orderData: {
+            companyId: company.id,
+          },
+          orderItems: [
+            {
+              id: location.id,
+              name: location.name,
+              items: location.clusters.flatMap((cluster) =>
+                cluster.items.map((item) => ({
+                  id: item.id,
+                  parameterId: item.parameter.id,
+                  price: item.price,
+                  quantity: item.quantity,
+                })),
+              ),
+            },
+          ],
+        })),
+      )
+      .flat();
+
+    createOrderMutation.mutate(orderItems);
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <Select
-        value={currentLocation ?? undefined}
-        onValueChange={(value) => {
-          if (value === currentLocation) {
-            setCurrentLocation(null);
-          } else {
-            setCurrentLocation(value);
-          }
-        }}
-      >
-        <SelectTrigger className="w-1/2">
-          <SelectValue placeholder="Pilih area" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Area</SelectLabel>
-            {mappedLocationFromCartItem.length > 0 ? (
-              mappedLocationFromCartItem.map((location) => (
-                <SelectItem key={location.id} value={location.id}>
-                  {location.name}
+      <div className="flex flex-row gap-4">
+        <Select
+          value={currentCompany ?? undefined}
+          onValueChange={(value) => {
+            if (value === currentCompany) {
+              setCurrentCompany(null);
+            } else {
+              setCurrentCompany(value);
+            }
+          }}
+        >
+          <SelectTrigger className="w-1/2">
+            <SelectValue placeholder="Pilih perusahaan" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Area</SelectLabel>
+              {mappedCompanyFromCartItem.length > 0 ? (
+                mappedCompanyFromCartItem.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="empty" disabled>
+                  Tidak ada perusahaan
                 </SelectItem>
-              ))
-            ) : (
-              <SelectItem value="empty" disabled>
-                Tidak ada area
-              </SelectItem>
-            )}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+              )}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Select
+          value={currentLocation ?? undefined}
+          onValueChange={(value) => {
+            if (value === currentLocation) {
+              setCurrentLocation(null);
+            } else {
+              setCurrentLocation(value);
+            }
+          }}
+        >
+          <SelectTrigger className="w-1/2">
+            <SelectValue placeholder="Pilih area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Area</SelectLabel>
+              {mappedLocationFromCartItem.length > 0 ? (
+                mappedLocationFromCartItem.map((location) => (
+                  <SelectItem key={location.id} value={location.id}>
+                    {location.name}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="empty" disabled>
+                  Tidak ada area
+                </SelectItem>
+              )}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="flex flex-row gap-2">
-        <Card className="flex max-h-[calc(100vh-240px)] flex-1 flex-col space-y-6 overflow-y-auto">
-          <CardContent className="space-y-6">
+        <Card className="flex flex-1 flex-col space-y-6">
+          <CardContent className="h-full space-y-6">
             {mappedItems.length > 0 ? (
-              mappedItems.map((cluster) => (
-                <div key={cluster.id}>
-                  {/* Header */}
-                  <div
-                    className={cn(
-                      getClusterColor(cluster.name),
-                      "rounded-t-2xl px-6 py-4 text-white",
-                    )}
-                  >
-                    <h1 className="text-center text-xl font-semibold text-white">
-                      {cluster.name}
-                    </h1>
-                  </div>
+              <div className="max-h-[calc(100vh-300px)] space-y-6 overflow-y-auto">
+                {mappedItems.map((cluster) => {
+                  return (
+                    <div key={cluster.id} className="max-w-3xl">
+                      {/* Header */}
+                      <div
+                        className={cn(
+                          getClusterColor(cluster.name),
+                          "rounded-t-2xl px-6 py-4 text-white",
+                        )}
+                      >
+                        <h1 className="text-center text-xl font-semibold text-white">
+                          {cluster.name}
+                        </h1>
+                      </div>
 
-                  {/* Cart Items */}
-                  <Card className="rounded-t-none rounded-b-2xl">
-                    <div className="divide-y">
-                      {cluster.items.map((item) => {
-                        const isLoading = loadingItems.has(item.id);
+                      {/* Cart Items */}
+                      <Card className="rounded-t-none rounded-b-2xl">
+                        <div className="divide-y">
+                          {cluster.items.map((item) => {
+                            const isLoading = loadingItems.has(item.id);
 
-                        return (
-                          <div key={item.id} className="p-6">
-                            <div className="flex items-start justify-between">
-                              <div className="max-w-[calc(100%-325px)]">
-                                <h3 className="truncate text-lg font-semibold text-gray-900">
-                                  {item.parameter.name}
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                  {item.parameter.category.name}
-                                </p>
-                              </div>
+                            return (
+                              <div key={item.id} className="p-6">
+                                <div className="flex items-start justify-between">
+                                  <div className="max-w-[calc(100%-325px)]">
+                                    <h3 className="truncate text-lg font-semibold text-gray-900">
+                                      {item.parameter.name}
+                                    </h3>
+                                    <p className="mt-1 text-sm text-gray-500">
+                                      {item.parameter.category.name}
+                                    </p>
+                                  </div>
 
-                              <div className="ml-4 flex items-center gap-4">
-                                {/* Quantity Controls */}
-                                <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2">
-                                  <button
-                                    onClick={() =>
-                                      decrementCartItemQuantity.mutate({
-                                        cartItemId: item.id,
-                                      })
-                                    }
-                                    disabled={isLoading}
-                                    className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
-                                  >
-                                    <Minus className="h-4 w-4" />
-                                  </button>
-                                  <span className="flex min-w-6 items-center justify-center font-semibold text-blue-600">
-                                    {isLoading ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      item.quantity
-                                    )}
-                                  </span>
-                                  <button
-                                    onClick={() =>
-                                      incrementCartItemQuantity.mutate({
-                                        cartItemId: item.id,
-                                      })
-                                    }
-                                    disabled={isLoading}
-                                    className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </button>
+                                  <div className="ml-4 flex items-center gap-4">
+                                    {/* Quantity Controls */}
+                                    <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2">
+                                      <button
+                                        onClick={() =>
+                                          decrementCartItemQuantity.mutate({
+                                            cartItemId: item.id,
+                                          })
+                                        }
+                                        disabled={isLoading}
+                                        className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                      >
+                                        <Minus className="h-4 w-4" />
+                                      </button>
+                                      <span className="flex min-w-6 items-center justify-center font-semibold text-blue-600">
+                                        {isLoading ? (
+                                          <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                          item.quantity
+                                        )}
+                                      </span>
+                                      <button
+                                        onClick={() =>
+                                          incrementCartItemQuantity.mutate({
+                                            cartItemId: item.id,
+                                          })
+                                        }
+                                        disabled={isLoading}
+                                        className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                      >
+                                        <Plus className="h-4 w-4" />
+                                      </button>
+                                    </div>
+
+                                    {/* Price */}
+                                    <span className="min-w-25 text-right font-semibold text-gray-900">
+                                      Rp {item.price.toLocaleString("id-ID")}
+                                    </span>
+
+                                    {/* Delete Button */}
+                                    <button
+                                      onClick={() =>
+                                        deleteCartItem.mutate({
+                                          cartItemId: item.id,
+                                        })
+                                      }
+                                      disabled={isLoading}
+                                      className="text-red-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      {deleteLoadingItems.has(item.id) ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <Trash2 className="h-4 w-4" />
+                                      )}
+                                    </button>
+                                  </div>
                                 </div>
-
-                                {/* Price */}
-                                <span className="min-w-25 text-right font-semibold text-gray-900">
-                                  Rp {item.price.toLocaleString("id-ID")}
-                                </span>
-
-                                {/* Delete Button */}
-                                <button
-                                  onClick={() =>
-                                    deleteCartItem.mutate({
-                                      cartItemId: item.id,
-                                    })
-                                  }
-                                  disabled={isLoading}
-                                  className="text-red-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {deleteLoadingItems.has(item.id) ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <Trash2 className="h-4 w-4" />
-                                  )}
-                                </button>
                               </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                            );
+                          })}
+                        </div>
+                      </Card>
                     </div>
-                  </Card>
-                </div>
-              ))
+                  );
+                })}
+              </div>
             ) : (
-              <Empty>
+              <Empty className="h-full">
                 <EmptyMedia>
                   <ShoppingCart className="h-12 w-12 text-slate-300" />
                 </EmptyMedia>
@@ -374,8 +518,16 @@ function RouteComponent() {
               </div>
               <Button
                 className="h-auto w-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
-                disabled={mappedItems.length === 0 || !isConfirmed}
+                disabled={
+                  mappedItems.length === 0 ||
+                  !isConfirmed ||
+                  createOrderMutation.isPending
+                }
+                onClick={handleOrderCreate}
               >
+                {createOrderMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
                 Order
               </Button>
             </div>

@@ -24,19 +24,19 @@ export const orderRouter = createTRPCRouter({
 
   createOrder: protectedProcedure
     .input(
-      z.object({
-        orderData: orderSchema.createOrderSchema,
-        orderItems: z.array(orderItemSchema.createOrderItem),
-      })
+      z.array(
+        z.object({
+          orderData: orderSchema.createOrderSchema,
+          orderItems: z.array(orderItemSchema.createOrderItem),
+        })
+      )
     )
-    .mutation(
-      async ({ input, ctx }) =>
-        await runEffect(
-          orderQueries.createOrder(
-            ctx.user.id,
-            input.orderData,
-            input.orderItems
+    .mutation(async ({ input, ctx }) =>
+      input.map(
+        async ({ orderData, orderItems }) =>
+          await runEffect(
+            orderQueries.createOrder(ctx.user.id, orderData, orderItems)
           )
-        )
+      )
     ),
 });

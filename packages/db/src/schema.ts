@@ -1,9 +1,10 @@
-import { sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import {
   bigserial,
   boolean,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgSequence,
   pgTableCreator,
@@ -22,6 +23,7 @@ import {
   timestamps,
 } from "./utils";
 import {
+  AUDIT_ACTIONS,
   ORDER_APPROVAL_STATUSES,
   ORDER_PAYMENT_STATUSES,
   ORDER_SEQUENCE_NAME,
@@ -57,6 +59,8 @@ export const ToolsAvailabilityEnum = pgEnum(
   "tools_availability",
   TOOLS_AVAILABILITY
 );
+
+export const auditActionEnum = pgEnum("audit_action", AUDIT_ACTIONS);
 
 export const users = createTable(
   "users",
@@ -753,5 +757,57 @@ export const orderStatusHistory = createTable(
   (table) => [
     index("order_status_history_id_idx").using("btree", table.id),
     index("order_status_history_order_id_idx").using("btree", table.orderId),
+  ]
+);
+
+export const audits = createTable(
+  "audits",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+
+    // What entity was changed
+    entityType: text("entity_type").notNull(), // e.g., "order", "order_item", "testing"
+    entityId: text("entity_id").notNull(), // ID of the changed entity
+
+    // What action was performed
+    action: auditActionEnum("action").notNull(),
+
+    // Who made the change
+    userId: uuid("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    userEmail: text("user_email"), // Stored for historical record even if user deleted
+
+    // What changed
+    oldValues: jsonb("old_values"), // Previous state
+    newValues: jsonb("new_values"), // New state
+    changedFields: jsonb("changed_fields"), // Array of field names that changed
+
+    // Additional context
+    metadata: jsonb("metadata"), // Extra info like IP address, user agent, etc.
+    description: text("description"), // Human-readable description
+
+    // Timestamps
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("audit_entity_type_id_idx").using(
+      "btree",
+      table.entityType,
+      table.entityId
+    ),
+    index("audit_user_id_idx").using("btree", table.userId),
+    index("audit_action_idx").using("btree", table.action),
+    index("audit_created_at_idx").using("btree", desc(table.createdAt)),
+    index("audit_entity_created_idx").using(
+      "btree",
+      table.entityType,
+      table.entityId,
+      desc(table.createdAt)
+    ),
+    index("audits_changed_fields_idx").using("gin", table.changedFields),
   ]
 );

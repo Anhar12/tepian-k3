@@ -16,6 +16,12 @@ const cartQueries = {
           db.query.cart.findMany({
             where: eq(cart.userId, userId),
             with: {
+              company: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
+              },
               location: {
                 columns: {
                   id: true,
@@ -62,46 +68,69 @@ const cartQueries = {
         },
       });
 
-      // Group cart items by location
-      const groupedByLocation = cartItems.reduce((acc, item) => {
-        const locationId = item.location.id;
+      // Group cart items by companyId
+      const groupedByCompany = cartItems.reduce((acc, item) => {
+        const companyId = item.companyId;
 
-        if (!acc[locationId]) {
-          acc[locationId] = {
-            id: item.location.id,
-            name: item.location.name,
+        if (!acc[companyId]) {
+          acc[companyId] = {
+            id: item.companyId,
+            name: item.company.name, // Assuming company name is same as location name for this example
             items: [],
           };
         }
-
-        acc[locationId].items.push(item);
+        acc[companyId].items.push(item);
 
         return acc;
       }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
 
-      // Convert to array and group items by cluster within each location
-      return Object.values(groupedByLocation).map((location) => {
-        // Group items by cluster
-        const groupedByCluster = location.items.reduce((acc, item) => {
-          const clusterId = item.parameter.category.cluster.id;
-
-          if (!acc[clusterId]) {
-            acc[clusterId] = {
-              id: item.parameter.category.cluster.id,
-              name: item.parameter.category.cluster.name,
+      // should return array of companies with their locations and items
+      return Object.values(groupedByCompany).map((company) => {
+        // Group item based on location
+        const itemsGroupedByLocation = company.items.reduce((acc, item) => {
+          const locationId = item.locationId;
+          if (!acc[locationId]) {
+            acc[locationId] = {
+              id: item.locationId,
+              name: item.location.name,
               items: [],
             };
           }
 
-          acc[clusterId].items.push(item);
-
+          acc[locationId].items.push(item);
           return acc;
         }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
 
+        // Group item based on cluster inside each location
+        const finalItemsGroupedByLocation = Object.values(
+          itemsGroupedByLocation
+        ).map((location) => {
+          const itemsGroupedByCluster = location.items.reduce((acc, item) => {
+            const clusterId = item.parameter.category.cluster.id;
+            if (!acc[clusterId]) {
+              acc[clusterId] = {
+                id: clusterId,
+                name: item.parameter.category.cluster.name,
+                items: [],
+              };
+            }
+
+            acc[clusterId].items.push(item);
+
+            return acc;
+          }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+
+          return {
+            id: location.id,
+            name: location.name,
+            clusters: Object.values(itemsGroupedByCluster),
+          };
+        });
+
         return {
-          id: location.id,
-          name: location.name,
-          items: Object.values(groupedByCluster),
+          id: company.id,
+          name: company.name,
+          locations: finalItemsGroupedByLocation,
         };
       });
     });

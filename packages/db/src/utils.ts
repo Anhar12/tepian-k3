@@ -72,11 +72,17 @@ export async function generateSequentialNumber(
   padLength: number = 6
 ): Promise<string> {
   // PostgreSQL sequences are atomic - handles race conditions automatically
-  const result = await db.execute(
+  const [result] = await db.execute(
     sql`SELECT nextval('${sql.raw(sequenceName)}')`
   );
 
-  const sequence = Number(result[0]?.sequence);
+  if (!result || result.nextval === undefined) {
+    throw new Error(
+      `Failed to retrieve next value from sequence: ${sequenceName}`
+    );
+  }
+
+  const sequence = Number(result.nextval);
 
   const date = new Date();
   const year = date.getFullYear();

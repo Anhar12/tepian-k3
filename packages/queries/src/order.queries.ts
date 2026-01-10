@@ -15,6 +15,7 @@ import orderItemSchema from "@tepian-k3/schema/order-item.schema";
 import { generateOrderNumberWithSequence } from "@tepian-k3/db/utils";
 import orderItemQueries from "./order-item.queries";
 import orderStatusHistoryQueries from "./order-status-history.queries";
+import { logCreate } from "./helpers/audit.helpers";
 
 const orderQueries = {
   getAllOrderByUserId(userId: string) {
@@ -225,6 +226,22 @@ const orderQueries = {
           });
         },
       });
+
+      // Log audit for order creation
+
+      yield* Effect.forkDaemon(
+        logCreate(
+          "order",
+          result.order.id,
+          result.order as Record<string, unknown>,
+          userId,
+          undefined,
+          {
+            orderType: "testing",
+            createdFrom: "web_interface",
+          }
+        )
+      );
 
       return result;
     });

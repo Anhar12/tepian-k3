@@ -1,4 +1,5 @@
 import { createCallerFactory, createTRPCRouter } from ".";
+import { auditRouter } from "./routers/audit";
 import { authRouter } from "./routers/auth";
 import { cartRouter } from "./routers/cart";
 import { clusterRouter } from "./routers/cluster";
@@ -46,6 +47,7 @@ export const appRouter = createTRPCRouter({
   order: orderRouter,
   event: eventRouter,
   test: testRouter,
+  audit: auditRouter,
 });
 
 // export type definition of API
