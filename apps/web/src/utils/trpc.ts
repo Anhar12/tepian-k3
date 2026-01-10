@@ -3,7 +3,7 @@ import { QueryCache, QueryClient } from "@tanstack/react-query";
 import {
   createTRPCClient,
   httpBatchLink,
-  httpBatchStreamLink,
+  httpSubscriptionLink,
   httpLink,
   isNonJsonSerializable,
   loggerLink,
@@ -12,6 +12,7 @@ import {
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { env } from "@/env";
+import { EventSourcePolyfill } from "event-source-polyfill";
 import SuperJSON from "superjson";
 
 export const queryClient = new QueryClient({
@@ -36,21 +37,6 @@ export const trpcClient = createTRPCClient<AppRouter>({
         process.env.NODE_ENV === "development" ||
         (op.direction === "down" && op.result instanceof Error),
     }),
-    // httpBatchLink({
-    //   url: `${env.VITE_SERVER_URL}/trpc`,
-    //   transformer: SuperJSON,
-    //   headers: () => {
-    //     const headers = new Headers();
-
-    //     const token = localStorage.getItem("token");
-
-    //     if (token) {
-    //       headers.append("Authorization", `Bearer ${token}`);
-    //     }
-
-    //     return headers;
-    //   },
-    // }),
     splitLink({
       condition: (op) => {
         return op.path.startsWith("auth.") || isNonJsonSerializable(op.input);
@@ -70,18 +56,37 @@ export const trpcClient = createTRPCClient<AppRouter>({
           return headers;
         },
       }),
-      false: httpBatchLink({
-        url: `${env.VITE_SERVER_URL}/trpc`,
-        transformer: SuperJSON,
-        headers: () => {
-          const headers = new Headers();
-          const token = localStorage.getItem("token");
+      false: splitLink({
+        condition: (op) => op.type === "subscription",
+        true: httpSubscriptionLink({
+          url: `${env.VITE_SERVER_URL}/trpc`,
+          transformer: SuperJSON,
+          EventSource: EventSourcePolyfill,
+          eventSourceOptions: async ({ op }) => {
+            //                          ^ Includes the operation that's being executed
+            // you can use this to generate a signature for the operation
+            const token = localStorage.getItem("token");
+            return {
+              headers: {
+                authorization: token ? `Bearer ${token}` : "",
+                "x-signature": `signature-for-${op.path}`,
+              },
+            };
+          },
+        }),
+        false: httpBatchLink({
+          url: `${env.VITE_SERVER_URL}/trpc`,
+          transformer: SuperJSON,
+          headers: () => {
+            const headers = new Headers();
+            const token = localStorage.getItem("token");
 
-          if (token) {
-            headers.append("Authorization", `Bearer ${token}`);
-          }
-          return headers;
-        },
+            if (token) {
+              headers.append("Authorization", `Bearer ${token}`);
+            }
+            return headers;
+          },
+        }),
       }),
     }),
   ],

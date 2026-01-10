@@ -20,6 +20,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { globalInfoToast } from "@/lib/toast";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -27,6 +28,8 @@ import {
   useNavigate,
   type LinkProps,
 } from "@tanstack/react-router";
+import { EventTypes } from "@tepian-k3/schema/event.schema";
+import { useSubscription } from "@trpc/tanstack-react-query";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -64,6 +67,14 @@ const pusatLayananItems: {
 
 function HomeComponent() {
   const navigate = useNavigate();
+
+  useSubscription({
+    ...trpc.event.onBroadcastTest.subscriptionOptions(),
+    onData: (data) => {
+      // ✅ data is BroadcastTestEvent - no type guard needed!
+      globalInfoToast(data.message);
+    },
+  });
 
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">

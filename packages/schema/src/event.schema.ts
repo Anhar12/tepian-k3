@@ -1,11 +1,10 @@
 import { ORDER_STATUS } from "@tepian-k3/constants";
 import { z } from "zod";
 
-// Define schemas for each event type
 export const notificationEventSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  orderId: z.string().uuid().nullable(),
+  id: z.uuidv7(),
+  userId: z.uuidv7(),
+  orderId: z.uuidv7().nullable(),
   type: z.string(),
   title: z.string(),
   message: z.string(),
@@ -21,20 +20,27 @@ export const orderStatusChangedEventSchema = z.object({
   timestamp: z.date(),
 });
 
+export const broadcastTestEventSchema = z.object({
+  message: z.string(),
+});
+
 // Define all event schemas
 export const eventSchemas = {
   notification: notificationEventSchema,
   orderStatusChanged: orderStatusChangedEventSchema,
+  broadcastTest: broadcastTestEventSchema,
 } as const;
 
 export type NotificationEvent = z.infer<typeof notificationEventSchema>;
 export type OrderStatusChangedEvent = z.infer<
   typeof orderStatusChangedEventSchema
 >;
+export type BroadcastTestEvent = z.infer<typeof broadcastTestEventSchema>;
 
 export type EventMap = {
   notification: NotificationEvent;
   orderStatusChanged: OrderStatusChangedEvent;
+  broadcastTest: BroadcastTestEvent;
 };
 
 export type EventName = keyof EventMap;
@@ -42,24 +48,6 @@ export type EventName = keyof EventMap;
 export enum EventTypes {
   NOTIFICATION = "notification",
   ORDER_STATUS_CHANGED = "orderStatusChanged",
+  BROADCAST_TEST = "broadcastTest",
   // Add more event types as needed
-}
-
-export type EventChannel = `${EventTypes}:${string}`;
-
-export function createChannel(type: EventTypes, userId: string): EventChannel {
-  return `${type}:${userId}`;
-}
-
-export function parseChannel(
-  channel: string
-): { type: EventTypes; userId: string } | null {
-  const [type, userId] = channel.split(":");
-  if (!type || !userId) return null;
-
-  if (!Object.values(EventTypes).includes(type as EventTypes)) {
-    return null;
-  }
-
-  return { type: type as EventTypes, userId };
 }

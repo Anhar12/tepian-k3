@@ -3,6 +3,7 @@ import { authRouter } from "./routers/auth";
 import { cartRouter } from "./routers/cart";
 import { clusterRouter } from "./routers/cluster";
 import { districtRouter } from "./routers/district";
+import { eventRouter } from "./routers/event";
 import { kbliRouter } from "./routers/kbli";
 import { orderRouter } from "./routers/order";
 import { parameterRouter } from "./routers/parameter";
@@ -12,6 +13,7 @@ import { permissionRouters } from "./routers/permission";
 import { provinceRouter } from "./routers/province";
 import { regencyRouter } from "./routers/regency";
 import { roleRouters } from "./routers/role";
+import { testRouter } from "./routers/test";
 import { toolRouter } from "./routers/tool";
 import { userRouter } from "./routers/user";
 import { userCompanyRouter } from "./routers/user-company";
@@ -42,6 +44,8 @@ export const appRouter = createTRPCRouter({
   userCompanyTestingLocation: userCompanyTestingLocationRouter,
   cart: cartRouter,
   order: orderRouter,
+  event: eventRouter,
+  test: testRouter,
 });
 
 // export type definition of API

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
+import { Route as TestRouteImport } from './routes/test'
 import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
@@ -62,6 +63,11 @@ import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './route
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
   path: '/unauthorized',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestRoute = TestRouteImport.update({
+  id: '/test',
+  path: '/test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KatalogRoute = KatalogRouteImport.update({
@@ -333,6 +339,7 @@ const coreBackOfficeClustersClusterIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/katalog': typeof KatalogRoute
+  '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/dashboard': typeof coreDashboardRouteRouteWithChildren
@@ -382,6 +389,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/katalog': typeof KatalogRoute
+  '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/konsultasi': typeof coreKonsultasiRouteRoute
   '/pelatihan': typeof corePelatihanRouteRoute
@@ -431,6 +439,7 @@ export interface FileRoutesById {
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
   '/katalog': typeof KatalogRoute
+  '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/(core)/dashboard': typeof coreDashboardRouteRouteWithChildren
@@ -482,6 +491,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/katalog'
+    | '/test'
     | '/unauthorized'
     | '/back-office'
     | '/dashboard'
@@ -531,6 +541,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/katalog'
+    | '/test'
     | '/unauthorized'
     | '/konsultasi'
     | '/pelatihan'
@@ -579,6 +590,7 @@ export interface FileRouteTypes {
     | '/(auth)'
     | '/(core)'
     | '/katalog'
+    | '/test'
     | '/unauthorized'
     | '/(core)/back-office'
     | '/(core)/dashboard'
@@ -631,6 +643,7 @@ export interface RootRouteChildren {
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
   KatalogRoute: typeof KatalogRoute
+  TestRoute: typeof TestRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
 }
 
@@ -641,6 +654,13 @@ declare module '@tanstack/react-router' {
       path: '/unauthorized'
       fullPath: '/unauthorized'
       preLoaderRoute: typeof UnauthorizedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/katalog': {
@@ -1130,6 +1150,7 @@ const rootRouteChildren: RootRouteChildren = {
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
   KatalogRoute: KatalogRoute,
+  TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
 }
 export const routeTree = rootRouteImport
