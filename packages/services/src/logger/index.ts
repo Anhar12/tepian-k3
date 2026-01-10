@@ -28,6 +28,30 @@ export const logWithContext = (
   logger.log(level, message, context);
 };
 
+export const logInfo = (
+  service: string,
+  message: string,
+  context?: Record<string, any>
+) => {
+  logWithContext("info", `[${service}] ${message}`, context);
+};
+
+export const logError = (
+  service: string,
+  message: string,
+  context?: Record<string, any>
+) => {
+  logWithContext("error", `[${service}] ${message}`, context);
+};
+
+export const logDebug = (
+  service: string,
+  message: string,
+  context?: Record<string, any>
+) => {
+  logWithContext("debug", `[${service}] ${message}`, context);
+};
+
 // Export logger instance
 export { logger };
 export default logger;

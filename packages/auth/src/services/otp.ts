@@ -5,7 +5,7 @@ import otpQueries from "@tepian-k3/queries/otp.queries";
 import { emailService } from "@tepian-k3/services/email";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import { encrypt } from "..";
-import logger from "@tepian-k3/services/logger";
+import { logError, logInfo } from "@tepian-k3/services/logger";
 import { Data, Effect, Option } from "effect";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { db } from "@tepian-k3/db/client";
@@ -57,10 +57,14 @@ export class OTPService {
               );
             }),
           catch: (error) => {
-            logger.error("Failed to create OTP in transaction", {
-              email,
-              error,
-            });
+            logError(
+              "OTPService.createOTP",
+              "Failed to create OTP in transaction",
+              {
+                email,
+                error,
+              }
+            );
             return new OTPError({
               status: false,
               message: "Gagal membuat kode OTP.",
@@ -76,7 +80,10 @@ export class OTPService {
               expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
             }),
           catch: (error) => {
-            logger.error("Failed to send OTP email", { email, error });
+            logError("OTPService.createOTP", "Failed to send OTP email", {
+              email,
+              error,
+            });
             return new OTPError({
               status: false,
               message: "Gagal mengirim email OTP.",
@@ -84,7 +91,7 @@ export class OTPService {
           },
         });
 
-        logger.info("OTP created and sent to email:", { email });
+        logInfo("OTPService.createOTP", `OTP created and sent to ${email}`);
 
         return {
           success: true,
@@ -141,10 +148,15 @@ export class OTPService {
               );
             }),
           catch: (error) => {
-            logger.error("Failed to mark OTP as verified", {
-              otpId: otp.id,
-              error,
-            });
+            logError(
+              "OTPService.verifyOTP",
+              "Failed to verify OTP in transaction",
+              {
+                otpId: otp.id,
+                userId: otp.userId,
+                error,
+              }
+            );
             return new OTPError({
               status: false,
               message: "Gagal memverifikasi kode OTP.",
@@ -179,7 +191,7 @@ export class OTPService {
               jti: user.id,
             }),
           catch: (error) => {
-            logger.error("Failed to generate token", {
+            logError("OTPService.verifyOTP", "Failed to generate auth token", {
               userId: user.id,
               error,
             });
@@ -255,10 +267,14 @@ export class OTPService {
               );
             }),
           catch: (error) => {
-            logger.error("Failed to create OTP in transaction", {
-              email,
-              error,
-            });
+            logError(
+              "OTPService.resendOTP",
+              "Failed to create OTP in transaction",
+              {
+                email,
+                error,
+              }
+            );
             return new OTPError({
               status: false,
               message: "Gagal membuat kode OTP.",
@@ -274,7 +290,10 @@ export class OTPService {
               expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
             }),
           catch: (error) => {
-            logger.error("Failed to send OTP email", { email, error });
+            logError("OTPService.resendOTP", "Failed to send OTP email", {
+              email,
+              error,
+            });
             return new OTPError({
               status: false,
               message: "Gagal mengirim email OTP.",
@@ -292,7 +311,7 @@ export class OTPService {
 
   static async cleanupExpiredOTPs(): Promise<void> {
     await Effect.runPromise(otpQueries.deleteExpiredOTPs()).catch((error) => {
-      logger.error("Error cleaning up OTPs", {
+      logError("OTPService.cleanupExpiredOTPs", "Error cleaning up OTPs", {
         error: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
       });
