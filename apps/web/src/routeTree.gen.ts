@@ -15,6 +15,7 @@ import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as coreSurveyKepuasanRouteImport } from './routes/(core)/survey-kepuasan'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
@@ -87,6 +88,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const coreSurveyKepuasanRoute = coreSurveyKepuasanRouteImport.update({
+  id: '/survey-kepuasan',
+  path: '/survey-kepuasan',
+  getParentRoute: () => coreRouteRoute,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
   id: '/settings',
@@ -354,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
@@ -401,6 +408,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
@@ -454,6 +462,7 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/(core)/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
@@ -506,6 +515,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/survey-kepuasan'
     | '/pengujian/checkout'
     | '/back-office/'
     | '/dashboard/'
@@ -553,6 +563,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
+    | '/survey-kepuasan'
     | '/pengujian/checkout'
     | '/back-office'
     | '/dashboard'
@@ -605,6 +616,7 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/(core)/survey-kepuasan'
     | '/(core)/pengujian/checkout'
     | '/(core)/back-office/'
     | '/(core)/dashboard/'
@@ -690,6 +702,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(core)/survey-kepuasan': {
+      id: '/(core)/survey-kepuasan'
+      path: '/survey-kepuasan'
+      fullPath: '/survey-kepuasan'
+      preLoaderRoute: typeof coreSurveyKepuasanRouteImport
+      parentRoute: typeof coreRouteRoute
     }
     '/(core)/settings': {
       id: '/(core)/settings'
@@ -1128,6 +1147,7 @@ interface coreRouteRouteChildren {
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
+  coreSurveyKepuasanRoute: typeof coreSurveyKepuasanRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
@@ -1139,6 +1159,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
+  coreSurveyKepuasanRoute: coreSurveyKepuasanRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
