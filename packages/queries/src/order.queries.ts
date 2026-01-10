@@ -16,13 +16,17 @@ import { generateOrderNumberWithSequence } from "@tepian-k3/db/utils";
 import orderItemQueries from "./order-item.queries";
 import orderStatusHistoryQueries from "./order-status-history.queries";
 import { logCreate } from "./helpers/audit.helpers";
+import type { OrderStatus } from "@tepian-k3/constants";
 
 const orderQueries = {
-  getAllOrderByUserId(userId: string) {
+  getAllOrderByUserId(userId: string, status: OrderStatus | "all" = "all") {
     return Effect.tryPromise({
       try: () =>
         db.query.order.findMany({
-          where: eq(order.userId, userId),
+          where: and(
+            eq(order.userId, userId),
+            status !== "all" ? eq(order.status, status) : undefined
+          ),
           orderBy: (order, { desc }) => [desc(order.createdAt)],
         }),
       catch: (error) => {

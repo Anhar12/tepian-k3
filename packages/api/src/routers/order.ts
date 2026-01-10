@@ -5,12 +5,21 @@ import orderSchema from "@tepian-k3/schema/order.schema";
 import { runEffect } from "../utils/run-effect";
 import orderItemSchema from "@tepian-k3/schema/order-item.schema";
 import { TRPCError } from "@trpc/server";
+import { ORDER_STATUS } from "@tepian-k3/constants";
 
 export const orderRouter = createTRPCRouter({
-  getAllOrders: protectedProcedure.query(
-    async ({ ctx }) =>
-      await runEffect(orderQueries.getAllOrderByUserId(ctx.user.id))
-  ),
+  getAllOrders: protectedProcedure
+    .input(
+      z.object({
+        status: z.enum(["all", ...ORDER_STATUS]).optional(),
+      })
+    )
+    .query(
+      async ({ input, ctx }) =>
+        await runEffect(
+          orderQueries.getAllOrderByUserId(ctx.user.id, input.status)
+        )
+    ),
 
   getOrderById: protectedProcedure
     .input(

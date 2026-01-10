@@ -1,26 +1,21 @@
+import { OrderDetailSkeleton } from "@/components/order-detail-skeleton";
 import { OrderTimeline } from "@/components/order-timeline";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Download, FileText } from "lucide-react";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/pengujian/status")({
-  beforeLoad: async ({ context, search }) => {
+  beforeLoad: async ({ search }) => {
     // check if orderId exists
     if (!search.orderId) {
       throw redirect({
         to: "/pengujian",
       });
     }
-
-    context.queryClient.ensureQueryData(
-      context.trpc.order.getOrderById.queryOptions({
-        orderId: search.orderId,
-      }),
-    );
   },
   validateSearch: z.object({
     orderId: z.uuidv7(),
@@ -31,11 +26,15 @@ export const Route = createFileRoute("/(core)/pengujian/status")({
 function RouteComponent() {
   const { orderId } = Route.useSearch();
 
-  const { data: orderDetail } = useSuspenseQuery(
+  const { data: orderDetail, isLoading } = useQuery(
     trpc.order.getOrderById.queryOptions({
       orderId,
     }),
   );
+
+  if (isLoading || !orderDetail) {
+    return <OrderDetailSkeleton />;
+  }
 
   return (
     <Card className="container min-h-[calc(100vh-8rem)] pt-0">

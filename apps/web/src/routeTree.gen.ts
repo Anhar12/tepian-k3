@@ -15,7 +15,6 @@ import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as coreSurveyKepuasanRouteImport } from './routes/(core)/survey-kepuasan'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
@@ -32,6 +31,8 @@ import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-of
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
+import { Route as corePengujianTransaksiRouteImport } from './routes/(core)/pengujian/transaksi'
+import { Route as corePengujianSurveyKepuasanRouteImport } from './routes/(core)/pengujian/survey-kepuasan'
 import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
 import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
@@ -89,11 +90,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const coreSurveyKepuasanRoute = coreSurveyKepuasanRouteImport.update({
-  id: '/survey-kepuasan',
-  path: '/survey-kepuasan',
-  getParentRoute: () => coreRouteRoute,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
   id: '/settings',
@@ -175,6 +171,17 @@ const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => coreBackOfficeRouteRoute,
 } as any)
+const corePengujianTransaksiRoute = corePengujianTransaksiRouteImport.update({
+  id: '/transaksi',
+  path: '/transaksi',
+  getParentRoute: () => corePengujianRouteRoute,
+} as any)
+const corePengujianSurveyKepuasanRoute =
+  corePengujianSurveyKepuasanRouteImport.update({
+    id: '/survey-kepuasan',
+    path: '/survey-kepuasan',
+    getParentRoute: () => corePengujianRouteRoute,
+  } as any)
 const corePengujianStatusRoute = corePengujianStatusRouteImport.update({
   id: '/status',
   path: '/status',
@@ -366,9 +373,10 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
+  '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
+  '/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
@@ -415,9 +423,10 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
-  '/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
+  '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
+  '/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
@@ -470,9 +479,10 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
-  '/(core)/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
+  '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
+  '/(core)/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
@@ -524,9 +534,10 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
-    | '/survey-kepuasan'
     | '/pengujian/checkout'
     | '/pengujian/status'
+    | '/pengujian/survey-kepuasan'
+    | '/pengujian/transaksi'
     | '/back-office/'
     | '/dashboard/'
     | '/pengujian/'
@@ -573,9 +584,10 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/profile'
     | '/settings'
-    | '/survey-kepuasan'
     | '/pengujian/checkout'
     | '/pengujian/status'
+    | '/pengujian/survey-kepuasan'
+    | '/pengujian/transaksi'
     | '/back-office'
     | '/dashboard'
     | '/pengujian'
@@ -627,9 +639,10 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/(core)/profile'
     | '/(core)/settings'
-    | '/(core)/survey-kepuasan'
     | '/(core)/pengujian/checkout'
     | '/(core)/pengujian/status'
+    | '/(core)/pengujian/survey-kepuasan'
+    | '/(core)/pengujian/transaksi'
     | '/(core)/back-office/'
     | '/(core)/dashboard/'
     | '/(core)/pengujian/'
@@ -714,13 +727,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/(core)/survey-kepuasan': {
-      id: '/(core)/survey-kepuasan'
-      path: '/survey-kepuasan'
-      fullPath: '/survey-kepuasan'
-      preLoaderRoute: typeof coreSurveyKepuasanRouteImport
-      parentRoute: typeof coreRouteRoute
     }
     '/(core)/settings': {
       id: '/(core)/settings'
@@ -833,6 +839,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/back-office/'
       preLoaderRoute: typeof coreBackOfficeIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/pengujian/transaksi': {
+      id: '/(core)/pengujian/transaksi'
+      path: '/transaksi'
+      fullPath: '/pengujian/transaksi'
+      preLoaderRoute: typeof corePengujianTransaksiRouteImport
+      parentRoute: typeof corePengujianRouteRoute
+    }
+    '/(core)/pengujian/survey-kepuasan': {
+      id: '/(core)/pengujian/survey-kepuasan'
+      path: '/survey-kepuasan'
+      fullPath: '/pengujian/survey-kepuasan'
+      preLoaderRoute: typeof corePengujianSurveyKepuasanRouteImport
+      parentRoute: typeof corePengujianRouteRoute
     }
     '/(core)/pengujian/status': {
       id: '/(core)/pengujian/status'
@@ -1147,12 +1167,16 @@ const coreDashboardRouteRouteWithChildren =
 interface corePengujianRouteRouteChildren {
   corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute
   corePengujianStatusRoute: typeof corePengujianStatusRoute
+  corePengujianSurveyKepuasanRoute: typeof corePengujianSurveyKepuasanRoute
+  corePengujianTransaksiRoute: typeof corePengujianTransaksiRoute
   corePengujianIndexRoute: typeof corePengujianIndexRoute
 }
 
 const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
   corePengujianCheckoutRoute: corePengujianCheckoutRoute,
   corePengujianStatusRoute: corePengujianStatusRoute,
+  corePengujianSurveyKepuasanRoute: corePengujianSurveyKepuasanRoute,
+  corePengujianTransaksiRoute: corePengujianTransaksiRoute,
   corePengujianIndexRoute: corePengujianIndexRoute,
 }
 
@@ -1168,7 +1192,6 @@ interface coreRouteRouteChildren {
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
-  coreSurveyKepuasanRoute: typeof coreSurveyKepuasanRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
@@ -1180,7 +1203,6 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
-  coreSurveyKepuasanRoute: coreSurveyKepuasanRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
