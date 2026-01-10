@@ -32,6 +32,7 @@ import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-of
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
+import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
 import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
@@ -173,6 +174,11 @@ const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => coreBackOfficeRouteRoute,
+} as any)
+const corePengujianStatusRoute = corePengujianStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => corePengujianRouteRoute,
 } as any)
 const corePengujianCheckoutRoute = corePengujianCheckoutRouteImport.update({
   id: '/checkout',
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof coreSettingsRoute
   '/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/pengujian/status': typeof corePengujianStatusRoute
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
@@ -410,6 +417,7 @@ export interface FileRoutesByTo {
   '/settings': typeof coreSettingsRoute
   '/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/pengujian/status': typeof corePengujianStatusRoute
   '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
@@ -464,6 +472,7 @@ export interface FileRoutesById {
   '/(core)/settings': typeof coreSettingsRoute
   '/(core)/survey-kepuasan': typeof coreSurveyKepuasanRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/(core)/pengujian/status': typeof corePengujianStatusRoute
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
@@ -517,6 +526,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/survey-kepuasan'
     | '/pengujian/checkout'
+    | '/pengujian/status'
     | '/back-office/'
     | '/dashboard/'
     | '/pengujian/'
@@ -565,6 +575,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/survey-kepuasan'
     | '/pengujian/checkout'
+    | '/pengujian/status'
     | '/back-office'
     | '/dashboard'
     | '/pengujian'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/(core)/settings'
     | '/(core)/survey-kepuasan'
     | '/(core)/pengujian/checkout'
+    | '/(core)/pengujian/status'
     | '/(core)/back-office/'
     | '/(core)/dashboard/'
     | '/(core)/pengujian/'
@@ -821,6 +833,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/back-office/'
       preLoaderRoute: typeof coreBackOfficeIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/pengujian/status': {
+      id: '/(core)/pengujian/status'
+      path: '/status'
+      fullPath: '/pengujian/status'
+      preLoaderRoute: typeof corePengujianStatusRouteImport
+      parentRoute: typeof corePengujianRouteRoute
     }
     '/(core)/pengujian/checkout': {
       id: '/(core)/pengujian/checkout'
@@ -1127,11 +1146,13 @@ const coreDashboardRouteRouteWithChildren =
 
 interface corePengujianRouteRouteChildren {
   corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute
+  corePengujianStatusRoute: typeof corePengujianStatusRoute
   corePengujianIndexRoute: typeof corePengujianIndexRoute
 }
 
 const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
   corePengujianCheckoutRoute: corePengujianCheckoutRoute,
+  corePengujianStatusRoute: corePengujianStatusRoute,
   corePengujianIndexRoute: corePengujianIndexRoute,
 }
 

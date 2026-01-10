@@ -64,6 +64,13 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   cancelled: "Cancelled",
 };
 
+export const ORDER_STATUS_FLOW: OrderStatus[] = [
+  "pending",
+  "confirmed",
+  "in_progress",
+  "completed",
+];
+
 export const ORDER_APPROVAL_STATUSES = [
   "pending",
   "approved",

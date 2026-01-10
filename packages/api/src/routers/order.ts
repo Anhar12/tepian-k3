@@ -4,6 +4,7 @@ import z from "zod";
 import orderSchema from "@tepian-k3/schema/order.schema";
 import { runEffect } from "../utils/run-effect";
 import orderItemSchema from "@tepian-k3/schema/order-item.schema";
+import { TRPCError } from "@trpc/server";
 
 export const orderRouter = createTRPCRouter({
   getAllOrders: protectedProcedure.query(
@@ -17,10 +18,20 @@ export const orderRouter = createTRPCRouter({
         orderId: z.string(),
       })
     )
-    .query(
-      async ({ input, ctx }) =>
-        await runEffect(orderQueries.getOrderById(input.orderId, ctx.user.id))
-    ),
+    .query(async ({ input, ctx }) => {
+      const order = await runEffect(
+        orderQueries.getOrderById(input.orderId, ctx.user.id)
+      );
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order tidak ditemukan",
+        });
+      }
+
+      return order;
+    }),
 
   createOrder: protectedProcedure
     .input(
