@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { SendEmailFailedError } from "../types";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -19,7 +20,7 @@ export const resendProvider = {
     });
 
     if (error) {
-      throw new Error(`Failed to send email: ${error.message}`);
+      throw new SendEmailFailedError("Failed to send email", error);
     }
 
     return data;

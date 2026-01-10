@@ -6,7 +6,7 @@ import {
   userCompanyTestingLocation,
 } from "@tepian-k3/db/schema";
 import type orderItemSchema from "@tepian-k3/schema/order-item.schema";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import type z from "zod";
@@ -19,10 +19,14 @@ const orderItemQueries = {
           where: eq(orderItem.orderId, orderId),
         }),
       catch: (error) => {
-        logger.error("Failed to fetch order items", { error, orderId });
+        logError(
+          "orderItemQueries.getOrderItemsByOrderId",
+          "Failed to fetch order items",
+          { error, orderId }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch order items",
+          message: "Gagal mengambil item pesanan",
         });
       },
     });
@@ -39,7 +43,7 @@ const orderItemQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Order items cannot be empty",
+            message: "Item pesanan tidak boleh kosong",
           })
         );
       }
@@ -52,7 +56,7 @@ const orderItemQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Item quantities must be greater than 0",
+            message: "Kuantitas item harus lebih besar dari 0",
           })
         );
       }
@@ -66,7 +70,7 @@ const orderItemQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Duplicate parameters found for the same location",
+            message: "Parameter duplikat ditemukan untuk lokasi yang sama",
           })
         );
       }
@@ -79,10 +83,17 @@ const orderItemQueries = {
             where: inArray(userCompanyTestingLocation.id, locationIds),
           }),
         catch: (error) => {
-          logger.error("Failed to validate locations", { error, locationIds });
+          logError(
+            "orderItemQueries.createOrderItems",
+            "Failed to validate locations",
+            {
+              error,
+              locationIds,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to validate locations",
+            message: "Gagal memvalidasi lokasi",
           });
         },
       });
@@ -91,7 +102,7 @@ const orderItemQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "One or more locations not found",
+            message: "Satu atau lebih lokasi tidak ditemukan",
           })
         );
       }
@@ -106,13 +117,14 @@ const orderItemQueries = {
             where: inArray(parameters.id, parameterIds),
           }),
         catch: (error) => {
-          logger.error("Failed to validate parameters", {
-            error,
-            parameterIds,
-          });
+          logError(
+            "orderItemQueries.createOrderItems",
+            "Failed to validate parameters",
+            { error, parameterIds }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to validate parameters",
+            message: "Gagal memvalidasi parameter",
           });
         },
       });
@@ -121,7 +133,7 @@ const orderItemQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "One or more parameters not found",
+            message: "Satu atau lebih parameter tidak ditemukan",
           })
         );
       }
@@ -137,7 +149,8 @@ const orderItemQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Price mismatch detected. Please refresh and try again.",
+            message:
+              "Terjadi ketidaksesuaian harga. Silakan segarkan dan coba lagi.",
           })
         );
       }
@@ -156,14 +169,14 @@ const orderItemQueries = {
       const insertedItems = yield* Effect.tryPromise({
         try: () => tx.insert(orderItem).values(mappedItems).returning(),
         catch: (error) => {
-          logger.error("Failed to create order items", {
-            error,
-            orderId,
-            mappedItems,
-          });
+          logError(
+            "orderItemQueries.createOrderItems",
+            "Failed to create order items",
+            { error, orderId, mappedItems }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create order items",
+            message: "Gagal membuat item pesanan",
           });
         },
       });
@@ -172,7 +185,7 @@ const orderItemQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "No order items were created",
+            message: "Tidak ada item pesanan yang dibuat",
           })
         );
       }

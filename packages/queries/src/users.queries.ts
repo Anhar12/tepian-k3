@@ -17,7 +17,7 @@ import { z } from "zod";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { hash } from "@node-rs/argon2";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { storageService } from "@tepian-k3/services/storage";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
@@ -31,7 +31,10 @@ const usersQueries = {
           where: and(eq(users.email, email), isNull(users.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Failed to get user by email", { email, error });
+        logError("usersQueries.getUserByEmail", "Failed to get user by email", {
+          email,
+          error,
+        });
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Gagal mengambil data pengguna.`,
@@ -65,8 +68,10 @@ const usersQueries = {
           },
         }),
       catch: (error) => {
-        console.log(error);
-        logger.error("Failed to get user by ID", { userId, error });
+        logError("usersQueries.getUserById", "Failed to get user by ID", {
+          userId,
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Gagal mengambil data pengguna.`,
@@ -99,10 +104,14 @@ const usersQueries = {
           where: and(eq(users.id, userId), isNull(users.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Failed to get user by ID with password", {
-          userId,
-          error,
-        });
+        logError(
+          "usersQueries.getUserByIdWithPassword",
+          "Failed to get user by ID with password",
+          {
+            userId,
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Gagal mengambil data pengguna.`,
@@ -206,7 +215,11 @@ const usersQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Failed to get all users", { input, error });
+          logError(
+            "usersQueries.getOffsetPaginatedUsers",
+            "Failed to get all users",
+            { input, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data pengguna.`,
@@ -307,7 +320,11 @@ const usersQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Failed to get all users", { input, error });
+          logError(
+            "usersQueries.getOffsetPaginatedUsers",
+            "Failed to get all users",
+            { input, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data pengguna.`,
@@ -333,10 +350,14 @@ const usersQueries = {
             where: and(eq(users.email, data.email), isNull(users.deletedAt)),
           }),
         catch: (error) => {
-          logger.error("Failed to check if email is taken", {
-            email: data.email,
-            error,
-          });
+          logError(
+            "usersQueries.createUser",
+            "Failed to check if email is taken",
+            {
+              email: data.email,
+              error,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memeriksa email pengguna.`,
@@ -357,7 +378,7 @@ const usersQueries = {
       const hashedPassword = yield* Effect.tryPromise({
         try: () => hash(data.password),
         catch: (error) => {
-          logger.error("Failed to hash password", {
+          logError("usersQueries.createUser", "Failed to hash password", {
             email: data.email,
             error,
           });
@@ -395,7 +416,10 @@ const usersQueries = {
             return newUser;
           }),
         catch: (error) => {
-          logger.error("Failed to create user", { data, error });
+          logError("usersQueries.createUser", "Failed to create user", {
+            data,
+            error,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal membuat pengguna.`,
@@ -417,10 +441,14 @@ const usersQueries = {
             where: and(eq(users.email, data.email), isNull(users.deletedAt)),
           }),
         catch: (error) => {
-          logger.error("Failed to check if email is taken", {
-            email: data.email,
-            error,
-          });
+          logError(
+            "usersQueries.adminCreateUser",
+            "Failed to check if email is taken",
+            {
+              email: data.email,
+              error,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memeriksa email pengguna.`,
@@ -442,7 +470,7 @@ const usersQueries = {
       const hashedPassword = yield* Effect.tryPromise({
         try: () => hash(data.password),
         catch: (error) => {
-          logger.error("Failed to hash password", {
+          logError("usersQueries.adminCreateUser", "Failed to hash password", {
             email: data.email,
             error,
           });
@@ -491,7 +519,10 @@ const usersQueries = {
             return user;
           }),
         catch: (error) => {
-          logger.error("Failed to create user", { data, error });
+          logError("usersQueries.createUser", "Failed to create user", {
+            data,
+            error,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal membuat pengguna.`,
@@ -515,7 +546,11 @@ const usersQueries = {
         ? yield* Effect.tryPromise({
             try: () => hash(data.password!),
             catch: (error) => {
-              logger.error("Failed to hash password", { id, error });
+              logError(
+                "usersQueries.adminUpdateUser",
+                "Failed to hash password",
+                { id, error }
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: `Gagal mengenkripsi password.`,
@@ -583,7 +618,11 @@ const usersQueries = {
             return updatedUser;
           }),
         catch: (error) => {
-          logger.error("Failed to update user", { id, data, error });
+          logError("usersQueries.updateUser", "Failed to update user", {
+            id,
+            data,
+            error,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui data pengguna.`,
@@ -607,7 +646,11 @@ const usersQueries = {
         try: () =>
           db.update(users).set(data).where(eq(users.id, id)).returning(),
         catch: (error) => {
-          logger.error("Failed to update user profile", { id, data, error });
+          logError(
+            "usersQueries.updateUserProfile",
+            "Failed to update user profile",
+            { id, data, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui profil pengguna.`,
@@ -617,7 +660,11 @@ const usersQueries = {
       });
 
       if (!user) {
-        logger.error("No user returned after profile update", { id });
+        logError(
+          "usersQueries.updateUserProfile",
+          "No user returned after profile update",
+          { id }
+        );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -644,7 +691,11 @@ const usersQueries = {
             .where(eq(users.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Failed to update user profile", { id, error });
+          logError(
+            "usersQueries.updateUserAvatar",
+            "Failed to update user profile",
+            { id, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui profil pengguna.`,
@@ -654,7 +705,11 @@ const usersQueries = {
       });
 
       if (!updatedUser) {
-        logger.error("No user returned after profile update", { id });
+        logError(
+          "usersQueries.updateUserAvatar",
+          "No user returned after profile update",
+          { id }
+        );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -668,7 +723,8 @@ const usersQueries = {
         const key = storageService.getKeyFromUrl(user.profilePictureUrl);
 
         if (!key) {
-          logger.warn(
+          logError(
+            "usersQueries.updateUserAvatar",
             "Failed to extract key from existing company picture URL",
             { url: user.profilePictureUrl }
           );
@@ -694,7 +750,11 @@ const usersQueries = {
       const hashedPassword = yield* Effect.tryPromise({
         try: () => hash(newPassword),
         catch: (error) => {
-          logger.error("Failed to hash new password", { userId, error });
+          logError(
+            "usersQueries.updateUserPassword",
+            "Failed to hash new password",
+            { userId, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengenkripsi password baru.`,
@@ -713,7 +773,11 @@ const usersQueries = {
             .where(eq(users.id, userId))
             .returning(),
         catch: (error) => {
-          logger.error("Failed to update user password", { userId, error });
+          logError(
+            "usersQueries.updateUserPassword",
+            "Failed to update user password",
+            { userId, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui password pengguna.`,
@@ -723,7 +787,11 @@ const usersQueries = {
       });
 
       if (!user) {
-        logger.error("No user returned after password update", { userId });
+        logError(
+          "usersQueries.updateUserPassword",
+          "No user returned after password update",
+          { userId }
+        );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -751,10 +819,11 @@ const usersQueries = {
             .where(eq(users.id, userId))
             .returning(),
         catch: (error) => {
-          logger.error("Failed to mark user email as verified", {
-            userId,
-            error,
-          });
+          logError(
+            "usersQueries.markUserEmailAsVerified",
+            "Failed to mark user email as verified",
+            { userId, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui status verifikasi email pengguna.`,
@@ -764,9 +833,11 @@ const usersQueries = {
       });
 
       if (!user) {
-        logger.error("No user returned after marking email as verified", {
-          userId,
-        });
+        logError(
+          "usersQueries.markUserEmailAsVerified",
+          "No user returned after marking email as verified",
+          { userId }
+        );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -793,7 +864,10 @@ const usersQueries = {
             .where(eq(users.id, userId))
             .returning(),
         catch: (error) => {
-          logger.error("Failed to delete user", { userId, error });
+          logError("usersQueries.deleteUser", "Failed to delete user", {
+            userId,
+            error,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal menghapus pengguna.`,
@@ -803,7 +877,9 @@ const usersQueries = {
       });
 
       if (!user) {
-        logger.error("No user returned after deletion", { userId });
+        logError("usersQueries.deleteUser", "No user returned after deletion", {
+          userId,
+        });
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -824,10 +900,14 @@ const usersQueries = {
             where: and(eq(users.id, userId), isNotNull(users.deletedAt)),
           }),
         catch: (error) => {
-          logger.error("Failed to check if deleted user exists", {
-            userId,
-            error,
-          });
+          logError(
+            "usersQueries.restoreUser",
+            "Failed to check if deleted user exists",
+            {
+              userId,
+              error,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memeriksa data pengguna.`,
@@ -855,7 +935,10 @@ const usersQueries = {
             .where(eq(users.id, userId))
             .returning(),
         catch: (error) => {
-          logger.error("Failed to restore user", { userId, error });
+          logError("usersQueries.restoreUser", "Failed to restore user", {
+            userId,
+            error,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengembalikan pengguna.`,
@@ -865,7 +948,13 @@ const usersQueries = {
       });
 
       if (!user) {
-        logger.error("No user returned after restoration", { userId });
+        logError(
+          "usersQueries.restoreUser",
+          "No user returned after restoration",
+          {
+            userId,
+          }
+        );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

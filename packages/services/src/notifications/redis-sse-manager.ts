@@ -1,6 +1,7 @@
 import type { EventMap, EventName } from "@tepian-k3/schema/event.schema";
 import type { ISSEManager, PubSubMessage, SSEClient } from "./types";
 import { redisPubSub, type RedisConfig } from "./redis-pubsub";
+import { logWarn, logInfo, logError } from "../logger";
 
 class RedisSSEManager implements ISSEManager {
   private clients: Map<string, SSEClient> = new Map();
@@ -15,7 +16,10 @@ class RedisSSEManager implements ISSEManager {
    */
   async initialize(config: RedisConfig): Promise<void> {
     if (this.isInitialized) {
-      console.warn("[RedisSSEManager] Already initialized");
+      logWarn(
+        "RedisSSEManager.initialize",
+        "RedisSSEManager is already initialized"
+      );
       return;
     }
 
@@ -31,7 +35,7 @@ class RedisSSEManager implements ISSEManager {
     this.startHeartbeat();
 
     this.isInitialized = true;
-    console.log("[RedisSSEManager] Initialized");
+    logInfo("RedisSSEManager.initialize", "Initialized RedisSSEManager");
   }
 
   /**
@@ -103,7 +107,12 @@ class RedisSSEManager implements ISSEManager {
     this.clientRoomMap.set(clientId, new Set());
 
     // Track user online in Redis
-    redisPubSub.setUserOnline(userId).catch(console.error);
+    redisPubSub.setUserOnline(userId).catch((error) => {
+      logError("RedisSSEManager.addClient", "Failed to set user online", {
+        error,
+        userId,
+      });
+    });
 
     // Send connection established event
     this.localSendToClient(clientId, "connected", {
@@ -112,8 +121,9 @@ class RedisSSEManager implements ISSEManager {
       timestamp: new Date().toISOString(),
     });
 
-    console.log(
-      `[RedisSSEManager] Client connected: ${clientId} for user: ${userId}`
+    logInfo(
+      "RedisSSEManager.addClient",
+      `Client connected: ${clientId} for user: ${userId}`
     );
     return client;
   }
@@ -131,7 +141,13 @@ class RedisSSEManager implements ISSEManager {
         if (userClients.size === 0) {
           this.userClientMap.delete(client.userId);
           // User has no more connections on this server
-          redisPubSub.setUserOffline(client.userId).catch(console.error);
+          redisPubSub.setUserOffline(client.userId).catch((error) => {
+            logError(
+              "RedisSSEManager.removeClient",
+              "Failed to set user offline",
+              { error, userId: client.userId }
+            );
+          });
         }
       }
 
@@ -145,7 +161,10 @@ class RedisSSEManager implements ISSEManager {
       this.clientRoomMap.delete(clientId);
 
       this.clients.delete(clientId);
-      console.log(`[RedisSSEManager] Client disconnected: ${clientId}`);
+      logInfo(
+        "RedisSSEManager.removeClient",
+        `Client disconnected: ${clientId} for user: ${client.userId}`
+      );
     }
   }
 
@@ -169,9 +188,18 @@ class RedisSSEManager implements ISSEManager {
     }
 
     // Track in Redis for cross-server membership
-    redisPubSub.addUserToRoom(client.userId, roomId).catch(console.error);
+    redisPubSub.addUserToRoom(client.userId, roomId).catch((error) => {
+      logError("RedisSSEManager.joinRoom", "Failed to add user to room", {
+        error,
+        userId: client.userId,
+        roomId,
+      });
+    });
 
-    console.log(`[RedisSSEManager] Client ${clientId} joined room: ${roomId}`);
+    logInfo(
+      "RedisSSEManager.joinRoom",
+      `Client ${clientId} joined room: ${roomId}`
+    );
 
     // Notify room members (local + other servers)
     this.sendToRoom(roomId, "roomJoined", {
@@ -204,11 +232,22 @@ class RedisSSEManager implements ISSEManager {
 
     if (client) {
       // Remove from Redis
-      redisPubSub
-        .removeUserFromRoom(client.userId, roomId)
-        .catch(console.error);
+      redisPubSub.removeUserFromRoom(client.userId, roomId).catch((error) => {
+        logError(
+          "RedisSSEManager.leaveRoom",
+          "Failed to remove user from room",
+          {
+            error,
+            userId: client.userId,
+            roomId,
+          }
+        );
+      });
 
-      console.log(`[RedisSSEManager] Client ${clientId} left room: ${roomId}`);
+      logInfo(
+        "RedisSSEManager.leaveRoom",
+        `Client ${clientId} left room: ${roomId}`
+      );
 
       // Notify remaining room members
       this.sendToRoom(roomId, "roomLeft", {
@@ -234,9 +273,10 @@ class RedisSSEManager implements ISSEManager {
       try {
         client.send(event, data);
       } catch (error) {
-        console.error(
-          `[RedisSSEManager] Failed to send to client ${clientId}:`,
-          error
+        logError(
+          "RedisSSEManager.localSendToClient",
+          `Failed to send to client ${clientId}`,
+          { error }
         );
         this.removeClient(clientId);
       }
@@ -300,7 +340,14 @@ class RedisSSEManager implements ISSEManager {
     this.localSendToUser(userId, event, data);
 
     // Publish to Redis for other servers
-    redisPubSub.publishToUser(userId, event, data).catch(console.error);
+    redisPubSub.publishToUser(userId, event, data).catch((error) => {
+      logError("RedisSSEManager.sendToUser", "Failed to publish to user", {
+        error,
+        userId,
+        event,
+        data,
+      });
+    });
   }
 
   /**
@@ -313,7 +360,14 @@ class RedisSSEManager implements ISSEManager {
     // Publish to Redis for other servers
     redisPubSub
       .publishToRoom(roomId, event as EventName, data as EventMap[EventName])
-      .catch(console.error);
+      .catch((error) => {
+        logError("RedisSSEManager.sendToRoom", "Failed to publish to room", {
+          error,
+          roomId,
+          event,
+          data,
+        });
+      });
   }
 
   /**
@@ -336,7 +390,19 @@ class RedisSSEManager implements ISSEManager {
         data as EventMap[EventName],
         excludeUserId
       )
-      .catch(console.error);
+      .catch((error) => {
+        logError(
+          "RedisSSEManager.sendToRoomExceptUser",
+          "Failed to publish to room except user",
+          {
+            error,
+            roomId,
+            excludeUserId,
+            event,
+            data,
+          }
+        );
+      });
   }
 
   /**
@@ -349,7 +415,13 @@ class RedisSSEManager implements ISSEManager {
     // Publish to Redis for other servers
     redisPubSub
       .broadcast(event as EventName, data as EventMap[EventName])
-      .catch(console.error);
+      .catch((error) => {
+        logError("RedisSSEManager.broadcast", "Failed to broadcast", {
+          error,
+          event,
+          data,
+        });
+      });
   }
 
   // ============================================
@@ -435,10 +507,14 @@ class RedisSSEManager implements ISSEManager {
     this.clientRoomMap.clear();
 
     // Disconnect from Redis
-    redisPubSub.disconnect().catch(console.error);
+    redisPubSub.disconnect().catch((error) => {
+      logError("RedisSSEManager.destroy", "Failed to disconnect from Redis", {
+        error,
+      });
+    });
 
     this.isInitialized = false;
-    console.log("[RedisSSEManager] Destroyed");
+    logInfo("RedisSSEManager.destroy", "Destroyed RedisSSEManager instance");
   }
 }
 

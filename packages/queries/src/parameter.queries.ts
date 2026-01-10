@@ -20,7 +20,7 @@ import {
 import { z } from "zod";
 import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 import parameterCategoriesQueries from "./parameter-categories.queries";
@@ -41,10 +41,14 @@ const parameterQueries = {
           },
         }),
       catch: (error) => {
-        logger.error("Error in getParameterById:", error);
+        logError(
+          "parameterQueries.getParameterById",
+          "Failed to fetch parameter by ID",
+          { id, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch parameter by ID.",
+          message: "Gagal mengambil parameter berdasarkan ID.",
         });
       },
     }).pipe(
@@ -61,10 +65,14 @@ const parameterQueries = {
           where: and(eq(parameters.id, id), isNotNull(parameters.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error in getDeletedParameterById:", error);
+        logError(
+          "parameterQueries.getDeletedParameterById",
+          "Failed to fetch deleted parameter by ID",
+          { id, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch deleted parameter by ID.",
+          message: "Gagal mengambil parameter yang dihapus berdasarkan ID.",
         });
       },
     }).pipe(
@@ -139,8 +147,9 @@ const parameterQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error(
-            "Error fetching paginated parameters by cluster and category",
+          logError(
+            "parameterQueries.getOffsetPaginatedParametersByClusterIdAndCategoryId",
+            "Failed to fetch paginated parameters by cluster and category",
             {
               error,
               input,
@@ -247,10 +256,11 @@ const parameterQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated parameters", {
-            error,
-            input,
-          });
+          logError(
+            "parameterQueries.getOffsetPaginatedParameters",
+            "Failed to fetch paginated parameters",
+            { error, input }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data parameter`,
@@ -285,7 +295,11 @@ const parameterQueries = {
       const [newParameter] = yield* Effect.tryPromise({
         try: () => db.insert(parameters).values(data).returning(),
         catch: (error) => {
-          logger.error("Error creating parameter", { error, data });
+          logError(
+            "parameterQueries.createParameter",
+            "Failed to create parameter",
+            { error, data }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat parameter baru.",
@@ -344,7 +358,11 @@ const parameterQueries = {
             .where(eq(parameters.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("Error updating parameter", { error, data });
+          logError(
+            "parameterQueries.updateParameter",
+            "Failed to update parameter",
+            { error, data }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui parameter.",
@@ -382,7 +400,11 @@ const parameterQueries = {
             .where(eq(parameters.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error deleting parameter", { error, id });
+          logError(
+            "parameterQueries.deleteParameter",
+            "Failed to delete parameter",
+            { id, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus parameter.",
@@ -422,7 +444,11 @@ const parameterQueries = {
             .where(eq(parameters.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error restoring parameter", { error, id });
+          logError(
+            "parameterQueries.restoreParameter",
+            "Failed to restore parameter",
+            { id, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan parameter.",

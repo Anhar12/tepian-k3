@@ -2,7 +2,7 @@ import type { OrderStatus } from "@tepian-k3/constants";
 import { eq } from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { orderStatusHistory } from "@tepian-k3/db/schema";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 
@@ -14,13 +14,14 @@ const orderStatusHistoryQueries = {
           where: eq(orderStatusHistory.orderId, orderId),
         }),
       catch: (error) => {
-        logger.error("Failed to fetch order status histories", {
-          error,
-          orderId,
-        });
+        logError(
+          "orderStatusHistoryQueries.getOrderStatusHistoriesByOrderId",
+          "Failed to fetch order status histories",
+          { error, orderId }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch order status histories",
+          message: "Gagal mengambil riwayat status pesanan",
         });
       },
     });
@@ -45,15 +46,14 @@ const orderStatusHistoryQueries = {
           })
           .returning(),
       catch: (error) => {
-        logger.error("Failed to create order status history", {
-          error,
-          orderId,
-          status,
-          changedBy,
-        });
+        logError(
+          "orderStatusHistoryQueries.createOrderStatusHistory",
+          "Failed to create order status history",
+          { error, orderId, status, changedBy, note }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create order status history",
+          message: "Gagal membuat riwayat status pesanan",
         });
       },
     }).pipe(
@@ -63,7 +63,7 @@ const orderStatusHistoryQueries = {
           : Effect.fail(
               new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
-                message: "Failed to create order status history",
+                message: "Gagal membuat riwayat status pesanan",
               })
             )
       )

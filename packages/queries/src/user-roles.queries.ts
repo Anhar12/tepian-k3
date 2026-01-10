@@ -1,7 +1,7 @@
 import { and, eq } from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { roles, userRoles } from "@tepian-k3/db/schema";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 
@@ -14,10 +14,14 @@ const userRolesQueries = {
             where: eq(roles.name, "user"),
           }),
         catch: (error) => {
-          logger.error("Error fetching default role", { error });
+          logError(
+            "userRolesQueries.assingDefaultRoleToUser",
+            "Error fetching default role",
+            { error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to fetch default role.",
+            message: "Gagal mengambil peran default.",
             cause: error,
           });
         },
@@ -27,7 +31,7 @@ const userRolesQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Default role not found.",
+            message: "Peran default tidak ditemukan.",
           })
         );
       }
@@ -44,13 +48,14 @@ const userRolesQueries = {
     return Effect.tryPromise({
       try: () => tx.insert(userRoles).values({ userId, roleId }).returning(),
       catch: (error) => {
-        logger.error(
+        logError(
+          "userRolesQueries.assignRoleToUser",
           `Error assigning role ${roleId} to user ${userId}:`,
-          error
+          { error }
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to assign role to user.",
+          message: "Gagal menetapkan peran ke user.",
           cause: error,
         });
       },
@@ -70,7 +75,11 @@ const userRolesQueries = {
           .onConflictDoNothing()
           .returning(),
       catch: (error) => {
-        logger.error("Error assigning role to user", { error });
+        logError(
+          "userRolesQueries.assignRole",
+          "Error assigning role to user",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menetapkan peran ke user",
@@ -96,7 +105,11 @@ const userRolesQueries = {
           .onConflictDoNothing()
           .returning(),
       catch: (error) => {
-        logger.error("Error assigning roles to user", { error });
+        logError(
+          "userRolesQueries.assignRoles",
+          "Error assigning roles to user",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menetapkan peran ke user",
@@ -116,7 +129,11 @@ const userRolesQueries = {
           )
           .returning(),
       catch: (error) => {
-        logger.error("Error removing role from user", { error });
+        logError(
+          "userRolesQueries.removeRole",
+          "Error removing role from user",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus peran dari user",
@@ -131,7 +148,11 @@ const userRolesQueries = {
       try: () =>
         tx.delete(userRoles).where(eq(userRoles.userId, userId)).returning(),
       catch: (error) => {
-        logger.error("Error removing all roles from user", { error });
+        logError(
+          "userRolesQueries.removeAllRoles",
+          "Error removing all roles from user",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus semua peran dari user",
@@ -159,7 +180,11 @@ const userRolesQueries = {
           }
         }),
       catch: (error) => {
-        logger.error("Error replacing roles for user", { error });
+        logError(
+          "userRolesQueries.replaceRoles",
+          "Error replacing roles for user",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengganti peran user",

@@ -8,7 +8,7 @@ import {
   userRoles,
   users,
 } from "@tepian-k3/db/schema";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import type { Permission } from "@tepian-k3/types/permission.types";
@@ -25,7 +25,11 @@ const permissionQueries = {
           },
         }),
       catch: (error) => {
-        logger.error("Error fetching permissions", { error });
+        logError(
+          "permissionQueries.getAllPermissions",
+          "Failed to get all permissions",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data izin",
@@ -45,7 +49,11 @@ const permissionQueries = {
             },
           }),
         catch: (error) => {
-          logger.error("Error fetching user", { error });
+          logError(
+            "permissionQueries.getUserWithPermissions",
+            "Failed to get user data",
+            { userId, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data user",
@@ -66,7 +74,11 @@ const permissionQueries = {
             .innerJoin(roles, eq(userRoles.roleId, roles.id))
             .where(eq(userRoles.userId, user.id)),
         catch: (error) => {
-          logger.error("Error fetching user roles", { error });
+          logError(
+            "permissionQueries.getUserWithPermissions",
+            "Failed to get user roles",
+            { userId, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data peran user",
@@ -96,7 +108,11 @@ const permissionQueries = {
             rolePerms = rolePermsData.map((rp) => rp.permission);
           },
           catch: (error) => {
-            logger.error("Error fetching role permissions", { error });
+            logError(
+              "permissionQueries.getUserWithPermissions",
+              "Failed to get role permissions",
+              { roleIds, error }
+            );
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: "Gagal mengambil data izin peran",
@@ -121,7 +137,11 @@ const permissionQueries = {
             .where(eq(userPermissions.userId, user.id)),
 
         catch: (error) => {
-          logger.error("Error fetching user permissions", { error });
+          logError(
+            "permissionQueries.getUserWithPermissions",
+            "Failed to get user permissions",
+            { userId, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data izin user",
@@ -220,7 +240,11 @@ const permissionQueries = {
               columns: { id: true },
             }),
           catch: (error) => {
-            logger.error("Error fetching permissions to remove", { error });
+            logError(
+              "permissionQueries.updateRolePermissions",
+              "Error fetching permissions to remove",
+              { error }
+            );
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: "Gagal mengambil data izin yang akan dihapus",
@@ -242,7 +266,11 @@ const permissionQueries = {
                   )
                 ),
             catch: (error) => {
-              logger.error("Error removing role permissions", { error });
+              logError(
+                "permissionQueries.updateRolePermissions",
+                "Error removing role permissions",
+                { error }
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal menghapus izin dari role",
@@ -262,7 +290,11 @@ const permissionQueries = {
               columns: { id: true },
             }),
           catch: (error) => {
-            logger.error("Error fetching permissions to add", { error });
+            logError(
+              "permissionQueries.updateRolePermissions",
+              "Error fetching permissions to add",
+              { error }
+            );
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: "Gagal mengambil data izin yang akan ditambahkan",
@@ -283,7 +315,11 @@ const permissionQueries = {
                 .values(newRolePermissions)
                 .onConflictDoNothing(),
             catch: (error) => {
-              logger.error("Error adding role permissions", { error });
+              logError(
+                "permissionQueries.updateRolePermissions",
+                "Error adding role permissions",
+                { error }
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal menambahkan izin ke role",

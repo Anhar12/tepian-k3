@@ -1,5 +1,6 @@
 import type { EventMap, EventName } from "@tepian-k3/schema/event.schema";
 import { notificationEmitter } from "./emitter";
+import { logError, logInfo } from "../logger";
 
 export type SSEClient = {
   id: string;
@@ -100,7 +101,10 @@ class SSEManager {
       timestamp: new Date().toISOString(),
     });
 
-    console.log(`[SSE] Client connected: ${clientId} for user: ${userId}`);
+    logInfo(
+      "SSEManager.addClient",
+      `Client connected: ${clientId} for user: ${userId}`
+    );
     return client;
   }
 
@@ -129,7 +133,7 @@ class SSEManager {
       this.clientRoomMap.delete(clientId);
 
       this.clients.delete(clientId);
-      console.log(`[SSE] Client disconnected: ${clientId}`);
+      logInfo("SSEManager.removeClient", `Client disconnected: ${clientId}`);
     }
   }
 
@@ -150,7 +154,7 @@ class SSEManager {
     }
 
     const client = this.clients.get(clientId);
-    console.log(`[SSE] Client ${clientId} joined room: ${roomId}`);
+    logInfo("SSEManager.joinRoom", `Client ${clientId} joined room: ${roomId}`);
 
     // Notify room members
     this.sendToRoom(roomId, "roomJoined", {
@@ -179,7 +183,7 @@ class SSEManager {
     }
 
     const client = this.clients.get(clientId);
-    console.log(`[SSE] Client ${clientId} left room: ${roomId}`);
+    logInfo("SSEManager.leaveRoom", `Client ${clientId} left room: ${roomId}`);
 
     // Notify remaining room members
     this.sendToRoom(roomId, "roomLeft", {
@@ -199,7 +203,11 @@ class SSEManager {
       try {
         client.send(event, data);
       } catch (error) {
-        console.error(`[SSE] Failed to send to client ${clientId}:`, error);
+        logError(
+          "SSEManager.sendToClient",
+          `Failed to send to client ${clientId}`,
+          { error, event, data }
+        );
         this.removeClient(clientId);
       }
     }

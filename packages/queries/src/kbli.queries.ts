@@ -15,7 +15,7 @@ import { kblis } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import districSchema from "@tepian-k3/schema/kbli.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -27,10 +27,12 @@ const kbliQueries = {
           where: isNull(kblis.deletedAt),
         }),
       catch: (error) => {
-        logger.error("Error fetching kblis", { error });
+        logError("kbliQueries.getAllKblis", "Error fetching all kblis", {
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch kblis",
+          message: "Gagal mengambil data kbli",
         });
       },
     });
@@ -43,10 +45,13 @@ const kbliQueries = {
           where: and(eq(kblis.id, id), isNull(kblis.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching kbli by ID", { error });
+        logError("kbliQueries.getKbliById", "Error fetching kbli by ID", {
+          id,
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch kbli by ID",
+          message: "Gagal mengambil data kbli berdasarkan ID",
         });
       },
     }).pipe(
@@ -63,10 +68,17 @@ const kbliQueries = {
           where: and((eq(kblis.id, id), isNotNull(kblis.deletedAt))),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted kbli by ID", { error });
+        logError(
+          "kbliQueries.getDeletedKbliById",
+          "Error fetching deleted kbli by ID",
+          {
+            id,
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch deleted kbli by ID",
+          message: "Gagal mengambil data kbli yang dihapus berdasarkan ID",
         });
       },
     }).pipe(
@@ -83,10 +95,13 @@ const kbliQueries = {
           where: eq(kblis.name, name),
         }),
       catch: (error) => {
-        logger.error("Error fetching kbli by name", { error });
+        logError("kbliQueries.getKbliByName", "Error fetching kbli by name", {
+          name,
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch kbli by name",
+          message: "Gagal mengambil data kbli berdasarkan nama",
         });
       },
     }).pipe(
@@ -170,10 +185,11 @@ const kbliQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated kblis", {
-            error,
-            input,
-          });
+          logError(
+            "kbliQueries.getOffsetPaginatedKblis",
+            "Error fetching paginated kblis",
+            { input, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data kbli`,
@@ -199,17 +215,20 @@ const kbliQueries = {
         throw new TRPCError({
           code: "CONFLICT",
           message:
-            "Daerah dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
+            "KBLI dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
         });
       }
 
       const [kbli] = yield* Effect.tryPromise({
         try: () => db.insert(kblis).values(data).returning().execute(),
         catch: (error) => {
-          logger.error("Error creating kbli", { error, data });
+          logError("kbliQueries.createKbli", "Error creating kbli", {
+            error,
+            data,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat data daerah",
+            message: "Gagal membuat data kbli",
           });
         },
       });
@@ -217,7 +236,7 @@ const kbliQueries = {
       if (!kbli) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal membuat data daerah",
+          message: "Gagal membuat data kbli",
         });
       }
 
@@ -232,7 +251,7 @@ const kbliQueries = {
       if (!existingKbli) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Daerah tidak ditemukan.",
+          message: "KBLI tidak ditemukan.",
         });
       }
 
@@ -245,10 +264,13 @@ const kbliQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error updating kbli", { error, data });
+          logError("kbliQueries.updateKbli", "Error updating kbli", {
+            error,
+            data,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal memperbarui data daerah",
+            message: "Gagal memperbarui data kbli",
           });
         },
       });
@@ -256,7 +278,7 @@ const kbliQueries = {
       if (!updatedKbli) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal memperbarui data daerah",
+          message: "Gagal memperbarui data kbli",
         });
       }
 
@@ -271,7 +293,7 @@ const kbliQueries = {
       if (!existingKbli) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Daerah tidak ditemukan.",
+          message: "KBLI tidak ditemukan.",
         });
       }
 
@@ -284,10 +306,13 @@ const kbliQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error deleting kbli", { error, id });
+          logError("kbliQueries.deleteKbli", "Error deleting kbli", {
+            error,
+            id,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menghapus data daerah",
+            message: "Gagal menghapus data kbli",
           });
         },
       });
@@ -295,7 +320,7 @@ const kbliQueries = {
       if (!deletedKbli) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal menghapus data daerah",
+          message: "Gagal menghapus data kbli",
         });
       }
 
@@ -310,7 +335,7 @@ const kbliQueries = {
       if (!deletedKbli) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Daerah yang dihapus tidak ditemukan.",
+          message: "KBLI yang dihapus tidak ditemukan.",
         });
       }
 
@@ -323,10 +348,13 @@ const kbliQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error restoring kbli", { error, id });
+          logError("kbliQueries.restoreKbli", "Error restoring kbli", {
+            error,
+            id,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengembalikan data daerah",
+            message: "Gagal mengembalikan data kbli",
           });
         },
       });

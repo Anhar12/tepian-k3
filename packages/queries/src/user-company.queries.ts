@@ -23,7 +23,7 @@ import {
 import { z } from "zod";
 import userCompanySchema from "@tepian-k3/schema/user-company.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 import { storageService } from "@tepian-k3/services/storage";
@@ -39,10 +39,14 @@ const userCompanyQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error("Error fetching userCompanies", { error });
+        logError(
+          "userCompanyQueries.getAllUserCompaniesByUserId",
+          "Failed to fetch userCompanies",
+          { userId, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch userCompanies",
+          message: "Gagal mengambil data perusahaan",
         });
       },
     }).pipe(
@@ -70,10 +74,14 @@ const userCompanyQueries = {
           where: and(eq(userCompanies.id, id), isNull(userCompanies.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching userCompany by ID", { error });
+        logError(
+          "userCompanyQueries.getUserCompanyById",
+          "Error fetching userCompany by ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch userCompany by ID",
+          message: "Gagal mengambil data perusahaan berdasarkan ID",
         });
       },
     }).pipe(
@@ -126,12 +134,14 @@ const userCompanyQueries = {
           },
         }),
       catch: (error) => {
-        logger.error("Error fetching userCompany details by userId and ID", {
-          error,
-        });
+        logError(
+          "userCompanyQueries.getUserCompanyDetailsByUserIdAndId",
+          "Error fetching userCompany details by userId and ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch userCompany details by userId and ID",
+          message: "Gagal mengambil data perusahaan berdasarkan userId dan ID",
         });
       },
     }).pipe(
@@ -150,10 +160,15 @@ const userCompanyQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted userCompany by ID", { error });
+        logError(
+          "userCompanyQueries.getDeletedUserCompanyById",
+          "Error fetching deleted userCompany by ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch deleted userCompany by ID",
+          message:
+            "Gagal mengambil data perusahaan yang sudah dihapus berdasarkan ID",
         });
       },
     }).pipe(
@@ -170,10 +185,14 @@ const userCompanyQueries = {
           where: eq(userCompanies.name, name),
         }),
       catch: (error) => {
-        logger.error("Error fetching userCompany by name", { error });
+        logError(
+          "userCompanyQueries.getUserCompanyByName",
+          "Error fetching userCompany by name",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch userCompany by name",
+          message: "Gagal mengambil data perusahaan berdasarkan nama",
         });
       },
     }).pipe(
@@ -194,10 +213,14 @@ const userCompanyQueries = {
           columns: { name: true, id: true },
         }),
       catch: (error) => {
-        logger.error("Error fetching userCompany names by userId", { error });
+        logError(
+          "userCompanyQueries.getUserCompanyNameByUserId",
+          "Error fetching userCompany names by userId",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch userCompany names by userId",
+          message: "Gagal mengambil data nama perusahaan berdasarkan userId",
         });
       },
     });
@@ -321,13 +344,14 @@ const userCompanyQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated userCompanies", {
-            error,
-            input,
-          });
+          logError(
+            "userCompanyQueries.getOffsetPaginatedUserCompanies",
+            "Error fetching paginated userCompanies",
+            { error, input }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: `Gagal mengambil data userCompany`,
+            message: `Gagal mengambil data perusahaan`,
             cause: error,
           });
         },
@@ -422,13 +446,14 @@ const userCompanyQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated userCompanies", {
-            error,
-            input,
-          });
+          logError(
+            "userCompanyQueries.getOffsetPaginatedUserCompanies",
+            "Error fetching paginated userCompanies",
+            { error, input }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: `Gagal mengambil data userCompany`,
+            message: `Gagal mengambil data perusahaan`,
             cause: error,
           });
         },
@@ -489,7 +514,11 @@ const userCompanyQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error creating userCompany", { error, data });
+          logError(
+            "userCompanyQueries.userCreateUserCompany",
+            "Error creating userCompany",
+            { error, data }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data perusahaan",
@@ -560,7 +589,8 @@ const userCompanyQueries = {
         );
 
         if (!key) {
-          logger.warn(
+          logError(
+            "userCompanyQueries.userUpdateUserCompany",
             "Failed to extract key from existing company picture URL",
             { url: existingUserCompany.companyPictureUrl }
           );
@@ -617,7 +647,11 @@ const userCompanyQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error updating userCompany", { error, data });
+          logError(
+            "userCompanyQueries.userUpdateUserCompany",
+            "Error updating userCompany",
+            { error, data }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data perusahaan",
@@ -665,7 +699,11 @@ const userCompanyQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error deleting userCompany", { error, id });
+          logError(
+            "userCompanyQueries.userDeleteUserCompany",
+            "Error deleting userCompany",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data perusahaan",
@@ -706,7 +744,11 @@ const userCompanyQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error deleting userCompany", { error, id });
+          logError(
+            "userCompanyQueries.userDeleteUserCompany",
+            "Error deleting userCompany",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data perusahaan",
@@ -754,7 +796,11 @@ const userCompanyQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error restoring userCompany", { error, id });
+          logError(
+            "userCompanyQueries.userRestoreUserCompany",
+            "Error restoring userCompany",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data perusahaan",
@@ -794,7 +840,11 @@ const userCompanyQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error restoring userCompany", { error, id });
+          logError(
+            "userCompanyQueries.userRestoreUserCompany",
+            "Error restoring userCompany",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data perusahaan",

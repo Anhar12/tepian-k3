@@ -2,6 +2,7 @@ import { Redis } from "ioredis";
 import { v7 as uuidv7 } from "uuid";
 import type { EventMap, EventName } from "@tepian-k3/schema/event.schema";
 import type { PubSubMessage } from "./types";
+import { logError, logInfo, logWarn } from "../logger";
 
 const CHANNEL_PREFIX = "sse:";
 const CHANNEL_EVENTS = `${CHANNEL_PREFIX}events`;
@@ -35,7 +36,10 @@ class RedisPubSub {
    */
   async connect(config: RedisConfig): Promise<void> {
     if (this.isConnected) {
-      console.warn("[RedisPubSub] Already connected");
+      logWarn(
+        "RedisPubSub.connect",
+        "Already connected to Redis server for Pub/Sub"
+      );
       return;
     }
 
@@ -49,7 +53,10 @@ class RedisPubSub {
       retryDelayOnClusterDown: 100,
       retryStrategy: (times: number) => {
         if (times > 10) {
-          console.error("[RedisPubSub] Max retries reached");
+          logError(
+            "RedisPubSub.connect",
+            "Failed to connect to Redis after multiple attempts"
+          );
           return null;
         }
         return Math.min(times * 100, 3000);
@@ -80,7 +87,7 @@ class RedisPubSub {
     await this.subscriber.psubscribe(`${CHANNEL_USERS}*`);
 
     this.isConnected = true;
-    console.log(`[RedisPubSub] Connected with server ID: ${this.serverId}`);
+    logInfo("RedisPubSub.connect", "Connected to Redis server for Pub/Sub");
   }
 
   /**
@@ -102,7 +109,10 @@ class RedisPubSub {
     this.subscribedChannels.clear();
     this.messageHandlers.clear();
     this.isConnected = false;
-    console.log("[RedisPubSub] Disconnected");
+    logInfo(
+      "RedisPubSub.disconnect",
+      "Disconnected from Redis server for Pub/Sub"
+    );
   }
 
   /**
@@ -122,11 +132,18 @@ class RedisPubSub {
         try {
           handler(message);
         } catch (error) {
-          console.error("[RedisPubSub] Handler error:", error);
+          logError("RedisPubSub.handleMessage", "Error in message handler", {
+            error,
+            message,
+          });
         }
       }
     } catch (error) {
-      console.error("[RedisPubSub] Failed to parse message:", error);
+      logError(
+        "RedisPubSub.handleMessage",
+        "Failed to parse Redis Pub/Sub message",
+        { error, channel, rawMessage }
+      );
     }
   }
 
@@ -149,7 +166,7 @@ class RedisPubSub {
     data: EventMap[K]
   ): Promise<void> {
     if (!this.publisher) {
-      console.warn("[RedisPubSub] Not connected");
+      logWarn("RedisPubSub.publishToUser", "Not connected");
       return;
     }
 
@@ -178,7 +195,7 @@ class RedisPubSub {
     excludeUserId?: string
   ): Promise<void> {
     if (!this.publisher) {
-      console.warn("[RedisPubSub] Not connected");
+      logWarn("RedisPubSub.publishToRoom", "Not connected");
       return;
     }
 
@@ -206,7 +223,7 @@ class RedisPubSub {
     data: EventMap[K]
   ): Promise<void> {
     if (!this.publisher) {
-      console.warn("[RedisPubSub] Not connected");
+      logWarn("RedisPubSub.broadcast", "Not connected");
       return;
     }
 

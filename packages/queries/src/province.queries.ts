@@ -15,7 +15,7 @@ import { provinces } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import provinceSchema from "@tepian-k3/schema/province.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -27,7 +27,9 @@ const provinceQueries = {
           where: isNull(provinces.deletedAt),
         }),
       catch: (error) => {
-        logger.error("Error fetching provinces", { error });
+        logError("provinceQueries.getAllProvinces", "Failed to get provinces", {
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data provinsi",
@@ -43,7 +45,14 @@ const provinceQueries = {
           where: and(eq(provinces.id, id), isNull(provinces.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching province by ID", { error });
+        logError(
+          "provinceQueries.getProvinceById",
+          "Failed to get province by ID",
+          {
+            id,
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data provinsi berdasarkan ID",
@@ -63,7 +72,14 @@ const provinceQueries = {
           where: and(eq(provinces.id, id), isNotNull(provinces.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted province by ID", { error });
+        logError(
+          "provinceQueries.getDeletedProvinceById",
+          "Failed to get deleted province by ID",
+          {
+            id,
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data provinsi terhapus berdasarkan ID",
@@ -83,7 +99,11 @@ const provinceQueries = {
           where: eq(provinces.name, name),
         }),
       catch: (error) => {
-        logger.error("Error fetching province by name", { error });
+        logError(
+          "provinceQueries.getProvinceByName",
+          "Failed to get province by name",
+          { name, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data provinsi berdasarkan nama",
@@ -170,10 +190,14 @@ const provinceQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated provinces", {
-            error,
-            input,
-          });
+          logError(
+            "provinceQueries.getOffsetPaginatedProvince",
+            "Failed to get paginated provinces",
+            {
+              error,
+              input,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data provinsi`,
@@ -208,7 +232,14 @@ const provinceQueries = {
       const [province] = yield* Effect.tryPromise({
         try: () => db.insert(provinces).values(data).returning(),
         catch: (error) => {
-          logger.error("Error creating province", { error, data });
+          logError(
+            "provinceQueries.createProvince",
+            "Error creating province",
+            {
+              error,
+              data,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data provinsi",
@@ -250,7 +281,14 @@ const provinceQueries = {
             .where(eq(provinces.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("Error updating province", { error, data });
+          logError(
+            "provinceQueries.updateProvince",
+            "Error updating province",
+            {
+              error,
+              data,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data provinsi",
@@ -292,7 +330,14 @@ const provinceQueries = {
             .where(eq(provinces.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error deleting province", { error, id });
+          logError(
+            "provinceQueries.deleteProvince",
+            "Error deleting province",
+            {
+              error,
+              id,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data provinsi",
@@ -334,7 +379,14 @@ const provinceQueries = {
             .where(eq(provinces.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error restoring province", { error, id });
+          logError(
+            "provinceQueries.restoreProvince",
+            "Error restoring province",
+            {
+              error,
+              id,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data provinsi",

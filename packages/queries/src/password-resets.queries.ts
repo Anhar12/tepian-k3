@@ -2,7 +2,7 @@ import { hash } from "@node-rs/argon2";
 import { and, eq, gt } from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { passwordResets } from "@tepian-k3/db/schema";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 
@@ -11,7 +11,11 @@ const passwordResetsQueries = {
     return Effect.tryPromise({
       try: () => hash(token),
       catch: (error) => {
-        logger.error("Failed to hash reset token", { token, error });
+        logError(
+          "passwordResetsQueries.hashResetToken",
+          "Failed to hash password reset token",
+          { token, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memproses token pengaturan ulang kata sandi.",
@@ -35,10 +39,11 @@ const passwordResetsQueries = {
             })
             .returning(),
         catch: (error) => {
-          logger.error("Failed to create password reset record", {
-            userId,
-            error,
-          });
+          logError(
+            "passwordResetsQueries.createResetRecord",
+            "Failed to create password reset record",
+            { userId, token, expiresAt, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat catatan pengaturan ulang kata sandi.",
@@ -48,7 +53,8 @@ const passwordResetsQueries = {
       });
 
       if (!result) {
-        logger.error(
+        logError(
+          "passwordResetsQueries.createResetRecord",
           "No result returned after creating password reset record",
           { userId }
         );
@@ -80,10 +86,11 @@ const passwordResetsQueries = {
             )
             .limit(1),
         catch: (error) => {
-          logger.error("Failed to validate password reset token", {
-            token,
-            error,
-          });
+          logError(
+            "passwordResetsQueries.validateResetToken",
+            "Failed to validate password reset token",
+            { token, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memvalidasi token pengaturan ulang kata sandi.",
@@ -106,10 +113,11 @@ const passwordResetsQueries = {
             .where(eq(passwordResets.token, token))
             .returning(),
         catch: (error) => {
-          logger.error("Failed to mark password reset token as used", {
-            token,
-            error,
-          });
+          logError(
+            "passwordResetsQueries.markTokenAsUsed",
+            "Failed to mark password reset token as used",
+            { token, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message:
@@ -120,9 +128,11 @@ const passwordResetsQueries = {
       });
 
       if (!result) {
-        logger.error("No result returned after marking reset token as used", {
-          token,
-        });
+        logError(
+          "passwordResetsQueries.markTokenAsUsed",
+          "No result returned after marking reset token as used",
+          { token }
+        );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -144,9 +154,11 @@ const passwordResetsQueries = {
           .where(gt(passwordResets.expiresAt, new Date().toISOString()))
           .returning(),
       catch: (error) => {
-        logger.error("Failed to delete expired password reset tokens", {
-          error,
-        });
+        logError(
+          "passwordResetsQueries.deleteExpiredTokens",
+          "Failed to delete expired password reset tokens",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -166,10 +178,11 @@ const passwordResetsQueries = {
           .where(eq(passwordResets.userId, userId))
           .returning(),
       catch: (error) => {
-        logger.error("Failed to invalidate user's password reset tokens", {
-          userId,
-          error,
-        });
+        logError(
+          "passwordResetsQueries.invalidateUserResets",
+          "Failed to invalidate user's password reset tokens",
+          { userId, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:

@@ -15,7 +15,7 @@ import { districts } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import districSchema from "@tepian-k3/schema/district.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -27,10 +27,14 @@ const districtQueries = {
           where: isNull(districts.deletedAt),
         }),
       catch: (error) => {
-        logger.error("Error fetching districts", { error });
+        logError(
+          "districtQueries.getAllDistricts",
+          "Error fetching all districts",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch districts",
+          message: "Gagal mengambil data kecamatan",
         });
       },
     });
@@ -46,10 +50,14 @@ const districtQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error("Error fetching districts by regency ID", { error });
+        logError(
+          "districtQueries.getAllDistrictsByRegencyId",
+          "Error fetching districts by regency ID",
+          { regencyId, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch districts by regency ID",
+          message: "Gagal mengambil data kecamatan berdasarkan kabupaten",
         });
       },
     });
@@ -62,10 +70,14 @@ const districtQueries = {
           where: and(eq(districts.id, id), isNull(districts.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching district by ID", { error });
+        logError(
+          "districtQueries.getDistrictById",
+          "Error fetching district by ID",
+          { id, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch district by ID",
+          message: "Gagal mengambil data kecamatan berdasarkan ID",
         });
       },
     }).pipe(
@@ -82,10 +94,14 @@ const districtQueries = {
           where: and((eq(districts.id, id), isNotNull(districts.deletedAt))),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted district by ID", { error });
+        logError(
+          "districtQueries.getDeletedDistrictById",
+          "Error fetching deleted district by ID",
+          { id, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch deleted district by ID",
+          message: "Gagal mengambil data kecamatan yang dihapus",
         });
       },
     }).pipe(
@@ -102,10 +118,14 @@ const districtQueries = {
           where: eq(districts.name, name),
         }),
       catch: (error) => {
-        logger.error("Error fetching district by name", { error });
+        logError(
+          "districtQueries.getDistrictByName",
+          "Error fetching district by name",
+          { name, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch district by name",
+          message: "Gagal mengambil data kecamatan berdasarkan nama",
         });
       },
     }).pipe(
@@ -189,13 +209,14 @@ const districtQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated districts", {
-            error,
-            input,
-          });
+          logError(
+            "districtQueries.getOffsetPaginatedDistricts",
+            "Error fetching paginated districts",
+            { input, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: `Gagal mengambil data district`,
+            message: `Gagal mengambil data kecamatan`,
             cause: error,
           });
         },
@@ -218,7 +239,7 @@ const districtQueries = {
         throw new TRPCError({
           code: "CONFLICT",
           message:
-            "Daerah dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
+            "Kecamatan dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
         });
       }
 
@@ -234,10 +255,17 @@ const districtQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error creating district", { error, data });
+          logError(
+            "districtQueries.createDistrict",
+            "Error creating district",
+            {
+              data,
+              error,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat data daerah",
+            message: "Gagal membuat data kecamatan",
           });
         },
       });
@@ -245,7 +273,7 @@ const districtQueries = {
       if (!district) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal membuat data daerah",
+          message: "Gagal membuat data kecamatan",
         });
       }
 
@@ -260,7 +288,7 @@ const districtQueries = {
       if (!existingDistrict) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Daerah tidak ditemukan.",
+          message: "Kecamatan tidak ditemukan.",
         });
       }
 
@@ -280,10 +308,14 @@ const districtQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error updating district", { error, data });
+          logError(
+            "districtQueries.updateDistrict",
+            "Error updating district",
+            { data, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal memperbarui data daerah",
+            message: "Gagal memperbarui data kecamatan",
           });
         },
       });
@@ -291,7 +323,7 @@ const districtQueries = {
       if (!updatedDistrict) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal memperbarui data daerah",
+          message: "Gagal memperbarui data kecamatan",
         });
       }
 
@@ -306,7 +338,7 @@ const districtQueries = {
       if (!existingDistrict) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Daerah tidak ditemukan.",
+          message: "Kecamatan tidak ditemukan.",
         });
       }
 
@@ -319,10 +351,17 @@ const districtQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error deleting district", { error, id });
+          logError(
+            "districtQueries.deleteDistrict",
+            "Error deleting district",
+            {
+              error,
+              id,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menghapus data daerah",
+            message: "Gagal menghapus data kecamatan",
           });
         },
       });
@@ -330,7 +369,7 @@ const districtQueries = {
       if (!deletedDistrict) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal menghapus data daerah",
+          message: "Gagal menghapus data kecamatan",
         });
       }
 
@@ -345,7 +384,7 @@ const districtQueries = {
       if (!deletedDistrict) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Daerah yang dihapus tidak ditemukan.",
+          message: "Kecamatan yang dihapus tidak ditemukan.",
         });
       }
 
@@ -358,10 +397,14 @@ const districtQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error restoring district", { error, id });
+          logError(
+            "districtQueries.restoreDistrict",
+            "Error restoring district",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengembalikan data daerah",
+            message: "Gagal mengembalikan data kecamatan",
           });
         },
       });
@@ -369,7 +412,7 @@ const districtQueries = {
       if (!restoredDistrict) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengembalikan data daerah",
+          message: "Gagal mengembalikan data kecamatan",
         });
       }
 

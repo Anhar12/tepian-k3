@@ -2,6 +2,8 @@ import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import type { ReactElement } from "react";
 import { env } from "../../../env";
+import { logError, logInfo } from "../../logger";
+import { SendEmailFailedError } from "../types";
 
 export interface SendEmailOptions {
   to: string | string[];
@@ -116,12 +118,12 @@ export const nodemailerProvider = {
 
       return info;
     } catch (error) {
-      console.error("Failed to send email:", error);
-      throw new Error(
-        `Failed to send email: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
+      logError(
+        "nodemailerProvider.send",
+        `Failed to send email to ${options.to}`,
+        { error }
       );
+      throw new SendEmailFailedError("Failed to send email", error);
     }
   },
 
@@ -129,10 +131,17 @@ export const nodemailerProvider = {
   async verify() {
     try {
       await transporter.verify();
-      console.log("Email server is ready to send messages");
+      logInfo(
+        "nodemailerProvider.verify",
+        "Email server verified successfully"
+      );
       return true;
     } catch (error) {
-      console.error("Email server verification failed:", error);
+      logError(
+        "nodemailerProvider.verify",
+        "Email server verification failed",
+        { error }
+      );
       return false;
     }
   },

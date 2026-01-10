@@ -1,7 +1,7 @@
 import usersQueries from "@tepian-k3/queries/users.queries";
 import { Data, Effect } from "effect";
 import { decryptResetToken, encryptResetToken } from "..";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import passwordResetsQueries from "@tepian-k3/queries/password-resets.queries";
 import { env } from "../../env";
 import { emailService } from "@tepian-k3/services/email";
@@ -23,10 +23,14 @@ export class PasswordResetService {
       const token = yield* Effect.tryPromise({
         try: () => encryptResetToken(user.id, user.email),
         catch: (error) => {
-          logger.error("Failed to create password reset token", {
-            email,
-            error,
-          });
+          logError(
+            "PasswordResetService.requestReset",
+            "Failed to create reset token",
+            {
+              email,
+              error,
+            }
+          );
           return new PasswordResetError({
             status: false,
             message: "Gagal membuat token reset password.",
@@ -57,7 +61,14 @@ export class PasswordResetService {
             PasswordResetService.RESET_EXPIRY_MINUTES
           ),
         catch: (error) => {
-          logger.error("Failed to send password reset email", { email, error });
+          logError(
+            "PasswordResetService.requestReset",
+            "Failed to send password reset email",
+            {
+              email,
+              error,
+            }
+          );
           return new PasswordResetError({
             status: false,
             message: "Gagal mengirim email reset password.",
@@ -74,10 +85,11 @@ export class PasswordResetService {
       const payload = yield* Effect.tryPromise({
         try: () => decryptResetToken(token),
         catch: (error) => {
-          logger.error("Invalid or expired password reset token", {
-            token,
-            error,
-          });
+          logError(
+            "PasswordResetService.verifyResetToken",
+            "Failed to decrypt reset token",
+            { token, error }
+          );
           return new PasswordResetError({
             status: false,
             message: "Token reset password tidak valid atau telah kedaluwarsa.",
@@ -165,10 +177,15 @@ export class PasswordResetService {
             );
           }),
         catch: (error) => {
-          logger.error("Failed to reset password", {
-            userId: verification.userId,
-            error,
-          });
+          logError(
+            "PasswordResetService.resetPassword",
+            "Failed to reset password",
+            {
+              token,
+              userId: verification.userId,
+              error,
+            }
+          );
           return new PasswordResetError({
             status: false,
             message: "Gagal mereset password.",

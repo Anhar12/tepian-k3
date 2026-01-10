@@ -3,7 +3,7 @@ import { db } from "@tepian-k3/db/client";
 import { z } from "zod";
 import orderSchema from "@tepian-k3/schema/order.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { and, eq, inArray } from "@tepian-k3/db";
 import {
   cart,
@@ -25,10 +25,13 @@ const orderQueries = {
           orderBy: (order, { desc }) => [desc(order.createdAt)],
         }),
       catch: (error) => {
-        logger.error("Failed to fetch orders", { error, userId });
+        logError("orderQueries.getAllOrderByUserId", "Failed to fetch orders", {
+          error,
+          userId,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch orders",
+          message: "Gagal mengambil pesanan",
         });
       },
     });
@@ -45,10 +48,14 @@ const orderQueries = {
           },
         }),
       catch: (error) => {
-        logger.error("Failed to fetch order by ID", { error, orderId, userId });
+        logError("orderQueries.getOrderById", "Failed to fetch order by ID", {
+          error,
+          orderId,
+          userId,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch order by ID",
+          message: "Gagal mengambil pesanan berdasarkan ID",
         });
       },
     });
@@ -65,7 +72,7 @@ const orderQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Order must contain at least one item",
+            message: "Pesanan harus memiliki setidaknya satu item",
           })
         );
       }
@@ -80,14 +87,14 @@ const orderQueries = {
             ),
           }),
         catch: (error) => {
-          logger.error("Failed to validate company ownership", {
+          logError("orderQueries.createOrder", "Failed to validate company", {
             error,
-            userId,
             companyId: orderData.companyId,
+            userId,
           });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to validate company",
+            message: "Gagal memvalidasi perusahaan",
           });
         },
       });
@@ -96,7 +103,8 @@ const orderQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "FORBIDDEN",
-            message: "Company not found or you don't have access",
+            message:
+              "Perusahaan tidak ditemukan atau Anda tidak memiliki akses",
           })
         );
       }
@@ -112,14 +120,14 @@ const orderQueries = {
             ),
           }),
         catch: (error) => {
-          logger.error("Failed to validate locations", {
+          logError("orderQueries.createOrder", "Failed to validate locations", {
             error,
             locationIds,
             companyId: orderData.companyId,
           });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to validate locations",
+            message: "Gagal memvalidasi lokasi",
           });
         },
       });
@@ -128,7 +136,8 @@ const orderQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "One or more locations don't belong to this company",
+            message:
+              "Satu atau lebih lokasi tidak ditemukan atau tidak dimiliki oleh perusahaan ini",
           })
         );
       }
@@ -171,7 +180,7 @@ const orderQueries = {
             if (!newOrder) {
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
-                message: "Failed to create order",
+                message: "Gagal membuat pesanan",
               });
             }
 
@@ -204,7 +213,7 @@ const orderQueries = {
             return { order: newOrder, items };
           }),
         catch: (error) => {
-          logger.error("Failed to create order", {
+          logError("orderQueries.createOrder", "Failed to create order", {
             error,
             userId,
             orderData,
@@ -212,7 +221,7 @@ const orderQueries = {
           });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create order",
+            message: "Gagal membuat pesanan",
           });
         },
       });

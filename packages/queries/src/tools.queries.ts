@@ -17,7 +17,7 @@ import { parameterTools, tools } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -40,9 +40,13 @@ const toolsQueries = {
             )
           ),
       catch: (error) => {
-        logger.error("Error fetching unassigned tools", {
-          error,
-        });
+        logError(
+          "toolsQueries.getAllUnassignedTools",
+          "Error fetching unassigned tools",
+          {
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data alat yang belum ditugaskan.",
@@ -58,7 +62,7 @@ const toolsQueries = {
           where: and(eq(tools.id, toolId), isNull(tools.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching tool by ID", {
+        logError("toolsQueries.getToolById", "Error fetching tool by ID", {
           error,
           toolId,
         });
@@ -88,10 +92,14 @@ const toolsQueries = {
           where: and(eq(tools.id, toolId), isNotNull(tools.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted tool by ID", {
-          error,
-          toolId,
-        });
+        logError(
+          "toolsQueries.getDeletedToolById",
+          "Error fetching deleted tool by ID",
+          {
+            error,
+            toolId,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data alat yang dihapus",
@@ -118,7 +126,7 @@ const toolsQueries = {
           where: and(eq(tools.toolCode, toolCode), isNull(tools.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching tool by code", {
+        logError("toolsQueries.getToolByCode", "Error fetching tool by code", {
           error,
           toolCode,
         });
@@ -210,10 +218,14 @@ const toolsQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated tools", {
-            error,
-            input,
-          });
+          logError(
+            "toolsQueries.getOffsetPaginatedTools",
+            "Error fetching paginated tools",
+            {
+              error,
+              input,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data alat`,
@@ -245,7 +257,7 @@ const toolsQueries = {
       const [newTool] = yield* Effect.tryPromise({
         try: () => db.insert(tools).values(data).returning().execute(),
         catch: (error) => {
-          logger.error("Error creating tool", {
+          logError("toolsQueries.createTool", "Error creating tool", {
             error,
             data,
           });
@@ -290,7 +302,7 @@ const toolsQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error updating tool", {
+          logError("toolsQueries.updateTool", "Error updating tool", {
             error,
             data,
           });
@@ -328,7 +340,7 @@ const toolsQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error deleting tool", {
+          logError("toolsQueries.deleteTool", "Error deleting tool", {
             error,
             toolId,
           });
@@ -366,7 +378,7 @@ const toolsQueries = {
             .returning()
             .execute(),
         catch: (error) => {
-          logger.error("Error restoring tool", {
+          logError("toolsQueries.restoreTool", "Error restoring tool", {
             error,
             toolId,
           });

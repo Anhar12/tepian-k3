@@ -15,7 +15,7 @@ import { regencies } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import regencySchema from "@tepian-k3/schema/regency.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -27,7 +27,11 @@ const regencyQueries = {
           where: isNull(regencies.deletedAt),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getAllRegencies", { error });
+        logError(
+          "regencyQueries.getAllRegencies",
+          "Failed to get all regencies",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data Kabupaten/Kota",
@@ -46,7 +50,11 @@ const regencyQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getAllRegenciesByProvinceId", { error });
+        logError(
+          "regencyQueries.getAllRegenciesByProvinceId",
+          "Failed to get all regencies by province ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -63,7 +71,11 @@ const regencyQueries = {
           where: and(eq(regencies.id, id), isNull(regencies.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getRegencyById", { error });
+        logError(
+          "regencyQueries.getRegencyById",
+          "Failed to get regency by ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data Kabupaten/Kota berdasarkan ID",
@@ -83,7 +95,11 @@ const regencyQueries = {
           where: and((eq(regencies.id, id), isNotNull(regencies.deletedAt))),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getDeletedRegencyById", { error });
+        logError(
+          "regencyQueries.getDeletedRegencyById",
+          "Failed to get deleted regency by ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -104,7 +120,11 @@ const regencyQueries = {
           where: eq(regencies.name, name),
         }),
       catch: (error) => {
-        logger.error("regencyQueries.getRegencyByName", { error });
+        logError(
+          "regencyQueries.getRegencyByName",
+          "Failed to get regency by name",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data Kabupaten/Kota berdasarkan nama",
@@ -191,10 +211,14 @@ const regencyQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated regencies", {
-            error,
-            input,
-          });
+          logError(
+            "regencyQueries.getOffsetPaginationRegencies",
+            "Error fetching paginated regencies",
+            {
+              error,
+              input,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data Kabupaten/Kota.`,
@@ -236,7 +260,10 @@ const regencyQueries = {
             })
             .returning(),
         catch: (error) => {
-          logger.error("regencyQueries.createRegency", { error, data });
+          logError("regencyQueries.createRegency", "Error creating regency", {
+            error,
+            data,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data Kabupaten/Kota.",
@@ -281,7 +308,10 @@ const regencyQueries = {
             .where(eq(regencies.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("regencyQueries.updateRegency", { error, data });
+          logError("regencyQueries.updateRegency", "Error updating regency", {
+            error,
+            data,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data Kabupaten/Kota.",
@@ -325,7 +355,10 @@ const regencyQueries = {
             .where(eq(regencies.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("regencyQueries.deleteRegency", { error, id });
+          logError("regencyQueries.deleteRegency", "Error deleting regency", {
+            error,
+            id,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data Kabupaten/Kota.",
@@ -370,7 +403,10 @@ const regencyQueries = {
             .returning(),
 
         catch: (error) => {
-          logger.error("regencyQueries.restoreRegency", { error, id });
+          logError("regencyQueries.restoreRegency", "Error restoring regency", {
+            error,
+            id,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data Kabupaten/Kota yang dihapus.",
