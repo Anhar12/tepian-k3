@@ -1,95 +1,1033 @@
 # tepian-k3
 
-> A modern, type-safe TypeScript monorepo for K3 safety management, built with Better-T-Stack, Turborepo, and pnpm workspaces.
+> A modern, type-safe TypeScript monorepo for K3 (Keselamatan dan Kesehatan Kerja / Occupational Health and Safety) management system, built with Better-T-Stack, Turborepo, and pnpm workspaces.
 
 ## Project Overview
 
-tepian-k3 is a full-stack TypeScript application featuring end-to-end type safety from database to UI using tRPC, Drizzle ORM, and Zod validation schemas.
+tepian-k3 is a comprehensive full-stack TypeScript application for managing occupational health and safety testing services. It provides end-to-end type safety from database to UI using tRPC, Drizzle ORM, and Zod validation schemas. The system handles testing orders, parameter management, user companies, and complete order lifecycle management.
+
+---
 
 ## Tech Stack
 
-- **Frontend**: React, TanStack Router, TailwindCSS, shadcn/ui, PWA
-- **Backend**: Hono, tRPC, Node.js, Effect
-- **Database**: PostgreSQL, Drizzle ORM
-- **Monorepo**: Turborepo, pnpm workspaces
-- **Type Safety**: TypeScript 5+, Zod
-- **Code Quality**: ESLint, Prettier, Husky
+### Frontend
+- **React 19.2.3** - UI library
+- **TanStack Router** - File-based routing with full TypeScript support
+- **TanStack Query** - Server state management
+- **TanStack Table** - Headless table component
+- **TanStack Form** - Form state management
+- **TailwindCSS 4.0** - Utility-first CSS framework
+- **shadcn/ui** - Re-usable UI components built with Radix UI
+- **Zustand** - Client state management
+- **nuqs** - URL query state management
+- **Vite** - Build tool and dev server
+- **PWA** - Progressive Web App support via vite-plugin-pwa
 
-## Project Structure
+### Backend
+- **Hono** - Lightweight web framework
+- **tRPC** - End-to-end typesafe APIs
+- **Node.js** - Runtime environment
+- **Effect** - Functional effect system for TypeScript
+
+### Database
+- **PostgreSQL** - Relational database
+- **Drizzle ORM** - TypeScript ORM with migrations
+- **drizzle-zod** - Drizzle to Zod schema generation
+
+### Authentication
+- **jose** - JWT token handling
+- **@node-rs/argon2** - Password hashing
+
+### Services
+- **nodemailer** - Email sending
+- **resend** - Email API service
+- **minio** - Object storage (S3-compatible)
+- **winston** - Logging
+- **ioredis** - Redis client for pub/sub events
+
+### Monorepo & Build
+- **Turborepo** - Monorepo build system with caching
+- **pnpm 10.5.2** - Package manager with workspaces
+- **TypeScript 5+** - Type checking
+- **Zod 4.1** - Runtime validation
+
+### Code Quality
+- **ESLint** - Linting
+- **Prettier** - Code formatting
+- **Husky** - Git hooks
+- **lint-staged** - Staged files linting
+
+---
+
+## Detailed Project Structure
 
 ```
 tepian-k3/
 ├── apps/
-│   ├── web/          # React frontend with TanStack Router
-│   └── server/       # Hono backend with tRPC
+│   ├── web/                              # React frontend application
+│   │   ├── src/
+│   │   │   ├── main.tsx                  # App entry point
+│   │   │   ├── index.css                 # Global styles (Tailwind)
+│   │   │   ├── env.ts                    # Environment variables (t3-env)
+│   │   │   ├── routeTree.gen.ts          # Auto-generated route tree
+│   │   │   ├── components/
+│   │   │   │   ├── ui/                   # shadcn/ui components (60+ components)
+│   │   │   │   │   ├── accordion.tsx
+│   │   │   │   │   ├── alert-dialog.tsx
+│   │   │   │   │   ├── avatar.tsx
+│   │   │   │   │   ├── badge.tsx
+│   │   │   │   │   ├── button.tsx
+│   │   │   │   │   ├── calendar.tsx
+│   │   │   │   │   ├── card.tsx
+│   │   │   │   │   ├── chart.tsx
+│   │   │   │   │   ├── combobox.tsx
+│   │   │   │   │   ├── command.tsx
+│   │   │   │   │   ├── data-table/       # Data table components
+│   │   │   │   │   ├── dialog.tsx
+│   │   │   │   │   ├── drawer.tsx
+│   │   │   │   │   ├── dropdown-menu.tsx
+│   │   │   │   │   ├── form.tsx
+│   │   │   │   │   ├── input.tsx
+│   │   │   │   │   ├── select.tsx
+│   │   │   │   │   ├── sheet.tsx
+│   │   │   │   │   ├── sidebar.tsx
+│   │   │   │   │   ├── sortable.tsx
+│   │   │   │   │   ├── table.tsx
+│   │   │   │   │   ├── tabs.tsx
+│   │   │   │   │   └── ... (60 total UI components)
+│   │   │   │   ├── app-sidebar.tsx       # Application sidebar
+│   │   │   │   ├── cart-sheet.tsx        # Shopping cart drawer
+│   │   │   │   ├── columns/              # Table column definitions
+│   │   │   │   ├── data-table/           # Data table wrapper components
+│   │   │   │   ├── header.tsx            # Page headers
+│   │   │   │   ├── login-form.tsx        # Auth forms
+│   │   │   │   ├── register-form.tsx
+│   │   │   │   ├── nav-main.tsx          # Navigation components
+│   │   │   │   ├── nav-user.tsx
+│   │   │   │   ├── permission-gate.tsx   # RBAC permission wrapper
+│   │   │   │   └── theme-provider.tsx    # Dark/light theme
+│   │   │   ├── config/                   # App configuration
+│   │   │   ├── hooks/
+│   │   │   │   ├── use-callback-ref.ts
+│   │   │   │   ├── use-data-table.ts     # Data table hook
+│   │   │   │   ├── use-debounced-callback.ts
+│   │   │   │   ├── use-debounced.ts
+│   │   │   │   └── use-mobile.ts         # Responsive hook
+│   │   │   ├── lib/
+│   │   │   │   ├── back-office-menu.ts   # Admin menu config
+│   │   │   │   ├── column-helpers.tsx    # Table column utilities
+│   │   │   │   ├── format.ts             # Formatters
+│   │   │   │   ├── toast.ts              # Toast notifications
+│   │   │   │   └── utils.ts              # cn() class merger
+│   │   │   ├── routes/
+│   │   │   │   ├── __root.tsx            # Root layout
+│   │   │   │   ├── index.tsx             # Home page
+│   │   │   │   ├── katalog.tsx           # Testing catalog
+│   │   │   │   ├── unauthorized.tsx      # 403 page
+│   │   │   │   ├── (auth)/               # Auth routes (unauthenticated)
+│   │   │   │   │   ├── route.tsx         # Auth layout
+│   │   │   │   │   ├── login.tsx
+│   │   │   │   │   ├── register.tsx
+│   │   │   │   │   ├── forgot-password.tsx
+│   │   │   │   │   ├── reset-password.tsx
+│   │   │   │   │   └── verify-email.tsx
+│   │   │   │   └── (core)/               # Core routes (authenticated)
+│   │   │   │       ├── route.tsx         # Core layout with sidebar
+│   │   │   │       ├── profile.tsx       # User profile
+│   │   │   │       ├── settings.tsx      # User settings
+│   │   │   │       ├── dashboard/        # Dashboard pages
+│   │   │   │       ├── back-office/      # Admin pages
+│   │   │   │       │   ├── route.tsx     # Back-office layout
+│   │   │   │       │   ├── index.tsx     # Admin dashboard
+│   │   │   │       │   ├── users/        # User management
+│   │   │   │       │   ├── roles/        # Role management
+│   │   │   │       │   ├── clusters/     # Testing clusters
+│   │   │   │       │   ├── parameters/   # Testing parameters
+│   │   │   │       │   ├── parameter-categories/
+│   │   │   │       │   ├── tools/        # Testing tools/equipment
+│   │   │   │       │   └── kblis/        # KBLI codes
+│   │   │   │       ├── pengujian/        # Testing module
+│   │   │   │       │   ├── route.tsx
+│   │   │   │       │   ├── index.tsx     # Testing list
+│   │   │   │       │   ├── checkout.tsx  # Checkout page
+│   │   │   │       │   └── -components/  # Testing components
+│   │   │   │       ├── konsultasi/       # Consultation module
+│   │   │   │       ├── pelatihan/        # Training module
+│   │   │   │       └── uji-kompetensi/   # Competency testing
+│   │   │   ├── stores/
+│   │   │   │   ├── cart.stores.ts        # Cart state
+│   │   │   │   ├── cart-sheet.stores.tsx # Cart sheet state
+│   │   │   │   ├── testing-form.stores.ts
+│   │   │   │   ├── parameter-tool-dialog.stores.ts
+│   │   │   │   └── testing-location-dialog.stores.ts
+│   │   │   └── utils/
+│   │   │       ├── trpc.ts               # tRPC client setup
+│   │   │       ├── form-data-mapper.ts   # Form data utilities
+│   │   │       └── require-permission.ts # Permission checks
+│   │   ├── public/
+│   │   │   └── assets/                   # Static assets
+│   │   ├── dev-dist/                     # PWA dev files
+│   │   ├── components.json              # shadcn/ui config
+│   │   ├── index.html                   # HTML template
+│   │   ├── vite.config.ts               # Vite configuration
+│   │   ├── pwa-assets.config.ts         # PWA assets config
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   └── server/                           # Hono backend server
+│       ├── src/
+│       │   └── index.ts                  # Server entry + tRPC handler
+│       ├── logs/                         # Application logs (winston)
+│       ├── uploads/
+│       │   ├── avatars/                  # User profile pictures
+│       │   └── company-pictures/         # Company logos
+│       ├── env.ts                        # Server environment variables
+│       ├── tsdown.config.ts              # Build configuration
+│       ├── tsconfig.json
+│       └── package.json
+│
 ├── packages/
-│   ├── api/          # tRPC routers & procedures
-│   ├── auth/         # Authentication logic & middleware
-│   ├── db/           # Drizzle schema & database client
-│   ├── queries/      # Reusable database queries
-│   ├── schema/       # Zod validation schemas
-│   ├── services/     # External services (email, storage, logger)
-│   ├── types/        # Shared TypeScript types
-│   ├── utils/        # Utility functions
-│   ├── constants/    # App-wide constants
-│   ├── config/       # Shared configs
-│   └── shared/       # Cross-app utilities
+│   ├── api/                              # tRPC API definition
+│   │   ├── src/
+│   │   │   ├── index.ts                  # API exports
+│   │   │   ├── root.ts                   # Root router aggregation
+│   │   │   ├── utils/                    # API utilities
+│   │   │   └── routers/                  # Feature routers
+│   │   │       ├── auth.ts               # Authentication procedures
+│   │   │       ├── user.ts               # User management
+│   │   │       ├── role.ts               # Role management
+│   │   │       ├── permission.ts         # Permission management
+│   │   │       ├── cluster.ts            # Testing clusters
+│   │   │       ├── parameter.ts          # Testing parameters
+│   │   │       ├── parameter-categories.ts
+│   │   │       ├── parameter-tool.ts     # Parameter-tool relations
+│   │   │       ├── tool.ts               # Testing equipment
+│   │   │       ├── kbli.ts               # Business classification
+│   │   │       ├── user-company.ts       # User companies
+│   │   │       ├── user-company-testing-location.ts
+│   │   │       ├── cart.ts               # Shopping cart
+│   │   │       ├── order.ts              # Order management
+│   │   │       ├── event.ts              # SSE events
+│   │   │       ├── province.ts           # Location data
+│   │   │       ├── regency.ts
+│   │   │       ├── district.ts
+│   │   │       ├── village.ts
+│   │   │       └── test.ts               # Test endpoints
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── auth/                             # Authentication logic
+│   │   ├── src/
+│   │   │   ├── index.ts                  # Auth exports
+│   │   │   ├── utils.ts                  # JWT helpers, token validation
+│   │   │   ├── services/                 # Auth services
+│   │   │   └── types/                    # Auth types
+│   │   ├── env.ts                        # Auth environment variables
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── db/                               # Database layer
+│   │   ├── src/
+│   │   │   ├── index.ts                  # DB exports
+│   │   │   ├── client.ts                 # Drizzle client instance
+│   │   │   ├── schema.ts                 # All table definitions (758 lines)
+│   │   │   ├── relations.ts              # Table relations
+│   │   │   ├── utils.ts                  # DB utilities, timestamps helper
+│   │   │   ├── migrations/               # SQL migration files
+│   │   │   ├── seed/                     # Seed data scripts
+│   │   │   │   └── index.ts
+│   │   │   └── reset/                    # Database reset scripts
+│   │   │       └── index.ts
+│   │   ├── drizzle.config.ts             # Drizzle Kit configuration
+│   │   ├── env.ts                        # Database environment variables
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── queries/                          # Reusable database queries
+│   │   ├── src/
+│   │   │   ├── users.queries.ts          # User CRUD operations
+│   │   │   ├── roles.queries.ts          # Role operations
+│   │   │   ├── permission.queries.ts     # Permission operations
+│   │   │   ├── user-roles.queries.ts     # User-role assignments
+│   │   │   ├── user-permission.queries.ts
+│   │   │   ├── clusters.queries.ts       # Cluster operations
+│   │   │   ├── parameter.queries.ts      # Parameter operations
+│   │   │   ├── parameter-categories.queries.ts
+│   │   │   ├── parameter-tool.queries.ts
+│   │   │   ├── tools.queries.ts          # Equipment operations
+│   │   │   ├── kbli.queries.ts           # KBLI operations
+│   │   │   ├── user-company.queries.ts   # Company operations
+│   │   │   ├── user-company-testing-location.queries.ts
+│   │   │   ├── cart.queries.ts           # Cart operations
+│   │   │   ├── order.queries.ts          # Order operations
+│   │   │   ├── order-item.queries.ts
+│   │   │   ├── order-status-history.queries.ts
+│   │   │   ├── otp.queries.ts            # OTP operations
+│   │   │   ├── password-resets.queries.ts
+│   │   │   ├── province.queries.ts       # Location queries
+│   │   │   ├── regency.queries.ts
+│   │   │   ├── district.queries.ts
+│   │   │   └── village.queries.ts
+│   │   ├── TRANSACTION-TODO.md           # Transaction handling notes
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── schema/                           # Zod validation schemas
+│   │   ├── src/
+│   │   │   ├── auth.schema.ts            # Login, register, password schemas
+│   │   │   ├── users.schema.ts           # User validation
+│   │   │   ├── role.schema.ts            # Role validation
+│   │   │   ├── cluster.schema.ts         # Cluster validation
+│   │   │   ├── parameter.schema.ts       # Parameter validation
+│   │   │   ├── parameter-categories.schema.ts
+│   │   │   ├── parameter-tool.schema.ts
+│   │   │   ├── tools.schema.ts           # Tools validation
+│   │   │   ├── kbli.schema.ts
+│   │   │   ├── user-company.schema.ts    # Company validation
+│   │   │   ├── user-company-testing-location.schema.ts
+│   │   │   ├── cart.schema.ts            # Cart validation
+│   │   │   ├── order.schema.ts           # Order validation
+│   │   │   ├── order-item.schema.ts
+│   │   │   ├── testing.schema.ts         # Testing validation
+│   │   │   ├── testing-item.schema.ts
+│   │   │   ├── otp.schema.ts
+│   │   │   ├── filter.schema.ts          # Data table filter schemas
+│   │   │   ├── province.schema.ts        # Location schemas
+│   │   │   ├── regency.schema.ts
+│   │   │   ├── district.schema.ts
+│   │   │   ├── village.schema.ts
+│   │   │   └── event.schema.ts           # SSE event schemas
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── services/                         # External services
+│   │   ├── src/
+│   │   │   ├── email/                    # Email service
+│   │   │   │   ├── index.ts              # Email sending logic
+│   │   │   │   ├── providers/            # Email providers
+│   │   │   │   │   ├── nodemailer.ts     # Nodemailer provider
+│   │   │   │   │   └── resend.ts         # Resend provider
+│   │   │   │   └── dev/                  # React Email dev templates
+│   │   │   ├── logger/                   # Logging service
+│   │   │   │   ├── config.ts             # Winston logger configuration
+│   │   │   │   ├── formatters.ts         # Winston logger formatters
+│   │   │   │   ├── transports.ts         # Winston logger transports
+│   │   │   │   └── index.ts              # Winston logger setup
+│   │   │   ├── storage/                  # File storage service
+│   │   │   │   ├── providers/            # Storage providers
+│   │   │   │   │   ├── filesystem.ts     # Filesystem provider
+│   │   │   │   │   ├── minio.ts          # MinIO provider
+│   │   │   │   │   └── s3.ts             # S3 provider
+│   │   │   │   ├── types.ts              # Storage types
+│   │   │   │   ├── utils.ts              # Storage utilities
+│   │   │   │   └── index.ts              # MinIO integration
+│   │   │   ├── notifications/            # Push notifications
+│   │   │   │   ├── event-bus.ts          # Event bus (ioredis)
+│   │   │   │   └── index.ts              # Redis pub/sub events
+│   │   │   └── scripts/
+│   │   │       └── verify-email.ts       # Email verification script
+│   │   ├── env.ts                        # Services environment variables
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── types/                            # Shared TypeScript types
+│   │   ├── src/
+│   │   │   ├── auth.types.ts             # Auth types, JWT payload
+│   │   │   ├── users.types.ts            # User types
+│   │   │   ├── roles.types.ts            # Role types
+│   │   │   ├── permission.types.ts       # Permission types
+│   │   │   ├── clusters.types.ts         # Cluster types
+│   │   │   ├── parameters.types.ts       # Parameter types
+│   │   │   ├── parameter-categories.types.ts
+│   │   │   ├── parameter-tool.types.ts
+│   │   │   ├── tools.types.ts            # Tool types
+│   │   │   ├── kbli.types.ts
+│   │   │   ├── user-company.types.ts     # Company types
+│   │   │   ├── user-company-testing-location.types.ts
+│   │   │   ├── cart.types.ts             # Cart types
+│   │   │   ├── order.types.ts            # Order types
+│   │   │   ├── order-item.types.ts
+│   │   │   ├── order-status-history.types.ts
+│   │   │   ├── testing.types.ts          # Testing types
+│   │   │   ├── testing-item.types.ts
+│   │   │   ├── data-table.types.ts       # TanStack Table types
+│   │   │   ├── provinces.types.ts        # Location types
+│   │   │   ├── regencies.types.ts
+│   │   │   ├── districts.types.ts
+│   │   │   ├── villages.types.ts
+│   │   │   └── utils.types.ts            # Utility types
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── utils/                            # Utility functions
+│   │   ├── src/
+│   │   │   ├── data-table.ts             # Data table utilities
+│   │   │   ├── data-table.config.ts      # Table configuration
+│   │   │   ├── filter-column.ts          # Column filter utilities
+│   │   │   ├── parsers.ts                # Data parsers
+│   │   │   ├── error.ts                  # Error handling
+│   │   │   └── typed-event-emitter.ts    # Typed EventEmitter
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── constants/                        # App-wide constants
+│   │   ├── src/
+│   │   │   └── index.ts                  # All constants (enums, labels)
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   ├── shared/                           # Cross-app shared utilities
+│   │   ├── src/
+│   │   │   ├── index.ts
+│   │   │   └── data-table.config.ts      # Shared table config
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   │
+│   └── config/                           # Shared configurations
+│       ├── tsconfig.base.json            # Base TypeScript config
+│       └── package.json
+│
+├── turbo.json                            # Turborepo pipeline configuration
+├── pnpm-workspace.yaml                   # pnpm workspace definition + catalogs
+├── package.json                          # Root scripts and dev dependencies
+├── pnpm-lock.yaml                        # Lock file
+├── bts.jsonc                             # Better-T-Stack config
+├── README.md                             # Project documentation
+└── llms.txt                              # LLM context file (this file)
 ```
 
-## Package Namespace
+---
 
-All packages use `@tepian-k3/*` namespace:
-- `@tepian-k3/api` - tRPC API definition
-- `@tepian-k3/db` - Database schema & client
-- `@tepian-k3/auth` - Authentication
-- `@tepian-k3/schema` - Zod schemas
+## Database Schema (Drizzle ORM)
+
+### Core Entities
+
+| Table | Description |
+|-------|-------------|
+| `users` | User accounts with auth info, profile |
+| `roles` | Role definitions (admin, user, etc.) |
+| `permissions` | RBAC permissions with resource/action |
+| `user_roles` | User-role assignments (many-to-many) |
+| `role_permissions` | Role-permission assignments |
+| `user_permissions` | Direct user permissions (overrides) |
+
+### Company & Location
+
+| Table | Description |
+|-------|-------------|
+| `user_companies` | User's registered companies |
+| `user_company_testing_locations` | Testing locations per company |
+| `kblis` | Business classification codes |
+| `provinces` | Indonesian provinces |
+| `regencies` | Cities/regencies |
+| `districts` | Districts (kecamatan) |
+| `villages` | Villages (kelurahan) |
+
+### Testing Configuration
+
+| Table | Description |
+|-------|-------------|
+| `clusters` | Testing category groups |
+| `parameter_categories` | Parameter categories per cluster |
+| `parameters` | Testing parameters with pricing |
+| `tools` | Testing equipment/instruments |
+| `parameter_tools` | Parameter-tool relationships |
+
+### Order & Testing Flow
+
+| Table | Description |
+|-------|-------------|
+| `cart` | Shopping cart items |
+| `orders` | Main order records |
+| `order_items` | Line items per order |
+| `order_status_history` | Order status audit trail |
+| `testing` | Testing sessions |
+| `testing_item` | Individual test items |
+
+### Authentication
+
+| Table | Description |
+|-------|-------------|
+| `otp_codes` | Email verification OTPs |
+| `password_resets` | Password reset tokens |
+
+### Enums
+
+```typescript
+// Permission actions
+PERMISSION_ACTION = ['create', 'read', 'update', 'delete', 'manage']
+
+// Order statuses
+ORDER_STATUS = ['pending', 'confirmed', 'revision', 'rejected', 'in_progress', 'completed', 'cancelled']
+
+// Approval statuses  
+ORDER_APPROVAL_STATUSES = ['pending', 'approved', 'rejected']
+
+// Payment statuses
+ORDER_PAYMENT_STATUSES = ['unpaid', 'pending_verification', 'paid', 'rejected']
+
+// Testing statuses
+TESTING_STATUSES = ['start_testing', 'sample_submission', 'sample_analysis', 'report_generation', 'report_publishing', 'completed']
+
+// Tool conditions
+TOOLS_CONDITIONS = ['baik', 'rusak', 'diperingatkan', 'tidak_menyala']
+
+// Tool availability
+TOOLS_AVAILABILITY = ['ready', 'kalibrasi', 'not_ready', 'maintenance', 'dipinjam']
+```
+
+---
+
+## Package Dependencies
+
+### @tepian-k3/web (Frontend)
+
+**Internal Dependencies:**
+- `@tepian-k3/api` - tRPC client types
+- `@tepian-k3/schema` - Form validation schemas
+- `@tepian-k3/types` - Shared types
+- `@tepian-k3/utils` - Utility functions
+- `@tepian-k3/constants` - App constants
+
+**Key External Dependencies:**
+- React 19.2.3, react-dom
+- @tanstack/react-router, react-query, react-table, react-form
+- @trpc/client, @trpc/tanstack-react-query
+- Radix UI primitives (20+ components)
+- TailwindCSS 4.0, tw-animate-css
+- zustand (state), nuqs (URL state)
+- date-fns, recharts, sonner
+- @dnd-kit/* (drag-and-drop)
+- vite-plugin-pwa
+
+### @tepian-k3/server (Backend)
+
+**Internal Dependencies:**
+- `@tepian-k3/api` - tRPC routers
+- `@tepian-k3/db` - Database client
+- `@tepian-k3/services` - Email, storage, logger
+
+**Key External Dependencies:**
+- hono, @hono/node-server, @hono/trpc-server
+- @trpc/server
+- mime-types
+
+### @tepian-k3/api (tRPC API)
+
+**Internal Dependencies:**
+- `@tepian-k3/auth` - Authentication middleware
+- `@tepian-k3/db` - Database access
+- `@tepian-k3/schema` - Input validation
 - `@tepian-k3/queries` - Database queries
 - `@tepian-k3/services` - External services
-- `@tepian-k3/types` - TypeScript types
+
+**Key External Dependencies:**
+- @trpc/server, @trpc/client
+- effect (functional programming)
+- superjson (serialization)
+
+### @tepian-k3/db (Database)
+
+**Internal Dependencies:**
+- `@tepian-k3/constants` - Enum values
+
+**Key External Dependencies:**
+- drizzle-orm, drizzle-kit
+- postgres (PostgreSQL driver)
+- drizzle-seed
+- @node-rs/argon2 (password hashing)
+- uuid v7
+
+### @tepian-k3/auth (Authentication)
+
+**Internal Dependencies:**
+- `@tepian-k3/db` - Database access
+- `@tepian-k3/schema` - Validation
+- `@tepian-k3/queries` - User queries
+- `@tepian-k3/services` - Email service
+
+**Key External Dependencies:**
+- jose (JWT handling)
+- @node-rs/argon2 (password hashing)
+- effect
+
+### @tepian-k3/queries (Database Queries)
+
+**Internal Dependencies:**
+- `@tepian-k3/db` - Database client & schema
+- `@tepian-k3/schema` - Input types
+- `@tepian-k3/types` - Return types
 - `@tepian-k3/utils` - Utilities
 - `@tepian-k3/constants` - Constants
+- `@tepian-k3/services` - External services
+
+**Key External Dependencies:**
+- @trpc/server (errors)
+- effect
+- @node-rs/argon2
+
+### @tepian-k3/schema (Validation)
+
+**Internal Dependencies:**
+- `@tepian-k3/db` - Drizzle schema for drizzle-zod
+- `@tepian-k3/types` - Type definitions
+- `@tepian-k3/constants` - Enum values
+
+**Key External Dependencies:**
+- zod
+- zod-form-data
+- drizzle-zod
+- @t3-oss/env-core
+
+### @tepian-k3/services (External Services)
+
+**Internal Dependencies:**
+- `@tepian-k3/constants` - Configuration
+- `@tepian-k3/schema` - Validation (dev)
+- `@tepian-k3/utils` - Utilities (dev)
+- `@tepian-k3/types` - Types (dev)
+
+**Key External Dependencies:**
+- nodemailer, resend, @react-email/*
+- winston, logform (logging)
+- minio (S3 storage)
+- ioredis (Redis)
+- uuid
+
+### @tepian-k3/types (TypeScript Types)
+
+**Internal Dependencies:**
+- `@tepian-k3/db` - Drizzle inferred types
+- `@tepian-k3/shared` - Shared config
+
+**Key External Dependencies:**
+- @tanstack/react-table
+- jose
+- type-fest
+
+### @tepian-k3/utils (Utilities)
+
+**Internal Dependencies:**
+- `@tepian-k3/db` - Database types
+- `@tepian-k3/schema` - Validation
+- `@tepian-k3/shared` - Shared utilities
+- `@tepian-k3/types` - Type definitions
+
+**Key External Dependencies:**
+- @tanstack/react-table
+- @trpc/server
+- date-fns
+- effect
+- eventemitter3
+- nuqs
+- zod
+
+### @tepian-k3/constants (Constants)
+
+No internal or external dependencies.
+
+### @tepian-k3/shared (Shared)
+
+No external dependencies.
+
+---
+
+## Catalog Dependencies (pnpm-workspace.yaml)
+
+Shared versions managed via pnpm catalogs:
+```yaml
+dotenv: ^17.2.2
+eventemitter3: ^5.0.1
+effect: ^3.19.13
+date-fns: ^4.1.0
+nuqs: ^2.8.6
+zod: ^4.1.13
+zod-form-data: ^3.0.1
+typescript: ^5
+hono: ^4.8.2
+uuid: ^13.0.0
+@tanstack/react-table: ^8.21.3
+@trpc/server: ^11.7.2
+@trpc/client: ^11.7.2
+@node-rs/argon2: ^2.0.2
+```
+
+---
 
 ## Type Safety Flow
 
-Database Schema (Drizzle) → Zod Schemas → tRPC Routers → Frontend Client
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     DATABASE (PostgreSQL)                        │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│              DRIZZLE SCHEMA (@tepian-k3/db/schema)              │
+│   - Table definitions with TypeScript inference                  │
+│   - Enums from @tepian-k3/constants                             │
+│   - Relations in @tepian-k3/db/relations                        │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│              ZOD SCHEMAS (@tepian-k3/schema)                    │
+│   - Input validation schemas                                     │
+│   - drizzle-zod for schema generation                           │
+│   - zod-form-data for multipart forms                           │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│              TYPE DEFINITIONS (@tepian-k3/types)                │
+│   - Inferred types from Drizzle                                 │
+│   - Custom business types                                        │
+│   - Data table types                                            │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│              DATABASE QUERIES (@tepian-k3/queries)              │
+│   - Reusable query functions                                    │
+│   - Effect-based error handling                                 │
+│   - Type-safe inputs/outputs                                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│              tRPC ROUTERS (@tepian-k3/api)                      │
+│   - Procedure definitions                                        │
+│   - Input validation with Zod                                   │
+│   - Middleware (auth, permissions)                              │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│              BACKEND SERVER (@tepian-k3/server)                 │
+│   - Hono server with tRPC adapter                               │
+│   - Static file serving                                         │
+│   - CORS, logging middleware                                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│              FRONTEND CLIENT (@tepian-k3/web)                   │
+│   - tRPC React Query client                                     │
+│   - Full type inference from server                             │
+│   - TanStack Router for type-safe routing                       │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-## Dependency Order
+---
 
-constants → types → schema → db → queries → services → api → apps
+## Package Dependency Graph
+
+```
+@tepian-k3/constants (leaf - no dependencies)
+       ↓
+@tepian-k3/shared (leaf - no dependencies)
+       ↓
+@tepian-k3/db ←── @tepian-k3/constants
+       ↓
+@tepian-k3/types ←── @tepian-k3/db, @tepian-k3/shared
+       ↓
+@tepian-k3/schema ←── @tepian-k3/db, @tepian-k3/types, @tepian-k3/constants
+       ↓
+@tepian-k3/services ←── @tepian-k3/constants
+       ↓
+@tepian-k3/utils ←── @tepian-k3/db, @tepian-k3/schema, @tepian-k3/shared, @tepian-k3/types
+       ↓
+@tepian-k3/queries ←── @tepian-k3/db, @tepian-k3/schema, @tepian-k3/types, @tepian-k3/utils, @tepian-k3/constants, @tepian-k3/services
+       ↓
+@tepian-k3/auth ←── @tepian-k3/db, @tepian-k3/schema, @tepian-k3/queries, @tepian-k3/services
+       ↓
+@tepian-k3/api ←── @tepian-k3/auth, @tepian-k3/db, @tepian-k3/schema, @tepian-k3/queries, @tepian-k3/services
+       ↓
+┌──────────────────────────────────────────────────────────────────┐
+│                           APPS                                    │
+├──────────────────────────────────────────────────────────────────┤
+│ @tepian-k3/server ←── @tepian-k3/api, @tepian-k3/db,            │
+│                        @tepian-k3/services                       │
+├──────────────────────────────────────────────────────────────────┤
+│ @tepian-k3/web ←── @tepian-k3/api, @tepian-k3/schema,           │
+│                     @tepian-k3/types, @tepian-k3/utils,          │
+│                     @tepian-k3/constants                         │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Key Commands
 
-- `pnpm dev` - Start development servers
-- `pnpm build` - Build all packages
-- `pnpm check-types` - Type check monorepo
-- `pnpm lint` - Lint all packages
-- `pnpm db:push` - Push schema to database
-- `pnpm db:migrate` - Run migrations
-- `pnpm db:studio` - Open Drizzle Studio
+### Development
+```bash
+pnpm dev              # Start all apps (web + server)
+pnpm dev:web          # Start only web app
+pnpm dev:server       # Start only API server
+```
+
+### Building
+```bash
+pnpm build            # Build all apps and packages
+pnpm check-types      # Type check entire monorepo
+```
+
+### Database
+```bash
+pnpm db:push          # Push schema to database (dev)
+pnpm db:generate      # Generate migration files
+pnpm db:migrate       # Run migrations (production)
+pnpm db:studio        # Open Drizzle Studio GUI
+pnpm db:seed          # Seed database with initial data
+pnpm db:reset         # Reset database and re-run everything
+```
+
+### Email
+```bash
+pnpm email:dev        # Start React Email preview server
+pnpm email:verify     # Verify email configuration
+```
+
+### Code Quality
+```bash
+pnpm lint             # Lint all packages
+pnpm web:prettier     # Format web app code
+```
+
+---
 
 ## Environment Variables
 
-Required:
-- `DATABASE_URL` - PostgreSQL connection string
-- `PORT` - Server port (default: 3000)
-- `NODE_ENV` - Environment (development/production)
-- `JWT_SECRET` - Authentication secret
+### Required
+```env
+# Database
+POSTGRES_URL=postgresql://user:password@localhost:5432/tepian_k3
 
-Optional:
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` - Email service
-- `STORAGE_PATH` - File upload path
-- `LOG_LEVEL` - Logging level
+# Server
+SERVER_HOSTNAME=0.0.0.0
+SERVER_PORT=3000
+NODE_ENV=development
+
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+
+# Frontend
+VITE_API_URL=http://localhost:3000
+
+# App URLs
+APP_URL=http://localhost:3000
+DASHBOARD_URL=http://localhost:3001
+CORS_ORIGIN=http://localhost:3001
+```
+
+### Email Service (choose one provider)
+```env
+EMAIL_FROM=noreply@tepian-k3.com
+EMAIL_PROVIDER=smtp|resend|sendgrid|mailgun|ses|ethereal
+
+# SMTP
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+
+# Resend
+RESEND_API_KEY=re_xxx
+
+# SendGrid
+SENDGRID_API_KEY=SG.xxx
+
+# Mailgun
+MAILGUN_SMTP_HOST=smtp.mailgun.org
+MAILGUN_SMTP_USER=xxx
+MAILGUN_SMTP_PASSWORD=xxx
+
+# AWS SES
+AWS_REGION=us-east-1
+AWS_SES_SMTP_USER=xxx
+AWS_SES_SMTP_PASSWORD=xxx
+
+# Ethereal (testing)
+ETHEREAL_USER=xxx
+ETHEREAL_PASSWORD=xxx
+```
+
+### Redis (for real-time events)
+```env
+MEMURAI_HOST=localhost
+MEMURAI_PORT=6379
+MEMURAI_PASSWORD=optional
+```
+
+---
 
 ## Development URLs
 
-- Web App: http://localhost:3001
-- API Server: http://localhost:3000
+- **Web App**: http://localhost:3001
+- **API Server**: http://localhost:3000
+- **Drizzle Studio**: Run `pnpm db:studio`
+- **Email Preview**: Run `pnpm email:dev` → http://localhost:3001
+
+---
 
 ## Code Conventions
 
+### General
 - Use TypeScript strict mode
-- Define types in `@tepian-k3/types`
-- Validate inputs with Zod schemas from `@tepian-k3/schema`
-- Database queries go in `@tepian-k3/queries`
-- API routes defined as tRPC procedures in `@tepian-k3/api`
-- Frontend uses tRPC client for type-safe API calls
+- ESM modules (`"type": "module"`)
+- pnpm workspace protocol for internal deps
+
+### Imports
+```typescript
+// Internal packages
+import { db } from "@tepian-k3/db";
+import { userSchema } from "@tepian-k3/schema";
+import { type User } from "@tepian-k3/types";
+import { PERMISSION_ACTION } from "@tepian-k3/constants";
+
+// Sub-path exports
+import { db } from "@tepian-k3/db/client";
+import { users } from "@tepian-k3/db/schema";
+import { logger } from "@tepian-k3/services/logger";
+```
+
+### tRPC Procedures
+```typescript
+// In @tepian-k3/api/routers/*.ts
+export const exampleRouter = router({
+  getAll: publicProcedure
+    .input(filterSchema)
+    .query(({ input }) => getAllQuery(input)),
+  
+  create: protectedProcedure
+    .input(createSchema)
+    .mutation(({ input, ctx }) => createMutation(input, ctx.user)),
+    
+  createFormData: protectedProcedure
+    .input(formDataInput)
+    .use(formDataProcedure(createFormDataSchema))
+    .mutation(async ({ input, ctx }) => runEffect(
+        Effect.gen(function* () {
+          // convert file to buffer
+          const arrayBuffer = yield* Effect.tryPromise(() =>
+            ctx.input.data.picture.arrayBuffer()
+          );
+
+          const buffer = Buffer.from(arrayBuffer);
+
+          const uploadedFile = yield* storageService.upload(buffer, {
+            filename: ctx.input.data.picture.name,
+            folder: "company-pictures",
+          });
+
+          const result = yield* userCompanyQueries.userCreateUserCompany(
+            ctx.user.id,
+            ctx.input.data,
+            uploadedFile.key
+          );
+
+          return result;
+        })
+      ));
+},
+```
+
+### Database Queries
+```typescript
+// In @tepian-k3/queries/*.queries.ts
+const usersQueries = {
+       getAll: async (filter: FilterOptions): Promise<User[]> => {
+       // Query implementation
+       },
+       
+       create: async (data: CreateUserInput): Promise<User> => {
+       // Mutation implementation
+       },
+};
+
+export default usersQueries;
+```
+
+### Zod Schemas
+```typescript
+// In @tepian-k3/schema/*.schema.ts
+const createUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1),
+  password: z.string().min(8),
+});
+
+const userSchema = {
+       createUserSchema,
+}
+
+export default userSchema;
+```
+
+### Frontend Components
+```typescript
+// Use tRPC hooks
+const { data, isLoading } = trpc.user.getAll.useQuery();
+
+// Use Zustand for client state
+const { items, addItem } = useCartStore();
+
+// Use nuqs for URL state
+const [search, setSearch] = useQueryState('search');
+```
+
+---
+
+## Feature Modules
+
+### Authentication
+- Email/password registration with OTP verification
+- JWT-based authentication (access + refresh tokens)
+- Password reset flow
+- RBAC with roles and permissions
+
+### User Management
+- User CRUD operations
+- Role assignment
+- Direct permission overrides
+- Profile management with avatar upload
+
+### Company Management
+- Company registration with KBLI classification
+- Testing locations per company
+- Indonesian address hierarchy (Province → Regency → District → Village)
+
+### Testing Catalog
+- Clusters → Parameter Categories → Parameters hierarchy
+- Parameter pricing
+- Tool/equipment management
+- Parameter-tool relationships
+
+### Order Flow
+1. Browse testing catalog
+2. Add parameters to cart
+3. Checkout with company/location selection
+4. Admin approval workflow
+5. Payment verification
+6. Testing execution
+7. Report generation
+
+### Real-time Events
+- Server-Sent Events (SSE) via Redis pub/sub
+- Order status notifications
+- Real-time updates
+
+---
+
+## Business Domain (K3)
+
+**K3 = Keselamatan dan Kesehatan Kerja** (Occupational Health and Safety)
+
+This system manages laboratory testing services for workplace safety compliance:
+
+- **Clusters**: Major testing categories (e.g., Chemical, Physical, Biological)
+- **Parameter Categories**: Sub-categories within clusters
+- **Parameters**: Specific tests with units, references, and pricing
+- **Tools**: Laboratory equipment used for testing
+- **Orders**: Customer requests for testing services
+- **Testing**: Actual test execution and results
+
+---
+
+## License
+
+MIT License
