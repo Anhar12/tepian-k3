@@ -923,7 +923,7 @@ export const exampleRouter = router({
           return result;
         })
       ));
-},
+});
 ```
 
 ### Database Queries
