@@ -153,3 +153,85 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   delete: "Delete",
   status_change: "Status Change",
 };
+
+export const DOCUMENT_ENTITY_TYPES = [
+  "order",
+  "testing",
+  "user_company",
+  "user", // for profile documents, certifications, etc.
+] as const;
+
+export type DocumentEntityType = (typeof DOCUMENT_ENTITY_TYPES)[number];
+
+export const DOCUMENT_ENTITY_TYPE_LABELS: Record<string, string> = {
+  order: "Order",
+  testing: "Testing",
+  user_company: "User Company",
+  user: "User",
+};
+
+export const DOCUMENT_TYPES = [
+  // Order documents
+  "offering_document",
+  "offering_user_document",
+  "invoice",
+  "proof_of_payment",
+  "assignment_letter",
+
+  // Testing documents
+  "testing_report",
+  "lab_certificate",
+  "sample_analysis",
+  "calibration_certificate",
+
+  // Company documents
+  "business_license",
+  "company_registration",
+
+  // User documents
+  "id_card",
+  "certification",
+] as const;
+
+export type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  // Order documents
+  offering_document: "Offering Document",
+  offering_user_document: "Offering User Document",
+  invoice: "Invoice",
+  proof_of_payment: "Proof of Payment",
+  assignment_letter: "Assignment Letter",
+
+  // Testing documents
+  testing_report: "Testing Report",
+  lab_certificate: "Lab Certificate",
+  sample_analysis: "Sample Analysis",
+  calibration_certificate: "Calibration Certificate",
+
+  // Company documents
+  business_license: "Business License",
+  company_registration: "Company Registration",
+
+  // User documents
+  id_card: "ID Card",
+  certification: "Certification",
+};
+
+export const DOCUMENT_STATUS = [
+  "draft",
+  "pending_signature",
+  "signed",
+  "verified",
+  "rejected",
+] as const;
+
+export type DocumentStatus = (typeof DOCUMENT_STATUS)[number];
+
+export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
+  draft: "Draft",
+  pending_signature: "Pending Signature",
+  signed: "Signed",
+  verified: "Verified",
+  rejected: "Rejected",
+};

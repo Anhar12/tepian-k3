@@ -46,6 +46,17 @@ export const env = createEnv({
     MEMURAI_HOST: z.string().default("localhost"),
     MEMURAI_PORT: z.string().default("6379"),
     MEMURAI_PASSWORD: z.string().default(""),
+    // Main document secret
+    JWT_DOCUMENT_SECRET: z.string().min(32),
+
+    // Optional: Type-specific secrets
+    JWT_LEGAL_DOCUMENT_SECRET: z.string().min(32).optional(),
+    JWT_TESTING_DOCUMENT_SECRET: z.string().min(32).optional(),
+    JWT_COMPANY_DOCUMENT_SECRET: z.string().min(32).optional(),
+
+    // Configuration
+    DOCUMENT_QR_EXPIRATION: z.string().default("10y"),
+    DOCUMENT_VERIFICATION_BASE_URL: z.string().url().optional(),
   },
 
   /**

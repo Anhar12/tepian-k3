@@ -1,0 +1,724 @@
+import { Effect } from "effect";
+import { db } from "@tepian-k3/db/client";
+import { documents, documentVerifications } from "@tepian-k3/db/schema";
+import { eq, and, desc } from "@tepian-k3/db";
+import { TRPCError } from "@trpc/server";
+import type {
+  CreateDocumentInput,
+  SignDocumentInput,
+  VerifyDocumentInput,
+} from "@tepian-k3/types/document.types";
+import type {
+  DocumentEntityType,
+  DocumentStatus,
+  DocumentType,
+} from "@tepian-k3/constants";
+import { logError } from "effect/Effect";
+import { storageService } from "@tepian-k3/services/storage";
+import { documentSigningService } from "@tepian-k3/services/document-signing";
+import QRCode from "qrcode";
+
+const documentQueries = {
+  /**
+   * Get all documents for a specific entity (order, testing, etc.)
+   */
+  getDocumentsByEntity: (entityType: DocumentEntityType, entityId: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.documents.findMany({
+          where: and(
+            eq(documents.entityType, entityType),
+            eq(documents.entityId, entityId)
+          ),
+          orderBy: desc(documents.createdAt),
+        }),
+      catch: (error) => {
+        logError(
+          "documentQueries.getDocumentsByEntity",
+          "Error fetching documents by entity",
+          { entityType, entityId, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil dokumen",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Get documents by type for an entity
+   */
+  getDocumentByTypeAndEntity: (
+    entityType: DocumentEntityType,
+    entityId: string,
+    documentType: DocumentType
+  ) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db.query.documents.findFirst({
+            where: and(
+              eq(documents.entityType, entityType),
+              eq(documents.entityId, entityId),
+              eq(documents.type, documentType)
+            ),
+          }),
+        catch: (error) => {
+          logError(
+            "documentQueries.getDocumentByTypeAndEntity",
+            "Error fetching document by type and entity",
+            { entityType, entityId, documentType, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      return results || null;
+    }),
+
+  /**
+   * Get document by ID
+   */
+  getDocumentById: (documentId: string) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db.query.documents.findFirst({
+            where: eq(documents.id, documentId),
+          }),
+
+        catch: (error) => {
+          logError(
+            "documentQueries.getDocumentById",
+            "Error fetching document by ID",
+            { documentId, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      if (!results) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Dokumen tidak ditemukan",
+          })
+        );
+      }
+
+      return results;
+    }),
+
+  /**
+   * Create a new document
+   */
+  createDocument: (input: CreateDocumentInput) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .insert(documents)
+            .values({
+              documentNumber: input.documentNumber,
+              type: input.type,
+              title: input.title,
+              description: input.description,
+              entityType: input.entityType,
+              entityId: input.entityId,
+              fileUrl: input.fileUrl,
+              fileName: input.fileName,
+              fileSize: input.fileSize,
+              mimeType: input.mimeType,
+              uploadedByUserId: input.uploadedByUserId,
+              status: "draft",
+            })
+            .returning(),
+        catch: (error) => {
+          logError(
+            "documentQueries.createDocument",
+            "Error creating document",
+            { input, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      const document = results[0];
+
+      if (!document) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat dokumen",
+          })
+        );
+      }
+
+      return document;
+    }),
+
+  /**
+   * Sign a document with JWT and generate QR code
+   */
+  signDocumentWithJWT: (
+    documentId: string,
+    signedByUserId: string,
+    appUrl: string
+  ) =>
+    Effect.gen(function* () {
+      // Get the document
+      const document = yield* documentQueries.getDocumentById(documentId);
+
+      // Download file content for hashing
+      const fileContent = yield* storageService.download(document.fileUrl);
+
+      // Create signature using JWT
+      const signatureData =
+        yield* documentSigningService.createDocumentSignature(
+          document.id,
+          document.documentNumber,
+          document.entityType,
+          document.entityId,
+          document.type,
+          document.fileUrl,
+          fileContent,
+          signedByUserId
+        );
+
+      // Generate verification URL
+      const verificationUrl = `${appUrl}/api/verify-document/${signatureData.verificationToken}`;
+
+      // Generate QR code
+      const qrCodeDataUrl = yield* Effect.tryPromise({
+        try: () =>
+          QRCode.toDataURL(verificationUrl, {
+            width: 400,
+            margin: 2,
+            errorCorrectionLevel: "H", // High error correction for documents
+          }),
+        catch: (error) => {
+          logError(
+            "documentQueries.signDocumentWithJWT",
+            "Error generating QR code",
+            { documentId, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat kode QR",
+            cause: error,
+          });
+        },
+      });
+
+      const splitDataUrl = qrCodeDataUrl.split(",")[1];
+
+      if (splitDataUrl === undefined) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat kode QR",
+          })
+        );
+      }
+
+      // Upload QR code image
+      const qrBuffer = Buffer.from(splitDataUrl, "base64");
+      const qrFile = yield* storageService.upload(qrBuffer, {
+        filename: `qr-${signatureData.verificationToken}.png`,
+        folder: "qr-codes",
+      });
+
+      // Update document with signature
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(documents)
+            .set({
+              status: "signed",
+              signatureData: signatureData.signatureData, // JWT signature
+              verificationToken: signatureData.verificationToken,
+              verificationUrl,
+              qrCodeUrl: qrFile.key,
+              signedByUserId,
+              signedAt: new Date().toISOString(),
+            })
+            .where(eq(documents.id, documentId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "documentQueries.signDocumentWithJWT",
+            "Error updating document with signature",
+            { documentId, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      const signedDocument = results[0];
+
+      if (!signedDocument) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to update document",
+          })
+        );
+      }
+
+      return signedDocument;
+    }),
+
+  /**
+   * Sign a document and generate verification token
+   */
+  signDocument: (documentId: string, input: SignDocumentInput) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(documents)
+            .set({
+              status: "signed",
+              signatureData: input.signatureData,
+              verificationToken: input.verificationToken,
+              verificationUrl: input.verificationUrl,
+              qrCodeUrl: input.qrCodeUrl,
+              signedByUserId: input.signedByUserId,
+              signedAt: new Date().toISOString(),
+            })
+            .where(eq(documents.id, documentId))
+            .returning(),
+        catch: (error) => {
+          logError("documentQueries.signDocument", "Error signing document", {
+            documentId,
+            input,
+            error,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menandatangani dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      const document = results[0];
+
+      if (!document) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Dokumen tidak ditemukan",
+          })
+        );
+      }
+
+      return document;
+    }),
+
+  /**
+   * Get document by verification token
+   */
+  getDocumentByToken: (token: string) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db.query.documents.findFirst({
+            where: eq(documents.verificationToken, token),
+          }),
+
+        catch: (error) => {
+          logError(
+            "documentQueries.getDocumentByToken",
+            "Error fetching document by token",
+            {
+              token,
+              error,
+            }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      return results || null;
+    }),
+
+  /**
+   * Verify document by token (for QR code scanning)
+   */
+  verifyDocumentByToken: (
+    token: string,
+    metadata: {
+      verifiedByUserId?: string;
+      verifiedByIp?: string;
+      verifiedByUserAgent?: string;
+      checkFileIntegrity?: boolean;
+    }
+  ) =>
+    Effect.gen(function* () {
+      // Get document by verification token
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db.query.documents.findFirst({
+            where: eq(documents.verificationToken, token),
+          }),
+
+        catch: (error) =>
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to fetch document",
+            cause: error,
+          }),
+      });
+
+      if (!results) {
+        yield* documentQueries.logVerification("", {
+          isValid: false,
+          verificationNotes: "Document not found",
+          ...metadata,
+        });
+
+        return {
+          valid: false,
+          error: "Document not found",
+          document: null,
+        };
+      }
+
+      if (!results.signatureData) {
+        yield* documentQueries.logVerification(results.id, {
+          isValid: false,
+          verificationNotes: "Document not signed",
+          ...metadata,
+        });
+
+        return {
+          valid: false,
+          error: "Document has not been signed",
+          document: null,
+        };
+      }
+
+      // Verify JWT signature
+      let fileContent: Buffer | undefined;
+      if (metadata.checkFileIntegrity) {
+        fileContent = yield* storageService.download(results.fileUrl);
+      }
+
+      const verificationResult =
+        yield* documentSigningService.verifyDocumentAuthenticity(
+          results.signatureData,
+          fileContent
+        );
+
+      if (!verificationResult.valid) {
+        yield* documentQueries.logVerification(results.id, {
+          isValid: false,
+          verificationNotes: verificationResult.error || "Invalid signature",
+          ...metadata,
+        });
+
+        return {
+          valid: false,
+          error: verificationResult.error,
+          document: null,
+        };
+      }
+
+      // Log successful verification
+      yield* documentQueries.logVerification(results.id, {
+        isValid: true,
+        verificationNotes: "Document verified successfully",
+        ...metadata,
+      });
+
+      // Update document verification timestamp
+      yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(documents)
+            .set({
+              status: "verified",
+              verifiedAt: new Date().toISOString(),
+            })
+            .where(eq(documents.id, results.id)),
+        catch: () => {
+          // Non-critical error, don't fail verification
+        },
+      });
+
+      return {
+        valid: true,
+        error: null,
+        document: results,
+        payload: verificationResult.payload,
+      };
+    }),
+
+  /**
+   * Verify a document and log the verification
+   */
+  verifyDocument: (token: string, metadata: VerifyDocumentInput) =>
+    Effect.gen(function* () {
+      const document = yield* documentQueries.getDocumentByToken(token);
+
+      if (!document) {
+        return {
+          isValid: false,
+          reason: "Dokumen tidak ditemukan",
+          document: null,
+        };
+      }
+
+      // Check expiration
+      if (document.expiresAt && new Date(document.expiresAt) < new Date()) {
+        yield* documentQueries.logVerification(document.id, {
+          ...metadata,
+          isValid: false,
+          verificationNotes: "Verifikasi dokumen kedaluwarsa",
+        });
+
+        return {
+          isValid: false,
+          reason: "Verifikasi kedaluwarsa",
+          document: null,
+        };
+      }
+
+      // Log successful verification
+      yield* documentQueries.logVerification(document.id, {
+        ...metadata,
+        isValid: true,
+      });
+
+      // Update document verified timestamp
+      yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(documents)
+            .set({
+              status: "verified",
+              verifiedAt: new Date().toISOString(),
+            })
+            .where(eq(documents.id, document.id)),
+        catch: (error) => {
+          logError(
+            "documentQueries.verifyDocument",
+            "Error updating document verified status",
+            { documentId: document.id, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui status verifikasi dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      return {
+        isValid: true,
+        reason: null,
+        document,
+      };
+    }),
+
+  /**
+   * Log a verification attempt
+   */
+  logVerification: (
+    documentId: string,
+    input: {
+      verifiedByUserId?: string;
+      verifiedByIp?: string;
+      verifiedByUserAgent?: string;
+      verificationLocation?: string;
+      isValid: boolean;
+      verificationMethod?: string;
+      verificationNotes?: string;
+    }
+  ) =>
+    Effect.tryPromise({
+      try: () =>
+        db
+          .insert(documentVerifications)
+          .values({
+            documentId,
+            ...input,
+            verificationMethod: input.verificationMethod || "qr_scan",
+          })
+          .returning(),
+      catch: (error) => {
+        logError(
+          "documentQueries.logVerification",
+          "Error logging document verification",
+          { documentId, input, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mencatat verifikasi dokumen",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Get verification history for a document
+   */
+  getVerificationHistory: (documentId: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.documentVerifications.findMany({
+          where: eq(documentVerifications.documentId, documentId),
+          orderBy: desc(documentVerifications.createdAt),
+        }),
+      catch: (error) => {
+        logError(
+          "documentQueries.getVerificationHistory",
+          "Error fetching document verification history",
+          { documentId, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil riwayat verifikasi dokumen",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Update document status
+   */
+  updateDocumentStatus: (documentId: string, status: DocumentStatus) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(documents)
+            .set({ status })
+            .where(eq(documents.id, documentId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "documentQueries.updateDocumentStatus",
+            "Error updating document status",
+            { documentId, status, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui status dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      const document = results[0];
+
+      if (!document) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Dokumen tidak ditemukan",
+          })
+        );
+      }
+
+      return document;
+    }),
+
+  /**
+   * Delete document
+   */
+  deleteDocument: (documentId: string) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db.delete(documents).where(eq(documents.id, documentId)).returning(),
+        catch: (error) => {
+          logError(
+            "documentQueries.deleteDocument",
+            "Error deleting document",
+            { documentId, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menghapus dokumen",
+            cause: error,
+          });
+        },
+      });
+
+      const document = results[0];
+
+      if (!document) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Dokumen tidak ditemukan",
+          })
+        );
+      }
+
+      return document;
+    }),
+
+  /**
+   * Helper: Get all order documents
+   */
+  getOrderDocuments: (orderId: string) =>
+    documentQueries.getDocumentsByEntity("order", orderId),
+
+  /**
+   * Helper: Get all testing documents
+   */
+  getTestingDocuments: (testingId: string) =>
+    documentQueries.getDocumentsByEntity("testing", testingId),
+
+  /**
+   * Helper: Get specific order document (e.g., invoice)
+   */
+  getOrderInvoice: (orderId: string) =>
+    documentQueries.getDocumentByTypeAndEntity("order", orderId, "invoice"),
+
+  /**
+   * Helper: Get testing report
+   */
+  getTestingReport: (testingId: string) =>
+    documentQueries.getDocumentByTypeAndEntity(
+      "testing",
+      testingId,
+      "testing_report"
+    ),
+
+  /**
+   * Helper: Get lab certificate
+   */
+  getLabCertificate: (testingId: string) =>
+    documentQueries.getDocumentByTypeAndEntity(
+      "testing",
+      testingId,
+      "lab_certificate"
+    ),
+};
+
+export default documentQueries;

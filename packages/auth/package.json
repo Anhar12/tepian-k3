@@ -23,7 +23,7 @@
     "@tepian-k3/services": "workspace:*",
     "dotenv": "catalog:",
     "effect": "catalog:",
-    "jose": "^6.1.3",
+    "jose": "catalog:",
     "zod": "catalog:"
   }
 }

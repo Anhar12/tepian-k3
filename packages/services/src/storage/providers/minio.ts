@@ -122,6 +122,37 @@ export class MinioProvider {
     });
   }
 
+  download(
+    key: string
+  ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
+    return Effect.tryPromise({
+      try: async () => {
+        const stream = await this.client.getObject(this.bucket, key);
+        const chunks: Buffer[] = [];
+
+        return await new Promise<Buffer>((resolve, reject) => {
+          stream.on("data", (chunk) => {
+            chunks.push(chunk);
+          });
+          stream.on("end", () => {
+            resolve(Buffer.concat(chunks));
+          });
+          stream.on("error", (err) => {
+            reject(
+              err.name === "NoSuchKey"
+                ? new FileNotFoundError(key)
+                : new UploadFailedError("Failed to download file", err)
+            );
+          });
+        });
+      },
+      catch: (error) =>
+        error instanceof FileNotFoundError
+          ? error
+          : new UploadFailedError("Failed to download file", error),
+    });
+  }
+
   getSignedUrl(
     key: string,
     expiresIn: number = 3600

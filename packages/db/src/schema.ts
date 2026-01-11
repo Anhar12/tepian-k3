@@ -24,6 +24,9 @@ import {
 } from "./utils";
 import {
   AUDIT_ACTIONS,
+  DOCUMENT_ENTITY_TYPES,
+  DOCUMENT_STATUS,
+  DOCUMENT_TYPES,
   ORDER_APPROVAL_STATUSES,
   ORDER_PAYMENT_STATUSES,
   ORDER_SEQUENCE_NAME,
@@ -91,6 +94,15 @@ export const users = createTable(
       .where(sql`${table.deletedAt} IS NULL`),
   ]
 );
+
+export const documentEntityTypeEnum = pgEnum(
+  "document_entity_type",
+  DOCUMENT_ENTITY_TYPES
+);
+
+export const documentTypeEnum = pgEnum("document_type", DOCUMENT_TYPES);
+
+export const documentStatusEnum = pgEnum("document_status", DOCUMENT_STATUS);
 
 export const otpCodes = createTable(
   "otp_codes",
@@ -605,19 +617,18 @@ export const order = createTable(
       .references(() => userCompanies.id, { onDelete: "cascade" }),
     status: orderStatusEnum("status").notNull().default("pending"),
     totalAmount: integer("total_amount").notNull(),
-    ...createFileUrlColumn("offeringDocument"),
-    ...createFileUrlColumn("offeringUserDocument"),
+
+    // Keep approval/payment status in orders for quick filtering
     approvalStatus: approvalStatusEnum("approval_status")
       .notNull()
       .default("pending"),
     approvalRejectReason: text("approval_reject_reason"),
-    ...createFileUrlColumn("invoice"),
-    ...createFileUrlColumn("proofOfPayment"),
     paymentStatus: paymentStatusEnum("payment_status")
       .notNull()
       .default("unpaid"),
     paymentRejectedReason: text("payment_rejected_reason"),
-    ...createFileUrlColumn("assignmentLetter"),
+
+    // Key timestamps
     approvedAt: timestamp("approved_at", {
       withTimezone: true,
       mode: "string",
@@ -631,6 +642,7 @@ export const order = createTable(
       withTimezone: true,
       mode: "string",
     }),
+
     ...timestamps,
   },
   (table) => [
@@ -809,5 +821,108 @@ export const audits = createTable(
       desc(table.createdAt)
     ),
     index("audits_changed_fields_idx").using("gin", table.changedFields),
+  ]
+);
+
+export const documents = createTable(
+  "documents",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+
+    // Document metadata
+    documentNumber: varchar("document_number", { length: 100 })
+      .notNull()
+      .unique(),
+    type: documentTypeEnum("type").notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    description: text("description"),
+
+    // Polymorphic relationship
+    entityType: documentEntityTypeEnum("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(), // Can reference order.id, testing.id, etc.
+
+    // File storage
+    fileUrl: text("file_url").notNull(),
+    fileName: varchar("file_name", { length: 255 }).notNull(),
+    fileSize: integer("file_size"), // in bytes
+    mimeType: varchar("mime_type", { length: 100 }),
+
+    // Digital signature & QR verification
+    status: documentStatusEnum("status").notNull().default("draft"),
+    signatureData: text("signature_data"), // Cryptographic hash or signature
+    qrCodeUrl: text("qr_code_url"), // URL to QR code image
+    verificationToken: varchar("verification_token", { length: 255 }).unique(),
+    verificationUrl: text("verification_url"), // Full URL: /api/verify-document/{token}
+
+    // User relationships
+    uploadedByUserId: uuid("uploaded_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    signedByUserId: uuid("signed_by_user_id").references(() => users.id),
+
+    // Timestamps
+    signedAt: timestamp("signed_at", { withTimezone: true, mode: "string" }),
+    verifiedAt: timestamp("verified_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "string" }),
+
+    ...timestamps,
+  },
+  (table) => [
+    index("documents_id_idx").using("btree", table.id),
+    index("documents_entity_idx").using(
+      "btree",
+      table.entityType,
+      table.entityId
+    ),
+    index("documents_type_idx").using("btree", table.type),
+    index("documents_status_idx").using("btree", table.status),
+    index("documents_verification_token_idx").using(
+      "btree",
+      table.verificationToken
+    ),
+    index("documents_document_number_idx").using("btree", table.documentNumber),
+  ]
+);
+
+export const documentVerifications = createTable(
+  "document_verifications",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+
+    // Verification metadata
+    verifiedByUserId: uuid("verified_by_user_id").references(() => users.id),
+    verifiedByIp: varchar("verified_by_ip", { length: 45 }), // IPv6 compatible
+    verifiedByUserAgent: text("verified_by_user_agent"),
+    verificationLocation: text("verification_location"), // Optional geolocation
+
+    // Verification result
+    isValid: boolean("is_valid").notNull(),
+    verificationMethod: varchar("verification_method", { length: 50 }), // 'qr_scan', 'token', 'manual'
+    verificationNotes: text("verification_notes"),
+
+    ...timestamps,
+  },
+  (table) => [
+    index("document_verifications_document_id_idx").using(
+      "btree",
+      table.documentId
+    ),
+    index("document_verifications_created_at_idx").using(
+      "btree",
+      table.createdAt
+    ),
   ]
 );

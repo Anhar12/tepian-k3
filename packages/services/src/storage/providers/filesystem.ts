@@ -103,6 +103,24 @@ export class FileSystemProvider {
     });
   }
 
+  download(
+    key: string
+  ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
+    const filePath = path.join(this.uploadsDir, key);
+    return Effect.tryPromise({
+      try: async () => {
+        return await fs.readFile(filePath);
+      },
+      catch: (error: any) => {
+        if (error.code === "ENOENT") {
+          return new FileNotFoundError(key);
+        } else {
+          return new UploadFailedError("Failed to read file", error);
+        }
+      },
+    });
+  }
+
   getSignedUrl(key: string): Effect.Effect<string> {
     // Filesystem doesn't support signed URLs, return public URL
     return Effect.succeed(this.getPublicUrl(key));

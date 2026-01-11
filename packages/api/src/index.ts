@@ -70,6 +70,7 @@ export const createTRPCContext = async (context: HonoContext) => {
   return {
     session: data?.session,
     user: data?.user,
+    header: context.req.header,
     eventBus,
   };
 };

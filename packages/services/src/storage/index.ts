@@ -44,6 +44,12 @@ class StorageService {
     return this.provider.delete(key);
   }
 
+  download(
+    key: string
+  ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
+    return this.provider.download(key);
+  }
+
   getSignedUrl(
     key: string,
     expiresIn: number = 3600

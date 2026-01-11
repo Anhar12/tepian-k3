@@ -3,6 +3,8 @@ import {
   cart,
   clusters,
   districts,
+  documents,
+  documentVerifications,
   kblis,
   order,
   orderItem,
@@ -290,6 +292,34 @@ export const orderStatusHistoryRelations = relations(
     order: one(order, {
       fields: [orderStatusHistory.orderId],
       references: [order.id],
+    }),
+  })
+);
+
+export const documentsRelations = relations(documents, ({ one, many }) => ({
+  uploadedBy: one(users, {
+    fields: [documents.uploadedByUserId],
+    references: [users.id],
+    relationName: "documentUploadedBy",
+  }),
+  signedBy: one(users, {
+    fields: [documents.signedByUserId],
+    references: [users.id],
+    relationName: "documentSignedBy",
+  }),
+  verifications: many(documentVerifications),
+}));
+
+export const documentVerificationsRelations = relations(
+  documentVerifications,
+  ({ one }) => ({
+    document: one(documents, {
+      fields: [documentVerifications.documentId],
+      references: [documents.id],
+    }),
+    verifiedBy: one(users, {
+      fields: [documentVerifications.verifiedByUserId],
+      references: [users.id],
     }),
   })
 );

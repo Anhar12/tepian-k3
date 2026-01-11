@@ -4,6 +4,7 @@ import { authRouter } from "./routers/auth";
 import { cartRouter } from "./routers/cart";
 import { clusterRouter } from "./routers/cluster";
 import { districtRouter } from "./routers/district";
+import { documentRouter } from "./routers/document";
 import { eventRouter } from "./routers/event";
 import { kbliRouter } from "./routers/kbli";
 import { orderRouter } from "./routers/order";
@@ -48,6 +49,7 @@ export const appRouter = createTRPCRouter({
   event: eventRouter,
   test: testRouter,
   audit: auditRouter,
+  document: documentRouter,
 });
 
 // export type definition of API
