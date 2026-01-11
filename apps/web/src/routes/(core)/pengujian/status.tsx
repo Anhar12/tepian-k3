@@ -3,7 +3,7 @@ import { OrderTimeline } from "@/components/order-timeline";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { trpc } from "@/utils/trpc";
+import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Download, FileText, Loader2 } from "lucide-react";
@@ -35,7 +35,10 @@ function RouteComponent() {
 
   const generateInvoiceMutation = useMutation(
     trpc.order.generateInvoice.mutationOptions({
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(
+          trpc.order.getOrderById.queryOptions({ orderId }),
+        );
         globalSuccessToast(
           "Invoice berhasil dibuat dan diunggah ke penyimpanan.",
         );

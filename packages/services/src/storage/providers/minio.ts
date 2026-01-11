@@ -140,6 +140,16 @@ export class MinioProvider {
   }
 
   /**
+   * Returns the public URL for an asset given its key
+   * @param key The key of the asset
+   * @returns  The public URL of the asset not from uploads endpoint
+   */
+  getAssetUrl(key: string): string {
+    const protocol = this.useSSL ? "https" : "http";
+    return `${protocol}://${this.endpoint}:${this.port}/${this.bucket}/${key}`;
+  }
+
+  /**
    * Extracts the folder path from a public URL
    * @param url - The public URL (e.g., http://localhost:9000/uploads/avatars/2026/01/09/file.jpg)
    * @returns The folder path (e.g., avatars/2026/01/09)

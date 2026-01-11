@@ -38,6 +38,58 @@ export type OrderWithHistory = InferQueryModel<
   }
 >;
 
+export type OrderWithCompanyAndItems = InferQueryModel<
+  "order",
+  {
+    with: {
+      company: {
+        columns: {
+          id: true;
+          name: true;
+          address: true;
+          responsibleTestingPersonPhone: true;
+        };
+        with: {
+          regency: {
+            columns: {
+              id: true;
+              name: true;
+            };
+          };
+        };
+      };
+      statusHistory: true;
+      items: {
+        with: {
+          parameter: {
+            columns: {
+              id: true;
+              name: true;
+              unit: true;
+            };
+            with: {
+              category: {
+                columns: {
+                  id: true;
+                  name: true;
+                };
+                with: {
+                  cluster: {
+                    columns: {
+                      id: true;
+                      name: true;
+                    };
+                  };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  }
+>;
+
 export type OrderWithRelations = InferQueryModel<
   "order",
   {

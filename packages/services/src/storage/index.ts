@@ -55,6 +55,10 @@ class StorageService {
     return this.provider.getPublicUrl(key);
   }
 
+  getAssetUrl(key: string): string {
+    return this.provider.getAssetUrl(key);
+  }
+
   getFolderFromUrl(url: string): string | null {
     return this.provider.getFolderFromUrl(url);
   }

@@ -48,12 +48,54 @@ const orderQueries = {
         db.query.order.findFirst({
           where: and(eq(order.id, orderId), eq(order.userId, userId)),
           with: {
+            items: true,
+            statusHistory: true,
+          },
+        }),
+      catch: (error) => {
+        logError("orderQueries.getOrderById", "Failed to fetch order by ID", {
+          error,
+          orderId,
+          userId,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil pesanan berdasarkan ID",
+        });
+      },
+    });
+  },
+
+  getOrderWithCompanyAndItems(orderId: string, userId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.order.findFirst({
+          where: and(eq(order.id, orderId), eq(order.userId, userId)),
+          with: {
+            company: {
+              columns: {
+                id: true,
+                name: true,
+                address: true,
+                responsibleTestingPersonPhone: true,
+              },
+              with: {
+                regency: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            statusHistory: true,
             items: {
               with: {
                 parameter: {
                   columns: {
                     id: true,
                     name: true,
+                    unit: true,
                   },
                   with: {
                     category: {
@@ -74,7 +116,6 @@ const orderQueries = {
                 },
               },
             },
-            statusHistory: true,
           },
         }),
       catch: (error) => {
@@ -271,6 +312,75 @@ const orderQueries = {
           }
         )
       );
+
+      return result;
+    });
+  },
+
+  createOrderOfferingLetter(orderId: string, offeringLetterUrl: string) {
+    return Effect.gen(function* () {
+      const isExists = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: eq(order.id, orderId),
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.createOrderOfferingLetter",
+            "Failed to fetch order",
+            {
+              error,
+              orderId,
+            }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!isExists) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Order tidak ditemukan",
+          })
+        );
+      }
+
+      const [result] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ offeringDocumentUrl: offeringLetterUrl })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.createOrderOfferingLetter",
+            "Failed to create offering letter",
+            {
+              error,
+              orderId,
+              offeringLetterUrl,
+            }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat surat penawaran",
+          });
+        },
+      });
+
+      if (!result) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat invoice",
+          })
+        );
+      }
 
       return result;
     });

@@ -112,6 +112,10 @@ export class FileSystemProvider {
     return `${this.baseUrl}/api/uploads/${key}`;
   }
 
+  getAssetUrl(key: string): string {
+    return `${this.baseUrl}/api/public/${key}`;
+  }
+
   /**
    * Extracts the folder path from a public URL
    * @param url - The public URL (e.g., http://localhost:3000/api/uploads/avatars/2026/01/09/file.jpg)

@@ -57,6 +57,26 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
+app.get("/api/public/*", async (c) => {
+  // Get the full path after /api/public/
+  const fullPath = c.req.path.replace("/api/public/", "");
+  const filePath = path.join("public", fullPath);
+
+  try {
+    await fs.access(filePath);
+
+    const file = await fs.readFile(filePath);
+
+    const mimeType = lookup(filePath) || "application/octet-stream";
+    c.header("Content-Type", mimeType);
+    c.header("Content-Length", file.length.toString());
+    c.header("Cache-Control", "public, max-age=31536000");
+    return c.body(file);
+  } catch (error) {
+    return c.text("File not found", 404);
+  }
+});
+
 app.get("/api/uploads/*", async (c) => {
   // Get the full path after /api/uploads/
   const fullPath = c.req.path.replace("/api/uploads/", "");
