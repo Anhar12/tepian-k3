@@ -4,11 +4,24 @@ import type {
   DocumentType,
 } from "@tepian-k3/constants";
 import type { documents, documentVerifications } from "@tepian-k3/db/schema";
+import type { InferQueryModel } from "./utils.types";
 
 // Inferred types from Drizzle schema
 export type Document = typeof documents.$inferSelect;
 export type NewDocument = typeof documents.$inferInsert;
-export type DocumentVerification = typeof documentVerifications.$inferSelect;
+export type DocumentVerification = InferQueryModel<
+  "documentVerifications",
+  {
+    with: {
+      verifiedBy: {
+        columns: {
+          id: true;
+          name: true;
+        };
+      };
+    };
+  }
+>;
 export type NewDocumentVerification = typeof documentVerifications.$inferInsert;
 
 // Create document input
@@ -65,7 +78,7 @@ export type DocumentWithRelations = Document & {
 export type VerificationResult = {
   isValid: boolean;
   reason: string | null;
-  document: Document | null;
+  document: DocumentWithRelations | null;
 };
 
 // Document filters

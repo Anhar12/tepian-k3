@@ -55,6 +55,7 @@
     "@tepian-k3/api": "workspace:*",
     "@tepian-k3/constants": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
+    "@tepian-k3/services": "workspace:*",
     "@tepian-k3/types": "workspace:*",
     "@tepian-k3/utils": "workspace:*",
     "@trpc/client": "catalog:",

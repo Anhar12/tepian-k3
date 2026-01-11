@@ -17,6 +17,7 @@ import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
+import { Route as coreDocumentRouteImport } from './routes/(core)/document'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
@@ -99,6 +100,11 @@ const coreSettingsRoute = coreSettingsRouteImport.update({
 const coreProfileRoute = coreProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDocumentRoute = coreDocumentRouteImport.update({
+  id: '/document',
+  path: '/document',
   getParentRoute: () => coreRouteRoute,
 } as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
@@ -371,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof authRegisterRoute
   '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/document': typeof coreDocumentRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
@@ -421,6 +428,7 @@ export interface FileRoutesByTo {
   '/register': typeof authRegisterRoute
   '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/document': typeof coreDocumentRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
@@ -477,6 +485,7 @@ export interface FileRoutesById {
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
+  '/(core)/document': typeof coreDocumentRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
@@ -532,6 +541,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/document'
     | '/profile'
     | '/settings'
     | '/pengujian/checkout'
@@ -582,6 +592,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/document'
     | '/profile'
     | '/settings'
     | '/pengujian/checkout'
@@ -637,6 +648,7 @@ export interface FileRouteTypes {
     | '/(auth)/register'
     | '/(auth)/reset-password'
     | '/(auth)/verify-email'
+    | '/(core)/document'
     | '/(core)/profile'
     | '/(core)/settings'
     | '/(core)/pengujian/checkout'
@@ -740,6 +752,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof coreProfileRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/document': {
+      id: '/(core)/document'
+      path: '/document'
+      fullPath: '/document'
+      preLoaderRoute: typeof coreDocumentRouteImport
       parentRoute: typeof coreRouteRoute
     }
     '/(auth)/verify-email': {
@@ -1190,6 +1209,7 @@ interface coreRouteRouteChildren {
   corePelatihanRouteRoute: typeof corePelatihanRouteRoute
   corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
+  coreDocumentRoute: typeof coreDocumentRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
 }
@@ -1201,6 +1221,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   corePelatihanRouteRoute: corePelatihanRouteRoute,
   corePengujianRouteRoute: corePengujianRouteRouteWithChildren,
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
+  coreDocumentRoute: coreDocumentRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
 }

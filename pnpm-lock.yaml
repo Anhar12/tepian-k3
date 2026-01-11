@@ -281,6 +281,9 @@ importers:
       '@tepian-k3/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@tepian-k3/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       '@tepian-k3/types':
         specifier: workspace:*
         version: link:../../packages/types
