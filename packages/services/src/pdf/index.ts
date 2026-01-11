@@ -11,3 +11,10 @@ export {
   generateVerificationURL,
   generateDocumentVerificationQRCode,
 } from "./utils/qrcode";
+
+// PDF Signing with QR Codes
+export {
+  pdfSigningService,
+  type QRCodePosition,
+  type SignatureData,
+} from "./pdf-signing";

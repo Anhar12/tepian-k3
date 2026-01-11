@@ -6,7 +6,10 @@
       "Bash(pnpm exec tsc:*)",
       "Bash(pnpm --filter @tepian-k3/db exec tsc:*)",
       "Bash(pnpm --filter @tepian-k3/queries exec tsc:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run db:generate:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

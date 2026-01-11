@@ -268,6 +268,46 @@ async function seed() {
       resource: "order-status-history",
       action: "delete",
     },
+    {
+      name: "document.create",
+      resource: "document",
+      action: "create",
+    },
+    {
+      name: "document.read",
+      resource: "document",
+      action: "read",
+    },
+    {
+      name: "document.update",
+      resource: "document",
+      action: "update",
+    },
+    {
+      name: "document.delete",
+      resource: "document",
+      action: "delete",
+    },
+    {
+      name: "document-signature.create",
+      resource: "document-signature",
+      action: "create",
+    },
+    {
+      name: "document-signature.read",
+      resource: "document-signature",
+      action: "read",
+    },
+    {
+      name: "document-signature.update",
+      resource: "document-signature",
+      action: "update",
+    },
+    {
+      name: "document-signature.delete",
+      resource: "document-signature",
+      action: "delete",
+    },
   ] as const;
 
   // Create or get all permissions

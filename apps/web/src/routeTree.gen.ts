@@ -15,6 +15,7 @@ import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerifyTokenRouteImport } from './routes/verify.$token'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as corePdfEditorRouteImport } from './routes/(core)/pdf-editor'
@@ -91,6 +92,11 @@ const authRouteRoute = authRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyTokenRoute = VerifyTokenRouteImport.update({
+  id: '/verify/$token',
+  path: '/verify/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
@@ -387,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/verify/$token': typeof VerifyTokenRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -439,6 +446,7 @@ export interface FileRoutesByTo {
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/verify/$token': typeof VerifyTokenRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -497,6 +505,7 @@ export interface FileRoutesById {
   '/(core)/pdf-editor': typeof corePdfEditorRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/verify/$token': typeof VerifyTokenRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
   '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -554,6 +563,7 @@ export interface FileRouteTypes {
     | '/pdf-editor'
     | '/profile'
     | '/settings'
+    | '/verify/$token'
     | '/pengujian/checkout'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
@@ -606,6 +616,7 @@ export interface FileRouteTypes {
     | '/pdf-editor'
     | '/profile'
     | '/settings'
+    | '/verify/$token'
     | '/pengujian/checkout'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
@@ -663,6 +674,7 @@ export interface FileRouteTypes {
     | '/(core)/pdf-editor'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/verify/$token'
     | '/(core)/pengujian/checkout'
     | '/(core)/pengujian/status'
     | '/(core)/pengujian/survey-kepuasan'
@@ -706,6 +718,7 @@ export interface RootRouteChildren {
   KatalogRoute: typeof KatalogRoute
   TestRoute: typeof TestRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
+  VerifyTokenRoute: typeof VerifyTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -750,6 +763,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify/$token': {
+      id: '/verify/$token'
+      path: '/verify/$token'
+      fullPath: '/verify/$token'
+      preLoaderRoute: typeof VerifyTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)/settings': {
@@ -1258,6 +1278,7 @@ const rootRouteChildren: RootRouteChildren = {
   KatalogRoute: KatalogRoute,
   TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
+  VerifyTokenRoute: VerifyTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

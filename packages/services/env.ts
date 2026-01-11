@@ -58,7 +58,7 @@ export const env = createEnv({
     DOCUMENT_QR_EXPIRATION: z.string().default("10y"),
     DOCUMENT_VERIFICATION_BASE_URL: z
       .url()
-      .default("http://localhost:3001/document"),
+      .default("http://localhost:3001/verify/"),
   },
 
   /**

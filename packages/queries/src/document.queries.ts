@@ -1,6 +1,10 @@
 import { Effect } from "effect";
 import { db } from "@tepian-k3/db/client";
-import { documents, documentVerifications } from "@tepian-k3/db/schema";
+import {
+  documents,
+  documentSignatures,
+  documentVerifications,
+} from "@tepian-k3/db/schema";
 import { eq, and, desc } from "@tepian-k3/db";
 import { TRPCError } from "@trpc/server";
 import type {
@@ -199,7 +203,7 @@ const documentQueries = {
         );
 
       // Generate verification URL
-      const verificationUrl = `${appUrl}/api/verify-document/${signatureData.verificationToken}`;
+      const verificationUrl = `${appUrl}/verify/${signatureData.verificationToken}`;
 
       // Generate QR code
       const qrCodeDataUrl = yield* Effect.tryPromise({
@@ -382,23 +386,26 @@ const documentQueries = {
         try: () =>
           db.query.documents.findFirst({
             where: eq(documents.verificationToken, token),
+            with: {
+              signedBy: true,
+            },
           }),
 
-        catch: (error) =>
-          new TRPCError({
+        catch: (error) => {
+          logError(
+            "documentQueries.verifyDocumentByToken",
+            "Error fetching document by token",
+            { token, error }
+          );
+          throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to fetch document",
             cause: error,
-          }),
+          });
+        },
       });
 
       if (!results) {
-        yield* documentQueries.logVerification("", {
-          isValid: false,
-          verificationNotes: "Document not found",
-          ...metadata,
-        });
-
         return {
           valid: false,
           error: "Document not found",
@@ -770,6 +777,215 @@ const documentQueries = {
       testingId,
       "lab_certificate"
     ),
+
+  /**
+   * Create a document signature record
+   */
+  createDocumentSignature: (input: {
+    documentId: string;
+    signedByUserId: string;
+    signerName: string;
+    signerEmail?: string;
+    purpose: string;
+    signatureOrder?: number;
+    qrCodePosition: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      page: number;
+    };
+    verificationToken: string;
+    verificationUrl: string;
+    signatureData: string;
+    fileHash: string;
+    expiresAt?: string;
+  }) =>
+    Effect.tryPromise({
+      try: async () => {
+        const [signature] = await db
+          .insert(documentSignatures)
+          .values({
+            documentId: input.documentId,
+            signedByUserId: input.signedByUserId,
+            signerName: input.signerName,
+            signerEmail: input.signerEmail,
+            purpose: input.purpose,
+            signatureOrder: input.signatureOrder,
+            qrCodePosition: input.qrCodePosition,
+            verificationToken: input.verificationToken,
+            verificationUrl: input.verificationUrl,
+            signatureData: input.signatureData,
+            fileHash: input.fileHash,
+            expiresAt: input.expiresAt,
+          })
+          .returning();
+
+        return signature;
+      },
+      catch: (error) => {
+        logError(
+          "documentQueries.createDocumentSignature",
+          "Error creating document signature",
+          { input, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create document signature",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Get all signatures for a document
+   */
+  getDocumentSignatures: (documentId: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.documentSignatures.findMany({
+          where: eq(documentSignatures.documentId, documentId),
+          orderBy: [
+            desc(documentSignatures.signatureOrder),
+            desc(documentSignatures.createdAt),
+          ],
+          with: {
+            signedBy: {
+              columns: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "documentQueries.getDocumentSignatures",
+          "Error fetching document signatures",
+          { documentId, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch document signatures",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Get a signature by verification token
+   */
+  getSignatureByToken: (verificationToken: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.documentSignatures.findFirst({
+          where: eq(documentSignatures.verificationToken, verificationToken),
+          with: {
+            document: true,
+            signedBy: {
+              columns: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "documentQueries.getSignatureByToken",
+          "Error fetching signature by token",
+          { verificationToken, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch signature",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Get signature by ID
+   */
+  getSignatureById: (signatureId: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.documentSignatures.findFirst({
+          where: eq(documentSignatures.id, signatureId),
+          with: {
+            document: true,
+            signedBy: {
+              columns: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "documentQueries.getSignatureById",
+          "Error fetching signature by ID",
+          { signatureId, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch signature",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Batch create multiple document signatures
+   */
+  createDocumentSignatures: (
+    signatures: Array<{
+      documentId: string;
+      signedByUserId: string;
+      signerName: string;
+      signerEmail?: string;
+      purpose: string;
+      signatureOrder?: number;
+      qrCodePosition: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        page: number;
+      };
+      verificationToken: string;
+      verificationUrl: string;
+      signatureData: string;
+      fileHash: string;
+      expiresAt?: string;
+    }>
+  ) =>
+    Effect.tryPromise({
+      try: async () => {
+        const result = await db
+          .insert(documentSignatures)
+          .values(signatures)
+          .returning();
+
+        return result;
+      },
+      catch: (error) => {
+        logError(
+          "documentQueries.createDocumentSignatures",
+          "Error creating document signatures",
+          { count: signatures.length, error }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create document signatures",
+          cause: error,
+        });
+      },
+    }),
 };
 
 export default documentQueries;

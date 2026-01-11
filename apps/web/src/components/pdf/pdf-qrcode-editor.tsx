@@ -8,6 +8,11 @@ import {
   type DraggableStateSnapshot,
 } from "@hello-pangea/dnd";
 import { throttle } from "@tanstack/react-pacer";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { toFormData } from "@/utils/form-data-mapper";
+import { Loader2 } from "lucide-react";
 
 interface QRCodeElement {
   id: string;
@@ -22,22 +27,10 @@ interface QRCodeElement {
   purpose: string;
 }
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-// Mock users data - replace with your actual user data source
-const MOCK_USERS: User[] = [
-  { id: "1", name: "John Doe", email: "john.doe@company.com" },
-  { id: "2", name: "Jane Smith", email: "jane.smith@company.com" },
-  { id: "3", name: "Mike Johnson", email: "mike.johnson@company.com" },
-  { id: "4", name: "Sarah Williams", email: "sarah.williams@company.com" },
-  { id: "5", name: "David Brown", email: "david.brown@company.com" },
-];
-
 export default function PDFQRCodeEditor() {
+  // Get current user
+  const { data: currentUser } = useQuery(trpc.auth.me.queryOptions());
+
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -45,10 +38,7 @@ export default function PDFQRCodeEditor() {
   const [scale, setScale] = useState(1);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 1100 });
 
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [purpose, setPurpose] = useState("");
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [userSearchQuery, setUserSearchQuery] = useState("");
 
   const [qrElements, setQrElements] = useState<QRCodeElement[]>([]);
   const [selectedQRId, setSelectedQRId] = useState<string | null>(null);
@@ -60,15 +50,7 @@ export default function PDFQRCodeEditor() {
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Filter users based on search query
-  const filteredUsers = MOCK_USERS.filter(
-    (user) =>
-      user.name.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(userSearchQuery.toLowerCase()),
-  );
 
   // Update canvas size based on container width
   useEffect(() => {
@@ -120,25 +102,10 @@ export default function PDFQRCodeEditor() {
     e.preventDefault();
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsUserDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   // Generate QR code for signature
   const handleAddSignature = useCallback(() => {
-    if (!selectedUser) {
-      setError("Please select a user");
+    if (!currentUser) {
+      setError("User not loaded");
       return;
     }
     if (!purpose.trim()) {
@@ -151,9 +118,9 @@ export default function PDFQRCodeEditor() {
 
       // Create QR code data with user and purpose info
       const qrData = JSON.stringify({
-        userId: selectedUser.id,
-        userName: selectedUser.name,
-        email: selectedUser.email,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        email: currentUser.email,
         purpose: purpose.trim(),
         timestamp: new Date().toISOString(),
       });
@@ -184,9 +151,9 @@ export default function PDFQRCodeEditor() {
         ctx.fillStyle = "black";
         ctx.font = "bold 24px sans-serif";
         ctx.textAlign = "center";
-        const initials = selectedUser.name
+        const initials = currentUser.name
           .split(" ")
-          .map((n) => n[0])
+          .map((n: string) => n[0])
           .join("")
           .toUpperCase();
         ctx.fillText(initials, 100, 105);
@@ -202,8 +169,8 @@ export default function PDFQRCodeEditor() {
         width: 100,
         height: 100,
         page: currentPage,
-        userId: selectedUser.id,
-        userName: selectedUser.name,
+        userId: currentUser.id,
+        userName: currentUser.name,
         purpose: purpose.trim(),
       };
 
@@ -212,12 +179,10 @@ export default function PDFQRCodeEditor() {
 
       // Reset form
       setPurpose("");
-      setSelectedUser(null);
-      setUserSearchQuery("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add signature");
     }
-  }, [selectedUser, purpose, currentPage]);
+  }, [currentUser, purpose, currentPage]);
 
   // Resize QR code with buttons
   const handleResizeQR = useCallback((id: string, increment: boolean) => {
@@ -346,9 +311,58 @@ export default function PDFQRCodeEditor() {
     [qrElements],
   );
 
+  const signDocumentMutation = useMutation(
+    trpc.document.signDocumentWithQRCodes.mutationOptions({
+      onMutate: () => {
+        setIsProcessing(true);
+        setError(null);
+      },
+      onSuccess: (data) => {
+        globalSuccessToast("Document signed successfully");
+
+        window.open(data.url, "_blank");
+
+        // Reset editor
+        setPdfFile(null);
+        setPdfPreviewUrl(null);
+        setQrElements([]);
+      },
+      onError: (err) => {
+        setError(err.message);
+        globalErrorToast("Failed to sign document: " + err.message);
+      },
+      onSettled: () => {
+        setIsProcessing(false);
+      },
+    }),
+  );
+
   const handleSavePDF = useCallback(() => {
-    alert("PDF would be saved with QR codes at the current positions");
-  }, []);
+    if (!pdfFile) return;
+
+    const data = {
+      entityId: null,
+      entityType: null,
+      type: "qr_code_signing",
+      file: pdfFile,
+      qrCodes: qrElements.map((qr) => ({
+        userId: qr.userId,
+        userName: qr.userName,
+        purpose: qr.purpose,
+        position: {
+          x: qr.x,
+          y: qr.y,
+          width: qr.width,
+          height: qr.height,
+          page: qr.page,
+        },
+      })),
+    };
+
+    const formData = toFormData(data);
+
+    signDocumentMutation.mutate(formData);
+  }, [pdfFile, qrElements, signDocumentMutation]);
 
   useEffect(() => {
     return () => {
@@ -366,9 +380,12 @@ export default function PDFQRCodeEditor() {
           <h1 className="text-2xl font-bold">PDF QR Code Editor</h1>
           <button
             onClick={handleSavePDF}
-            disabled={!pdfFile || qrElements.length === 0}
+            disabled={!pdfFile || qrElements.length === 0 || isProcessing}
             className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
           >
+            {isProcessing ? (
+              <Loader2 className="mr-2 inline-block h-4 w-4 animate-spin" />
+            ) : null}
             Save PDF
           </button>
         </div>
@@ -402,85 +419,47 @@ export default function PDFQRCodeEditor() {
               />
             </div>
 
+            {/* Select Which Document to Sign */}
+            <div>
+              <h2 className="mb-2 font-semibold">2. Document to Sign</h2>
+              <div className="rounded border bg-white p-2">
+                {pdfFile ? (
+                  <div>
+                    <div className="text-sm font-medium">{pdfFile.name}</div>
+                    <div className="text-xs text-gray-500">
+                      {pageCount} page{pageCount > 1 ? "s" : ""}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-400">
+                    No document uploaded
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Signature Assignment */}
             <div>
-              <h2 className="mb-2 font-semibold">2. Add Signature</h2>
+              <h2 className="mb-2 font-semibold">3. Add Signature</h2>
               <div className="space-y-3">
-                {/* User Selector */}
+                {/* Current User Display */}
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-700">
-                    Select User *
+                    Signing as
                   </label>
-                  <div ref={dropdownRef} className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                      className="flex w-full items-center justify-between rounded border bg-white p-2 text-left text-sm hover:border-blue-500"
-                    >
-                      {selectedUser ? (
-                        <div>
-                          <div className="font-medium">{selectedUser.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {selectedUser.email}
-                          </div>
+                  <div className="rounded border bg-gray-50 p-2">
+                    {currentUser ? (
+                      <div>
+                        <div className="text-sm font-medium">
+                          {currentUser.name}
                         </div>
-                      ) : (
-                        <span className="text-gray-400">Choose a user...</span>
-                      )}
-                      <svg
-                        className={`h-4 w-4 transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-
-                    {isUserDropdownOpen && (
-                      <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border bg-white shadow-lg">
-                        <div className="sticky top-0 bg-white p-2">
-                          <input
-                            type="text"
-                            placeholder="Search users..."
-                            value={userSearchQuery}
-                            onChange={(e) => setUserSearchQuery(e.target.value)}
-                            className="w-full rounded border px-2 py-1 text-sm"
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                        <div className="text-xs text-gray-500">
+                          {currentUser.email}
                         </div>
-                        <div className="max-h-48 overflow-y-auto">
-                          {filteredUsers.length === 0 ? (
-                            <div className="p-3 text-center text-sm text-gray-500">
-                              No users found
-                            </div>
-                          ) : (
-                            filteredUsers.map((user) => (
-                              <button
-                                key={user.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setIsUserDropdownOpen(false);
-                                  setUserSearchQuery("");
-                                }}
-                                className="w-full p-2 text-left hover:bg-blue-50"
-                              >
-                                <div className="text-sm font-medium">
-                                  {user.name}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  {user.email}
-                                </div>
-                              </button>
-                            ))
-                          )}
-                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-400">
+                        Loading user...
                       </div>
                     )}
                   </div>
@@ -503,7 +482,7 @@ export default function PDFQRCodeEditor() {
                 <button
                   onClick={handleAddSignature}
                   disabled={
-                    !pdfFile || !selectedUser || !purpose.trim() || isProcessing
+                    !pdfFile || !currentUser || !purpose.trim() || isProcessing
                   }
                   className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
                 >
@@ -619,7 +598,7 @@ export default function PDFQRCodeEditor() {
               <div className="rounded bg-blue-50 p-3 text-xs text-blue-800">
                 <p className="font-semibold">How to use:</p>
                 <ul className="mt-1 list-inside list-disc space-y-1">
-                  <li>Select user and enter signing purpose</li>
+                  <li>Enter signing purpose and add signature</li>
                   <li>Drag signatures on the PDF to position them</li>
                   <li>Use +/− buttons to resize (10px per click)</li>
                   <li>Drag signatures in the list to reorder layers</li>

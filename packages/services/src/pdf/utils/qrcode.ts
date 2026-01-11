@@ -62,7 +62,7 @@ export const generateVerificationURL = (
   baseUrl?: string
 ): string => {
   const base = baseUrl || env.DOCUMENT_VERIFICATION_BASE_URL || "";
-  return `${base}?token=${verificationToken}`;
+  return `${base}${verificationToken}`;
 };
 
 /**

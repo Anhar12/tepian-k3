@@ -34,7 +34,7 @@ function RouteComponent() {
   );
 
   const generateOfferingLetterMutation = useMutation(
-    trpc.order.generateOfferingLetterTransactional.mutationOptions({
+    trpc.order.generateOfferingLetter.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
           trpc.order.getOrderWithDocuments.queryOptions({ orderId }),
@@ -52,7 +52,7 @@ function RouteComponent() {
   );
 
   const generateInvoiceMutation = useMutation(
-    trpc.order.generateInvoiceTransactional.mutationOptions({
+    trpc.order.generateInvoice.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
           trpc.order.getOrderById.queryOptions({ orderId }),

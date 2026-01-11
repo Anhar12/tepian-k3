@@ -17,11 +17,12 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   verificationText: {
-    fontSize: 7,
+    fontSize: 6,
     marginTop: 3,
     textAlign: "center",
     color: "#999",
-    maxWidth: 150,
+    maxWidth: 500,
+    hyphenationCallback: (word: string) => [word],
   },
 });
 
@@ -61,10 +62,7 @@ export const QRCodeImage: React.FC<QRCodeImageProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <Image
-        src={qrCodeDataURL}
-        style={[styles.qrImage, { width, height }]}
-      />
+      <Image src={qrCodeDataURL} style={[styles.qrImage, { width, height }]} />
       {label && <Text style={styles.label}>{label}</Text>}
       {verificationText && (
         <Text style={styles.verificationText}>{verificationText}</Text>

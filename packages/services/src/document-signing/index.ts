@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { TRPCError } from "@trpc/server";
 import crypto from "crypto";
 import { env } from "../../env";
+import type { DocumentEntityType, DocumentType } from "@tepian-k3/constants";
 
 /**
  * Payload structure for document signing
@@ -10,9 +11,9 @@ import { env } from "../../env";
 type DocumentSignPayload = {
   documentId: string;
   documentNumber: string;
-  entityType: string;
+  entityType: DocumentEntityType;
   entityId: string;
-  type: string;
+  type: DocumentType;
   fileUrl: string;
   fileHash: string; // SHA-256 hash of file content
   signedBy: string;
@@ -124,12 +125,13 @@ export const verifyFileIntegrity = (
 export const createDocumentSignature = (
   documentId: string,
   documentNumber: string,
-  entityType: string,
+  entityType: DocumentEntityType,
   entityId: string,
-  type: string,
+  type: DocumentType,
   fileUrl: string,
   fileContent: Buffer,
-  signedByUserId: string
+  signedByUserId: string,
+  existingVerificationToken?: string // Optional: reuse existing token
 ) =>
   Effect.gen(function* () {
     // Generate file hash
@@ -151,8 +153,10 @@ export const createDocumentSignature = (
     // Sign the document (JWT for signature data)
     const signature = yield* signDocument(payload);
 
-    // Generate verification token (for QR code URL)
-    const verificationToken = yield* generateVerificationToken();
+    // Use existing token or generate new one
+    const verificationToken = existingVerificationToken
+      ? existingVerificationToken
+      : yield* generateVerificationToken();
 
     return {
       signatureData: signature, // Store this in DB

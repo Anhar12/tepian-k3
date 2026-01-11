@@ -4,6 +4,7 @@ import {
   clusters,
   districts,
   documents,
+  documentSignatures,
   documentVerifications,
   kblis,
   order,
@@ -324,6 +325,7 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
     relationName: "documentSignedBy",
   }),
   verifications: many(documentVerifications),
+  signatures: many(documentSignatures),
   // Polymorphic relations - one of these will be populated based on entityType
   order: one(order, {
     fields: [documents.entityId],
@@ -356,6 +358,20 @@ export const documentVerificationsRelations = relations(
     }),
     verifiedBy: one(users, {
       fields: [documentVerifications.verifiedByUserId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const documentSignaturesRelations = relations(
+  documentSignatures,
+  ({ one }) => ({
+    document: one(documents, {
+      fields: [documentSignatures.documentId],
+      references: [documents.id],
+    }),
+    signedBy: one(users, {
+      fields: [documentSignatures.signedByUserId],
       references: [users.id],
     }),
   })

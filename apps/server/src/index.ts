@@ -43,6 +43,14 @@ app.use(
   })
 );
 
+// Only for local testing
+app.use("*", async (c, next) => {
+  if (env.NODE_ENV === "development") {
+    c.req.raw.headers.set("x-forwarded-for", "127.0.0.1"); // test IP
+  }
+  await next();
+});
+
 app.use(
   "/trpc/*",
   trpcServer({

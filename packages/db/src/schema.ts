@@ -926,3 +926,69 @@ export const documentVerifications = createTable(
     ),
   ]
 );
+
+export const documentSignatures = createTable(
+  "document_signatures",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+
+    // Link to parent document
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+
+    // Signer information
+    signedByUserId: uuid("signed_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    signerName: varchar("signer_name", { length: 255 }).notNull(), // Cached for display
+    signerEmail: varchar("signer_email", { length: 255 }), // Optional, cached from user
+
+    // Signature purpose and details
+    purpose: text("purpose").notNull(), // Why this person is signing
+    signatureOrder: integer("signature_order"), // Order of signature (1st, 2nd, etc.)
+
+    // QR Code information
+    qrCodePosition: jsonb("qr_code_position").notNull(), // {x, y, width, height, page}
+    verificationToken: varchar("verification_token", { length: 255 })
+      .notNull()
+      .unique(), // Unique token for this signature
+    verificationUrl: text("verification_url").notNull(), // Full URL with token
+
+    // Cryptographic signature data
+    signatureData: text("signature_data").notNull(), // JWT signature
+    fileHash: varchar("file_hash", { length: 64 }).notNull(), // SHA-256 hash at signing time
+
+    // Timestamps
+    signedAt: timestamp("signed_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "string",
+    }), // Optional expiration
+
+    ...timestamps,
+  },
+  (table) => [
+    index("document_signatures_document_id_idx").using(
+      "btree",
+      table.documentId
+    ),
+    index("document_signatures_signed_by_idx").using(
+      "btree",
+      table.signedByUserId
+    ),
+    index("document_signatures_verification_token_idx").using(
+      "btree",
+      table.verificationToken
+    ),
+    index("document_signatures_created_at_idx").using(
+      "btree",
+      table.createdAt
+    ),
+  ]
+);
