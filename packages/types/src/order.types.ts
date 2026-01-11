@@ -3,6 +3,41 @@ import type { InferQueryModel } from "./utils.types";
 
 export type Order = typeof order.$inferSelect;
 
+export type OrderWithHistory = InferQueryModel<
+  "order",
+  {
+    with: {
+      statusHistory: true;
+      items: {
+        with: {
+          parameter: {
+            columns: {
+              id: true;
+              name: true;
+            };
+            with: {
+              category: {
+                columns: {
+                  id: true;
+                  name: true;
+                };
+                with: {
+                  cluster: {
+                    columns: {
+                      id: true;
+                      name: true;
+                    };
+                  };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  }
+>;
+
 export type OrderWithRelations = InferQueryModel<
   "order",
   {

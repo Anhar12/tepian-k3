@@ -6,6 +6,9 @@ import { runEffect } from "../utils/run-effect";
 import orderItemSchema from "@tepian-k3/schema/order-item.schema";
 import { TRPCError } from "@trpc/server";
 import { ORDER_STATUS } from "@tepian-k3/constants";
+import { Effect } from "effect";
+import { generateInvoicePdf } from "@tepian-k3/services/pdf";
+import { storageService } from "@tepian-k3/services/storage";
 
 export const orderRouter = createTRPCRouter({
   getAllOrders: protectedProcedure
@@ -41,6 +44,52 @@ export const orderRouter = createTRPCRouter({
 
       return order;
     }),
+
+  generateInvoice: protectedProcedure
+    .input(
+      z.object({
+        orderId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) =>
+      runEffect(
+        Effect.gen(function* () {
+          const order = yield* orderQueries.getOrderById(
+            input.orderId,
+            ctx.user.id
+          );
+
+          if (!order) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Order tidak ditemukan",
+            });
+          }
+
+          // Generate PDF
+          const pdfBuffer = yield* Effect.tryPromise({
+            try: () => generateInvoicePdf(order),
+            catch: (error) =>
+              new Error(`Gagal generate invoice: ${String(error)}`),
+          });
+
+          const uploadedFile = yield* storageService.upload(
+            pdfBuffer as Buffer,
+            {
+              filename: `invoice-${order.orderNumber}.pdf`,
+              folder: "invoices",
+              contentType: "application/pdf",
+            }
+          );
+
+          yield* orderQueries.createOrderInvoice(order.id, uploadedFile.key);
+
+          return {
+            url: storageService.getPublicUrl(uploadedFile.key),
+          };
+        })
+      )
+    ),
 
   createOrder: protectedProcedure
     .input(

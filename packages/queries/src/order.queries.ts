@@ -48,7 +48,32 @@ const orderQueries = {
         db.query.order.findFirst({
           where: and(eq(order.id, orderId), eq(order.userId, userId)),
           with: {
-            items: true,
+            items: {
+              with: {
+                parameter: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                  with: {
+                    category: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      },
+                      with: {
+                        cluster: {
+                          columns: {
+                            id: true,
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
             statusHistory: true,
           },
         }),
@@ -246,6 +271,71 @@ const orderQueries = {
           }
         )
       );
+
+      return result;
+    });
+  },
+
+  createOrderInvoice(orderId: string, invoiceUrl: string) {
+    return Effect.gen(function* () {
+      const isExists = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: eq(order.id, orderId),
+          }),
+        catch: (error) => {
+          logError("orderQueries.createOrderInvoice", "Failed to fetch order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!isExists) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Order tidak ditemukan",
+          })
+        );
+      }
+
+      const [result] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ invoiceUrl })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.createOrderInvoice",
+            "Failed to create invoice",
+            {
+              error,
+              orderId,
+              invoiceUrl,
+            }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat invoice",
+          });
+        },
+      });
+
+      if (!result) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membuat invoice",
+          })
+        );
+      }
 
       return result;
     });

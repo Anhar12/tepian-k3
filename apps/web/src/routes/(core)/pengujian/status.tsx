@@ -2,10 +2,11 @@ import { OrderDetailSkeleton } from "@/components/order-detail-skeleton";
 import { OrderTimeline } from "@/components/order-timeline";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { trpc } from "@/utils/trpc";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Loader2 } from "lucide-react";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/pengujian/status")({
@@ -29,6 +30,21 @@ function RouteComponent() {
   const { data: orderDetail, isLoading } = useQuery(
     trpc.order.getOrderById.queryOptions({
       orderId,
+    }),
+  );
+
+  const generateInvoiceMutation = useMutation(
+    trpc.order.generateInvoice.mutationOptions({
+      onSuccess: (data) => {
+        globalSuccessToast(
+          "Invoice berhasil dibuat dan diunggah ke penyimpanan.",
+        );
+        // open the invoice url in a new tab
+        window.open(data.url, "_blank");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal membuat invoice: " + error.message);
+      },
     }),
   );
 
@@ -64,19 +80,59 @@ function RouteComponent() {
               </p>
 
               {/* Document Download Card */}
-              <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                  <FileText className="h-5 w-5 text-blue-500" />
+              <div className="flex flex-row gap-4">
+                <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                    <FileText className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <span className="min-w-30 font-medium text-foreground">
+                    Dokumen
+                  </span>
+                  <Button
+                    size="icon"
+                    className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
                 </div>
-                <span className="min-w-30 font-medium text-foreground">
-                  Dokumen
-                </span>
-                <Button
-                  size="icon"
-                  className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
+                <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                    <FileText className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <span className="min-w-30 font-medium text-foreground">
+                    Invoice
+                  </span>
+                  {/* Generate Invoice Button */}
+                  {orderDetail.invoiceUrl ? (
+                    <Button
+                      size="icon"
+                      className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+                      onClick={() =>
+                        window.open(orderDetail.invoiceUrl!, "_blank")
+                      }
+                      disabled={orderDetail.invoiceUrl === null}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="icon"
+                      className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+                      onClick={() =>
+                        generateInvoiceMutation.mutate({
+                          orderId: orderDetail.id,
+                        })
+                      }
+                      disabled={generateInvoiceMutation.isPending}
+                    >
+                      {generateInvoiceMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FileText className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 

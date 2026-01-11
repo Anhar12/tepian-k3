@@ -26,18 +26,18 @@ export function OrderTimelineSkeleton() {
 
 export function OrderDetailSkeleton() {
   return (
-    <div className="w-full">
+    <Card className="w-full pt-0">
       {/* Back button skeleton */}
-      <Skeleton className="mb-4 h-5 w-48" />
+      {/* <Skeleton className="mb-4 h-5 w-48" /> */}
 
       {/* Header badge skeleton */}
-      <div className="mb-6 flex items-center gap-3">
-        <Skeleton className="h-10 w-40 rounded-md" />
-        <Skeleton className="h-6 w-24 rounded-full" />
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-10 w-40 rounded-md rounded-tr-none rounded-bl-none" />
+        {/* <Skeleton className="h-6 w-24 rounded-full" /> */}
       </div>
 
       {/* Main content grid */}
-      <div className="flex gap-6">
+      <div className="flex gap-6 px-6">
         {/* Timeline skeleton */}
         <div className="pt-4">
           <OrderTimelineSkeleton />
@@ -71,6 +71,6 @@ export function OrderDetailSkeleton() {
           </div>
         </Card>
       </div>
-    </div>
+    </Card>
   );
 }

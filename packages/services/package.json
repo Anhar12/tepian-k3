@@ -18,17 +18,21 @@
     },
     "./notifications": {
       "default": "./src/notifications/index.ts"
+    },
+    "./pdf": {
+      "default": "./src/pdf/index.ts"
     }
   },
   "dependencies": {
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
+    "@react-pdf/renderer": "^4.3.2",
     "@tepian-k3/constants": "workspace:*",
     "ioredis": "^5.9.1",
     "logform": "^2.7.0",
     "minio": "^8.0.6",
     "nodemailer": "^7.0.11",
-    "react": "19.2.3",
+    "react": "catalog:react19",
     "resend": "^6.6.0",
     "uuid": "catalog:",
     "winston": "^3.19.0"
@@ -38,10 +42,10 @@
     "@t3-oss/env-core": "^0.13.10",
     "@tepian-k3/config": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
-    "@tepian-k3/utils": "workspace:*",
     "@tepian-k3/types": "workspace:*",
+    "@tepian-k3/utils": "workspace:*",
     "@types/nodemailer": "^7.0.4",
-    "@types/react": "19.2.3",
+    "@types/react": "catalog:react19",
     "dotenv-cli": "^11.0.0",
     "effect": "catalog:",
     "react-email": "^5.0.8",
