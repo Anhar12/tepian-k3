@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm list:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(pnpm --filter @tepian-k3/db exec tsc:*)",
+      "Bash(pnpm --filter @tepian-k3/queries exec tsc:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

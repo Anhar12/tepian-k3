@@ -17,6 +17,7 @@ import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
+import { Route as corePdfEditorRouteImport } from './routes/(core)/pdf-editor'
 import { Route as coreDocumentRouteImport } from './routes/(core)/document'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
@@ -100,6 +101,11 @@ const coreSettingsRoute = coreSettingsRouteImport.update({
 const coreProfileRoute = coreProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const corePdfEditorRoute = corePdfEditorRouteImport.update({
+  id: '/pdf-editor',
+  path: '/pdf-editor',
   getParentRoute: () => coreRouteRoute,
 } as any)
 const coreDocumentRoute = coreDocumentRouteImport.update({
@@ -378,6 +384,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/document': typeof coreDocumentRoute
+  '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
@@ -429,6 +436,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/document': typeof coreDocumentRoute
+  '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
@@ -486,6 +494,7 @@ export interface FileRoutesById {
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/document': typeof coreDocumentRoute
+  '/(core)/pdf-editor': typeof corePdfEditorRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
@@ -542,6 +551,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/document'
+    | '/pdf-editor'
     | '/profile'
     | '/settings'
     | '/pengujian/checkout'
@@ -593,6 +603,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/document'
+    | '/pdf-editor'
     | '/profile'
     | '/settings'
     | '/pengujian/checkout'
@@ -649,6 +660,7 @@ export interface FileRouteTypes {
     | '/(auth)/reset-password'
     | '/(auth)/verify-email'
     | '/(core)/document'
+    | '/(core)/pdf-editor'
     | '/(core)/profile'
     | '/(core)/settings'
     | '/(core)/pengujian/checkout'
@@ -752,6 +764,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof coreProfileRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/pdf-editor': {
+      id: '/(core)/pdf-editor'
+      path: '/pdf-editor'
+      fullPath: '/pdf-editor'
+      preLoaderRoute: typeof corePdfEditorRouteImport
       parentRoute: typeof coreRouteRoute
     }
     '/(core)/document': {
@@ -1210,6 +1229,7 @@ interface coreRouteRouteChildren {
   corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
   coreDocumentRoute: typeof coreDocumentRoute
+  corePdfEditorRoute: typeof corePdfEditorRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
 }
@@ -1222,6 +1242,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   corePengujianRouteRoute: corePengujianRouteRouteWithChildren,
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
   coreDocumentRoute: coreDocumentRoute,
+  corePdfEditorRoute: corePdfEditorRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
 }

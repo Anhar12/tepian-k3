@@ -1,0 +1,395 @@
+/**
+ * Quick Reference: Polymorphic Relations Examples
+ *
+ * This file contains copy-paste ready examples for working with
+ * polymorphic document relations in Drizzle ORM 0.45.1
+ */
+
+import { db, whereEntityIs, getEntityRelationName, isDocumentOfType } from "@tepian-k3/db";
+import { documents, order } from "@tepian-k3/db/schema";
+import { eq, and, desc } from "drizzle-orm";
+import { Effect } from "effect";
+import type { DocumentEntityType } from "@tepian-k3/constants";
+
+// ============================================================================
+// 1. CREATE: Insert a document for an order
+// ============================================================================
+
+export const createOrderDocument = (orderId: string, data: {
+  documentNumber: string;
+  type: "invoice" | "offering_document" | "proof_of_payment";
+  title: string;
+  fileUrl: string;
+  fileKey: string;
+  userId: string;
+}) =>
+  Effect.tryPromise(() =>
+    db
+      .insert(documents)
+      .values({
+        documentNumber: data.documentNumber,
+        type: data.type,
+        title: data.title,
+        entityType: "order", // ← Polymorphic type
+        entityId: orderId,   // ← Polymorphic ID
+        fileUrl: data.fileUrl,
+        fileKey: data.fileKey,
+        uploadedByUserId: data.userId,
+        status: "draft",
+      })
+      .returning()
+  );
+
+// ============================================================================
+// 2. READ: Get all documents for a specific order
+// ============================================================================
+
+export const getOrderDocuments = (orderId: string) =>
+  Effect.tryPromise(() =>
+    db.query.documents.findMany({
+      where: whereEntityIs("order", orderId),
+      orderBy: (documents, { desc }) => [desc(documents.createdAt)],
+    })
+  );
+
+// ============================================================================
+// 3. READ: Get order with all its documents
+// ============================================================================
+
+export const getOrderWithDocuments = (orderId: string) =>
+  Effect.tryPromise(() =>
+    db.query.order.findFirst({
+      where: eq(order.id, orderId),
+      with: {
+        documents: {
+          orderBy: (documents, { desc }) => [desc(documents.createdAt)],
+        },
+        company: true,
+        items: true,
+      },
+    })
+  );
+
+// ============================================================================
+// 4. READ: Get a specific document type for an order (e.g., invoice)
+// ============================================================================
+
+export const getOrderInvoice = (orderId: string) =>
+  Effect.tryPromise(() =>
+    db.query.documents.findFirst({
+      where: and(
+        eq(documents.entityType, "order"),
+        eq(documents.entityId, orderId),
+        eq(documents.type, "invoice")
+      ),
+    })
+  );
+
+// ============================================================================
+// 5. READ: Get document with its related entity (dynamic)
+// ============================================================================
+
+export const getDocumentWithEntity = (documentId: string) =>
+  Effect.gen(function* () {
+    // First, get the document to know its entity type
+    const document = yield* Effect.tryPromise(() =>
+      db.query.documents.findFirst({
+        where: eq(documents.id, documentId),
+      })
+    );
+
+    if (!document) return null;
+
+    // Get the correct relation name
+    const relationName = getEntityRelationName(document.entityType);
+
+    // Fetch with the appropriate relation
+    const documentWithEntity = yield* Effect.tryPromise(() =>
+      db.query.documents.findFirst({
+        where: eq(documents.id, documentId),
+        with: {
+          [relationName]: true,
+          uploadedBy: true,
+          signedBy: true,
+          verifications: true,
+        },
+      })
+    );
+
+    return documentWithEntity;
+  });
+
+// ============================================================================
+// 6. UPDATE: Update a document
+// ============================================================================
+
+export const updateDocumentSignature = (
+  documentId: string,
+  signatureData: {
+    signatureData: string;
+    verificationToken: string;
+    verificationUrl: string;
+    signedByUserId: string;
+  }
+) =>
+  Effect.tryPromise(() =>
+    db
+      .update(documents)
+      .set({
+        ...signatureData,
+        status: "signed",
+      })
+      .where(eq(documents.id, documentId))
+      .returning()
+  );
+
+// ============================================================================
+// 7. DELETE: Delete a document (soft delete if you have deletedAt)
+// ============================================================================
+
+export const deleteDocument = (documentId: string) =>
+  Effect.tryPromise(() =>
+    db
+      .delete(documents)
+      .where(eq(documents.id, documentId))
+      .returning()
+  );
+
+// ============================================================================
+// 8. QUERY: Get all documents for multiple entities
+// ============================================================================
+
+export const getAllDocumentsForEntity = (
+  entityType: DocumentEntityType,
+  entityIds: string[]
+) =>
+  Effect.tryPromise(() =>
+    db.query.documents.findMany({
+      where: and(
+        eq(documents.entityType, entityType),
+        // @ts-expect-error - inArray works at runtime
+        inArray(documents.entityId, entityIds)
+      ),
+      orderBy: (documents, { desc }) => [desc(documents.createdAt)],
+    })
+  );
+
+// ============================================================================
+// 9. TYPE GUARD: Type-safe access to polymorphic relations
+// ============================================================================
+
+export const processDocument = (document: {
+  entityType: DocumentEntityType;
+  order?: any;
+  testing?: any;
+  userCompany?: any;
+  user?: any;
+}) => {
+  if (isDocumentOfType(document, "order")) {
+    // TypeScript knows document.entityType is "order"
+    console.log("Order document:", document.order?.orderNumber);
+  } else if (isDocumentOfType(document, "testing")) {
+    // TypeScript knows document.entityType is "testing"
+    console.log("Testing document:", document.testing?.testingNumber);
+  } else if (isDocumentOfType(document, "user_company")) {
+    console.log("Company document:", document.userCompany?.name);
+  } else if (isDocumentOfType(document, "user")) {
+    console.log("User document:", document.user?.email);
+  }
+};
+
+// ============================================================================
+// 10. COMPLEX: Create signed document with QR code for an order
+// ============================================================================
+
+export const createSignedOrderDocument = (
+  orderId: string,
+  documentData: {
+    documentNumber: string;
+    type: "invoice" | "offering_document";
+    title: string;
+    fileUrl: string;
+    fileKey: string;
+    signatureData: string;
+    verificationToken: string;
+    verificationUrl: string;
+    qrCodeUrl?: string;
+    userId: string;
+  }
+) =>
+  Effect.tryPromise(() =>
+    db
+      .insert(documents)
+      .values({
+        documentNumber: documentData.documentNumber,
+        type: documentData.type,
+        title: documentData.title,
+        entityType: "order",
+        entityId: orderId,
+        fileUrl: documentData.fileUrl,
+        fileKey: documentData.fileKey,
+        signatureData: documentData.signatureData,
+        verificationToken: documentData.verificationToken,
+        verificationUrl: documentData.verificationUrl,
+        qrCodeUrl: documentData.qrCodeUrl,
+        uploadedByUserId: documentData.userId,
+        signedByUserId: documentData.userId,
+        status: "signed",
+      })
+      .returning()
+  );
+
+// ============================================================================
+// 11. QUERY: Get all documents across all entity types with their entities
+// ============================================================================
+
+export const getAllDocumentsWithEntities = () =>
+  Effect.tryPromise(() =>
+    db.query.documents.findMany({
+      with: {
+        order: true,
+        testing: true,
+        userCompany: true,
+        user: true,
+        uploadedBy: true,
+        signedBy: true,
+      },
+      orderBy: (documents, { desc }) => [desc(documents.createdAt)],
+    })
+  );
+
+// ============================================================================
+// 12. TRANSACTION: Create order and its initial document atomically
+// ============================================================================
+
+export const createOrderWithDocument = (orderData: any, documentData: any) =>
+  Effect.gen(function* () {
+    const result = yield* Effect.tryPromise(() =>
+      db.transaction(async (tx) => {
+        // Create order
+        const [newOrder] = await tx
+          .insert(order)
+          .values(orderData)
+          .returning();
+
+        // Create document for the order
+        const [newDocument] = await tx
+          .insert(documents)
+          .values({
+            ...documentData,
+            entityType: "order",
+            entityId: newOrder.id,
+          })
+          .returning();
+
+        return { order: newOrder, document: newDocument };
+      })
+    );
+
+    return result;
+  });
+
+// ============================================================================
+// 13. COUNT: Count documents for each entity type
+// ============================================================================
+
+export const countDocumentsByEntityType = () =>
+  Effect.tryPromise(() =>
+    db
+      .select({
+        entityType: documents.entityType,
+        count: count(documents.id),
+      })
+      .from(documents)
+      .groupBy(documents.entityType)
+  );
+
+// ============================================================================
+// 14. SEARCH: Find documents by verification token
+// ============================================================================
+
+export const getDocumentByVerificationToken = (token: string) =>
+  Effect.tryPromise(() =>
+    db.query.documents.findFirst({
+      where: eq(documents.verificationToken, token),
+      with: {
+        order: true,
+        testing: true,
+        userCompany: true,
+        user: true,
+        uploadedBy: true,
+        signedBy: true,
+      },
+    })
+  );
+
+// ============================================================================
+// 15. VALIDATION: Check if document exists for entity
+// ============================================================================
+
+export const documentExistsForEntity = (
+  entityType: DocumentEntityType,
+  entityId: string,
+  documentType: string
+) =>
+  Effect.gen(function* () {
+    const document = yield* Effect.tryPromise(() =>
+      db.query.documents.findFirst({
+        where: and(
+          eq(documents.entityType, entityType),
+          eq(documents.entityId, entityId),
+          eq(documents.type, documentType)
+        ),
+      })
+    );
+
+    return !!document;
+  });
+
+// ============================================================================
+// USAGE IN tRPC ROUTER
+// ============================================================================
+
+/*
+import { createTRPCRouter, protectedProcedure } from "..";
+import { z } from "zod";
+import { runEffect } from "../utils/run-effect";
+
+export const documentRouter = createTRPCRouter({
+  // Get all documents for an order
+  getOrderDocuments: protectedProcedure
+    .input(z.object({ orderId: z.string() }))
+    .query(({ input }) =>
+      runEffect(getOrderDocuments(input.orderId))
+    ),
+
+  // Create a document for an order
+  createOrderDocument: protectedProcedure
+    .input(z.object({
+      orderId: z.string(),
+      documentNumber: z.string(),
+      type: z.enum(["invoice", "offering_document", "proof_of_payment"]),
+      title: z.string(),
+      fileUrl: z.string(),
+      fileKey: z.string(),
+    }))
+    .mutation(({ input, ctx }) =>
+      runEffect(
+        createOrderDocument(input.orderId, {
+          ...input,
+          userId: ctx.user.id,
+        })
+      )
+    ),
+
+  // Get document by verification token (for QR code scanning)
+  verifyDocument: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .query(({ input }) =>
+      runEffect(getDocumentByVerificationToken(input.token))
+    ),
+});
+*/
+
+// Missing import (add at the top if needed)
+import { count, inArray } from "drizzle-orm";

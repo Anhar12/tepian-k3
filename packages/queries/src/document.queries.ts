@@ -647,6 +647,57 @@ const documentQueries = {
     }),
 
   /**
+   * Update document signature data
+   * @param documentId - ID of the document to update
+   * @param signatureData - New signature data
+   * @returns
+   */
+  updateDocumentSignature: (
+    documentId: string,
+    signatureData: {
+      signatureData: string;
+      verificationToken: string;
+    }
+  ) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(documents)
+            .set({
+              signatureData: signatureData.signatureData,
+              verificationToken: signatureData.verificationToken,
+            })
+            .where(eq(documents.id, documentId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "documentQueries.updateDocumentSignature",
+            "Error updating document signature",
+            { documentId, signatureData, error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui tanda tangan dokumen",
+            cause: error,
+          });
+        },
+      });
+      const document = results[0];
+
+      if (!document) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Dokumen tidak ditemukan",
+          })
+        );
+      }
+
+      return document;
+    }),
+
+  /**
    * Delete document
    */
   deleteDocument: (documentId: string) =>

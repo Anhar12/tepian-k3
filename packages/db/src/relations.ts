@@ -33,6 +33,10 @@ export const userRelations = relations(users, ({ many }) => ({
   roles: many(userRoles),
   cart: many(cart),
   testing: many(testing),
+  // Polymorphic relation: documents where entityType = 'user' and entityId = user.id
+  documents: many(documents, {
+    relationName: "userDocuments",
+  }),
 }));
 
 export const kbliRelations = relations(kblis, ({ many }) => ({
@@ -68,6 +72,10 @@ export const userCompanyRelations = relations(
     }),
     testingLocation: many(userCompanyTestingLocation),
     testing: many(testing),
+    // Polymorphic relation: documents where entityType = 'user_company' and entityId = userCompany.id
+    documents: many(documents, {
+      relationName: "userCompanyDocuments",
+    }),
   })
 );
 
@@ -230,6 +238,10 @@ export const orderRelations = relations(order, ({ one, many }) => ({
   testing: many(testing),
   items: many(orderItem),
   statusHistory: many(orderStatusHistory),
+  // Polymorphic relation: documents where entityType = 'order' and entityId = order.id
+  documents: many(documents, {
+    relationName: "orderDocuments",
+  }),
 }));
 
 export const orderItemRelations = relations(orderItem, ({ one }) => ({
@@ -265,6 +277,10 @@ export const testingRelations = relations(testing, ({ one, many }) => ({
     references: [parameterCategories.id],
   }),
   items: many(testingItem),
+  // Polymorphic relation: documents where entityType = 'testing' and entityId = testing.id
+  documents: many(documents, {
+    relationName: "testingDocuments",
+  }),
 }));
 
 export const testingItemRelations = relations(testingItem, ({ one }) => ({
@@ -308,6 +324,27 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
     relationName: "documentSignedBy",
   }),
   verifications: many(documentVerifications),
+  // Polymorphic relations - one of these will be populated based on entityType
+  order: one(order, {
+    fields: [documents.entityId],
+    references: [order.id],
+    relationName: "orderDocuments",
+  }),
+  testing: one(testing, {
+    fields: [documents.entityId],
+    references: [testing.id],
+    relationName: "testingDocuments",
+  }),
+  userCompany: one(userCompanies, {
+    fields: [documents.entityId],
+    references: [userCompanies.id],
+    relationName: "userCompanyDocuments",
+  }),
+  user: one(users, {
+    fields: [documents.entityId],
+    references: [users.id],
+    relationName: "userDocuments",
+  }),
 }));
 
 export const documentVerificationsRelations = relations(

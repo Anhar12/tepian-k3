@@ -8,6 +8,8 @@ interface GenerateInvoiceOptions {
   invoiceNumber: string;
   dueDate?: string;
   logoUrl?: string;
+  qrCodeDataURL?: string;
+  verificationURL?: string;
 }
 
 export const generateInvoicePdf = async (

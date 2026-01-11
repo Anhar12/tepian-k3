@@ -438,11 +438,24 @@ tepian-k3/
 | Table | Description |
 |-------|-------------|
 | `cart` | Shopping cart items |
-| `orders` | Main order records |
-| `order_items` | Line items per order |
+| `order` | Main order records |
+| `order_item` | Line items per order |
 | `order_status_history` | Order status audit trail |
 | `testing` | Testing sessions |
 | `testing_item` | Individual test items |
+
+### Document Management
+
+| Table | Description |
+|-------|-------------|
+| `documents` | Digital documents with JWT signatures |
+| `document_verifications` | Document verification tracking |
+
+### Audit & Tracking
+
+| Table | Description |
+|-------|-------------|
+| `audits` | Complete audit trail with field-level changes |
 
 ### Authentication
 
@@ -450,6 +463,17 @@ tepian-k3/
 |-------|-------------|
 | `otp_codes` | Email verification OTPs |
 | `password_resets` | Password reset tokens |
+
+### Key Schema Features
+
+- **UUIv7 Primary Keys** - Better performance than traditional UUIDs
+- **Soft Deletes** - `deletedAt` timestamp on deletable entities
+- **Audit Trail** - JSONB columns for tracking changes (oldValues, newValues, changedFields)
+- **Comprehensive Indexing** - BTree indexes on foreign keys, GIN indexes on JSONB columns
+- **Timestamp Tracking** - `createdAt` and `updatedAt` on all tables
+- **Sequences** - For order numbers (`order_number_seq`) and testing numbers (`testing_number_seq`)
+- **Document Signatures** - JWT-based signing with SHA-256 integrity verification
+- **Polymorphic Relations** - Documents can belong to orders, testing, companies, or users
 
 ### Enums
 
@@ -460,7 +484,7 @@ PERMISSION_ACTION = ['create', 'read', 'update', 'delete', 'manage']
 // Order statuses
 ORDER_STATUS = ['pending', 'confirmed', 'revision', 'rejected', 'in_progress', 'completed', 'cancelled']
 
-// Approval statuses  
+// Approval statuses
 ORDER_APPROVAL_STATUSES = ['pending', 'approved', 'rejected']
 
 // Payment statuses
@@ -474,6 +498,18 @@ TOOLS_CONDITIONS = ['baik', 'rusak', 'diperingatkan', 'tidak_menyala']
 
 // Tool availability
 TOOLS_AVAILABILITY = ['ready', 'kalibrasi', 'not_ready', 'maintenance', 'dipinjam']
+
+// Document types
+DOCUMENT_TYPES = ['offering', 'invoice', 'testing_report', 'certificate', 'other']
+
+// Document owner types (polymorphic)
+DOCUMENT_OWNER_TYPES = ['order', 'testing', 'user_company', 'user']
+
+// Audit actions
+AUDIT_ACTIONS = ['create', 'update', 'delete', 'status_change']
+
+// WLKP statuses
+WLKP_STATUSES = ['belum', 'sudah']
 ```
 
 ---
@@ -592,7 +628,18 @@ TOOLS_AVAILABILITY = ['ready', 'kalibrasi', 'not_ready', 'maintenance', 'dipinja
 - winston, logform (logging)
 - minio (S3 storage)
 - ioredis (Redis)
+- pdfkit (PDF generation)
+- qrcode (QR code generation)
+- jose (JWT signing for documents)
 - uuid
+
+**Services Included:**
+- **Email Service** - Multi-provider email (Nodemailer, Resend, SMTP)
+- **PDF Service** - Invoice and offering letter generation
+- **Document Signing Service** - JWT-based digital signatures with QR codes
+- **Storage Service** - File upload/download (filesystem, minio, S3)
+- **Notification Service** - Redis event bus for pub/sub
+- **Logger Service** - Structured logging with Winston
 
 ### @tepian-k3/types (TypeScript Types)
 
@@ -976,40 +1023,226 @@ const [search, setSearch] = useQueryState('search');
 
 ### Authentication
 - Email/password registration with OTP verification
-- JWT-based authentication (access + refresh tokens)
-- Password reset flow
+- JWT-based authentication (30-day token expiration)
+- Password reset flow with secure tokens
 - RBAC with roles and permissions
+- Permission-based access control (resource + action)
+- User role and permission overrides
 
 ### User Management
 - User CRUD operations
-- Role assignment
+- Role assignment (multiple roles per user)
 - Direct permission overrides
 - Profile management with avatar upload
+- Soft delete support
+- Email verification tracking
 
 ### Company Management
 - Company registration with KBLI classification
 - Testing locations per company
 - Indonesian address hierarchy (Province → Regency → District → Village)
+- Responsible person tracking
+- Worker count tracking (male/female)
+- Health facility availability tracking
+- WLKP (Workplace Hazard Identification) status
 
 ### Testing Catalog
 - Clusters → Parameter Categories → Parameters hierarchy
-- Parameter pricing
-- Tool/equipment management
+- Parameter pricing with units and references
+- Tool/equipment management with conditions and availability
 - Parameter-tool relationships
+- Tool location and shelf tracking
+- Serial number and brand management
 
 ### Order Flow
 1. Browse testing catalog
-2. Add parameters to cart
+2. Add parameters to cart with quantity and location
 3. Checkout with company/location selection
-4. Admin approval workflow
-5. Payment verification
-6. Testing execution
-7. Report generation
+4. Admin approval workflow (pending → approved → rejected)
+5. Payment verification (unpaid → pending_verification → paid → rejected)
+6. Testing execution (start → sample submission → analysis → report generation → publishing → completed)
+7. Report generation and document signing
+
+### Document Management
+- Digital document generation (invoices, offering letters)
+- JWT-based document signing with SHA-256 integrity verification
+- QR code generation for verification
+- Document verification tracking (IP, timestamp, user agent)
+- Polymorphic document relationships (order, testing, company, user)
+- Signed download URLs with expiration
+
+### Audit System
+- Comprehensive audit trail for all entity changes
+- Field-level change tracking (oldValues, newValues, changedFields)
+- Action tracking (create, update, delete, status_change)
+- User attribution and IP tracking
+- JSONB metadata storage for flexible audit data
+- Entity-based audit log queries
 
 ### Real-time Events
 - Server-Sent Events (SSE) via Redis pub/sub
 - Order status notifications
-- Real-time updates
+- Real-time updates for testing progress
+- Event broadcasting across services
+
+---
+
+## API Routes (tRPC Routers)
+
+### Authentication Router (`auth`)
+- `login` - User login with email/password
+- `register` - User registration
+- `sendOTP` - Send OTP for email verification
+- `verifyOTP` - Verify OTP code
+- `forgotPassword` - Initiate password reset
+- `resetPassword` - Reset password with token
+- `me` - Get current authenticated user
+
+### User Router (`user`)
+- `getUserPaginated` - List users (paginated, filterable)
+- `getDeletedUserPaginated` - List soft-deleted users
+- `getUserDetails` - Get specific user details
+- `getUserDetailWithRolesAndPermissions` - Get user with permissions
+- `createUser` - Create new user (admin)
+- `updateUser` - Update user (admin)
+- `deleteUser` - Soft delete user
+- `restoreUser` - Restore soft-deleted user
+- `uploadProfilePicture` - Upload user avatar (multipart form)
+
+### Order Router (`order`)
+- `getAllOrders` - Get user's orders (filterable by status)
+- `getOrderById` - Get specific order details
+- `createOrder` - Create order from cart
+- `updateOrderStatus` - Update order status (admin)
+- `generateOfferingLetter` - Generate offering letter PDF
+- `generateInvoice` - Generate invoice PDF
+- `getOfferingLetterDownloadLink` - Get signed document URL
+- `getInvoiceDownloadLink` - Get invoice download URL
+
+### Cart Router (`cart`)
+- `getCart` - Get user's cart items
+- `addToCart` - Add item to cart
+- `removeFromCart` - Remove item from cart
+- `updateCartItem` - Update cart item quantity
+- `clearCart` - Clear all cart items
+
+### Parameter Router (`parameter`)
+- `getAllParameters` - List all parameters (paginated, filterable)
+- `getParameterById` - Get parameter details with tools
+- `createParameter` - Create new parameter
+- `updateParameter` - Update parameter
+- `deleteParameter` - Delete parameter
+- `getParametersByCategory` - Get parameters by category
+
+### Parameter Tool Router (`parameterTool`)
+- `getParameterTools` - List tools for a parameter
+- `createParameterTool` - Associate tool to parameter
+- `updateParameterTool` - Update parameter-tool association
+- `deleteParameterTool` - Remove tool from parameter
+
+### Tool Router (`tool`)
+- `getAllTools` - List all tools/equipment (paginated, filterable)
+- `getToolById` - Get tool details
+- `createTool` - Create new tool
+- `updateTool` - Update tool info
+- `deleteTool` - Delete tool
+- `updateToolCondition` - Update tool condition
+- `updateToolAvailability` - Update tool availability
+
+### Company Router (`userCompany`)
+- `getUserCompanies` - Get user's companies
+- `getCompanyById` - Get company details
+- `createCompany` - Register new company (with file upload)
+- `updateCompany` - Update company info (with file upload)
+- `deleteCompany` - Delete company
+
+### Testing Location Router (`userCompanyTestingLocation`)
+- `getTestingLocations` - Get company's testing locations
+- `getTestingLocationById` - Get location details
+- `createTestingLocation` - Add testing location
+- `updateTestingLocation` - Update location
+- `deleteTestingLocation` - Delete location
+
+### Location Data Routers
+- **Province Router** (`province`)
+  - `getAllProvinces` - Get all provinces
+- **Regency Router** (`regency`)
+  - `getRegenciesByProvinceId` - Get regencies by province
+- **District Router** (`district`)
+  - `getDistrictsByRegencyId` - Get districts by regency
+- **Village Router** (`village`)
+  - `getVillagesByDistrictId` - Get villages by district
+
+### Cluster Router (`cluster`)
+- `getAllClusters` - List all clusters
+- `getClusterById` - Get cluster details
+- `createCluster` - Create cluster
+- `updateCluster` - Update cluster
+- `deleteCluster` - Delete cluster
+
+### Parameter Category Router (`parameterCategories`)
+- `getAllCategories` - List all categories
+- `getCategoriesByClusterId` - Get categories by cluster
+- `getCategoryById` - Get category details
+- `createCategory` - Create category
+- `updateCategory` - Update category
+- `deleteCategory` - Delete category
+
+### Role Router (`role`)
+- `getAllRoles` - List all roles (paginated)
+- `getRoleById` - Get role details with permissions
+- `createRole` - Create role
+- `updateRole` - Update role
+- `deleteRole` - Delete role
+- `assignPermissionToRole` - Assign permission to role
+- `removePermissionFromRole` - Remove permission from role
+
+### Permission Router (`permission`)
+- `getAllPermissions` - List all permissions
+- `getPermissionById` - Get permission details
+- `createPermission` - Create permission
+- `updatePermission` - Update permission
+- `deletePermission` - Delete permission
+
+### KBLI Router (`kbli`)
+- `getAllKblis` - List all business classifications
+- `getKbliById` - Get KBLI details
+- `createKbli` - Create KBLI
+- `updateKbli` - Update KBLI
+- `deleteKbli` - Delete KBLI
+
+### Testing Router (`test`)
+- `getAllTests` - Get testing sessions (paginated, filterable)
+- `getTestById` - Get test details with items
+- `createTest` - Create testing session
+- `updateTestStatus` - Update test status
+- `addTestItem` - Add item to testing session
+- `updateTestItem` - Update test item results
+
+### Document Router (`document`)
+- `createDocument` - Create document record
+- `getDocuments` - List documents for entity
+- `getDocumentById` - Get document details
+- `signDocument` - Generate JWT signature and QR code
+- `verifyDocument` - Verify document signature
+- `getVerificationStatus` - Check verification history
+
+### Audit Router (`audit`)
+- `getAuditTrail` - Get audit logs for entity
+- `getAuditStats` - Get audit statistics
+- `getRecentActivity` - Get recent user activity
+
+### Event Router (`event`)
+- `subscribe` - Subscribe to SSE events
+- `publish` - Publish event to Redis
+
+### Procedure Types
+- **`publicProcedure`** - No authentication required
+- **`protectedProcedure`** - Requires JWT authentication
+- **`withPermission(permission)`** - Requires specific permission
+- **`withRole(role)`** - Requires specific role
+- **`withAnyRole(roles)`** - Requires one of multiple roles
+- **`withAllRoles(roles)`** - Requires all specified roles
 
 ---
 
@@ -1025,6 +1258,52 @@ This system manages laboratory testing services for workplace safety compliance:
 - **Tools**: Laboratory equipment used for testing
 - **Orders**: Customer requests for testing services
 - **Testing**: Actual test execution and results
+
+---
+
+## Recent Features & Enhancements
+
+Based on the latest commits (feature/order branch):
+
+### Document Signing & Verification System
+- JWT-based cryptographic document signatures
+- QR code generation for document verification
+- SHA-256 file integrity verification
+- Document verification tracking (IP, user agent, timestamp)
+- Polymorphic document relationships (orders, testing, companies, users)
+
+### Order Document Generation
+- **Invoice Generation** - Automated PDF invoices with company details and asset handling
+- **Offering Letter Generation** - Dynamic PDF offering letters with company information
+- **Signed Download URLs** - Secure, time-limited download links for documents
+- **Document Management** - Full CRUD operations for order-related documents
+
+### Audit System Implementation
+- Comprehensive audit trail for all entity changes
+- Field-level change tracking (oldValues, newValues, changedFields)
+- Action-based logging (create, update, delete, status_change)
+- User and IP attribution tracking
+- JSONB storage for flexible audit metadata
+
+### Testing Service Workflow
+- Complete testing lifecycle management
+- Status tracking from sample submission to report publishing
+- Testing item management with results and notes
+- Integration with order system
+
+### Order Management Enhancements
+- Multi-status workflow (pending → confirmed → in_progress → completed)
+- Approval process (pending → approved → rejected)
+- Payment tracking (unpaid → pending_verification → paid → rejected)
+- Order status history with audit trail
+- Order item management with parameter and location mapping
+
+### Infrastructure Improvements
+- Redis-based event broadcasting for real-time updates
+- Server-Sent Events (SSE) integration
+- Enhanced logging with Winston
+- PDF generation service with PDFKit
+- Storage service with multiple providers (filesystem, minio, S3)
 
 ---
 

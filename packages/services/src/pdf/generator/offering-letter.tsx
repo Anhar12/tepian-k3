@@ -11,6 +11,8 @@ interface GenerateOfferingLetterOptions {
   adminEmail: string;
   adminContact: string;
   logoUrl?: string;
+  qrCodeDataURL?: string;
+  verificationURL?: string;
 }
 
 export const generateOfferingLetterPdf = async (

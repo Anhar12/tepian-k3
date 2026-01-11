@@ -1,6 +1,7 @@
 import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
+import { QRCodeImage } from "../components/qrcode";
 import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 
 const styles = StyleSheet.create({
@@ -88,6 +89,8 @@ interface OfferingLetterProps {
   adminEmail: string;
   adminContact: string;
   logoUrl?: string;
+  qrCodeDataURL?: string;
+  verificationURL?: string;
 }
 
 export const OfferingLetter: React.FC<OfferingLetterProps> = ({
@@ -98,6 +101,8 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
   adminEmail,
   adminContact,
   logoUrl,
+  qrCodeDataURL,
+  verificationURL,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
     day: "numeric",
@@ -248,6 +253,15 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
             />
           </View>
         </View>
+
+        {/* QR Code for verification */}
+        {qrCodeDataURL && (
+          <QRCodeImage
+            qrCodeDataURL={qrCodeDataURL}
+            label="Scan untuk verifikasi keaslian dokumen"
+            verificationText={verificationURL}
+          />
+        )}
       </Page>
     </Document>
   );

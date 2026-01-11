@@ -1,6 +1,7 @@
 import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
+import { QRCodeImage } from "../components/qrcode";
 import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 
 const styles = StyleSheet.create({
@@ -141,6 +142,8 @@ interface InvoiceProps {
   invoiceNumber: string;
   dueDate?: string;
   logoUrl?: string;
+  qrCodeDataURL?: string;
+  verificationURL?: string;
 }
 
 export const Invoice: React.FC<InvoiceProps> = ({
@@ -148,6 +151,8 @@ export const Invoice: React.FC<InvoiceProps> = ({
   invoiceNumber,
   dueDate,
   logoUrl,
+  qrCodeDataURL,
+  verificationURL,
 }) => {
   const invoiceDate = new Date(order.createdAt).toLocaleDateString("id-ID", {
     day: "numeric",
@@ -299,6 +304,15 @@ export const Invoice: React.FC<InvoiceProps> = ({
             • Invoice ini berlaku sebagai tagihan resmi dari Balai K3 Samarinda.
           </Text>
         </View>
+
+        {/* QR Code for verification */}
+        {qrCodeDataURL && (
+          <QRCodeImage
+            qrCodeDataURL={qrCodeDataURL}
+            label="Scan untuk verifikasi keaslian dokumen"
+            verificationText={verificationURL}
+          />
+        )}
 
         {/* Footer */}
         <Text style={styles.footer}>

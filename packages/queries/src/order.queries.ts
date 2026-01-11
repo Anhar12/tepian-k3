@@ -132,6 +132,36 @@ const orderQueries = {
     });
   },
 
+  getOrderWithDocuments(orderId: string, userId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.order.findFirst({
+          where: and(eq(order.id, orderId), eq(order.userId, userId)),
+          with: {
+            statusHistory: true,
+            documents: {
+              orderBy: (documents, { desc }) => [desc(documents.createdAt)],
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "orderQueries.getOrderWithDocuments",
+          "Failed to fetch order with documents",
+          {
+            error,
+            orderId,
+            userId,
+          }
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil pesanan beserta dokumennya",
+        });
+      },
+    });
+  },
+
   createOrder(
     userId: string,
     orderData: z.infer<typeof orderSchema.createOrderSchema>,
@@ -312,140 +342,6 @@ const orderQueries = {
           }
         )
       );
-
-      return result;
-    });
-  },
-
-  createOrderOfferingLetter(orderId: string, offeringLetterUrl: string) {
-    return Effect.gen(function* () {
-      const isExists = yield* Effect.tryPromise({
-        try: () =>
-          db.query.order.findFirst({
-            where: eq(order.id, orderId),
-          }),
-        catch: (error) => {
-          logError(
-            "orderQueries.createOrderOfferingLetter",
-            "Failed to fetch order",
-            {
-              error,
-              orderId,
-            }
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengambil pesanan",
-          });
-        },
-      });
-
-      if (!isExists) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "NOT_FOUND",
-            message: "Order tidak ditemukan",
-          })
-        );
-      }
-
-      const [result] = yield* Effect.tryPromise({
-        try: () =>
-          db
-            .update(order)
-            .set({ offeringDocumentUrl: offeringLetterUrl })
-            .where(eq(order.id, orderId))
-            .returning(),
-        catch: (error) => {
-          logError(
-            "orderQueries.createOrderOfferingLetter",
-            "Failed to create offering letter",
-            {
-              error,
-              orderId,
-              offeringLetterUrl,
-            }
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat surat penawaran",
-          });
-        },
-      });
-
-      if (!result) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat invoice",
-          })
-        );
-      }
-
-      return result;
-    });
-  },
-
-  createOrderInvoice(orderId: string, invoiceUrl: string) {
-    return Effect.gen(function* () {
-      const isExists = yield* Effect.tryPromise({
-        try: () =>
-          db.query.order.findFirst({
-            where: eq(order.id, orderId),
-          }),
-        catch: (error) => {
-          logError("orderQueries.createOrderInvoice", "Failed to fetch order", {
-            error,
-            orderId,
-          });
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengambil pesanan",
-          });
-        },
-      });
-
-      if (!isExists) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "NOT_FOUND",
-            message: "Order tidak ditemukan",
-          })
-        );
-      }
-
-      const [result] = yield* Effect.tryPromise({
-        try: () =>
-          db
-            .update(order)
-            .set({ invoiceUrl })
-            .where(eq(order.id, orderId))
-            .returning(),
-        catch: (error) => {
-          logError(
-            "orderQueries.createOrderInvoice",
-            "Failed to create invoice",
-            {
-              error,
-              orderId,
-              invoiceUrl,
-            }
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat invoice",
-          });
-        },
-      });
-
-      if (!result) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat invoice",
-          })
-        );
-      }
 
       return result;
     });

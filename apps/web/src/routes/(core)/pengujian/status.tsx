@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient, trpc } from "@/utils/trpc";
-import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Download, FileText, Loader2 } from "lucide-react";
 import z from "zod";
@@ -28,16 +28,16 @@ function RouteComponent() {
   const { orderId } = Route.useSearch();
 
   const { data: orderDetail, isLoading } = useQuery(
-    trpc.order.getOrderById.queryOptions({
+    trpc.order.getOrderWithDocuments.queryOptions({
       orderId,
     }),
   );
 
   const generateOfferingLetterMutation = useMutation(
-    trpc.order.generateOfferingLetter.mutationOptions({
+    trpc.order.generateOfferingLetterTransactional.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderById.queryOptions({ orderId }),
+          trpc.order.getOrderWithDocuments.queryOptions({ orderId }),
         );
         globalSuccessToast(
           "Surat penawaran berhasil dibuat dan diunggah ke penyimpanan.",
@@ -52,7 +52,7 @@ function RouteComponent() {
   );
 
   const generateInvoiceMutation = useMutation(
-    trpc.order.generateInvoice.mutationOptions({
+    trpc.order.generateInvoiceTransactional.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
           trpc.order.getOrderById.queryOptions({ orderId }),
@@ -110,14 +110,26 @@ function RouteComponent() {
                     Dokumen
                   </span>
                   {/* Generate Offering Letter Button */}
-                  {orderDetail.offeringDocumentUrl ? (
+                  {orderDetail.documents.length > 0 &&
+                  orderDetail.documents.some(
+                    (doc) => doc.type === "offering_document",
+                  ) ? (
                     <Button
                       size="icon"
                       className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
                       onClick={() =>
-                        window.open(orderDetail.offeringDocumentUrl!, "_blank")
+                        window.open(
+                          orderDetail.documents.find(
+                            (doc) => doc.type === "offering_document",
+                          )!.fileUrl,
+                          "_blank",
+                        )
                       }
-                      disabled={orderDetail.offeringDocumentUrl === null}
+                      disabled={
+                        orderDetail.documents.find(
+                          (doc) => doc.type === "offering_document",
+                        )!.fileUrl === null
+                      }
                     >
                       <Download className="h-4 w-4" />
                     </Button>
@@ -153,14 +165,26 @@ function RouteComponent() {
                     Invoice
                   </span>
                   {/* Generate Invoice Button */}
-                  {orderDetail.invoiceUrl ? (
+                  {orderDetail.documents.length > 0 &&
+                  orderDetail.documents.some(
+                    (doc) => doc.type === "invoice",
+                  ) ? (
                     <Button
                       size="icon"
                       className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
                       onClick={() =>
-                        window.open(orderDetail.invoiceUrl!, "_blank")
+                        window.open(
+                          orderDetail.documents.find(
+                            (doc) => doc.type === "invoice",
+                          )!.fileUrl,
+                          "_blank",
+                        )
                       }
-                      disabled={orderDetail.invoiceUrl === null}
+                      disabled={
+                        orderDetail.documents.find(
+                          (doc) => doc.type === "invoice",
+                        )!.fileUrl === null
+                      }
                     >
                       <Download className="h-4 w-4" />
                     </Button>
