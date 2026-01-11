@@ -33,6 +33,24 @@ function RouteComponent() {
     }),
   );
 
+  const generateOfferingLetterMutation = useMutation(
+    trpc.order.generateOfferingLetter.mutationOptions({
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(
+          trpc.order.getOrderById.queryOptions({ orderId }),
+        );
+        globalSuccessToast(
+          "Surat penawaran berhasil dibuat dan diunggah ke penyimpanan.",
+        );
+        // open the offering letter url in a new tab
+        window.open(data.url, "_blank");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal membuat surat penawaran: " + error.message);
+      },
+    }),
+  );
+
   const generateInvoiceMutation = useMutation(
     trpc.order.generateInvoice.mutationOptions({
       onSuccess: async (data) => {
@@ -91,12 +109,41 @@ function RouteComponent() {
                   <span className="min-w-30 font-medium text-foreground">
                     Dokumen
                   </span>
-                  <Button
-                    size="icon"
-                    className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
+                  {/* Generate Offering Letter Button */}
+                  {orderDetail.offeringDocumentUrl ? (
+                    <Button
+                      size="icon"
+                      className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+                      onClick={() =>
+                        window.open(orderDetail.offeringDocumentUrl!, "_blank")
+                      }
+                      disabled={orderDetail.offeringDocumentUrl === null}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="icon"
+                      className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+                      onClick={() =>
+                        generateOfferingLetterMutation.mutate({
+                          orderId: orderDetail.id,
+                          letterNumber:
+                            "OT-" + orderDetail.id.slice(0, 8).toUpperCase(),
+                          referenceNumber:
+                            "REF-" + orderDetail.id.slice(0, 8).toUpperCase(),
+                          referenceDate: new Date().toISOString().split("T")[0],
+                        })
+                      }
+                      disabled={generateOfferingLetterMutation.isPending}
+                    >
+                      {generateOfferingLetterMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FileText className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
                 </div>
                 <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
