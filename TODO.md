@@ -1,0 +1,1 @@
+- change all useSuspenseQuery to use useQuery (because the app is fully client sided)
