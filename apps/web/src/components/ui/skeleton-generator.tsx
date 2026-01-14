@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils"
-import { Skeleton } from "./skeleton"
+import { cn } from "@/lib/utils";
+import { Skeleton } from "./skeleton";
 
 interface SkeletonGeneratorProps {
   variant?:
@@ -9,6 +9,7 @@ interface SkeletonGeneratorProps {
     | "list"
     | "avatar"
     | "text"
+    | "input"
     | "button"
     | "companyForm"
     | "userForm"
@@ -19,10 +20,10 @@ interface SkeletonGeneratorProps {
     | "radioGroup"
     | "tabbedContent"
     | "combobox"
-    | "custom"
-  count?: number
-  className?: string
-  children?: React.ReactNode
+    | "custom";
+  count?: number;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 export function SkeletonGenerator({
@@ -34,43 +35,45 @@ export function SkeletonGenerator({
   const renderSkeleton = () => {
     switch (variant) {
       case "card":
-        return <SkeletonCard className={className} />
+        return <SkeletonCard className={className} />;
       case "form":
-        return <SkeletonForm className={className} />
+        return <SkeletonForm className={className} />;
       case "table":
-        return <SkeletonTable className={className} />
+        return <SkeletonTable className={className} />;
       case "list":
-        return <SkeletonList className={className} />
+        return <SkeletonList className={className} />;
       case "avatar":
-        return <SkeletonAvatar className={className} />
+        return <SkeletonAvatar className={className} />;
       case "text":
-        return <SkeletonText className={className} />
+        return <SkeletonText className={className} />;
       case "button":
-        return <SkeletonButton className={className} />
+        return <SkeletonButton className={className} />;
+      case "input":
+        return <SkeletonInput className={className} />;
       case "companyForm":
-        return <SkeletonCompanyForm className={className} />
+        return <SkeletonCompanyForm className={className} />;
       case "userForm":
-        return <SkeletonUserForm className={className} />
+        return <SkeletonUserForm className={className} />;
       case "parameterForm":
-        return <SkeletonParameterForm className={className} />
+        return <SkeletonParameterForm className={className} />;
       case "imageUpload":
-        return <SkeletonImageUpload className={className} />
+        return <SkeletonImageUpload className={className} />;
       case "locationSelector":
-        return <SkeletonLocationSelector className={className} />
+        return <SkeletonLocationSelector className={className} />;
       case "sectionHeader":
-        return <SkeletonSectionHeader className={className} />
+        return <SkeletonSectionHeader className={className} />;
       case "radioGroup":
-        return <SkeletonRadioGroup className={className} />
+        return <SkeletonRadioGroup className={className} />;
       case "tabbedContent":
-        return <SkeletonTabbedContent className={className} />
+        return <SkeletonTabbedContent className={className} />;
       case "combobox":
-        return <SkeletonCombobox className={className} />
+        return <SkeletonCombobox className={className} />;
       case "custom":
-        return children
+        return children;
       default:
-        return <Skeleton className={className} />
+        return <Skeleton className={className} />;
     }
-  }
+  };
 
   return (
     <>
@@ -78,7 +81,7 @@ export function SkeletonGenerator({
         <div key={index}>{renderSkeleton()}</div>
       ))}
     </>
-  )
+  );
 }
 
 export function SkeletonCard({ className }: { className?: string }) {
@@ -93,7 +96,7 @@ export function SkeletonCard({ className }: { className?: string }) {
       </div>
       <Skeleton className="h-10 w-full" />
     </div>
-  )
+  );
 }
 
 export function SkeletonForm({ className }: { className?: string }) {
@@ -113,7 +116,7 @@ export function SkeletonForm({ className }: { className?: string }) {
       </div>
       <Skeleton className="h-10 w-full" />
     </div>
-  )
+  );
 }
 
 export function SkeletonTable({ className }: { className?: string }) {
@@ -134,7 +137,7 @@ export function SkeletonTable({ className }: { className?: string }) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 export function SkeletonList({ className }: { className?: string }) {
@@ -150,37 +153,43 @@ export function SkeletonList({ className }: { className?: string }) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 export function SkeletonAvatar({ className }: { className?: string }) {
-  return <Skeleton className={cn("h-12 w-12 rounded-full", className)} />
+  return <Skeleton className={cn("h-12 w-12 rounded-full", className)} />;
 }
 
 export function SkeletonText({
   className,
   lines = 3,
 }: {
-  className?: string
-  lines?: number
+  className?: string;
+  lines?: number;
 }) {
   return (
     <div className={cn("space-y-2", className)}>
       {Array.from({ length: lines }).map((_, index) => (
         <Skeleton
           key={index}
-          className={cn(
-            "h-4",
-            index === lines - 1 ? "w-2/3" : "w-full"
-          )}
+          className={cn("h-4", index === lines - 1 ? "w-2/3" : "w-full")}
         />
       ))}
     </div>
-  )
+  );
+}
+
+export function SkeletonInput({ className }: { className?: string }) {
+  return (
+    <div className={cn("space-y-2", className)}>
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-10 w-full rounded-md" />
+    </div>
+  );
 }
 
 export function SkeletonButton({ className }: { className?: string }) {
-  return <Skeleton className={cn("h-10 w-24 rounded-md", className)} />
+  return <Skeleton className={cn("h-10 w-24 rounded-md", className)} />;
 }
 
 export function SkeletonCompanyForm({ className }: { className?: string }) {
@@ -313,7 +322,7 @@ export function SkeletonCompanyForm({ className }: { className?: string }) {
       {/* Submit Button */}
       <Skeleton className="mt-2 h-10 w-full rounded-md" />
     </div>
-  )
+  );
 }
 
 export function SkeletonCombobox({ className }: { className?: string }) {
@@ -322,7 +331,7 @@ export function SkeletonCombobox({ className }: { className?: string }) {
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-10 w-full rounded-md" />
     </div>
-  )
+  );
 }
 
 export function SkeletonImageUpload({ className }: { className?: string }) {
@@ -335,12 +344,18 @@ export function SkeletonImageUpload({ className }: { className?: string }) {
         <Skeleton className="h-3 w-32" />
       </div>
     </div>
-  )
+  );
 }
 
-export function SkeletonLocationSelector({ className }: { className?: string }) {
+export function SkeletonLocationSelector({
+  className,
+}: {
+  className?: string;
+}) {
   return (
-    <div className={cn("flex flex-row flex-wrap justify-between gap-2", className)}>
+    <div
+      className={cn("flex flex-row flex-wrap justify-between gap-2", className)}
+    >
       <div className="w-[49%] space-y-2">
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-10 w-full" />
@@ -358,7 +373,7 @@ export function SkeletonLocationSelector({ className }: { className?: string }) 
         <Skeleton className="h-10 w-full" />
       </div>
     </div>
-  )
+  );
 }
 
 export function SkeletonSectionHeader({ className }: { className?: string }) {
@@ -370,15 +385,15 @@ export function SkeletonSectionHeader({ className }: { className?: string }) {
         <Skeleton className="h-3 w-36" />
       </div>
     </div>
-  )
+  );
 }
 
 export function SkeletonRadioGroup({
   className,
-  options = 2
+  options = 2,
 }: {
-  className?: string
-  options?: number
+  className?: string;
+  options?: number;
 }) {
   return (
     <div className={cn("space-y-3", className)}>
@@ -390,15 +405,15 @@ export function SkeletonRadioGroup({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 export function SkeletonTabbedContent({
   className,
-  tabs = 3
+  tabs = 3,
 }: {
-  className?: string
-  tabs?: number
+  className?: string;
+  tabs?: number;
 }) {
   return (
     <div className={cn("space-y-4", className)}>
@@ -415,7 +430,7 @@ export function SkeletonTabbedContent({
         <Skeleton className="h-4 w-3/4" />
       </div>
     </div>
-  )
+  );
 }
 
 export function SkeletonUserForm({ className }: { className?: string }) {
@@ -461,7 +476,7 @@ export function SkeletonUserForm({ className }: { className?: string }) {
       {/* Submit Button */}
       <Skeleton className="mt-2 h-10 w-full rounded-md" />
     </div>
-  )
+  );
 }
 
 export function SkeletonParameterForm({ className }: { className?: string }) {
@@ -500,5 +515,5 @@ export function SkeletonParameterForm({ className }: { className?: string }) {
       {/* Submit Button */}
       <Skeleton className="mt-2 h-10 w-full rounded-md" />
     </div>
-  )
+  );
 }
