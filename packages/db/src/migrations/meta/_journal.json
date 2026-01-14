@@ -50,6 +50,13 @@
       "when": 1768123696199,
       "tag": "0006_equal_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768434654776,
+      "tag": "0007_careless_nico_minoru",
+      "breakpoints": true
     }
   ]
 }

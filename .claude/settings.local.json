@@ -9,7 +9,9 @@
       "Bash(ls:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run db:generate:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(test:*)",
+      "Bash(wc:*)"
     ]
   }
 }

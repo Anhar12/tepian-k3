@@ -27,6 +27,7 @@ import {
   DOCUMENT_ENTITY_TYPES,
   DOCUMENT_STATUS,
   DOCUMENT_TYPES,
+  EMPLOYEE_STATUS,
   ORDER_APPROVAL_STATUSES,
   ORDER_PAYMENT_STATUSES,
   ORDER_SEQUENCE_NAME,
@@ -64,6 +65,8 @@ export const ToolsAvailabilityEnum = pgEnum(
 );
 
 export const auditActionEnum = pgEnum("audit_action", AUDIT_ACTIONS);
+
+export const employeeStatusEnum = pgEnum("employee_status", EMPLOYEE_STATUS);
 
 export const users = createTable(
   "users",
@@ -986,9 +989,30 @@ export const documentSignatures = createTable(
       "btree",
       table.verificationToken
     ),
-    index("document_signatures_created_at_idx").using(
-      "btree",
-      table.createdAt
-    ),
+    index("document_signatures_created_at_idx").using("btree", table.createdAt),
+  ]
+);
+
+export const employees = createTable(
+  "employees",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 250 }).notNull(),
+    email: varchar("email", { length: 250 }).notNull().unique(),
+    position: varchar("position", { length: 250 }).notNull(),
+    status: employeeStatusEnum("status").notNull().default("siap"),
+    ...timestamps,
+  },
+  (table) => [
+    index("employee_id_idx").using("btree", table.id),
+    index("employee_user_id_idx").using("btree", table.userId),
+    index("employee_email_idx").using("btree", table.email),
   ]
 );

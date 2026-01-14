@@ -346,6 +346,10 @@ async function seed() {
     where: eq(roles.name, "user"),
   });
 
+  const existingEmployee = await db.query.roles.findFirst({
+    where: eq(roles.name, "employee"),
+  });
+
   const superAdminRole =
     existingSuperAdmin ||
     (
@@ -382,12 +386,23 @@ async function seed() {
         .returning()
     )[0];
 
-  if (!superAdminRole || !adminRole || !userRole) {
+  const employeeRole =
+    existingEmployee ||
+    (
+      await db
+        .insert(roles)
+        .values({
+          name: "employee",
+          description: "Employee role",
+        })
+        .returning()
+    )[0];
+
+  if (!superAdminRole || !adminRole || !userRole || !employeeRole) {
     throw new Error("Failed to create or retrieve roles");
   }
 
-  console.log("✅ Roles synced: super_admin, admin, user");
-
+  console.log("✅ Roles synced: super_admin, admin, user, employee");
   // Sync permissions to roles (idempotent)
   console.log("🔐 Syncing permissions to roles...");
 

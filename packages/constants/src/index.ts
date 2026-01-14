@@ -235,3 +235,14 @@ export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
   verified: "Verified",
   rejected: "Rejected",
 };
+
+export const EMPLOYEE_STATUS = ["siap", "spt", "standby", "cuti"] as const;
+
+export type EmployeeStatus = (typeof EMPLOYEE_STATUS)[number];
+
+export const EMPLOYEE_STATUS_LABELS: Record<EmployeeStatus, string> = {
+  siap: "Siap",
+  spt: "SPT",
+  standby: "Standby",
+  cuti: "Cuti",
+};
