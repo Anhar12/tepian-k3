@@ -9,7 +9,9 @@ import { ArchiveRestore, Trash } from "lucide-react";
 interface CrudActionCellConfig<T, TParams> {
   /** Resource name (singular) for display messages */
   resourceName: string;
-  /** Resource path for routing (e.g., 'clusters', 'tools') */
+  /**
+   * @deprecated currently not being used,
+   * Resource path for routing (e.g., 'clusters', 'tools') */
   resourcePath: string;
   /** Permission prefix (e.g., 'clusters', 'tools') */
   permissionPrefix: string;
@@ -114,14 +116,12 @@ export function createCrudActionCell<
             : `Apakah anda yakin ingin menghapus data ${resourceName} ini? Data yang sudah dihapus tidak dapat dikembalikan.`
         }
         btnClassName="bg-red-600 text-white hover:bg-red-500"
-        onEditAction={`${resourcePath}/${row.original.id}/edit`}
+        onEditAction={`${row.original.id}/edit`}
         onHoverEdit={() => onHoverEdit && onHoverEdit(row.original.id)}
         showEdit={canEdit}
         showDelete={canDelete}
         showDetail={showDetail && canSeeDetail}
-        onDetailAction={
-          showDetail ? `${resourcePath}/${row.original.id}/detail` : undefined
-        }
+        onDetailAction={showDetail ? `${row.original.id}/detail` : undefined}
         onHoverDetail={() => onHoverDetail && onHoverDetail(row.original.id)}
         onConfirm={() =>
           row.original.deletedAt
