@@ -9,6 +9,7 @@ interface SkeletonGeneratorProps {
     | "list"
     | "avatar"
     | "text"
+    | "textArea"
     | "input"
     | "button"
     | "companyForm"
@@ -50,6 +51,8 @@ export function SkeletonGenerator({
         return <SkeletonButton className={className} />;
       case "input":
         return <SkeletonInput className={className} />;
+      case "textArea":
+        return <SkeletonTextArea className={className} />;
       case "companyForm":
         return <SkeletonCompanyForm className={className} />;
       case "userForm":
@@ -181,9 +184,18 @@ export function SkeletonText({
 
 export function SkeletonInput({ className }: { className?: string }) {
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("mb-4 space-y-2", className)}>
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-10 w-full rounded-md" />
+    </div>
+  );
+}
+
+export function SkeletonTextArea({ className }: { className?: string }) {
+  return (
+    <div className={cn("mb-4 space-y-2", className)}>
+      <Skeleton className="h-4 w-28" />
+      <Skeleton className="h-20 w-full rounded-md" />
     </div>
   );
 }

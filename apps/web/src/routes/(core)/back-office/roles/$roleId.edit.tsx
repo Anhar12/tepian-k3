@@ -13,6 +13,10 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  SkeletonInput,
+  SkeletonButton,
+} from "@/components/ui/skeleton-generator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -37,7 +41,30 @@ export const Route = createFileRoute("/(core)/back-office/roles/$roleId/edit")({
       context.trpc.role.getRoleById.queryOptions({ id: params.roleId }),
     ),
   component: RouteComponent,
+  pendingComponent: LoaderComponent,
 });
+
+function LoaderComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit Role</CardTitle>
+          <CardDescription>
+            Perbarui informasi role di bawah ini.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            <SkeletonInput className="h-10 w-full" />
+            <SkeletonInput className="h-24 w-full" />
+            <SkeletonButton className="w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function RouteComponent() {
   const { roleId } = Route.useParams();

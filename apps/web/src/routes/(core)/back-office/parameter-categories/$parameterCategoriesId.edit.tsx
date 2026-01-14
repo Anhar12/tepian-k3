@@ -26,6 +26,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  SkeletonInput,
+  SkeletonButton,
+  SkeletonTextArea,
+} from "@/components/ui/skeleton-generator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -62,7 +67,31 @@ export const Route = createFileRoute(
     );
   },
   component: RouteComponent,
+  pendingComponent: LoaderComponent,
 });
+
+function LoaderComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit Kategori Parameter</CardTitle>
+          <CardDescription>
+            Perbarui informasi kategori parameter di bawah ini.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4">
+            <SkeletonInput className="w-full" />
+            <SkeletonInput className="w-full" />
+            <SkeletonTextArea className="w-full" />
+            <SkeletonButton className="w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function RouteComponent() {
   const { parameterCategoriesId } = Route.useParams();
