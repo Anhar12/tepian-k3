@@ -30,6 +30,9 @@
     },
     "./document-signing": {
       "default": "./src/document-signing/index.ts"
+    },
+    "./image": {
+      "default": "./src/image/index.ts"
     }
   },
   "dependencies": {
@@ -48,6 +51,7 @@
     "qrcode": "catalog:",
     "react": "catalog:react19",
     "resend": "^6.6.0",
+    "sharp": "^0.34.5",
     "uuid": "catalog:",
     "winston": "^3.19.0"
   },

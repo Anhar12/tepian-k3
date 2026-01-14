@@ -12,6 +12,7 @@ import { TRPCError } from "@trpc/server";
 import { storageService, type UploadResult } from "@tepian-k3/services/storage";
 import { runEffect } from "../utils/run-effect";
 import { Effect } from "effect";
+import { imageService } from "@tepian-k3/services/image";
 
 export const userCompanyRouter = createTRPCRouter({
   getAllUserCompaniesByUserId: protectedProcedure.query(
@@ -102,10 +103,19 @@ export const userCompanyRouter = createTRPCRouter({
 
           const buffer = Buffer.from(arrayBuffer);
 
-          const uploadedFile = yield* storageService.upload(buffer, {
+          const convertedImage = yield* imageService.convertToWebP(buffer, {
+            quality: 80,
+            effort: 4,
             filename: ctx.input.data.picture.name,
-            folder: "company-pictures",
           });
+
+          const uploadedFile = yield* storageService.upload(
+            convertedImage.buffer,
+            {
+              filename: convertedImage.filename!,
+              folder: "company-pictures",
+            }
+          );
 
           const result = yield* userCompanyQueries.userCreateUserCompany(
             ctx.user.id,
@@ -134,10 +144,19 @@ export const userCompanyRouter = createTRPCRouter({
 
             const buffer = Buffer.from(arrayBuffer);
 
-            uploadedFile = yield* storageService.upload(buffer, {
+            const convertedImage = yield* imageService.convertToWebP(buffer, {
+              quality: 80,
+              effort: 4,
               filename: input.data.picture.name,
-              folder: "company-pictures",
             });
+
+            uploadedFile = yield* storageService.upload(
+              convertedImage.buffer,
+              {
+                filename: convertedImage.filename!,
+                folder: "company-pictures",
+              }
+            );
           }
 
           const result = yield* userCompanyQueries.userUpdateUserCompany(

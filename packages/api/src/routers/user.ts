@@ -7,6 +7,7 @@ import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { Effect } from "effect";
+import { imageService } from "@tepian-k3/services/image";
 
 export const userRouter = createTRPCRouter({
   getUserPaginated: withPermission("users.read")
@@ -95,10 +96,19 @@ export const userRouter = createTRPCRouter({
           );
           const buffer = Buffer.from(arrayBuffer);
 
-          const uploadedFile = yield* storageService.upload(buffer, {
+          const convertedImage = yield* imageService.convertToWebP(buffer, {
+            quality: 80,
+            effort: 4,
             filename: input.avatar.name,
-            folder: "avatars",
           });
+
+          const uploadedFile = yield* storageService.upload(
+            convertedImage.buffer,
+            {
+              filename: convertedImage.filename!,
+              folder: "avatars",
+            }
+          );
 
           yield* usersQueries.updateUserAvatar(user.id, uploadedFile.key);
         })
