@@ -2,11 +2,15 @@ import {
   IconAdjustments,
   IconBook,
   IconBuilding,
+  IconCategory,
+  IconCategoryPlus,
   IconDashboard,
+  IconFileInvoice,
   IconFolderCog,
   IconLayersSubtract,
   IconShieldCheckFilled,
   IconTools,
+  IconUserPlus,
   IconUsers,
 } from "@tabler/icons-react";
 import type { NavMainProps } from "@/components/nav-main";
@@ -23,21 +27,20 @@ export const backOfficeMenu: {
       icon: IconDashboard,
     },
     {
+      title: "Worksheets",
+      url: `${urlStarter}/worksheets`,
+      icon: IconFileInvoice,
+    },
+    {
       title: "Users",
       url: `${urlStarter}/users`,
       icon: IconUsers,
       permission: "users.read",
     },
     {
-      title: "Tools",
-      url: `${urlStarter}/tools`,
-      icon: IconTools,
-      permission: "tools.read",
-    },
-    {
       title: "Roles",
       url: `${urlStarter}/roles`,
-      icon: IconShieldCheckFilled,
+      icon: IconUserPlus,
       permission: "roles.read",
     },
     {
@@ -49,14 +52,20 @@ export const backOfficeMenu: {
     {
       title: "Parameter Categories",
       url: `${urlStarter}/parameter-categories`,
-      icon: IconFolderCog,
+      icon: IconCategory,
       permission: "parameter-categories.read",
     },
     {
       title: "Parameters",
       url: `${urlStarter}/parameters`,
-      icon: IconAdjustments,
+      icon: IconCategoryPlus,
       permission: "parameters.read",
+    },
+    {
+      title: "Tools",
+      url: `${urlStarter}/tools`,
+      icon: IconTools,
+      permission: "tools.read",
     },
     {
       title: "KBLIs",
