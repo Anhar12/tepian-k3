@@ -20,11 +20,13 @@ interface SkeletonGeneratorProps {
     | "sectionHeader"
     | "radioGroup"
     | "tabbedContent"
+    | "tabs"
     | "combobox"
     | "custom";
   count?: number;
   className?: string;
   children?: React.ReactNode;
+  tabs?: number;
 }
 
 export function SkeletonGenerator({
@@ -32,6 +34,7 @@ export function SkeletonGenerator({
   count = 1,
   className,
   children,
+  tabs = 2,
 }: SkeletonGeneratorProps) {
   const renderSkeleton = () => {
     switch (variant) {
@@ -69,6 +72,12 @@ export function SkeletonGenerator({
         return <SkeletonRadioGroup className={className} />;
       case "tabbedContent":
         return <SkeletonTabbedContent className={className} />;
+      case "tabs":
+        return (
+          <SkeletonTabs className={className} tabs={tabs}>
+            {children}
+          </SkeletonTabs>
+        );
       case "combobox":
         return <SkeletonCombobox className={className} />;
       case "custom":
@@ -184,7 +193,7 @@ export function SkeletonText({
 
 export function SkeletonInput({ className }: { className?: string }) {
   return (
-    <div className={cn("mb-4 space-y-2", className)}>
+    <div className={cn("space-y-2", className)}>
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-10 w-full rounded-md" />
     </div>
@@ -193,7 +202,7 @@ export function SkeletonInput({ className }: { className?: string }) {
 
 export function SkeletonTextArea({ className }: { className?: string }) {
   return (
-    <div className={cn("mb-4 space-y-2", className)}>
+    <div className={cn("space-y-2", className)}>
       <Skeleton className="h-4 w-28" />
       <Skeleton className="h-20 w-full rounded-md" />
     </div>
@@ -209,7 +218,7 @@ export function SkeletonCompanyForm({ className }: { className?: string }) {
     <div className={cn("space-y-4", className)}>
       {/* Company Logo Section */}
       <div className="flex justify-start">
-        <Skeleton className="h-32 w-32 rounded-lg" />
+        <Skeleton className="h-32 w-full rounded-lg" />
       </div>
 
       {/* Image Upload */}
@@ -526,6 +535,45 @@ export function SkeletonParameterForm({ className }: { className?: string }) {
 
       {/* Submit Button */}
       <Skeleton className="mt-2 h-10 w-full rounded-md" />
+    </div>
+  );
+}
+
+export function SkeletonTabs({
+  className,
+  tabs = 2,
+  children,
+}: {
+  className?: string;
+  tabs?: number;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className={cn("space-y-4", className)}>
+      {/* Tabs List - matches shadcn tabs styling */}
+      <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+        {Array.from({ length: tabs }).map((_, index) => (
+          <Skeleton
+            key={index}
+            className={cn(
+              "h-8 rounded-md px-3",
+              index === 0 ? "w-32" : "w-28",
+              index < tabs - 1 ? "mr-1" : "",
+            )}
+          />
+        ))}
+      </div>
+      {/* Tab Content */}
+      {children ? (
+        children
+      ) : (
+        <div className="space-y-3 pt-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-5/6" />
+        </div>
+      )}
     </div>
   );
 }

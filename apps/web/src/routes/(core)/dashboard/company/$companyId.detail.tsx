@@ -1,5 +1,4 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { requirePermission } from "@/utils/require-permission";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import CompanyDetail from "./-components/company-detail";
@@ -17,29 +16,6 @@ export const Route = createFileRoute(
   params: z.object({
     companyId: z.uuidv7(),
   }),
-  loaderDeps: (search) => ({
-    searchParams: z
-      .object({
-        showDeleted: z.boolean().optional(),
-      })
-      .parse(search),
-  }),
-  loader: async ({ context, params, deps }) => {
-    context.queryClient.ensureQueryData(
-      context.trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
-        id: params.companyId,
-      }),
-    );
-
-    context.queryClient.ensureQueryData(
-      context.trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
-        {
-          companyId: params.companyId,
-          showDeleted: deps.searchParams.showDeleted ?? false,
-        },
-      ),
-    );
-  },
   component: RouteComponent,
 });
 

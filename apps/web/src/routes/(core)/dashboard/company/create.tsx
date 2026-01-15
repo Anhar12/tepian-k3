@@ -35,6 +35,7 @@ import { LoaderCircle, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
+import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 
 export const Route = createFileRoute("/(core)/dashboard/company/create")({
   loader: async ({ context }) => {
@@ -46,7 +47,26 @@ export const Route = createFileRoute("/(core)/dashboard/company/create")({
     );
   },
   component: RouteComponent,
+  pendingComponent: LoaderComponent,
 });
+
+function LoaderComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Buat Perusahaan Baru</CardTitle>
+          <CardDescription>
+            Isi form di bawah untuk membuat perusahaan baru.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SkeletonGenerator variant="companyForm" />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();

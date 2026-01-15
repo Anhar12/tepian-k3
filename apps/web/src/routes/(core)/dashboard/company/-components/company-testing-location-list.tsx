@@ -13,13 +13,15 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import TestingLocationCard from "./testing-location-card";
 import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
 import CreateCompanyLocationDialog from "./create-company-location-dialog";
 import { History, MapPin } from "lucide-react";
 import { Route } from "../$companyId.detail";
 import EditCompanyLocationDialog from "./edit-company-location-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 
 interface CompanyTestingLocationListProps {
   companyId: string;
@@ -36,7 +38,7 @@ export default function CompanyTestingLocationList({
     (state) => state.setIsCreateDialogOpen,
   );
 
-  const { data: testingLocations } = useSuspenseQuery(
+  const { data: testingLocations, isLoading } = useQuery(
     trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
       { companyId, showDeleted: showDeleted ?? false },
     ),
@@ -55,6 +57,7 @@ export default function CompanyTestingLocationList({
           {/* Show deleted Button */}
           <Button
             variant={showDeleted ? "default" : "outline"}
+            disabled={isLoading}
             onClick={() => {
               navigate({
                 search: (old) => ({
@@ -69,29 +72,36 @@ export default function CompanyTestingLocationList({
         </div>
         <CardContent className="flex flex-col gap-4">
           {!showDeleted && (
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              disabled={isLoading}
+            >
               Tambah Lokasi Pengujian
             </Button>
           )}
-          {testingLocations.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <MapPin />
-                </EmptyMedia>
-                <EmptyTitle>
-                  {showDeleted
-                    ? "Tidak ada lokasi pengujian yang dihapus."
-                    : "Belum ada lokasi pengujian."}
-                </EmptyTitle>
-                <EmptyDescription>
-                  Lokasi pengujian yang Anda buat akan ditampilkan di sini.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+          {isLoading ? (
+            <div className="flex flex-row flex-wrap gap-4">
+              {[...Array(3)].map((_, index) => (
+                <SkeletonGenerator
+                  key={index}
+                  variant="card"
+                  className="w-60"
+                />
+              ))}
+            </div>
+          ) : testingLocations && testingLocations.length === 0 ? (
+            <EmptyState
+              icon={<MapPin />}
+              title={
+                showDeleted
+                  ? "Tidak ada lokasi pengujian yang dihapus."
+                  : "Belum ada lokasi pengujian."
+              }
+              description="Lokasi pengujian yang Anda buat akan ditampilkan di sini."
+            />
           ) : (
             <div className="flex flex-row flex-wrap gap-4">
-              {testingLocations.map((location) => (
+              {testingLocations?.map((location) => (
                 <TestingLocationCard
                   key={location.id}
                   testingLocation={location}

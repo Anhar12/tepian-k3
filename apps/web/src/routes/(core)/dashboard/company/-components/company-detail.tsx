@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Field,
   FieldContent,
@@ -17,20 +18,62 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { Building2 } from "lucide-react";
 
 interface CompanyDetailProps {
   companyId: string;
 }
 
 export default function CompanyDetail({ companyId }: CompanyDetailProps) {
-  const { data: company } = useSuspenseQuery(
+  const { data: company, isLoading } = useQuery(
     trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
       id: companyId,
     }),
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Detail Perusahaan</CardTitle>
+            <CardDescription>
+              Lihat detail informasi perusahaan Anda di sini.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SkeletonGenerator variant="companyForm" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!company) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Detail Perusahaan</CardTitle>
+            <CardDescription>
+              Lihat detail informasi perusahaan Anda di sini.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EmptyState
+              icon={<Building2 />}
+              title="Perusahaan Tidak Ditemukan"
+              description="Perusahaan dengan ID yang diberikan tidak ditemukan. Silakan periksa kembali ID dan coba lagi."
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
