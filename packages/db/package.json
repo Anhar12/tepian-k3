@@ -28,6 +28,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.2.0",
     "@tepian-k3/config": "workspace:*",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.8",

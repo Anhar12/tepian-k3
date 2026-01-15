@@ -1,0 +1,155 @@
+import { hash } from "@node-rs/argon2";
+import { db } from "../../client";
+import { employees, users, roles, userRoles } from "../../schema";
+import { fakerID_ID as faker } from "@faker-js/faker";
+import { eq } from "drizzle-orm";
+
+const employeesNames: {
+  name: string;
+  position: string;
+}[] = [
+  {
+    name: "Waluyo",
+    position: "Kepala Regu",
+  },
+  {
+    name: "Rahmat",
+    position: "Ketua Regu Kimia",
+  },
+  {
+    name: "Zaqqi Muawanah",
+    position: "Penguji K3 Ahli Madya",
+  },
+  {
+    name: "Heri Purwanto",
+    position: "Penguji K3 Ahli Madya",
+  },
+  {
+    name: "Rahman Nur",
+    position: "Penguji K3 Ahli Muda",
+  },
+  {
+    name: "Muliyadi",
+    position: "Penguji K3 Ahli Muda",
+  },
+  {
+    name: "David Lagadoni",
+    position: "Penguji K3 Ahli Muda",
+  },
+  {
+    name: "Ahmad Yani",
+    position: "Penguji K3 Ahli Muda",
+  },
+  {
+    name: "Ugeng Priyanto",
+    position: "Penguji K3 Ahli Pertama",
+  },
+  {
+    name: "Arif Sumarianto",
+    position: "Penguji K3 Ahli Pertama",
+  },
+  {
+    name: "Rizky Katherine",
+    position: "Penguji K3 Ahli Pertama",
+  },
+  {
+    name: "Priscella Cindy Samosir",
+    position: "Penguji K3 Ahli Pertama",
+  },
+  {
+    name: "Arif Budiman",
+    position: "Penguji K3 Ahli Pertama",
+  },
+  {
+    name: "Henny Ayu Nirwala",
+    position: "Penguji K3 Ahli Pertama",
+  },
+];
+
+const emailGenerator = (name: string) => {
+  const formattedName = name.toLowerCase().replace(/ /g, ".");
+  return `${formattedName}@mail.com`;
+};
+
+async function seedEmployees() {
+  console.log("👷 Syncing employees...");
+
+  // Get employee role
+  const employeeRole = await db.query.roles.findFirst({
+    where: eq(roles.name, "employee"),
+  });
+
+  if (!employeeRole) {
+    throw new Error("Employee role not found. Please run main seed first.");
+  }
+
+  const password = await hash("test12345");
+
+  // Process each employee
+  for (const emp of employeesNames) {
+    const email = emailGenerator(emp.name);
+
+    // Check if user already exists
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    let user = existingUser;
+
+    // Create user if doesn't exist
+    if (!existingUser) {
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          name: emp.name,
+          email: email,
+          password: password,
+          address: faker.location.streetAddress(),
+          phone: faker.phone.number({ style: "human" }),
+          emailVerified: true,
+          emailVerifiedAt: new Date().toISOString(),
+        })
+        .returning();
+
+      user = newUser;
+      console.log(`   ➕ Created user: ${emp.name}`);
+    }
+
+    if (!user) {
+      throw new Error(`Failed to create or retrieve user for ${emp.name}`);
+    }
+
+    // Check if employee record exists
+    const existingEmployee = await db.query.employees.findFirst({
+      where: eq(employees.userId, user.id),
+    });
+
+    // Create employee record if doesn't exist
+    if (!existingEmployee) {
+      await db.insert(employees).values({
+        userId: user.id,
+        name: emp.name,
+        position: emp.position,
+        email: email,
+      });
+      console.log(`   ➕ Created employee: ${emp.name} (${emp.position})`);
+    }
+
+    // Assign employee role if not already assigned
+    const existingUserRole = await db.query.userRoles.findFirst({
+      where: eq(userRoles.userId, user.id),
+    });
+
+    if (!existingUserRole) {
+      await db.insert(userRoles).values({
+        userId: user.id,
+        roleId: employeeRole.id,
+      });
+      console.log(`   ➕ Assigned employee role to: ${emp.name}`);
+    }
+  }
+
+  console.log("✅ Employees synced successfully");
+}
+
+export default seedEmployees;

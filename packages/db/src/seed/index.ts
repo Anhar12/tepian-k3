@@ -17,6 +17,7 @@ import seedDistricts from "./districts";
 import seedVillages from "./villages";
 import seedKblis from "./kblis";
 import seedParameters from "./parameter";
+import seedEmployees from "./employee";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -556,6 +557,7 @@ async function seed() {
   await seedDistricts();
   await seedVillages();
   await seedKblis();
+  await seedEmployees();
 
   console.log("✅ User roles synced");
   console.log("\n🎉 Database seeding completed successfully!");
