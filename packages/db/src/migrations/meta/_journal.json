@@ -71,6 +71,13 @@
       "when": 1768439008930,
       "tag": "0009_left_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1768439916491,
+      "tag": "0010_light_mattie_franklin",
+      "breakpoints": true
     }
   ]
 }

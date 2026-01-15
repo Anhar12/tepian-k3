@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **tepian-k3** is a TypeScript monorepo for a K3 (Kesehatan dan Keselamatan Kerja / Occupational Health and Safety) laboratory testing management system. Built with the Better-T-Stack, it provides end-to-end type safety from PostgreSQL to React UI using tRPC, Drizzle ORM, and TanStack Router.
 
 **Tech Stack:**
+
 - **Monorepo:** Turborepo + pnpm workspaces
 - **Frontend:** React 19 + TanStack Router + shadcn/ui + TailwindCSS 4
 - **Backend:** Hono + tRPC
@@ -17,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Common Commands
 
 ### Development
+
 ```bash
 pnpm dev              # Start all apps (web on :3001, server on :3000)
 pnpm dev:web          # Start only web app
@@ -24,12 +26,14 @@ pnpm dev:server       # Start only API server
 ```
 
 ### Building
+
 ```bash
 pnpm build            # Build all packages and apps
 pnpm check-types      # Type check entire monorepo
 ```
 
 ### Database
+
 ```bash
 pnpm db:push          # Push schema changes (development only)
 pnpm db:generate      # Generate migration files
@@ -40,12 +44,14 @@ pnpm db:reset         # Reset database and re-run migrations
 ```
 
 ### Testing Email
+
 ```bash
 pnpm email:dev        # Start Ethereal email test server
 pnpm email:verify     # Send test verification email
 ```
 
 ### Code Quality
+
 ```bash
 pnpm web:prettier     # Format web app with Prettier
 ```
@@ -99,26 +105,32 @@ import { usersQueries } from "@tepian-k3/queries/users.queries";
 ### Key Patterns
 
 1. **UUIDs v7 for Primary Keys:** All tables use UUIDv7 (time-sortable)
+
    ```typescript
-   id: uuid("id").primaryKey().notNull().$default(() => uuidv7())
+   id: uuid("id")
+     .primaryKey()
+     .notNull()
+     .$default(() => uuidv7());
    ```
 
 2. **Soft Deletes:** All tables include `timestamps` with `deletedAt`
+
    ```typescript
    ...timestamps  // Adds createdAt, updatedAt, deletedAt
    ```
 
 3. **Unique Constraints with Soft Delete:**
+
    ```typescript
    uniqueIndex("email_deleted_at_unique_idx")
      .on(table.email)
-     .where(sql`${table.deletedAt} IS NULL`)
+     .where(sql`${table.deletedAt} IS NULL`);
    ```
 
 4. **Polymorphic Relations:** Documents use `entityType` + `entityId` pattern
    ```typescript
-   entityType: documentEntityTypeEnum("entity_type").notNull()
-   entityId: uuid("entity_id").notNull()  // References order.id, testing.id, etc.
+   entityType: documentEntityTypeEnum("entity_type").notNull();
+   entityId: uuid("entity_id").notNull(); // References order.id, testing.id, etc.
    ```
 
 ### Core Domain Models
@@ -137,6 +149,7 @@ import { usersQueries } from "@tepian-k3/queries/users.queries";
 ### Employee Authentication
 
 Employees share the same authentication system as regular users:
+
 - `employees` table has a `userId` foreign key linking to `users`
 - Employees log in using the same JWT auth system
 - Access is controlled via roles (e.g., "Lab Technician", "Lab Manager")
@@ -149,10 +162,12 @@ Employees share the same authentication system as regular users:
 ### Router Structure (23 Routers)
 
 **Authentication & Authorization:**
+
 - `auth` - Login, registration, OTP, password reset
 - `user`, `role`, `permission` - User management
 
 **Core Domain:**
+
 - `order` - Order management, invoice/offering letter generation
 - `cart` - Shopping cart
 - `document` - Document upload, verification, signing (largest: 434 lines)
@@ -160,13 +175,16 @@ Employees share the same authentication system as regular users:
 - `audit` - Audit logging
 
 **Parameters & Tools:**
+
 - `parameter`, `parameter-categories`, `parameter-tool`
 - `tool`, `cluster`
 
 **Geography:**
+
 - `province`, `regency`, `district`, `village`
 
 **Company:**
+
 - `user-company`, `user-company-testing-location`, `kbli`
 
 ### Procedure Types
@@ -182,6 +200,7 @@ Employees share the same authentication system as regular users:
 ### Common Patterns
 
 **Standard CRUD Router:**
+
 ```typescript
 export const resourceRouter = createTRPCRouter({
   getAll: publicProcedure.query(async () => { ... }),
@@ -225,6 +244,7 @@ create: withPermission("resources.create")
 ```
 
 **File Upload Pattern:**
+
 ```typescript
 upload: protectedProcedure
   .input(z.object({
@@ -284,6 +304,7 @@ All queries should be Effect-based and all routers should use `runEffect()` wrap
 ### Permission Model
 
 Fine-grained permissions use `resource.action` pattern:
+
 - `users.read`, `users.create`, `users.update`, `users.delete`
 - `orders.read`, `orders.create`, `orders.update`, `orders.delete`
 - Permissions are checked at runtime from database
@@ -297,22 +318,22 @@ Fine-grained permissions use `resource.action` pattern:
 // Single permission
 beforeLoad: async ({ context }) => {
   await requirePermission(context, { permission: "users.create" });
-}
+};
 
 // Multiple permissions (any)
 beforeLoad: async ({ context }) => {
   await requirePermission(context, {
-    permission: ["users.create", "users.update"]
+    permission: ["users.create", "users.update"],
   });
-}
+};
 
 // Multiple permissions (all)
 beforeLoad: async ({ context }) => {
   await requirePermission(context, {
     permission: ["users.create", "admin.access"],
-    requireAll: true
+    requireAll: true,
   });
-}
+};
 ```
 
 ## Services Layer
@@ -322,30 +343,36 @@ beforeLoad: async ({ context }) => {
 ### Available Services
 
 1. **Storage Service** (`storage/`)
+
    - Providers: Filesystem, MinIO, S3
    - Operations: upload, download, delete, getUrl
    - Configured via `STORAGE_PROVIDER` env var
 
 2. **Email Service** (`email/`)
+
    - Providers: Nodemailer (SMTP), Resend
    - Templates for: OTP verification, password reset, welcome emails
    - Configured via `EMAIL_PROVIDER` env var
 
 3. **Logger Service** (`logger/`)
+
    - Winston-based logging
    - Transports: Console, File rotation
    - Log levels: error, warn, info, debug
 
 4. **Image Service** (`image/`)
+
    - Image optimization and transformation
    - Format conversion, resizing
 
 5. **PDF Service** (`pdf/`)
+
    - PDF generation and modification using pdf-lib
    - QR code embedding for document verification
    - Client-side PDF signing (`pdf/client/`)
 
 6. **Document Signing Service** (`document-signing/`)
+
    - JWT-based document signatures
    - QR code generation for verification
    - Token expiry: configurable via `DOCUMENT_QR_EXPIRATION`
@@ -364,9 +391,11 @@ beforeLoad: async ({ context }) => {
 **File-based routing with route groups:**
 
 - `(auth)/` - Authentication routes (login, register, verify-email)
+
   - Public routes, no auth required
 
 - `(core)/` - Protected routes (requires authentication)
+
   - `dashboard/` - User dashboard and company management
   - `back-office/` - Admin routes (users, roles, parameters, tools, clusters, kblis)
   - `pengujian/` - Testing workflow (order creation, checkout, status tracking)
@@ -447,6 +476,7 @@ MEMURAI_PORT=6379
 ### Environment Variable Flow
 
 Environment variables are:
+
 1. Defined in root `.env`
 2. Passed through Turborepo via `globalPassThroughEnv` in `turbo.json`
 3. Validated using `@t3-oss/env-core` in each package
@@ -466,10 +496,11 @@ export const getUserById = (id: string) =>
       const user = await db.query.users.findFirst({
         where: eq(users.id, id),
       });
-      if (!user) throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "User not found",
-      });
+      if (!user)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
       return user;
     },
     catch: (error) => error as TRPCError,
@@ -482,22 +513,21 @@ All resources support soft deletion:
 
 ```typescript
 // Delete: Sets deletedAt timestamp
-const deleted = await db.update(table)
+const deleted = await db
+  .update(table)
   .set({ deletedAt: sql`CURRENT_TIMESTAMP` })
   .where(eq(table.id, id))
   .returning();
 
 // Restore: Clears deletedAt
-const restored = await db.update(table)
+const restored = await db
+  .update(table)
   .set({ deletedAt: null })
   .where(eq(table.id, id))
   .returning();
 
 // Queries exclude soft-deleted by default
-where: and(
-  eq(table.id, id),
-  isNull(table.deletedAt)
-)
+where: and(eq(table.id, id), isNull(table.deletedAt));
 ```
 
 ### 3. Pagination Pattern
@@ -575,15 +605,20 @@ The application manages an end-to-end testing workflow:
 ### Adding a New Database Table
 
 1. **Add schema** in `packages/db/src/schema.ts`:
+
    ```typescript
    export const newTable = createTable("new_table", {
-     id: uuid("id").primaryKey().notNull().$default(() => uuidv7()),
+     id: uuid("id")
+       .primaryKey()
+       .notNull()
+       .$default(() => uuidv7()),
      name: varchar("name", { length: 250 }).notNull(),
      ...timestamps,
    });
    ```
 
 2. **Generate migration:**
+
    ```bash
    pnpm db:generate
    ```
@@ -629,11 +664,16 @@ The application manages an end-to-end testing workflow:
 ## Documentation
 
 Additional documentation in `docs/` folder:
+
 - `EMPLOYEE_AUTH_GUIDE.md` - Employee authentication implementation
 - `POLYMORPHIC_RELATIONS_GUIDE.md` - Document polymorphic relations
 - `DOCUMENT_VERIFICATION.md` - Document verification system
 - `PDF_EDITOR_USER_GUIDE.md` - PDF signing and QR code embedding
 - See `docs/` folder for complete list
+
+IMPORTANT: If YOU ADD NEW DOCUMENTATION PUT IT IN THE PACKAGE FOLDERS AS WELL BUT INSIDE THE docs/ FOLDER
+FOR EXAMPLE YOU CAN PUT IT IN THE PACKAGE FOLDERS BUT INSIDE THE docs/example/\*.example.ts/md perferably using md
+FOR BETTER ORGANIZATION AND EASY TO FIND.
 
 ## Monorepo Commands Reference
 

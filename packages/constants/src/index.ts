@@ -1,10 +1,5 @@
-export const PERMISSION_ACTION = [
-  "create",
-  "read",
-  "update",
-  "delete",
-  "view",
-] as const;
+// Re-export permission action from permissions module to avoid circular imports
+export { PERMISSION_ACTION, type PermissionAction } from "./permissions";
 
 export const USER_STATUS = ["Active", "Inactive", "Banned"] as const;
 
@@ -301,3 +296,8 @@ export const WORKSHEET_NOTE_STATUS_COLORS: Record<WorksheetNoteStatus, string> =
     urgent: "bg-pink-100 text-pink-700",
     unknown: "bg-gray-100 text-gray-700",
   };
+
+// Re-export resources, permissions, and roles
+export * from "./resources";
+export * from "./permissions";
+export * from "./roles";

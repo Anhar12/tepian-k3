@@ -15,6 +15,7 @@ import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { Effect } from "effect";
 import { parseAndValidateSafe } from "./utils/form-data-parser";
 import { getEventBus } from "@tepian-k3/services/notifications";
+import type { Permission } from "@tepian-k3/constants";
 
 /**
  * Isomorphic Session getter for API requests
@@ -237,12 +238,12 @@ export const formDataInput = z.custom<FormData>(
 /**
  * The `withPermission` function checks if a user has a specific permission before allowing access to a
  * protected procedure.
- * @param {string} permission - The `permission` parameter in the `withPermission` function is a string
+ * @param {Permission} permission - The `permission` parameter in the `withPermission` function is a string
  * that represents the specific permission that a user must have in order to access a particular
  * resource or perform a certain action. This permission is checked against the user's permissions to
  * determine if they have the necessary authorization.
  */
-export const withPermission = (permission: string) =>
+export const withPermission = (permission: Permission) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasPermission = await Effect.runPromise(
       permissionQueries.userHasPermission(ctx.user.id, permission)
