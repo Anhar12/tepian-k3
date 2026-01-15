@@ -11,18 +11,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { getCommonPinningStyles } from "@tepian-k3/utils/data-table";
 import { cn } from "@/lib/utils";
 import { IconAlertCircle } from "@tabler/icons-react";
 import type { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "@tepian-k3/api/root";
+import { EmptyState } from "../ui/empty-state";
 
 interface DataTableProps<TData> extends React.ComponentProps<"div"> {
   table: TanstackTable<TData>;
@@ -90,17 +84,11 @@ export function DataTable<TData>({
             ) : error ? (
               <TableRow>
                 <TableCell colSpan={columnCount} className="h-64">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <IconAlertCircle />
-                      </EmptyMedia>
-                      <EmptyTitle>
-                        {error.data?.code || "Terjadi Kesalahan"}
-                      </EmptyTitle>
-                      <EmptyDescription>{error.message}</EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
+                  <EmptyState
+                    icon={<IconAlertCircle />}
+                    title={error.data?.code || "Terjadi Kesalahan"}
+                    description={error.message}
+                  />
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
@@ -127,15 +115,11 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columnCount} className="h-64">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <IconAlertCircle />
-                      </EmptyMedia>
-                      <EmptyTitle>{emptyMessage}</EmptyTitle>
-                      <EmptyDescription>{emptyDescription}</EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
+                  <EmptyState
+                    icon={<IconAlertCircle />}
+                    title={emptyMessage}
+                    description={emptyDescription}
+                  />
                 </TableCell>
               </TableRow>
             )}

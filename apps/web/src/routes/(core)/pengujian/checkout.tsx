@@ -1,13 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -206,7 +200,7 @@ function RouteComponent() {
           trpc.cart.getAllCartItems.queryOptions(),
         );
         await queryClient.invalidateQueries(
-          trpc.order.getAllOrders.queryOptions(),
+          trpc.order.getAllOrders.queryOptions({}),
         );
         await queryClient.invalidateQueries(
           trpc.cart.getCartItemCount.queryOptions(),
@@ -429,17 +423,11 @@ function RouteComponent() {
                 })}
               </div>
             ) : (
-              <Empty className="h-full">
-                <EmptyMedia>
-                  <ShoppingCart className="h-12 w-12 text-slate-300" />
-                </EmptyMedia>
-                <EmptyHeader>
-                  <EmptyTitle>Tidak ada item di keranjang</EmptyTitle>
-                  <EmptyDescription>
-                    Silakan tambahkan parameter pengujian dari daftar
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+              <EmptyState
+                icon={<ShoppingCart className="h-12 w-12 text-slate-300" />}
+                title="Tidak ada item di keranjang"
+                description="Silakan tambahkan parameter pengujian dari daftar"
+              />
             )}
           </CardContent>
         </Card>

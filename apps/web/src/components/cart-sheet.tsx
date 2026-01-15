@@ -24,14 +24,8 @@ import { cn } from "@/lib/utils";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { Minus, Plus, Trash2, Loader2, ShoppingCart } from "lucide-react";
 import { globalErrorToast } from "@/lib/toast";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "./ui/empty";
 import { useNavigate } from "@tanstack/react-router";
+import { EmptyState } from "./ui/empty-state";
 
 export default function CartSheet() {
   const navigate = useNavigate();
@@ -373,17 +367,11 @@ export default function CartSheet() {
                 })}
               </div>
             ) : (
-              <Empty>
-                <EmptyMedia>
-                  <ShoppingCart className="h-12 w-12 text-slate-300" />
-                </EmptyMedia>
-                <EmptyHeader>
-                  <EmptyTitle>Tidak ada item di keranjang</EmptyTitle>
-                  <EmptyDescription>
-                    Silakan tambahkan parameter pengujian dari daftar
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+              <EmptyState
+                icon={<ShoppingCart className="h-12 w-12 text-slate-300" />}
+                title="Tidak ada item di keranjang"
+                description="Silakan tambahkan parameter pengujian dari daftar"
+              />
             )}
           </div>
         </div>

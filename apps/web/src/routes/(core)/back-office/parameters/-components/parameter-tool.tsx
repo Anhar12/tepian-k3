@@ -5,19 +5,13 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { trpc } from "@/utils/trpc";
 import { IconTools } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import ParameterToolCard from "./parameter-tool-card";
 import { useParameterToolDialogStore } from "@/stores/parameter-tool-dialog.stores";
 import { SkeletonCard } from "@/components/ui/skeleton-generator";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface ParameterToolsProps {
   parameterId: string;
@@ -59,19 +53,11 @@ export default function ParameterTools({ parameterId }: ParameterToolsProps) {
               ))}
             </div>
           ) : tools && tools.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <IconTools />
-                </EmptyMedia>
-                <EmptyTitle>
-                  Belum ada alat yang terkait dengan parameter ini.
-                </EmptyTitle>
-                <EmptyDescription>
-                  Alat yang Anda buat akan ditampilkan di sini.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+            <EmptyState
+              icon={<IconTools />}
+              title="Belum ada alat yang terkait dengan parameter ini."
+              description="Alat yang Anda buat akan ditampilkan di sini."
+            />
           ) : (
             <div className="flex flex-row flex-wrap gap-4">
               {tools?.map((paramTool) => (

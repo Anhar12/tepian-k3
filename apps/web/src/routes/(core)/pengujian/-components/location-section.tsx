@@ -1,11 +1,4 @@
 import { MapPin, Plus, Building2 } from "lucide-react";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +7,7 @@ import { trpc } from "@/utils/trpc";
 import { cn } from "@/lib/utils";
 import ComboBox from "@/components/ui/combobox";
 import { useState } from "react";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import CreateCompanyLocationDialog from "../../dashboard/company/-components/create-company-location-dialog";
 import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
 import { globalWarningToast } from "@/lib/toast";
@@ -27,6 +20,7 @@ import {
 } from "@/components/ui/carousel";
 import MultiComboBox from "@/components/ui/multi-combobox";
 import { useCartStore } from "@/stores/cart.stores";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export function LocationSection() {
   const routeApi = getRouteApi("/(core)/pengujian/");
@@ -255,18 +249,11 @@ export function LocationSection() {
           </Carousel>
         </div>
       ) : (
-        <Empty>
-          <EmptyMedia>
-            <MapPin className="h-12 w-12 text-slate-300" />
-          </EmptyMedia>
-          <EmptyHeader>
-            <EmptyTitle>Belum ada lokasi pengujian</EmptyTitle>
-            <EmptyDescription>
-              Anda belum menambahkan lokasi pengujian. Klik tombol di atas untuk
-              menambahkan lokasi pertama Anda.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <EmptyState
+          icon={<MapPin className="h-12 w-12 text-slate-300" />}
+          title="Belum ada lokasi pengujian"
+          description="Anda belum menambahkan lokasi pengujian. Klik tombol di atas untuk menambahkan lokasi pertama Anda."
+        />
       )}
       {selectedCompany && (
         <CreateCompanyLocationDialog companyId={selectedCompany} />
