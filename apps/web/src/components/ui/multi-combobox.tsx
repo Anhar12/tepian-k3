@@ -68,6 +68,10 @@ function MultiComboBox({
     [value, onChange],
   );
 
+  if (isLoading) {
+    return <Skeleton className={cn("h-10 w-full", className)} />;
+  }
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
@@ -83,48 +87,44 @@ function MultiComboBox({
             className,
           )}
         >
-          {isLoading ? (
-            <Skeleton className="h-4 w-32" />
-          ) : (
-            <div className="flex flex-1 flex-wrap items-center gap-1">
-              {selectedOptions.length === 0 ? (
-                placeholder
-              ) : (
-                <>
-                  {selectedOptions.slice(0, maxDisplay).map((option) => (
-                    <Badge
-                      key={option.id}
-                      variant="secondary"
-                      className="mr-1 gap-1"
+          <div className="flex flex-1 flex-wrap items-center gap-1">
+            {selectedOptions.length === 0 ? (
+              placeholder
+            ) : (
+              <>
+                {selectedOptions.slice(0, maxDisplay).map((option) => (
+                  <Badge
+                    key={option.id}
+                    variant="secondary"
+                    className="mr-1 gap-1"
+                  >
+                    {option.name}
+                    <button
+                      type="button"
+                      className="ml-1 rounded-full ring-offset-background outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleRemove(option.id, e as any);
+                        }
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => handleRemove(option.id, e)}
                     >
-                      {option.name}
-                      <button
-                        type="button"
-                        className="ml-1 rounded-full ring-offset-background outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleRemove(option.id, e as any);
-                          }
-                        }}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onClick={(e) => handleRemove(option.id, e)}
-                      >
-                        <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                      </button>
-                    </Badge>
-                  ))}
-                  {selectedOptions.length > maxDisplay && (
-                    <Badge variant="secondary" className="mr-1">
-                      +{selectedOptions.length - maxDisplay} more
-                    </Badge>
-                  )}
-                </>
-              )}
-            </div>
-          )}
+                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </Badge>
+                ))}
+                {selectedOptions.length > maxDisplay && (
+                  <Badge variant="secondary" className="mr-1">
+                    +{selectedOptions.length - maxDisplay} more
+                  </Badge>
+                )}
+              </>
+            )}
+          </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -132,37 +132,24 @@ function MultiComboBox({
         <Command>
           <CommandInput placeholder={searchPlaceholder} className="h-9" />
           <CommandList>
-            {isLoading ? (
-              <div className="space-y-2 p-2">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            ) : (
-              <>
-                <CommandEmpty>{emptyMessage}</CommandEmpty>
-                <CommandGroup>
-                  {options?.map((option) => (
-                    <CommandItem
-                      value={option.name}
-                      key={option.id}
-                      onSelect={() => handleSelect(option.id)}
-                    >
-                      {option.name}
-                      <Check
-                        className={cn(
-                          "ml-auto",
-                          value.includes(option.id)
-                            ? "opacity-100"
-                            : "opacity-0",
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </>
-            )}
+            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandGroup>
+              {options?.map((option) => (
+                <CommandItem
+                  value={option.name}
+                  key={option.id}
+                  onSelect={() => handleSelect(option.id)}
+                >
+                  {option.name}
+                  <Check
+                    className={cn(
+                      "ml-auto",
+                      value.includes(option.id) ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

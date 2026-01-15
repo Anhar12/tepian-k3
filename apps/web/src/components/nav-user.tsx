@@ -35,7 +35,8 @@ export function NavUser() {
   const { data: user } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
   function onLogout() {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
 
     queryClient.invalidateQueries(trpc.auth.me.queryFilter());
     queryClient.refetchQueries(trpc.auth.me.queryFilter());

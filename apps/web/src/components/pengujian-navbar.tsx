@@ -41,7 +41,8 @@ export default function PengujianNavbar() {
   const isCartMoreThan99 = cartCount !== undefined && cartCount > 99;
 
   function onLogout() {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
 
     queryClient.invalidateQueries(trpc.auth.me.queryFilter());
     queryClient.refetchQueries(trpc.auth.me.queryFilter());

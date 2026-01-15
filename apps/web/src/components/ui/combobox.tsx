@@ -55,6 +55,10 @@ function ComboBox({
     [onChange, onOpenChange],
   );
 
+  if (isLoading) {
+    return <Skeleton className={cn("h-10 w-full", className)} />;
+  }
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
@@ -70,11 +74,7 @@ function ComboBox({
             className,
           )}
         >
-          {isLoading ? (
-            <Skeleton className="h-4 w-32" />
-          ) : (
-            selectedOption?.name || placeholder
-          )}
+          {selectedOption?.name || placeholder}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -82,35 +82,24 @@ function ComboBox({
         <Command>
           <CommandInput placeholder={searchPlaceholder} className="h-9" />
           <CommandList>
-            {isLoading ? (
-              <div className="space-y-2 p-2">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            ) : (
-              <>
-                <CommandEmpty>{emptyMessage}</CommandEmpty>
-                <CommandGroup>
-                  {options?.map((option) => (
-                    <CommandItem
-                      value={option.name}
-                      key={option.id}
-                      onSelect={() => handleSelect(option.id)}
-                    >
-                      {option.name}
-                      <Check
-                        className={cn(
-                          "ml-auto",
-                          value === option.id ? "opacity-100" : "opacity-0",
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </>
-            )}
+            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandGroup>
+              {options?.map((option) => (
+                <CommandItem
+                  value={option.name}
+                  key={option.id}
+                  onSelect={() => handleSelect(option.id)}
+                >
+                  {option.name}
+                  <Check
+                    className={cn(
+                      "ml-auto",
+                      value === option.id ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
