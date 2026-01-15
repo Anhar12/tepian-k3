@@ -80,15 +80,6 @@ export const embedQRCodesInPDF = (
         });
       }
 
-      // Create QR code data
-      const qrData = JSON.stringify({
-        userId: signature.userId,
-        userName: signature.userName,
-        purpose: signature.purpose,
-        verificationUrl: signature.verificationUrl,
-        timestamp: new Date().toISOString(),
-      });
-
       // Generate QR code as PNG buffer
       const qrCodeBuffer = yield* generateQRCodeBuffer(
         signature.verificationUrl,

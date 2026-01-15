@@ -4,7 +4,6 @@ import { StorageError, UploadFailedError, FileNotFoundError } from "./types";
 import { FileSystemProvider } from "./providers/filesystem";
 // import { S3Provider } from "./providers/s3";
 import { MinioProvider } from "./providers/minio";
-import { env } from "../../env";
 
 type StorageType = "filesystem" | "s3" | "minio";
 

@@ -2,7 +2,7 @@ import { Effect, pipe } from "effect";
 import fs from "fs/promises";
 import path from "path";
 import { v7 as uuidv7 } from "uuid";
-import type { UploadOptions, UploadResult } from "../types";
+import type { UploadOptions, UploadResult } from "@/storage/types";
 import { UploadFailedError, FileNotFoundError } from "../types";
 import { generateDateBasedPath } from "../utils";
 

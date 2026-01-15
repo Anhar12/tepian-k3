@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 
 const userRolesQueries = {
-  assingDefaultRoleToUser(userId: string, tx: DBorTx = db) {
+  assignDefaultRoleToUser(userId: string, tx: DBorTx = db) {
     return Effect.gen(function* () {
       const defaultRole = yield* Effect.tryPromise({
         try: () =>
@@ -15,7 +15,7 @@ const userRolesQueries = {
           }),
         catch: (error) => {
           logError(
-            "userRolesQueries.assingDefaultRoleToUser",
+            "userRolesQueries.assignDefaultRoleToUser",
             "Error fetching default role",
             { error }
           );

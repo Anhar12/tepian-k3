@@ -2,11 +2,17 @@
   "extends": "@tepian-k3/config/tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
     "composite": true,
-    "noUnusedLocals": false
+    "noUnusedLocals": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "env": ["./env.ts"]
+    }
   }
 }
