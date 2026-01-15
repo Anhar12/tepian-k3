@@ -24,7 +24,6 @@ import SingleImageUpload from "@/components/ui/single-image-upload";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { toFormData } from "@/utils/form-data-mapper";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,10 +37,6 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/dashboard/company/create")({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "user-company.create",
-    }),
   loader: async ({ context }) => {
     context.queryClient.ensureQueryData(
       context.trpc.kbli.getAllKblis.queryOptions(),

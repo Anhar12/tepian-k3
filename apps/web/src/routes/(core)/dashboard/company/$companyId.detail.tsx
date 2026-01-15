@@ -14,10 +14,6 @@ export const Route = createFileRoute(
       .default("company-info"),
     showDeleted: z.boolean().optional(),
   }),
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: ["user-company.read", "user-company-testing-location.read"],
-    }),
   params: z.object({
     companyId: z.uuidv7(),
   }),

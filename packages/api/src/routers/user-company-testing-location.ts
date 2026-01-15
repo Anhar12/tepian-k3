@@ -1,5 +1,10 @@
 import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+  withPermission,
+} from "..";
 import userCompanyTestingLocationQueries from "@tepian-k3/queries/user-company-testing-location.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
@@ -13,9 +18,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       )
   ),
 
-  getAllUserCompanyTestingLocationsByCompanyIdAndUserId: withPermission(
-    "user-company-testing-location.view"
-  )
+  getAllUserCompanyTestingLocationsByCompanyIdAndUserId: protectedProcedure
     .input(
       z.object({
         companyId: z.uuidv7(),
