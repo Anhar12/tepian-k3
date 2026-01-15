@@ -3,7 +3,7 @@ export const PERMISSION_ACTION = [
   "read",
   "update",
   "delete",
-  "manage",
+  "view",
 ] as const;
 
 export const USER_STATUS = ["Active", "Inactive", "Banned"] as const;

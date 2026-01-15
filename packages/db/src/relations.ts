@@ -6,6 +6,7 @@ import {
   documents,
   documentSignatures,
   documentVerifications,
+  employees,
   kblis,
   order,
   orderItem,
@@ -27,13 +28,23 @@ import {
   userRoles,
   users,
   villages,
+  worksheetAssignments,
+  worksheetItems,
+  worksheetNotes,
+  worksheets,
+  worksheetTools,
 } from "./schema";
 
-export const userRelations = relations(users, ({ many }) => ({
+export const userRelations = relations(users, ({ many, one }) => ({
   userCompanies: many(userCompanies),
   roles: many(userRoles),
   cart: many(cart),
   testing: many(testing),
+  employee: one(employees, {
+    fields: [users.id],
+    references: [employees.userId],
+    relationName: "employeeManager",
+  }),
   // Polymorphic relation: documents where entityType = 'user' and entityId = user.id
   documents: many(documents, {
     relationName: "userDocuments",
@@ -372,6 +383,91 @@ export const documentSignaturesRelations = relations(
     }),
     signedBy: one(users, {
       fields: [documentSignatures.signedByUserId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const employeeRelations = relations(employees, ({ one }) => ({
+  user: one(users, {
+    fields: [employees.userId],
+    references: [users.id],
+  }),
+}));
+
+export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
+  testing: one(testing, {
+    fields: [worksheets.testingId],
+    references: [testing.id],
+  }),
+  mainSupervisor: one(employees, {
+    fields: [worksheets.mainSupervisorId],
+    references: [employees.id],
+  }),
+  accompanyingSupervisor: one(employees, {
+    fields: [worksheets.accompanyingSupervisorId],
+    references: [employees.id],
+  }),
+  createdBy: one(users, {
+    fields: [worksheets.createdBy],
+    references: [users.id],
+  }),
+  assignment: many(worksheetAssignments),
+  items: many(worksheetItems),
+  tools: many(worksheetTools),
+  notes: many(worksheetNotes),
+}));
+
+export const worksheetItemRelations = relations(worksheetItems, ({ one }) => ({
+  worksheet: one(worksheets, {
+    fields: [worksheetItems.worksheetId],
+    references: [worksheets.id],
+  }),
+  parameter: one(parameters, {
+    fields: [worksheetItems.parameterId],
+    references: [parameters.id],
+  }),
+  location: one(userCompanyTestingLocation, {
+    fields: [worksheetItems.locationId],
+    references: [userCompanyTestingLocation.id],
+  }),
+}));
+
+export const worksheetToolRelations = relations(worksheetTools, ({ one }) => ({
+  worksheet: one(worksheets, {
+    fields: [worksheetTools.worksheetId],
+    references: [worksheets.id],
+  }),
+  tool: one(tools, {
+    fields: [worksheetTools.toolId],
+    references: [tools.id],
+  }),
+}));
+
+export const worksheetNoteRelations = relations(worksheetNotes, ({ one }) => ({
+  worksheet: one(worksheets, {
+    fields: [worksheetNotes.worksheetId],
+    references: [worksheets.id],
+  }),
+  createdBy: one(users, {
+    fields: [worksheetNotes.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const worksheetAssignmentRelations = relations(
+  worksheetAssignments,
+  ({ one }) => ({
+    worksheet: one(worksheets, {
+      fields: [worksheetAssignments.worksheetId],
+      references: [worksheets.id],
+    }),
+    employee: one(employees, {
+      fields: [worksheetAssignments.employeeId],
+      references: [employees.id],
+    }),
+    assignedBy: one(users, {
+      fields: [worksheetAssignments.assignedBy],
       references: [users.id],
     }),
   })

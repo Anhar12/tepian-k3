@@ -24,21 +24,33 @@ async function seed() {
 
   // Define all permissions
   const permissionsList = [
+    // ==================== USERS & AUTH ====================
+    { name: "users.view", resource: "users", action: "view" },
     { name: "users.create", resource: "users", action: "create" },
     { name: "users.read", resource: "users", action: "read" },
     { name: "users.update", resource: "users", action: "update" },
     { name: "users.delete", resource: "users", action: "delete" },
-    { name: "users.manage", resource: "users", action: "manage" },
+
+    // ==================== ROLES ====================
+    { name: "roles.view", resource: "roles", action: "view" },
     { name: "roles.create", resource: "roles", action: "create" },
     { name: "roles.read", resource: "roles", action: "read" },
     { name: "roles.update", resource: "roles", action: "update" },
     { name: "roles.delete", resource: "roles", action: "delete" },
-    { name: "roles.manage", resource: "roles", action: "manage" },
+
+    // ==================== PERMISSIONS ====================
+    { name: "permissions.view", resource: "permissions", action: "view" },
     { name: "permissions.create", resource: "permissions", action: "create" },
     { name: "permissions.read", resource: "permissions", action: "read" },
     { name: "permissions.update", resource: "permissions", action: "update" },
     { name: "permissions.delete", resource: "permissions", action: "delete" },
-    { name: "permissions.manage", resource: "permissions", action: "manage" },
+
+    // ==================== ROLE PERMISSIONS ====================
+    {
+      name: "role-permissions.view",
+      resource: "role-permissions",
+      action: "view",
+    },
     {
       name: "role-permissions.create",
       resource: "role-permissions",
@@ -59,10 +71,12 @@ async function seed() {
       resource: "role-permissions",
       action: "delete",
     },
+
+    // ==================== USER PERMISSIONS ====================
     {
-      name: "role-permissions.manage",
-      resource: "role-permissions",
-      action: "manage",
+      name: "user-permissions.view",
+      resource: "user-permissions",
+      action: "view",
     },
     {
       name: "user-permissions.create",
@@ -84,21 +98,27 @@ async function seed() {
       resource: "user-permissions",
       action: "delete",
     },
-    {
-      name: "user-permissions.manage",
-      resource: "user-permissions",
-      action: "manage",
-    },
+
+    // ==================== TOOLS ====================
+    { name: "tools.view", resource: "tools", action: "view" },
     { name: "tools.create", resource: "tools", action: "create" },
     { name: "tools.read", resource: "tools", action: "read" },
     { name: "tools.update", resource: "tools", action: "update" },
     { name: "tools.delete", resource: "tools", action: "delete" },
-    { name: "tools.manage", resource: "tools", action: "manage" },
+
+    // ==================== CLUSTERS ====================
+    { name: "clusters.view", resource: "clusters", action: "view" },
     { name: "clusters.create", resource: "clusters", action: "create" },
     { name: "clusters.read", resource: "clusters", action: "read" },
     { name: "clusters.update", resource: "clusters", action: "update" },
     { name: "clusters.delete", resource: "clusters", action: "delete" },
-    { name: "clusters.manage", resource: "clusters", action: "manage" },
+
+    // ==================== PARAMETER CATEGORIES ====================
+    {
+      name: "parameter-categories.view",
+      resource: "parameter-categories",
+      action: "view",
+    },
     {
       name: "parameter-categories.create",
       resource: "parameter-categories",
@@ -119,16 +139,20 @@ async function seed() {
       resource: "parameter-categories",
       action: "delete",
     },
-    {
-      name: "parameter-categories.manage",
-      resource: "parameter-categories",
-      action: "manage",
-    },
+
+    // ==================== PARAMETERS ====================
+    { name: "parameters.view", resource: "parameters", action: "view" },
     { name: "parameters.create", resource: "parameters", action: "create" },
     { name: "parameters.read", resource: "parameters", action: "read" },
     { name: "parameters.update", resource: "parameters", action: "update" },
     { name: "parameters.delete", resource: "parameters", action: "delete" },
-    { name: "parameters.manage", resource: "parameters", action: "manage" },
+
+    // ==================== PARAMETER TOOLS ====================
+    {
+      name: "parameter-tool.view",
+      resource: "parameter-tool",
+      action: "view",
+    },
     {
       name: "parameter-tool.create",
       resource: "parameter-tool",
@@ -149,36 +173,48 @@ async function seed() {
       resource: "parameter-tool",
       action: "delete",
     },
-    {
-      name: "parameter-tool.manage",
-      resource: "parameter-tool",
-      action: "manage",
-    },
+
+    // ==================== PROVINCES ====================
+    { name: "provinces.view", resource: "provinces", action: "view" },
     { name: "provinces.create", resource: "provinces", action: "create" },
     { name: "provinces.read", resource: "provinces", action: "read" },
     { name: "provinces.update", resource: "provinces", action: "update" },
     { name: "provinces.delete", resource: "provinces", action: "delete" },
-    { name: "provinces.manage", resource: "provinces", action: "manage" },
-    { name: "regency.create", resource: "regency", action: "create" },
-    { name: "regency.read", resource: "regency", action: "read" },
-    { name: "regency.update", resource: "regency", action: "update" },
-    { name: "regency.delete", resource: "regency", action: "delete" },
-    { name: "regency.manage", resource: "regency", action: "manage" },
-    { name: "district.create", resource: "districts", action: "create" },
-    { name: "district.read", resource: "districts", action: "read" },
-    { name: "district.update", resource: "districts", action: "update" },
-    { name: "district.delete", resource: "districts", action: "delete" },
-    { name: "district.manage", resource: "districts", action: "manage" },
-    { name: "village.create", resource: "village", action: "create" },
-    { name: "village.read", resource: "village", action: "read" },
-    { name: "village.update", resource: "village", action: "update" },
-    { name: "village.delete", resource: "village", action: "delete" },
-    { name: "village.manage", resource: "village", action: "manage" },
+
+    // ==================== REGENCIES ====================
+    { name: "regencies.view", resource: "regencies", action: "view" },
+    { name: "regencies.create", resource: "regencies", action: "create" },
+    { name: "regencies.read", resource: "regencies", action: "read" },
+    { name: "regencies.update", resource: "regencies", action: "update" },
+    { name: "regencies.delete", resource: "regencies", action: "delete" },
+
+    // ==================== DISTRICTS ====================
+    { name: "districts.view", resource: "districts", action: "view" },
+    { name: "districts.create", resource: "districts", action: "create" },
+    { name: "districts.read", resource: "districts", action: "read" },
+    { name: "districts.update", resource: "districts", action: "update" },
+    { name: "districts.delete", resource: "districts", action: "delete" },
+
+    // ==================== VILLAGES ====================
+    { name: "villages.view", resource: "villages", action: "view" },
+    { name: "villages.create", resource: "villages", action: "create" },
+    { name: "villages.read", resource: "villages", action: "read" },
+    { name: "villages.update", resource: "villages", action: "update" },
+    { name: "villages.delete", resource: "villages", action: "delete" },
+
+    // ==================== KBLI ====================
+    { name: "kbli.view", resource: "kbli", action: "view" },
     { name: "kbli.create", resource: "kbli", action: "create" },
     { name: "kbli.read", resource: "kbli", action: "read" },
     { name: "kbli.update", resource: "kbli", action: "update" },
     { name: "kbli.delete", resource: "kbli", action: "delete" },
-    { name: "kbli.manage", resource: "kbli", action: "manage" },
+
+    // ==================== USER COMPANIES ====================
+    {
+      name: "user-company.view",
+      resource: "user-company",
+      action: "view",
+    },
     {
       name: "user-company.create",
       resource: "user-company",
@@ -199,10 +235,12 @@ async function seed() {
       resource: "user-company",
       action: "delete",
     },
+
+    // ==================== USER COMPANY TESTING LOCATIONS ====================
     {
-      name: "user-company.manage",
-      resource: "user-company",
-      action: "manage",
+      name: "user-company-testing-location.view",
+      resource: "user-company-testing-location",
+      action: "view",
     },
     {
       name: "user-company-testing-location.create",
@@ -224,30 +262,33 @@ async function seed() {
       resource: "user-company-testing-location",
       action: "delete",
     },
+
+    // ==================== CART ====================
+    { name: "cart.view", resource: "cart", action: "view" },
+    { name: "cart.create", resource: "cart", action: "create" },
+    { name: "cart.read", resource: "cart", action: "read" },
+    { name: "cart.update", resource: "cart", action: "update" },
+    { name: "cart.delete", resource: "cart", action: "delete" },
+
+    // ==================== ORDERS ====================
+    { name: "orders.view", resource: "orders", action: "view" },
+    { name: "orders.create", resource: "orders", action: "create" },
+    { name: "orders.read", resource: "orders", action: "read" },
+    { name: "orders.update", resource: "orders", action: "update" },
+    { name: "orders.delete", resource: "orders", action: "delete" },
+
+    // ==================== ORDER ITEMS ====================
+    { name: "order-items.view", resource: "order-items", action: "view" },
+    { name: "order-items.create", resource: "order-items", action: "create" },
+    { name: "order-items.read", resource: "order-items", action: "read" },
+    { name: "order-items.update", resource: "order-items", action: "update" },
+    { name: "order-items.delete", resource: "order-items", action: "delete" },
+
+    // ==================== ORDER STATUS HISTORY ====================
     {
-      name: "user-company-testing-location.manage",
-      resource: "user-company-testing-location",
-      action: "manage",
-    },
-    {
-      name: "order.create",
-      resource: "order",
-      action: "create",
-    },
-    {
-      name: "order.read",
-      resource: "order",
-      action: "read",
-    },
-    {
-      name: "order.update",
-      resource: "order",
-      action: "update",
-    },
-    {
-      name: "order.delete",
-      resource: "order",
-      action: "delete",
+      name: "order-status-history.view",
+      resource: "order-status-history",
+      action: "view",
     },
     {
       name: "order-status-history.create",
@@ -269,44 +310,208 @@ async function seed() {
       resource: "order-status-history",
       action: "delete",
     },
+
+    // ==================== TESTING ====================
+    { name: "testing.view", resource: "testing", action: "view" },
+    { name: "testing.create", resource: "testing", action: "create" },
+    { name: "testing.read", resource: "testing", action: "read" },
+    { name: "testing.update", resource: "testing", action: "update" },
+    { name: "testing.delete", resource: "testing", action: "delete" },
+
+    // ==================== TESTING ITEMS ====================
+    { name: "testing-item.view", resource: "testing-item", action: "view" },
+    { name: "testing-item.create", resource: "testing-item", action: "create" },
+    { name: "testing-item.read", resource: "testing-item", action: "read" },
+    { name: "testing-item.update", resource: "testing-item", action: "update" },
+    { name: "testing-item.delete", resource: "testing-item", action: "delete" },
+
+    // ==================== DOCUMENTS ====================
+    { name: "documents.view", resource: "documents", action: "view" },
+    { name: "documents.create", resource: "documents", action: "create" },
+    { name: "documents.read", resource: "documents", action: "read" },
+    { name: "documents.update", resource: "documents", action: "update" },
+    { name: "documents.delete", resource: "documents", action: "delete" },
+
+    // ==================== DOCUMENT SIGNATURES ====================
     {
-      name: "document.create",
-      resource: "document",
+      name: "document-signatures.view",
+      resource: "document-signatures",
+      action: "view",
+    },
+    {
+      name: "document-signatures.create",
+      resource: "document-signatures",
       action: "create",
     },
     {
-      name: "document.read",
-      resource: "document",
+      name: "document-signatures.read",
+      resource: "document-signatures",
       action: "read",
     },
     {
-      name: "document.update",
-      resource: "document",
+      name: "document-signatures.update",
+      resource: "document-signatures",
       action: "update",
     },
     {
-      name: "document.delete",
-      resource: "document",
+      name: "document-signatures.delete",
+      resource: "document-signatures",
       action: "delete",
     },
+
+    // ==================== DOCUMENT VERIFICATIONS ====================
     {
-      name: "document-signature.create",
-      resource: "document-signature",
+      name: "document-verifications.view",
+      resource: "document-verifications",
+      action: "view",
+    },
+    {
+      name: "document-verifications.create",
+      resource: "document-verifications",
       action: "create",
     },
     {
-      name: "document-signature.read",
-      resource: "document-signature",
+      name: "document-verifications.read",
+      resource: "document-verifications",
       action: "read",
     },
     {
-      name: "document-signature.update",
-      resource: "document-signature",
+      name: "document-verifications.update",
+      resource: "document-verifications",
       action: "update",
     },
     {
-      name: "document-signature.delete",
-      resource: "document-signature",
+      name: "document-verifications.delete",
+      resource: "document-verifications",
+      action: "delete",
+    },
+
+    // ==================== AUDITS ====================
+    { name: "audits.view", resource: "audits", action: "view" },
+    { name: "audits.create", resource: "audits", action: "create" },
+    { name: "audits.read", resource: "audits", action: "read" },
+    { name: "audits.update", resource: "audits", action: "update" },
+    { name: "audits.delete", resource: "audits", action: "delete" },
+
+    // ==================== EMPLOYEES ====================
+    { name: "employees.view", resource: "employees", action: "view" },
+    { name: "employees.create", resource: "employees", action: "create" },
+    { name: "employees.read", resource: "employees", action: "read" },
+    { name: "employees.update", resource: "employees", action: "update" },
+    { name: "employees.delete", resource: "employees", action: "delete" },
+
+    // ==================== WORKSHEETS ====================
+    { name: "worksheets.view", resource: "worksheets", action: "view" },
+    { name: "worksheets.create", resource: "worksheets", action: "create" },
+    { name: "worksheets.read", resource: "worksheets", action: "read" },
+    { name: "worksheets.update", resource: "worksheets", action: "update" },
+    { name: "worksheets.delete", resource: "worksheets", action: "delete" },
+
+    // ==================== WORKSHEET ITEMS ====================
+    {
+      name: "worksheet-items.view",
+      resource: "worksheet-items",
+      action: "view",
+    },
+    {
+      name: "worksheet-items.create",
+      resource: "worksheet-items",
+      action: "create",
+    },
+    {
+      name: "worksheet-items.read",
+      resource: "worksheet-items",
+      action: "read",
+    },
+    {
+      name: "worksheet-items.update",
+      resource: "worksheet-items",
+      action: "update",
+    },
+    {
+      name: "worksheet-items.delete",
+      resource: "worksheet-items",
+      action: "delete",
+    },
+
+    // ==================== WORKSHEET TOOLS ====================
+    {
+      name: "worksheet-tools.view",
+      resource: "worksheet-tools",
+      action: "view",
+    },
+    {
+      name: "worksheet-tools.create",
+      resource: "worksheet-tools",
+      action: "create",
+    },
+    {
+      name: "worksheet-tools.read",
+      resource: "worksheet-tools",
+      action: "read",
+    },
+    {
+      name: "worksheet-tools.update",
+      resource: "worksheet-tools",
+      action: "update",
+    },
+    {
+      name: "worksheet-tools.delete",
+      resource: "worksheet-tools",
+      action: "delete",
+    },
+
+    // ==================== WORKSHEET NOTES ====================
+    {
+      name: "worksheet-notes.view",
+      resource: "worksheet-notes",
+      action: "view",
+    },
+    {
+      name: "worksheet-notes.create",
+      resource: "worksheet-notes",
+      action: "create",
+    },
+    {
+      name: "worksheet-notes.read",
+      resource: "worksheet-notes",
+      action: "read",
+    },
+    {
+      name: "worksheet-notes.update",
+      resource: "worksheet-notes",
+      action: "update",
+    },
+    {
+      name: "worksheet-notes.delete",
+      resource: "worksheet-notes",
+      action: "delete",
+    },
+
+    // ==================== WORKSHEET ASSIGNMENTS ====================
+    {
+      name: "worksheet-assignments.view",
+      resource: "worksheet-assignments",
+      action: "view",
+    },
+    {
+      name: "worksheet-assignments.create",
+      resource: "worksheet-assignments",
+      action: "create",
+    },
+    {
+      name: "worksheet-assignments.read",
+      resource: "worksheet-assignments",
+      action: "read",
+    },
+    {
+      name: "worksheet-assignments.update",
+      resource: "worksheet-assignments",
+      action: "update",
+    },
+    {
+      name: "worksheet-assignments.delete",
+      resource: "worksheet-assignments",
       action: "delete",
     },
   ] as const;

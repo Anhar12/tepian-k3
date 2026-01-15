@@ -17,7 +17,6 @@ export type UsersWithoutFoto = InferQueryModel<
   "users",
   {
     columns: {
-      profilePictureFileName: false;
       profilePictureUrl: false;
       password: false;
     };

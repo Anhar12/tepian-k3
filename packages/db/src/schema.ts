@@ -1037,9 +1037,6 @@ export const worksheets = createTable(
     testingId: uuid("testing_id")
       .notNull()
       .references(() => testing.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
     status: worksheetStatusEnum("status").notNull().default("in_progress"),
     startDate: timestamp("start_date", {
       withTimezone: true,
@@ -1060,12 +1057,14 @@ export const worksheets = createTable(
       { onDelete: "set null" }
     ),
     result: text("result"),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
     ...timestamps,
   },
   (table) => [
     index("worksheet_id_idx").using("btree", table.id),
     index("worksheet_testing_id_idx").using("btree", table.testingId),
-    index("worksheet_user_id_idx").using("btree", table.userId),
     index("worksheet_status_idx").using("btree", table.status),
     index("worksheet_main_supervisor_id_idx").using(
       "btree",
@@ -1075,6 +1074,7 @@ export const worksheets = createTable(
       "btree",
       table.accompanyingSupervisorId
     ),
+    index("worksheet_created_by_idx").using("btree", table.createdBy),
   ]
 );
 
