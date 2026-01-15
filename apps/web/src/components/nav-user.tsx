@@ -4,6 +4,7 @@ import {
   IconHome,
   IconLogout,
   IconNotification,
+  IconSettings,
   IconUserCircle,
 } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -114,6 +115,10 @@ export function NavUser() {
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <ModeToggle />
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}>
+                <IconSettings />
+                Pengaturan
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

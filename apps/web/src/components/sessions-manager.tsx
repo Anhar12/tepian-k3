@@ -1,7 +1,20 @@
 import { trpc } from "@/utils/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
-import { Monitor, Smartphone, Tablet, Trash2, LoaderCircle, AlertCircle } from "lucide-react";
+import {
+  Monitor,
+  Smartphone,
+  Tablet,
+  Trash2,
+  LoaderCircle,
+  AlertCircle,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -17,12 +30,17 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 function getDeviceIcon(userAgent: string | null) {
   if (!userAgent) return <Monitor className="h-5 w-5" />;
 
   const ua = userAgent.toLowerCase();
-  if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
+  if (
+    ua.includes("mobile") ||
+    ua.includes("android") ||
+    ua.includes("iphone")
+  ) {
     return <Smartphone className="h-5 w-5" />;
   }
   if (ua.includes("tablet") || ua.includes("ipad")) {
@@ -50,7 +68,8 @@ function getDeviceName(userAgent: string | null): string {
   else if (ua.includes("mac")) os = "macOS";
   else if (ua.includes("linux")) os = "Linux";
   else if (ua.includes("android")) os = "Android";
-  else if (ua.includes("ios") || ua.includes("iphone") || ua.includes("ipad")) os = "iOS";
+  else if (ua.includes("ios") || ua.includes("iphone") || ua.includes("ipad"))
+    os = "iOS";
 
   return `${browser}${os ? ` di ${os}` : ""}`;
 }
@@ -59,31 +78,39 @@ export function SessionsManager() {
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const [revokeAllDialogOpen, setRevokeAllDialogOpen] = useState(false);
 
-  const { data: sessions, isLoading, refetch } = trpc.auth.getSessions.useQuery();
+  const {
+    data: sessions,
+    isLoading,
+    refetch,
+  } = useQuery(trpc.auth.getSessions.queryOptions());
 
-  const revokeMutation = trpc.auth.revokeSession.useMutation({
-    onSuccess: () => {
-      globalSuccessToast("Sesi berhasil dicabut");
-      refetch();
-      setRevokeDialogOpen(false);
-    },
-    onError: (error) => {
-      globalErrorToast(error.message);
-    },
-  });
+  const revokeMutation = useMutation(
+    trpc.auth.revokeSession.mutationOptions({
+      onSuccess: () => {
+        globalSuccessToast("Sesi berhasil dicabut");
+        refetch();
+        setRevokeDialogOpen(false);
+      },
+      onError: (error) => {
+        globalErrorToast(error.message);
+      },
+    }),
+  );
 
-  const revokeAllMutation = trpc.auth.revokeAllSessions.useMutation({
-    onSuccess: () => {
-      globalSuccessToast("Semua sesi berhasil dicabut. Anda akan logout.");
-      // Clear tokens and redirect to login
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      window.location.href = "/login";
-    },
-    onError: (error) => {
-      globalErrorToast(error.message);
-    },
-  });
+  const revokeAllMutation = useMutation(
+    trpc.auth.revokeAllSessions.mutationOptions({
+      onSuccess: () => {
+        globalSuccessToast("Semua sesi berhasil dicabut. Anda akan logout.");
+        // Clear tokens and redirect to login
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
+      },
+      onError: (error) => {
+        globalErrorToast(error.message);
+      },
+    }),
+  );
 
   if (isLoading) {
     return (
@@ -152,17 +179,23 @@ export function SessionsManager() {
 
                         <div className="font-['Poppins'] text-[12px] text-slate-400">
                           Kadaluarsa:{" "}
-                          {new Date(session.expiresAt).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
+                          {new Date(session.expiresAt).toLocaleDateString(
+                            "id-ID",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            },
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <AlertDialog open={revokeDialogOpen} onOpenChange={setRevokeDialogOpen}>
+                  <AlertDialog
+                    open={revokeDialogOpen}
+                    onOpenChange={setRevokeDialogOpen}
+                  >
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="ghost"
@@ -176,14 +209,17 @@ export function SessionsManager() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Cabut Sesi?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Tindakan ini akan mengeluarkan perangkat ini dari akun Anda.
-                          Perangkat perlu login ulang untuk mengakses akun.
+                          Tindakan ini akan mengeluarkan perangkat ini dari akun
+                          Anda. Perangkat perlu login ulang untuk mengakses
+                          akun.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Batal</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => revokeMutation.mutate({ sessionId: session.id })}
+                          onClick={() =>
+                            revokeMutation.mutate({ sessionId: session.id })
+                          }
                           disabled={revokeMutation.isPending}
                           className="bg-red-600 hover:bg-red-700"
                         >
@@ -207,12 +243,16 @@ export function SessionsManager() {
                         Logout dari Semua Perangkat
                       </div>
                       <div className="font-['Poppins'] text-[12px] text-red-700">
-                        Ini akan mengeluarkan Anda dari semua perangkat termasuk yang sedang Anda gunakan
+                        Ini akan mengeluarkan Anda dari semua perangkat termasuk
+                        yang sedang Anda gunakan
                       </div>
                     </div>
                   </div>
 
-                  <AlertDialog open={revokeAllDialogOpen} onOpenChange={setRevokeAllDialogOpen}>
+                  <AlertDialog
+                    open={revokeAllDialogOpen}
+                    onOpenChange={setRevokeAllDialogOpen}
+                  >
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="destructive"
@@ -224,10 +264,13 @@ export function SessionsManager() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Logout dari Semua Perangkat?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          Logout dari Semua Perangkat?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          Tindakan ini akan mengeluarkan Anda dari SEMUA perangkat yang sedang login,
-                          termasuk perangkat yang sedang Anda gunakan saat ini. Anda perlu login ulang
+                          Tindakan ini akan mengeluarkan Anda dari SEMUA
+                          perangkat yang sedang login, termasuk perangkat yang
+                          sedang Anda gunakan saat ini. Anda perlu login ulang
                           untuk mengakses akun.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
@@ -250,7 +293,7 @@ export function SessionsManager() {
               )}
             </>
           ) : (
-            <div className="text-center py-8 text-slate-500">
+            <div className="py-8 text-center text-slate-500">
               Tidak ada sesi aktif ditemukan
             </div>
           )}
@@ -260,13 +303,15 @@ export function SessionsManager() {
       <Card className="border-blue-200 bg-blue-50">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
+            <AlertCircle className="h-5 w-5 shrink-0 text-blue-600" />
             <div className="space-y-2 font-['Poppins'] text-[14px] text-blue-900">
               <p className="font-medium">Tentang Keamanan Sesi</p>
-              <ul className="list-disc list-inside space-y-1 text-[13px]">
+              <ul className="list-inside list-disc space-y-1 text-[13px]">
                 <li>Sesi otomatis kadaluarsa setelah 30 hari tidak aktif</li>
                 <li>Token akses diperbarui setiap 15 menit untuk keamanan</li>
-                <li>Cabut sesi jika Anda melihat aktivitas yang mencurigakan</li>
+                <li>
+                  Cabut sesi jika Anda melihat aktivitas yang mencurigakan
+                </li>
                 <li>Selalu logout dari perangkat bersama atau publik</li>
               </ul>
             </div>
