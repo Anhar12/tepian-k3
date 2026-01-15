@@ -23,7 +23,7 @@ export const regencyRouter = createTRPCRouter({
         )
     ),
 
-  getPaginatedRegencies: withPermission("regency.read")
+  getPaginatedRegencies: withPermission("regency.view")
     .input(regencySchema.getAllRegenciesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(

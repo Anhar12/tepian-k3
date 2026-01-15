@@ -10,7 +10,7 @@ export const clusterRouter = createTRPCRouter({
     async () => await runEffect(clustersQueries.getAllClusters())
   ),
 
-  getPaginatedClusters: withPermission("clusters.read")
+  getPaginatedClusters: withPermission("clusters.view")
     .input(clusterSchema.getAllClustersSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(

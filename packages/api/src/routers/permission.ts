@@ -4,9 +4,9 @@ import z from "zod";
 import { runEffect } from "../utils/run-effect";
 
 export const permissionRouters = createTRPCRouter({
-  getAllPermissions: withPermission("permissions.read").query(async () => {
-    return await runEffect(permissionsQueries.getAllPermissions());
-  }),
+  getAllPermissions: withPermission("permissions.view").query(
+    async () => await runEffect(permissionsQueries.getAllPermissions())
+  ),
 
   updateRolePermissions: withPermission("roles.update")
     .input(

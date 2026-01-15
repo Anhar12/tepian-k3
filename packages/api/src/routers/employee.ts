@@ -7,7 +7,7 @@ import { runEffect } from "../utils/run-effect";
 import { EMPLOYEE_STATUS } from "@tepian-k3/constants";
 
 export const employeeRouter = createTRPCRouter({
-  getEmployeePaginated: withPermission("employees.read")
+  getEmployeePaginated: withPermission("employees.view")
     .input(employeeSchema.getAllEmployeesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(

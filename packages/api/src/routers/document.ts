@@ -1,7 +1,6 @@
 import { Effect } from "effect";
 import {
   createTRPCRouter,
-  protectedProcedure,
   publicProcedure,
   formDataProcedure,
   withPermission,
@@ -22,7 +21,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Upload and create a document
    */
-  uploadDocument: protectedProcedure
+  uploadDocument: withPermission("documents.create")
     .input(
       z.object({
         entityType: documentSchema.documentEntityTypeSchema,
@@ -77,7 +76,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Get documents for an entity
    */
-  getDocumentsByEntity: protectedProcedure
+  getDocumentsByEntity: withPermission("documents.view")
     .input(documentSchema.getDocumentsByEntitySchema)
     .query(
       async ({ input }) =>
@@ -89,7 +88,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Get document by ID
    */
-  getDocumentById: protectedProcedure
+  getDocumentById: withPermission("documents.read")
     .input(
       z.object({
         documentId: z.uuidv7(),
@@ -132,7 +131,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Get verification history for a document
    */
-  getVerificationHistory: protectedProcedure
+  getVerificationHistory: withPermission("documents.view")
     .input(documentSchema.getVerificationHistorySchema)
     .query(
       async ({ input }) =>
@@ -144,7 +143,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Get all order documents
    */
-  getOrderDocuments: protectedProcedure
+  getOrderDocuments: withPermission("documents.view")
     .input(
       z.object({
         orderId: z.uuidv7(),
@@ -158,7 +157,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Get all testing documents
    */
-  getTestingDocuments: protectedProcedure
+  getTestingDocuments: withPermission("documents.view")
     .input(
       z.object({
         testingId: z.uuidv7(),
@@ -172,7 +171,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Upload and sign order invoice (combined operation)
    */
-  uploadAndSignOrderInvoice: protectedProcedure
+  uploadAndSignOrderInvoice: withPermission("documents.create")
     .input(
       z.object({
         orderId: z.uuidv7(),
@@ -236,7 +235,7 @@ export const documentRouter = createTRPCRouter({
   /**
    * Upload and sign testing report (combined operation)
    */
-  uploadAndSignTestingReport: protectedProcedure
+  uploadAndSignTestingReport: withPermission("documents.create")
     .input(
       z.object({
         testingId: z.uuidv7(),

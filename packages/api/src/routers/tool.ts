@@ -5,11 +5,11 @@ import z from "zod";
 import { runEffect } from "../utils/run-effect";
 
 export const toolRouter = createTRPCRouter({
-  getAllUnassignedTools: withPermission("tools.read").query(
+  getAllUnassignedTools: withPermission("tools.view").query(
     async () => await runEffect(toolsQureies.getAllUnassignedTools())
   ),
 
-  getToolPaginated: withPermission("tools.read")
+  getToolPaginated: withPermission("tools.view")
     .input(toolsSchema.getAllToolsSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(

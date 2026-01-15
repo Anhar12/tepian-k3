@@ -10,7 +10,7 @@ export const kbliRouter = createTRPCRouter({
     async () => await runEffect(kbliQueries.getAllKblis())
   ),
 
-  getPaginatedKblis: withPermission("kbli.read")
+  getPaginatedKblis: withPermission("kbli.view")
     .input(kbliSchema.getAllKBLISchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(

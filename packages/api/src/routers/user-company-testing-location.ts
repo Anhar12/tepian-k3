@@ -14,7 +14,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
   ),
 
   getAllUserCompanyTestingLocationsByCompanyIdAndUserId: withPermission(
-    "user-company-testing-location.read"
+    "user-company-testing-location.view"
   )
     .input(
       z.object({
@@ -22,18 +22,19 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         showDeleted: z.boolean().optional(),
       })
     )
-    .query(async ({ input, ctx: { user } }) => {
-      return await runEffect(
-        userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
-          input.companyId,
-          user.id,
-          input.showDeleted ?? false
+    .query(
+      async ({ input, ctx: { user } }) =>
+        await runEffect(
+          userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
+            input.companyId,
+            user.id,
+            input.showDeleted ?? false
+          )
         )
-      );
-    }),
+    ),
 
   getPaginatedUserCompanyTestingLocations: withPermission(
-    "user-company-testing-location.read"
+    "user-company-testing-location.view"
   )
     .input(
       userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema
@@ -49,7 +50,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     }),
 
   getUserCompanyTestingLocationByUserIdAndCompanyId: withPermission(
-    "user-company-testing-location.read"
+    "user-company-testing-location.view"
   )
     .input(
       z.object({
@@ -68,7 +69,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     }),
 
   getUserCompanyTestingLocationById: withPermission(
-    "user-company-testing-location.read"
+    "user-company-testing-location.view"
   )
     .input(
       z.object({

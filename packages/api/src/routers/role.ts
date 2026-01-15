@@ -5,9 +5,9 @@ import rolesSchema from "@tepian-k3/schema/role.schema";
 import { runEffect } from "../utils/run-effect";
 
 export const roleRouters = createTRPCRouter({
-  getAllRoles: withPermission("roles.read").query(async () => {
-    return await runEffect(rolesQueries.getAllRoles());
-  }),
+  getAllRoles: withPermission("roles.view").query(
+    async () => await runEffect(rolesQueries.getAllRoles())
+  ),
 
   getRoleById: withPermission("roles.read")
     .input(
@@ -30,7 +30,7 @@ export const roleRouters = createTRPCRouter({
         await runEffect(rolesQueries.getRoleWithPermissionsById(input.id))
     ),
 
-  getPaginatedRoles: withPermission("roles.read")
+  getPaginatedRoles: withPermission("roles.view")
     .input(rolesSchema.getAllRolesSchema)
     .query(
       async ({ input }) =>

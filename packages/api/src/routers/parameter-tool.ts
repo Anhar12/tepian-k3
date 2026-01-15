@@ -5,7 +5,7 @@ import z from "zod";
 import { runEffect } from "../utils/run-effect";
 
 export const parameterToolRouter = createTRPCRouter({
-  getAllParameterToolsByParameterId: withPermission("parameter-tool.read")
+  getAllParameterToolsByParameterId: withPermission("parameter-tool.view")
     .input(
       z.object({
         parameterId: z.uuidv7(),

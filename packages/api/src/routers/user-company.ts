@@ -33,7 +33,7 @@ export const userCompanyRouter = createTRPCRouter({
       return { data, pageCount };
     }),
 
-  getPaginatedUserCompanies: withPermission("user-company.read")
+  getPaginatedUserCompanies: withPermission("user-company.view")
     .input(userCompanySchema.getAllUserCompaniesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
@@ -150,13 +150,10 @@ export const userCompanyRouter = createTRPCRouter({
               filename: input.data.picture.name,
             });
 
-            uploadedFile = yield* storageService.upload(
-              convertedImage.buffer,
-              {
-                filename: convertedImage.filename!,
-                folder: "company-pictures",
-              }
-            );
+            uploadedFile = yield* storageService.upload(convertedImage.buffer, {
+              filename: convertedImage.filename!,
+              folder: "company-pictures",
+            });
           }
 
           const result = yield* userCompanyQueries.userUpdateUserCompany(

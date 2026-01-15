@@ -23,7 +23,7 @@ export const districtRouter = createTRPCRouter({
         )
     ),
 
-  getPaginatedDistricts: withPermission("district.read")
+  getPaginatedDistricts: withPermission("district.view")
     .input(districtSchema.getAllDistrictsSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(

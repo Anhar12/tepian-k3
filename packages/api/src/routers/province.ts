@@ -10,7 +10,7 @@ export const provinceRouter = createTRPCRouter({
     async () => await runEffect(provinceQueries.getAllProvinces())
   ),
 
-  getPaginatedProvinces: withPermission("provinces.read")
+  getPaginatedProvinces: withPermission("provinces.view")
     .input(provinceSchema.getAllProvincesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(

@@ -11,7 +11,7 @@ export const parameterCategoriesRouter = createTRPCRouter({
       await runEffect(parameterCategoriesQueries.getAllParameterCategories())
   ),
 
-  getPaginatedParameterCategories: withPermission("parameter-categories.read")
+  getPaginatedParameterCategories: withPermission("parameter-categories.view")
     .input(parameterCategoriesSchema.getAllParameterCategoriesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
