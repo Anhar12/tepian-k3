@@ -16,6 +16,21 @@ export interface JWTPayload extends JoseJWTPayload {
   updatedAt: string | null;
 }
 
+export interface AccessTokenPayload extends JoseJWTPayload {
+  id: string;
+  email: string;
+  roles: string[];
+  permissions: string[];
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface RefreshTokenPayload extends JoseJWTPayload {
+  id: string;
+  sessionId: string;
+  type: "refresh";
+}
+
 export interface ResetTokenPayload {
   userId: string;
   email: string;

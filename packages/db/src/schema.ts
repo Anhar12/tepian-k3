@@ -171,6 +171,47 @@ export const passwordResets = createTable("password_resets", {
     .notNull(),
 });
 
+export const refreshTokens = createTable(
+  "refresh_tokens",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    deviceInfo: text("device_info"),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: text("user_agent"),
+    lastUsedAt: timestamp("last_used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    revoked: boolean("revoked").notNull().default(false),
+    revokedAt: timestamp("revoked_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .$default(() => sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    index("refresh_token_user_id_idx").using("btree", table.userId),
+    index("refresh_token_token_idx").using("btree", table.token),
+    index("refresh_token_expires_at_idx").using("btree", table.expiresAt),
+  ]
+);
+
 export const kblis = createTable(
   "kblis",
   {

@@ -68,7 +68,10 @@ export const createTRPCContext = async (context: HonoContext) => {
 
   const eventBus = getEventBus();
 
-  const ip = context.req.header("x-forwarded-for") || "";
+  const ip =
+    context.req.header("x-forwarded-for") ||
+    context.req.header("x-real-ip") ||
+    "";
   const userAgent = context.req.header("user-agent") || "";
 
   return {
