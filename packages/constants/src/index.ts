@@ -246,3 +246,58 @@ export const EMPLOYEE_STATUS_LABELS: Record<EmployeeStatus, string> = {
   standby: "Standby",
   cuti: "Cuti",
 };
+
+export const WORKSHEET_STATUS = [
+  "draft",
+  "in_progress",
+  "completed",
+  "approved",
+  "rejected",
+] as const;
+
+export type WorksheetStatus = (typeof WORKSHEET_STATUS)[number];
+
+export const WORKSHEET_STATUS_LABELS: Record<WorksheetStatus, string> = {
+  draft: "Draft",
+  in_progress: "In Progress",
+  completed: "Completed",
+  approved: "Approved",
+  rejected: "Rejected",
+};
+
+export const WORKSHEET_NOTE_STATUS = [
+  "info",
+  "warning",
+  "danger",
+  "success",
+  "important",
+  "question",
+  "urgent",
+  "unknown",
+] as const;
+
+export type WorksheetNoteStatus = (typeof WORKSHEET_NOTE_STATUS)[number];
+
+export const WORKSHEET_NOTE_STATUS_LABELS: Record<WorksheetNoteStatus, string> =
+  {
+    info: "Info",
+    warning: "Warning",
+    danger: "Danger",
+    success: "Success",
+    important: "Important",
+    question: "Question",
+    urgent: "Urgent",
+    unknown: "Unknown",
+  };
+
+export const WORKSHEET_NOTE_STATUS_COLORS: Record<WorksheetNoteStatus, string> =
+  {
+    info: "bg-blue-100 text-blue-700",
+    warning: "bg-yellow-100 text-yellow-700",
+    danger: "bg-red-100 text-red-700",
+    success: "bg-green-100 text-green-700",
+    important: "bg-purple-100 text-purple-700",
+    question: "bg-indigo-100 text-indigo-700",
+    urgent: "bg-pink-100 text-pink-700",
+    unknown: "bg-gray-100 text-gray-700",
+  };

@@ -9,6 +9,7 @@ import {
   pgSequence,
   pgTableCreator,
   primaryKey,
+  real,
   text,
   timestamp,
   unique,
@@ -37,6 +38,8 @@ import {
   TESTING_STATUSES,
   TOOLS_AVAILABILITY,
   TOOLS_CONDITIONS,
+  WORKSHEET_NOTE_STATUS,
+  WORKSHEET_STATUS,
 } from "@tepian-k3/constants";
 
 export const createTable = pgTableCreator((name) => `${name}`);
@@ -67,6 +70,13 @@ export const ToolsAvailabilityEnum = pgEnum(
 export const auditActionEnum = pgEnum("audit_action", AUDIT_ACTIONS);
 
 export const employeeStatusEnum = pgEnum("employee_status", EMPLOYEE_STATUS);
+
+export const worksheetStatusEnum = pgEnum("worksheet_status", WORKSHEET_STATUS);
+
+export const worksheetNoteStatusEnum = pgEnum(
+  "worksheet_note_status",
+  WORKSHEET_NOTE_STATUS
+);
 
 export const users = createTable(
   "users",
@@ -1014,5 +1024,162 @@ export const employees = createTable(
     index("employee_id_idx").using("btree", table.id),
     index("employee_user_id_idx").using("btree", table.userId),
     index("employee_email_idx").using("btree", table.email),
+  ]
+);
+
+export const worksheets = createTable(
+  "worksheets",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    testingId: uuid("testing_id")
+      .notNull()
+      .references(() => testing.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: worksheetStatusEnum("status").notNull().default("in_progress"),
+    startDate: timestamp("start_date", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    endDate: timestamp("end_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    mainSupervisorId: uuid("main_supervisor_id").references(
+      () => employees.id,
+      {
+        onDelete: "set null",
+      }
+    ),
+    accompanyingSupervisorId: uuid("accompanying_supervisor_id").references(
+      () => employees.id,
+      { onDelete: "set null" }
+    ),
+    result: text("result"),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_id_idx").using("btree", table.id),
+    index("worksheet_testing_id_idx").using("btree", table.testingId),
+    index("worksheet_user_id_idx").using("btree", table.userId),
+    index("worksheet_status_idx").using("btree", table.status),
+    index("worksheet_main_supervisor_id_idx").using(
+      "btree",
+      table.mainSupervisorId
+    ),
+    index("worksheet_accompanying_supervisor_id_idx").using(
+      "btree",
+      table.accompanyingSupervisorId
+    ),
+  ]
+);
+
+export const worksheetItems = createTable(
+  "worksheet_items",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    locationId: uuid("location_id")
+      .notNull()
+      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    value: real("value"),
+    note: text("note"),
+    isReady: boolean("is_ready").notNull().default(false),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_item_id_idx").using("btree", table.id),
+    index("worksheet_item_worksheet_id_idx").using("btree", table.worksheetId),
+    index("worksheet_item_parameter_id_idx").using("btree", table.parameterId),
+    index("worksheet_item_location_id_idx").using("btree", table.locationId),
+  ]
+);
+
+export const worksheetTools = createTable(
+  "worksheet_tools",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    toolId: uuid("tool_id")
+      .notNull()
+      .references(() => tools.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_tool_id_idx").using("btree", table.id),
+    index("worksheet_tool_worksheet_id_idx").using("btree", table.worksheetId),
+    index("worksheet_tool_tool_id_idx").using("btree", table.toolId),
+  ]
+);
+
+export const worksheetNotes = createTable(
+  "worksheet_notes",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    note: text("note").notNull(),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    severity: worksheetNoteStatusEnum("severity").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_note_id_idx").using("btree", table.id),
+    index("worksheet_note_worksheet_id_idx").using("btree", table.worksheetId),
+  ]
+);
+
+export const worksheetAssignments = createTable(
+  "worksheet_assignments",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    employeeId: uuid("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    assignedBy: uuid("assigned_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_assignment_id_idx").using("btree", table.id),
+    index("worksheet_assignment_worksheet_id_idx").using(
+      "btree",
+      table.worksheetId
+    ),
+    index("worksheet_assignment_employee_id_idx").using(
+      "btree",
+      table.employeeId
+    ),
   ]
 );
