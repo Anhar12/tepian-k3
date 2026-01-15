@@ -410,7 +410,7 @@ const usersQueries = {
 
             // Assign default role to user
             await Effect.runPromise(
-              userRolesQueries.assingDefaultRoleToUser(user.id)
+              userRolesQueries.assignDefaultRoleToUser(newUser.id, tx)
             );
 
             return newUser;
@@ -418,7 +418,7 @@ const usersQueries = {
         catch: (error) => {
           logError("usersQueries.createUser", "Failed to create user", {
             data,
-            error,
+            error: error,
           });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
