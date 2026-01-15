@@ -64,7 +64,7 @@ function LoaderComponent() {
 
             <Skeleton className="h-48 w-full" />
 
-            <SkeletonButton />
+            <SkeletonButton className="w-full" />
           </div>
         </CardContent>
       </Card>
