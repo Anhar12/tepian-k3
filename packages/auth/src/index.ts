@@ -38,7 +38,6 @@ export async function createAccessToken(
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(env.JWT_ACCESS_TOKEN_EXPIRY)
-    .setJtiGenerationFunction(() => crypto.randomUUID())
     .sign(key);
 }
 

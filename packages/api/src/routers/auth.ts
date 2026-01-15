@@ -19,6 +19,7 @@ import { PasswordResetService } from "@tepian-k3/auth/services/password-reset";
 import { runEffect } from "../utils/run-effect";
 import refreshTokensQueries from "@tepian-k3/queries/refresh-tokens.queries";
 import { v7 as uuidv7 } from "uuid";
+import { logError } from "@tepian-k3/services/logger";
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure.input(authSchema.loginSchema).mutation(
@@ -29,12 +30,17 @@ export const authRouter = createTRPCRouter({
 
           const verifyPasswordResult = yield* Effect.tryPromise({
             try: () => verify(user.password, input.password),
-            catch: (error) =>
-              new TRPCError({
+            catch: (error) => {
+              logError("authRouter.login", "Password verification failed", {
+                email: input.email,
+                error: error instanceof Error ? error.message : String(error),
+              });
+              throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal memverifikasi password.",
                 cause: error,
-              }),
+              });
+            },
           });
 
           if (!verifyPasswordResult) {
@@ -70,12 +76,17 @@ export const authRouter = createTRPCRouter({
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
               }),
-            catch: (error) =>
-              new TRPCError({
+            catch: (error) => {
+              logError("authRouter.login", "Failed to create access token", {
+                userId: user.id,
+                error: error instanceof Error ? error.message : String(error),
+              });
+              throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal membuat access token.",
                 cause: error,
-              }),
+              });
+            },
           });
 
           // Create refresh token with long expiry
@@ -87,12 +98,17 @@ export const authRouter = createTRPCRouter({
                 sessionId,
                 type: "refresh",
               }),
-            catch: (error) =>
-              new TRPCError({
+            catch: (error) => {
+              logError("authRouter.login", "Failed to create refresh token", {
+                userId: user.id,
+                error: error instanceof Error ? error.message : String(error),
+              });
+              throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal membuat refresh token.",
                 cause: error,
-              }),
+              });
+            },
           });
 
           // Store refresh token in database
