@@ -1,8 +1,8 @@
 import { queryClient, trpc } from "@/utils/trpc";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useNavigate, type LinkProps } from "@tanstack/react-router";
 import { Button } from "./ui/button";
-import { Bell, ShoppingCart } from "lucide-react";
+import { Bell } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { IconHome, IconLogout, IconUserCircle } from "@tabler/icons-react";
+import {
+  IconHome,
+  IconLogout,
+  IconSettings,
+  IconUserCircle,
+} from "@tabler/icons-react";
 import { ModeToggle } from "./mode-toggle";
 
 const navItems: {
@@ -30,13 +35,6 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
-
-  const { data: cartCount } = useQuery({
-    ...trpc.cart.getCartItemCount.queryOptions(),
-    enabled: !!user,
-  });
-
-  const isCartMoreThan99 = cartCount !== undefined && cartCount > 99;
 
   function onLogout() {
     localStorage.removeItem("token");
@@ -69,14 +67,6 @@ export default function Navbar() {
       {user ? (
         <div className="flex flex-row gap-10">
           <div className="flex flex-row gap-4">
-            <Button className="relative flex size-9 items-center justify-center rounded-full">
-              {cartCount !== undefined && cartCount > 0 && (
-                <div className="absolute -top-1 -right-2 flex size-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-semibold text-white">
-                  {isCartMoreThan99 ? "99+" : cartCount}
-                </div>
-              )}
-              <ShoppingCart className="size-5" />
-            </Button>
             <Button className="relative flex size-9 items-center justify-center rounded-full">
               <div className="absolute top-0 -right-0.5 flex size-3 items-center justify-center rounded-full bg-orange-500 text-xs" />
               <Bell className="size-5" />
@@ -142,6 +132,12 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <ModeToggle />
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => navigate({ to: "/settings" })}
+                >
+                  <IconSettings />
+                  Pengaturan
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
