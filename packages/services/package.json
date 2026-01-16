@@ -16,9 +16,6 @@
     "./storage": {
       "default": "./src/storage/index.ts"
     },
-    "./storage/client": {
-      "default": "./src/storage/client.ts"
-    },
     "./notifications": {
       "default": "./src/notifications/index.ts"
     },
