@@ -19,6 +19,13 @@ export const TOOLS_CONDITIONS_LABELS: Record<ToolsCondition, string> = {
   tidak_menyala: "Tidak Menyala",
 };
 
+export const TOOLS_CONDITIONS_COLORS: Record<ToolsCondition, string> = {
+  baik: "bg-green-100 text-green-700",
+  rusak: "bg-red-100 text-red-700",
+  diperingatkan: "bg-yellow-100 text-yellow-700",
+  tidak_menyala: "bg-gray-100 text-gray-700",
+};
+
 export const TOOLS_AVAILABILITY = [
   "ready",
   "kalibrasi",
@@ -35,6 +42,14 @@ export const TOOLS_AVAILABILITY_LABELS: Record<ToolsAvailability, string> = {
   not_ready: "Not Ready",
   maintenance: "Maintenance",
   dipinjam: "Dipinjam",
+};
+
+export const TOOLS_AVAILABILITY_COLORS: Record<ToolsAvailability, string> = {
+  ready: "bg-green-100 text-green-700",
+  kalibrasi: "bg-yellow-100 text-yellow-700",
+  not_ready: "bg-red-100 text-red-700",
+  maintenance: "bg-orange-100 text-orange-700",
+  dipinjam: "bg-blue-100 text-blue-700",
 };
 
 export const ORDER_STATUS = [
