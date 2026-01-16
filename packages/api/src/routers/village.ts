@@ -1,16 +1,17 @@
 import villageSchema from "@tepian-k3/schema/village.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import villageQueries from "@tepian-k3/queries/village.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const villageRouter = createTRPCRouter({
-  getAllVillages: publicProcedure.query(
+  getAllVillages: withRateLimit(rateLimiters.moderate()).query(
     async () => await runEffect(villageQueries.getAllVillages())
   ),
 
-  getAllVillagesByDistrictId: publicProcedure
+  getAllVillagesByDistrictId: withRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         districtId: z.uuidv7(),

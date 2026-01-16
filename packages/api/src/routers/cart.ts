@@ -1,27 +1,28 @@
 import cartQueries from "@tepian-k3/queries/cart.queries";
-import { createTRPCRouter, protectedProcedure } from "..";
+import { createTRPCRouter, withProtectedRateLimit } from "..";
 import z from "zod";
 import cartSchema from "@tepian-k3/schema/cart.schema";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const cartRouter = createTRPCRouter({
-  getAllCartItems: protectedProcedure.query(
+  getAllCartItems: withProtectedRateLimit(rateLimiters.moderate()).query(
     async ({ ctx }) => await runEffect(cartQueries.getUserCartList(ctx.user.id))
   ),
 
-  getCartItemCount: protectedProcedure.query(
+  getCartItemCount: withProtectedRateLimit(rateLimiters.moderate()).query(
     async ({ ctx }) =>
       await runEffect(cartQueries.getUserCartCount(ctx.user.id))
   ),
 
-  insertCartItem: protectedProcedure
+  insertCartItem: withProtectedRateLimit(rateLimiters.moderate())
     .input(cartSchema.createCartSchema)
     .mutation(
       async ({ input, ctx }) =>
         await runEffect(cartQueries.insertCartItem(ctx.user.id, input))
     ),
 
-  incrementCartItemQuantity: protectedProcedure
+  incrementCartItemQuantity: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         cartItemId: z.string(),
@@ -32,7 +33,7 @@ export const cartRouter = createTRPCRouter({
         await runEffect(cartQueries.incrementCartItemQuantity(input.cartItemId))
     ),
 
-  decrementCartItemQuantity: protectedProcedure
+  decrementCartItemQuantity: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         cartItemId: z.string(),
@@ -43,7 +44,7 @@ export const cartRouter = createTRPCRouter({
         await runEffect(cartQueries.decrementCartItemQuantity(input.cartItemId))
     ),
 
-  updateCartItemQuantity: protectedProcedure
+  updateCartItemQuantity: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         cartItemId: z.string(),
@@ -56,7 +57,7 @@ export const cartRouter = createTRPCRouter({
       );
     }),
 
-  deleteCartItem: protectedProcedure
+  deleteCartItem: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         cartItemId: z.string(),

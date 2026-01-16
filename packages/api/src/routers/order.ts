@@ -1,5 +1,9 @@
 import orderQueries from "@tepian-k3/queries/order.queries";
-import { createTRPCRouter, protectedProcedure } from "..";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  withProtectedRateLimit,
+} from "..";
 import z from "zod";
 import orderSchema from "@tepian-k3/schema/order.schema";
 import { runEffect } from "../utils/run-effect";
@@ -18,9 +22,10 @@ import {
   createDocumentSignature,
   documentSigningService,
 } from "@tepian-k3/services/document-signing";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const orderRouter = createTRPCRouter({
-  getAllOrders: protectedProcedure
+  getAllOrders: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         status: z.enum(["all", ...ORDER_STATUS]).optional(),
@@ -33,7 +38,7 @@ export const orderRouter = createTRPCRouter({
         )
     ),
 
-  getOrderById: protectedProcedure
+  getOrderById: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         orderId: z.string(),
@@ -285,7 +290,7 @@ export const orderRouter = createTRPCRouter({
         )
     ),
 
-  createOrder: protectedProcedure
+  createOrder: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.array(
         z.object({

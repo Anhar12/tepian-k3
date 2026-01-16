@@ -1,12 +1,13 @@
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import parameterCategoriesQueries from "@tepian-k3/queries/parameter-categories.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const parameterCategoriesRouter = createTRPCRouter({
-  getAllParameterCategories: publicProcedure.query(
+  getAllParameterCategories: withRateLimit(rateLimiters.moderate()).query(
     async () =>
       await runEffect(parameterCategoriesQueries.getAllParameterCategories())
   ),

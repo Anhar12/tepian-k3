@@ -1,12 +1,13 @@
 import kbliSchema from "@tepian-k3/schema/kbli.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import kbliQueries from "@tepian-k3/queries/kbli.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const kbliRouter = createTRPCRouter({
-  getAllKblis: publicProcedure.query(
+  getAllKblis: withRateLimit(rateLimiters.moderate()).query(
     async () => await runEffect(kbliQueries.getAllKblis())
   ),
 

@@ -1,24 +1,29 @@
 import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
 import {
   createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
+  withProtectedRateLimit,
   withPermission,
+  withRateLimit,
 } from "..";
 import userCompanyTestingLocationQueries from "@tepian-k3/queries/user-company-testing-location.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userCompanyTestingLocationRouter = createTRPCRouter({
-  getAllUserCompanyTestingLocations: publicProcedure.query(
+  getAllUserCompanyTestingLocations: withRateLimit(
+    rateLimiters.moderate()
+  ).query(
     async () =>
       await runEffect(
         userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations()
       )
   ),
 
-  getAllUserCompanyTestingLocationsByCompanyIdAndUserId: protectedProcedure
+  getAllUserCompanyTestingLocationsByCompanyIdAndUserId: withProtectedRateLimit(
+    rateLimiters.moderate()
+  )
     .input(
       z.object({
         companyId: z.uuidv7(),
@@ -96,8 +101,8 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       return userCompanyTestingLocation;
     }),
 
-  userCreateUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.create"
+  userCreateUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
@@ -112,8 +117,8 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  userUpdateUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.update"
+  userUpdateUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
@@ -128,8 +133,8 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  userDeleteUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.delete"
+  userDeleteUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       z.object({
@@ -146,8 +151,8 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  userRestoreUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.delete"
+  userRestoreUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       z.object({

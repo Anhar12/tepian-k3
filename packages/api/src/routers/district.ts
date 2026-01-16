@@ -1,16 +1,17 @@
 import districtSchema from "@tepian-k3/schema/district.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import districtQueries from "@tepian-k3/queries/district.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const districtRouter = createTRPCRouter({
-  getAllDistricts: publicProcedure.query(
+  getAllDistricts: withRateLimit(rateLimiters.moderate()).query(
     async () => await runEffect(districtQueries.getAllDistricts())
   ),
 
-  getAllDistrictsByRegencyId: publicProcedure
+  getAllDistrictsByRegencyId: withRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         regencyId: z.uuidv7(),

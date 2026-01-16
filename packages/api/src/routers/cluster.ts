@@ -1,12 +1,13 @@
 import clusterSchema from "@tepian-k3/schema/cluster.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import clustersQueries from "@tepian-k3/queries/clusters.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const clusterRouter = createTRPCRouter({
-  getAllClusters: publicProcedure.query(
+  getAllClusters: withRateLimit(rateLimiters.moderate()).query(
     async () => await runEffect(clustersQueries.getAllClusters())
   ),
 

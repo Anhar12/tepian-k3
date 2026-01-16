@@ -1,12 +1,13 @@
 import provinceSchema from "@tepian-k3/schema/province.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import provinceQueries from "@tepian-k3/queries/province.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const provinceRouter = createTRPCRouter({
-  getAllProvinces: publicProcedure.query(
+  getAllProvinces: withRateLimit(rateLimiters.moderate()).query(
     async () => await runEffect(provinceQueries.getAllProvinces())
   ),
 

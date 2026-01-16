@@ -1,5 +1,5 @@
 import userSchema from "@tepian-k3/schema/users.schema";
-import { createTRPCRouter, protectedProcedure, withPermission } from "..";
+import { createTRPCRouter, withPermission, withProtectedRateLimit } from "..";
 import { storageService } from "@tepian-k3/services/storage";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import z from "zod";
@@ -8,6 +8,7 @@ import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { Effect } from "effect";
 import { imageService } from "@tepian-k3/services/image";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userRouter = createTRPCRouter({
   getUserPaginated: withPermission("users.read")
@@ -79,13 +80,13 @@ export const userRouter = createTRPCRouter({
         await runEffect(usersQueries.updateUser(input, input.id))
     ),
 
-  updateProfile: protectedProcedure
+  updateProfile: withProtectedRateLimit(rateLimiters.moderate())
     .input(userSchema.updateUserSchema)
     .mutation(async ({ input, ctx: { user } }) =>
       runEffect(usersQueries.updateUserProfile(user.id, input))
     ),
 
-  updateAvatar: protectedProcedure
+  updateAvatar: withProtectedRateLimit(rateLimiters.moderate())
     .input(userSchema.updateUserProfileSchema)
     .mutation(async ({ input, ctx: { user } }) =>
       runEffect(
@@ -115,7 +116,7 @@ export const userRouter = createTRPCRouter({
       )
     ),
 
-  updatePassword: protectedProcedure
+  updatePassword: withProtectedRateLimit(rateLimiters.moderate())
     .input(userSchema.updateUserPasswordSchema)
     .mutation(async ({ input, ctx: { user } }) =>
       runEffect(
