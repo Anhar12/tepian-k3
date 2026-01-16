@@ -57,6 +57,9 @@ export const RESOURCES = [
   "worksheet-tools",
   "worksheet-notes",
   "worksheet-assignments",
+
+  // ==================== NOTIFICATIONS ====================
+  "notifications",
 ] as const;
 
 export type Resource = (typeof RESOURCES)[number];
