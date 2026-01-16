@@ -2,7 +2,6 @@ import { createTRPCRouter, protectedProcedure } from "..";
 import { notificationsQueries } from "@tepian-k3/queries/notifications.queries";
 import notificationSchema from "@tepian-k3/schema/notification.schema";
 import { runEffect } from "../utils/run-effect";
-import z from "zod";
 
 export const notificationsRouter = createTRPCRouter({
   /**
@@ -59,5 +58,7 @@ export const notificationsRouter = createTRPCRouter({
    */
   create: protectedProcedure
     .input(notificationSchema.createNotificationSchema)
-    .mutation(async ({ input }) => runEffect(notificationsQueries.create(input))),
+    .mutation(async ({ input }) =>
+      runEffect(notificationsQueries.create(input))
+    ),
 });
