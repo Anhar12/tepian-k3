@@ -15,7 +15,10 @@ import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { Effect } from "effect";
 import { parseAndValidateSafe } from "./utils/form-data-parser";
 import { getEventBus } from "@tepian-k3/services/notifications";
-import type { Permission } from "@tepian-k3/constants";
+import type { Permission, Role } from "@tepian-k3/constants";
+import { getRateLimitConfig } from "@tepian-k3/constants";
+import { createRateLimiter } from "@tepian-k3/services/rate-limiter";
+import type { RateLimiter } from "@tepian-k3/services/rate-limiter";
 
 /**
  * Isomorphic Session getter for API requests
@@ -335,5 +338,321 @@ export const withAllRoles = (roleNames: string[]) =>
 
     return next({
       ctx,
+    });
+  });
+
+/**
+ * Rate limiting middleware for public procedures
+ *
+ * @param limiter - The rate limiter instance to use (from rateLimiters presets or custom)
+ * @param getKey - Function to generate the rate limit key from context (defaults to IP address)
+ *
+ * @example
+ * ```typescript
+ * // Using IP-based rate limiting with AUTH preset
+ * export const loginRouter = createTRPCRouter({
+ *   login: withRateLimit(rateLimiters.auth())
+ *     .input(loginSchema)
+ *     .mutation(async ({ input }) => { ... }),
+ * });
+ *
+ * // Using user-based rate limiting
+ * export const apiRouter = createTRPCRouter({
+ *   getData: withRateLimit(
+ *     rateLimiters.api(),
+ *     (ctx) => `user:${ctx.user?.id || ctx.ip}`
+ *   )
+ *     .query(async ({ ctx }) => { ... }),
+ * });
+ *
+ * // Using custom key function
+ * export const emailRouter = createTRPCRouter({
+ *   send: withRateLimit(
+ *     rateLimiters.email(),
+ *     (ctx, input) => `email:${input.to}`
+ *   )
+ *     .input(emailSchema)
+ *     .mutation(async ({ input }) => { ... }),
+ * });
+ * ```
+ */
+export const withRateLimit = <TInput = unknown>(
+  limiter: RateLimiter,
+  getKey?: (
+    ctx: Awaited<ReturnType<typeof createTRPCContext>>,
+    input?: TInput
+  ) => string
+) =>
+  publicProcedure.use(async ({ ctx, next, getRawInput }) => {
+    // Get the rate limit key
+    const rawInput = await getRawInput();
+    const key = getKey ? getKey(ctx, rawInput as TInput) : ctx.ip;
+
+    // Check rate limit
+    const result = await limiter.consume(key);
+
+    if (!result.allowed) {
+      const resetInSeconds = Math.ceil(result.resetMs / 1000);
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Terlalu banyak permintaan. Coba lagi dalam ${resetInSeconds} detik.`,
+      });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        rateLimit: {
+          remaining: result.remaining,
+          resetMs: result.resetMs,
+        },
+      },
+    });
+  });
+
+/**
+ * Rate limiting middleware for protected procedures
+ *
+ * Same as withRateLimit but requires authentication first.
+ * Defaults to user-based rate limiting instead of IP-based.
+ *
+ * @param limiter - The rate limiter instance to use
+ * @param getKey - Function to generate the rate limit key from context (defaults to user ID)
+ *
+ * @example
+ * ```typescript
+ * // User-based rate limiting with API preset
+ * export const userRouter = createTRPCRouter({
+ *   update: withProtectedRateLimit(rateLimiters.api())
+ *     .input(updateSchema)
+ *     .mutation(async ({ input, ctx }) => { ... }),
+ * });
+ *
+ * // Custom key with user email
+ * export const emailRouter = createTRPCRouter({
+ *   send: withProtectedRateLimit(
+ *     rateLimiters.email(),
+ *     (ctx) => `email:${ctx.user.email}`
+ *   )
+ *     .input(emailSchema)
+ *     .mutation(async ({ input }) => { ... }),
+ * });
+ * ```
+ */
+export const withProtectedRateLimit = <TInput = unknown>(
+  limiter: RateLimiter,
+  getKey?: (
+    ctx: Awaited<ReturnType<typeof createTRPCContext>> & {
+      user: NonNullable<Awaited<ReturnType<typeof createTRPCContext>>["user"]>;
+    },
+    input?: TInput
+  ) => string
+) =>
+  protectedProcedure.use(async ({ ctx, next, getRawInput }) => {
+    // Get the rate limit key
+    const rawInput = await getRawInput();
+    const key = getKey
+      ? getKey(ctx, rawInput as TInput)
+      : `user:${ctx.user.id}`;
+
+    // Check rate limit
+    const result = await limiter.consume(key);
+
+    if (!result.allowed) {
+      const resetInSeconds = Math.ceil(result.resetMs / 1000);
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Terlalu banyak permintaan. Coba lagi dalam ${resetInSeconds} detik.`,
+      });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        rateLimit: {
+          remaining: result.remaining,
+          resetMs: result.resetMs,
+        },
+      },
+    });
+  });
+
+/**
+ * Role-based rate limiting middleware for protected procedures
+ *
+ * Automatically applies different rate limits based on user's roles.
+ * Higher roles (admin, lab_manager) get more generous limits than basic users.
+ *
+ * @param operation - The type of operation (api, mutations, queries, uploads, email)
+ * @param getKey - Optional function to generate custom rate limit key (defaults to user ID)
+ *
+ * @example
+ * ```typescript
+ * // Apply role-based API rate limits
+ * export const userRouter = createTRPCRouter({
+ *   // Admins get 100k/hr, users get 1k/hr, viewers get 100/hr
+ *   getProfile: withRoleBasedRateLimit("api")
+ *     .query(async ({ ctx }) => { ... }),
+ *
+ *   // Apply mutation-specific limits
+ *   updateProfile: withRoleBasedRateLimit("mutations")
+ *     .input(updateSchema)
+ *     .mutation(async ({ input, ctx }) => { ... }),
+ * });
+ *
+ * // Upload endpoints with role-based limits
+ * export const documentRouter = createTRPCRouter({
+ *   // Admins: 1000/hr, users: 20/hr, viewers: 5/hr
+ *   upload: withRoleBasedRateLimit("uploads")
+ *     .input(uploadSchema)
+ *     .mutation(async ({ input }) => { ... }),
+ * });
+ * ```
+ */
+export const withRoleBasedRateLimit = <TInput = unknown>(
+  operation: "api" | "mutations" | "queries" | "uploads" | "email",
+  getKey?: (
+    ctx: Awaited<ReturnType<typeof createTRPCContext>> & {
+      user: NonNullable<Awaited<ReturnType<typeof createTRPCContext>>["user"]>;
+    },
+    input?: TInput
+  ) => string
+) =>
+  protectedProcedure.use(async ({ ctx, next, getRawInput }) => {
+    // Get user's roles from context
+    const userRoles = (ctx.user.roles || []) as Role[];
+
+    // Get rate limit configuration based on highest role tier
+    const config = getRateLimitConfig(userRoles, operation);
+
+    // Create a rate limiter with the config
+    const limiter = createRateLimiter(config);
+
+    // Get the rate limit key
+    const rawInput = await getRawInput();
+    const key = getKey
+      ? getKey(ctx, rawInput as TInput)
+      : `${operation}:${ctx.user.id}`;
+
+    // Check rate limit
+    const result = await limiter.consume(key);
+
+    if (!result.allowed) {
+      const resetInSeconds = Math.ceil(result.resetMs / 1000);
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Terlalu banyak permintaan. Coba lagi dalam ${resetInSeconds} detik.`,
+      });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        rateLimit: {
+          remaining: result.remaining,
+          resetMs: result.resetMs,
+          tier: userRoles.length > 0 ? "role-based" : "default",
+        },
+      },
+    });
+  });
+
+/**
+ * Combined permission and role-based rate limiting middleware
+ *
+ * Checks both permission access AND applies role-based rate limits in a single middleware.
+ * This is useful when you need to protect an endpoint with both permission checks and rate limiting.
+ *
+ * @param permission - The permission required to access the endpoint
+ * @param operation - The type of operation for rate limiting (api, mutations, queries, uploads, email)
+ * @param getKey - Optional function to generate custom rate limit key (defaults to operation:userId)
+ *
+ * @example
+ * ```typescript
+ * // Protect audit logs with permission + role-based rate limiting
+ * export const auditRouter = createTRPCRouter({
+ *   getAll: withPermissionAndRateLimit("audits.read", "queries")
+ *     .input(paginationSchema)
+ *     .query(async ({ input }) => {
+ *       return await auditQueries.getAll(input);
+ *     }),
+ *
+ *   export: withPermissionAndRateLimit("audits.export", "api")
+ *     .query(async () => {
+ *       return await auditQueries.export();
+ *     }),
+ * });
+ *
+ * // Custom rate limit key
+ * export const documentRouter = createTRPCRouter({
+ *   upload: withPermissionAndRateLimit(
+ *     "documents.create",
+ *     "uploads",
+ *     (ctx, input) => `upload:${ctx.user.id}:${input.entityType}`
+ *   )
+ *     .input(uploadSchema)
+ *     .mutation(async ({ input }) => { ... }),
+ * });
+ * ```
+ */
+export const withPermissionAndRateLimit = <TInput = unknown>(
+  permission: Permission,
+  operation: "api" | "mutations" | "queries" | "uploads" | "email",
+  getKey?: (
+    ctx: Awaited<ReturnType<typeof createTRPCContext>> & {
+      user: NonNullable<Awaited<ReturnType<typeof createTRPCContext>>["user"]>;
+    },
+    input?: TInput
+  ) => string
+) =>
+  protectedProcedure.use(async ({ ctx, next, getRawInput }) => {
+    // 1. Check permission first
+    const hasPermission = await Effect.runPromise(
+      permissionQueries.userHasPermission(ctx.user.id, permission)
+    );
+
+    if (!hasPermission) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Anda tidak memiliki izin untuk mengakses sumber daya ini.",
+      });
+    }
+
+    // 2. Get user's roles from context
+    const userRoles = (ctx.user.roles || []) as Role[];
+
+    // 3. Get rate limit configuration based on highest role tier
+    const config = getRateLimitConfig(userRoles, operation);
+
+    // 4. Create a rate limiter with the config
+    const limiter = createRateLimiter(config);
+
+    // 5. Get the rate limit key
+    const rawInput = await getRawInput();
+    const key = getKey
+      ? getKey(ctx, rawInput as TInput)
+      : `${operation}:${ctx.user.id}`;
+
+    // 6. Check rate limit
+    const result = await limiter.consume(key);
+
+    if (!result.allowed) {
+      const resetInSeconds = Math.ceil(result.resetMs / 1000);
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Terlalu banyak permintaan. Coba lagi dalam ${resetInSeconds} detik.`,
+      });
+    }
+
+    // 7. Continue with the request
+    return next({
+      ctx: {
+        ...ctx,
+        rateLimit: {
+          remaining: result.remaining,
+          resetMs: result.resetMs,
+          tier: userRoles.length > 0 ? "role-based" : "default",
+        },
+      },
     });
   });

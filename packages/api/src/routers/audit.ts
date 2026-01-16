@@ -2,13 +2,13 @@ import auditSchema from "@tepian-k3/schema/audit.schema";
 import auditQueries from "@tepian-k3/queries/audit.queries";
 import { Effect } from "effect";
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, withPermission } from "..";
+import { createTRPCRouter, withPermissionAndRateLimit } from "..";
 
 export const auditRouter = createTRPCRouter({
   /**
    * Get audit logs with filters
    */
-  getAuditLogs: withPermission("audits.view")
+  getAuditLogs: withPermissionAndRateLimit("audits.view", "queries")
     .input(auditSchema.getAuditLogsSchema)
     .query(async ({ input, ctx }) => {
       try {
@@ -53,7 +53,7 @@ export const auditRouter = createTRPCRouter({
   /**
    * Get audit history for a specific entity
    */
-  getEntityHistory: withPermission("audits.view")
+  getEntityHistory: withPermissionAndRateLimit("audits.view", "queries")
     .input(auditSchema.getEntityAuditHistorySchema)
     .query(async ({ input }) => {
       try {
@@ -74,7 +74,7 @@ export const auditRouter = createTRPCRouter({
   /**
    * Get user activity logs
    */
-  getUserActivity: withPermission("audits.view")
+  getUserActivity: withPermissionAndRateLimit("audits.view", "queries")
     .input(auditSchema.getUserActivitySchema)
     .query(async ({ input, ctx }) => {
       try {
@@ -99,7 +99,7 @@ export const auditRouter = createTRPCRouter({
   /**
    * Get audit statistics
    */
-  getStatistics: withPermission("audits.view")
+  getStatistics: withPermissionAndRateLimit("audits.view", "api")
     .input(auditSchema.getAuditStatisticsSchema)
     .query(async ({ input, ctx }) => {
       try {

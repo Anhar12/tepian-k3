@@ -1,5 +1,5 @@
 import authSchema from "@tepian-k3/schema/auth.schema";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "..";
+import { createTRPCRouter, withProtectedRateLimit, withRateLimit } from "..";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import { TRPCError } from "@trpc/server";
 import { verify } from "@node-rs/argon2";
@@ -20,129 +20,132 @@ import { runEffect } from "../utils/run-effect";
 import refreshTokensQueries from "@tepian-k3/queries/refresh-tokens.queries";
 import { v7 as uuidv7 } from "uuid";
 import { logError } from "@tepian-k3/services/logger";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const authRouter = createTRPCRouter({
-  login: publicProcedure.input(authSchema.loginSchema).mutation(
-    async ({ input, ctx }) =>
-      await runEffect(
-        Effect.gen(function* () {
-          const user = yield* usersQueries.getUserByEmail(input.email);
+  login: withRateLimit(rateLimiters.auth())
+    .input(authSchema.loginSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const user = yield* usersQueries.getUserByEmail(input.email);
 
-          const verifyPasswordResult = yield* Effect.tryPromise({
-            try: () => verify(user.password, input.password),
-            catch: (error) => {
-              logError("authRouter.login", "Password verification failed", {
-                email: input.email,
-                error: error instanceof Error ? error.message : String(error),
-              });
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal memverifikasi password.",
-                cause: error,
-              });
-            },
-          });
+            const verifyPasswordResult = yield* Effect.tryPromise({
+              try: () => verify(user.password, input.password),
+              catch: (error) => {
+                logError("authRouter.login", "Password verification failed", {
+                  email: input.email,
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal memverifikasi password.",
+                  cause: error,
+                });
+              },
+            });
 
-          if (!verifyPasswordResult) {
-            return yield* Effect.fail(
-              new TRPCError({
-                code: "UNAUTHORIZED",
-                message: "Username atau password salah.",
-              })
+            if (!verifyPasswordResult) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "Username atau password salah.",
+                })
+              );
+            }
+
+            if (!user.emailVerified) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "FORBIDDEN",
+                  message: "Email belum terverifikasi.",
+                })
+              );
+            }
+
+            const permission = yield* permissionQueries.getUserWithPermissions(
+              user.id
             );
-          }
 
-          if (!user.emailVerified) {
-            return yield* Effect.fail(
-              new TRPCError({
-                code: "FORBIDDEN",
-                message: "Email belum terverifikasi.",
-              })
-            );
-          }
+            // Create access token with short expiry
+            const accessToken = yield* Effect.tryPromise({
+              try: () =>
+                createAccessToken({
+                  id: user.id,
+                  email: user.email,
+                  roles: permission?.roles.map((role) => role.name) || [],
+                  permissions: permission?.permissions || [],
+                  createdAt: user.createdAt,
+                  updatedAt: user.updatedAt,
+                }),
+              catch: (error) => {
+                logError("authRouter.login", "Failed to create access token", {
+                  userId: user.id,
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal membuat access token.",
+                  cause: error,
+                });
+              },
+            });
 
-          const permission = yield* permissionQueries.getUserWithPermissions(
-            user.id
-          );
+            // Create refresh token with long expiry
+            const sessionId = uuidv7();
+            const refreshTokenJWT = yield* Effect.tryPromise({
+              try: () =>
+                createRefreshToken({
+                  id: user.id,
+                  sessionId,
+                  type: "refresh",
+                }),
+              catch: (error) => {
+                logError("authRouter.login", "Failed to create refresh token", {
+                  userId: user.id,
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal membuat refresh token.",
+                  cause: error,
+                });
+              },
+            });
 
-          // Create access token with short expiry
-          const accessToken = yield* Effect.tryPromise({
-            try: () =>
-              createAccessToken({
-                id: user.id,
-                email: user.email,
-                roles: permission?.roles.map((role) => role.name) || [],
-                permissions: permission?.permissions || [],
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
-              }),
-            catch: (error) => {
-              logError("authRouter.login", "Failed to create access token", {
-                userId: user.id,
-                error: error instanceof Error ? error.message : String(error),
-              });
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal membuat access token.",
-                cause: error,
-              });
-            },
-          });
+            // Store refresh token in database
+            const refreshTokenExpiry = new Date();
+            refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30); // 30 days
 
-          // Create refresh token with long expiry
-          const sessionId = uuidv7();
-          const refreshTokenJWT = yield* Effect.tryPromise({
-            try: () =>
-              createRefreshToken({
-                id: user.id,
-                sessionId,
-                type: "refresh",
-              }),
-            catch: (error) => {
-              logError("authRouter.login", "Failed to create refresh token", {
-                userId: user.id,
-                error: error instanceof Error ? error.message : String(error),
-              });
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal membuat refresh token.",
-                cause: error,
-              });
-            },
-          });
+            yield* refreshTokensQueries.createRefreshToken({
+              userId: user.id,
+              token: refreshTokenJWT,
+              expiresAt: refreshTokenExpiry.toISOString(),
+              deviceInfo: ctx.userAgent || undefined,
+              ipAddress: ctx.ip || undefined,
+              userAgent: ctx.userAgent || undefined,
+            });
 
-          // Store refresh token in database
-          const refreshTokenExpiry = new Date();
-          refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30); // 30 days
+            return {
+              accessToken,
+              refreshToken: refreshTokenJWT,
+              user: {
+                ...permission,
+                password: undefined,
+              },
+            };
+          })
+        )
+    ),
 
-          yield* refreshTokensQueries.createRefreshToken({
-            userId: user.id,
-            token: refreshTokenJWT,
-            expiresAt: refreshTokenExpiry.toISOString(),
-            deviceInfo: ctx.userAgent || undefined,
-            ipAddress: ctx.ip || undefined,
-            userAgent: ctx.userAgent || undefined,
-          });
-
-          return {
-            accessToken,
-            refreshToken: refreshTokenJWT,
-            user: {
-              ...permission,
-              password: undefined,
-            },
-          };
-        })
-      )
-  ),
-
-  register: publicProcedure
+  register: withRateLimit(rateLimiters.auth())
     .input(userSchema.createUserSchema)
     .mutation(async ({ input }) => {
       return runEffect(usersQueries.createUser(input));
     }),
 
-  sendOTP: publicProcedure
+  sendOTP: withRateLimit(rateLimiters.otp())
     .input(otpSchema.createOtpSchema)
     .mutation(async ({ input }) => {
       const result = await OTPService.createOTP(input);
@@ -157,7 +160,7 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
-  resendOTP: publicProcedure
+  resendOTP: withRateLimit(rateLimiters.otp())
     .input(otpSchema.createOtpSchema)
     .mutation(async ({ input }) => {
       const result = await OTPService.resendOTP(input);
@@ -172,7 +175,7 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
-  verifyOTP: publicProcedure
+  verifyOTP: withRateLimit(rateLimiters.otp())
     .input(otpSchema.verifyOtpSchema)
     .mutation(async ({ input }) => {
       const result = await OTPService.verifyOTP(input);
@@ -187,7 +190,7 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
-  requestPasswordReset: publicProcedure
+  requestPasswordReset: withRateLimit(rateLimiters.email())
     .input(
       z.object({
         email: z.email(),
@@ -208,7 +211,10 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
-  verifyResetToken: publicProcedure
+  verifyResetToken: withRateLimit<{ token: string }>(
+    rateLimiters.api(),
+    (_, input) => `verify-reset:${input?.token || "unknown"}`
+  )
     .input(
       z.object({
         token: z.string(),
@@ -229,7 +235,10 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
-  profile: protectedProcedure.query(async ({ ctx }) => {
+  profile: withProtectedRateLimit(
+    rateLimiters.api(),
+    (ctx) => `profile:${ctx.user.id}`
+  ).query(async ({ ctx }) => {
     const user = await runEffect(
       permissionQueries.getUserWithPermissions(ctx.user.id)
     );
@@ -249,7 +258,7 @@ export const authRouter = createTRPCRouter({
     };
   }),
 
-  resetPassword: publicProcedure
+  resetPassword: withRateLimit(rateLimiters.passwordReset())
     .input(
       z.object({
         token: z.string(),
@@ -273,7 +282,9 @@ export const authRouter = createTRPCRouter({
       return result;
     }),
 
-  me: publicProcedure.query(async ({ ctx }) => {
+  me: withRateLimit(rateLimiters.api(), (ctx) =>
+    ctx.user?.id ? `me:user:${ctx.user.id}` : `me:ip:${ctx.ip}`
+  ).query(async ({ ctx }) => {
     if (!ctx.user) {
       return null;
     }
@@ -297,124 +308,130 @@ export const authRouter = createTRPCRouter({
     };
   }),
 
-  refresh: publicProcedure.input(authSchema.refreshTokenSchema).mutation(
-    async ({ input, ctx }) =>
-      await runEffect(
-        Effect.gen(function* () {
-          // Verify refresh token JWT
-          yield* Effect.tryPromise({
-            try: async () => {
-              const result = await verifyRefreshToken(input.refreshToken);
-              if (!result) {
-                throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "Refresh token tidak valid.",
-                });
-              }
-              return result;
-            },
-            catch: (error) =>
-              error instanceof TRPCError
-                ? error
-                : new TRPCError({
+  refresh: withRateLimit(rateLimiters.auth())
+    .input(authSchema.refreshTokenSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Verify refresh token JWT
+            yield* Effect.tryPromise({
+              try: async () => {
+                const result = await verifyRefreshToken(input.refreshToken);
+                if (!result) {
+                  throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message: "Refresh token tidak valid.",
-                    cause: error,
-                  }),
-          });
+                  });
+                }
+                return result;
+              },
+              catch: (error) =>
+                error instanceof TRPCError
+                  ? error
+                  : new TRPCError({
+                      code: "UNAUTHORIZED",
+                      message: "Refresh token tidak valid.",
+                      cause: error,
+                    }),
+            });
 
-          // Validate refresh token in database
-          const storedToken = yield* refreshTokensQueries.validateRefreshToken(
-            input.refreshToken
-          );
+            // Validate refresh token in database
+            const storedToken =
+              yield* refreshTokensQueries.validateRefreshToken(
+                input.refreshToken
+              );
 
-          if (!storedToken) {
-            return yield* Effect.fail(
-              new TRPCError({
-                code: "UNAUTHORIZED",
-                message: "Refresh token tidak valid atau telah kedaluwarsa.",
-              })
+            if (!storedToken) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "Refresh token tidak valid atau telah kedaluwarsa.",
+                })
+              );
+            }
+
+            // Get user with permissions
+            const permission = yield* permissionQueries.getUserWithPermissions(
+              storedToken.userId
             );
-          }
 
-          // Get user with permissions
-          const permission = yield* permissionQueries.getUserWithPermissions(
-            storedToken.userId
-          );
+            if (!permission) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Pengguna tidak ditemukan.",
+                })
+              );
+            }
 
-          if (!permission) {
-            return yield* Effect.fail(
-              new TRPCError({
-                code: "NOT_FOUND",
-                message: "Pengguna tidak ditemukan.",
-              })
-            );
-          }
+            // Create new access token
+            const accessToken = yield* Effect.tryPromise({
+              try: () =>
+                createAccessToken({
+                  id: permission.id,
+                  email: permission.email,
+                  roles: permission.roles.map((role) => role.name),
+                  permissions: permission.permissions,
+                  createdAt: permission.createdAt,
+                  updatedAt: permission.updatedAt,
+                }),
+              catch: (error) =>
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal membuat access token baru.",
+                  cause: error,
+                }),
+            });
 
-          // Create new access token
-          const accessToken = yield* Effect.tryPromise({
-            try: () =>
-              createAccessToken({
-                id: permission.id,
-                email: permission.email,
-                roles: permission.roles.map((role) => role.name),
-                permissions: permission.permissions,
-                createdAt: permission.createdAt,
-                updatedAt: permission.updatedAt,
-              }),
-            catch: (error) =>
-              new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal membuat access token baru.",
-                cause: error,
-              }),
-          });
+            // Create new refresh token (rotation)
+            const sessionId = uuidv7();
+            const newRefreshTokenJWT = yield* Effect.tryPromise({
+              try: () =>
+                createRefreshToken({
+                  id: permission.id,
+                  sessionId,
+                  type: "refresh",
+                }),
+              catch: (error) =>
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal membuat refresh token baru.",
+                  cause: error,
+                }),
+            });
 
-          // Create new refresh token (rotation)
-          const sessionId = uuidv7();
-          const newRefreshTokenJWT = yield* Effect.tryPromise({
-            try: () =>
-              createRefreshToken({
-                id: permission.id,
-                sessionId,
-                type: "refresh",
-              }),
-            catch: (error) =>
-              new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal membuat refresh token baru.",
-                cause: error,
-              }),
-          });
+            // Revoke old refresh token
+            yield* refreshTokensQueries.revokeToken(input.refreshToken);
 
-          // Revoke old refresh token
-          yield* refreshTokensQueries.revokeToken(input.refreshToken);
+            // Store new refresh token
+            const refreshTokenExpiry = new Date();
+            refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30);
 
-          // Store new refresh token
-          const refreshTokenExpiry = new Date();
-          refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30);
+            yield* refreshTokensQueries.createRefreshToken({
+              userId: permission.id,
+              token: newRefreshTokenJWT,
+              expiresAt: refreshTokenExpiry.toISOString(),
+              deviceInfo: ctx.userAgent || undefined,
+              ipAddress: ctx.ip || undefined,
+              userAgent: ctx.userAgent || undefined,
+            });
 
-          yield* refreshTokensQueries.createRefreshToken({
-            userId: permission.id,
-            token: newRefreshTokenJWT,
-            expiresAt: refreshTokenExpiry.toISOString(),
-            deviceInfo: ctx.userAgent || undefined,
-            ipAddress: ctx.ip || undefined,
-            userAgent: ctx.userAgent || undefined,
-          });
+            // Update last used timestamp
+            yield* refreshTokensQueries.updateLastUsed(newRefreshTokenJWT);
 
-          // Update last used timestamp
-          yield* refreshTokensQueries.updateLastUsed(newRefreshTokenJWT);
+            return {
+              accessToken,
+              refreshToken: newRefreshTokenJWT,
+            };
+          })
+        )
+    ),
 
-          return {
-            accessToken,
-            refreshToken: newRefreshTokenJWT,
-          };
-        })
-      )
-  ),
-
-  getSessions: protectedProcedure.query(async ({ ctx }) => {
+  getSessions: withProtectedRateLimit(
+    rateLimiters.api(),
+    (ctx) => `sessions:${ctx.user.id}`
+  ).query(async ({ ctx }) => {
     const sessions = await runEffect(
       refreshTokensQueries.getUserActiveSessions(ctx.user.id)
     );
@@ -422,7 +439,10 @@ export const authRouter = createTRPCRouter({
     return sessions;
   }),
 
-  revokeSession: protectedProcedure
+  revokeSession: withProtectedRateLimit(
+    rateLimiters.api(),
+    (ctx) => `revoke-session:${ctx.user.id}`
+  )
     .input(authSchema.revokeSessionSchema)
     .mutation(async ({ input }) => {
       await runEffect(refreshTokensQueries.revokeTokenById(input.sessionId));
@@ -433,7 +453,10 @@ export const authRouter = createTRPCRouter({
       };
     }),
 
-  revokeAllSessions: protectedProcedure.mutation(async ({ ctx }) => {
+  revokeAllSessions: withProtectedRateLimit(
+    rateLimiters.api(),
+    (ctx) => `revoke-all-sessions:${ctx.user.id}`
+  ).mutation(async ({ ctx }) => {
     await runEffect(refreshTokensQueries.revokeAllUserTokens(ctx.user.id));
 
     return {

@@ -16,7 +16,8 @@
       "Bash(pnpm check-types:*)",
       "Bash(pnpm -F @tepian-k3/server check-types:*)",
       "Bash(pnpm db:generate:*)",
-      "Bash(pnpm db:migrate:*)"
+      "Bash(pnpm db:migrate:*)",
+      "Bash(pnpm --filter @tepian-k3/constants run tsc:*)"
     ]
   }
 }

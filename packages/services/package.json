@@ -30,6 +30,9 @@
     },
     "./image": {
       "default": "./src/image/index.ts"
+    },
+    "./rate-limiter": {
+      "default": "./src/rate-limiter/index.ts"
     }
   },
   "dependencies": {

@@ -14,5 +14,9 @@
       "@/*": ["./src/*"],
       "env": ["./env.ts"]
     }
-  }
+  },
+  "exclude": [
+    "src/**/docs/**/*.example.ts",
+    "src/**/docs/**/*.example.md"
+  ]
 }

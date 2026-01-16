@@ -195,7 +195,10 @@ Employees share the same authentication system as regular users:
 4. **`withRole(role)`** - Requires specific role
 5. **`withAnyRole(roles[])`** - Requires any of the specified roles
 6. **`withAllRoles(roles[])`** - Requires all specified roles
-7. **`formDataProcedure(schema)`** - Handles file uploads
+7. **`withRateLimit(limiter, getKey?)`** - Rate limiting for public procedures
+8. **`withProtectedRateLimit(limiter, getKey?)`** - Rate limiting for protected procedures
+9. **`withRoleBasedRateLimit(operation, getKey?)`** - Automatic role-based rate limiting
+10. **`formDataProcedure(schema)`** - Handles file uploads
 
 ### Common Patterns
 
@@ -266,6 +269,35 @@ upload: protectedProcedure
       )
   ),
 ```
+
+**Rate Limiting Pattern:**
+
+```typescript
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+
+// Public endpoint with IP-based rate limiting
+login: withRateLimit(
+  rateLimiters.auth(),
+  (ctx, input) => `login:${input.email}`
+)
+  .input(loginSchema)
+  .mutation(async ({ input }) => { ... }),
+
+// Protected endpoint with user-based rate limiting
+sendEmail: withProtectedRateLimit(
+  rateLimiters.email(),
+  (ctx) => `email:${ctx.user.email}`
+)
+  .input(emailSchema)
+  .mutation(async ({ input, ctx }) => { ... }),
+
+// Role-based rate limiting (automatic tier selection)
+// Admins: 100k/hr, Users: 1k/hr, Viewers: 100/hr
+getProfile: withRoleBasedRateLimit("api")
+  .query(async ({ ctx }) => { ... }),
+```
+
+See [Rate Limiting Middleware Guide](packages/api/docs/RATE_LIMITING_MIDDLEWARE.md) for complete documentation.
 
 ### Adding a New Router
 
@@ -378,7 +410,15 @@ beforeLoad: async ({ context }) => {
    - Token expiry: configurable via `DOCUMENT_QR_EXPIRATION`
    - Separate JWT secrets for different document types
 
-7. **Event Bus** (`notifications/event-bus.ts`)
+7. **Rate Limiter Service** (`rate-limiter/`)
+
+   - Multiple strategies: sliding-window, token-bucket, fixed-window
+   - Redis-backed with automatic in-memory fallback
+   - Preset configurations for common use cases
+   - Used for: authentication, API calls, email sending, OTP verification
+   - See `docs/RATE_LIMITER_GUIDE.md` for implementation details
+
+8. **Event Bus** (`notifications/event-bus.ts`)
    - Server-sent events (SSE) for real-time notifications
    - Used for order status updates, testing progress
 
@@ -672,7 +712,7 @@ Additional documentation in `docs/` folder:
 - See `docs/` folder for complete list
 
 IMPORTANT: If YOU ADD NEW DOCUMENTATION PUT IT IN THE PACKAGE FOLDERS AS WELL BUT INSIDE THE docs/ FOLDER
-FOR EXAMPLE YOU CAN PUT IT IN THE PACKAGE FOLDERS BUT INSIDE THE docs/example/\*.example.ts/md perferably using md
+FOR EXAMPLE YOU CAN PUT IT IN THE PACKAGE FOLDERS BUT INSIDE THE docs/example/\*.example.md
 FOR BETTER ORGANIZATION AND EASY TO FIND.
 
 ## Monorepo Commands Reference

@@ -43,9 +43,12 @@ export const env = createEnv({
     ETHEREAL_USER: z.string().optional(),
     ETHEREAL_PASSWORD: z.string().optional(),
     DASHBOARD_URL: z.url().optional(),
+
+    // Memurai / Redis configuration
     MEMURAI_HOST: z.string().default("localhost"),
     MEMURAI_PORT: z.string().default("6379"),
     MEMURAI_PASSWORD: z.string().default(""),
+
     // Main document secret
     JWT_DOCUMENT_SECRET: z.string().min(32),
 
