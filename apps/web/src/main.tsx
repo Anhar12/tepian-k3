@@ -9,9 +9,11 @@ z.config(z.locales.id());
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient, trpc } from "./utils/trpc";
+import { katalogMask } from "./mask";
 
 const router = createRouter({
   routeTree,
+  routeMasks: [katalogMask],
   defaultPreload: "intent",
   defaultPendingComponent: () => <Loader />,
   context: { trpc, queryClient },
