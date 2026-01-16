@@ -17,7 +17,13 @@
       "Bash(pnpm -F @tepian-k3/server check-types:*)",
       "Bash(pnpm db:generate:*)",
       "Bash(pnpm db:migrate:*)",
-      "Bash(pnpm --filter @tepian-k3/constants run tsc:*)"
+      "Bash(pnpm --filter @tepian-k3/constants run tsc:*)",
+      "Bash(for file in *.ts)",
+      "Bash(do if ! grep -q \"logError.*from.*@tepian-k3/services/logger\" \"$file\")",
+      "Bash(then echo \"$file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(pnpm -F @tepian-k3/queries exec tsc:*)"
     ]
   }
 }

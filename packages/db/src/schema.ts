@@ -29,6 +29,7 @@ import {
   DOCUMENT_STATUS,
   DOCUMENT_TYPES,
   EMPLOYEE_STATUS,
+  NOTIFICATION_TYPES,
   ORDER_APPROVAL_STATUSES,
   ORDER_PAYMENT_STATUSES,
   ORDER_SEQUENCE_NAME,
@@ -76,6 +77,11 @@ export const worksheetStatusEnum = pgEnum("worksheet_status", WORKSHEET_STATUS);
 export const worksheetNoteStatusEnum = pgEnum(
   "worksheet_note_status",
   WORKSHEET_NOTE_STATUS
+);
+
+export const notificationTypeEnum = pgEnum(
+  "notification_type",
+  NOTIFICATION_TYPES
 );
 
 export const users = createTable(
@@ -1222,5 +1228,47 @@ export const worksheetAssignments = createTable(
       "btree",
       table.employeeId
     ),
+  ]
+);
+
+export const notifications = createTable(
+  "notifications",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: notificationTypeEnum("type").notNull().default("general"),
+    title: varchar("title", { length: 250 }).notNull(),
+    message: text("message").notNull(),
+    isRead: boolean("is_read").notNull().default(false),
+    readAt: timestamp("read_at", { withTimezone: true, mode: "string" }),
+    // Optional: link to related entities
+    orderId: uuid("order_id").references(() => order.id, {
+      onDelete: "cascade",
+    }),
+    testingId: uuid("testing_id").references(() => testing.id, {
+      onDelete: "cascade",
+    }),
+    documentId: uuid("document_id").references(() => documents.id, {
+      onDelete: "cascade",
+    }),
+    // Metadata for additional context (e.g., old/new status, triggeredBy user, etc.)
+    metadata: jsonb("metadata"),
+    ...timestamps,
+  },
+  (table) => [
+    index("notifications_user_id_idx").using("btree", table.userId),
+    index("notifications_is_read_idx").using("btree", table.isRead),
+    index("notifications_user_read_idx").using(
+      "btree",
+      table.userId,
+      table.isRead
+    ),
+    index("notifications_created_at_idx").using("btree", table.createdAt),
+    index("notifications_type_idx").using("btree", table.type),
   ]
 );

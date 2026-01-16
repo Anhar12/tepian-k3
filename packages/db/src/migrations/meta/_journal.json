@@ -85,6 +85,13 @@
       "when": 1768458508047,
       "tag": "0011_pale_trish_tilby",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1768605958358,
+      "tag": "0012_clammy_lady_deathstrike",
+      "breakpoints": true
     }
   ]
 }

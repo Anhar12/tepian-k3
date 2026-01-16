@@ -8,6 +8,7 @@ import { documentRouter } from "./routers/document";
 import { employeeRouter } from "./routers/employee";
 import { eventRouter } from "./routers/event";
 import { kbliRouter } from "./routers/kbli";
+import { notificationsRouter } from "./routers/notifications";
 import { orderRouter } from "./routers/order";
 import { parameterRouter } from "./routers/parameter";
 import { parameterCategoriesRouter } from "./routers/parameter-categories";
@@ -52,6 +53,7 @@ export const appRouter = createTRPCRouter({
   audit: auditRouter,
   document: documentRouter,
   employee: employeeRouter,
+  notifications: notificationsRouter,
 });
 
 // export type definition of API

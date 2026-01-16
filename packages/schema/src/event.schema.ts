@@ -4,12 +4,15 @@ import { z } from "zod";
 export const notificationEventSchema = z.object({
   id: z.uuidv7(),
   userId: z.uuidv7(),
-  orderId: z.uuidv7().nullable(),
+  orderId: z.uuidv7().nullable().optional(),
+  testingId: z.uuidv7().nullable().optional(),
+  documentId: z.uuidv7().nullable().optional(),
   type: z.string(),
   title: z.string(),
   message: z.string(),
-  isRead: z.boolean(),
-  createdAt: z.date(),
+  timestamp: z.date(),
+  triggeredBy: z.uuidv7().optional(), // User who triggered the event
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const orderStatusChangedEventSchema = z.object({
@@ -18,6 +21,7 @@ export const orderStatusChangedEventSchema = z.object({
   oldStatus: z.enum(ORDER_STATUS),
   newStatus: z.enum(ORDER_STATUS),
   timestamp: z.date(),
+  triggeredBy: z.uuidv7().optional(), // User who changed the status
 });
 
 export const broadcastTestEventSchema = z.object({

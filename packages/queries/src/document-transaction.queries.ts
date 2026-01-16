@@ -4,7 +4,7 @@ import { documents } from "@tepian-k3/db/schema";
 import { eq } from "@tepian-k3/db";
 import { TRPCError } from "@trpc/server";
 import type { CreateDocumentInput } from "@tepian-k3/types/document.types";
-import { logError } from "effect/Effect";
+import { logError } from "@tepian-k3/services/logger";
 
 /**
  * Transactional document operations

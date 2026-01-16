@@ -17,7 +17,7 @@ import type {
   DocumentStatus,
   DocumentType,
 } from "@tepian-k3/constants";
-import { logError } from "effect/Effect";
+import { logError } from "@tepian-k3/services/logger";
 import { storageService } from "@tepian-k3/services/storage";
 import { documentSigningService } from "@tepian-k3/services/document-signing";
 import QRCode from "qrcode";
