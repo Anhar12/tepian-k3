@@ -131,7 +131,7 @@ export default function DataTableActionCell({
   return (
     <AlertDialog open={isOpen}>
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger aria-label="Buka menu aksi">
           <Ellipsis className="size-4 text-black dark:text-white" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="group">

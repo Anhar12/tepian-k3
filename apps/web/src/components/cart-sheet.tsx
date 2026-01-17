@@ -7,9 +7,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useCartSheetStore } from "@/stores/cart-sheet.stores";
-import { queryClient, trpc } from "@/utils/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { useCartMutations } from "@/hooks/use-cart-mutations";
 import {
   Select,
   SelectContent,
@@ -23,7 +24,6 @@ import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { Minus, Plus, Trash2, Loader2, ShoppingCart } from "lucide-react";
-import { globalErrorToast } from "@/lib/toast";
 import { useNavigate } from "@tanstack/react-router";
 import { EmptyState } from "./ui/empty-state";
 
@@ -35,87 +35,18 @@ export default function CartSheet() {
 
   const [currentCompany, setCurrentCompany] = useState<string | null>(null);
   const [currentLocation, setCurrentLocation] = useState<string | null>(null);
-  const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
-  const [deleteLoadingItems, setDeleteLoadingItems] = useState<Set<string>>(
-    new Set(),
-  );
 
   const { data: cartItems } = useQuery(
     trpc.cart.getAllCartItems.queryOptions(),
   );
 
-  const incrementCartItemQuantity = useMutation(
-    trpc.cart.incrementCartItemQuantity.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-      },
-      onError: (error) => {
-        globalErrorToast(
-          `Gagal menambah jumlah item di keranjang: ${error.message}`,
-        );
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const decrementCartItemQuantity = useMutation(
-    trpc.cart.decrementCartItemQuantity.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-      },
-      onError: (error) => {
-        globalErrorToast(
-          `Gagal mengurangi jumlah item di keranjang: ${error.message}`,
-        );
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const deleteCartItem = useMutation(
-    trpc.cart.deleteCartItem.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setDeleteLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-      },
-      onError: (error) => {
-        globalErrorToast(`Gagal menghapus item di keranjang: ${error.message}`);
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setDeleteLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
+  const {
+    incrementCartItemQuantity,
+    decrementCartItemQuantity,
+    deleteCartItem,
+    loadingItems,
+    deleteLoadingItems,
+  } = useCartMutations();
 
   const mappedCompanyFromCartItem = useMemo(() => {
     if (cartItems) {
@@ -311,6 +242,7 @@ export default function CartSheet() {
                                         }
                                         disabled={isLoading}
                                         className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                        aria-label="Kurangi jumlah"
                                       >
                                         <Minus className="h-4 w-4" />
                                       </button>
@@ -329,6 +261,7 @@ export default function CartSheet() {
                                         }
                                         disabled={isLoading}
                                         className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                        aria-label="Tambah jumlah"
                                       >
                                         <Plus className="h-4 w-4" />
                                       </button>
@@ -348,6 +281,7 @@ export default function CartSheet() {
                                       }
                                       disabled={isLoading}
                                       className="text-red-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                      aria-label="Hapus item dari keranjang"
                                     >
                                       {deleteLoadingItems.has(item.id) ? (
                                         <Loader2 className="h-4 w-4 animate-spin" />

@@ -24,7 +24,12 @@
       "Bash(fi)",
       "Bash(done)",
       "Bash(pnpm -F @tepian-k3/queries exec tsc:*)",
-      "Bash(pnpm tsc:*)"
+      "Bash(pnpm tsc:*)",
+      "Skill(vercel-react-best-practices)",
+      "Skill(vercel-react-best-practices:*)",
+      "Skill(web-design-guidelines)",
+      "Skill(web-design-guidelines:*)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

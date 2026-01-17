@@ -175,6 +175,7 @@ export function RegisterForm({
                         size="sm"
                         className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent text-slate-500 hover:text-slate-700"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
