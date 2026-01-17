@@ -25,7 +25,13 @@ const logWithContext = (
   message: string,
   context?: Record<string, any>
 ) => {
-  logger.log(level, message, context);
+  // Winston expects metadata to be passed as the third argument
+  // Use the splat format or pass metadata directly
+  if (context && Object.keys(context).length > 0) {
+    logger.log({ level, message, ...context });
+  } else {
+    logger.log({ level, message });
+  }
 };
 
 const logInfo = (
