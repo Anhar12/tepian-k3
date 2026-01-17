@@ -25,6 +25,7 @@ import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-pas
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as coreWorksheetsRouteRouteImport } from './routes/(core)/worksheets/route'
 import { Route as coreUjiKompetensiRouteRouteImport } from './routes/(core)/uji-kompetensi/route'
 import { Route as corePengujianRouteRouteImport } from './routes/(core)/pengujian/route'
 import { Route as corePelatihanRouteRouteImport } from './routes/(core)/pelatihan/route'
@@ -39,6 +40,7 @@ import { Route as corePengujianSurveyKepuasanRouteImport } from './routes/(core)
 import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
 import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
+import { Route as coreBackOfficeWorksheetsIndexRouteImport } from './routes/(core)/back-office/worksheets/index'
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
@@ -144,6 +146,11 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => authRouteRoute,
 } as any)
+const coreWorksheetsRouteRoute = coreWorksheetsRouteRouteImport.update({
+  id: '/worksheets',
+  path: '/worksheets',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 const coreUjiKompetensiRouteRoute = coreUjiKompetensiRouteRouteImport.update({
   id: '/uji-kompetensi',
   path: '/uji-kompetensi',
@@ -215,6 +222,12 @@ const coreDashboardCompanyIndexRoute =
     id: '/company/',
     path: '/company/',
     getParentRoute: () => coreDashboardRouteRoute,
+  } as any)
+const coreBackOfficeWorksheetsIndexRoute =
+  coreBackOfficeWorksheetsIndexRouteImport.update({
+    id: '/worksheets/',
+    path: '/worksheets/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeUsersIndexRoute =
   coreBackOfficeUsersIndexRouteImport.update({
@@ -384,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/pelatihan': typeof corePelatihanRouteRoute
   '/pengujian': typeof corePengujianRouteRouteWithChildren
   '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
+  '/worksheets': typeof coreWorksheetsRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -416,6 +430,7 @@ export interface FileRoutesByFullPath {
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
+  '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
@@ -437,6 +452,7 @@ export interface FileRoutesByTo {
   '/konsultasi': typeof coreKonsultasiRouteRoute
   '/pelatihan': typeof corePelatihanRouteRoute
   '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
+  '/worksheets': typeof coreWorksheetsRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -469,6 +485,7 @@ export interface FileRoutesByTo {
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
+  '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
@@ -496,6 +513,7 @@ export interface FileRoutesById {
   '/(core)/pelatihan': typeof corePelatihanRouteRoute
   '/(core)/pengujian': typeof corePengujianRouteRouteWithChildren
   '/(core)/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
+  '/(core)/worksheets': typeof coreWorksheetsRouteRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
@@ -528,6 +546,7 @@ export interface FileRoutesById {
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
   '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
   '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
+  '/(core)/back-office/worksheets/': typeof coreBackOfficeWorksheetsIndexRoute
   '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
@@ -554,6 +573,7 @@ export interface FileRouteTypes {
     | '/pelatihan'
     | '/pengujian'
     | '/uji-kompetensi'
+    | '/worksheets'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -586,6 +606,7 @@ export interface FileRouteTypes {
     | '/back-office/roles'
     | '/back-office/tools'
     | '/back-office/users'
+    | '/back-office/worksheets'
     | '/dashboard/company'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/kblis/$kbliId/edit'
@@ -607,6 +628,7 @@ export interface FileRouteTypes {
     | '/konsultasi'
     | '/pelatihan'
     | '/uji-kompetensi'
+    | '/worksheets'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -639,6 +661,7 @@ export interface FileRouteTypes {
     | '/back-office/roles'
     | '/back-office/tools'
     | '/back-office/users'
+    | '/back-office/worksheets'
     | '/dashboard/company'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/kblis/$kbliId/edit'
@@ -665,6 +688,7 @@ export interface FileRouteTypes {
     | '/(core)/pelatihan'
     | '/(core)/pengujian'
     | '/(core)/uji-kompetensi'
+    | '/(core)/worksheets'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/register'
@@ -697,6 +721,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/roles/'
     | '/(core)/back-office/tools/'
     | '/(core)/back-office/users/'
+    | '/(core)/back-office/worksheets/'
     | '/(core)/dashboard/company/'
     | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
@@ -835,6 +860,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof authRouteRoute
     }
+    '/(core)/worksheets': {
+      id: '/(core)/worksheets'
+      path: '/worksheets'
+      fullPath: '/worksheets'
+      preLoaderRoute: typeof coreWorksheetsRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/uji-kompetensi': {
       id: '/(core)/uji-kompetensi'
       path: '/uji-kompetensi'
@@ -932,6 +964,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/company'
       preLoaderRoute: typeof coreDashboardCompanyIndexRouteImport
       parentRoute: typeof coreDashboardRouteRoute
+    }
+    '/(core)/back-office/worksheets/': {
+      id: '/(core)/back-office/worksheets/'
+      path: '/worksheets'
+      fullPath: '/back-office/worksheets'
+      preLoaderRoute: typeof coreBackOfficeWorksheetsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/users/': {
       id: '/(core)/back-office/users/'
@@ -1154,6 +1193,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
   coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
+  coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
   coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
@@ -1183,6 +1223,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeRolesIndexRoute: coreBackOfficeRolesIndexRoute,
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
   coreBackOfficeUsersIndexRoute: coreBackOfficeUsersIndexRoute,
+  coreBackOfficeWorksheetsIndexRoute: coreBackOfficeWorksheetsIndexRoute,
   coreBackOfficeClustersClusterIdEditRoute:
     coreBackOfficeClustersClusterIdEditRoute,
   coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
@@ -1248,6 +1289,7 @@ interface coreRouteRouteChildren {
   corePelatihanRouteRoute: typeof corePelatihanRouteRoute
   corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
+  coreWorksheetsRouteRoute: typeof coreWorksheetsRouteRoute
   coreDocumentRoute: typeof coreDocumentRoute
   corePdfEditorRoute: typeof corePdfEditorRoute
   coreProfileRoute: typeof coreProfileRoute
@@ -1261,6 +1303,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   corePelatihanRouteRoute: corePelatihanRouteRoute,
   corePengujianRouteRoute: corePengujianRouteRouteWithChildren,
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
+  coreWorksheetsRouteRoute: coreWorksheetsRouteRoute,
   coreDocumentRoute: coreDocumentRoute,
   corePdfEditorRoute: corePdfEditorRoute,
   coreProfileRoute: coreProfileRoute,
