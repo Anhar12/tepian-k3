@@ -92,6 +92,13 @@
       "when": 1768605958358,
       "tag": "0012_clammy_lady_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1768626317740,
+      "tag": "0013_curly_captain_marvel",
+      "breakpoints": true
     }
   ]
 }

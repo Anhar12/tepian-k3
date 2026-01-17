@@ -20,6 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Separator } from "./ui/separator";
+import { auth } from "@/utils/auth";
 
 export function LoginForm({
   className,
@@ -40,8 +41,7 @@ export function LoginForm({
   const loginMutation = useMutation(
     trpc.auth.login.mutationOptions({
       onSuccess: async (data) => {
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
+        auth.setTokens(data.accessToken, data.refreshToken);
         await queryClient.refetchQueries(trpc.auth.me.queryFilter());
         globalSuccessToast("Login berhasil");
 

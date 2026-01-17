@@ -4,11 +4,13 @@ import userQueries from "@tepian-k3/queries/users.queries";
 import otpQueries from "@tepian-k3/queries/otp.queries";
 import { emailService } from "@tepian-k3/services/email";
 import usersQueries from "@tepian-k3/queries/users.queries";
-import { encrypt } from "..";
+import { createAccessToken, createRefreshToken } from "..";
 import { logError, logInfo } from "@tepian-k3/services/logger";
 import { Data, Effect, Option } from "effect";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { db } from "@tepian-k3/db/client";
+import refreshTokensQueries from "@tepian-k3/queries/refresh-tokens.queries";
+import { v7 as uuidv7 } from "uuid";
 
 class OTPError extends Data.TaggedError("OTPError")<{
   status: boolean;
@@ -101,7 +103,15 @@ export class OTPService {
     );
   }
 
-  static async verifyOTP(input: z.infer<typeof otpSchema.verifyOtpSchema>) {
+  static async verifyOTP(
+    input: z.infer<typeof otpSchema.verifyOtpSchema>,
+    deviceInfo?: {
+      userAgent?: string;
+      ipAddress?: string;
+      os?: string;
+      version?: string;
+    }
+  ) {
     return Effect.runPromise(
       Effect.gen(function* () {
         const { email, code } = input;
@@ -177,36 +187,80 @@ export class OTPService {
           );
         }
 
-        const token = yield* Effect.tryPromise({
+        // Create access token with short expiry
+        const accessToken = yield* Effect.tryPromise({
           try: () =>
-            encrypt({
+            createAccessToken({
               id: user.id,
               email: user.email,
-              permissions: user.permissions,
               roles: user.roles.map((role) => role.name),
+              permissions: user.permissions,
               createdAt: user.createdAt,
               updatedAt: user.updatedAt,
-              exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
-              iat: Math.floor(Date.now() / 1000),
-              jti: user.id,
             }),
           catch: (error) => {
-            logError("OTPService.verifyOTP", "Failed to generate auth token", {
+            logError("OTPService.verifyOTP", "Failed to create access token", {
               userId: user.id,
               error,
             });
             return new OTPError({
               status: false,
-              message: "Gagal membuat token.",
+              message: "Gagal membuat access token.",
             });
           },
         });
+
+        // Create refresh token with long expiry
+        const sessionId = uuidv7();
+        const refreshTokenJWT = yield* Effect.tryPromise({
+          try: () =>
+            createRefreshToken({
+              id: user.id,
+              sessionId,
+              type: "refresh",
+            }),
+          catch: (error) => {
+            logError(
+              "OTPService.verifyOTP",
+              "Failed to create refresh token",
+              {
+                userId: user.id,
+                error,
+              }
+            );
+            return new OTPError({
+              status: false,
+              message: "Gagal membuat refresh token.",
+            });
+          },
+        });
+
+        // Store refresh token in database
+        const refreshTokenExpiry = new Date();
+        refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30); // 30 days
+
+        yield* refreshTokensQueries.createRefreshToken({
+          userId: user.id,
+          token: refreshTokenJWT,
+          expiresAt: refreshTokenExpiry.toISOString(),
+          deviceInfo: deviceInfo?.userAgent,
+          ipAddress: deviceInfo?.ipAddress,
+          userAgent: deviceInfo?.userAgent,
+          os: deviceInfo?.os,
+          version: deviceInfo?.version,
+        });
+
+        logInfo(
+          "OTPService.verifyOTP",
+          `OTP verified and tokens generated for ${email}`
+        );
 
         return {
           success: true,
           message: "OTP berhasil diverifikasi.",
           userId: otp.userId,
-          token,
+          accessToken,
+          refreshToken: refreshTokenJWT,
         };
       })
     );

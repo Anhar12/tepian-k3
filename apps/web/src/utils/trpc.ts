@@ -8,16 +8,35 @@ import {
   isNonJsonSerializable,
   loggerLink,
   splitLink,
+  TRPCClientError,
+  type TRPCLink,
 } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { env } from "@/env";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import SuperJSON from "superjson";
+import { observable } from "@trpc/server/observable";
+import { auth } from "./auth";
 
 // Token management
 let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
+
+// Create a separate simple tRPC client for refresh calls (to avoid circular dependencies)
+const refreshClient = createTRPCClient<AppRouter>({
+  links: [
+    httpLink({
+      url: `${env.VITE_SERVER_URL}/trpc`,
+      transformer: SuperJSON,
+      headers: () => {
+        const headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        return headers;
+      },
+    }),
+  ],
+});
 
 async function refreshTokens() {
   // If already refreshing, return the existing promise
@@ -34,26 +53,13 @@ async function refreshTokens() {
         throw new Error("No refresh token available");
       }
 
-      const response = await fetch(`${env.VITE_SERVER_URL}/trpc/auth.refresh`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          refreshToken,
-        }),
+      // Use tRPC client to call refresh endpoint
+      const result = await refreshClient.auth.refresh.mutate({
+        refreshToken,
       });
 
-      if (!response.ok) {
-        throw new Error("Token refresh failed");
-      }
-
-      const data = await response.json();
-
-      if (data.result?.data) {
-        const { accessToken, refreshToken: newRefreshToken } = data.result.data;
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
+      if (result.accessToken && result.refreshToken) {
+        auth.setTokens(result.accessToken, result.refreshToken);
       } else {
         throw new Error("Invalid refresh response");
       }
@@ -73,41 +79,65 @@ async function refreshTokens() {
   return refreshPromise;
 }
 
-// Custom fetch wrapper that handles token refresh
-async function fetchWithTokenRefresh(
-  url: RequestInfo | URL,
-  options?: RequestInit,
-): Promise<Response> {
-  let response = await fetch(url, options);
+// Custom tRPC link that handles token refresh on 401 errors
+const tokenRefreshLink: TRPCLink<AppRouter> = () => {
+  return ({ next, op }) => {
+    return observable((observer) => {
+      const unsubscribe = next(op).subscribe({
+        next(value) {
+          observer.next(value);
+        },
+        error(err) {
+          // Check if it's a 401 UNAUTHORIZED error
+          if (
+            err instanceof TRPCClientError &&
+            err.data?.code === "UNAUTHORIZED"
+          ) {
+            const refreshToken = localStorage.getItem("refreshToken");
 
-  // If 401 and we have a refresh token, try to refresh
-  if (response.status === 401) {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (refreshToken) {
-      try {
-        // Refresh the token
-        await refreshTokens();
+            if (refreshToken) {
+              console.log("401 error detected, attempting token refresh...");
 
-        // Retry the original request with new token
-        const newToken = localStorage.getItem("accessToken");
-        const newOptions = {
-          ...options,
-          headers: {
-            ...options?.headers,
-            Authorization: newToken ? `Bearer ${newToken}` : "",
-          },
-        };
+              // Attempt to refresh the token
+              refreshTokens()
+                .then(() => {
+                  console.log("Token refreshed, retrying request...");
+                  // Retry the original operation
+                  next(op).subscribe({
+                    next(value) {
+                      observer.next(value);
+                    },
+                    error(retryErr) {
+                      observer.error(retryErr);
+                    },
+                    complete() {
+                      observer.complete();
+                    },
+                  });
+                })
+                .catch((refreshErr) => {
+                  console.error("Token refresh failed:", refreshErr);
+                  // If refresh fails, pass through the original error
+                  observer.error(err);
+                });
+            } else {
+              // No refresh token, pass through the error
+              observer.error(err);
+            }
+          } else {
+            // Not a 401 error, pass it through
+            observer.error(err);
+          }
+        },
+        complete() {
+          observer.complete();
+        },
+      });
 
-        response = await fetch(url, newOptions);
-      } catch (error) {
-        // Refresh failed, return the original 401 response
-        return response;
-      }
-    }
-  }
-
-  return response;
-}
+      return unsubscribe;
+    });
+  };
+};
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -131,6 +161,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
         process.env.NODE_ENV === "development" ||
         (op.direction === "down" && op.result instanceof Error),
     }),
+    tokenRefreshLink,
     splitLink({
       condition: (op) => {
         return op.path.startsWith("auth.") || isNonJsonSerializable(op.input);
@@ -138,7 +169,6 @@ export const trpcClient = createTRPCClient<AppRouter>({
       true: httpLink({
         url: `${env.VITE_SERVER_URL}/trpc`,
         transformer: SuperJSON,
-        fetch: fetchWithTokenRefresh,
         headers: () => {
           const headers = new Headers();
 
@@ -172,7 +202,6 @@ export const trpcClient = createTRPCClient<AppRouter>({
         false: httpBatchLink({
           url: `${env.VITE_SERVER_URL}/trpc`,
           transformer: SuperJSON,
-          fetch: fetchWithTokenRefresh,
           headers: () => {
             const headers = new Headers();
             const token = localStorage.getItem("accessToken");

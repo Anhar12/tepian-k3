@@ -22,13 +22,11 @@ import {
 } from "@/components/ui/carousel";
 import { globalInfoToast } from "@/lib/toast";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
   useNavigate,
   type LinkProps,
 } from "@tanstack/react-router";
-import { EventTypes } from "@tepian-k3/schema/event.schema";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
 

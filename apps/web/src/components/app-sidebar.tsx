@@ -1,7 +1,5 @@
 import * as React from "react";
-import { IconInnerShadowTop } from "@tabler/icons-react";
-
-import { NavMain, type NavMainProps } from "@/components/nav-main";
+import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,

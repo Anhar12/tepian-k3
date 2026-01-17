@@ -9,6 +9,8 @@ interface CreateRefreshTokenInput {
   userId: string;
   token: string;
   expiresAt: string;
+  os?: string;
+  version?: string;
   deviceInfo?: string;
   ipAddress?: string;
   userAgent?: string;
@@ -28,6 +30,8 @@ const refreshTokensQueries = {
               deviceInfo: input.deviceInfo,
               ipAddress: input.ipAddress,
               userAgent: input.userAgent,
+              os: input.os,
+              version: input.version,
               revoked: false,
             })
             .returning(),
@@ -35,7 +39,7 @@ const refreshTokensQueries = {
           logError(
             "refreshTokensQueries.createRefreshToken",
             "Failed to create refresh token",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -49,13 +53,13 @@ const refreshTokensQueries = {
         logError(
           "refreshTokensQueries.createRefreshToken",
           "No result returned after creating refresh token",
-          { input }
+          { input },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat refresh token.",
-          })
+          }),
         );
       }
 
@@ -74,15 +78,15 @@ const refreshTokensQueries = {
               and(
                 eq(refreshTokens.token, token),
                 eq(refreshTokens.revoked, false),
-                gt(refreshTokens.expiresAt, new Date().toISOString())
-              )
+                gt(refreshTokens.expiresAt, new Date().toISOString()),
+              ),
             )
             .limit(1),
         catch: (error) => {
           logError(
             "refreshTokensQueries.validateRefreshToken",
             "Failed to validate refresh token",
-            { token, error }
+            { token, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -108,7 +112,7 @@ const refreshTokensQueries = {
         logError(
           "refreshTokensQueries.updateLastUsed",
           "Failed to update refresh token last used timestamp",
-          { token, error }
+          { token, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -135,7 +139,7 @@ const refreshTokensQueries = {
           logError(
             "refreshTokensQueries.revokeToken",
             "Failed to revoke refresh token",
-            { token, error }
+            { token, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -149,13 +153,13 @@ const refreshTokensQueries = {
         logError(
           "refreshTokensQueries.revokeToken",
           "No result returned after revoking refresh token",
-          { token }
+          { token },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
             message: "Refresh token tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -179,7 +183,7 @@ const refreshTokensQueries = {
           logError(
             "refreshTokensQueries.revokeTokenById",
             "Failed to revoke refresh token by ID",
-            { id, error }
+            { id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -193,13 +197,13 @@ const refreshTokensQueries = {
         logError(
           "refreshTokensQueries.revokeTokenById",
           "No result returned after revoking refresh token by ID",
-          { id }
+          { id },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
             message: "Refresh token tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -219,15 +223,15 @@ const refreshTokensQueries = {
           .where(
             and(
               eq(refreshTokens.userId, userId),
-              eq(refreshTokens.revoked, false)
-            )
+              eq(refreshTokens.revoked, false),
+            ),
           )
           .returning(),
       catch: (error) => {
         logError(
           "refreshTokensQueries.revokeAllUserTokens",
           "Failed to revoke all user's refresh tokens",
-          { userId, error }
+          { userId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -256,15 +260,15 @@ const refreshTokensQueries = {
             and(
               eq(refreshTokens.userId, userId),
               eq(refreshTokens.revoked, false),
-              gt(refreshTokens.expiresAt, new Date().toISOString())
-            )
+              gt(refreshTokens.expiresAt, new Date().toISOString()),
+            ),
           )
           .orderBy(desc(refreshTokens.lastUsedAt)),
       catch: (error) => {
         logError(
           "refreshTokensQueries.getUserActiveSessions",
           "Failed to get user's active sessions",
-          { userId, error }
+          { userId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -281,14 +285,14 @@ const refreshTokensQueries = {
         tx
           .delete(refreshTokens)
           .where(
-            sql`${refreshTokens.expiresAt} < CURRENT_TIMESTAMP OR ${refreshTokens.revoked} = true`
+            sql`${refreshTokens.expiresAt} < CURRENT_TIMESTAMP OR ${refreshTokens.revoked} = true`,
           )
           .returning(),
       catch: (error) => {
         logError(
           "refreshTokensQueries.deleteExpiredTokens",
           "Failed to delete expired refresh tokens",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

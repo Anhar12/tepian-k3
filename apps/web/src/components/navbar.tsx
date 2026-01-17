@@ -1,4 +1,4 @@
-import { queryClient, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useNavigate, type LinkProps } from "@tanstack/react-router";
 import { Button } from "./ui/button";
@@ -20,6 +20,7 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react";
 import { ModeToggle } from "./mode-toggle";
+import { logout } from "@/lib/logout";
 
 const navItems: {
   label: string;
@@ -37,11 +38,7 @@ export default function Navbar() {
   const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
 
   function onLogout() {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-
-    queryClient.invalidateQueries(trpc.auth.me.queryFilter());
-    queryClient.refetchQueries(trpc.auth.me.queryFilter());
+    logout();
   }
 
   return (

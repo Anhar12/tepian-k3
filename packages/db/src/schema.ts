@@ -55,17 +55,17 @@ export const testingStatusEnum = pgEnum("testing_status", TESTING_STATUSES);
 
 export const approvalStatusEnum = pgEnum(
   "approval_status",
-  ORDER_APPROVAL_STATUSES
+  ORDER_APPROVAL_STATUSES,
 );
 
 export const paymentStatusEnum = pgEnum(
   "payment_status",
-  ORDER_PAYMENT_STATUSES
+  ORDER_PAYMENT_STATUSES,
 );
 
 export const ToolsAvailabilityEnum = pgEnum(
   "tools_availability",
-  TOOLS_AVAILABILITY
+  TOOLS_AVAILABILITY,
 );
 
 export const auditActionEnum = pgEnum("audit_action", AUDIT_ACTIONS);
@@ -76,12 +76,12 @@ export const worksheetStatusEnum = pgEnum("worksheet_status", WORKSHEET_STATUS);
 
 export const worksheetNoteStatusEnum = pgEnum(
   "worksheet_note_status",
-  WORKSHEET_NOTE_STATUS
+  WORKSHEET_NOTE_STATUS,
 );
 
 export const notificationTypeEnum = pgEnum(
   "notification_type",
-  NOTIFICATION_TYPES
+  NOTIFICATION_TYPES,
 );
 
 export const users = createTable(
@@ -111,12 +111,12 @@ export const users = createTable(
     uniqueIndex("email_deleted_at_unique_idx")
       .on(table.email)
       .where(sql`${table.deletedAt} IS NULL`),
-  ]
+  ],
 );
 
 export const documentEntityTypeEnum = pgEnum(
   "document_entity_type",
-  DOCUMENT_ENTITY_TYPES
+  DOCUMENT_ENTITY_TYPES,
 );
 
 export const documentTypeEnum = pgEnum("document_type", DOCUMENT_TYPES);
@@ -152,7 +152,7 @@ export const otpCodes = createTable(
   (table) => [
     index("otp_code_user_id_idx").using("btree", table.userId),
     index("otp_code_email_idx").using("btree", table.email),
-  ]
+  ],
 );
 
 export const passwordResets = createTable("password_resets", {
@@ -189,6 +189,8 @@ export const refreshTokens = createTable(
       .references(() => users.id, { onDelete: "cascade" }),
     token: text("token").notNull().unique(),
     deviceInfo: text("device_info"),
+    os: text("os"),
+    version: varchar("version", { length: 100 }),
     ipAddress: varchar("ip_address", { length: 45 }),
     userAgent: text("user_agent"),
     lastUsedAt: timestamp("last_used_at", {
@@ -215,7 +217,7 @@ export const refreshTokens = createTable(
     index("refresh_token_user_id_idx").using("btree", table.userId),
     index("refresh_token_token_idx").using("btree", table.token),
     index("refresh_token_expires_at_idx").using("btree", table.expiresAt),
-  ]
+  ],
 );
 
 export const kblis = createTable(
@@ -228,7 +230,7 @@ export const kblis = createTable(
     name: varchar("name", { length: 250 }).notNull(),
     ...timestamps,
   },
-  (table) => [index("kbli_id_idx").using("btree", table.id)]
+  (table) => [index("kbli_id_idx").using("btree", table.id)],
 );
 
 export const userCompanies = createTable(
@@ -281,7 +283,7 @@ export const userCompanies = createTable(
   (table) => [
     index("user_company_id_idx").using("btree", table.id),
     index("user_company_user_id_idx").using("btree", table.userId),
-  ]
+  ],
 );
 
 export const userCompanyTestingLocation = createTable(
@@ -310,9 +312,9 @@ export const userCompanyTestingLocation = createTable(
     index("user_company_testing_location_id_idx").using("btree", table.id),
     index("user_company_testing_location_user_company_id_idx").using(
       "btree",
-      table.userCompanyId
+      table.userCompanyId,
     ),
-  ]
+  ],
 );
 
 export const userRoles = createTable(
@@ -337,7 +339,7 @@ export const userRoles = createTable(
     }),
     index("user_role_user_id_idx").using("btree", table.userId),
     index("user_role_role_id_idx").using("btree", table.roleId),
-  ]
+  ],
 );
 
 export const roles = createTable(
@@ -351,7 +353,7 @@ export const roles = createTable(
     description: text("description"),
     ...timestamps,
   },
-  (table) => [index("role_name_idx").using("btree", table.name)]
+  (table) => [index("role_name_idx").using("btree", table.name)],
 );
 
 export const permission = createTable(
@@ -372,9 +374,9 @@ export const permission = createTable(
       "btree",
       table.name,
       table.resource,
-      table.action
+      table.action,
     ),
-  ]
+  ],
 );
 
 export const rolePermissions = createTable(
@@ -392,12 +394,12 @@ export const rolePermissions = createTable(
     index("role_permission_role_id_idx").using("btree", table.roleId),
     index("role_permission_permission_id_idx").using(
       "btree",
-      table.permissionId
+      table.permissionId,
     ),
     primaryKey({
       columns: [table.roleId, table.permissionId],
     }),
-  ]
+  ],
 );
 
 export const userPermissions = createTable(
@@ -417,9 +419,9 @@ export const userPermissions = createTable(
     index("user_permission_user_id_idx").using("btree", table.userId),
     index("user_permission_permission_id_idx").using(
       "btree",
-      table.permissionId
+      table.permissionId,
     ),
-  ]
+  ],
 );
 
 export const tools = createTable(
@@ -450,7 +452,7 @@ export const tools = createTable(
   (table) => [
     index("tool_id_idx").using("btree", table.id),
     index("tool_tool_code_idx").using("btree", table.toolCode),
-  ]
+  ],
 );
 
 export const clusters = createTable(
@@ -467,7 +469,7 @@ export const clusters = createTable(
   (table) => [
     index("cluster_id_idx").using("btree", table.id),
     index("cluster_name_idx").using("btree", table.name),
-  ]
+  ],
 );
 
 export const parameterCategories = createTable(
@@ -488,7 +490,7 @@ export const parameterCategories = createTable(
     index("parameter_category_id_idx").using("btree", table.id),
     index("parameter_category_cluster_id_idx").using("btree", table.clusterId),
     index("parameter_category_name_idx").using("btree", table.name),
-  ]
+  ],
 );
 
 export const parameters = createTable(
@@ -511,10 +513,10 @@ export const parameters = createTable(
     index("parameter_id_idx").using("btree", table.id),
     index("parameter_parameter_category_id_idx").using(
       "btree",
-      table.parameterCategoryId
+      table.parameterCategoryId,
     ),
     index("parameter_name_idx").using("btree", table.name),
-  ]
+  ],
 );
 
 export const parameterTools = createTable(
@@ -536,7 +538,7 @@ export const parameterTools = createTable(
     index("parameter_tool_id_idx").using("btree", table.id),
     index("parameter_tool_parameter_id_idx").using("btree", table.parameterId),
     index("parameter_tool_tool_id_idx").using("btree", table.toolId),
-  ]
+  ],
 );
 
 export const provinces = createTable(
@@ -554,7 +556,7 @@ export const provinces = createTable(
   (table) => [
     index("province_name_idx").using("btree", table.name),
     index("province_old_id_idx").using("btree", table.oldId),
-  ]
+  ],
 );
 
 export const regencies = createTable(
@@ -577,7 +579,7 @@ export const regencies = createTable(
     index("regency_province_id_idx").using("btree", table.provinceId),
     index("regency_old_id_idx").using("btree", table.oldId),
     index("regency_old_province_id_idx").using("btree", table.oldProvinceId),
-  ]
+  ],
 );
 
 export const districts = createTable(
@@ -600,7 +602,7 @@ export const districts = createTable(
     index("district_regency_id_idx").using("btree", table.regencyId),
     index("district_old_id_idx").using("btree", table.oldId),
     index("district_old_regency_id_idx").using("btree", table.oldRegencyId),
-  ]
+  ],
 );
 
 export const villages = createTable(
@@ -623,7 +625,7 @@ export const villages = createTable(
     index("village_district_id_idx").using("btree", table.districtId),
     index("village_old_id_idx").using("btree", table.oldId),
     index("village_old_district_id_idx").using("btree", table.oldDistrictId),
-  ]
+  ],
 );
 
 export const cart = createTable(
@@ -654,7 +656,7 @@ export const cart = createTable(
     index("cart_company_id_idx").using("btree", table.companyId),
     index("cart_location_id_idx").using("btree", table.locationId),
     index("cart_parameter_id_idx").using("btree", table.parameterId),
-  ]
+  ],
 );
 
 export const orderNumberSequence = pgSequence(ORDER_SEQUENCE_NAME);
@@ -710,7 +712,7 @@ export const order = createTable(
     index("order_order_number_idx").using("btree", table.orderNumber),
     index("order_user_id_idx").using("btree", table.userId),
     index("order_company_id_idx").using("btree", table.companyId),
-  ]
+  ],
 );
 
 export const orderItem = createTable(
@@ -737,7 +739,7 @@ export const orderItem = createTable(
   (table) => [
     index("order_item_id_idx").using("btree", table.id),
     index("order_item_order_id_idx").using("btree", table.orderId),
-  ]
+  ],
 );
 
 export const testing = createTable(
@@ -772,7 +774,7 @@ export const testing = createTable(
     index("testing_testing_type_idx").using("btree", table.testingType),
     index("testing_user_id_idx").using("btree", table.userId),
     index("testing_company_id_idx").using("btree", table.companyId),
-  ]
+  ],
 );
 
 export const testingItem = createTable(
@@ -805,7 +807,7 @@ export const testingItem = createTable(
     index("testing_item_id_idx").using("btree", table.id),
     index("testing_item_testing_id_idx").using("btree", table.testingId),
     index("testing_item_parameter_id_idx").using("btree", table.parameterId),
-  ]
+  ],
 );
 
 export const orderStatusHistory = createTable(
@@ -829,7 +831,7 @@ export const orderStatusHistory = createTable(
   (table) => [
     index("order_status_history_id_idx").using("btree", table.id),
     index("order_status_history_order_id_idx").using("btree", table.orderId),
-  ]
+  ],
 );
 
 export const audits = createTable(
@@ -869,7 +871,7 @@ export const audits = createTable(
     index("audit_entity_type_id_idx").using(
       "btree",
       table.entityType,
-      table.entityId
+      table.entityId,
     ),
     index("audit_user_id_idx").using("btree", table.userId),
     index("audit_action_idx").using("btree", table.action),
@@ -878,10 +880,10 @@ export const audits = createTable(
       "btree",
       table.entityType,
       table.entityId,
-      desc(table.createdAt)
+      desc(table.createdAt),
     ),
     index("audits_changed_fields_idx").using("gin", table.changedFields),
-  ]
+  ],
 );
 
 export const documents = createTable(
@@ -938,16 +940,16 @@ export const documents = createTable(
     index("documents_entity_idx").using(
       "btree",
       table.entityType,
-      table.entityId
+      table.entityId,
     ),
     index("documents_type_idx").using("btree", table.type),
     index("documents_status_idx").using("btree", table.status),
     index("documents_verification_token_idx").using(
       "btree",
-      table.verificationToken
+      table.verificationToken,
     ),
     index("documents_document_number_idx").using("btree", table.documentNumber),
-  ]
+  ],
 );
 
 export const documentVerifications = createTable(
@@ -978,13 +980,13 @@ export const documentVerifications = createTable(
   (table) => [
     index("document_verifications_document_id_idx").using(
       "btree",
-      table.documentId
+      table.documentId,
     ),
     index("document_verifications_created_at_idx").using(
       "btree",
-      table.createdAt
+      table.createdAt,
     ),
-  ]
+  ],
 );
 
 export const documentSignatures = createTable(
@@ -1036,18 +1038,18 @@ export const documentSignatures = createTable(
   (table) => [
     index("document_signatures_document_id_idx").using(
       "btree",
-      table.documentId
+      table.documentId,
     ),
     index("document_signatures_signed_by_idx").using(
       "btree",
-      table.signedByUserId
+      table.signedByUserId,
     ),
     index("document_signatures_verification_token_idx").using(
       "btree",
-      table.verificationToken
+      table.verificationToken,
     ),
     index("document_signatures_created_at_idx").using("btree", table.createdAt),
-  ]
+  ],
 );
 
 export const employees = createTable(
@@ -1071,7 +1073,7 @@ export const employees = createTable(
     index("employee_id_idx").using("btree", table.id),
     index("employee_user_id_idx").using("btree", table.userId),
     index("employee_email_idx").using("btree", table.email),
-  ]
+  ],
 );
 
 export const worksheets = createTable(
@@ -1097,11 +1099,11 @@ export const worksheets = createTable(
       () => employees.id,
       {
         onDelete: "set null",
-      }
+      },
     ),
     accompanyingSupervisorId: uuid("accompanying_supervisor_id").references(
       () => employees.id,
-      { onDelete: "set null" }
+      { onDelete: "set null" },
     ),
     result: text("result"),
     createdBy: uuid("created_by")
@@ -1115,14 +1117,14 @@ export const worksheets = createTable(
     index("worksheet_status_idx").using("btree", table.status),
     index("worksheet_main_supervisor_id_idx").using(
       "btree",
-      table.mainSupervisorId
+      table.mainSupervisorId,
     ),
     index("worksheet_accompanying_supervisor_id_idx").using(
       "btree",
-      table.accompanyingSupervisorId
+      table.accompanyingSupervisorId,
     ),
     index("worksheet_created_by_idx").using("btree", table.createdBy),
-  ]
+  ],
 );
 
 export const worksheetItems = createTable(
@@ -1152,7 +1154,7 @@ export const worksheetItems = createTable(
     index("worksheet_item_worksheet_id_idx").using("btree", table.worksheetId),
     index("worksheet_item_parameter_id_idx").using("btree", table.parameterId),
     index("worksheet_item_location_id_idx").using("btree", table.locationId),
-  ]
+  ],
 );
 
 export const worksheetTools = createTable(
@@ -1174,7 +1176,7 @@ export const worksheetTools = createTable(
     index("worksheet_tool_id_idx").using("btree", table.id),
     index("worksheet_tool_worksheet_id_idx").using("btree", table.worksheetId),
     index("worksheet_tool_tool_id_idx").using("btree", table.toolId),
-  ]
+  ],
 );
 
 export const worksheetNotes = createTable(
@@ -1197,7 +1199,7 @@ export const worksheetNotes = createTable(
   (table) => [
     index("worksheet_note_id_idx").using("btree", table.id),
     index("worksheet_note_worksheet_id_idx").using("btree", table.worksheetId),
-  ]
+  ],
 );
 
 export const worksheetAssignments = createTable(
@@ -1222,13 +1224,13 @@ export const worksheetAssignments = createTable(
     index("worksheet_assignment_id_idx").using("btree", table.id),
     index("worksheet_assignment_worksheet_id_idx").using(
       "btree",
-      table.worksheetId
+      table.worksheetId,
     ),
     index("worksheet_assignment_employee_id_idx").using(
       "btree",
-      table.employeeId
+      table.employeeId,
     ),
-  ]
+  ],
 );
 
 export const notifications = createTable(
@@ -1266,9 +1268,9 @@ export const notifications = createTable(
     index("notifications_user_read_idx").using(
       "btree",
       table.userId,
-      table.isRead
+      table.isRead,
     ),
     index("notifications_created_at_idx").using("btree", table.createdAt),
     index("notifications_type_idx").using("btree", table.type),
-  ]
+  ],
 );

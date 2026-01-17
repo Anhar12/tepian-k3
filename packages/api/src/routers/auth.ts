@@ -51,7 +51,7 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "UNAUTHORIZED",
                   message: "Username atau password salah.",
-                })
+                }),
               );
             }
 
@@ -60,12 +60,12 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "FORBIDDEN",
                   message: "Email belum terverifikasi.",
-                })
+                }),
               );
             }
 
             const permission = yield* permissionQueries.getUserWithPermissions(
-              user.id
+              user.id,
             );
 
             // Create access token with short expiry
@@ -125,6 +125,8 @@ export const authRouter = createTRPCRouter({
               deviceInfo: ctx.userAgent || undefined,
               ipAddress: ctx.ip || undefined,
               userAgent: ctx.userAgent || undefined,
+              os: ctx.osName || undefined,
+              version: ctx.osVersion || undefined,
             });
 
             return {
@@ -135,8 +137,8 @@ export const authRouter = createTRPCRouter({
                 password: undefined,
               },
             };
-          })
-        )
+          }),
+        ),
     ),
 
   register: withRateLimit(rateLimiters.auth())
@@ -177,8 +179,13 @@ export const authRouter = createTRPCRouter({
 
   verifyOTP: withRateLimit(rateLimiters.otp())
     .input(otpSchema.verifyOtpSchema)
-    .mutation(async ({ input }) => {
-      const result = await OTPService.verifyOTP(input);
+    .mutation(async ({ input, ctx }) => {
+      const result = await OTPService.verifyOTP(input, {
+        userAgent: ctx.userAgent,
+        ipAddress: ctx.ip,
+        os: ctx.osName,
+        version: ctx.osVersion,
+      });
 
       if (!result.success) {
         throw new TRPCError({
@@ -194,11 +201,11 @@ export const authRouter = createTRPCRouter({
     .input(
       z.object({
         email: z.email(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const result = await runEffect(
-        PasswordResetService.requestReset(input.email)
+        PasswordResetService.requestReset(input.email),
       );
 
       if (!result.status) {
@@ -213,16 +220,16 @@ export const authRouter = createTRPCRouter({
 
   verifyResetToken: withRateLimit<{ token: string }>(
     rateLimiters.api(),
-    (_, input) => `verify-reset:${input?.token || "unknown"}`
+    (_, input) => `verify-reset:${input?.token || "unknown"}`,
   )
     .input(
       z.object({
         token: z.string(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const result = await runEffect(
-        PasswordResetService.verifyResetToken(input.token)
+        PasswordResetService.verifyResetToken(input.token),
       );
 
       if (!result.valid) {
@@ -237,10 +244,10 @@ export const authRouter = createTRPCRouter({
 
   profile: withProtectedRateLimit(
     rateLimiters.api(),
-    (ctx) => `profile:${ctx.user.id}`
+    (ctx) => `profile:${ctx.user.id}`,
   ).query(async ({ ctx }) => {
     const user = await runEffect(
-      permissionQueries.getUserWithPermissions(ctx.user.id)
+      permissionQueries.getUserWithPermissions(ctx.user.id),
     );
 
     if (!user) {
@@ -265,11 +272,11 @@ export const authRouter = createTRPCRouter({
         newPassword: z
           .string()
           .min(8, "Password harus terdiri dari minimal 8 karakter"),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const result = await runEffect(
-        PasswordResetService.resetPassword(input.token, input.newPassword)
+        PasswordResetService.resetPassword(input.token, input.newPassword),
       );
 
       if (!result.status) {
@@ -283,14 +290,23 @@ export const authRouter = createTRPCRouter({
     }),
 
   me: withRateLimit(rateLimiters.api(), (ctx) =>
-    ctx.user?.id ? `me:user:${ctx.user.id}` : `me:ip:${ctx.ip}`
+    ctx.user?.id ? `me:user:${ctx.user.id}` : `me:ip:${ctx.ip}`,
   ).query(async ({ ctx }) => {
-    if (!ctx.user) {
+    // If no user and no auth header, return null (unauthenticated visitor)
+    if (!ctx.user && !ctx.hasAuthHeader) {
       return null;
     }
 
+    // If auth header present but no user, token is invalid/expired
+    if (!ctx.user && ctx.hasAuthHeader) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Token tidak valid atau telah kedaluwarsa.",
+      });
+    }
+
     const user = await runEffect(
-      permissionQueries.getUserWithPermissions(ctx.user.id)
+      permissionQueries.getUserWithPermissions(ctx.user!.id),
     );
 
     if (!user) {
@@ -339,7 +355,7 @@ export const authRouter = createTRPCRouter({
             // Validate refresh token in database
             const storedToken =
               yield* refreshTokensQueries.validateRefreshToken(
-                input.refreshToken
+                input.refreshToken,
               );
 
             if (!storedToken) {
@@ -347,13 +363,13 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "UNAUTHORIZED",
                   message: "Refresh token tidak valid atau telah kedaluwarsa.",
-                })
+                }),
               );
             }
 
             // Get user with permissions
             const permission = yield* permissionQueries.getUserWithPermissions(
-              storedToken.userId
+              storedToken.userId,
             );
 
             if (!permission) {
@@ -361,7 +377,7 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "NOT_FOUND",
                   message: "Pengguna tidak ditemukan.",
-                })
+                }),
               );
             }
 
@@ -415,6 +431,8 @@ export const authRouter = createTRPCRouter({
               deviceInfo: ctx.userAgent || undefined,
               ipAddress: ctx.ip || undefined,
               userAgent: ctx.userAgent || undefined,
+              os: ctx.osName || undefined,
+              version: ctx.osVersion || undefined,
             });
 
             // Update last used timestamp
@@ -424,16 +442,16 @@ export const authRouter = createTRPCRouter({
               accessToken,
               refreshToken: newRefreshTokenJWT,
             };
-          })
-        )
+          }),
+        ),
     ),
 
   getSessions: withProtectedRateLimit(
     rateLimiters.api(),
-    (ctx) => `sessions:${ctx.user.id}`
+    (ctx) => `sessions:${ctx.user.id}`,
   ).query(async ({ ctx }) => {
     const sessions = await runEffect(
-      refreshTokensQueries.getUserActiveSessions(ctx.user.id)
+      refreshTokensQueries.getUserActiveSessions(ctx.user.id),
     );
 
     return sessions;
@@ -441,7 +459,7 @@ export const authRouter = createTRPCRouter({
 
   revokeSession: withProtectedRateLimit(
     rateLimiters.api(),
-    (ctx) => `revoke-session:${ctx.user.id}`
+    (ctx) => `revoke-session:${ctx.user.id}`,
   )
     .input(authSchema.revokeSessionSchema)
     .mutation(async ({ input }) => {
@@ -455,7 +473,7 @@ export const authRouter = createTRPCRouter({
 
   revokeAllSessions: withProtectedRateLimit(
     rateLimiters.api(),
-    (ctx) => `revoke-all-sessions:${ctx.user.id}`
+    (ctx) => `revoke-all-sessions:${ctx.user.id}`,
   ).mutation(async ({ ctx }) => {
     await runEffect(refreshTokensQueries.revokeAllUserTokens(ctx.user.id));
 
@@ -464,4 +482,18 @@ export const authRouter = createTRPCRouter({
       message: "Semua sesi berhasil dicabut.",
     };
   }),
+
+  logout: withProtectedRateLimit(
+    rateLimiters.api(),
+    (ctx) => `logout:${ctx.user.id}`,
+  )
+    .input(authSchema.refreshTokenSchema)
+    .mutation(async ({ input }) => {
+      await runEffect(refreshTokensQueries.revokeToken(input.refreshToken));
+
+      return {
+        success: true,
+        message: "Logout berhasil.",
+      };
+    }),
 });

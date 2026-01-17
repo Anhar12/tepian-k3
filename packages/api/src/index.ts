@@ -19,6 +19,7 @@ import type { Permission, Role } from "@tepian-k3/constants";
 import { getRateLimitConfig } from "@tepian-k3/constants";
 import { createRateLimiter } from "@tepian-k3/services/rate-limiter";
 import type { RateLimiter } from "@tepian-k3/services/rate-limiter";
+import { UAParser } from "ua-parser-js";
 
 /**
  * Isomorphic Session getter for API requests
@@ -66,6 +67,7 @@ const isomorphicGetSession = async (token: string) => {
  */
 export const createTRPCContext = async (context: HonoContext) => {
   const Authorization = context.req.header("Authorization") || "";
+  const hasAuthHeader = !!Authorization;
 
   const data = await isomorphicGetSession(Authorization);
 
@@ -77,11 +79,20 @@ export const createTRPCContext = async (context: HonoContext) => {
     "";
   const userAgent = context.req.header("user-agent") || "";
 
+  // Parse User-Agent to extract OS information
+  const parser = new UAParser(userAgent);
+  const os = parser.getOS();
+  const osName = os.name || "";
+  const osVersion = os.version || "";
+
   return {
     session: data?.session,
     user: data?.user,
+    hasAuthHeader,
     ip,
     userAgent,
+    osName,
+    osVersion,
     eventBus,
   };
 };
@@ -238,7 +249,7 @@ export const formDataProcedure = <T extends z.ZodTypeAny>(schema: T) =>
  */
 export const formDataInput = z.custom<FormData>(
   (val) => val instanceof FormData,
-  { message: "Expected FormData input" }
+  { message: "Expected FormData input" },
 );
 
 /**
@@ -252,7 +263,7 @@ export const formDataInput = z.custom<FormData>(
 export const withPermission = (permission: Permission) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasPermission = await Effect.runPromise(
-      permissionQueries.userHasPermission(ctx.user.id, permission)
+      permissionQueries.userHasPermission(ctx.user.id, permission),
     );
 
     if (!hasPermission) {
@@ -276,7 +287,7 @@ export const withPermission = (permission: Permission) =>
 export const withRole = (role: string) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
-      permissionQueries.userHasRole(ctx.user.id, role)
+      permissionQueries.userHasRole(ctx.user.id, role),
     );
 
     if (!hasRole) {
@@ -300,7 +311,7 @@ export const withRole = (role: string) =>
 export const withAnyRole = (roleNames: string[]) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
-      permissionQueries.userHasAnyRole(ctx.user.id, roleNames)
+      permissionQueries.userHasAnyRole(ctx.user.id, roleNames),
     );
 
     if (!hasRole) {
@@ -326,7 +337,7 @@ export const withAnyRole = (roleNames: string[]) =>
 export const withAllRoles = (roleNames: string[]) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
-      permissionQueries.userHasAllRoles(ctx.user.id, roleNames)
+      permissionQueries.userHasAllRoles(ctx.user.id, roleNames),
     );
 
     if (!hasRole) {
@@ -380,8 +391,8 @@ export const withRateLimit = <TInput = unknown>(
   limiter: RateLimiter,
   getKey?: (
     ctx: Awaited<ReturnType<typeof createTRPCContext>>,
-    input?: TInput
-  ) => string
+    input?: TInput,
+  ) => string,
 ) =>
   publicProcedure.use(async ({ ctx, next, getRawInput }) => {
     // Get the rate limit key
@@ -445,8 +456,8 @@ export const withProtectedRateLimit = <TInput = unknown>(
     ctx: Awaited<ReturnType<typeof createTRPCContext>> & {
       user: NonNullable<Awaited<ReturnType<typeof createTRPCContext>>["user"]>;
     },
-    input?: TInput
-  ) => string
+    input?: TInput,
+  ) => string,
 ) =>
   protectedProcedure.use(async ({ ctx, next, getRawInput }) => {
     // Get the rate limit key
@@ -515,8 +526,8 @@ export const withRoleBasedRateLimit = <TInput = unknown>(
     ctx: Awaited<ReturnType<typeof createTRPCContext>> & {
       user: NonNullable<Awaited<ReturnType<typeof createTRPCContext>>["user"]>;
     },
-    input?: TInput
-  ) => string
+    input?: TInput,
+  ) => string,
 ) =>
   protectedProcedure.use(async ({ ctx, next, getRawInput }) => {
     // Get user's roles from context
@@ -602,13 +613,13 @@ export const withPermissionAndRateLimit = <TInput = unknown>(
     ctx: Awaited<ReturnType<typeof createTRPCContext>> & {
       user: NonNullable<Awaited<ReturnType<typeof createTRPCContext>>["user"]>;
     },
-    input?: TInput
-  ) => string
+    input?: TInput,
+  ) => string,
 ) =>
   protectedProcedure.use(async ({ ctx, next, getRawInput }) => {
     // 1. Check permission first
     const hasPermission = await Effect.runPromise(
-      permissionQueries.userHasPermission(ctx.user.id, permission)
+      permissionQueries.userHasPermission(ctx.user.id, permission),
     );
 
     if (!hasPermission) {

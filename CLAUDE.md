@@ -463,6 +463,29 @@ export const Route = createFileRoute("/(core)/back-office/users/")({
 - **Data tables** use TanStack Table with server-side pagination
 - **Forms** use React Hook Form + Zod validation
 
+### tRPC Client Usage Patterns
+
+The frontend supports three patterns for making tRPC calls:
+
+1. **Classic Pattern** - Using tRPC hooks directly:
+   ```typescript
+   const user = trpc.user.getById.useQuery({ id });
+   const updateUser = trpc.user.update.useMutation();
+   ```
+
+2. **Modern Pattern** - Using TanStack Query hooks with tRPC options:
+   ```typescript
+   const user = useQuery(trpc.user.getById.queryOptions({ id }));
+   const updateUser = useMutation(trpc.user.update.mutationOptions());
+   ```
+
+3. **Direct Client** - For non-React contexts (utilities, lib files):
+   ```typescript
+   await trpcClient.auth.logout.mutate({ refreshToken });
+   ```
+
+See [tRPC TanStack Query Usage Guide](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md) for detailed examples and best practices.
+
 ## Environment Variables
 
 **Location:** Root `.env` file (not committed)

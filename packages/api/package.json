@@ -15,19 +15,20 @@
     "typescript": "catalog:"
   },
   "dependencies": {
+    "@node-rs/argon2": "catalog:",
     "@tepian-k3/auth": "workspace:*",
     "@tepian-k3/constants": "workspace:*",
     "@tepian-k3/db": "workspace:*",
-    "@tepian-k3/services": "workspace:*",
-    "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/queries": "workspace:*",
+    "@tepian-k3/schema": "workspace:*",
+    "@tepian-k3/services": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
-    "@node-rs/argon2": "catalog:",
     "dotenv": "catalog:",
     "effect": "catalog:",
     "hono": "catalog:",
     "superjson": "^2.2.6",
+    "ua-parser-js": "^2.0.8",
     "uuid": "catalog:",
     "zod": "catalog:"
   }

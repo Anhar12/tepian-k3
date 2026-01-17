@@ -11,21 +11,15 @@ import {
 } from "./ui/dropdown-menu";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { queryClient, trpc } from "@/utils/trpc";
-import { globalSuccessToast } from "@/lib/toast";
+import { trpc } from "@/utils/trpc";
+import { logout } from "@/lib/logout";
 
 export default function MainHeader() {
   const navigate = useNavigate();
   const { data: user } = useQuery(trpc.auth.me.queryOptions());
 
-  async function handleLogout() {
-    localStorage.removeItem("token");
-
-    globalSuccessToast("Logout berhasil");
-
-    await queryClient.refetchQueries(trpc.auth.me.queryFilter());
-
-    navigate({ to: "/login" });
+  function handleLogout() {
+    logout();
   }
 
   return (

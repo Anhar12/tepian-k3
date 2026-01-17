@@ -24,6 +24,7 @@
     "dotenv": "catalog:",
     "effect": "catalog:",
     "jose": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "uuid": "catalog:"
   }
 }

@@ -1006,10 +1006,70 @@ export default userSchema;
 ```
 
 ### Frontend Components
-```typescript
-// Use tRPC hooks
-const { data, isLoading } = trpc.user.getAll.useQuery();
 
+#### tRPC Usage Patterns
+
+The frontend supports three patterns for making tRPC API calls:
+
+**1. Classic Pattern - tRPC Hooks (React components)**
+```typescript
+// Queries
+const { data, isLoading, error } = trpc.user.getAll.useQuery();
+
+// Mutations
+const createUser = trpc.user.create.useMutation({
+  onSuccess: () => toast.success("User created"),
+});
+
+// Subscriptions
+trpc.notification.onUpdate.useSubscription(undefined, {
+  onData: (notification) => console.log(notification),
+});
+```
+
+**2. Modern Pattern - TanStack Query with tRPC Options (React components)**
+```typescript
+import { useQuery, useMutation } from "@tanstack/react-query";
+
+// Queries
+const { data, isLoading } = useQuery(
+  trpc.user.getAll.queryOptions()
+);
+
+// Mutations
+const createUser = useMutation(
+  trpc.user.create.mutationOptions({
+    onSuccess: () => toast.success("User created"),
+  })
+);
+
+// Advanced features (prefetching, optimistic updates, etc.)
+await queryClient.prefetchQuery(
+  trpc.user.getById.queryOptions({ id: userId })
+);
+```
+
+**3. Direct Client - Non-React contexts (utils, lib files)**
+```typescript
+import { trpcClient } from "@/utils/trpc";
+
+// Queries
+const user = await trpcClient.user.getById.query({ id: userId });
+
+// Mutations
+await trpcClient.user.update.mutate({ id, name: "New Name" });
+```
+
+**When to use each pattern:**
+- Classic: Simple components, concise syntax, subscriptions
+- Modern: Advanced TanStack Query features, route loaders, prefetching
+- Direct Client: Utility functions, lib files, non-React code
+
+See [apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md) for detailed examples.
+
+#### Other Frontend Patterns
+
+```typescript
 // Use Zustand for client state
 const { items, addItem } = useCartStore();
 

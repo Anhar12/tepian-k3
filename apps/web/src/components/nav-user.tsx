@@ -24,9 +24,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { queryClient, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
+import { logout } from "@/lib/logout";
 
 export function NavUser() {
   const navigate = useNavigate();
@@ -35,13 +36,7 @@ export function NavUser() {
   const { data: user } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
   function onLogout() {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-
-    queryClient.invalidateQueries(trpc.auth.me.queryFilter());
-    queryClient.refetchQueries(trpc.auth.me.queryFilter());
-
-    navigate({ to: "/" });
+    logout();
   }
 
   return (
