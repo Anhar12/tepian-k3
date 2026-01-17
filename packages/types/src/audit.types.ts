@@ -15,7 +15,12 @@ export type AuditEntityType =
   | "user"
   | "user_company"
   | "parameter"
-  | "tool";
+  | "tool"
+  | "worksheet"
+  | "worksheet_item"
+  | "worksheet_assignment"
+  | "worksheet_tool"
+  | "worksheet_note";
 
 export interface AuditMetadata {
   ipAddress?: string;

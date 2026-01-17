@@ -6,65 +6,70 @@ import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const cartRouter = createTRPCRouter({
-  getAllCartItems: withProtectedRateLimit(rateLimiters.moderate()).query(
-    async ({ ctx }) => await runEffect(cartQueries.getUserCartList(ctx.user.id))
-  ),
-
-  getCartItemCount: withProtectedRateLimit(rateLimiters.moderate()).query(
+  getAllCartItems: withProtectedRateLimit(rateLimiters.lenient()).query(
     async ({ ctx }) =>
-      await runEffect(cartQueries.getUserCartCount(ctx.user.id))
+      await runEffect(cartQueries.getUserCartList(ctx.user.id)),
   ),
 
-  insertCartItem: withProtectedRateLimit(rateLimiters.moderate())
+  getCartItemCount: withProtectedRateLimit(rateLimiters.lenient()).query(
+    async ({ ctx }) =>
+      await runEffect(cartQueries.getUserCartCount(ctx.user.id)),
+  ),
+
+  insertCartItem: withProtectedRateLimit(rateLimiters.lenient())
     .input(cartSchema.createCartSchema)
     .mutation(
       async ({ input, ctx }) =>
-        await runEffect(cartQueries.insertCartItem(ctx.user.id, input))
+        await runEffect(cartQueries.insertCartItem(ctx.user.id, input)),
     ),
 
-  incrementCartItemQuantity: withProtectedRateLimit(rateLimiters.moderate())
+  incrementCartItemQuantity: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
         cartItemId: z.string(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(cartQueries.incrementCartItemQuantity(input.cartItemId))
+        await runEffect(
+          cartQueries.incrementCartItemQuantity(input.cartItemId),
+        ),
     ),
 
-  decrementCartItemQuantity: withProtectedRateLimit(rateLimiters.moderate())
+  decrementCartItemQuantity: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
         cartItemId: z.string(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(cartQueries.decrementCartItemQuantity(input.cartItemId))
+        await runEffect(
+          cartQueries.decrementCartItemQuantity(input.cartItemId),
+        ),
     ),
 
-  updateCartItemQuantity: withProtectedRateLimit(rateLimiters.moderate())
+  updateCartItemQuantity: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
         cartItemId: z.string(),
         quantity: z.number().min(1),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       return await runEffect(
-        cartQueries.updateCartItemQuantity(input.cartItemId, input.quantity)
+        cartQueries.updateCartItemQuantity(input.cartItemId, input.quantity),
       );
     }),
 
-  deleteCartItem: withProtectedRateLimit(rateLimiters.moderate())
+  deleteCartItem: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
         cartItemId: z.string(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(cartQueries.deleteCartItem(input.cartItemId))
+        await runEffect(cartQueries.deleteCartItem(input.cartItemId)),
     ),
 });

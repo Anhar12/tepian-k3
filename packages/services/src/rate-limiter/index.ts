@@ -64,7 +64,7 @@ export class RateLimiterService {
       this.redis.connect().catch((err) => {
         console.warn(
           "Failed to connect to Redis, using in-memory fallback:",
-          err.message
+          err.message,
         );
       });
     } catch (error) {
@@ -98,8 +98,13 @@ export class RateLimiterService {
    */
   createFromPreset(
     name: string,
-    preset: keyof typeof RateLimiterPresets
+    preset: keyof typeof RateLimiterPresets,
   ): RateLimiter {
+    const isDev = env.NODE_ENV === "development";
+    if (isDev) {
+      // In development, use a more lenient config for STRICT preset
+      return this.create(name, RateLimiterPresets["DEV_MODE"]);
+    }
     return this.create(name, RateLimiterPresets[preset]);
   }
 
@@ -148,7 +153,7 @@ export function getRateLimiterService(): RateLimiterService {
  */
 export function createRateLimiter(
   config: RateLimiterConfig,
-  name: string = "default"
+  name: string = "default",
 ): RateLimiter {
   const service = getRateLimiterService();
   return service.create(name, config);
@@ -159,7 +164,7 @@ export function createRateLimiter(
  */
 export function createRateLimiterFromPreset(
   preset: keyof typeof RateLimiterPresets,
-  name: string = "default"
+  name: string = "default",
 ): RateLimiter {
   const service = getRateLimiterService();
   return service.createFromPreset(name, preset);

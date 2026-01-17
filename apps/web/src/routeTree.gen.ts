@@ -49,6 +49,7 @@ import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/ba
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
 import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
 import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './routes/(core)/back-office/parameter-categories/index'
+import { Route as coreBackOfficeOrdersIndexRouteImport } from './routes/(core)/back-office/orders/index'
 import { Route as coreBackOfficeKblisIndexRouteImport } from './routes/(core)/back-office/kblis/index'
 import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)/back-office/clusters/index'
 import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
@@ -68,6 +69,7 @@ import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(c
 import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './routes/(core)/back-office/parameters/$parameterId.edit'
 import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from './routes/(core)/back-office/parameters/$parameterId.detail'
 import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
+import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from './routes/(core)/back-office/orders/$orderId.detail'
 import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
 
@@ -279,6 +281,12 @@ const coreBackOfficeParameterCategoriesIndexRoute =
     path: '/parameter-categories/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeOrdersIndexRoute =
+  coreBackOfficeOrdersIndexRouteImport.update({
+    id: '/orders/',
+    path: '/orders/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeKblisIndexRoute =
   coreBackOfficeKblisIndexRouteImport.update({
     id: '/kblis/',
@@ -393,6 +401,12 @@ const coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute =
     path: '/parameter-categories/$parameterCategoriesId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeOrdersOrderIdDetailRoute =
+  coreBackOfficeOrdersOrderIdDetailRouteImport.update({
+    id: '/orders/$orderId/detail',
+    path: '/orders/$orderId/detail',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeKblisKbliIdEditRoute =
   coreBackOfficeKblisKbliIdEditRouteImport.update({
     id: '/kblis/$kbliId/edit',
@@ -448,6 +462,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
@@ -457,6 +472,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
@@ -505,6 +521,7 @@ export interface FileRoutesByTo {
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
@@ -514,6 +531,7 @@ export interface FileRoutesByTo {
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
@@ -569,6 +587,7 @@ export interface FileRoutesById {
   '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
   '/(core)/back-office/clusters/': typeof coreBackOfficeClustersIndexRoute
   '/(core)/back-office/kblis/': typeof coreBackOfficeKblisIndexRoute
+  '/(core)/back-office/orders/': typeof coreBackOfficeOrdersIndexRoute
   '/(core)/back-office/parameter-categories/': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
@@ -578,6 +597,7 @@ export interface FileRoutesById {
   '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/(core)/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/(core)/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/(core)/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
@@ -632,6 +652,7 @@ export interface FileRouteTypes {
     | '/dashboard/company/create'
     | '/back-office/clusters'
     | '/back-office/kblis'
+    | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
     | '/back-office/roles'
@@ -641,6 +662,7 @@ export interface FileRouteTypes {
     | '/dashboard/company'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
     | '/back-office/parameters/$parameterId/edit'
@@ -689,6 +711,7 @@ export interface FileRouteTypes {
     | '/dashboard/company/create'
     | '/back-office/clusters'
     | '/back-office/kblis'
+    | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
     | '/back-office/roles'
@@ -698,6 +721,7 @@ export interface FileRouteTypes {
     | '/dashboard/company'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
     | '/back-office/parameters/$parameterId/edit'
@@ -752,6 +776,7 @@ export interface FileRouteTypes {
     | '/(core)/dashboard/company/create'
     | '/(core)/back-office/clusters/'
     | '/(core)/back-office/kblis/'
+    | '/(core)/back-office/orders/'
     | '/(core)/back-office/parameter-categories/'
     | '/(core)/back-office/parameters/'
     | '/(core)/back-office/roles/'
@@ -761,6 +786,7 @@ export interface FileRouteTypes {
     | '/(core)/dashboard/company/'
     | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
+    | '/(core)/back-office/orders/$orderId/detail'
     | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/(core)/back-office/parameters/$parameterId/detail'
     | '/(core)/back-office/parameters/$parameterId/edit'
@@ -1064,6 +1090,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeParameterCategoriesIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/orders/': {
+      id: '/(core)/back-office/orders/'
+      path: '/orders'
+      fullPath: '/back-office/orders'
+      preLoaderRoute: typeof coreBackOfficeOrdersIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/': {
       id: '/(core)/back-office/kblis/'
       path: '/kblis'
@@ -1197,6 +1230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/orders/$orderId/detail': {
+      id: '/(core)/back-office/orders/$orderId/detail'
+      path: '/orders/$orderId/detail'
+      fullPath: '/back-office/orders/$orderId/detail'
+      preLoaderRoute: typeof coreBackOfficeOrdersOrderIdDetailRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/$kbliId/edit': {
       id: '/(core)/back-office/kblis/$kbliId/edit'
       path: '/kblis/$kbliId/edit'
@@ -1245,6 +1285,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
   coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute
   coreBackOfficeKblisIndexRoute: typeof coreBackOfficeKblisIndexRoute
+  coreBackOfficeOrdersIndexRoute: typeof coreBackOfficeOrdersIndexRoute
   coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute
   coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
@@ -1253,6 +1294,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
   coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
+  coreBackOfficeOrdersOrderIdDetailRoute: typeof coreBackOfficeOrdersOrderIdDetailRoute
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute
   coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute
@@ -1274,6 +1316,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
   coreBackOfficeClustersIndexRoute: coreBackOfficeClustersIndexRoute,
   coreBackOfficeKblisIndexRoute: coreBackOfficeKblisIndexRoute,
+  coreBackOfficeOrdersIndexRoute: coreBackOfficeOrdersIndexRoute,
   coreBackOfficeParameterCategoriesIndexRoute:
     coreBackOfficeParameterCategoriesIndexRoute,
   coreBackOfficeParametersIndexRoute: coreBackOfficeParametersIndexRoute,
@@ -1284,6 +1327,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeClustersClusterIdEditRoute:
     coreBackOfficeClustersClusterIdEditRoute,
   coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
+  coreBackOfficeOrdersOrderIdDetailRoute:
+    coreBackOfficeOrdersOrderIdDetailRoute,
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute:
     coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute,
   coreBackOfficeParametersParameterIdDetailRoute:

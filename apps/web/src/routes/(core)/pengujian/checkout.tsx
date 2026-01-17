@@ -227,29 +227,94 @@ function RouteComponent() {
 
     if (!cartItems) return;
 
-    const orderItems = cartItems
-      .map((company) =>
-        company.locations.map((location) => ({
-          orderData: {
-            companyId: company.id,
-          },
-          orderItems: [
-            {
-              id: location.id,
-              name: location.name,
-              items: location.clusters.flatMap((cluster) =>
-                cluster.items.map((item) => ({
-                  id: item.id,
-                  parameterId: item.parameter.id,
-                  price: item.price,
-                  quantity: item.quantity,
-                })),
-              ),
-            },
-          ],
-        })),
-      )
-      .flat();
+    /**
+     * Prepare order items payload
+     * the end payload shoulbd be like this:
+     * [
+     *    { companyId: string, items: [ { parameterId: string, quantity: number, price: number } ] }
+     * ]
+     * grouped by locationId and companyId
+     * what if there was mulitple companies in cart?
+     * then we need to group items by companyId
+     */
+
+    const groupedItemsByCompany: Record<
+      string,
+      {
+        id: string;
+        name: string;
+        items: {
+          id: string;
+          parameterId: string;
+          locationId: string;
+          quantity: number;
+          price: number;
+        }[];
+      }[]
+    > = {};
+
+    cartItems.forEach((company) => {
+      company.locations.forEach((location) => {
+        location.clusters.forEach((cluster) => {
+          cluster.items.forEach((item) => {
+            if (!groupedItemsByCompany[company.id]) {
+              groupedItemsByCompany[company.id] = [];
+            }
+            let companyEntry = groupedItemsByCompany[company.id].find(
+              (entry) => entry.id === location.id,
+            );
+            if (!companyEntry) {
+              companyEntry = {
+                id: location.id,
+                name: location.name,
+                items: [],
+              };
+              groupedItemsByCompany[company.id].push(companyEntry);
+            }
+            companyEntry.items.push({
+              id: item.id,
+              parameterId: item.parameter.id,
+              locationId: location.id,
+              quantity: item.quantity,
+              price: item.price,
+            });
+          });
+        });
+      });
+    });
+
+    const orderItems = Object.entries(groupedItemsByCompany).map(
+      ([companyId, items]) => ({
+        orderData: {
+          companyId,
+        },
+        orderItems: items,
+      }),
+    );
+
+    // const orderItems = cartItems
+    //   .map((company) =>
+    //     company.locations.map((location) => ({
+    //       orderData: {
+    //         companyId: company.id,
+    //       },
+    //       orderItems: [
+    //         {
+    //           id: location.id,
+    //           name: location.name,
+    //           items: location.clusters.flatMap((cluster) =>
+    //             cluster.items.map((item) => ({
+    //               id: item.id,
+    //               parameterId: item.parameter.id,
+    //               price: item.price,
+    //               quantity: item.quantity,
+    //             })),
+    //           ),
+    //         },
+    //       ],
+    //     })),
+    //   )
+    //   .flat();
 
     createOrderMutation.mutate(orderItems);
   };
@@ -323,9 +388,9 @@ function RouteComponent() {
           <CardContent className="h-full space-y-6">
             {mappedItems.length > 0 ? (
               <div className="max-h-[calc(100vh-300px)] space-y-6 overflow-y-auto">
-                {mappedItems.map((cluster) => {
+                {mappedItems.map((cluster, idx) => {
                   return (
-                    <div key={cluster.id} className="max-w-3xl">
+                    <div key={idx} className="max-w-3xl">
                       {/* Header */}
                       <div
                         className={cn(

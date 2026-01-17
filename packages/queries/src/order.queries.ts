@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { db } from "@tepian-k3/db/client";
 import { z } from "zod";
 import orderSchema from "@tepian-k3/schema/order.schema";
-import { Effect } from "effect";
+import { Cause, Effect, Exit } from "effect";
 import { logError } from "@tepian-k3/services/logger";
-import { and, eq, inArray } from "@tepian-k3/db";
+import { and, eq, inArray, sql } from "@tepian-k3/db";
 import {
   cart,
   order,
@@ -25,7 +25,7 @@ const orderQueries = {
         db.query.order.findMany({
           where: and(
             eq(order.userId, userId),
-            status !== "all" ? eq(order.status, status) : undefined
+            status !== "all" ? eq(order.status, status) : undefined,
           ),
           orderBy: (order, { desc }) => [desc(order.createdAt)],
         }),
@@ -39,6 +39,86 @@ const orderQueries = {
           message: "Gagal mengambil pesanan",
         });
       },
+    });
+  },
+
+  /**
+   * Get all orders with pagination (Admin)
+   */
+  getAllOrdersPaginated(
+    page: number = 1,
+    limit: number = 10,
+    status?: OrderStatus,
+    search?: string,
+  ) {
+    return Effect.gen(function* () {
+      const offset = (page - 1) * limit;
+
+      const [items, totalCount] = yield* Effect.tryPromise({
+        try: () =>
+          Promise.all([
+            db.query.order.findMany({
+              where: status ? eq(order.status, status) : undefined,
+              limit,
+              offset,
+              orderBy: (order, { desc }) => [desc(order.createdAt)],
+              with: {
+                company: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+                user: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+                testing: {
+                  columns: {
+                    id: true,
+                    testingNumber: true,
+                    status: true,
+                  },
+                },
+              },
+            }),
+            db
+              .select({ count: sql<number>`count(*)` })
+              .from(order)
+              .where(status ? eq(order.status, status) : undefined)
+              .then((result) => result[0]?.count),
+          ]),
+        catch: (error) => {
+          logError(
+            "orderQueries.getAllOrdersPaginated",
+            "Failed to fetch orders",
+            {
+              error,
+              page,
+              limit,
+              status,
+              search,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil daftar pesanan",
+          });
+        },
+      });
+
+      return {
+        data: items,
+        pagination: {
+          page,
+          limit,
+          totalPages: Math.ceil((totalCount ?? 0) / limit),
+          totalItems: totalCount,
+        },
+      };
     });
   },
 
@@ -138,6 +218,45 @@ const orderQueries = {
         db.query.order.findFirst({
           where: and(eq(order.id, orderId), eq(order.userId, userId)),
           with: {
+            company: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+            user: true,
+            items: {
+              with: {
+                parameter: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    unit: true,
+                  },
+                  with: {
+                    category: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      },
+                      with: {
+                        cluster: {
+                          columns: {
+                            id: true,
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            testing: {
+              with: {
+                worksheet: true,
+              },
+            },
             statusHistory: true,
             documents: {
               orderBy: (documents, { desc }) => [desc(documents.createdAt)],
@@ -152,7 +271,75 @@ const orderQueries = {
             error,
             orderId,
             userId,
-          }
+          },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil pesanan beserta dokumennya",
+        });
+      },
+    });
+  },
+
+  getOrderWithDocumentsAdmin(orderId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.order.findFirst({
+          where: eq(order.id, orderId),
+          with: {
+            company: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+            user: true,
+            items: {
+              with: {
+                parameter: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    unit: true,
+                  },
+                  with: {
+                    category: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      },
+                      with: {
+                        cluster: {
+                          columns: {
+                            id: true,
+                            name: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            testing: {
+              with: {
+                worksheet: true,
+              },
+            },
+            statusHistory: true,
+            documents: {
+              orderBy: (documents, { desc }) => [desc(documents.createdAt)],
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "orderQueries.getOrderWithDocuments",
+          "Failed to fetch order with documents",
+          {
+            error,
+            orderId,
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -165,7 +352,7 @@ const orderQueries = {
   createOrder(
     userId: string,
     orderData: z.infer<typeof orderSchema.createOrderSchema>,
-    orderItems: z.infer<typeof orderItemSchema.createOrderItem>[]
+    orderItems: z.infer<typeof orderItemSchema.createOrderItem>[],
   ) {
     return Effect.gen(function* () {
       // 1. Validate order items not empty
@@ -174,7 +361,7 @@ const orderQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Pesanan harus memiliki setidaknya satu item",
-          })
+          }),
         );
       }
 
@@ -184,7 +371,7 @@ const orderQueries = {
           db.query.userCompanies.findFirst({
             where: and(
               eq(userCompanies.id, orderData.companyId),
-              eq(userCompanies.userId, userId)
+              eq(userCompanies.userId, userId),
             ),
           }),
         catch: (error) => {
@@ -206,7 +393,7 @@ const orderQueries = {
             code: "FORBIDDEN",
             message:
               "Perusahaan tidak ditemukan atau Anda tidak memiliki akses",
-          })
+          }),
         );
       }
 
@@ -217,7 +404,7 @@ const orderQueries = {
           db.query.userCompanyTestingLocation.findMany({
             where: and(
               inArray(userCompanyTestingLocation.id, locationIds),
-              eq(userCompanyTestingLocation.userCompanyId, orderData.companyId)
+              eq(userCompanyTestingLocation.userCompanyId, orderData.companyId),
             ),
           }),
         catch: (error) => {
@@ -239,7 +426,7 @@ const orderQueries = {
             code: "BAD_REQUEST",
             message:
               "Satu atau lebih lokasi tidak ditemukan atau tidak dimiliki oleh perusahaan ini",
-          })
+          }),
         );
       }
 
@@ -249,9 +436,9 @@ const orderQueries = {
           total +
           location.items.reduce(
             (locationTotal, item) => locationTotal + item.price * item.quantity,
-            0
+            0,
           ),
-        0
+        0,
       );
 
       // 5. Create order and order items in a transaction
@@ -261,7 +448,7 @@ const orderQueries = {
             // Generate order number using sequence
             const orderNumber = await generateOrderNumberWithSequence(
               tx,
-              "ORD"
+              "ORD",
             );
 
             // Insert order
@@ -285,10 +472,22 @@ const orderQueries = {
               });
             }
 
+            console.log("New Order Created:", newOrder);
+            console.log("Order Items to be Created:", orderItems);
+
             // Create order items using the existing query
-            const items = await Effect.runPromise(
-              orderItemQueries.createOrderItems(tx, newOrder.id, orderItems)
+            const items = await Effect.runPromiseExit(
+              orderItemQueries.createOrderItems(tx, newOrder.id, orderItems),
             );
+
+            if (Exit.isFailure(items)) {
+              const error = Cause.squash(items.cause) as TRPCError;
+              throw new TRPCError({
+                code: error.code ?? "INTERNAL_SERVER_ERROR",
+                message: error.message || "Gagal membuat item pesanan",
+                cause: error,
+              });
+            }
 
             // Clear cart items for this company
             await tx
@@ -296,8 +495,8 @@ const orderQueries = {
               .where(
                 and(
                   eq(cart.userId, userId),
-                  eq(cart.companyId, orderData.companyId)
-                )
+                  eq(cart.companyId, orderData.companyId),
+                ),
               );
 
             // create order status history - pending
@@ -307,8 +506,8 @@ const orderQueries = {
                 newOrder.id,
                 "pending",
                 userId,
-                "Order created and is pending approval"
-              )
+                "Order created and is pending approval",
+              ),
             );
 
             return { order: newOrder, items };
@@ -321,8 +520,12 @@ const orderQueries = {
             orderItems,
           });
           throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat pesanan",
+            code:
+              error instanceof Error
+                ? (error.cause as TRPCError)?.code || "INTERNAL_SERVER_ERROR"
+                : "INTERNAL_SERVER_ERROR",
+            message:
+              error instanceof Error ? error.message : "Gagal membuat pesanan",
           });
         },
       });
@@ -339,11 +542,365 @@ const orderQueries = {
           {
             orderType: "testing",
             createdFrom: "web_interface",
-          }
-        )
+          },
+        ),
       );
 
       return result;
+    });
+  },
+
+  approveOrder(orderId: string, adminId: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is pending approval
+      const orderToApprove = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.approvalStatus, "pending"),
+            ),
+            with: {
+              user: true,
+            },
+          }),
+        catch: (error) => {
+          logError("orderQueries.approveOrder", "Failed to fetch order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToApprove) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Pesanan tidak ditemukan atau bukan dalam status pending",
+          }),
+        );
+      }
+
+      // update order approval status to approved
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ approvalStatus: "approved" })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.approveOrder", "Failed to update order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menyetujui pesanan",
+          }),
+        );
+      }
+
+      // create order status history - approved
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "in_progress",
+        adminId,
+        "Order approved by admin",
+      );
+
+      return {
+        ...updatedOrder,
+        user: orderToApprove.user,
+      };
+    });
+  },
+
+  rejectOrderApproval(orderId: string, adminId: string, reason: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is pending approval
+      const orderToReject = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.approvalStatus, "pending"),
+            ),
+            with: {
+              user: true,
+            },
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.rejectOrderApproval",
+            "Failed to fetch order",
+            {
+              error,
+              orderId,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToReject) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Pesanan tidak ditemukan atau bukan dalam status pending",
+          }),
+        );
+      }
+
+      // update order approval status to rejected
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ approvalStatus: "rejected" })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.rejectOrderApproval",
+            "Failed to update order",
+            {
+              error,
+              orderId,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menolak persetujuan pesanan",
+          }),
+        );
+      }
+
+      // create order status history - rejected
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "rejected",
+        adminId,
+        `Order approval rejected by admin. Reason: ${reason}`,
+      );
+
+      return { ...updatedOrder, user: orderToReject.user };
+    });
+  },
+
+  verifyPayment(orderId: string, adminId: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is unpaid
+      const orderToVerify = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.paymentStatus, "unpaid"),
+            ),
+            with: {
+              user: true,
+            },
+          }),
+        catch: (error) => {
+          logError("orderQueries.verifyPayment", "Failed to fetch order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToVerify) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Pesanan tidak ditemukan atau sudah terverifikasi",
+          }),
+        );
+      }
+
+      // update order payment status to paid
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ paymentStatus: "paid" })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.verifyPayment", "Failed to update order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memverifikasi pembayaran pesanan",
+          }),
+        );
+      }
+
+      // create order status history - paid
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "confirmed",
+        adminId,
+        "Order payment verified by admin",
+      );
+
+      return { ...updatedOrder, user: orderToVerify.user };
+    });
+  },
+
+  rejectPayment(orderId: string, adminId: string, reason: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is unpaid
+      const orderToReject = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.paymentStatus, "unpaid"),
+            ),
+            with: {
+              user: true,
+            },
+          }),
+        catch: (error) => {
+          logError("orderQueries.rejectPayment", "Failed to fetch order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToReject) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Pesanan tidak ditemukan atau sudah terverifikasi",
+          }),
+        );
+      }
+
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ paymentStatus: "rejected" })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.rejectPayment", "Failed to update order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menolak pembayaran pesanan",
+          }),
+        );
+      }
+
+      // create order status history - payment rejected
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "rejected",
+        adminId,
+        `Order payment rejected by admin. Reason: ${reason}`,
+      );
+
+      return { ...orderToReject };
+    });
+  },
+
+  /**
+   * Create testing from order
+   * Delegates to testingQueries.createTestingFromOrder
+   */
+  createTestingFromOrder(orderId: string) {
+    // Import here to avoid circular dependency
+    // The actual implementation is in testing.queries.ts
+    return Effect.tryPromise({
+      try: async () => {
+        const testingQueries = await import("./testing.queries");
+        return Effect.runPromise(
+          testingQueries.default.createTestingFromOrder(orderId),
+        );
+      },
+      catch: (error) => {
+        logError(
+          "orderQueries.createTestingFromOrder",
+          "Failed to create testing from order",
+          {
+            error,
+            orderId,
+          },
+        );
+
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal membuat testing dari order",
+        });
+      },
     });
   },
 };

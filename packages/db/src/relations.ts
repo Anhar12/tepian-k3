@@ -88,7 +88,7 @@ export const userCompanyRelations = relations(
     documents: many(documents, {
       relationName: "userCompanyDocuments",
     }),
-  })
+  }),
 );
 
 export const userCompanyTestingLocationRelations = relations(
@@ -106,7 +106,7 @@ export const userCompanyTestingLocationRelations = relations(
       fields: [userCompanyTestingLocation.districtId],
       references: [districts.id],
     }),
-  })
+  }),
 );
 
 export const userRoleRelations = relations(userRoles, ({ one }) => ({
@@ -136,7 +136,7 @@ export const rolePermissionRelations = relations(
       fields: [rolePermissions.permissionId],
       references: [permission.id],
     }),
-  })
+  }),
 );
 
 export const userPermissionsRelations = relations(
@@ -150,7 +150,7 @@ export const userPermissionsRelations = relations(
       fields: [userPermissions.permissionId],
       references: [permission.id],
     }),
-  })
+  }),
 );
 
 export const toolsRelations = relations(tools, ({ many }) => ({
@@ -170,7 +170,7 @@ export const parameterCategoriesRelations = relations(
       references: [clusters.id],
     }),
     parameters: many(parameters),
-  })
+  }),
 );
 
 export const parametersRelations = relations(parameters, ({ one, many }) => ({
@@ -247,7 +247,10 @@ export const orderRelations = relations(order, ({ one, many }) => ({
     fields: [order.companyId],
     references: [userCompanies.id],
   }),
-  testing: many(testing),
+  testing: one(testing, {
+    fields: [order.id],
+    references: [testing.id],
+  }),
   items: many(orderItem),
   statusHistory: many(orderStatusHistory),
   // Polymorphic relation: documents where entityType = 'order' and entityId = order.id
@@ -288,6 +291,10 @@ export const testingRelations = relations(testing, ({ one, many }) => ({
     fields: [testing.testingType],
     references: [parameterCategories.id],
   }),
+  worksheet: one(worksheets, {
+    fields: [testing.id],
+    references: [worksheets.testingId],
+  }),
   items: many(testingItem),
   // Polymorphic relation: documents where entityType = 'testing' and entityId = testing.id
   documents: many(documents, {
@@ -321,7 +328,7 @@ export const orderStatusHistoryRelations = relations(
       fields: [orderStatusHistory.orderId],
       references: [order.id],
     }),
-  })
+  }),
 );
 
 export const documentsRelations = relations(documents, ({ one, many }) => ({
@@ -371,7 +378,7 @@ export const documentVerificationsRelations = relations(
       fields: [documentVerifications.verifiedByUserId],
       references: [users.id],
     }),
-  })
+  }),
 );
 
 export const documentSignaturesRelations = relations(
@@ -385,7 +392,7 @@ export const documentSignaturesRelations = relations(
       fields: [documentSignatures.signedByUserId],
       references: [users.id],
     }),
-  })
+  }),
 );
 
 export const employeeRelations = relations(employees, ({ one }) => ({
@@ -412,7 +419,7 @@ export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
     fields: [worksheets.createdBy],
     references: [users.id],
   }),
-  assignment: many(worksheetAssignments),
+  assignments: many(worksheetAssignments),
   items: many(worksheetItems),
   tools: many(worksheetTools),
   notes: many(worksheetNotes),
@@ -470,5 +477,5 @@ export const worksheetAssignmentRelations = relations(
       fields: [worksheetAssignments.assignedBy],
       references: [users.id],
     }),
-  })
+  }),
 );

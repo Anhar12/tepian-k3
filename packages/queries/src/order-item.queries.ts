@@ -22,7 +22,7 @@ const orderItemQueries = {
         logError(
           "orderItemQueries.getOrderItemsByOrderId",
           "Failed to fetch order items",
-          { error, orderId }
+          { error, orderId },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -35,7 +35,7 @@ const orderItemQueries = {
   createOrderItems(
     tx: DBorTx,
     orderId: string,
-    orderItems: z.infer<typeof orderItemSchema.createOrderItem>[]
+    orderItems: z.infer<typeof orderItemSchema.createOrderItem>[],
   ) {
     return Effect.gen(function* () {
       // 1. Check if orderItems is empty
@@ -44,20 +44,20 @@ const orderItemQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Item pesanan tidak boleh kosong",
-          })
+          }),
         );
       }
 
       // 2. Validate quantities
       const invalidQuantity = orderItems.some((item) =>
-        item.items.some((subItem) => subItem.quantity <= 0)
+        item.items.some((subItem) => subItem.quantity <= 0),
       );
       if (invalidQuantity) {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Kuantitas item harus lebih besar dari 0",
-          })
+          }),
         );
       }
 
@@ -71,7 +71,7 @@ const orderItemQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Parameter duplikat ditemukan untuk lokasi yang sama",
-          })
+          }),
         );
       }
 
@@ -89,7 +89,7 @@ const orderItemQueries = {
             {
               error,
               locationIds,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -103,24 +103,26 @@ const orderItemQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Satu atau lebih lokasi tidak ditemukan",
-          })
+          }),
         );
       }
 
       // 5. Validate parameters and prices
       const parameterIds = orderItems.flatMap((item) =>
-        item.items.map((subItem) => subItem.parameterId)
+        item.items.map((subItem) => subItem.parameterId),
       );
+      // filter out duplicates
+      const uniqueParameterIds = Array.from(new Set(parameterIds));
       const params = yield* Effect.tryPromise({
         try: () =>
           tx.query.parameters.findMany({
-            where: inArray(parameters.id, parameterIds),
+            where: inArray(parameters.id, uniqueParameterIds),
           }),
         catch: (error) => {
           logError(
             "orderItemQueries.createOrderItems",
             "Failed to validate parameters",
-            { error, parameterIds }
+            { error, uniqueParameterIds },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -129,12 +131,12 @@ const orderItemQueries = {
         },
       });
 
-      if (params.length !== parameterIds.length) {
+      if (params.length !== uniqueParameterIds.length) {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Satu atau lebih parameter tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -142,8 +144,8 @@ const orderItemQueries = {
       const priceMap = new Map(params.map((p) => [p.id, p.price]));
       const invalidPrice = orderItems.some((item) =>
         item.items.some(
-          (subItem) => priceMap.get(subItem.parameterId) !== subItem.price
-        )
+          (subItem) => priceMap.get(subItem.parameterId) !== subItem.price,
+        ),
       );
       if (invalidPrice) {
         return yield* Effect.fail(
@@ -151,7 +153,7 @@ const orderItemQueries = {
             code: "BAD_REQUEST",
             message:
               "Terjadi ketidaksesuaian harga. Silakan segarkan dan coba lagi.",
-          })
+          }),
         );
       }
 
@@ -163,7 +165,7 @@ const orderItemQueries = {
           price: subItem.price,
           quantity: subItem.quantity,
           subTotal: subItem.price * subItem.quantity,
-        }))
+        })),
       );
 
       const insertedItems = yield* Effect.tryPromise({
@@ -172,7 +174,7 @@ const orderItemQueries = {
           logError(
             "orderItemQueries.createOrderItems",
             "Failed to create order items",
-            { error, orderId, mappedItems }
+            { error, orderId, mappedItems },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -186,7 +188,7 @@ const orderItemQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Tidak ada item pesanan yang dibuat",
-          })
+          }),
         );
       }
 

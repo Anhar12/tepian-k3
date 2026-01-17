@@ -177,4 +177,15 @@ export const RateLimiterPresets = {
     blockDuration: 3600,
     strategy: "sliding-window" as const,
   },
+
+  /**
+   * this is for development environment only
+   * unlimited requests
+   * Development Mode: 10000 requests per minute
+   */
+  DEV_MODE: {
+    points: 10000,
+    duration: 60,
+    strategy: "sliding-window" as const,
+  },
 } as const;

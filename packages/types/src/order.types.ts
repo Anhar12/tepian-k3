@@ -3,6 +3,34 @@ import type { InferQueryModel } from "./utils.types";
 
 export type Order = typeof order.$inferSelect;
 
+export type PaginatedOrder = InferQueryModel<
+  "order",
+  {
+    with: {
+      company: {
+        columns: {
+          id: true;
+          name: true;
+        };
+      };
+      user: {
+        columns: {
+          id: true;
+          name: true;
+          email: true;
+        };
+      };
+      testing: {
+        columns: {
+          id: true;
+          testingNumber: true;
+          status: true;
+        };
+      };
+    };
+  }
+>;
+
 export type OrderWithHistory = InferQueryModel<
   "order",
   {

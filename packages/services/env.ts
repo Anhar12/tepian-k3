@@ -3,7 +3,9 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    // NODE_ENV: z.enum(["development", "production", "test"]),
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
     BASE_URL: z.url(),
     STORAGE_TYPE: z.enum(["filesystem", "s3", "minio"]).default("filesystem"),
     UPLOADS_DIR: z.string().default("uploads"),

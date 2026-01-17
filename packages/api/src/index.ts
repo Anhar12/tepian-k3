@@ -399,6 +399,11 @@ export const withRateLimit = <TInput = unknown>(
     const rawInput = await getRawInput();
     const key = getKey ? getKey(ctx, rawInput as TInput) : ctx.ip;
 
+    // should skip rate limiting for localhost IPs or dev mode
+    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+      return next({ ctx });
+    }
+
     // Check rate limit
     const result = await limiter.consume(key);
 
@@ -465,6 +470,11 @@ export const withProtectedRateLimit = <TInput = unknown>(
     const key = getKey
       ? getKey(ctx, rawInput as TInput)
       : `user:${ctx.user.id}`;
+
+    // should skip rate limiting for localhost IPs or dev mode
+    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+      return next({ ctx });
+    }
 
     // Check rate limit
     const result = await limiter.consume(key);
@@ -544,6 +554,11 @@ export const withRoleBasedRateLimit = <TInput = unknown>(
     const key = getKey
       ? getKey(ctx, rawInput as TInput)
       : `${operation}:${ctx.user.id}`;
+
+    // should skip rate limiting for localhost IPs or dev mode
+    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+      return next({ ctx });
+    }
 
     // Check rate limit
     const result = await limiter.consume(key);
@@ -643,6 +658,11 @@ export const withPermissionAndRateLimit = <TInput = unknown>(
     const key = getKey
       ? getKey(ctx, rawInput as TInput)
       : `${operation}:${ctx.user.id}`;
+
+    // should skip rate limiting for localhost IPs or dev mode
+    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+      return next({ ctx });
+    }
 
     // 6. Check rate limit
     const result = await limiter.consume(key);

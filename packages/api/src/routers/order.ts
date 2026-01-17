@@ -2,6 +2,7 @@ import orderQueries from "@tepian-k3/queries/order.queries";
 import {
   createTRPCRouter,
   protectedProcedure,
+  withPermission,
   withProtectedRateLimit,
 } from "..";
 import z from "zod";
@@ -23,30 +24,46 @@ import {
   documentSigningService,
 } from "@tepian-k3/services/document-signing";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { emailService } from "@tepian-k3/services/email";
+import { forEach } from "effect/Chunk";
 
 export const orderRouter = createTRPCRouter({
   getAllOrders: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         status: z.enum(["all", ...ORDER_STATUS]).optional(),
-      })
+      }),
     )
     .query(
       async ({ input, ctx }) =>
         await runEffect(
-          orderQueries.getAllOrderByUserId(ctx.user.id, input.status)
-        )
+          orderQueries.getAllOrderByUserId(ctx.user.id, input.status),
+        ),
+    ),
+
+  getAllOrdersPaginated: withPermission("orders.read")
+    .input(orderSchema.getAllOrdersSchema)
+    .query(
+      async ({ input }) =>
+        await runEffect(
+          orderQueries.getAllOrdersPaginated(
+            input.page,
+            input.perPage,
+            input.status,
+            input.search,
+          ),
+        ),
     ),
 
   getOrderById: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         orderId: z.string(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const order = await runEffect(
-        orderQueries.getOrderById(input.orderId, ctx.user.id)
+        orderQueries.getOrderById(input.orderId, ctx.user.id),
       );
 
       if (!order) {
@@ -63,11 +80,32 @@ export const orderRouter = createTRPCRouter({
     .input(
       z.object({
         orderId: z.string(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const order = await runEffect(
-        orderQueries.getOrderWithDocuments(input.orderId, ctx.user.id)
+        orderQueries.getOrderWithDocuments(input.orderId, ctx.user.id),
+      );
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order tidak ditemukan",
+        });
+      }
+
+      return order;
+    }),
+
+  getOrderWithDocumentsAdmin: withPermission("orders.read")
+    .input(
+      z.object({
+        orderId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const order = await runEffect(
+        orderQueries.getOrderWithDocumentsAdmin(input.orderId),
       );
 
       if (!order) {
@@ -87,7 +125,7 @@ export const orderRouter = createTRPCRouter({
         letterNumber: z.string(),
         referenceNumber: z.string(),
         referenceDate: z.string(),
-      })
+      }),
     )
     .mutation(
       async ({ input, ctx }) =>
@@ -96,7 +134,7 @@ export const orderRouter = createTRPCRouter({
             // 1. Get order data
             const order = yield* orderQueries.getOrderWithCompanyAndItems(
               input.orderId,
-              ctx.user.id
+              ctx.user.id,
             );
 
             if (!order) {
@@ -104,7 +142,7 @@ export const orderRouter = createTRPCRouter({
                 new TRPCError({
                   code: "NOT_FOUND",
                   message: "Order tidak ditemukan",
-                })
+                }),
               );
             }
 
@@ -130,7 +168,7 @@ export const orderRouter = createTRPCRouter({
                 logoUrl: storageService.getAssetUrl("assets/kemnaker.png"),
                 qrCodeDataURL,
                 verificationURL,
-              })
+              }),
             );
 
             // 5. Upload FINAL PDF
@@ -140,7 +178,7 @@ export const orderRouter = createTRPCRouter({
                 filename,
                 folder: "offering-letters",
                 contentType: "application/pdf",
-              }
+              },
             );
 
             // 6. Create document record
@@ -168,7 +206,7 @@ export const orderRouter = createTRPCRouter({
               uploadedFile.key,
               finalPdfBuffer as Buffer,
               ctx.user.id,
-              verificationToken // Reuse the same token from step 2
+              verificationToken, // Reuse the same token from step 2
             );
 
             // 8. Store signature ke database
@@ -182,15 +220,15 @@ export const orderRouter = createTRPCRouter({
               url: storageService.getPublicUrl(uploadedFile.key),
               verificationURL,
             };
-          })
-        )
+          }),
+        ),
     ),
 
   generateInvoice: protectedProcedure
     .input(
       z.object({
         orderId: z.string(),
-      })
+      }),
     )
     .mutation(
       async ({ input, ctx }) =>
@@ -199,7 +237,7 @@ export const orderRouter = createTRPCRouter({
             // 1. Get order data
             const order = yield* orderQueries.getOrderWithCompanyAndItems(
               input.orderId,
-              ctx.user.id
+              ctx.user.id,
             );
 
             if (!order) {
@@ -244,7 +282,7 @@ export const orderRouter = createTRPCRouter({
                 filename,
                 folder: "invoices",
                 contentType: "application/pdf",
-              }
+              },
             );
 
             // 6. Create document record
@@ -272,7 +310,7 @@ export const orderRouter = createTRPCRouter({
               uploadedFile.key,
               finalPdfBuffer as Buffer,
               ctx.user.id,
-              verificationToken // Reuse the same token from step 2
+              verificationToken, // Reuse the same token from step 2
             );
 
             // 8. Store signature ke database
@@ -286,8 +324,8 @@ export const orderRouter = createTRPCRouter({
               url: storageService.getPublicUrl(uploadedFile.key),
               verificationURL,
             };
-          })
-        )
+          }),
+        ),
     ),
 
   createOrder: withProtectedRateLimit(rateLimiters.moderate())
@@ -296,15 +334,299 @@ export const orderRouter = createTRPCRouter({
         z.object({
           orderData: orderSchema.createOrderSchema,
           orderItems: z.array(orderItemSchema.createOrderItem),
-        })
-      )
+        }),
+      ),
     )
-    .mutation(async ({ input, ctx }) =>
-      input.map(
-        async ({ orderData, orderItems }) =>
-          await runEffect(
-            orderQueries.createOrder(ctx.user.id, orderData, orderItems)
-          )
-      )
+    .mutation(async ({ input, ctx }) => {
+      await runEffect(
+        Effect.gen(function* () {
+          const createdOrders = yield* Effect.forEach(input, (orderPayload) =>
+            orderQueries.createOrder(
+              ctx.user.id,
+              orderPayload.orderData,
+              orderPayload.orderItems,
+            ),
+          );
+          return createdOrders;
+        }),
+      );
+
+      return { success: true };
+    }),
+
+  // Admin procedures
+  approveOrder: withPermission("orders.update")
+    .input(
+      z.object({
+        orderId: z.string(),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Update order approval status
+            const order = yield* orderQueries.approveOrder(
+              input.orderId,
+              ctx.user.id,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
+
+            // // Send notification email to customer
+            // yield* Effect.tryPromise(() =>
+            //   emailService.send({
+            //     to: order.user.email,
+            //     subject: `Order #${order.orderNumber} Telah Disetujui`,
+            //     template: "order-approved",
+            //     data: {
+            //       customerName: order.user.name,
+            //       orderNumber: order.orderNumber,
+            //       note: input.note,
+            //     },
+            //   })
+            // );
+
+            return order;
+          }),
+        ),
+    ),
+
+  rejectOrderApproval: withPermission("orders.update")
+    .input(
+      z.object({
+        orderId: z.string(),
+        reason: z.string().min(10, "Alasan penolakan minimal 10 karakter"),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Update order approval status to rejected
+            const order = yield* orderQueries.rejectOrderApproval(
+              input.orderId,
+              ctx.user.id,
+              input.reason,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
+
+            // // Send notification email to customer
+            // yield* Effect.tryPromise(() =>
+            //   emailService.sendEmail({
+            //     to: order.user.email,
+            //     subject: `Order #${order.orderNumber} Ditolak`,
+            //     template: "order-rejected",
+            //     data: {
+            //       customerName: order.user.name,
+            //       orderNumber: order.orderNumber,
+            //       reason: input.reason,
+            //     },
+            //   }),
+            // );
+
+            return order;
+          }),
+        ),
+    ),
+
+  verifyPayment: withPermission("orders.update")
+    .input(
+      z.object({
+        orderId: z.string(),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Update payment status to paid
+            const order = yield* orderQueries.verifyPayment(
+              input.orderId,
+              ctx.user.id,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
+
+            // // Send notification email to customer
+            // yield* Effect.tryPromise(() =>
+            //   emailService.sendEmail({
+            //     to: order.user.email,
+            //     subject: `Pembayaran Order #${order.orderNumber} Terverifikasi`,
+            //     template: "payment-verified",
+            //     data: {
+            //       customerName: order.user.name,
+            //       orderNumber: order.orderNumber,
+            //       note: input.note,
+            //     },
+            //   }),
+            // );
+
+            return order;
+          }),
+        ),
+    ),
+
+  rejectPayment: withPermission("orders.update")
+    .input(
+      z.object({
+        orderId: z.string(),
+        reason: z.string().min(10, "Alasan penolakan minimal 10 karakter"),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Update payment status to rejected
+            const order = yield* orderQueries.rejectPayment(
+              input.orderId,
+              ctx.user.id,
+              input.reason,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
+
+            // // Send notification email to customer
+            // yield* Effect.tryPromise(() =>
+            //   emailService.sendEmail({
+            //     to: order.user.email,
+            //     subject: `Pembayaran Order #${order.orderNumber} Ditolak`,
+            //     template: "payment-rejected",
+            //     data: {
+            //       customerName: order.user.name,
+            //       orderNumber: order.orderNumber,
+            //       reason: input.reason,
+            //     },
+            //   }),
+            // );
+
+            return order;
+          }),
+        ),
+    ),
+
+  notifyCustomer: withPermission("notifications.create")
+    .input(
+      z.object({
+        orderId: z.string(),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Get order with documents
+            const order = yield* orderQueries.getOrderWithDocuments(
+              input.orderId,
+              ctx.user.id,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
+
+            // Get document URLs
+            const offeringLetter = order.documents.find(
+              (doc) => doc.type === "offering_document",
+            );
+            const invoice = order.documents.find(
+              (doc) => doc.type === "invoice",
+            );
+
+            if (!offeringLetter || !invoice) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Dokumen penagihan belum lengkap",
+                }),
+              );
+            }
+
+            // // Send notification email with document links
+            // yield* Effect.tryPromise(() =>
+            //   emailService.sendEmail({
+            //     to: order.user.email,
+            //     subject: `Dokumen Penagihan Order #${order.orderNumber}`,
+            //     template: "billing-documents",
+            //     data: {
+            //       customerName: order.user.name,
+            //       orderNumber: order.orderNumber,
+            //       offeringLetterUrl: storageService.getPublicUrl(
+            //         offeringLetter.fileUrl,
+            //       ),
+            //       invoiceUrl: storageService.getPublicUrl(invoice.fileUrl),
+            //     },
+            //   }),
+            // );
+
+            return { success: true };
+          }),
+        ),
+    ),
+
+  createTesting: withPermission("testing.create")
+    .input(
+      z.object({
+        orderId: z.string(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Create testing record from order
+            const testing = yield* orderQueries.createTestingFromOrder(
+              input.orderId,
+            );
+
+            if (!testing) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal membuat testing record",
+                }),
+              );
+            }
+
+            return testing;
+          }),
+        ),
     ),
 });

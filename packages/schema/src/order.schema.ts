@@ -1,3 +1,4 @@
+import { ORDER_STATUS } from "@tepian-k3/constants";
 import { order } from "@tepian-k3/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
@@ -36,6 +37,13 @@ const uploadAssignmentLetterSchema = z.object({
   assignmentLetter: z.file().max(5 * 1024 * 1024),
 });
 
+const getAllOrdersSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  perPage: z.coerce.number().int().positive().max(100).default(10),
+  status: z.enum(ORDER_STATUS).optional(),
+  search: z.string().optional(),
+});
+
 const orderSchema = {
   createOrderSchema,
   rejectApproveOrderSchema,
@@ -45,6 +53,7 @@ const orderSchema = {
   uploadInvoiceSchema,
   uploadProofOfPaymentSchema,
   uploadAssignmentLetterSchema,
+  getAllOrdersSchema,
 };
 
 export default orderSchema;

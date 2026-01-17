@@ -9,6 +9,7 @@ import {
   IconFolderCog,
   IconLayersSubtract,
   IconShieldCheckFilled,
+  IconShoppingCart,
   IconTools,
   IconUserPlus,
   IconUsers,
@@ -25,6 +26,12 @@ export const backOfficeMenu: {
       title: "Dashboard",
       url: urlStarter,
       icon: IconDashboard,
+    },
+    {
+      title: "Orders",
+      url: `${urlStarter}/orders`,
+      icon: IconShoppingCart,
+      permission: "orders.read",
     },
     {
       title: "Worksheets",
