@@ -2,16 +2,21 @@ import * as React from "react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Mail, MapPin, PhoneCall, User } from "lucide-react";
+import { Home, Mail, MapPin, PhoneCall, User } from "lucide-react";
+import { Button } from "./ui/button";
+import { useNavigate } from "@tanstack/react-router";
 
 export function WorksheetSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const navigate = useNavigate();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -78,9 +83,16 @@ export function WorksheetSidebar({
           </div>
         </div>
       </SidebarContent>
-      {/* <SidebarFooter>
-          <NavUser />
-        </SidebarFooter> */}
+      <SidebarFooter>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={() => navigate({ to: "/dashboard" })}
+        >
+          <Home className="size-5" />
+          Back to Dashboard
+        </Button>
+      </SidebarFooter>
     </Sidebar>
   );
 }

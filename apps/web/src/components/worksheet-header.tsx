@@ -3,26 +3,35 @@ import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
 import { getRouteApi } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 
 const navItems: {
+  href: string;
+  location: string;
   tabs: string;
   label: string;
   shortLabel: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
 }[] = [
   {
+    href: "/worksheets/",
+    location: "worksheets",
     tabs: "parameter",
     label: "Parameter",
     shortLabel: "Parameter",
     icon: Beaker,
   },
   {
+    href: "/worksheets/jadwal-personil",
+    location: "jadwal-personil",
     tabs: "jadwal-personil",
     label: "Jadwal Personil",
     shortLabel: "Jadwal",
     icon: CalendarDays,
   },
   {
+    href: "/worksheets/detail-transaksi",
+    location: "detail-transaksi",
     tabs: "detail-transaksi",
     label: "Detail Transaksi",
     shortLabel: "Transaksi",
@@ -30,12 +39,9 @@ const navItems: {
   },
 ];
 
-type TabsEnum = "parameter" | "jadwal-personil" | "detail-transaksi";
-
 export function WorksheetHeader() {
   const route = getRouteApi("/(core)/worksheets");
-  const { tabs } = route.useSearch();
-
+  const location = useLocation();
   const navigate = route.useNavigate();
 
   return (
@@ -50,7 +56,16 @@ export function WorksheetHeader() {
         <nav className="flex items-center gap-1 border-b border-border px-2 sm:px-4">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = tabs === item.tabs;
+            const cleanPath = location.pathname.replace(/\/$/, "") || "/";
+            const segments = cleanPath.split("/").filter(Boolean);
+            const isSegmentOnlyHasOnePart = segments.length === 1;
+            const lastSegment = segments[segments.length - 1];
+
+            const isActive =
+              item.location === lastSegment ||
+              (isSegmentOnlyHasOnePart &&
+                item.location === segments[0] &&
+                item.location === "worksheets");
             return (
               <button
                 key={item.tabs}
@@ -62,7 +77,8 @@ export function WorksheetHeader() {
                 )}
                 onClick={() => {
                   navigate({
-                    search: (old) => ({ ...old, tabs: item.tabs as TabsEnum }),
+                    to: item.href,
+                    search: (old) => ({ ...old }),
                   });
                 }}
               >

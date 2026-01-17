@@ -32,9 +32,12 @@ import { Route as corePelatihanRouteRouteImport } from './routes/(core)/pelatiha
 import { Route as coreKonsultasiRouteRouteImport } from './routes/(core)/konsultasi/route'
 import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
 import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
+import { Route as coreWorksheetsIndexRouteImport } from './routes/(core)/worksheets/index'
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
+import { Route as coreWorksheetsJadwalPersonilRouteImport } from './routes/(core)/worksheets/jadwal-personil'
+import { Route as coreWorksheetsDetailTransaksiRouteImport } from './routes/(core)/worksheets/detail-transaksi'
 import { Route as corePengujianTransaksiRouteImport } from './routes/(core)/pengujian/transaksi'
 import { Route as corePengujianSurveyKepuasanRouteImport } from './routes/(core)/pengujian/survey-kepuasan'
 import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
@@ -181,6 +184,11 @@ const coreBackOfficeRouteRoute = coreBackOfficeRouteRouteImport.update({
   path: '/back-office',
   getParentRoute: () => coreRouteRoute,
 } as any)
+const coreWorksheetsIndexRoute = coreWorksheetsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => coreWorksheetsRouteRoute,
+} as any)
 const corePengujianIndexRoute = corePengujianIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -196,6 +204,18 @@ const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => coreBackOfficeRouteRoute,
 } as any)
+const coreWorksheetsJadwalPersonilRoute =
+  coreWorksheetsJadwalPersonilRouteImport.update({
+    id: '/jadwal-personil',
+    path: '/jadwal-personil',
+    getParentRoute: () => coreWorksheetsRouteRoute,
+  } as any)
+const coreWorksheetsDetailTransaksiRoute =
+  coreWorksheetsDetailTransaksiRouteImport.update({
+    id: '/detail-transaksi',
+    path: '/detail-transaksi',
+    getParentRoute: () => coreWorksheetsRouteRoute,
+  } as any)
 const corePengujianTransaksiRoute = corePengujianTransaksiRouteImport.update({
   id: '/transaksi',
   path: '/transaksi',
@@ -397,7 +417,7 @@ export interface FileRoutesByFullPath {
   '/pelatihan': typeof corePelatihanRouteRoute
   '/pengujian': typeof corePengujianRouteRouteWithChildren
   '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
-  '/worksheets': typeof coreWorksheetsRouteRoute
+  '/worksheets': typeof coreWorksheetsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -412,9 +432,12 @@ export interface FileRoutesByFullPath {
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
+  '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
+  '/worksheets/jadwal-personil': typeof coreWorksheetsJadwalPersonilRoute
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
+  '/worksheets/': typeof coreWorksheetsIndexRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -452,7 +475,6 @@ export interface FileRoutesByTo {
   '/konsultasi': typeof coreKonsultasiRouteRoute
   '/pelatihan': typeof corePelatihanRouteRoute
   '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
-  '/worksheets': typeof coreWorksheetsRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
@@ -467,9 +489,12 @@ export interface FileRoutesByTo {
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
+  '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
+  '/worksheets/jadwal-personil': typeof coreWorksheetsJadwalPersonilRoute
   '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
+  '/worksheets': typeof coreWorksheetsIndexRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -513,7 +538,7 @@ export interface FileRoutesById {
   '/(core)/pelatihan': typeof corePelatihanRouteRoute
   '/(core)/pengujian': typeof corePengujianRouteRouteWithChildren
   '/(core)/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
-  '/(core)/worksheets': typeof coreWorksheetsRouteRoute
+  '/(core)/worksheets': typeof coreWorksheetsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
@@ -528,9 +553,12 @@ export interface FileRoutesById {
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
   '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/(core)/pengujian/transaksi': typeof corePengujianTransaksiRoute
+  '/(core)/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
+  '/(core)/worksheets/jadwal-personil': typeof coreWorksheetsJadwalPersonilRoute
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
+  '/(core)/worksheets/': typeof coreWorksheetsIndexRoute
   '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
   '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -588,9 +616,12 @@ export interface FileRouteTypes {
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
     | '/pengujian/transaksi'
+    | '/worksheets/detail-transaksi'
+    | '/worksheets/jadwal-personil'
     | '/back-office/'
     | '/dashboard/'
     | '/pengujian/'
+    | '/worksheets/'
     | '/back-office/clusters/create'
     | '/back-office/kblis/create'
     | '/back-office/parameter-categories/create'
@@ -628,7 +659,6 @@ export interface FileRouteTypes {
     | '/konsultasi'
     | '/pelatihan'
     | '/uji-kompetensi'
-    | '/worksheets'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -643,9 +673,12 @@ export interface FileRouteTypes {
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
     | '/pengujian/transaksi'
+    | '/worksheets/detail-transaksi'
+    | '/worksheets/jadwal-personil'
     | '/back-office'
     | '/dashboard'
     | '/pengujian'
+    | '/worksheets'
     | '/back-office/clusters/create'
     | '/back-office/kblis/create'
     | '/back-office/parameter-categories/create'
@@ -703,9 +736,12 @@ export interface FileRouteTypes {
     | '/(core)/pengujian/status'
     | '/(core)/pengujian/survey-kepuasan'
     | '/(core)/pengujian/transaksi'
+    | '/(core)/worksheets/detail-transaksi'
+    | '/(core)/worksheets/jadwal-personil'
     | '/(core)/back-office/'
     | '/(core)/dashboard/'
     | '/(core)/pengujian/'
+    | '/(core)/worksheets/'
     | '/(core)/back-office/clusters/create'
     | '/(core)/back-office/kblis/create'
     | '/(core)/back-office/parameter-categories/create'
@@ -909,6 +945,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeRouteRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/worksheets/': {
+      id: '/(core)/worksheets/'
+      path: '/'
+      fullPath: '/worksheets/'
+      preLoaderRoute: typeof coreWorksheetsIndexRouteImport
+      parentRoute: typeof coreWorksheetsRouteRoute
+    }
     '/(core)/pengujian/': {
       id: '/(core)/pengujian/'
       path: '/'
@@ -929,6 +972,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/back-office/'
       preLoaderRoute: typeof coreBackOfficeIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/worksheets/jadwal-personil': {
+      id: '/(core)/worksheets/jadwal-personil'
+      path: '/jadwal-personil'
+      fullPath: '/worksheets/jadwal-personil'
+      preLoaderRoute: typeof coreWorksheetsJadwalPersonilRouteImport
+      parentRoute: typeof coreWorksheetsRouteRoute
+    }
+    '/(core)/worksheets/detail-transaksi': {
+      id: '/(core)/worksheets/detail-transaksi'
+      path: '/detail-transaksi'
+      fullPath: '/worksheets/detail-transaksi'
+      preLoaderRoute: typeof coreWorksheetsDetailTransaksiRouteImport
+      parentRoute: typeof coreWorksheetsRouteRoute
     }
     '/(core)/pengujian/transaksi': {
       id: '/(core)/pengujian/transaksi'
@@ -1282,6 +1339,21 @@ const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
 const corePengujianRouteRouteWithChildren =
   corePengujianRouteRoute._addFileChildren(corePengujianRouteRouteChildren)
 
+interface coreWorksheetsRouteRouteChildren {
+  coreWorksheetsDetailTransaksiRoute: typeof coreWorksheetsDetailTransaksiRoute
+  coreWorksheetsJadwalPersonilRoute: typeof coreWorksheetsJadwalPersonilRoute
+  coreWorksheetsIndexRoute: typeof coreWorksheetsIndexRoute
+}
+
+const coreWorksheetsRouteRouteChildren: coreWorksheetsRouteRouteChildren = {
+  coreWorksheetsDetailTransaksiRoute: coreWorksheetsDetailTransaksiRoute,
+  coreWorksheetsJadwalPersonilRoute: coreWorksheetsJadwalPersonilRoute,
+  coreWorksheetsIndexRoute: coreWorksheetsIndexRoute,
+}
+
+const coreWorksheetsRouteRouteWithChildren =
+  coreWorksheetsRouteRoute._addFileChildren(coreWorksheetsRouteRouteChildren)
+
 interface coreRouteRouteChildren {
   coreBackOfficeRouteRoute: typeof coreBackOfficeRouteRouteWithChildren
   coreDashboardRouteRoute: typeof coreDashboardRouteRouteWithChildren
@@ -1289,7 +1361,7 @@ interface coreRouteRouteChildren {
   corePelatihanRouteRoute: typeof corePelatihanRouteRoute
   corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
-  coreWorksheetsRouteRoute: typeof coreWorksheetsRouteRoute
+  coreWorksheetsRouteRoute: typeof coreWorksheetsRouteRouteWithChildren
   coreDocumentRoute: typeof coreDocumentRoute
   corePdfEditorRoute: typeof corePdfEditorRoute
   coreProfileRoute: typeof coreProfileRoute
@@ -1303,7 +1375,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   corePelatihanRouteRoute: corePelatihanRouteRoute,
   corePengujianRouteRoute: corePengujianRouteRouteWithChildren,
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
-  coreWorksheetsRouteRoute: coreWorksheetsRouteRoute,
+  coreWorksheetsRouteRoute: coreWorksheetsRouteRouteWithChildren,
   coreDocumentRoute: coreDocumentRoute,
   corePdfEditorRoute: corePdfEditorRoute,
   coreProfileRoute: coreProfileRoute,

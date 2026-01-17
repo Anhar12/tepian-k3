@@ -8,9 +8,6 @@ import z from "zod";
 export const Route = createFileRoute("/(core)/worksheets")({
   validateSearch: z.object({
     worksheetId: z.uuidv7(),
-    tabs: z
-      .enum(["parameter", "jadwal-personil", "detail-transaksi"])
-      .default("parameter"),
   }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
