@@ -19,7 +19,7 @@ import { useMemo, useState } from "react";
 export const Route = createFileRoute("/(core)/back-office/roles/")({
   validateSearch: rolesSchema.getAllRolesSchema,
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "roles.read" }),
+    await requirePermission(context, { permission: "roles.view" }),
   component: RouteComponent,
 });
 

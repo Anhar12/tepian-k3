@@ -14,7 +14,7 @@ export const Route = createFileRoute(
   }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: ["parameter.read", "parameter-tool.read"],
+      permission: ["parameters.read", "parameter-tool.view"],
     }),
   params: z.object({
     parameterId: z.string(),

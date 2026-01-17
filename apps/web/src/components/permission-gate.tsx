@@ -1,10 +1,11 @@
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { Permission } from "@tepian-k3/constants";
 import type { ReactNode } from "react";
 
 interface PermissionGateProps {
   /** Single permission or array of permissions to check */
-  permission: string | string[];
+  permission: Permission | Permission[];
   /** If true, user must have ALL permissions. If false, user needs at least ONE permission */
   requireAll?: boolean;
   /** Content to render if user has permission */

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/(core)/back-office/kblis/")({
   validateSearch: kbliSchema.getAllKBLISchema,
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: "parameters.read",
+      permission: "parameters.view",
     }),
   component: RouteComponent,
 });

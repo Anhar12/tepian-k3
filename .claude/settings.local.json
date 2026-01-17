@@ -23,7 +23,8 @@
       "Bash(then echo \"$file\")",
       "Bash(fi)",
       "Bash(done)",
-      "Bash(pnpm -F @tepian-k3/queries exec tsc:*)"
+      "Bash(pnpm -F @tepian-k3/queries exec tsc:*)",
+      "Bash(pnpm tsc:*)"
     ]
   }
 }

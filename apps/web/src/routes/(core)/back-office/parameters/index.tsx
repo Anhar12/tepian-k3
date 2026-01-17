@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import parameterSchema from "@tepian-k3/schema/parameter.schema";
 import { PlusCircle } from "lucide-react";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/(core)/back-office/parameters/")({
   validateSearch: parameterSchema.getAllParametersSchema,
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: "parameters.read",
+      permission: "parameters.view",
     }),
   component: RouteComponent,
 });

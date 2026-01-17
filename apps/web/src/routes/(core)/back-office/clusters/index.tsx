@@ -19,7 +19,7 @@ import { useMemo, useState } from "react";
 export const Route = createFileRoute("/(core)/back-office/clusters/")({
   validateSearch: clusterSchema.getAllClustersSchema,
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "clusters.read" }),
+    await requirePermission(context, { permission: "clusters.view" }),
   component: RouteComponent,
 });
 
