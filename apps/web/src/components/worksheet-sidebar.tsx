@@ -47,7 +47,9 @@ export function WorksheetSidebar({
           </div>
 
           {/* Company Name */}
-          <h2 className="text-center text-lg font-semibold">Company Name</h2>
+          <h2 className="text-center text-lg font-semibold">
+            Long ass company name that might overflow
+          </h2>
 
           {/* Company Details */}
           <div className="flex flex-col gap-4">

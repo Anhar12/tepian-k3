@@ -19,7 +19,7 @@ function RouteComponent() {
   const router = useRouter();
 
   return (
-    <div className="container mx-auto max-w-4xl">
+    <div className="container mx-auto max-w-4xl py-4">
       {/* Back button */}
       <Button
         variant="ghost"
