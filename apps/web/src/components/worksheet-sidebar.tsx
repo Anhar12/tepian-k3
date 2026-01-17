@@ -2,13 +2,12 @@ import * as React from "react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Mail, MapIcon, MapPin, PhoneCall, User } from "lucide-react";
+import { Mail, MapPin, PhoneCall, User } from "lucide-react";
 
 export function WorksheetSidebar({
   ...props
