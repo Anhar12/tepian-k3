@@ -63,6 +63,7 @@ import { cn } from "@/lib/utils";
 import { toFormData } from "@/utils/form-data-mapper";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { getPublicUrl } from "@/utils/url";
+import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation";
 
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
@@ -190,19 +191,7 @@ function RouteComponent() {
   );
 
   // Document upload mutation
-  const uploadDocumentMutation = useMutation(
-    trpc.document.uploadDocument.mutationOptions({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
-        );
-        globalSuccessToast("Dokumen berhasil diunggah");
-      },
-      onError: (error) => {
-        globalErrorToast("Gagal mengunggah dokumen: " + error.message);
-      },
-    }),
-  );
+  const { uploadDocument } = useUploadDocumentMutation({ orderId });
 
   // Notify customer mutation
   const notifyCustomerMutation = useMutation(
@@ -259,79 +248,77 @@ function RouteComponent() {
   const handleUploadOfferingLetter = async () => {
     if (!offeringLetter.file) return;
 
-    offeringLetter.setUploading(true);
-    try {
-      const formData = toFormData({
-        title: "Surat Penawaran",
-        entityType: "order",
-        entityId: orderId,
-        type: "offering_document",
-        file: offeringLetter.file,
-      });
-
-      await uploadDocumentMutation.mutateAsync(formData);
-
-      offeringLetter.reset();
-    } finally {
-      offeringLetter.setUploading(false);
-    }
+    await uploadDocument({
+      title: "Surat Penawaran",
+      type: "offering_document",
+      file: offeringLetter.file,
+      onMutate: () => {
+        offeringLetter.setUploading(true);
+      },
+      onSuccess: () => {
+        offeringLetter.reset();
+      },
+      onSettled: () => {
+        offeringLetter.setUploading(false);
+      },
+    });
   };
 
   const handleUploadApprovalLetter = async () => {
     if (!approvalLetter.file) return;
 
-    approvalLetter.setUploading(true);
-    try {
-      const formData = toFormData({
-        title: "Surat Persetujuan",
-        entityType: "order",
-        entityId: orderId,
-        type: "approval_letter",
-        file: approvalLetter.file,
-      });
-      await uploadDocumentMutation.mutateAsync(formData);
-      approvalLetter.reset();
-    } finally {
-      approvalLetter.setUploading(false);
-    }
+    await uploadDocument({
+      title: "Surat Persetujuan",
+      type: "approval_letter",
+      file: approvalLetter.file,
+      onMutate: () => {
+        approvalLetter.setUploading(true);
+      },
+      onSuccess: () => {
+        approvalLetter.reset();
+      },
+      onSettled: () => {
+        approvalLetter.setUploading(false);
+      },
+    });
   };
 
   const handleUploadCooperationAgreement = async () => {
     if (!cooperationAgreement.file) return;
 
-    cooperationAgreement.setUploading(true);
-    try {
-      const formData = toFormData({
-        title: "Perjanjian Kerjasama",
-        entityType: "order",
-        entityId: orderId,
-        type: "cooperation_agreement",
-        file: cooperationAgreement.file,
-      });
-      await uploadDocumentMutation.mutateAsync(formData);
-      cooperationAgreement.reset();
-    } finally {
-      cooperationAgreement.setUploading(false);
-    }
+    await uploadDocument({
+      title: "Perjanjian Kerjasama",
+      type: "cooperation_agreement",
+      file: cooperationAgreement.file,
+      onMutate: () => {
+        cooperationAgreement.setUploading(true);
+      },
+      onSuccess: () => {
+        cooperationAgreement.reset();
+      },
+      onSettled: () => {
+        cooperationAgreement.setUploading(false);
+      },
+    });
   };
 
   const handleUploadInvoice = async () => {
     if (!invoice.file) return;
 
-    invoice.setUploading(true);
-    try {
-      const formData = toFormData({
-        title: "Invoice",
-        entityType: "order",
-        entityId: orderId,
-        type: "invoice",
-        file: invoice.file,
-      });
-      await uploadDocumentMutation.mutateAsync(formData);
-      invoice.reset();
-    } finally {
-      invoice.setUploading(false);
-    }
+    await uploadDocument({
+      title: "Invoice",
+      type: "invoice",
+      file: invoice.file,
+      onMutate: () => {
+        invoice.setUploading(true);
+      },
+      onSuccess: () => {
+        invoice.reset();
+      },
+      onSettled: () => {
+        invoice.setUploading(false);
+      },
+    });
   };
 
   const handleNotifyCustomer = () => {
