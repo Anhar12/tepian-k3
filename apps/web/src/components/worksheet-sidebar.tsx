@@ -8,14 +8,51 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Home, Mail, MapPin, PhoneCall, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Building2,
+  Calendar,
+  ClipboardList,
+  Home,
+  Loader2,
+  Mail,
+  MapPin,
+  PhoneCall,
+  User,
+} from "lucide-react";
 import { Button } from "./ui/button";
-import { useNavigate } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
+import {
+  WORKSHEET_STATUS_LABELS,
+  type WorksheetStatus,
+} from "@tepian-k3/constants";
+
+const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
+  draft: "bg-gray-100 text-gray-700",
+  in_progress: "bg-blue-100 text-blue-700",
+  completed: "bg-green-100 text-green-700",
+  approved: "bg-emerald-100 text-emerald-700",
+  rejected: "bg-red-100 text-red-700",
+};
+
+const routeApi = getRouteApi("/(core)/worksheets");
 
 export function WorksheetSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
+  const { worksheetId } = routeApi.useSearch();
+
+  const { data: worksheet, isLoading } = useQuery(
+    trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+  );
+
+  const company = worksheet?.testing?.order?.company;
+  const testing = worksheet?.testing;
+  const order = worksheet?.testing?.order;
+  const mainSupervisor = worksheet?.mainSupervisor;
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -39,49 +76,143 @@ export function WorksheetSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="p-4">
-        {/* Worksheet sidebar content goes here */}
-        <div className="mx-auto flex flex-col gap-12">
-          {/* Company Picture */}
-          <div className="flex justify-center">
-            <img
-              src="https://picsum.photos/200"
-              alt="Company"
-              className="size-48 rounded-lg object-cover"
-            />
+        {isLoading ? (
+          <div className="flex h-64 items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-
-          {/* Company Name */}
-          <h2 className="text-center text-lg font-semibold">
-            Long ass company name that might overflow
-          </h2>
-
-          {/* Company Details */}
-          <div className="flex flex-col gap-4">
-            {/* Address */}
-            <div className="flex flex-row gap-4">
-              <MapPin className="size-5 text-gray-500" />
-              <span className="text-gray-700">123 Main St, City, Country</span>
+        ) : worksheet ? (
+          <div className="mx-auto flex flex-col gap-6">
+            {/* Company Picture */}
+            <div className="flex justify-center">
+              <div className="flex size-32 items-center justify-center rounded-lg bg-muted">
+                <Building2 className="size-16 text-muted-foreground" />
+              </div>
             </div>
 
-            {/* Contact Person */}
-            <div className="flex flex-row gap-4">
-              <User className="size-5 text-gray-500" />
-              <span className="text-gray-700">John Doe</span>
+            {/* Company Name */}
+            <div className="text-center">
+              <h2 className="text-lg font-semibold">
+                {company?.name ?? "Unknown Company"}
+              </h2>
+              {worksheet.status && (
+                <Badge
+                  className={`mt-2 ${WORKSHEET_STATUS_COLORS[worksheet.status]}`}
+                >
+                  {WORKSHEET_STATUS_LABELS[worksheet.status]}
+                </Badge>
+              )}
             </div>
 
-            {/* Contact Number */}
-            <div className="flex flex-row gap-4">
-              <PhoneCall className="size-5 text-gray-500" />
-              <span className="text-gray-700">+1 234 567 890</span>
+            {/* Worksheet Info */}
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <div className="flex items-center gap-2 text-sm">
+                <ClipboardList className="size-4 text-muted-foreground" />
+                <span className="font-medium">Testing:</span>
+                <span className="text-muted-foreground">
+                  {testing?.testingNumber ?? "N/A"}
+                </span>
+              </div>
+              {order?.orderNumber && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <ClipboardList className="size-4 text-muted-foreground" />
+                  <span className="font-medium">Order:</span>
+                  <span className="text-muted-foreground">
+                    {order.orderNumber}
+                  </span>
+                </div>
+              )}
+              {worksheet.startDate && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <Calendar className="size-4 text-muted-foreground" />
+                  <span className="font-medium">Mulai:</span>
+                  <span className="text-muted-foreground">
+                    {new Date(worksheet.startDate).toLocaleDateString("id-ID")}
+                  </span>
+                </div>
+              )}
+              {worksheet.endDate && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <Calendar className="size-4 text-muted-foreground" />
+                  <span className="font-medium">Selesai:</span>
+                  <span className="text-muted-foreground">
+                    {new Date(worksheet.endDate).toLocaleDateString("id-ID")}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Contact Email */}
-            <div className="flex flex-row gap-4">
-              <Mail className="size-5 text-gray-500" />
-              <span className="text-gray-700">contact@example.com</span>
+            {/* Company Details */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Detail Perusahaan
+              </h3>
+              {/* Address */}
+              {company?.address && (
+                <div className="flex gap-3">
+                  <MapPin className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.address}
+                  </span>
+                </div>
+              )}
+
+              {/* Contact Person */}
+              {company?.responsibleTestingPerson && (
+                <div className="flex gap-3">
+                  <User className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.responsibleTestingPerson}
+                  </span>
+                </div>
+              )}
+
+              {/* Contact Number */}
+              {company?.responsibleTestingPersonPhone && (
+                <div className="flex gap-3">
+                  <PhoneCall className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.responsibleTestingPersonPhone}
+                  </span>
+                </div>
+              )}
+
+              {/* Contact Email */}
+              {company?.responsibleTestingPersonEmail && (
+                <div className="flex gap-3">
+                  <Mail className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.responsibleTestingPersonEmail}
+                  </span>
+                </div>
+              )}
             </div>
+
+            {/* Supervisor Info */}
+            {mainSupervisor && (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-muted-foreground">
+                  Supervisor
+                </h3>
+                <div className="flex gap-3">
+                  <User className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {mainSupervisor.user?.name ?? mainSupervisor.name ?? "N/A"}
+                  </span>
+                </div>
+                {mainSupervisor.position && (
+                  <div className="ml-7 text-xs text-muted-foreground">
+                    {mainSupervisor.position}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
+            <ClipboardList className="size-8" />
+            <span className="text-sm">Worksheet tidak ditemukan</span>
+          </div>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <Button

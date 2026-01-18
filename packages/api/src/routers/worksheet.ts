@@ -4,15 +4,13 @@ import { z } from "zod";
 import { db } from "@tepian-k3/db/client";
 import { worksheetItems } from "@tepian-k3/db/schema";
 import { eq, sql } from "@tepian-k3/db";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  withPermission,
-} from "../index";
+import { createTRPCRouter, protectedProcedure, withPermission } from "../index";
 import worksheetQueries from "@tepian-k3/queries/worksheet.queries";
+import testingQueries from "@tepian-k3/queries/testing.queries";
 import worksheetSchema from "@tepian-k3/schema/worksheet.schema";
 import { runEffect } from "../utils/run-effect";
-import { WORKSHEET_STATUS, WORKSHEET_NOTE_STATUS } from "@tepian-k3/constants";
+import { WORKSHEET_STATUS } from "@tepian-k3/constants";
+import { logError } from "@tepian-k3/services/logger";
 
 export const worksheetRouter = createTRPCRouter({
   /**
@@ -23,18 +21,22 @@ export const worksheetRouter = createTRPCRouter({
     .query(
       async ({ input }) =>
         await runEffect(
-          worksheetQueries.getAllWorksheets(input.page, input.perPage, input.status)
-        )
+          worksheetQueries.getAllWorksheets(
+            input.page,
+            input.perPage,
+            input.status,
+          ),
+        ),
     ),
 
   /**
    * Get worksheet by ID with all relations
    */
   getWorksheetById: withPermission("worksheets.read")
-    .input(z.object({ worksheetId: z.string().uuid() }))
+    .input(z.object({ worksheetId: z.uuidv7() }))
     .query(async ({ input }) => {
       const worksheet = await runEffect(
-        worksheetQueries.getWorksheetById(input.worksheetId)
+        worksheetQueries.getWorksheetById(input.worksheetId),
       );
 
       if (!worksheet) {
@@ -51,10 +53,12 @@ export const worksheetRouter = createTRPCRouter({
    * Get worksheets by testing ID
    */
   getWorksheetsByTestingId: withPermission("worksheets.read")
-    .input(z.object({ testingId: z.string().uuid() }))
+    .input(z.object({ testingId: z.uuidv7() }))
     .query(
       async ({ input }) =>
-        await runEffect(worksheetQueries.getWorksheetsByTestingId(input.testingId))
+        await runEffect(
+          worksheetQueries.getWorksheetsByTestingId(input.testingId),
+        ),
     ),
 
   /**
@@ -70,9 +74,9 @@ export const worksheetRouter = createTRPCRouter({
             ctx.user.id,
             input.startDate,
             input.mainSupervisorId,
-            input.accompanyingSupervisorId
-          )
-        )
+            input.accompanyingSupervisorId,
+          ),
+        ),
     ),
 
   /**
@@ -88,9 +92,9 @@ export const worksheetRouter = createTRPCRouter({
             input.status,
             ctx.user.id,
             input.endDate,
-            input.result
-          )
-        )
+            input.result,
+          ),
+        ),
     ),
 
   /**
@@ -105,9 +109,9 @@ export const worksheetRouter = createTRPCRouter({
             input.worksheetId,
             input.mainSupervisorId ?? undefined,
             input.accompanyingSupervisorId ?? undefined,
-            ctx.user.id
-          )
-        )
+            ctx.user.id,
+          ),
+        ),
     ),
 
   /**
@@ -123,9 +127,9 @@ export const worksheetRouter = createTRPCRouter({
             input.itemId,
             input.value,
             input.note,
-            input.isReady
-          )
-        )
+            input.isReady,
+          ),
+        ),
     ),
 
   /**
@@ -138,7 +142,7 @@ export const worksheetRouter = createTRPCRouter({
         Effect.gen(function* () {
           // Verify worksheet exists
           const worksheet = yield* worksheetQueries.getWorksheetById(
-            input.worksheetId
+            input.worksheetId,
           );
 
           if (!worksheet) {
@@ -146,7 +150,7 @@ export const worksheetRouter = createTRPCRouter({
               new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
-              })
+              }),
             );
           }
 
@@ -176,6 +180,14 @@ export const worksheetRouter = createTRPCRouter({
                 return updatedItems;
               }),
             catch: (error) => {
+              logError(
+                "worksheetRouter.batchUpdateItems",
+                "Failed to update worksheet items",
+                {
+                  input,
+                  error,
+                },
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal memperbarui worksheet items",
@@ -187,7 +199,7 @@ export const worksheetRouter = createTRPCRouter({
             updatedCount: results.length,
             items: results,
           };
-        })
+        }),
       );
     }),
 
@@ -201,7 +213,7 @@ export const worksheetRouter = createTRPCRouter({
         Effect.gen(function* () {
           // Verify worksheet exists
           const worksheet = yield* worksheetQueries.getWorksheetById(
-            input.worksheetId
+            input.worksheetId,
           );
 
           if (!worksheet) {
@@ -209,7 +221,7 @@ export const worksheetRouter = createTRPCRouter({
               new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
-              })
+              }),
             );
           }
 
@@ -221,11 +233,19 @@ export const worksheetRouter = createTRPCRouter({
                   worksheetQueries.assignToolsToWorksheet(
                     tx,
                     input.worksheetId,
-                    input.toolIds
-                  )
+                    input.toolIds,
+                  ),
                 );
               }),
             catch: (error) => {
+              logError(
+                "worksheetRouter.assignTools",
+                "Failed to assign tools to worksheet",
+                {
+                  input,
+                  error,
+                },
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal mengassign alat ke worksheet",
@@ -234,7 +254,7 @@ export const worksheetRouter = createTRPCRouter({
           });
 
           return results;
-        })
+        }),
       );
     }),
 
@@ -248,7 +268,7 @@ export const worksheetRouter = createTRPCRouter({
         Effect.gen(function* () {
           // Verify worksheet exists
           const worksheet = yield* worksheetQueries.getWorksheetById(
-            input.worksheetId
+            input.worksheetId,
           );
 
           if (!worksheet) {
@@ -256,7 +276,7 @@ export const worksheetRouter = createTRPCRouter({
               new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
-              })
+              }),
             );
           }
 
@@ -269,11 +289,19 @@ export const worksheetRouter = createTRPCRouter({
                     tx,
                     input.worksheetId,
                     input.employeeIds,
-                    ctx.user.id
-                  )
+                    ctx.user.id,
+                  ),
                 );
               }),
             catch: (error) => {
+              logError(
+                "worksheetRouter.assignEmployees",
+                "Failed to assign employees to worksheet",
+                {
+                  input,
+                  error,
+                },
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal mengassign personil ke worksheet",
@@ -282,7 +310,7 @@ export const worksheetRouter = createTRPCRouter({
           });
 
           return results;
-        })
+        }),
       );
     }),
 
@@ -296,7 +324,7 @@ export const worksheetRouter = createTRPCRouter({
         Effect.gen(function* () {
           // Verify worksheet exists
           const worksheet = yield* worksheetQueries.getWorksheetById(
-            input.worksheetId
+            input.worksheetId,
           );
 
           if (!worksheet) {
@@ -304,7 +332,7 @@ export const worksheetRouter = createTRPCRouter({
               new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
-              })
+              }),
             );
           }
 
@@ -318,11 +346,16 @@ export const worksheetRouter = createTRPCRouter({
                     input.worksheetId,
                     input.note,
                     ctx.user.id,
-                    input.severity
-                  )
+                    input.severity,
+                  ),
                 );
               }),
             catch: (error) => {
+              logError(
+                "worksheetRouter.addNote",
+                "Failed to add note to worksheet",
+                { input, error },
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal menambahkan catatan",
@@ -331,7 +364,7 @@ export const worksheetRouter = createTRPCRouter({
           });
 
           return result;
-        })
+        }),
       );
     }),
 
@@ -345,7 +378,7 @@ export const worksheetRouter = createTRPCRouter({
         Effect.gen(function* () {
           // Verify worksheet exists and is in_progress
           const worksheet = yield* worksheetQueries.getWorksheetById(
-            input.worksheetId
+            input.worksheetId,
           );
 
           if (!worksheet) {
@@ -353,7 +386,7 @@ export const worksheetRouter = createTRPCRouter({
               new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
-              })
+              }),
             );
           }
 
@@ -361,8 +394,9 @@ export const worksheetRouter = createTRPCRouter({
             return yield* Effect.fail(
               new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Worksheet harus dalam status 'in_progress' untuk diselesaikan",
-              })
+                message:
+                  "Worksheet harus dalam status 'in_progress' untuk diselesaikan",
+              }),
             );
           }
 
@@ -373,10 +407,17 @@ export const worksheetRouter = createTRPCRouter({
             return yield* Effect.fail(
               new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Semua item worksheet harus ditandai 'ready' sebelum menyelesaikan",
-              })
+                message:
+                  "Semua item worksheet harus ditandai 'ready' sebelum menyelesaikan",
+              }),
             );
           }
+
+          // Sync worksheet values to testing items
+          yield* worksheetQueries.syncWorksheetToTesting(
+            input.worksheetId,
+            ctx.user.id,
+          );
 
           // Update status to completed
           const result = yield* worksheetQueries.updateWorksheetStatus(
@@ -384,11 +425,43 @@ export const worksheetRouter = createTRPCRouter({
             "completed",
             ctx.user.id,
             new Date().toISOString(),
-            input.result
+            input.result,
           );
 
+          // Check if all worksheets for this testing are completed
+          // If so, update testing status to testing_completed
+          if (worksheet.testing?.id) {
+            const allWorksheets =
+              yield* worksheetQueries.getWorksheetsByTestingId(
+                worksheet.testing.id,
+              );
+
+            const allCompleted = allWorksheets.every(
+              (ws) => ws.id === input.worksheetId || ws.status === "completed",
+            );
+
+            if (allCompleted && allWorksheets.length > 0) {
+              yield* testingQueries.updateTestingStatus(
+                worksheet.testing.id,
+                "completed",
+                "Semua worksheet telah selesai",
+              );
+            }
+          }
+
           return result;
-        })
+        }),
+      );
+    }),
+
+  /**
+   * Sync worksheet values to testing items manually
+   */
+  syncToTesting: withPermission("worksheets.update")
+    .input(z.object({ worksheetId: z.uuidv7() }))
+    .mutation(async ({ input, ctx }) => {
+      return await runEffect(
+        worksheetQueries.syncWorksheetToTesting(input.worksheetId, ctx.user.id),
       );
     }),
 
@@ -401,7 +474,7 @@ export const worksheetRouter = createTRPCRouter({
         page: z.number().min(1).default(1),
         perPage: z.number().min(1).max(100).default(10),
         status: z.enum(WORKSHEET_STATUS).optional(),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       return await runEffect(
@@ -412,35 +485,36 @@ export const worksheetRouter = createTRPCRouter({
               const offset = (input.page - 1) * input.perPage;
 
               // Query worksheets assigned to current user
-              const assignedWorksheets = await db.query.worksheetAssignments.findMany({
-                where: (assignments, { eq }) => {
-                  // We need to find assignments for this user's employee record
-                  return eq(assignments.assignedBy, ctx.user.id); // This is a workaround - ideally should check employee.userId
-                },
-                with: {
-                  worksheet: {
-                    with: {
-                      testing: {
-                        with: {
-                          order: {
-                            with: {
-                              company: {
-                                columns: { id: true, name: true },
+              const assignedWorksheets =
+                await db.query.worksheetAssignments.findMany({
+                  where: (assignments, { eq }) => {
+                    // We need to find assignments for this user's employee record
+                    return eq(assignments.assignedBy, ctx.user.id); // This is a workaround - ideally should check employee.userId
+                  },
+                  with: {
+                    worksheet: {
+                      with: {
+                        testing: {
+                          with: {
+                            order: {
+                              with: {
+                                company: {
+                                  columns: { id: true, name: true },
+                                },
                               },
                             },
                           },
                         },
-                      },
-                      items: true,
-                      mainSupervisor: {
-                        with: { user: { columns: { id: true, name: true } } },
+                        items: true,
+                        mainSupervisor: {
+                          with: { user: { columns: { id: true, name: true } } },
+                        },
                       },
                     },
                   },
-                },
-                limit: input.perPage,
-                offset,
-              });
+                  limit: input.perPage,
+                  offset,
+                });
 
               // Extract unique worksheets
               const worksheets = assignedWorksheets.map((a) => a.worksheet);
@@ -450,12 +524,19 @@ export const worksheetRouter = createTRPCRouter({
                 pagination: {
                   page: input.page,
                   limit: input.perPage,
-                  totalPages: Math.ceil(assignedWorksheets.length / input.perPage),
+                  totalPages: Math.ceil(
+                    assignedWorksheets.length / input.perPage,
+                  ),
                   totalItems: assignedWorksheets.length,
                 },
               };
             },
             catch: (error) => {
+              logError(
+                "worksheetRouter.getMyAssignedWorksheets",
+                "Failed to get assigned worksheets for user",
+                { input, userId: ctx.user.id, error },
+              );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal mengambil worksheet yang ditugaskan",
@@ -464,7 +545,7 @@ export const worksheetRouter = createTRPCRouter({
           });
 
           return result;
-        })
+        }),
       );
     }),
 });

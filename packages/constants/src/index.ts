@@ -146,6 +146,25 @@ export const TESTING_STATUS_LABELS: Record<TestingStatus, string> = {
   completed: "Completed",
 };
 
+export const TESTING_STATUS_COLORS: Record<TestingStatus, string> = {
+  start_testing: "bg-blue-100 text-blue-700",
+  sample_submission: "bg-indigo-100 text-indigo-700",
+  sample_analysis: "bg-purple-100 text-purple-700",
+  report_generation: "bg-amber-100 text-amber-700",
+  report_publishing: "bg-orange-100 text-orange-700",
+  completed: "bg-green-100 text-green-700",
+};
+
+export const TESTING_DOCUMENT_TYPES = [
+  { value: "testing_report", label: "Laporan Pengujian" },
+  { value: "lab_certificate", label: "Sertifikat Lab" },
+  { value: "sample_analysis", label: "Analisis Sampel" },
+  { value: "calibration_certificate", label: "Sertifikat Kalibrasi" },
+] as const;
+
+export type TestingDocumentType =
+  (typeof TESTING_DOCUMENT_TYPES)[number]["value"];
+
 export const REDIS_CHANNEL = "tepian-k3-events";
 
 export const AUDIT_ACTIONS = [
@@ -287,6 +306,14 @@ export const WORKSHEET_STATUS_LABELS: Record<WorksheetStatus, string> = {
   completed: "Completed",
   approved: "Approved",
   rejected: "Rejected",
+};
+
+export const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
+  draft: "bg-gray-100 text-gray-700",
+  in_progress: "bg-blue-100 text-blue-700",
+  completed: "bg-green-100 text-green-700",
+  approved: "bg-emerald-100 text-emerald-700",
+  rejected: "bg-red-100 text-red-700",
 };
 
 export const WORKSHEET_NOTE_STATUS = [

@@ -29,20 +29,23 @@ import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { usePagination } from "@/lib/pagination";
 import { TabsContent } from "@radix-ui/react-tabs";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import {
   TOOLS_AVAILABILITY,
   TOOLS_AVAILABILITY_LABELS,
   TOOLS_CONDITIONS,
   TOOLS_CONDITIONS_LABELS,
+  WORKSHEET_NOTE_STATUS,
   type ToolsAvailability,
   type ToolsCondition,
+  type WorksheetNoteStatus,
 } from "@tepian-k3/constants";
 import {
   AlertCircle,
   AlertTriangle,
   CheckCircle2,
   ClipboardList,
+  Loader2,
   MessageSquare,
   Package,
   Search,
@@ -51,6 +54,9 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/(core)/worksheets/")({
   validateSearch: z.object({
@@ -61,481 +67,154 @@ export const Route = createFileRoute("/(core)/worksheets/")({
   component: RouteComponent,
 });
 
+const routeApi = getRouteApi("/(core)/worksheets");
+
 interface Tool {
   id: string;
-  code: string;
-  name: string;
+  toolCode: string;
+  toolName: string;
   condition: ToolsCondition;
   availability: ToolsAvailability;
   selected?: boolean;
 }
 
-interface Consumable {
-  id: number;
-  name: string;
-  unit: string;
-  required: number;
-  stock: number;
-  status: "sufficient" | "low";
-  parameterIds: number[]; // Which parameters need this material
+interface WorksheetItemWithMeta {
+  id: string;
+  parameterId: string;
+  parameterName: string;
+  clusterName: string;
+  categoryName: string;
+  quantity: number;
+  value: number | null;
+  note: string | null;
+  isReady: boolean;
+  locationName: string;
 }
 
-interface Parameter {
-  id: number;
-  cluster: string;
-  jenisPengujian: string;
-  parameter: string;
-  jumlah: number;
-  acuan: string;
-  peralatan: string;
-  jumlahPeralatan: number;
-  ready: boolean;
+interface WorksheetNote {
+  id: string;
+  note: string;
+  severity: WorksheetNoteStatus;
+  createdAt: string;
+  createdBy: {
+    id: string;
+    name: string;
+  };
 }
-
-const initialToolsData: Tool[] = [
-  {
-    id: "TL001",
-    code: "SLM-001",
-    name: "Sound Level Meter",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL002",
-    code: "SLM-002",
-    name: "Sound Level Meter",
-    condition: "baik",
-    availability: "kalibrasi",
-    selected: false,
-  },
-  {
-    id: "TL003",
-    code: "LUX-001",
-    name: "Lux Meter",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL004",
-    code: "LUX-002",
-    name: "Lux Meter",
-    condition: "diperingatkan",
-    availability: "maintenance",
-    selected: false,
-  },
-  {
-    id: "TL005",
-    code: "HSM-001",
-    name: "Heat Stress Monitor",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL006",
-    code: "HSM-002",
-    name: "Heat Stress Monitor",
-    condition: "rusak",
-    availability: "not_ready",
-    selected: false,
-  },
-  {
-    id: "TL007",
-    code: "VBM-001",
-    name: "Vibration Meter WB/HA",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL008",
-    code: "VBM-002",
-    name: "Vibration Meter WB/HA",
-    condition: "baik",
-    availability: "dipinjam",
-    selected: false,
-  },
-  {
-    id: "TL009",
-    code: "UVM-001",
-    name: "UV Meter A",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL010",
-    code: "UVM-002",
-    name: "UV Meter B",
-    condition: "tidak_menyala",
-    availability: "not_ready",
-    selected: false,
-  },
-  {
-    id: "TL011",
-    code: "NDM-001",
-    name: "Noise Dosimeter",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL012",
-    code: "IMP-001",
-    name: "Impinger",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL013",
-    code: "IMP-002",
-    name: "Impinger",
-    condition: "baik",
-    availability: "kalibrasi",
-    selected: false,
-  },
-  {
-    id: "TL014",
-    code: "VCP-001",
-    name: "Vacuum Pump",
-    condition: "baik",
-    availability: "ready",
-    selected: false,
-  },
-  {
-    id: "TL015",
-    code: "MAS-001",
-    name: "Microbiology Air Sampler",
-    condition: "baik",
-    availability: "maintenance",
-    selected: false,
-  },
-];
-
-const initialConsumablesData: Consumable[] = [
-  {
-    id: 1,
-    name: "Parameter SO2",
-    unit: "pcs",
-    required: 0,
-    stock: 50,
-    status: "sufficient",
-    parameterIds: [7],
-  }, // SO2 parameter
-  {
-    id: 2,
-    name: "Parameter O3",
-    unit: "pcs",
-    required: 0,
-    stock: 30,
-    status: "sufficient",
-    parameterIds: [7],
-  }, // Related to SO2
-  {
-    id: 3,
-    name: "Filter Membran",
-    unit: "box",
-    required: 0,
-    stock: 12,
-    status: "sufficient",
-    parameterIds: [4, 6],
-  }, // Debu Total, Opasitas
-  {
-    id: 4,
-    name: "Silica Gel",
-    unit: "kg",
-    required: 0,
-    stock: 8,
-    status: "sufficient",
-    parameterIds: [4, 5, 7],
-  }, // Debu Total, Gas CO, SO2
-  {
-    id: 5,
-    name: "Aquades",
-    unit: "liter",
-    required: 0,
-    stock: 25,
-    status: "sufficient",
-    parameterIds: [7, 8, 9],
-  }, // SO2, pH, BOD
-  {
-    id: 6,
-    name: "HCL",
-    unit: "liter",
-    required: 0,
-    stock: 3,
-    status: "low",
-    parameterIds: [7],
-  }, // SO2
-  {
-    id: 7,
-    name: "H2SO4",
-    unit: "liter",
-    required: 0,
-    stock: 5,
-    status: "sufficient",
-    parameterIds: [7, 9],
-  }, // SO2, BOD
-  {
-    id: 8,
-    name: "NaOH",
-    unit: "kg",
-    required: 0,
-    stock: 2,
-    status: "low",
-    parameterIds: [8],
-  }, // pH
-  {
-    id: 9,
-    name: "Indikator pH",
-    unit: "botol",
-    required: 0,
-    stock: 15,
-    status: "sufficient",
-    parameterIds: [8],
-  }, // pH
-  {
-    id: 10,
-    name: "Kertas Saring",
-    unit: "pack",
-    required: 0,
-    stock: 20,
-    status: "sufficient",
-    parameterIds: [4, 6],
-  }, // Debu Total, Opasitas
-  {
-    id: 11,
-    name: "Charcoal Tube",
-    unit: "pcs",
-    required: 0,
-    stock: 100,
-    status: "sufficient",
-    parameterIds: [5],
-  }, // Gas CO
-  {
-    id: 12,
-    name: "Calibration Gas",
-    unit: "tabung",
-    required: 0,
-    stock: 5,
-    status: "sufficient",
-    parameterIds: [5],
-  }, // Gas CO
-  {
-    id: 13,
-    name: "Media Agar",
-    unit: "pack",
-    required: 0,
-    stock: 10,
-    status: "sufficient",
-    parameterIds: [9],
-  }, // BOD
-  {
-    id: 14,
-    name: "Alkohol 70%",
-    unit: "liter",
-    required: 0,
-    stock: 8,
-    status: "sufficient",
-    parameterIds: [1, 2, 3, 10],
-  }, // General cleaning
-];
-
-const initialNotes = [
-  {
-    id: 1,
-    author: "Arif Budiman",
-    initials: "AB",
-    message: "Pastikan penyimpanan charcoal pada coolbox sebelum pengujian.",
-    timestamp: "25/12/2025 09:30",
-    type: "note",
-  },
-  {
-    id: 2,
-    author: "Muttaqin",
-    initials: "MQ",
-    message:
-      "Sound Level Meter unit 3 sedang dalam perbaikan, estimasi selesai 2 hari.",
-    timestamp: "25/12/2025 10:15",
-    type: "warning",
-  },
-  {
-    id: 3,
-    author: "Siti Rahma",
-    initials: "SR",
-    message: "Stok Silica Gel perlu ditambah sebelum pengujian minggu depan.",
-    timestamp: "25/12/2025 11:00",
-    type: "note",
-  },
-  {
-    id: 4,
-    author: "Arif Budiman",
-    initials: "AB",
-    message:
-      "Kaji ulang parameter Kebisingan untuk lokasi workshop, perlu tambahan titik sampling.",
-    timestamp: "25/12/2025 14:20",
-    type: "important",
-  },
-];
-
-const initialTestingData: Parameter[] = [
-  {
-    id: 1,
-    cluster: "Lingkungan kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Kebisingan",
-    jumlah: 2,
-    acuan: "Permenaker 05 thn 2018",
-    peralatan: "Sound Maker level",
-    jumlahPeralatan: 2,
-    ready: false,
-  },
-  {
-    id: 2,
-    cluster: "Lingkungan kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Pencahayaan",
-    jumlah: 3,
-    acuan: "Permenaker 05 thn 2018",
-    peralatan: "Lux Meter",
-    jumlahPeralatan: 3,
-    ready: true,
-  },
-  {
-    id: 3,
-    cluster: "Lingkungan kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Iklim Kerja",
-    jumlah: 2,
-    acuan: "Permenaker 05 thn 2018",
-    peralatan: "Heat Stress Monitor",
-    jumlahPeralatan: 2,
-    ready: false,
-  },
-  {
-    id: 4,
-    cluster: "Lingkungan kerja",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "Debu Total",
-    jumlah: 4,
-    acuan: "Permenaker 05 thn 2018",
-    peralatan: "Personal Dust Sampler",
-    jumlahPeralatan: 4,
-    ready: true,
-  },
-  {
-    id: 5,
-    cluster: "Lingkungan kerja",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "Gas CO",
-    jumlah: 2,
-    acuan: "Permenaker 05 thn 2018",
-    peralatan: "Gas Detector",
-    jumlahPeralatan: 2,
-    ready: false,
-  },
-  {
-    id: 6,
-    cluster: "Emisi Udara",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Opasitas",
-    jumlah: 1,
-    acuan: "PermenLHK 2021",
-    peralatan: "Smoke Meter",
-    jumlahPeralatan: 1,
-    ready: true,
-  },
-  {
-    id: 7,
-    cluster: "Emisi Udara",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "SO2",
-    jumlah: 2,
-    acuan: "PermenLHK 2021",
-    peralatan: "Impinger Set",
-    jumlahPeralatan: 2,
-    ready: false,
-  },
-  {
-    id: 8,
-    cluster: "Air Limbah",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "pH",
-    jumlah: 5,
-    acuan: "PermenLHK 2019",
-    peralatan: "pH Meter",
-    jumlahPeralatan: 5,
-    ready: true,
-  },
-  {
-    id: 9,
-    cluster: "Air Limbah",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "BOD",
-    jumlah: 3,
-    acuan: "PermenLHK 2019",
-    peralatan: "BOD Incubator",
-    jumlahPeralatan: 3,
-    ready: true,
-  },
-  {
-    id: 10,
-    cluster: "Lingkungan kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Getaran",
-    jumlah: 2,
-    acuan: "Permenaker 05 thn 2018",
-    peralatan: "Vibration Meter",
-    jumlahPeralatan: 2,
-    ready: false,
-  },
-];
-
-const clusters = [
-  "Semua Cluster",
-  "Lingkungan kerja",
-  "Emisi Udara",
-  "Air Limbah",
-];
 
 function RouteComponent() {
+  const { worksheetId } = routeApi.useSearch();
+  const queryClient = useQueryClient();
+
+  // Fetch worksheet data
+  const {
+    data: worksheet,
+    isLoading,
+    error,
+  } = useQuery(trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }));
+
+  // Fetch all tools for assignment
+  const { data: allToolsData } = useQuery(
+    trpc.tool.getToolPaginated.queryOptions({
+      page: 1,
+      perPage: 100,
+      sort: [],
+      createdAt: [],
+    }),
+  );
+
+  // Mutations
+  const batchUpdateMutation = useMutation(
+    trpc.worksheet.batchUpdateItems.mutationOptions(),
+  );
+
+  const assignToolsMutation = useMutation(
+    trpc.worksheet.assignTools.mutationOptions(),
+  );
+
+  const addNoteMutation = useMutation(trpc.worksheet.addNote.mutationOptions());
+
+  // Local state
   const [selectedCluster, setSelectedCluster] = useState("Semua Cluster");
-  const [data, setData] = useState<Parameter[]>(initialTestingData);
-  const [notes, setNotes] = useState(initialNotes);
   const [newNote, setNewNote] = useState("");
-  const [tools, setTools] = useState<Tool[]>(initialToolsData);
+  const [noteSeverity, setNoteSeverity] = useState<WorksheetNoteStatus>("info");
   const [toolSearch, setToolSearch] = useState("");
   const [conditionFilter, setConditionFilter] = useState<string>("all");
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
-  const [consumables, setConsumables] = useState<Consumable[]>(
-    initialConsumablesData,
-  );
   const [activeSubTab, setActiveSubTab] = useState<
     "parameter" | "alat" | "bahan" | "stok-habis" | "catatan"
   >("parameter");
+  const [selectedToolIds, setSelectedToolIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [localItemUpdates, setLocalItemUpdates] = useState<
+    Map<string, { value: number | null; note: string | null; isReady: boolean }>
+  >(new Map());
 
   const [parameterPage, setParameterPage] = useState(1);
   const [parameterPageSize, setParameterPageSize] = useState(5);
   const [toolPage, setToolPage] = useState(1);
   const [toolPageSize, setToolPageSize] = useState(5);
-  const [bahanPage, setBahanPage] = useState(1);
-  const [bahanPageSize, setBahanPageSize] = useState(5);
 
-  const filteredData = useMemo(() => {
+  // Initialize selected tools from worksheet data
+  useMemo(() => {
+    if (worksheet?.tools) {
+      setSelectedToolIds(new Set(worksheet.tools.map((t) => t.toolId)));
+    }
+  }, [worksheet?.tools]);
+
+  // Transform worksheet items to display format
+  const worksheetItems: WorksheetItemWithMeta[] = useMemo(() => {
+    if (!worksheet?.items) return [];
+    return worksheet.items.map((item) => ({
+      id: item.id,
+      parameterId: item.parameterId,
+      parameterName: item.parameter?.name ?? "Unknown",
+      clusterName: item.parameter.category.cluster?.name ?? "Unknown",
+      categoryName: item.parameter?.category?.name ?? "Unknown",
+      quantity: item.quantity,
+      value: item.value,
+      note: item.note,
+      isReady: item.isReady,
+      locationName: item.location?.name ?? "Unknown",
+    }));
+  }, [worksheet?.items]);
+
+  // Get unique clusters for filter
+  const clusters = useMemo(() => {
+    const uniqueClusters = new Set(
+      worksheetItems.map((item) => item.clusterName),
+    );
+    return ["Semua Cluster", ...Array.from(uniqueClusters)];
+  }, [worksheetItems]);
+
+  // Filter items by cluster
+  const filteredItems = useMemo(() => {
     return selectedCluster === "Semua Cluster"
-      ? data
-      : data.filter((item) => item.cluster === selectedCluster);
-  }, [data, selectedCluster]);
+      ? worksheetItems
+      : worksheetItems.filter((item) => item.clusterName === selectedCluster);
+  }, [worksheetItems, selectedCluster]);
 
+  // Transform tools data
+  const tools: Tool[] = useMemo(() => {
+    if (!allToolsData?.data) return [];
+    return allToolsData.data.map((tool) => ({
+      id: tool.id,
+      toolCode: tool.toolCode,
+      toolName: tool.toolName,
+      condition: tool.condition,
+      availability: tool.availability,
+      selected: selectedToolIds.has(tool.id),
+    }));
+  }, [allToolsData?.data, selectedToolIds]);
+
+  // Filter tools
   const filteredTools = useMemo(() => {
     return tools.filter((tool) => {
       const matchesSearch =
         tool.id.toLowerCase().includes(toolSearch.toLowerCase()) ||
-        tool.code.toLowerCase().includes(toolSearch.toLowerCase()) ||
-        tool.name.toLowerCase().includes(toolSearch.toLowerCase());
+        tool.toolCode.toLowerCase().includes(toolSearch.toLowerCase()) ||
+        tool.toolName.toLowerCase().includes(toolSearch.toLowerCase());
       const matchesCondition =
         conditionFilter === "all" || tool.condition === conditionFilter;
       const matchesAvailability =
@@ -545,118 +224,181 @@ function RouteComponent() {
     });
   }, [tools, toolSearch, conditionFilter, availabilityFilter]);
 
-  const readyParameterIds = data.filter((p) => p.ready).map((p) => p.id);
+  // Transform notes
+  const notes: WorksheetNote[] = useMemo(() => {
+    if (!worksheet?.notes) return [];
+    return worksheet.notes.map((note) => ({
+      id: note.id,
+      note: note.note,
+      severity: note.severity,
+      createdAt: note.createdAt,
+      createdBy: {
+        id: note.createdBy?.id ?? "",
+        name: note.createdBy?.name ?? "Unknown",
+      },
+    }));
+  }, [worksheet?.notes]);
 
-  const filteredConsumables = useMemo(() => {
-    return consumables.filter((c) =>
-      c.parameterIds.some((pId) => readyParameterIds.includes(pId)),
-    );
-  }, [consumables, readyParameterIds]);
-
+  // Pagination
   const parameterPagination = usePagination(
-    filteredData,
+    filteredItems,
     parameterPageSize,
     parameterPage,
   );
   const toolPagination = usePagination(filteredTools, toolPageSize, toolPage);
-  const bahanPagination = usePagination(
-    filteredConsumables,
-    bahanPageSize,
-    bahanPage,
-  );
 
-  const getLinkedParameterNames = (parameterIds: number[]) => {
-    return data
-      .filter((p) => parameterIds.includes(p.id) && p.ready)
-      .map((p) => p.parameter)
-      .join(", ");
+  // Handlers
+  const getItemState = (itemId: string) => {
+    const localUpdate = localItemUpdates.get(itemId);
+    if (localUpdate) return localUpdate;
+    const item = worksheetItems.find((i) => i.id === itemId);
+    return item
+      ? { value: item.value, note: item.note, isReady: item.isReady }
+      : { value: null, note: null, isReady: false };
   };
 
-  const handleReadyChange = (id: number, checked: boolean) => {
-    setData(
-      data.map((item) => (item.id === id ? { ...item, ready: checked } : item)),
+  const handleItemChange = (
+    itemId: string,
+    field: "value" | "note" | "isReady",
+    value: number | string | boolean | null,
+  ) => {
+    setLocalItemUpdates((prev) => {
+      const newMap = new Map(prev);
+      const current = getItemState(itemId);
+      newMap.set(itemId, {
+        ...current,
+        [field]: value,
+      });
+      return newMap;
+    });
+  };
+
+  const handleSaveItems = async () => {
+    if (localItemUpdates.size === 0) return;
+
+    const items = Array.from(localItemUpdates.entries()).map(
+      ([itemId, data]) => ({
+        itemId,
+        value: data.value,
+        note: data.note,
+        isReady: data.isReady,
+      }),
     );
-  };
 
-  const handleJumlahChange = (id: number, value: string) => {
-    const numValue = Number.parseInt(value) || 0;
-    setData(
-      data.map((item) =>
-        item.id === id ? { ...item, jumlah: numValue } : item,
-      ),
-    );
-  };
-
-  const handleJumlahPeralatanChange = (id: number, value: string) => {
-    const numValue = Number.parseInt(value) || 0;
-    setData(
-      data.map((item) =>
-        item.id === id ? { ...item, jumlahPeralatan: numValue } : item,
-      ),
-    );
-  };
-
-  const handleSendNote = () => {
-    if (newNote.trim()) {
-      const note = {
-        id: notes.length + 1,
-        author: "You",
-        initials: "YO",
-        message: newNote,
-        timestamp: new Date().toLocaleString("id-ID"),
-        type: "note" as const,
-      };
-      setNotes([...notes, note]);
-      setNewNote("");
+    try {
+      await batchUpdateMutation.mutateAsync({
+        worksheetId,
+        items,
+      });
+      toast.success("Perubahan berhasil disimpan");
+      setLocalItemUpdates(new Map());
+      queryClient.invalidateQueries({
+        queryKey: [["worksheet", "getWorksheetById"]],
+      });
+    } catch {
+      toast.error("Gagal menyimpan perubahan");
     }
   };
 
   const handleToolSelect = (toolId: string, checked: boolean) => {
-    setTools(
-      tools.map((t) => (t.id === toolId ? { ...t, selected: checked } : t)),
-    );
+    setSelectedToolIds((prev) => {
+      const newSet = new Set(prev);
+      if (checked) {
+        newSet.add(toolId);
+      } else {
+        newSet.delete(toolId);
+      }
+      return newSet;
+    });
   };
 
   const handleSelectAllTools = (checked: boolean) => {
     const filteredIds = filteredTools.map((t) => t.id);
-    setTools(
-      tools.map((t) =>
-        filteredIds.includes(t.id) ? { ...t, selected: checked } : t,
-      ),
-    );
+    setSelectedToolIds((prev) => {
+      const newSet = new Set(prev);
+      if (checked) {
+        filteredIds.forEach((id) => newSet.add(id));
+      } else {
+        filteredIds.forEach((id) => newSet.delete(id));
+      }
+      return newSet;
+    });
   };
 
-  const selectedToolsCount = tools.filter((t) => t.selected).length;
+  const handleSaveTools = async () => {
+    try {
+      await assignToolsMutation.mutateAsync({
+        worksheetId,
+        toolIds: Array.from(selectedToolIds),
+      });
+      toast.success("Alat berhasil disimpan");
+      queryClient.invalidateQueries({
+        queryKey: [["worksheet", "getWorksheetById"]],
+      });
+    } catch {
+      toast.error("Gagal menyimpan alat");
+    }
+  };
+
+  const handleSendNote = async () => {
+    if (!newNote.trim()) return;
+
+    try {
+      await addNoteMutation.mutateAsync({
+        worksheetId,
+        note: newNote.trim(),
+        severity: noteSeverity,
+      });
+      toast.success("Catatan berhasil ditambahkan");
+      setNewNote("");
+      setNoteSeverity("info");
+      queryClient.invalidateQueries({
+        queryKey: [["worksheet", "getWorksheetById"]],
+      });
+    } catch {
+      toast.error("Gagal menambahkan catatan");
+    }
+  };
+
+  const selectedToolsCount = selectedToolIds.size;
   const allToolsSelected =
-    filteredTools.length > 0 && filteredTools.every((t) => t.selected);
-  const someToolsSelected = filteredTools.some((t) => t.selected);
-
-  const handleRequiredChange = (id: number, value: string) => {
-    const numValue = Number.parseInt(value) || 0;
-    setConsumables(
-      consumables.map((c) => {
-        if (c.id === id) {
-          const newStatus = numValue > c.stock ? "low" : "sufficient";
-          return { ...c, required: numValue, status: newStatus };
-        }
-        return c;
-      }),
-    );
-  };
-
-  const readyParametersCount = data.filter((p) => p.ready).length;
-
-  const outOfStockMaterials = consumables.filter((c) => c.stock === 0);
-  const lowStockMaterials = consumables.filter(
-    (c) => c.stock > 0 && c.stock <= 5,
+    filteredTools.length > 0 &&
+    filteredTools.every((t) => selectedToolIds.has(t.id));
+  const someToolsSelected = filteredTools.some((t) =>
+    selectedToolIds.has(t.id),
   );
-  const criticalStockCount =
-    outOfStockMaterials.length + lowStockMaterials.length;
+  const readyParametersCount = worksheetItems.filter((p) => {
+    const state = getItemState(p.id);
+    return state.isReady;
+  }).length;
+
+  const hasLocalChanges = localItemUpdates.size > 0;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error || !worksheet) {
+    return (
+      <div className="flex h-96 flex-col items-center justify-center gap-4">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <p className="text-lg font-medium">Worksheet tidak ditemukan</p>
+        <p className="text-sm text-muted-foreground">
+          {error?.message ?? "Tidak dapat memuat data worksheet"}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <WorksheetHeaderCard
         title="Rincian parameter"
-        subtitle="Sistem manajemen worksheet parameter pengujian"
+        subtitle={`Worksheet untuk ${worksheet.testing?.order?.company?.name ?? "Unknown"}`}
       />
 
       <Card>
@@ -674,6 +416,14 @@ function RouteComponent() {
                 <ClipboardList className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="xs:inline hidden">Parameter</span>
                 <span className="xs:hidden">Param</span>
+                {hasLocalChanges && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 h-5 px-1.5 text-xs"
+                  >
+                    *
+                  </Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger
                 value="alat"
@@ -696,14 +446,6 @@ function RouteComponent() {
               >
                 <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Bahan</span>
-                {filteredConsumables.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 h-5 px-1.5 text-xs"
-                  >
-                    {filteredConsumables.length}
-                  </Badge>
-                )}
               </TabsTrigger>
               <TabsTrigger
                 value="stok-habis"
@@ -712,14 +454,6 @@ function RouteComponent() {
                 <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Stok Habis</span>
                 <span className="sm:hidden">Habis</span>
-                {criticalStockCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="ml-1 h-5 px-1.5 text-xs"
-                  >
-                    {criticalStockCount}
-                  </Badge>
-                )}
               </TabsTrigger>
               <TabsTrigger
                 value="catatan"
@@ -727,13 +461,21 @@ function RouteComponent() {
               >
                 <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Catatan</span>
+                {notes.length > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 h-5 px-1.5 text-xs"
+                  >
+                    {notes.length}
+                  </Badge>
+                )}
               </TabsTrigger>
             </TabsList>
           </div>
 
           {/* Parameter Tab */}
           <TabsContent value="parameter" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Select
                 value={selectedCluster}
                 onValueChange={(v) => {
@@ -752,14 +494,27 @@ function RouteComponent() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {hasLocalChanges && (
+                <Button
+                  onClick={handleSaveItems}
+                  disabled={batchUpdateMutation.isPending}
+                  className="gap-2"
+                >
+                  {batchUpdateMutation.isPending && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
+                  Simpan Perubahan
+                </Button>
+              )}
             </div>
 
             <Alert className="mb-4 border-primary/20 bg-primary/5">
               <AlertCircle className="h-4 w-4 text-primary" />
               <AlertDescription className="text-sm">
-                Centang "Ready" pada parameter untuk menampilkan bahan yang
-                dibutuhkan di tab <strong>Bahan</strong>. Saat ini{" "}
-                <strong>{readyParametersCount}</strong> parameter siap.
+                Centang "Ready" pada parameter untuk menandakan pengujian
+                selesai. Saat ini <strong>{readyParametersCount}</strong> dari{" "}
+                <strong>{worksheetItems.length}</strong> parameter siap.
               </AlertDescription>
             </Alert>
 
@@ -772,22 +527,22 @@ function RouteComponent() {
                         Cluster
                       </TableHead>
                       <TableHead className="hidden text-xs font-semibold sm:text-sm md:table-cell">
-                        Jenis Pengujian
+                        Kategori
                       </TableHead>
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Parameter
                       </TableHead>
+                      <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
+                        Lokasi
+                      </TableHead>
                       <TableHead className="text-center text-xs font-semibold sm:text-sm">
                         Jumlah
                       </TableHead>
-                      <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
-                        Acuan
+                      <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                        Nilai
                       </TableHead>
-                      <TableHead className="hidden text-xs font-semibold sm:text-sm xl:table-cell">
-                        Peralatan
-                      </TableHead>
-                      <TableHead className="hidden text-center text-xs font-semibold sm:table-cell sm:text-sm">
-                        Jml Alat
+                      <TableHead className="hidden text-xs font-semibold sm:table-cell sm:text-sm">
+                        Catatan
                       </TableHead>
                       <TableHead className="text-center text-xs font-semibold sm:text-sm">
                         Ready
@@ -795,66 +550,79 @@ function RouteComponent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {parameterPagination.paginatedData.map((item) => (
-                      <TableRow
-                        key={item.id}
-                        className={`hover:bg-muted/30 ${item.ready ? "bg-emerald-50/50" : ""}`}
-                      >
-                        <TableCell>
-                          <Badge
-                            className={`${getClusterColor(item.cluster)} text-xs`}
-                          >
-                            {item.cluster}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden text-xs sm:text-sm md:table-cell">
-                          {item.jenisPengujian}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium sm:text-sm">
-                          {item.parameter}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Input
-                            type="number"
-                            value={item.jumlah}
-                            onChange={(e) =>
-                              handleJumlahChange(item.id, e.target.value)
-                            }
-                            className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
-                            min={0}
-                          />
-                        </TableCell>
-                        <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                          {item.acuan}
-                        </TableCell>
-                        <TableCell className="hidden text-xs sm:text-sm xl:table-cell">
-                          {item.peralatan}
-                        </TableCell>
-                        <TableCell className="hidden text-center sm:table-cell">
-                          <Input
-                            type="number"
-                            value={item.jumlahPeralatan}
-                            onChange={(e) =>
-                              handleJumlahPeralatanChange(
-                                item.id,
-                                e.target.value,
-                              )
-                            }
-                            className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
-                            min={0}
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Checkbox
-                            checked={item.ready}
-                            onCheckedChange={(checked) =>
-                              handleReadyChange(item.id, checked as boolean)
-                            }
-                            className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {parameterPagination.paginatedData.map((item) => {
+                      const itemState = getItemState(item.id);
+                      return (
+                        <TableRow
+                          key={item.id}
+                          className={`hover:bg-muted/30 ${itemState.isReady ? "bg-emerald-50/50" : ""}`}
+                        >
+                          <TableCell>
+                            <Badge
+                              className={`${getClusterColor(item.clusterName)} text-xs`}
+                            >
+                              {item.clusterName}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden text-xs sm:text-sm md:table-cell">
+                            {item.categoryName}
+                          </TableCell>
+                          <TableCell className="text-xs font-medium sm:text-sm">
+                            {item.parameterName}
+                          </TableCell>
+                          <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
+                            {item.locationName}
+                          </TableCell>
+                          <TableCell className="text-center text-xs sm:text-sm">
+                            {item.quantity}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Input
+                              type="number"
+                              value={itemState.value ?? ""}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  item.id,
+                                  "value",
+                                  e.target.value
+                                    ? parseFloat(e.target.value)
+                                    : null,
+                                )
+                              }
+                              className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
+                              step="any"
+                            />
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                            <Input
+                              value={itemState.note ?? ""}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  item.id,
+                                  "note",
+                                  e.target.value || null,
+                                )
+                              }
+                              className="h-8 text-xs"
+                              placeholder="Catatan..."
+                            />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Checkbox
+                              checked={itemState.isReady}
+                              onCheckedChange={(checked) =>
+                                handleItemChange(
+                                  item.id,
+                                  "isReady",
+                                  checked as boolean,
+                                )
+                              }
+                              className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -977,6 +745,19 @@ function RouteComponent() {
               ))}
             </div>
 
+            <div className="mb-4 flex justify-end">
+              <Button
+                onClick={handleSaveTools}
+                disabled={assignToolsMutation.isPending}
+                className="gap-2"
+              >
+                {assignToolsMutation.isPending && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                Simpan Alat ({selectedToolsCount})
+              </Button>
+            </div>
+
             <div className="overflow-hidden rounded-xl border">
               <div className="overflow-x-auto">
                 <Table>
@@ -993,9 +774,6 @@ function RouteComponent() {
                               : ""
                           }
                         />
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold sm:text-sm">
-                        ID
                       </TableHead>
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Kode
@@ -1015,27 +793,29 @@ function RouteComponent() {
                     {toolPagination.paginatedData.map((tool) => (
                       <TableRow
                         key={tool.id}
-                        className={`cursor-pointer hover:bg-muted/30 ${tool.selected ? "bg-primary/5" : ""}`}
+                        className={`cursor-pointer hover:bg-muted/30 ${
+                          selectedToolIds.has(tool.id) ? "bg-primary/5" : ""
+                        }`}
                         onClick={() =>
-                          handleToolSelect(tool.id, !tool.selected)
+                          handleToolSelect(
+                            tool.id,
+                            !selectedToolIds.has(tool.id),
+                          )
                         }
                       >
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
-                            checked={tool.selected}
+                            checked={selectedToolIds.has(tool.id)}
                             onCheckedChange={(checked) =>
                               handleToolSelect(tool.id, checked as boolean)
                             }
                           />
                         </TableCell>
                         <TableCell className="font-mono text-xs">
-                          {tool.id}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {tool.code}
+                          {tool.toolCode}
                         </TableCell>
                         <TableCell className="text-xs font-medium sm:text-sm">
-                          {tool.name}
+                          {tool.toolName}
                         </TableCell>
                         <TableCell>
                           <StatusBadge
@@ -1075,314 +855,28 @@ function RouteComponent() {
             )}
           </TabsContent>
 
-          {/* Bahan Tab */}
+          {/* Bahan Tab - Placeholder for now */}
           <TabsContent value="bahan" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            {filteredConsumables.length === 0 ? (
-              <div className="py-12 text-center">
-                <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mb-2 text-lg font-medium">
-                  Tidak ada bahan yang dibutuhkan
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Centang "Ready" pada parameter di tab Parameter untuk
-                  menampilkan bahan yang dibutuhkan.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-                  <Card className="border-0 shadow-sm">
-                    <CardContent className="p-2 text-center sm:p-3">
-                      <p className="text-lg font-bold sm:text-xl">
-                        {filteredConsumables.length}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Total Bahan
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-0 shadow-sm">
-                    <CardContent className="p-2 text-center sm:p-3">
-                      <p className="text-lg font-bold text-emerald-600 sm:text-xl">
-                        {
-                          filteredConsumables.filter(
-                            (c) => c.required <= c.stock,
-                          ).length
-                        }
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Stok Cukup
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-0 shadow-sm">
-                    <CardContent className="p-2 text-center sm:p-3">
-                      <p className="text-lg font-bold text-amber-600 sm:text-xl">
-                        {
-                          filteredConsumables.filter(
-                            (c) => c.required > c.stock,
-                          ).length
-                        }
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Stok Kurang
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-0 shadow-sm">
-                    <CardContent className="p-2 text-center sm:p-3">
-                      <p className="text-lg font-bold text-primary sm:text-xl">
-                        {filteredConsumables.reduce(
-                          (sum, c) => sum + c.required,
-                          0,
-                        )}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Total Dibutuhkan
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="overflow-hidden rounded-xl border">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-muted/50">
-                          <TableHead className="text-xs font-semibold sm:text-sm">
-                            Nama Bahan
-                          </TableHead>
-                          <TableHead className="hidden text-xs font-semibold sm:table-cell sm:text-sm">
-                            Untuk Parameter
-                          </TableHead>
-                          <TableHead className="text-xs font-semibold sm:text-sm">
-                            Satuan
-                          </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Dibutuhkan
-                          </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Stok
-                          </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Status
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {bahanPagination.paginatedData.map((item) => (
-                          <TableRow
-                            key={item.id}
-                            className={`hover:bg-muted/30 ${item.required > 0 ? "bg-primary/5" : ""}`}
-                          >
-                            <TableCell className="text-xs font-medium sm:text-sm">
-                              {item.name}
-                            </TableCell>
-                            <TableCell className="hidden text-xs text-muted-foreground sm:table-cell">
-                              {getLinkedParameterNames(item.parameterIds)}
-                            </TableCell>
-                            <TableCell className="text-xs sm:text-sm">
-                              {item.unit}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Input
-                                type="number"
-                                value={item.required}
-                                onChange={(e) =>
-                                  handleRequiredChange(item.id, e.target.value)
-                                }
-                                className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
-                                min={0}
-                              />
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge
-                                variant="outline"
-                                className="bg-background text-xs"
-                              >
-                                {item.stock}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {item.required === 0 ? (
-                                <span className="text-xs text-muted-foreground">
-                                  -
-                                </span>
-                              ) : item.required <= item.stock ? (
-                                <Badge className="bg-emerald-100 text-xs text-emerald-700">
-                                  Cukup
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-amber-100 text-xs text-amber-700">
-                                  Kurang
-                                </Badge>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  <WorksheetDataTable
-                    currentPage={bahanPagination.currentPage}
-                    totalPages={bahanPagination.totalPages}
-                    pageSize={bahanPageSize}
-                    totalItems={bahanPagination.totalItems}
-                    onPageChange={setBahanPage}
-                    onPageSizeChange={(size) => {
-                      setBahanPageSize(size);
-                      setBahanPage(1);
-                    }}
-                  />
-                </div>
-              </>
-            )}
+            <div className="py-12 text-center">
+              <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+              <h3 className="mb-2 text-lg font-medium">
+                Manajemen Bahan Belum Tersedia
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Fitur pengelolaan bahan akan ditambahkan pada versi selanjutnya.
+              </p>
+            </div>
           </TabsContent>
 
-          {/* Stok Habis Tab */}
+          {/* Stok Habis Tab - Placeholder for now */}
           <TabsContent value="stok-habis" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-              <Card className="border-0 shadow-sm">
-                <CardContent className="p-2 text-center sm:p-3">
-                  <p className="text-lg font-bold sm:text-xl">
-                    {consumables.length}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Total Bahan</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 border-red-200 bg-red-50/50 shadow-sm">
-                <CardContent className="p-2 text-center sm:p-3">
-                  <p className="text-lg font-bold text-red-600 sm:text-xl">
-                    {outOfStockMaterials.length}
-                  </p>
-                  <p className="text-xs text-red-600">Habis</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 border-amber-200 bg-amber-50/50 shadow-sm">
-                <CardContent className="p-2 text-center sm:p-3">
-                  <p className="text-lg font-bold text-amber-600 sm:text-xl">
-                    {lowStockMaterials.length}
-                  </p>
-                  <p className="text-xs text-amber-600">Stok Rendah</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 border-emerald-200 bg-emerald-50/50 shadow-sm">
-                <CardContent className="p-2 text-center sm:p-3">
-                  <p className="text-lg font-bold text-emerald-600 sm:text-xl">
-                    {consumables.filter((c) => c.stock > 5).length}
-                  </p>
-                  <p className="text-xs text-emerald-600">Stok Aman</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {criticalStockCount === 0 ? (
-              <div className="py-12 text-center">
-                <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-emerald-500" />
-                <h3 className="mb-2 text-lg font-medium">
-                  Semua stok dalam kondisi aman
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Tidak ada bahan yang perlu di-restock saat ini.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {outOfStockMaterials.length > 0 && (
-                  <div>
-                    <h3 className="mb-3 flex items-center gap-2 font-semibold text-red-600">
-                      <AlertTriangle className="h-4 w-4" />
-                      Stok Habis ({outOfStockMaterials.length})
-                    </h3>
-                    <div className="overflow-hidden rounded-xl border border-red-200">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-red-50">
-                            <TableHead className="text-xs font-semibold sm:text-sm">
-                              Nama Bahan
-                            </TableHead>
-                            <TableHead className="text-xs font-semibold sm:text-sm">
-                              Satuan
-                            </TableHead>
-                            <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                              Stok
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {outOfStockMaterials.map((item) => (
-                            <TableRow key={item.id} className="bg-red-50/30">
-                              <TableCell className="text-xs font-medium sm:text-sm">
-                                {item.name}
-                              </TableCell>
-                              <TableCell className="text-xs sm:text-sm">
-                                {item.unit}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <Badge
-                                  variant="destructive"
-                                  className="text-xs"
-                                >
-                                  0
-                                </Badge>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
-                )}
-
-                {lowStockMaterials.length > 0 && (
-                  <div>
-                    <h3 className="mb-3 flex items-center gap-2 font-semibold text-amber-600">
-                      <AlertCircle className="h-4 w-4" />
-                      Stok Rendah ({lowStockMaterials.length})
-                    </h3>
-                    <div className="overflow-hidden rounded-xl border border-amber-200">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-amber-50">
-                            <TableHead className="text-xs font-semibold sm:text-sm">
-                              Nama Bahan
-                            </TableHead>
-                            <TableHead className="text-xs font-semibold sm:text-sm">
-                              Satuan
-                            </TableHead>
-                            <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                              Stok
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {lowStockMaterials.map((item) => (
-                            <TableRow key={item.id} className="bg-amber-50/30">
-                              <TableCell className="text-xs font-medium sm:text-sm">
-                                {item.name}
-                              </TableCell>
-                              <TableCell className="text-xs sm:text-sm">
-                                {item.unit}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <Badge className="bg-amber-100 text-xs text-amber-700">
-                                  {item.stock}
-                                </Badge>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            <div className="mt-6 rounded-lg bg-muted/30 p-4">
+            <div className="py-12 text-center">
+              <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+              <h3 className="mb-2 text-lg font-medium">
+                Peringatan Stok Belum Tersedia
+              </h3>
               <p className="text-sm text-muted-foreground">
-                <strong>Catatan:</strong> Bahan dengan stok ≤ 5 dianggap
-                menipis. Stok dikelola melalui dashboard inventory. Hubungi
-                admin untuk melakukan restocking.
+                Fitur peringatan stok akan ditambahkan pada versi selanjutnya.
               </p>
             </div>
           </TabsContent>
@@ -1392,65 +886,91 @@ function RouteComponent() {
             <div className="flex h-125 flex-col">
               <ScrollArea className="mb-4 flex-1 pr-4">
                 <div className="space-y-4">
-                  {notes.map((note) => (
-                    <div
-                      key={note.id}
-                      className={`flex gap-3 ${note.author === "You" ? "flex-row-reverse" : ""}`}
-                    >
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarFallback
-                          className={
-                            note.author === "You"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }
-                        >
-                          {note.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div
-                        className={`max-w-[80%] flex-1 ${note.author === "You" ? "text-right" : ""}`}
-                      >
-                        <div
-                          className={`inline-block rounded-2xl px-4 py-2 ${
-                            note.author === "You"
-                              ? "bg-primary text-primary-foreground"
-                              : note.type === "warning"
+                  {notes.length === 0 ? (
+                    <div className="py-12 text-center">
+                      <MessageSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+                      <p className="text-sm text-muted-foreground">
+                        Belum ada catatan untuk worksheet ini
+                      </p>
+                    </div>
+                  ) : (
+                    notes.map((note) => (
+                      <div key={note.id} className="flex gap-3">
+                        <Avatar className="h-8 w-8 shrink-0">
+                          <AvatarFallback className="bg-muted">
+                            {note.createdBy.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="max-w-[80%] flex-1">
+                          <div
+                            className={`inline-block rounded-2xl px-4 py-2 ${
+                              note.severity === "warning"
                                 ? "bg-amber-100 text-amber-900"
-                                : note.type === "important"
+                                : note.severity === "danger"
                                   ? "bg-red-100 text-red-900"
                                   : "bg-muted"
-                          }`}
-                        >
-                          <p className="text-sm">{note.message}</p>
-                        </div>
-                        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                          {note.author !== "You" && (
-                            <span className="font-medium">{note.author}</span>
-                          )}
-                          <span>{note.timestamp}</span>
-                          {note.type !== "note" && (
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${
-                                note.type === "warning"
-                                  ? "border-amber-300 text-amber-600"
-                                  : "border-red-300 text-red-600"
-                              }`}
-                            >
-                              {note.type === "warning"
-                                ? "Peringatan"
-                                : "Penting"}
-                            </Badge>
-                          )}
+                            }`}
+                          >
+                            <p className="text-sm">{note.note}</p>
+                          </div>
+                          <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="font-medium">
+                              {note.createdBy.name}
+                            </span>
+                            <span>
+                              {new Date(note.createdAt).toLocaleString("id-ID")}
+                            </span>
+                            {note.severity !== "info" && (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${
+                                  note.severity === "warning"
+                                    ? "border-amber-300 text-amber-600"
+                                    : "border-red-300 text-red-600"
+                                }`}
+                              >
+                                {note.severity === "warning"
+                                  ? "Peringatan"
+                                  : "Error"}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </ScrollArea>
 
               <div className="border-t pt-4">
+                <div className="mb-2 flex gap-2">
+                  <Select
+                    value={noteSeverity}
+                    onValueChange={(v) =>
+                      setNoteSeverity(v as WorksheetNoteStatus)
+                    }
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {WORKSHEET_NOTE_STATUS.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status === "info"
+                            ? "Info"
+                            : status === "warning"
+                              ? "Peringatan"
+                              : "Error"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex gap-2">
                   <Textarea
                     placeholder="Tulis catatan baru..."
@@ -1468,9 +988,13 @@ function RouteComponent() {
                     onClick={handleSendNote}
                     size="icon"
                     className="size-15"
-                    disabled={!newNote.trim()}
+                    disabled={!newNote.trim() || addNoteMutation.isPending}
                   >
-                    <Send className="h-4 w-4" />
+                    {addNoteMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">

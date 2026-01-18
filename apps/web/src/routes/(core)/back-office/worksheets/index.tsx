@@ -71,7 +71,7 @@ function RouteComponent() {
       page: params.page,
       perPage: params.perPage,
       status: params.status,
-    })
+    }),
   );
 
   const handleSearch = () => {
@@ -267,7 +267,11 @@ function RouteComponent() {
                           <Badge
                             className={`${STATUS_COLORS[worksheet.status as WorksheetStatus]} text-xs`}
                           >
-                            {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
+                            {
+                              WORKSHEET_STATUS_LABELS[
+                                worksheet.status as WorksheetStatus
+                              ]
+                            }
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
@@ -280,7 +284,7 @@ function RouteComponent() {
                                   day: "2-digit",
                                   month: "short",
                                   year: "numeric",
-                                }
+                                },
                               )}
                             </span>
                             {worksheet.endDate && (
@@ -292,7 +296,7 @@ function RouteComponent() {
                                     day: "2-digit",
                                     month: "short",
                                     year: "numeric",
-                                  }
+                                  },
                                 )}
                               </span>
                             )}
@@ -301,8 +305,8 @@ function RouteComponent() {
                         <TableCell className="text-center">
                           <Button asChild size="sm" variant="outline">
                             <Link
-                              to="/back-office/worksheets/$worksheetId/detail"
-                              params={{ worksheetId: worksheet.id }}
+                              to="/worksheets"
+                              search={{ worksheetId: worksheet.id }}
                             >
                               <Eye className="mr-1 h-4 w-4" />
                               <span className="hidden sm:inline">Detail</span>

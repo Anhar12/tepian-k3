@@ -10,6 +10,7 @@ import {
   worksheetAssignments,
   worksheetNotes,
   testing,
+  testingItem,
 } from "@tepian-k3/db/schema";
 import { logCreate, logUpdate } from "./helpers/audit.helpers";
 import type { WorksheetNoteStatus } from "@tepian-k3/constants";
@@ -33,7 +34,15 @@ const worksheetQueries = {
                 },
                 items: {
                   with: {
-                    parameter: true,
+                    parameter: {
+                      with: {
+                        category: {
+                          with: {
+                            cluster: true,
+                          },
+                        },
+                      },
+                    },
                     location: true,
                   },
                 },
@@ -43,7 +52,11 @@ const worksheetQueries = {
               with: {
                 parameter: {
                   with: {
-                    category: true,
+                    category: {
+                      with: {
+                        cluster: true,
+                      },
+                    },
                   },
                 },
                 location: true,
@@ -694,6 +707,118 @@ const worksheetQueries = {
       }
 
       return updated;
+    });
+  },
+
+  /**
+   * Sync worksheet item values to testing items
+   * This should be called when worksheet is completed
+   */
+  syncWorksheetToTesting(worksheetId: string, userId: string) {
+    return Effect.gen(function* () {
+      const result = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            // 1. Get worksheet with items and testing info
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
+              with: {
+                items: {
+                  with: {
+                    parameter: true,
+                    location: true,
+                  },
+                },
+                testing: {
+                  with: {
+                    items: true,
+                  },
+                },
+              },
+            });
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            if (!worksheet.testing) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Worksheet tidak terhubung ke testing",
+              });
+            }
+
+            // 2. Match worksheet items to testing items by parameter and location
+            const syncedItems = [];
+            for (const worksheetItem of worksheet.items) {
+              // Find matching testing item
+              const matchingTestingItem = worksheet.testing.items.find(
+                (ti) =>
+                  ti.parameterId === worksheetItem.parameterId &&
+                  ti.locationId === worksheetItem.locationId,
+              );
+
+              if (matchingTestingItem && worksheetItem.value !== null) {
+                // Update testing item with worksheet value
+                const [updated] = await tx
+                  .update(testingItem)
+                  .set({
+                    result: String(worksheetItem.value),
+                    note: worksheetItem.note,
+                    updatedAt: sql`CURRENT_TIMESTAMP`,
+                  })
+                  .where(eq(testingItem.id, matchingTestingItem.id))
+                  .returning();
+
+                if (updated) {
+                  syncedItems.push(updated);
+                }
+              }
+            }
+
+            return {
+              worksheet,
+              syncedCount: syncedItems.length,
+              syncedItems,
+            };
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.syncWorksheetToTesting",
+            "Failed to sync worksheet to testing",
+            {
+              error,
+              worksheetId,
+            },
+          );
+
+          if (error instanceof TRPCError) {
+            throw error;
+          }
+
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal sinkronisasi worksheet ke testing",
+          });
+        },
+      });
+
+      // Log audit
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          { action: "sync_to_testing" },
+          { syncedCount: result.syncedCount } as Record<string, unknown>,
+          userId,
+          "sync",
+        ),
+      );
+
+      return result;
     });
   },
 };

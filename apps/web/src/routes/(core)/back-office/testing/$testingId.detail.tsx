@@ -40,9 +40,13 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import {
+  TESTING_DOCUMENT_TYPES,
   TESTING_STATUSES,
+  TESTING_STATUS_COLORS,
   TESTING_STATUS_LABELS,
+  WORKSHEET_STATUS_COLORS,
   WORKSHEET_STATUS_LABELS,
+  type TestingDocumentType,
   type TestingStatus,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
@@ -77,32 +81,6 @@ export const Route = createFileRoute(
     await requirePermission(context, { permission: "testing.read" }),
   component: RouteComponent,
 });
-
-const STATUS_COLORS: Record<TestingStatus, string> = {
-  start_testing: "bg-blue-100 text-blue-700",
-  sample_submission: "bg-indigo-100 text-indigo-700",
-  sample_analysis: "bg-purple-100 text-purple-700",
-  report_generation: "bg-amber-100 text-amber-700",
-  report_publishing: "bg-orange-100 text-orange-700",
-  completed: "bg-green-100 text-green-700",
-};
-
-const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
-  approved: "bg-emerald-100 text-emerald-700",
-  rejected: "bg-red-100 text-red-700",
-};
-
-const DOCUMENT_TYPES = [
-  { value: "testing_report", label: "Laporan Pengujian" },
-  { value: "lab_certificate", label: "Sertifikat Lab" },
-  { value: "sample_analysis", label: "Analisis Sampel" },
-  { value: "calibration_certificate", label: "Sertifikat Kalibrasi" },
-] as const;
-
-type TestingDocumentType = (typeof DOCUMENT_TYPES)[number]["value"];
 
 function RouteComponent() {
   const router = useRouter();
@@ -349,9 +327,9 @@ function RouteComponent() {
                         Status
                       </span>
                       <Badge
-                        className={`${STATUS_COLORS[testing.status as TestingStatus]} text-xs`}
+                        className={`${TESTING_STATUS_COLORS[testing.status]} text-xs`}
                       >
-                        {TESTING_STATUS_LABELS[testing.status as TestingStatus]}
+                        {TESTING_STATUS_LABELS[testing.status]}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
@@ -618,7 +596,7 @@ function RouteComponent() {
                           </TableCell>
                           <TableCell>
                             <Badge
-                              className={`${WORKSHEET_STATUS_COLORS[worksheet.status as WorksheetStatus]} text-xs`}
+                              className={`${WORKSHEET_STATUS_COLORS[worksheet.status]} text-xs`}
                             >
                               {
                                 WORKSHEET_STATUS_LABELS[
@@ -682,7 +660,7 @@ function RouteComponent() {
                   <Upload className="h-5 w-5 text-primary" />
                   Unggah Dokumen Testing
                 </h3>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
                   <div>
                     <Label className="mb-2 block text-sm">Tipe Dokumen</Label>
                     <Select
@@ -695,7 +673,7 @@ function RouteComponent() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {DOCUMENT_TYPES.map((type) => (
+                        {TESTING_DOCUMENT_TYPES.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
                           </SelectItem>
@@ -807,8 +785,9 @@ function RouteComponent() {
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
                             <Badge variant="outline" className="text-xs">
-                              {DOCUMENT_TYPES.find((t) => t.value === doc.type)
-                                ?.label || doc.type}
+                              {TESTING_DOCUMENT_TYPES.find(
+                                (t) => t.value === doc.type,
+                              )?.label || doc.type}
                             </Badge>
                           </TableCell>
                           <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
