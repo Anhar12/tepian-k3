@@ -1,15 +1,3 @@
-/**
- * Admin Order Detail Page
- *
- * Shows order details with 6 workflow states:
- * 1. Pending Approval - Admin reviews and approves/rejects order
- * 2. Approved - Upload Documents - Admin uploads offering letter and invoice
- * 3. Awaiting Payment - Waiting for customer to pay
- * 4. Payment Verification - Admin verifies payment proof from customer
- * 5. Payment Verified - Create Testing - Admin creates testing record
- * 6. Testing Created - Navigate to testing/worksheet management
- */
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -60,10 +48,11 @@ import { format } from "date-fns";
 import { requirePermission } from "@/utils/require-permission";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { cn } from "@/lib/utils";
-import { toFormData } from "@/utils/form-data-mapper";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { getPublicUrl } from "@/utils/url";
 import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation";
+import useDialogs from "@/hooks/use-dialog";
+import z from "zod";
 
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
@@ -111,10 +100,22 @@ function RouteComponent() {
   const navigate = useNavigate();
   const { orderId } = Route.useParams();
 
-  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [rejectPaymentDialogOpen, setRejectPaymentDialogOpen] = useState(false);
-  const [paymentRejectReason, setPaymentRejectReason] = useState("");
+  const dialogs = useDialogs({
+    reject: z.object({
+      reason: z
+        .string()
+        .min(1, "Reason is required")
+        .min(10, "Reason must be at least 10 characters")
+        .max(500, "Reason must not exceed 500 characters"),
+    }),
+    rejectPayment: z.object({
+      reason: z
+        .string()
+        .min(1, "Reason is required")
+        .min(20, "Payment rejection must be at least 20 characters")
+        .max(1000, "Reason must not exceed 1000 characters"),
+    }),
+  } as const);
 
   // Document upload states
   const offeringLetter = useFileUpload();
@@ -149,8 +150,8 @@ function RouteComponent() {
         await queryClient.invalidateQueries(
           trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
         );
-        setRejectDialogOpen(false);
-        setRejectReason("");
+        dialogs.close("reject");
+        dialogs.reset("reject");
         globalSuccessToast("Order berhasil ditolak");
       },
       onError: (error) => {
@@ -180,8 +181,8 @@ function RouteComponent() {
         await queryClient.invalidateQueries(
           trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
         );
-        setRejectPaymentDialogOpen(false);
-        setPaymentRejectReason("");
+        dialogs.close("rejectPayment");
+        dialogs.updateData("rejectPayment", { reason: "" });
         globalSuccessToast("Pembayaran berhasil ditolak");
       },
       onError: (error) => {
@@ -226,11 +227,18 @@ function RouteComponent() {
   };
 
   const handleRejectApproval = () => {
-    if (rejectReason.trim().length < 10) {
-      globalErrorToast("Alasan penolakan minimal 10 karakter");
+    const result = dialogs.validate("reject");
+
+    if (!result.success) {
+      globalErrorToast(
+        dialogs.getErrors("reject").reason || "Alasan penolakan tidak valid",
+      );
       return;
     }
-    rejectApprovalMutation.mutate({ orderId, reason: rejectReason });
+
+    const { reason } = result.data;
+
+    rejectApprovalMutation.mutate({ orderId, reason });
   };
 
   const handleVerifyPayment = () => {
@@ -238,11 +246,19 @@ function RouteComponent() {
   };
 
   const handleRejectPayment = () => {
-    if (paymentRejectReason.trim().length < 10) {
-      globalErrorToast("Alasan penolakan minimal 10 karakter");
+    const result = dialogs.validate("rejectPayment");
+
+    if (!result.success) {
+      globalErrorToast(
+        dialogs.getErrors("rejectPayment").reason ||
+          "Alasan penolakan tidak valid",
+      );
       return;
     }
-    rejectPaymentMutation.mutate({ orderId, reason: paymentRejectReason });
+
+    const { reason } = result.data;
+
+    rejectPaymentMutation.mutate({ orderId, reason });
   };
 
   const handleUploadOfferingLetter = async () => {
@@ -499,7 +515,7 @@ function RouteComponent() {
                     <Button
                       variant="outline"
                       className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                      onClick={() => setRejectDialogOpen(true)}
+                      onClick={() => dialogs.open("reject")}
                     >
                       Tolak Order
                     </Button>
@@ -1391,7 +1407,7 @@ function RouteComponent() {
                       <Button
                         variant="outline"
                         className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                        onClick={() => setRejectPaymentDialogOpen(true)}
+                        onClick={() => dialogs.open("rejectPayment")}
                       >
                         Tolak Pembayaran
                       </Button>
@@ -1670,7 +1686,12 @@ function RouteComponent() {
       </div>
 
       {/* Reject Approval Dialog */}
-      <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+      <AlertDialog
+        open={dialogs.isOpen("reject")}
+        onOpenChange={(open) =>
+          open ? dialogs.open("reject") : dialogs.close("reject")
+        }
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Tolak Order</AlertDialogTitle>
@@ -1681,8 +1702,10 @@ function RouteComponent() {
           </AlertDialogHeader>
           <div className="py-4">
             <Textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
+              value={dialogs.getData("reject")?.reason ?? ""}
+              onChange={(e) =>
+                dialogs.updateData("reject", { reason: e.target.value })
+              }
               placeholder="Tuliskan alasan penolakan (minimal 10 karakter)"
               rows={4}
             />
@@ -1705,8 +1728,10 @@ function RouteComponent() {
 
       {/* Reject Payment Dialog */}
       <AlertDialog
-        open={rejectPaymentDialogOpen}
-        onOpenChange={setRejectPaymentDialogOpen}
+        open={dialogs.isOpen("rejectPayment")}
+        onOpenChange={(open) =>
+          open ? dialogs.open("rejectPayment") : dialogs.close("rejectPayment")
+        }
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1719,8 +1744,10 @@ function RouteComponent() {
           </AlertDialogHeader>
           <div className="py-4">
             <Textarea
-              value={paymentRejectReason}
-              onChange={(e) => setPaymentRejectReason(e.target.value)}
+              value={dialogs.getData("rejectPayment")?.reason ?? ""}
+              onChange={(e) =>
+                dialogs.updateData("rejectPayment", { reason: e.target.value })
+              }
               placeholder="Tuliskan alasan penolakan (minimal 10 karakter)"
               rows={4}
             />
