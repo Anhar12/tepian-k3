@@ -618,9 +618,9 @@ const orderQueries = {
       yield* orderStatusHistoryQueries.createOrderStatusHistory(
         db,
         orderId,
-        "in_progress",
+        "pending",
         adminId,
-        "Order approved by admin",
+        "Order approved by admin and is waiting for payment document to be uploaded",
       );
 
       return {
@@ -674,7 +674,7 @@ const orderQueries = {
         try: () =>
           db
             .update(order)
-            .set({ approvalStatus: "rejected" })
+            .set({ approvalStatus: "rejected", approvalRejectReason: reason })
             .where(eq(order.id, orderId))
             .returning(),
         catch: (error) => {
@@ -831,7 +831,7 @@ const orderQueries = {
         try: () =>
           db
             .update(order)
-            .set({ paymentStatus: "rejected" })
+            .set({ paymentStatus: "rejected", paymentRejectedReason: reason })
             .where(eq(order.id, orderId))
             .returning(),
         catch: (error) => {

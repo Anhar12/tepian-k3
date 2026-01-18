@@ -24,8 +24,8 @@ import {
   documentSigningService,
 } from "@tepian-k3/services/document-signing";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
-import { emailService } from "@tepian-k3/services/email";
-import { forEach } from "effect/Chunk";
+import { EventTypes } from "@tepian-k3/schema/event.schema";
+import { notificationsQueries } from "@tepian-k3/queries/notifications.queries";
 
 export const orderRouter = createTRPCRouter({
   getAllOrders: withProtectedRateLimit(rateLimiters.moderate())
@@ -381,19 +381,32 @@ export const orderRouter = createTRPCRouter({
               );
             }
 
+            Effect.forkDaemon(
+              notificationsQueries.create({
+                userId: order.userId,
+                title: "Order Disetujui",
+                message: `Order #${order.orderNumber} telah disetujui oleh admin.`,
+                type: "order_status_changed",
+                orderId: order.id,
+                metadata: {
+                  orderStatus: "approved",
+                },
+              }),
+            );
+
+            Effect.forkDaemon(
+              Effect.tryPromise(() =>
+                ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                  orderId: order.id,
+                  userId: order.userId,
+                  newStatus: "pending",
+                  oldStatus: "pending",
+                  triggeredBy: ctx.user.id,
+                }),
+              ),
+            );
+
             // // Send notification email to customer
-            // yield* Effect.tryPromise(() =>
-            //   emailService.send({
-            //     to: order.user.email,
-            //     subject: `Order #${order.orderNumber} Telah Disetujui`,
-            //     template: "order-approved",
-            //     data: {
-            //       customerName: order.user.name,
-            //       orderNumber: order.orderNumber,
-            //       note: input.note,
-            //     },
-            //   })
-            // );
 
             return order;
           }),
@@ -427,19 +440,30 @@ export const orderRouter = createTRPCRouter({
               );
             }
 
-            // // Send notification email to customer
-            // yield* Effect.tryPromise(() =>
-            //   emailService.sendEmail({
-            //     to: order.user.email,
-            //     subject: `Order #${order.orderNumber} Ditolak`,
-            //     template: "order-rejected",
-            //     data: {
-            //       customerName: order.user.name,
-            //       orderNumber: order.orderNumber,
-            //       reason: input.reason,
-            //     },
-            //   }),
-            // );
+            Effect.forkDaemon(
+              notificationsQueries.create({
+                userId: order.userId,
+                title: "Order Ditolak",
+                message: `Order #${order.orderNumber} telah ditolak oleh admin. Alasan: ${input.reason}`,
+                type: "order_status_changed",
+                orderId: order.id,
+                metadata: {
+                  orderStatus: "rejected",
+                },
+              }),
+            );
+
+            Effect.forkDaemon(
+              Effect.tryPromise(() =>
+                ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                  orderId: order.id,
+                  userId: order.userId,
+                  newStatus: "rejected",
+                  oldStatus: "pending",
+                  triggeredBy: ctx.user.id,
+                }),
+              ),
+            );
 
             return order;
           }),
@@ -472,19 +496,30 @@ export const orderRouter = createTRPCRouter({
               );
             }
 
-            // // Send notification email to customer
-            // yield* Effect.tryPromise(() =>
-            //   emailService.sendEmail({
-            //     to: order.user.email,
-            //     subject: `Pembayaran Order #${order.orderNumber} Terverifikasi`,
-            //     template: "payment-verified",
-            //     data: {
-            //       customerName: order.user.name,
-            //       orderNumber: order.orderNumber,
-            //       note: input.note,
-            //     },
-            //   }),
-            // );
+            Effect.forkDaemon(
+              notificationsQueries.create({
+                userId: order.userId,
+                title: "Pembayaran Diverifikasi",
+                message: `Pembayaran untuk Order #${order.orderNumber} telah diverifikasi.`,
+                type: "order_status_changed",
+                orderId: order.id,
+                metadata: {
+                  orderStatus: "in_progress",
+                },
+              }),
+            );
+
+            Effect.forkDaemon(
+              Effect.tryPromise(() =>
+                ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                  orderId: order.id,
+                  userId: order.userId,
+                  newStatus: "in_progress",
+                  oldStatus: "pending",
+                  triggeredBy: ctx.user.id,
+                }),
+              ),
+            );
 
             return order;
           }),
@@ -518,19 +553,30 @@ export const orderRouter = createTRPCRouter({
               );
             }
 
-            // // Send notification email to customer
-            // yield* Effect.tryPromise(() =>
-            //   emailService.sendEmail({
-            //     to: order.user.email,
-            //     subject: `Pembayaran Order #${order.orderNumber} Ditolak`,
-            //     template: "payment-rejected",
-            //     data: {
-            //       customerName: order.user.name,
-            //       orderNumber: order.orderNumber,
-            //       reason: input.reason,
-            //     },
-            //   }),
-            // );
+            Effect.forkDaemon(
+              notificationsQueries.create({
+                userId: order.userId,
+                title: "Pembayaran Ditolak",
+                message: `Pembayaran untuk Order #${order.orderNumber} telah ditolak. Alasan: ${input.reason}`,
+                type: "order_status_changed",
+                orderId: order.id,
+                metadata: {
+                  orderStatus: "payment_rejected",
+                },
+              }),
+            );
+
+            Effect.forkDaemon(
+              Effect.tryPromise(() =>
+                ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                  orderId: order.id,
+                  userId: order.userId,
+                  newStatus: "rejected",
+                  oldStatus: "pending",
+                  triggeredBy: ctx.user.id,
+                }),
+              ),
+            );
 
             return order;
           }),
@@ -579,22 +625,38 @@ export const orderRouter = createTRPCRouter({
               );
             }
 
-            // // Send notification email with document links
-            // yield* Effect.tryPromise(() =>
-            //   emailService.sendEmail({
-            //     to: order.user.email,
-            //     subject: `Dokumen Penagihan Order #${order.orderNumber}`,
-            //     template: "billing-documents",
-            //     data: {
-            //       customerName: order.user.name,
-            //       orderNumber: order.orderNumber,
-            //       offeringLetterUrl: storageService.getPublicUrl(
-            //         offeringLetter.fileUrl,
-            //       ),
-            //       invoiceUrl: storageService.getPublicUrl(invoice.fileUrl),
-            //     },
-            //   }),
-            // );
+            // Create notification
+            yield* notificationsQueries.create({
+              userId: order.userId,
+              title: "Dokumen Order Anda Telah Tersedia",
+              message: `Dokumen penawaran dan faktur untuk Order #${order.orderNumber} telah tersedia. Silakan cek dokumen Anda.`,
+              type: "document_ready",
+              orderId: order.id,
+              metadata: {
+                offeringLetterUrl: storageService.getPublicUrl(
+                  offeringLetter.fileUrl,
+                ),
+                invoiceUrl: storageService.getPublicUrl(invoice.fileUrl),
+              },
+            });
+
+            Effect.forkDaemon(
+              Effect.tryPromise(() =>
+                ctx.eventBus.publish(EventTypes.NOTIFICATION, {
+                  userId: order.userId,
+                  message: `Dokumen penawaran dan faktur untuk Order #${order.orderNumber} telah tersedia.`,
+                  title: "Dokumen Order Anda Telah Tersedia",
+                  type: "document_ready",
+                  orderId: order.id,
+                  metadata: {
+                    offeringLetterUrl: storageService.getPublicUrl(
+                      offeringLetter.fileUrl,
+                    ),
+                    invoiceUrl: storageService.getPublicUrl(invoice.fileUrl),
+                  },
+                }),
+              ),
+            );
 
             return { success: true };
           }),
