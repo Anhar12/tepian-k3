@@ -4,6 +4,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { Row } from "@tanstack/react-table";
+import type { Resource } from "@tepian-k3/constants";
 import { ArchiveRestore, Trash } from "lucide-react";
 
 interface CrudActionCellConfig<T, TParams> {
@@ -14,7 +15,7 @@ interface CrudActionCellConfig<T, TParams> {
    * Resource path for routing (e.g., 'clusters', 'tools') */
   resourcePath: string;
   /** Permission prefix (e.g., 'clusters', 'tools') */
-  permissionPrefix: string;
+  permissionPrefix: Resource;
   /** Delete mutation from tRPC no type because tRPC mutation types are complex */
   deleteMutation: any;
   /** Restore mutation from tRPC no type because tRPC mutation types are complex */
