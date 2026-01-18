@@ -57,6 +57,7 @@ import z from "zod";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useSubscription } from "@trpc/tanstack-react-query";
 
 export const Route = createFileRoute("/(core)/worksheets/")({
   validateSearch: z.object({
@@ -113,8 +114,16 @@ function RouteComponent() {
     error,
   } = useQuery(trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }));
 
-  // TODO create worksheet notes type, schema, queries and api
   // Fetch worksheet notes
+  const { data: notes } = useQuery(
+    trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+  );
+
+  // TODO create worksheet items api to fetch items separately
+  // Fetch worksheet items
+
+  // TODO create worksheet tools api to fetch tools separately
+  // Fetch worksheet tools
 
   // Fetch all tools for assignment
   const { data: allToolsData } = useQuery(
@@ -226,21 +235,6 @@ function RouteComponent() {
       return matchesSearch && matchesCondition && matchesAvailability;
     });
   }, [tools, toolSearch, conditionFilter, availabilityFilter]);
-
-  // Transform notes
-  const notes: WorksheetNote[] = useMemo(() => {
-    if (!worksheet?.notes) return [];
-    return worksheet.notes.map((note) => ({
-      id: note.id,
-      note: note.note,
-      severity: note.severity,
-      createdAt: note.createdAt,
-      createdBy: {
-        id: note.createdBy?.id ?? "",
-        name: note.createdBy?.name ?? "Unknown",
-      },
-    }));
-  }, [worksheet?.notes]);
 
   // Pagination
   const parameterPagination = usePagination(
@@ -377,6 +371,16 @@ function RouteComponent() {
 
   const hasLocalChanges = localItemUpdates.size > 0;
 
+  useSubscription({
+    ...trpc.event.onWorksheetNoteCreated.subscriptionOptions(),
+    onData: (event) => {
+      if (event.worksheetId === worksheetId)
+        queryClient.invalidateQueries(
+          trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+        );
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -464,7 +468,7 @@ function RouteComponent() {
               >
                 <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Catatan</span>
-                {notes.length > 0 && (
+                {notes && notes.length > 0 && (
                   <Badge
                     variant="secondary"
                     className="ml-1 h-5 px-1.5 text-xs"
@@ -889,7 +893,7 @@ function RouteComponent() {
             <div className="flex h-125 flex-col">
               <ScrollArea className="mb-4 flex-1 pr-4">
                 <div className="space-y-4">
-                  {notes.length === 0 ? (
+                  {notes?.length === 0 ? (
                     <div className="py-12 text-center">
                       <MessageSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
                       <p className="text-sm text-muted-foreground">
@@ -897,7 +901,7 @@ function RouteComponent() {
                       </p>
                     </div>
                   ) : (
-                    notes.map((note) => (
+                    notes?.map((note) => (
                       <div key={note.id} className="flex gap-3">
                         <Avatar className="h-8 w-8 shrink-0">
                           <AvatarFallback className="bg-muted">

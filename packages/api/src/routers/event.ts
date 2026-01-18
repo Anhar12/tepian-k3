@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "..";
+import { createTRPCRouter, protectedProcedure, withPermission } from "..";
 import {
   EventTypes,
   type BroadcastTestEvent,
@@ -20,7 +20,7 @@ export const eventRouter = createTRPCRouter({
           /** Include events triggered by the current user */
           includeOwnEvents: z.boolean().optional(),
         })
-        .optional()
+        .optional(),
     )
     .subscription(async function* ({ input, ctx, signal }) {
       const filterContext = {
@@ -34,7 +34,7 @@ export const eventRouter = createTRPCRouter({
         input?.eventTypes ?? Object.values(EventTypes),
         filterContext,
         signal,
-        { includeOwnEvents: input?.includeOwnEvents ?? false }
+        { includeOwnEvents: input?.includeOwnEvents ?? false },
       )) {
         yield event;
       }
@@ -50,7 +50,7 @@ export const eventRouter = createTRPCRouter({
         .object({
           includeOwnEvents: z.boolean().optional(),
         })
-        .optional()
+        .optional(),
     )
     .subscription(async function* ({ ctx, input, signal }) {
       const filterContext = {
@@ -62,7 +62,7 @@ export const eventRouter = createTRPCRouter({
         [EventTypes.BROADCAST_TEST],
         filterContext,
         signal,
-        { includeOwnEvents: input?.includeOwnEvents ?? false }
+        { includeOwnEvents: input?.includeOwnEvents ?? false },
       )) {
         yield event.payload as BroadcastTestEvent;
       }
@@ -78,7 +78,7 @@ export const eventRouter = createTRPCRouter({
         .object({
           includeOwnEvents: z.boolean().optional(),
         })
-        .optional()
+        .optional(),
     )
     .subscription(async function* ({ ctx, input, signal }) {
       const filterContext = {
@@ -90,7 +90,7 @@ export const eventRouter = createTRPCRouter({
         [EventTypes.NOTIFICATION],
         filterContext,
         signal,
-        { includeOwnEvents: input?.includeOwnEvents ?? false }
+        { includeOwnEvents: input?.includeOwnEvents ?? false },
       )) {
         yield event.payload as NotificationEvent;
       }
@@ -106,7 +106,7 @@ export const eventRouter = createTRPCRouter({
         .object({
           includeOwnEvents: z.boolean().optional(),
         })
-        .optional()
+        .optional(),
     )
     .subscription(async function* ({ ctx, input, signal }) {
       const filterContext = {
@@ -118,9 +118,30 @@ export const eventRouter = createTRPCRouter({
         [EventTypes.ORDER_STATUS_CHANGED],
         filterContext,
         signal,
-        { includeOwnEvents: input?.includeOwnEvents ?? false }
+        { includeOwnEvents: input?.includeOwnEvents ?? false },
       )) {
         yield event.payload as OrderStatusChangedEvent;
       }
     }),
+
+  /**
+   * Subscribe to worksheet note created events only
+   * Returns properly typed WorksheetNoteCreatedEvent
+   */
+  onWorksheetNoteCreated: withPermission("worksheet-notes.read").subscription(
+    async function* ({ ctx, signal }) {
+      const filterContext = {
+        session: ctx.session,
+        user: ctx.user,
+      };
+
+      for await (const event of ctx.eventBus.subscribe(
+        [EventTypes.WORKSHEET_NOTE_CREATED],
+        filterContext,
+        signal,
+      )) {
+        yield event.payload;
+      }
+    },
+  ),
 });

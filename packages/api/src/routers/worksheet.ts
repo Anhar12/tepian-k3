@@ -11,6 +11,7 @@ import worksheetSchema from "@tepian-k3/schema/worksheet.schema";
 import { runEffect } from "../utils/run-effect";
 import { WORKSHEET_STATUS } from "@tepian-k3/constants";
 import { logError } from "@tepian-k3/services/logger";
+import worksheetNoteQueries from "@tepian-k3/queries/worksheet-note.queries";
 
 export const worksheetRouter = createTRPCRouter({
   /**
@@ -313,6 +314,18 @@ export const worksheetRouter = createTRPCRouter({
         }),
       );
     }),
+
+  /**
+   * Get worksheet notes
+   */
+  getNotes: withPermission("worksheet-notes.read")
+    .input(z.object({ worksheetId: z.string().uuidv7() }))
+    .query(
+      async ({ input }) =>
+        await runEffect(
+          worksheetNoteQueries.getWorksheetNoteByWorksheetId(input.worksheetId),
+        ),
+    ),
 
   /**
    * Add note to worksheet

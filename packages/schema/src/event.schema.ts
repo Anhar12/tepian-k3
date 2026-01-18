@@ -24,6 +24,14 @@ export const orderStatusChangedEventSchema = z.object({
   triggeredBy: z.uuidv7().optional(), // User who changed the status
 });
 
+export const worksheetNoteCreatedEventSchema = z.object({
+  noteId: z.uuidv7(),
+  worksheetId: z.uuidv7(),
+  content: z.string(),
+  createdBy: z.uuidv7(),
+  timestamp: z.date(),
+});
+
 export const broadcastTestEventSchema = z.object({
   message: z.string(),
 });
@@ -32,6 +40,7 @@ export const broadcastTestEventSchema = z.object({
 export const eventSchemas = {
   notification: notificationEventSchema,
   orderStatusChanged: orderStatusChangedEventSchema,
+  worksheetNoteCreated: worksheetNoteCreatedEventSchema,
   broadcastTest: broadcastTestEventSchema,
 } as const;
 
@@ -39,11 +48,15 @@ export type NotificationEvent = z.infer<typeof notificationEventSchema>;
 export type OrderStatusChangedEvent = z.infer<
   typeof orderStatusChangedEventSchema
 >;
+export type WorksheetNoteCreatedEvent = z.infer<
+  typeof worksheetNoteCreatedEventSchema
+>;
 export type BroadcastTestEvent = z.infer<typeof broadcastTestEventSchema>;
 
 export type EventMap = {
   notification: NotificationEvent;
   orderStatusChanged: OrderStatusChangedEvent;
+  worksheetNoteCreated: WorksheetNoteCreatedEvent;
   broadcastTest: BroadcastTestEvent;
 };
 
@@ -52,6 +65,7 @@ export type EventName = keyof EventMap;
 export enum EventTypes {
   NOTIFICATION = "notification",
   ORDER_STATUS_CHANGED = "orderStatusChanged",
+  WORKSHEET_NOTE_CREATED = "worksheetNoteCreated",
   BROADCAST_TEST = "broadcastTest",
   // Add more event types as needed
 }
