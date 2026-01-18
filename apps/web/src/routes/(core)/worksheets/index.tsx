@@ -58,6 +58,7 @@ import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSubscription } from "@trpc/tanstack-react-query";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 
 export const Route = createFileRoute("/(core)/worksheets/")({
   validateSearch: z.object({
@@ -122,9 +123,6 @@ function RouteComponent() {
   // TODO create worksheet items api to fetch items separately
   // Fetch worksheet items
 
-  // TODO create worksheet tools api to fetch tools separately
-  // Fetch worksheet tools
-
   // Fetch all tools for assignment
   const { data: allToolsData } = useQuery(
     trpc.tool.getToolPaginated.queryOptions({
@@ -137,14 +135,49 @@ function RouteComponent() {
 
   // Mutations
   const batchUpdateMutation = useMutation(
-    trpc.worksheet.batchUpdateItems.mutationOptions(),
+    trpc.worksheet.batchUpdateItems.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+        );
+        globalSuccessToast("Perubahan berhasil disimpan");
+        setLocalItemUpdates(new Map());
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal menyimpan perubahan : " + error.message);
+      },
+    }),
   );
 
   const assignToolsMutation = useMutation(
-    trpc.worksheet.assignTools.mutationOptions(),
+    trpc.worksheet.assignTools.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+        );
+        globalSuccessToast("Alat berhasil disimpan");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal menyimpan alat : " + error.message);
+      },
+    }),
   );
 
-  const addNoteMutation = useMutation(trpc.worksheet.addNote.mutationOptions());
+  const addNoteMutation = useMutation(
+    trpc.worksheet.addNote.mutationOptions({
+      onSuccess: async () => {
+        (await queryClient.invalidateQueries(
+          trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+        ),
+          globalSuccessToast("Catatan berhasil ditambahkan"));
+        setNewNote("");
+        setNoteSeverity("info");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal menambahkan catatan : " + error.message);
+      },
+    }),
+  );
 
   // Local state
   const [selectedCluster, setSelectedCluster] = useState("Semua Cluster");
@@ -270,7 +303,7 @@ function RouteComponent() {
     });
   };
 
-  const handleSaveItems = async () => {
+  const handleSaveItems = () => {
     if (localItemUpdates.size === 0) return;
 
     const items = Array.from(localItemUpdates.entries()).map(
@@ -282,19 +315,10 @@ function RouteComponent() {
       }),
     );
 
-    try {
-      await batchUpdateMutation.mutateAsync({
-        worksheetId,
-        items,
-      });
-      toast.success("Perubahan berhasil disimpan");
-      setLocalItemUpdates(new Map());
-      queryClient.invalidateQueries({
-        queryKey: [["worksheet", "getWorksheetById"]],
-      });
-    } catch {
-      toast.error("Gagal menyimpan perubahan");
-    }
+    batchUpdateMutation.mutate({
+      worksheetId,
+      items,
+    });
   };
 
   const handleToolSelect = (toolId: string, checked: boolean) => {
@@ -322,39 +346,21 @@ function RouteComponent() {
     });
   };
 
-  const handleSaveTools = async () => {
-    try {
-      await assignToolsMutation.mutateAsync({
-        worksheetId,
-        toolIds: Array.from(selectedToolIds),
-      });
-      toast.success("Alat berhasil disimpan");
-      queryClient.invalidateQueries({
-        queryKey: [["worksheet", "getWorksheetById"]],
-      });
-    } catch {
-      toast.error("Gagal menyimpan alat");
-    }
+  const handleSaveTools = () => {
+    assignToolsMutation.mutate({
+      worksheetId,
+      toolIds: Array.from(selectedToolIds),
+    });
   };
 
-  const handleSendNote = async () => {
+  const handleSendNote = () => {
     if (!newNote.trim()) return;
 
-    try {
-      await addNoteMutation.mutateAsync({
-        worksheetId,
-        note: newNote.trim(),
-        severity: noteSeverity,
-      });
-      toast.success("Catatan berhasil ditambahkan");
-      setNewNote("");
-      setNoteSeverity("info");
-      queryClient.invalidateQueries({
-        queryKey: [["worksheet", "getWorksheetById"]],
-      });
-    } catch {
-      toast.error("Gagal menambahkan catatan");
-    }
+    addNoteMutation.mutate({
+      worksheetId,
+      note: newNote.trim(),
+      severity: noteSeverity,
+    });
   };
 
   const selectedToolsCount = selectedToolIds.size;
