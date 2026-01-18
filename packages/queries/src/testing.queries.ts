@@ -73,6 +73,10 @@ const testingQueries = {
               orderBy: (testing, { desc }) => [desc(testing.createdAt)],
               with: {
                 order: {
+                  columns: {
+                    id: true,
+                    orderNumber: true,
+                  },
                   with: {
                     company: {
                       columns: {

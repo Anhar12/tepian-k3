@@ -184,7 +184,11 @@ export const DOCUMENT_TYPES = [
   // Order documents
   "offering_document",
   "offering_user_document",
+  "approval_letter",
+  "approval_letter_user",
   "invoice",
+  "cooperation_agreement",
+  "cooperation_agreement_user",
   "proof_of_payment",
   "assignment_letter",
 
@@ -209,8 +213,11 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   // Order documents
   offering_document: "Offering Document",
   offering_user_document: "Offering User Document",
+  approval_letter: "Approval Letter",
   invoice: "Invoice",
   proof_of_payment: "Proof of Payment",
+  cooperation_agreement: "Cooperation Agreement",
+  cooperation_agreement_user: "Cooperation Agreement (User)",
   assignment_letter: "Assignment Letter",
 
   // Testing documents

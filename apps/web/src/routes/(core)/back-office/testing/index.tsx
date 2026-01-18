@@ -24,59 +24,53 @@ import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  WORKSHEET_STATUS,
-  WORKSHEET_STATUS_LABELS,
-  type WorksheetStatus,
+  TESTING_STATUSES,
+  TESTING_STATUS_LABELS,
+  type TestingStatus,
 } from "@tepian-k3/constants";
-import {
-  Building2,
-  Calendar,
-  ClipboardList,
-  Eye,
-  FlaskConical,
-  Search,
-  UserCheck,
-} from "lucide-react";
+import { Building2, Eye, FileText, FlaskConical, Search } from "lucide-react";
 import { useState } from "react";
 import z from "zod";
 
 const searchSchema = z.object({
   page: z.number().min(1).default(1),
   perPage: z.number().min(1).max(100).default(10),
-  status: z.enum(WORKSHEET_STATUS).optional(),
+  search: z.string().optional(),
+  status: z.enum(TESTING_STATUSES).optional(),
 });
 
-export const Route = createFileRoute("/(core)/back-office/worksheets/")({
+export const Route = createFileRoute("/(core)/back-office/testing/")({
   validateSearch: (search) => searchSchema.parse(search),
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "worksheets.read" }),
+    await requirePermission(context, { permission: "testing.read" }),
   component: RouteComponent,
 });
 
-const STATUS_COLORS: Record<WorksheetStatus, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  in_progress: "bg-blue-100 text-blue-700",
+const STATUS_COLORS: Record<TestingStatus, string> = {
+  start_testing: "bg-blue-100 text-blue-700",
+  sample_submission: "bg-indigo-100 text-indigo-700",
+  sample_analysis: "bg-purple-100 text-purple-700",
+  report_generation: "bg-amber-100 text-amber-700",
+  report_publishing: "bg-orange-100 text-orange-700",
   completed: "bg-green-100 text-green-700",
-  approved: "bg-emerald-100 text-emerald-700",
-  rejected: "bg-red-100 text-red-700",
 };
 
 function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(params.search || "");
 
   const { data, isLoading } = useQuery(
-    trpc.worksheet.getAllWorksheets.queryOptions({
+    trpc.testing.getAllTestings.queryOptions({
       page: params.page,
       perPage: params.perPage,
-      status: params.status,
-    })
+      search: params.search,
+    }),
   );
 
   const handleSearch = () => {
     navigate({
-      search: { ...params, page: 1 },
+      search: { ...params, search: searchInput || undefined, page: 1 },
     });
   };
 
@@ -92,17 +86,28 @@ function RouteComponent() {
     navigate({
       search: {
         ...params,
-        status: status === "all" ? undefined : (status as WorksheetStatus),
+        status: status === "all" ? undefined : (status as TestingStatus),
         page: 1,
       },
     });
   };
 
+  // Count by status
+  const statusCounts = {
+    total: data?.pagination?.totalItems ?? 0,
+    start_testing: 0,
+    sample_submission: 0,
+    sample_analysis: 0,
+    report_generation: 0,
+    report_publishing: 0,
+    completed: 0,
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <WorksheetHeaderCard
-        title="Manajemen Worksheet"
-        subtitle="Kelola worksheet pengujian laboratorium dan pelaksanaan testing"
+        title="Manajemen Testing"
+        subtitle="Kelola pengujian laboratorium dan dokumen hasil testing"
       />
 
       <Card>
@@ -131,9 +136,9 @@ function RouteComponent() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>
-                {WORKSHEET_STATUS.map((status) => (
+                {TESTING_STATUSES.map((status) => (
                   <SelectItem key={status} value={status}>
-                    {WORKSHEET_STATUS_LABELS[status]}
+                    {TESTING_STATUS_LABELS[status]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -141,37 +146,42 @@ function RouteComponent() {
           </div>
 
           {/* Summary Cards */}
-          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
+          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-7">
             {[
               {
                 label: "Total",
-                count: data?.pagination?.totalItems ?? 0,
+                count: statusCounts.total,
                 color: "bg-slate-100 text-slate-700",
               },
               {
-                label: "Draft",
-                count: 0,
-                color: STATUS_COLORS.draft,
+                label: "Start",
+                count: statusCounts.start_testing,
+                color: STATUS_COLORS.start_testing,
               },
               {
-                label: "In Progress",
-                count: 0,
-                color: STATUS_COLORS.in_progress,
+                label: "Submission",
+                count: statusCounts.sample_submission,
+                color: STATUS_COLORS.sample_submission,
+              },
+              {
+                label: "Analysis",
+                count: statusCounts.sample_analysis,
+                color: STATUS_COLORS.sample_analysis,
+              },
+              {
+                label: "Report Gen",
+                count: statusCounts.report_generation,
+                color: STATUS_COLORS.report_generation,
+              },
+              {
+                label: "Publishing",
+                count: statusCounts.report_publishing,
+                color: STATUS_COLORS.report_publishing,
               },
               {
                 label: "Completed",
-                count: 0,
+                count: statusCounts.completed,
                 color: STATUS_COLORS.completed,
-              },
-              {
-                label: "Approved",
-                count: 0,
-                color: STATUS_COLORS.approved,
-              },
-              {
-                label: "Rejected",
-                count: 0,
-                color: STATUS_COLORS.rejected,
               },
             ].map((stat) => (
               <Card key={stat.label} className="border-0 shadow-sm">
@@ -207,18 +217,15 @@ function RouteComponent() {
                     </TableHead>
                     <TableHead className="hidden text-xs font-semibold sm:text-sm md:table-cell">
                       <div className="flex items-center gap-2">
-                        <UserCheck className="h-4 w-4" />
-                        Supervisor
+                        <FileText className="h-4 w-4" />
+                        Order
                       </div>
                     </TableHead>
                     <TableHead className="text-xs font-semibold sm:text-sm">
                       Status
                     </TableHead>
                     <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Tanggal
-                      </div>
+                      Tanggal
                     </TableHead>
                     <TableHead className="text-center text-xs font-semibold sm:text-sm">
                       Aksi
@@ -232,7 +239,7 @@ function RouteComponent() {
                         colSpan={6}
                         className="py-12 text-center text-muted-foreground"
                       >
-                        <ClipboardList className="mx-auto mb-2 h-8 w-8 animate-pulse" />
+                        <FlaskConical className="mx-auto mb-2 h-8 w-8 animate-pulse" />
                         Memuat data...
                       </TableCell>
                     </TableRow>
@@ -242,67 +249,53 @@ function RouteComponent() {
                         colSpan={6}
                         className="py-12 text-center text-muted-foreground"
                       >
-                        <ClipboardList className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                        Tidak ada worksheet ditemukan
+                        <FlaskConical className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                        Tidak ada data testing ditemukan
                       </TableCell>
                     </TableRow>
                   ) : (
-                    data.data.map((worksheet) => (
+                    data.data.map((testing) => (
                       <TableRow
-                        key={worksheet.id}
+                        key={testing.id}
                         className="cursor-pointer transition-colors hover:bg-muted/30"
                       >
                         <TableCell className="font-mono text-xs font-medium sm:text-sm">
-                          {worksheet.testing?.testingNumber || "-"}
+                          {testing.testingNumber}
                         </TableCell>
                         <TableCell className="text-xs sm:text-sm">
                           <div className="max-w-50 truncate">
-                            {worksheet.testing?.order?.company?.name || "-"}
+                            {testing.order?.company?.name || "-"}
                           </div>
                         </TableCell>
-                        <TableCell className="hidden text-xs md:table-cell">
-                          {worksheet.mainSupervisor?.user?.name || "-"}
+                        <TableCell className="hidden font-mono text-xs md:table-cell">
+                          {testing.order?.orderNumber || "-"}
                         </TableCell>
                         <TableCell>
                           <Badge
-                            className={`${STATUS_COLORS[worksheet.status as WorksheetStatus]} text-xs`}
+                            className={`${STATUS_COLORS[testing.status as TestingStatus]} text-xs`}
                           >
-                            {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
+                            {
+                              TESTING_STATUS_LABELS[
+                                testing.status as TestingStatus
+                              ]
+                            }
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                          <div className="flex flex-col">
-                            <span>
-                              Mulai:{" "}
-                              {new Date(worksheet.startDate).toLocaleDateString(
-                                "id-ID",
-                                {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                }
-                              )}
-                            </span>
-                            {worksheet.endDate && (
-                              <span>
-                                Selesai:{" "}
-                                {new Date(worksheet.endDate).toLocaleDateString(
-                                  "id-ID",
-                                  {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                  }
-                                )}
-                              </span>
-                            )}
-                          </div>
+                          {new Date(testing.createdAt).toLocaleDateString(
+                            "id-ID",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           <Button asChild size="sm" variant="outline">
                             <Link
-                              to="/back-office/worksheets/$worksheetId/detail"
-                              params={{ worksheetId: worksheet.id }}
+                              to="/back-office/testing/$testingId/detail"
+                              params={{ testingId: testing.id }}
                             >
                               <Eye className="mr-1 h-4 w-4" />
                               <span className="hidden sm:inline">Detail</span>

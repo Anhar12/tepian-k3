@@ -40,7 +40,7 @@ app.use(
   cors({
     origin: env.CORS_ORIGIN || "",
     allowMethods: ["GET", "POST", "OPTIONS"],
-  })
+  }),
 );
 
 // Only for local testing
@@ -58,7 +58,7 @@ app.use(
     createContext: (_opts, context) => {
       return createTRPCContext(context);
     },
-  })
+  }),
 );
 
 app.get("/", (c) => {
@@ -88,6 +88,8 @@ app.get("/api/public/*", async (c) => {
 app.get("/api/uploads/*", async (c) => {
   // Get the full path after /api/uploads/
   const fullPath = c.req.path.replace("/api/uploads/", "");
+
+  console.log("Requested file:", fullPath);
 
   // Security check: prevent directory traversal
   if (fullPath.includes("..")) {
@@ -121,7 +123,7 @@ serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  }
+  },
 );
 
 // Graceful shutdown

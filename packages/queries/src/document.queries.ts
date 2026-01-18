@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { db } from "@tepian-k3/db/client";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
   documents,
   documentSignatures,
@@ -32,7 +32,7 @@ const documentQueries = {
         db.query.documents.findMany({
           where: and(
             eq(documents.entityType, entityType),
-            eq(documents.entityId, entityId)
+            eq(documents.entityId, entityId),
           ),
           orderBy: desc(documents.createdAt),
         }),
@@ -40,7 +40,7 @@ const documentQueries = {
         logError(
           "documentQueries.getDocumentsByEntity",
           "Error fetching documents by entity",
-          { entityType, entityId, error }
+          { entityType, entityId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -56,7 +56,7 @@ const documentQueries = {
   getDocumentByTypeAndEntity: (
     entityType: DocumentEntityType,
     entityId: string,
-    documentType: DocumentType
+    documentType: DocumentType,
   ) =>
     Effect.gen(function* () {
       const results = yield* Effect.tryPromise({
@@ -65,14 +65,14 @@ const documentQueries = {
             where: and(
               eq(documents.entityType, entityType),
               eq(documents.entityId, entityId),
-              eq(documents.type, documentType)
+              eq(documents.type, documentType),
             ),
           }),
         catch: (error) => {
           logError(
             "documentQueries.getDocumentByTypeAndEntity",
             "Error fetching document by type and entity",
-            { entityType, entityId, documentType, error }
+            { entityType, entityId, documentType, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -100,7 +100,7 @@ const documentQueries = {
           logError(
             "documentQueries.getDocumentById",
             "Error fetching document by ID",
-            { documentId, error }
+            { documentId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -115,7 +115,7 @@ const documentQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Dokumen tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -125,11 +125,11 @@ const documentQueries = {
   /**
    * Create a new document
    */
-  createDocument: (input: CreateDocumentInput) =>
+  createDocument: (input: CreateDocumentInput, tx: DBorTx = db) =>
     Effect.gen(function* () {
       const results = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .insert(documents)
             .values({
               documentNumber: input.documentNumber,
@@ -150,7 +150,7 @@ const documentQueries = {
           logError(
             "documentQueries.createDocument",
             "Error creating document",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -167,7 +167,7 @@ const documentQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat dokumen",
-          })
+          }),
         );
       }
 
@@ -180,7 +180,7 @@ const documentQueries = {
   signDocumentWithJWT: (
     documentId: string,
     signedByUserId: string,
-    appUrl: string
+    appUrl: string,
   ) =>
     Effect.gen(function* () {
       // Get the document
@@ -199,7 +199,7 @@ const documentQueries = {
           document.type,
           document.fileUrl,
           fileContent,
-          signedByUserId
+          signedByUserId,
         );
 
       // Generate verification URL
@@ -217,7 +217,7 @@ const documentQueries = {
           logError(
             "documentQueries.signDocumentWithJWT",
             "Error generating QR code",
-            { documentId, error }
+            { documentId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -234,7 +234,7 @@ const documentQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat kode QR",
-          })
+          }),
         );
       }
 
@@ -265,7 +265,7 @@ const documentQueries = {
           logError(
             "documentQueries.signDocumentWithJWT",
             "Error updating document with signature",
-            { documentId, error }
+            { documentId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -282,7 +282,7 @@ const documentQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to update document",
-          })
+          }),
         );
       }
 
@@ -330,7 +330,7 @@ const documentQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Dokumen tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -355,7 +355,7 @@ const documentQueries = {
             {
               token,
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -378,7 +378,7 @@ const documentQueries = {
       verifiedByIp?: string;
       verifiedByUserAgent?: string;
       checkFileIntegrity?: boolean;
-    }
+    },
   ) =>
     Effect.gen(function* () {
       // Get document by verification token
@@ -395,7 +395,7 @@ const documentQueries = {
           logError(
             "documentQueries.verifyDocumentByToken",
             "Error fetching document by token",
-            { token, error }
+            { token, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -436,7 +436,7 @@ const documentQueries = {
       const verificationResult =
         yield* documentSigningService.verifyDocumentAuthenticity(
           results.signatureData,
-          fileContent
+          fileContent,
         );
 
       if (!verificationResult.valid) {
@@ -533,7 +533,7 @@ const documentQueries = {
           logError(
             "documentQueries.verifyDocument",
             "Error updating document verified status",
-            { documentId: document.id, error }
+            { documentId: document.id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -563,7 +563,7 @@ const documentQueries = {
       isValid: boolean;
       verificationMethod?: string;
       verificationNotes?: string;
-    }
+    },
   ) =>
     Effect.tryPromise({
       try: () =>
@@ -579,7 +579,7 @@ const documentQueries = {
         logError(
           "documentQueries.logVerification",
           "Error logging document verification",
-          { documentId, input, error }
+          { documentId, input, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -603,7 +603,7 @@ const documentQueries = {
         logError(
           "documentQueries.getVerificationHistory",
           "Error fetching document verification history",
-          { documentId, error }
+          { documentId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -629,7 +629,7 @@ const documentQueries = {
           logError(
             "documentQueries.updateDocumentStatus",
             "Error updating document status",
-            { documentId, status, error }
+            { documentId, status, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -646,7 +646,7 @@ const documentQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Dokumen tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -664,7 +664,7 @@ const documentQueries = {
     signatureData: {
       signatureData: string;
       verificationToken: string;
-    }
+    },
   ) =>
     Effect.gen(function* () {
       const results = yield* Effect.tryPromise({
@@ -681,7 +681,7 @@ const documentQueries = {
           logError(
             "documentQueries.updateDocumentSignature",
             "Error updating document signature",
-            { documentId, signatureData, error }
+            { documentId, signatureData, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -697,7 +697,7 @@ const documentQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Dokumen tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -716,7 +716,7 @@ const documentQueries = {
           logError(
             "documentQueries.deleteDocument",
             "Error deleting document",
-            { documentId, error }
+            { documentId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -733,7 +733,7 @@ const documentQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Dokumen tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -765,7 +765,7 @@ const documentQueries = {
     documentQueries.getDocumentByTypeAndEntity(
       "testing",
       testingId,
-      "testing_report"
+      "testing_report",
     ),
 
   /**
@@ -775,7 +775,7 @@ const documentQueries = {
     documentQueries.getDocumentByTypeAndEntity(
       "testing",
       testingId,
-      "lab_certificate"
+      "lab_certificate",
     ),
 
   /**
@@ -827,7 +827,7 @@ const documentQueries = {
         logError(
           "documentQueries.createDocumentSignature",
           "Error creating document signature",
-          { input, error }
+          { input, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -863,7 +863,7 @@ const documentQueries = {
         logError(
           "documentQueries.getDocumentSignatures",
           "Error fetching document signatures",
-          { documentId, error }
+          { documentId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -896,7 +896,7 @@ const documentQueries = {
         logError(
           "documentQueries.getSignatureByToken",
           "Error fetching signature by token",
-          { verificationToken, error }
+          { verificationToken, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -929,7 +929,7 @@ const documentQueries = {
         logError(
           "documentQueries.getSignatureById",
           "Error fetching signature by ID",
-          { signatureId, error }
+          { signatureId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -962,7 +962,7 @@ const documentQueries = {
       signatureData: string;
       fileHash: string;
       expiresAt?: string;
-    }>
+    }>,
   ) =>
     Effect.tryPromise({
       try: async () => {
@@ -977,7 +977,7 @@ const documentQueries = {
         logError(
           "documentQueries.createDocumentSignatures",
           "Error creating document signatures",
-          { count: signatures.length, error }
+          { count: signatures.length, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

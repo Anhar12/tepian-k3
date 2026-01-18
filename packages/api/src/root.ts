@@ -18,11 +18,13 @@ import { provinceRouter } from "./routers/province";
 import { regencyRouter } from "./routers/regency";
 import { roleRouters } from "./routers/role";
 import { testRouter } from "./routers/test";
+import { testingRouter } from "./routers/testing";
 import { toolRouter } from "./routers/tool";
 import { userRouter } from "./routers/user";
 import { userCompanyRouter } from "./routers/user-company";
 import { userCompanyTestingLocationRouter } from "./routers/user-company-testing-location";
 import { villageRouter } from "./routers/village";
+import { worksheetRouter } from "./routers/worksheet";
 
 /**
  * This is the primary router for your server.
@@ -50,10 +52,12 @@ export const appRouter = createTRPCRouter({
   order: orderRouter,
   event: eventRouter,
   test: testRouter,
+  testing: testingRouter,
   audit: auditRouter,
   document: documentRouter,
   employee: employeeRouter,
   notifications: notificationsRouter,
+  worksheet: worksheetRouter,
 });
 
 // export type definition of API

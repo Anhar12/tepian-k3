@@ -1,0 +1,2 @@
+ALTER TYPE "public"."document_type" ADD VALUE 'cooperation_agreement' BEFORE 'assignment_letter';--> statement-breakpoint
+ALTER TYPE "public"."document_type" ADD VALUE 'cooperation_agreement_user' BEFORE 'assignment_letter';

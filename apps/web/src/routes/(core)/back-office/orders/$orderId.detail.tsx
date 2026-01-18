@@ -60,6 +60,9 @@ import { format } from "date-fns";
 import { requirePermission } from "@/utils/require-permission";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { cn } from "@/lib/utils";
+import { toFormData } from "@/utils/form-data-mapper";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { getPublicUrl } from "@/utils/url";
 
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
@@ -113,12 +116,10 @@ function RouteComponent() {
   const [paymentRejectReason, setPaymentRejectReason] = useState("");
 
   // Document upload states
-  const [offeringLetterFile, setOfferingLetterFile] = useState<File | null>(
-    null,
-  );
-  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
-  const [uploadingOffering, setUploadingOffering] = useState(false);
-  const [uploadingInvoice, setUploadingInvoice] = useState(false);
+  const offeringLetter = useFileUpload();
+  const approvalLetter = useFileUpload();
+  const cooperationAgreement = useFileUpload();
+  const invoice = useFileUpload();
 
   const { data: order, isLoading } = useQuery(
     trpc.order.getOrderWithDocumentsAdmin.queryOptions({
@@ -256,38 +257,80 @@ function RouteComponent() {
   };
 
   const handleUploadOfferingLetter = async () => {
-    if (!offeringLetterFile) return;
+    if (!offeringLetter.file) return;
 
-    setUploadingOffering(true);
+    offeringLetter.setUploading(true);
     try {
-      await uploadDocumentMutation.mutateAsync({
+      const formData = toFormData({
         title: "Surat Penawaran",
         entityType: "order",
         entityId: orderId,
         type: "offering_document",
-        file: offeringLetterFile,
+        file: offeringLetter.file,
       });
-      setOfferingLetterFile(null);
+
+      await uploadDocumentMutation.mutateAsync(formData);
+
+      offeringLetter.reset();
     } finally {
-      setUploadingOffering(false);
+      offeringLetter.setUploading(false);
+    }
+  };
+
+  const handleUploadApprovalLetter = async () => {
+    if (!approvalLetter.file) return;
+
+    approvalLetter.setUploading(true);
+    try {
+      const formData = toFormData({
+        title: "Surat Persetujuan",
+        entityType: "order",
+        entityId: orderId,
+        type: "approval_letter",
+        file: approvalLetter.file,
+      });
+      await uploadDocumentMutation.mutateAsync(formData);
+      approvalLetter.reset();
+    } finally {
+      approvalLetter.setUploading(false);
+    }
+  };
+
+  const handleUploadCooperationAgreement = async () => {
+    if (!cooperationAgreement.file) return;
+
+    cooperationAgreement.setUploading(true);
+    try {
+      const formData = toFormData({
+        title: "Perjanjian Kerjasama",
+        entityType: "order",
+        entityId: orderId,
+        type: "cooperation_agreement",
+        file: cooperationAgreement.file,
+      });
+      await uploadDocumentMutation.mutateAsync(formData);
+      cooperationAgreement.reset();
+    } finally {
+      cooperationAgreement.setUploading(false);
     }
   };
 
   const handleUploadInvoice = async () => {
-    if (!invoiceFile) return;
+    if (!invoice.file) return;
 
-    setUploadingInvoice(true);
+    invoice.setUploading(true);
     try {
-      await uploadDocumentMutation.mutateAsync({
+      const formData = toFormData({
         title: "Invoice",
         entityType: "order",
         entityId: orderId,
         type: "invoice",
-        file: invoiceFile,
+        file: invoice.file,
       });
-      setInvoiceFile(null);
+      await uploadDocumentMutation.mutateAsync(formData);
+      invoice.reset();
     } finally {
-      setUploadingInvoice(false);
+      invoice.setUploading(false);
     }
   };
 
@@ -310,22 +353,56 @@ function RouteComponent() {
   const hasOfferingLetter = order.documents.some(
     (doc) => doc.type === "offering_document",
   );
+  const hasApprovalLetter = order.documents.some(
+    (doc) => doc.type === "approval_letter",
+  );
+  const hasApprovalLetterUserDocument = order.documents.some(
+    (doc) => doc.type === "approval_letter_user",
+  );
+  const hasCooperationAgreement = order.documents.some(
+    (doc) => doc.type === "cooperation_agreement",
+  );
+  const hasCooperationAgreementUserDocument = order.documents.some(
+    (doc) => doc.type === "cooperation_agreement_user",
+  );
   const hasInvoice = order.documents.some((doc) => doc.type === "invoice");
-  const hasBothDocuments = hasOfferingLetter && hasInvoice;
+  const hasBothApprovalLetter =
+    hasApprovalLetter && hasApprovalLetterUserDocument;
+  const hasBothDocuments =
+    hasOfferingLetter && hasInvoice && hasBothApprovalLetter;
 
   // Determine current workflow state
   const isPendingApproval = order.approvalStatus === "pending";
+  const isRevisionRequested = order.status === "revision";
   const isApprovedNeedsDocs =
-    order.approvalStatus === "approved" && !hasBothDocuments;
+    order.approvalStatus === "approved" &&
+    !hasBothDocuments &&
+    !isRevisionRequested;
+  const isApprovedNeedsApprovalLetter =
+    order.approvalStatus === "approved" && !isRevisionRequested;
+  const isAcceptingDocuments =
+    order.approvalStatus === "approved" &&
+    order.status === "confirmed" &&
+    hasBothApprovalLetter &&
+    !isRevisionRequested;
   const isAwaitingPayment =
     order.approvalStatus === "approved" &&
     hasBothDocuments &&
-    order.paymentStatus === "unpaid";
+    order.paymentStatus === "unpaid" &&
+    !isRevisionRequested;
   const isPendingPaymentVerification =
     order.paymentStatus === "pending_verification";
   const isPaymentVerifiedNeedsTesting =
     order.paymentStatus === "paid" && !order.testing;
   const hasTestingCreated = !!order.testing;
+
+  // Get revision notes from the latest revision status history
+  const revisionHistory = order.statusHistory
+    ?.filter((h) => h.status === "revision")
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )[0];
 
   return (
     <Card className="container min-h-[calc(100vh-8rem)]">
@@ -425,7 +502,7 @@ function RouteComponent() {
                   <CardTitle>Order Pending Approval</CardTitle>
                   <CardDescription>
                     Tinjau detail order dan setujui untuk melanjutkan ke tahap
-                    penerbitan dokumen penagihan
+                    penerbitan dokumen penawaran.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -452,12 +529,238 @@ function RouteComponent() {
               </Card>
             )}
 
+            {isRevisionRequested && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Permintaan Revisi Dokumen</CardTitle>
+                  <CardDescription>
+                    Pelanggan meminta revisi dokumen penawaran. Upload dokumen
+                    yang sudah direvisi.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Revision Notes from Customer */}
+                  {revisionHistory?.note && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                          <FileText className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-amber-800">
+                            Catatan Revisi dari Pelanggan
+                          </h3>
+                          <p className="mt-2 text-sm text-amber-700">
+                            {revisionHistory.note}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Offering Letter Upload */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <Label className="text-base font-medium">
+                            Surat Penawaran (Revisi)
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Format: PDF
+                          </p>
+                        </div>
+                      </div>
+                      {hasOfferingLetter && !offeringLetter.file && (
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-blue-100 text-blue-800">
+                            Dokumen Lama
+                          </Badge>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() =>
+                              window.open(
+                                getPublicUrl(
+                                  order.documents.find(
+                                    (doc) => doc.type === "offering_document",
+                                  )!.fileUrl,
+                                ),
+                                "_blank",
+                              )
+                            }
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.type !== "application/pdf") {
+                                globalErrorToast("Format file harus PDF");
+                                return;
+                              }
+                              offeringLetter.setFile(file);
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                        {offeringLetter.file && (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => offeringLetter.setFile(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      {offeringLetter.file && (
+                        <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                          <span className="text-sm">
+                            {offeringLetter.file.name}
+                          </span>
+                          <Button
+                            size="sm"
+                            onClick={handleUploadOfferingLetter}
+                            disabled={offeringLetter.uploading}
+                          >
+                            {offeringLetter.uploading ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Upload className="mr-2 h-4 w-4" />
+                            )}
+                            Upload
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Invoice Upload */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <Label className="text-base font-medium">
+                            Invoice (Revisi)
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Format: PDF
+                          </p>
+                        </div>
+                      </div>
+                      {hasInvoice && !invoice.file && (
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-blue-100 text-blue-800">
+                            Dokumen Lama
+                          </Badge>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() =>
+                              window.open(
+                                getPublicUrl(
+                                  order.documents.find(
+                                    (doc) => doc.type === "invoice",
+                                  )!.fileUrl,
+                                ),
+                                "_blank",
+                              )
+                            }
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.type !== "application/pdf") {
+                                globalErrorToast("Format file harus PDF");
+                                return;
+                              }
+                              invoice.setFile(file);
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                        {invoice.file && (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => invoice.setFile(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      {invoice.file && (
+                        <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                          <span className="text-sm">{invoice.file.name}</span>
+                          <Button
+                            size="sm"
+                            onClick={handleUploadInvoice}
+                            disabled={invoice.uploading}
+                          >
+                            {invoice.uploading ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Upload className="mr-2 h-4 w-4" />
+                            )}
+                            Upload
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      className="bg-blue-500 hover:bg-blue-600"
+                      onClick={handleNotifyCustomer}
+                      disabled={notifyCustomerMutation.isPending}
+                    >
+                      {notifyCustomerMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Mail className="mr-2 h-4 w-4" />
+                      )}
+                      Kirim Dokumen Revisi ke Pelanggan
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {isApprovedNeedsDocs && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Upload Dokumen Penagihan</CardTitle>
+                  <CardTitle>Upload Surat Penawaran</CardTitle>
                   <CardDescription>
-                    Upload surat penawaran dan invoice untuk pelanggan
+                    Unggah surat penawaran untuk melanjutkan ke tahap
+                    selanjutnya.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -487,9 +790,11 @@ function RouteComponent() {
                             variant="outline"
                             onClick={() =>
                               window.open(
-                                order.documents.find(
-                                  (doc) => doc.type === "offering_document",
-                                )!.fileUrl,
+                                getPublicUrl(
+                                  order.documents.find(
+                                    (doc) => doc.type === "offering_document",
+                                  )!.fileUrl,
+                                ),
                                 "_blank",
                               )
                             }
@@ -517,32 +822,32 @@ function RouteComponent() {
                                   globalErrorToast("Format file harus PDF");
                                   return;
                                 }
-                                setOfferingLetterFile(file);
+                                offeringLetter.setFile(file);
                               }
                             }}
                             className="flex-1"
                           />
-                          {offeringLetterFile && (
+                          {offeringLetter.file && (
                             <Button
                               size="icon"
                               variant="outline"
-                              onClick={() => setOfferingLetterFile(null)}
+                              onClick={() => offeringLetter.setFile(null)}
                             >
                               <X className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
-                        {offeringLetterFile && (
+                        {offeringLetter.file && (
                           <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
                             <span className="text-sm">
-                              {offeringLetterFile.name}
+                              {offeringLetter.file.name}
                             </span>
                             <Button
                               size="sm"
                               onClick={handleUploadOfferingLetter}
-                              disabled={uploadingOffering}
+                              disabled={offeringLetter.uploading}
                             >
-                              {uploadingOffering ? (
+                              {offeringLetter.uploading ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               ) : (
                                 <Upload className="mr-2 h-4 w-4" />
@@ -555,99 +860,7 @@ function RouteComponent() {
                     )}
                   </div>
 
-                  {/* Invoice Upload */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                          <FileText className="h-5 w-5 text-blue-500" />
-                        </div>
-                        <div>
-                          <Label className="text-base font-medium">
-                            Invoice
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Format: PDF
-                          </p>
-                        </div>
-                      </div>
-                      {hasInvoice ? (
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-100 text-green-800">
-                            Sudah Diunggah
-                          </Badge>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() =>
-                              window.open(
-                                order.documents.find(
-                                  (doc) => doc.type === "invoice",
-                                )!.fileUrl,
-                                "_blank",
-                              )
-                            }
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Badge className="bg-yellow-100 text-yellow-800">
-                          Belum Diunggah
-                        </Badge>
-                      )}
-                    </div>
-
-                    {!hasInvoice && (
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <Input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                if (file.type !== "application/pdf") {
-                                  globalErrorToast("Format file harus PDF");
-                                  return;
-                                }
-                                setInvoiceFile(file);
-                              }
-                            }}
-                            className="flex-1"
-                          />
-                          {invoiceFile && (
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => setInvoiceFile(null)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                        {invoiceFile && (
-                          <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                            <span className="text-sm">{invoiceFile.name}</span>
-                            <Button
-                              size="sm"
-                              onClick={handleUploadInvoice}
-                              disabled={uploadingInvoice}
-                            >
-                              {uploadingInvoice ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Upload className="mr-2 h-4 w-4" />
-                              )}
-                              Upload
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {hasBothDocuments && (
+                  {hasOfferingLetter && (
                     <div className="flex justify-end pt-4">
                       <Button
                         className="bg-blue-500 hover:bg-blue-600"
@@ -663,6 +876,323 @@ function RouteComponent() {
                       </Button>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {isApprovedNeedsApprovalLetter && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upload Surat Persetujuan</CardTitle>
+                  <CardDescription>
+                    Unggah surat persetujuan untuk melanjutkan ke tahap
+                    selanjutnya.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* approval letter upload */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <Label className="text-base font-medium">
+                            Surat Persetujuan
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Format: PDF
+                          </p>
+                        </div>
+                      </div>
+                      {hasApprovalLetter ? (
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-100 text-green-800">
+                            Sudah Diunggah
+                          </Badge>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() =>
+                              window.open(
+                                getPublicUrl(
+                                  order.documents.find(
+                                    (doc) => doc.type === "approval_letter",
+                                  )!.fileUrl,
+                                ),
+                                "_blank",
+                              )
+                            }
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Badge className="bg-yellow-100 text-yellow-800">
+                          Belum Diunggah
+                        </Badge>
+                      )}
+                    </div>
+                    {!hasApprovalLetter && (
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            type="file"
+                            accept=".pdf"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.type !== "application/pdf") {
+                                  globalErrorToast("Format file harus PDF");
+                                  return;
+                                }
+                                approvalLetter.setFile(file);
+                              }
+                            }}
+                            className="flex-1"
+                          />
+                          {approvalLetter.file && (
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => approvalLetter.setFile(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        {approvalLetter.file && (
+                          <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                            <span className="text-sm">
+                              {approvalLetter.file.name}
+                            </span>
+                            <Button
+                              size="sm"
+                              onClick={handleUploadApprovalLetter}
+                              disabled={approvalLetter.uploading}
+                            >
+                              {approvalLetter.uploading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Upload className="mr-2 h-4 w-4" />
+                              )}
+                              Upload
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {isAcceptingDocuments && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    Upload Invoice dan Surat Perjanjian Kerjasama
+                  </CardTitle>
+                  <CardDescription>
+                    Unggah dokumen invoice dan perjanjian kerjasama untuk
+                    melanjutkan ke tahap selanjutnya.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* cooperation agreement upload */}
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                          </div>
+                          <div>
+                            <Label className="text-base font-medium">
+                              Invoice
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Format: PDF
+                            </p>
+                          </div>
+                        </div>
+                        {hasInvoice ? (
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-green-100 text-green-800">
+                              Sudah Diunggah
+                            </Badge>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() =>
+                                window.open(
+                                  getPublicUrl(
+                                    order.documents.find(
+                                      (doc) =>
+                                        doc.type === "cooperation_agreement",
+                                    )!.fileUrl,
+                                  ),
+                                  "_blank",
+                                )
+                              }
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Badge className="bg-yellow-100 text-yellow-800">
+                            Belum Diunggah
+                          </Badge>
+                        )}
+                      </div>
+                      {!hasInvoice && (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input
+                              type="file"
+                              accept=".pdf"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  if (file.type !== "application/pdf") {
+                                    globalErrorToast("Format file harus PDF");
+                                    return;
+                                  }
+                                  invoice.setFile(file);
+                                }
+                              }}
+                              className="flex-1"
+                            />
+                            {invoice.file && (
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => invoice.setFile(null)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          {invoice.file && (
+                            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                              <span className="text-sm">
+                                {invoice.file.name}
+                              </span>
+                              <Button
+                                size="sm"
+                                onClick={handleUploadInvoice}
+                                disabled={invoice.uploading}
+                              >
+                                {invoice.uploading ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Upload className="mr-2 h-4 w-4" />
+                                )}
+                                Upload
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                          </div>
+                          <div>
+                            <Label className="text-base font-medium">
+                              Surat Perjanjian Kerjasama
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Format: PDF
+                            </p>
+                          </div>
+                        </div>
+                        {hasCooperationAgreement ? (
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-green-100 text-green-800">
+                              Sudah Diunggah
+                            </Badge>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() =>
+                                window.open(
+                                  getPublicUrl(
+                                    order.documents.find(
+                                      (doc) =>
+                                        doc.type === "cooperation_agreement",
+                                    )!.fileUrl,
+                                  ),
+                                  "_blank",
+                                )
+                              }
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Badge className="bg-yellow-100 text-yellow-800">
+                            Belum Diunggah
+                          </Badge>
+                        )}
+                      </div>
+                      {!hasCooperationAgreement && (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input
+                              type="file"
+                              accept=".pdf"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  if (file.type !== "application/pdf") {
+                                    globalErrorToast("Format file harus PDF");
+                                    return;
+                                  }
+                                  cooperationAgreement.setFile(file);
+                                }
+                              }}
+                              className="flex-1"
+                            />
+                            {cooperationAgreement.file && (
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() =>
+                                  cooperationAgreement.setFile(null)
+                                }
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          {cooperationAgreement.file && (
+                            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                              <span className="text-sm">
+                                {cooperationAgreement.file.name}
+                              </span>
+                              <Button
+                                size="sm"
+                                onClick={handleUploadCooperationAgreement}
+                                disabled={cooperationAgreement.uploading}
+                              >
+                                {cooperationAgreement.uploading ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Upload className="mr-2 h-4 w-4" />
+                                )}
+                                Upload
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -691,9 +1221,11 @@ function RouteComponent() {
                           className="h-10 w-10 rounded-lg bg-blue-500"
                           onClick={() =>
                             window.open(
-                              order.documents.find(
-                                (doc) => doc.type === "offering_document",
-                              )!.fileUrl,
+                              getPublicUrl(
+                                order.documents.find(
+                                  (doc) => doc.type === "offering_document",
+                                )!.fileUrl,
+                              ),
                               "_blank",
                             )
                           }
@@ -712,9 +1244,36 @@ function RouteComponent() {
                           className="h-10 w-10 rounded-lg bg-blue-500"
                           onClick={() =>
                             window.open(
-                              order.documents.find(
-                                (doc) => doc.type === "invoice",
-                              )!.fileUrl,
+                              getPublicUrl(
+                                order.documents.find(
+                                  (doc) => doc.type === "invoice",
+                                )!.fileUrl,
+                              ),
+                              "_blank",
+                            )
+                          }
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="inline-flex flex-1 items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <span className="flex-1 font-medium">
+                          Surat Perjanjian Kerjasama
+                        </span>
+                        <Button
+                          size="icon"
+                          className="h-10 w-10 rounded-lg bg-blue-500"
+                          onClick={() =>
+                            window.open(
+                              getPublicUrl(
+                                order.documents.find(
+                                  (doc) => doc.type === "cooperation_agreement",
+                                )!.fileUrl,
+                              ),
                               "_blank",
                             )
                           }
@@ -792,9 +1351,12 @@ function RouteComponent() {
                                 className="h-auto p-0"
                                 onClick={() =>
                                   window.open(
-                                    order.documents.find(
-                                      (doc) => doc.type === "proof_of_payment",
-                                    )!.fileUrl,
+                                    getPublicUrl(
+                                      order.documents.find(
+                                        (doc) =>
+                                          doc.type === "proof_of_payment",
+                                      )!.fileUrl,
+                                    ),
                                     "_blank",
                                   )
                                 }
@@ -805,18 +1367,20 @@ function RouteComponent() {
                           </div>
                         ) : (
                           <img
-                            src={
+                            src={getPublicUrl(
                               order.documents.find(
                                 (doc) => doc.type === "proof_of_payment",
-                              )!.fileUrl
-                            }
+                              )!.fileUrl,
+                            )}
                             alt="Bukti pembayaran"
                             className="max-h-96 w-full cursor-pointer rounded object-contain"
                             onClick={() =>
                               window.open(
-                                order.documents.find(
-                                  (doc) => doc.type === "proof_of_payment",
-                                )!.fileUrl,
+                                getPublicUrl(
+                                  order.documents.find(
+                                    (doc) => doc.type === "proof_of_payment",
+                                  )!.fileUrl,
+                                ),
                                 "_blank",
                               )
                             }
@@ -960,7 +1524,8 @@ function RouteComponent() {
                           Nomor Testing
                         </Label>
                         <p className="font-medium">
-                          TEST-{order.testing?.id.slice(0, 8).toUpperCase()}
+                          {order.testing?.testingNumber ||
+                            `TEST-${order.testing?.id.slice(0, 8).toUpperCase()}`}
                         </p>
                       </div>
                       <div>
@@ -974,7 +1539,7 @@ function RouteComponent() {
                       {order.testing?.worksheet && (
                         <div>
                           <Label className="text-muted-foreground">
-                            Worksheet
+                            Worksheet ({order.testing.worksheet.id})
                           </Label>
                           <Button
                             variant="link"
@@ -982,8 +1547,9 @@ function RouteComponent() {
                             onClick={() =>
                               navigate({
                                 to: "/worksheets",
+
                                 search: {
-                                  worksheetId: order.testing!.worksheet!.id,
+                                  worksheetId: order.testing!.worksheet.id,
                                 },
                               })
                             }
@@ -997,12 +1563,12 @@ function RouteComponent() {
                     <div className="flex justify-end gap-3 pt-4">
                       <Button
                         variant="outline"
-                        // onClick={() =>
-                        //   navigate({
-                        //     to: "/back-office/testing/$testingId/detail",
-                        //     params: { testingId: order.testing!.id },
-                        //   })
-                        // }
+                        onClick={() =>
+                          navigate({
+                            to: "/back-office/testing/$testingId/detail",
+                            params: { testingId: order.testing!.id },
+                          })
+                        }
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         Lihat Detail Testing
@@ -1010,13 +1576,13 @@ function RouteComponent() {
                       {!order.testing?.worksheet && (
                         <Button
                           className="bg-blue-500 hover:bg-blue-600"
-                          // onClick={() =>
-                          //   navigate({
-                          //     to: "/back-office/testing/$testingId/detail",
-                          //     params: { testingId: order.testing!.id },
-                          //     search: { createWorksheet: true },
-                          //   })
-                          // }
+                          onClick={() =>
+                            navigate({
+                              to: "/back-office/testing/$testingId/detail",
+                              params: { testingId: order.testing!.id },
+                              search: { createWorksheet: "true" },
+                            })
+                          }
                         >
                           <Plus className="mr-2 h-4 w-4" />
                           Buat Worksheet

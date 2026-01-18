@@ -22,6 +22,29 @@ import usersQueries from "./users.queries";
 import type { EmployeeStatus } from "@tepian-k3/constants";
 
 const employeeQueries = {
+  getAllEmployees: () =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.employees.findMany({
+          where: isNull(employees.deletedAt),
+          with: {
+            user: true,
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "employeeQueries.getAllEmployees",
+          "Failed to get all employees",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Gagal mengambil data pegawai.`,
+          cause: error,
+        });
+      },
+    }),
+
   getEmployeeById: (id: string) =>
     Effect.tryPromise({
       try: () =>
@@ -32,7 +55,7 @@ const employeeQueries = {
         logError(
           "employeeQueries.getEmployeeById",
           "Failed to get employee by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -52,7 +75,7 @@ const employeeQueries = {
         logError(
           "employeeQueries.getEmployeeByUserId",
           "Failed to get employee by user ID",
-          { userId, error }
+          { userId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -72,7 +95,7 @@ const employeeQueries = {
         logError(
           "employeeQueries.getDeletedEmployeeById",
           "Failed to get deleted employee by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -88,14 +111,14 @@ const employeeQueries = {
         db.query.employees.findFirst({
           where: and(
             eq(employees.userId, userId),
-            isNotNull(employees.deletedAt)
+            isNotNull(employees.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "employeeQueries.getDeletedEmployeeByUserId",
           "Failed to get deleted employee by user ID",
-          { userId, error }
+          { userId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -106,7 +129,7 @@ const employeeQueries = {
     }),
 
   getOffsetPaginatedEmployees: (
-    input: z.infer<typeof employeeSchema.getAllEmployeesSchema>
+    input: z.infer<typeof employeeSchema.getAllEmployeesSchema>,
   ) =>
     Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -129,7 +152,7 @@ const employeeQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -139,20 +162,20 @@ const employeeQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(employees.deletedAt)
-              : isNull(employees.deletedAt)
+              : isNull(employees.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(employees[item.id]) : asc(employees[item.id])
+              item.desc ? desc(employees[item.id]) : asc(employees[item.id]),
             )
           : [desc(employees.createdAt)];
 
@@ -182,7 +205,7 @@ const employeeQueries = {
           logError(
             "employeeQueries.getOffsetPaginatedEmployees",
             "Failed to get all employees",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -201,7 +224,7 @@ const employeeQueries = {
     }),
 
   createEmployee: (
-    input: z.infer<typeof employeeSchema.createEmployeeSchema>
+    input: z.infer<typeof employeeSchema.createEmployeeSchema>,
   ) =>
     Effect.gen(function* () {
       const isUserExist = yield* usersQueries.getUserById(input.userId);
@@ -221,7 +244,7 @@ const employeeQueries = {
           logError(
             "employeeQueries.createEmployee",
             "Failed to create employee",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -236,7 +259,7 @@ const employeeQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal membuat data pegawai.`,
-          })
+          }),
         );
       }
 
@@ -244,7 +267,7 @@ const employeeQueries = {
     }),
 
   updateEmployee: (
-    input: z.infer<typeof employeeSchema.updateEmployeeSchema>
+    input: z.infer<typeof employeeSchema.updateEmployeeSchema>,
   ) =>
     Effect.gen(function* () {
       const isEmployeeExist = yield* employeeQueries.getEmployeeById(input.id);
@@ -254,7 +277,7 @@ const employeeQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: `Pegawai tidak ditemukan.`,
-          })
+          }),
         );
       }
 
@@ -276,7 +299,7 @@ const employeeQueries = {
           logError(
             "employeeQueries.updateEmployee",
             "Failed to update employee",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -291,7 +314,7 @@ const employeeQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui data pegawai.`,
-          })
+          }),
         );
       }
 
@@ -300,16 +323,15 @@ const employeeQueries = {
 
   updateEmployeeStatus: (employeeId: string, status: EmployeeStatus) =>
     Effect.gen(function* () {
-      const isEmployeeExist = yield* employeeQueries.getEmployeeById(
-        employeeId
-      );
+      const isEmployeeExist =
+        yield* employeeQueries.getEmployeeById(employeeId);
 
       if (!isEmployeeExist) {
         return yield* Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
             message: `Pegawai tidak ditemukan.`,
-          })
+          }),
         );
       }
 
@@ -326,7 +348,7 @@ const employeeQueries = {
           logError(
             "employeeQueries.updateEmployeeStatus",
             "Failed to update employee status",
-            { employeeId, status, error }
+            { employeeId, status, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -341,7 +363,7 @@ const employeeQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui status pegawai.`,
-          })
+          }),
         );
       }
 
@@ -362,7 +384,7 @@ const employeeQueries = {
         logError(
           "employeeQueries.deleteEmployee",
           "Failed to delete employee",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -386,7 +408,7 @@ const employeeQueries = {
         logError(
           "employeeQueries.restoreEmployee",
           "Failed to restore employee",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

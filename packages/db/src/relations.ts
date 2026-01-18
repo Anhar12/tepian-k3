@@ -249,7 +249,7 @@ export const orderRelations = relations(order, ({ one, many }) => ({
   }),
   testing: one(testing, {
     fields: [order.id],
-    references: [testing.id],
+    references: [testing.orderId],
   }),
   items: many(orderItem),
   statusHistory: many(orderStatusHistory),

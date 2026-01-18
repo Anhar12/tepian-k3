@@ -690,6 +690,10 @@ export const order = createTable(
       .default("unpaid"),
     paymentRejectedReason: text("payment_rejected_reason"),
 
+    // Revision tracking
+    revisionCount: integer("revision_count").notNull().default(0),
+    revisionNotes: text("revision_notes"),
+
     // Key timestamps
     approvedAt: timestamp("approved_at", {
       withTimezone: true,

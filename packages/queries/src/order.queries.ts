@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { db } from "@tepian-k3/db/client";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import { z } from "zod";
 import orderSchema from "@tepian-k3/schema/order.schema";
 import { Cause, Effect, Exit } from "effect";
@@ -7,6 +7,7 @@ import { logError } from "@tepian-k3/services/logger";
 import { and, eq, inArray, sql } from "@tepian-k3/db";
 import {
   cart,
+  documents,
   order,
   userCompanies,
   userCompanyTestingLocation,
@@ -16,7 +17,8 @@ import { generateOrderNumberWithSequence } from "@tepian-k3/db/utils";
 import orderItemQueries from "./order-item.queries";
 import orderStatusHistoryQueries from "./order-status-history.queries";
 import { logCreate } from "./helpers/audit.helpers";
-import type { OrderStatus } from "@tepian-k3/constants";
+import type { OrderPaymentStatus, OrderStatus } from "@tepian-k3/constants";
+import testingQueries from "./testing.queries";
 
 const orderQueries = {
   getAllOrderByUserId(userId: string, status: OrderStatus | "all" = "all") {
@@ -257,7 +259,11 @@ const orderQueries = {
                 worksheet: true,
               },
             },
-            statusHistory: true,
+            statusHistory: {
+              orderBy: (statusHistory, { desc }) => [
+                desc(statusHistory.createdAt),
+              ],
+            },
             documents: {
               orderBy: (documents, { desc }) => [desc(documents.createdAt)],
             },
@@ -550,6 +556,315 @@ const orderQueries = {
     });
   },
 
+  acceptOffer(orderId: string, userId: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is in offered status
+      const orderToAccept = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.userId, userId),
+              eq(order.status, "pending"),
+            ),
+          }),
+        catch: (error) => {
+          logError("orderQueries.acceptOffer", "Failed to fetch order", {
+            error,
+            orderId,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToAccept) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Pesanan tidak ditemukan atau bukan dalam status ditawarkan",
+          }),
+        );
+      }
+
+      // check if order has offering document and invoice document
+      const hasOfferingDocument = yield* Effect.tryPromise({
+        try: () =>
+          db.query.documents.findFirst({
+            where: and(
+              eq(documents.entityId, orderId),
+              eq(documents.entityType, "order"),
+              eq(documents.type, "offering_document"),
+            ),
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.offerRevision",
+            "Failed to fetch order status history",
+            {
+              error,
+              orderId,
+              userId,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil riwayat status pesanan",
+          });
+        },
+      });
+
+      if (!hasOfferingDocument) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Dokumen penawaran tidak ditemukan untuk pesanan ini",
+          }),
+        );
+      }
+
+      // update order status to confirmed
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ status: "confirmed", approvedAt: new Date().toISOString() })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.acceptOffer", "Failed to update order", {
+            error,
+            orderId,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menerima penawaran untuk pesanan",
+          }),
+        );
+      }
+
+      // create order status history - confirmed
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "confirmed",
+        userId,
+        "Offer accepted by customer",
+      );
+
+      return updatedOrder;
+    });
+  },
+
+  reviseOrder(orderId: string, userId: string, revisionNote: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is in offered status
+      const orderToRevise = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.userId, userId),
+              eq(order.status, "pending"),
+            ),
+          }),
+        catch: (error) => {
+          logError("orderQueries.offerRevision", "Failed to fetch order", {
+            error,
+            orderId,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToRevise) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Pesanan tidak ditemukan atau bukan dalam status ditawarkan",
+          }),
+        );
+      }
+
+      const hasInvoiceDocument = yield* Effect.tryPromise({
+        try: () =>
+          db.query.documents.findFirst({
+            where: and(
+              eq(documents.entityId, orderId),
+              eq(documents.entityType, "order"),
+              eq(documents.type, "invoice"),
+            ),
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.offerRevision",
+            "Failed to fetch order status history",
+            {
+              error,
+              orderId,
+              userId,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil riwayat status pesanan",
+          });
+        },
+      });
+
+      if (!hasInvoiceDocument) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Dokumen invoice tidak ditemukan untuk pesanan ini",
+          }),
+        );
+      }
+
+      // update order status to revision_offered
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({
+              status: "revision",
+              revisionNotes: revisionNote,
+              revisionCount: sql`revision_count + 1`,
+            })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.offerRevision", "Failed to update order", {
+            error,
+            orderId,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menawarkan revisi untuk pesanan",
+          }),
+        );
+      }
+
+      // create order status history - revision_offered
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "revision",
+        userId,
+        `Revision offered to customer. Note: ${revisionNote}`,
+      );
+
+      return updatedOrder;
+    });
+  },
+
+  cancelOrder(orderId: string, userId: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is cancellable
+      const orderToCancel = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.userId, userId),
+              eq(order.status, "pending"),
+            ),
+          }),
+        catch: (error) => {
+          logError("orderQueries.cancelOrder", "Failed to fetch order", {
+            error,
+            orderId,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToCancel) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Pesanan tidak ditemukan atau tidak dapat dibatalkan",
+          }),
+        );
+      }
+
+      // update order status to cancelled
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ status: "cancelled", cancelledAt: new Date().toISOString() })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.cancelOrder", "Failed to update order", {
+            error,
+            orderId,
+            userId,
+          });
+
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal membatalkan pesanan",
+          }),
+        );
+      }
+
+      // create order status history - cancelled
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "cancelled",
+        userId,
+        "Order cancelled by customer",
+      );
+
+      return updatedOrder;
+    });
+  },
+
   approveOrder(orderId: string, adminId: string) {
     return Effect.gen(function* () {
       // check if order exists and is pending approval
@@ -717,13 +1032,13 @@ const orderQueries = {
 
   verifyPayment(orderId: string, adminId: string) {
     return Effect.gen(function* () {
-      // check if order exists and is unpaid
+      // check if order exists and is pending verification
       const orderToVerify = yield* Effect.tryPromise({
         try: () =>
           db.query.order.findFirst({
             where: and(
               eq(order.id, orderId),
-              eq(order.paymentStatus, "unpaid"),
+              eq(order.paymentStatus, "pending_verification"),
             ),
             with: {
               user: true,
@@ -755,7 +1070,7 @@ const orderQueries = {
         try: () =>
           db
             .update(order)
-            .set({ paymentStatus: "paid" })
+            .set({ paymentStatus: "paid", paidAt: new Date().toISOString() })
             .where(eq(order.id, orderId))
             .returning(),
         catch: (error) => {
@@ -869,6 +1184,105 @@ const orderQueries = {
   },
 
   /**
+   * Update order status
+   * Used when admin completes revision and sends documents back to customer
+   */
+  updateOrderStatus(orderId: string, status: OrderStatus) {
+    return Effect.gen(function* () {
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ status })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.updateOrderStatus",
+            "Failed to update order status",
+            {
+              error,
+              orderId,
+              status,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui status pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui status pesanan",
+          }),
+        );
+      }
+
+      // Create order status history
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        status,
+        updatedOrder.userId,
+        `Order status updated to ${status}`,
+      );
+
+      return updatedOrder;
+    });
+  },
+
+  /**
+   * Update payment status
+   * Used when admin verifies or rejects payment
+   * Used for updating payment status to 'pending_verification' when user uploads payment proof
+   */
+  updatePaymentStatus(
+    orderId: string,
+    paymentStatus: OrderPaymentStatus,
+    tx: DBorTx = db,
+  ) {
+    return Effect.gen(function* () {
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          tx
+            .update(order)
+            .set({ paymentStatus })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.updatePaymentStatus",
+            "Failed to update order payment status",
+            {
+              error,
+              orderId,
+              paymentStatus,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui status pembayaran pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui status pembayaran pesanan",
+          }),
+        );
+      }
+      return updatedOrder;
+    });
+  },
+
+  /**
    * Create testing from order
    * Delegates to testingQueries.createTestingFromOrder
    */
@@ -877,9 +1291,8 @@ const orderQueries = {
     // The actual implementation is in testing.queries.ts
     return Effect.tryPromise({
       try: async () => {
-        const testingQueries = await import("./testing.queries");
         return Effect.runPromise(
-          testingQueries.default.createTestingFromOrder(orderId),
+          testingQueries.createTestingFromOrder(orderId),
         );
       },
       catch: (error) => {

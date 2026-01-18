@@ -32,7 +32,7 @@ function TimelineItem({ children, className, ...props }: TimelineItemProps) {
 interface TimelineConnectorProps extends React.HTMLAttributes<HTMLDivElement> {
   isLast?: boolean;
   variant?: "solid" | "dashed";
-  color?: "blue" | "gray" | "green";
+  color?: "blue" | "gray" | "green" | "yellow";
 }
 
 function TimelineConnector({
@@ -48,12 +48,13 @@ function TimelineConnector({
     blue: "border-blue-400",
     gray: "border-muted-foreground/30",
     green: "border-emerald-400",
+    yellow: "border-yellow-400",
   };
 
   return (
     <div
       className={cn(
-        "absolute top-6 h-10 w-px border-l-2",
+        "absolute top-6 h-[calc(100%+1.5rem)] w-px border-l-2",
         variant === "dashed" ? "border-dashed" : "border-solid",
         colorStyles[color],
         className,
@@ -64,7 +65,7 @@ function TimelineConnector({
 }
 
 interface TimelineDotProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "completed" | "current" | "pending";
+  variant?: "default" | "completed" | "current" | "pending" | "revision";
   size?: "sm" | "md" | "lg";
 }
 
@@ -96,7 +97,7 @@ function TimelineDot({
     return (
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-full bg-emerald-500",
+          "z-10 flex shrink-0 items-center justify-center rounded-full bg-emerald-500",
           sizeStyles[size],
           className,
         )}
@@ -114,7 +115,7 @@ function TimelineDot({
     return (
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center",
+          "z-10 flex shrink-0 items-center justify-center rounded-full bg-background",
           sizeStyles[size],
           className,
         )}
@@ -127,11 +128,28 @@ function TimelineDot({
     );
   }
 
+  if (variant === "revision") {
+    return (
+      <div
+        className={cn(
+          "z-10 flex shrink-0 items-center justify-center rounded-full border-2 border-dashed border-yellow-500 bg-background",
+          sizeStyles[size],
+          className,
+        )}
+        {...props}
+      >
+        <div
+          className={cn("rounded-full bg-yellow-500", innerSizeStyles[size])}
+        />
+      </div>
+    );
+  }
+
   if (variant === "pending") {
     return (
       <div
         className={cn(
-          "flex shrink-0 items-center justify-center",
+          "z-10 flex shrink-0 items-center justify-center rounded-full bg-background",
           sizeStyles[size],
           className,
         )}
@@ -150,7 +168,7 @@ function TimelineDot({
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center",
+        "z-10 flex shrink-0 items-center justify-center rounded-full bg-background",
         sizeStyles[size],
         className,
       )}

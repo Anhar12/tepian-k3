@@ -141,4 +141,53 @@ export type OrderWithRelations = InferQueryModel<
   }
 >;
 
+export type OrderDetailWithStatus = InferQueryModel<
+  "order",
+  {
+    with: {
+      company: {
+        columns: {
+          id: true;
+          name: true;
+        };
+      };
+      user: true;
+      items: {
+        with: {
+          parameter: {
+            columns: {
+              id: true;
+              name: true;
+              unit: true;
+            };
+            with: {
+              category: {
+                columns: {
+                  id: true;
+                  name: true;
+                };
+                with: {
+                  cluster: {
+                    columns: {
+                      id: true;
+                      name: true;
+                    };
+                  };
+                };
+              };
+            };
+          };
+        };
+      };
+      testing: {
+        with: {
+          worksheet: true;
+        };
+      };
+      statusHistory: true;
+      documents: true;
+    };
+  }
+>;
+
 export type InsertTesting = typeof order.$inferInsert;

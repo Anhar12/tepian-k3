@@ -22,45 +22,36 @@ export const documentRouter = createTRPCRouter({
    * Upload and create a document
    */
   uploadDocument: withPermission("documents.create")
-    .input(
-      z.object({
-        entityType: documentSchema.documentEntityTypeSchema,
-        entityId: z.uuidv7(),
-        type: documentSchema.documentTypeSchema,
-        title: z.string().min(1).max(255),
-        description: z.string().optional(),
-        file: z.file(),
-      })
-    )
+    .input(formDataInput)
     .use(formDataProcedure(documentSchema.uploadDocumentSchema))
     .mutation(
-      async ({ input, ctx }) =>
+      async ({ ctx }) =>
         await runEffect(
           Effect.gen(function* () {
             // Convert file to buffer
             const arrayBuffer = yield* Effect.tryPromise(() =>
-              ctx.input.data.file.arrayBuffer()
+              ctx.input.data.file.arrayBuffer(),
             );
             const buffer = Buffer.from(arrayBuffer);
 
             // Upload file to storage
             const uploadedFile = yield* storageService.upload(buffer, {
               filename: ctx.input.data.file.name,
-              folder: `documents/${input.entityType}/${input.type}`,
+              folder: `documents/${ctx.input.data.entityType}/${ctx.input.data.type}`,
             });
 
             // Generate document number
             const timestamp = Date.now();
-            const documentNumber = `DOC-${input.type.toUpperCase()}-${timestamp}`;
+            const documentNumber = `DOC-${ctx.input.data.type.toUpperCase()}-${timestamp}`;
 
             // Create document record
             const document = yield* documentQueries.createDocument({
               documentNumber,
-              type: input.type,
-              title: input.title,
-              description: input.description,
-              entityType: input.entityType,
-              entityId: input.entityId,
+              type: ctx.input.data.type,
+              title: ctx.input.data.title,
+              description: ctx.input.data.description,
+              entityType: ctx.input.data.entityType,
+              entityId: ctx.input.data.entityId,
               fileUrl: uploadedFile.key,
               fileName: ctx.input.data.file.name,
               fileSize: ctx.input.data.file.size,
@@ -69,8 +60,8 @@ export const documentRouter = createTRPCRouter({
             });
 
             return document;
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -81,8 +72,11 @@ export const documentRouter = createTRPCRouter({
     .query(
       async ({ input }) =>
         await runEffect(
-          documentQueries.getDocumentsByEntity(input.entityType, input.entityId)
-        )
+          documentQueries.getDocumentsByEntity(
+            input.entityType,
+            input.entityId,
+          ),
+        ),
     ),
 
   /**
@@ -92,11 +86,11 @@ export const documentRouter = createTRPCRouter({
     .input(
       z.object({
         documentId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(documentQueries.getDocumentById(input.documentId))
+        await runEffect(documentQueries.getDocumentById(input.documentId)),
     ),
 
   /**
@@ -107,7 +101,7 @@ export const documentRouter = createTRPCRouter({
       z.object({
         token: z.string(),
         checkFileIntegrity: z.boolean().optional().default(false),
-      })
+      }),
     )
     .query(async ({ input, ctx }) => {
       const result = await runEffect(
@@ -116,7 +110,7 @@ export const documentRouter = createTRPCRouter({
           verifiedByIp: ctx.ip || undefined,
           verifiedByUserAgent: ctx.userAgent || undefined,
           checkFileIntegrity: input.checkFileIntegrity,
-        })
+        }),
       );
 
       // Map response to match frontend expectation
@@ -136,8 +130,8 @@ export const documentRouter = createTRPCRouter({
     .query(
       async ({ input }) =>
         await runEffect(
-          documentQueries.getVerificationHistory(input.documentId)
-        )
+          documentQueries.getVerificationHistory(input.documentId),
+        ),
     ),
 
   /**
@@ -147,11 +141,11 @@ export const documentRouter = createTRPCRouter({
     .input(
       z.object({
         orderId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(documentQueries.getOrderDocuments(input.orderId))
+        await runEffect(documentQueries.getOrderDocuments(input.orderId)),
     ),
 
   /**
@@ -161,11 +155,11 @@ export const documentRouter = createTRPCRouter({
     .input(
       z.object({
         testingId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(documentQueries.getTestingDocuments(input.testingId))
+        await runEffect(documentQueries.getTestingDocuments(input.testingId)),
     ),
 
   /**
@@ -176,15 +170,15 @@ export const documentRouter = createTRPCRouter({
       z.object({
         orderId: z.uuidv7(),
         file: z.file(),
-      })
+      }),
     )
     .use(
       formDataProcedure(
         z.object({
           orderId: z.uuidv7(),
           file: z.file(),
-        })
-      )
+        }),
+      ),
     )
     .mutation(
       async ({ input, ctx }) =>
@@ -192,7 +186,7 @@ export const documentRouter = createTRPCRouter({
           Effect.gen(function* () {
             // Upload invoice
             const arrayBuffer = yield* Effect.tryPromise(() =>
-              ctx.input.data.file.arrayBuffer()
+              ctx.input.data.file.arrayBuffer(),
             );
             const buffer = Buffer.from(arrayBuffer);
 
@@ -203,7 +197,7 @@ export const documentRouter = createTRPCRouter({
 
             const documentNumber = `INV-${Date.now()}-${input.orderId.slice(
               0,
-              8
+              8,
             )}`;
 
             // Create document
@@ -224,12 +218,12 @@ export const documentRouter = createTRPCRouter({
             const signedDocument = yield* documentQueries.signDocumentWithJWT(
               document.id,
               ctx.user.id,
-              process.env.APP_URL || "http://localhost:3000"
+              process.env.APP_URL || "http://localhost:3000",
             );
 
             return signedDocument;
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -240,21 +234,21 @@ export const documentRouter = createTRPCRouter({
       z.object({
         testingId: z.uuidv7(),
         file: z.file(),
-      })
+      }),
     )
     .use(
       formDataProcedure(
         z.object({
           testingId: z.uuidv7(),
           file: z.file(),
-        })
-      )
+        }),
+      ),
     )
     .mutation(({ input, ctx }) =>
       Effect.runPromise(
         Effect.gen(function* () {
           const arrayBuffer = yield* Effect.tryPromise(() =>
-            ctx.input.data.file.arrayBuffer()
+            ctx.input.data.file.arrayBuffer(),
           );
           const buffer = Buffer.from(arrayBuffer);
 
@@ -265,7 +259,7 @@ export const documentRouter = createTRPCRouter({
 
           const documentNumber = `RPT-${Date.now()}-${input.testingId.slice(
             0,
-            8
+            8,
           )}`;
 
           const document = yield* documentQueries.createDocument({
@@ -284,12 +278,12 @@ export const documentRouter = createTRPCRouter({
           const signedDocument = yield* documentQueries.signDocumentWithJWT(
             document.id,
             ctx.user.id,
-            process.env.APP_URL || "http://localhost:3000"
+            process.env.APP_URL || "http://localhost:3000",
           );
 
           return signedDocument;
-        })
-      )
+        }),
+      ),
     ),
 
   /**
@@ -318,10 +312,10 @@ export const documentRouter = createTRPCRouter({
                 height: z.number(),
                 page: z.number().int().min(0),
               }),
-            })
+            }),
           ),
-        })
-      )
+        }),
+      ),
     )
     .mutation(
       async ({ ctx }) =>
@@ -329,7 +323,7 @@ export const documentRouter = createTRPCRouter({
           Effect.gen(function* () {
             // Convert file to buffer
             const arrayBuffer = yield* Effect.tryPromise(() =>
-              ctx.input.data.file.arrayBuffer()
+              ctx.input.data.file.arrayBuffer(),
             );
             const originalBuffer = Buffer.from(arrayBuffer);
 
@@ -346,7 +340,7 @@ export const documentRouter = createTRPCRouter({
                 ctx.input.data.type,
                 "temp-url", // Will be updated after upload
                 originalBuffer,
-                qrCode.userId
+                qrCode.userId,
               );
 
               documentSignatures.push({
@@ -371,7 +365,7 @@ export const documentRouter = createTRPCRouter({
 
             const signedPdfBuffer = yield* pdfSigningService.embedQRCodesInPDF(
               originalBuffer,
-              qrCodeData
+              qrCodeData,
             );
 
             // Upload signed PDF to storage
@@ -412,7 +406,7 @@ export const documentRouter = createTRPCRouter({
                   verificationUrl: sig.verificationUrl,
                   signatureData: sig.signatureData,
                   fileHash: sig.fileHash,
-                }))
+                })),
               );
 
             return {
@@ -427,7 +421,7 @@ export const documentRouter = createTRPCRouter({
               })),
               url: storageService.getPublicUrl(uploadedFile.key),
             };
-          })
-        )
+          }),
+        ),
     ),
 });

@@ -7,11 +7,15 @@ import { runEffect } from "../utils/run-effect";
 import { EMPLOYEE_STATUS } from "@tepian-k3/constants";
 
 export const employeeRouter = createTRPCRouter({
+  getAll: withPermission("employees.view").query(
+    async () => await runEffect(employeeQueries.getAllEmployees()),
+  ),
+
   getEmployeePaginated: withPermission("employees.view")
     .input(employeeSchema.getAllEmployeesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        employeeQueries.getOffsetPaginatedEmployees(input)
+        employeeQueries.getOffsetPaginatedEmployees(input),
       );
 
       return { data, pageCount };
@@ -21,18 +25,18 @@ export const employeeRouter = createTRPCRouter({
     .input(
       z.object({
         employeeId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(employeeQueries.getEmployeeById(input.employeeId))
+        await runEffect(employeeQueries.getEmployeeById(input.employeeId)),
     ),
 
   createEmployee: withPermission("employees.create")
     .input(employeeSchema.createEmployeeSchema)
     .mutation(async ({ input }) => {
       const newEmployee = await runEffect(
-        employeeQueries.createEmployee(input)
+        employeeQueries.createEmployee(input),
       );
 
       return newEmployee;
@@ -42,7 +46,7 @@ export const employeeRouter = createTRPCRouter({
     .input(employeeSchema.updateEmployeeSchema)
     .mutation(async ({ input }) => {
       const updatedEmployee = await runEffect(
-        employeeQueries.updateEmployee(input)
+        employeeQueries.updateEmployee(input),
       );
 
       return updatedEmployee;
@@ -53,11 +57,11 @@ export const employeeRouter = createTRPCRouter({
       z.object({
         employeeId: z.uuidv7(),
         status: z.enum(EMPLOYEE_STATUS),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const updatedEmployee = await runEffect(
-        employeeQueries.updateEmployeeStatus(input.employeeId, input.status)
+        employeeQueries.updateEmployeeStatus(input.employeeId, input.status),
       );
 
       return updatedEmployee;
@@ -67,11 +71,11 @@ export const employeeRouter = createTRPCRouter({
     .input(
       z.object({
         employeeId: z.uuidv7(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const [deletedEmployee] = await runEffect(
-        employeeQueries.deleteEmployee(input.employeeId)
+        employeeQueries.deleteEmployee(input.employeeId),
       );
 
       if (!deletedEmployee) {
@@ -88,11 +92,11 @@ export const employeeRouter = createTRPCRouter({
     .input(
       z.object({
         employeeId: z.uuidv7(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const [restoredEmployee] = await runEffect(
-        employeeQueries.restoreEmployee(input.employeeId)
+        employeeQueries.restoreEmployee(input.employeeId),
       );
 
       if (!restoredEmployee) {
