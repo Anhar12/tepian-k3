@@ -379,7 +379,9 @@ function RouteComponent() {
     !hasBothDocuments &&
     !isRevisionRequested;
   const isApprovedNeedsApprovalLetter =
-    order.approvalStatus === "approved" && !isRevisionRequested;
+    order.approvalStatus === "approved" &&
+    hasOfferingLetter &&
+    !isRevisionRequested;
   const isAcceptingDocuments =
     order.approvalStatus === "approved" &&
     order.status === "confirmed" &&
@@ -1208,7 +1210,7 @@ function RouteComponent() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                       <div className="inline-flex flex-1 items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
                           <FileText className="h-5 w-5 text-blue-500" />
@@ -1565,7 +1567,7 @@ function RouteComponent() {
                         variant="outline"
                         onClick={() =>
                           navigate({
-                            to: "/back-office/testing/$testingId/detail",
+                            to: "/back-office/testings/$testingId/detail",
                             params: { testingId: order.testing!.id },
                           })
                         }
@@ -1578,7 +1580,7 @@ function RouteComponent() {
                           className="bg-blue-500 hover:bg-blue-600"
                           onClick={() =>
                             navigate({
-                              to: "/back-office/testing/$testingId/detail",
+                              to: "/back-office/testings/$testingId/detail",
                               params: { testingId: order.testing!.id },
                               search: { createWorksheet: "true" },
                             })

@@ -68,13 +68,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import z from "zod";
+import ComboBox from "@/components/ui/combobox";
 
 const searchSchema = z.object({
   createWorksheet: z.string().optional(),
 });
 
 export const Route = createFileRoute(
-  "/(core)/back-office/testing/$testingId/detail",
+  "/(core)/back-office/testings/$testingId/detail",
 )({
   validateSearch: (search) => searchSchema.parse(search),
   beforeLoad: async ({ context }) =>
@@ -91,6 +92,11 @@ function RouteComponent() {
   const [activeTab, setActiveTab] = useState<
     "info" | "items" | "worksheets" | "documents"
   >("info");
+
+  // ComboBox states
+  const [openMainSupervisor, setOpenMainSupervisor] = useState(false);
+  const [openAccompanyingSupervisor, setOpenAccompanyingSupervisor] =
+    useState(false);
 
   // Worksheet creation dialog
   const [worksheetDialogOpen, setWorksheetDialogOpen] = useState(false);
@@ -877,42 +883,40 @@ function RouteComponent() {
 
             <div className="space-y-2">
               <Label>Supervisor Utama (Opsional)</Label>
-              <Select
+              <ComboBox
                 value={selectedMainSupervisor}
-                onValueChange={setSelectedMainSupervisor}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih supervisor utama" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tidak ada</SelectItem>
-                  {employees?.map((emp) => (
-                    <SelectItem key={emp.id} value={emp.id}>
-                      {emp.user?.name} - {emp.position}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(val) => setSelectedMainSupervisor(val)}
+                options={
+                  employees?.map((emp) => ({
+                    id: emp.id,
+                    name: `${emp.user?.name} - ${emp.position}`,
+                  })) ?? []
+                }
+                placeholder="Pilih supervisor utama"
+                emptyMessage="Tidak ada data supervisor"
+                searchPlaceholder="Cari supervisor..."
+                open={openMainSupervisor}
+                onOpenChange={setOpenMainSupervisor}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Supervisor Pendamping (Opsional)</Label>
-              <Select
+              <ComboBox
                 value={selectedAccompanyingSupervisor}
-                onValueChange={setSelectedAccompanyingSupervisor}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih supervisor pendamping" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tidak ada</SelectItem>
-                  {employees?.map((emp) => (
-                    <SelectItem key={emp.id} value={emp.id}>
-                      {emp.user?.name} - {emp.position}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(val) => setSelectedAccompanyingSupervisor(val)}
+                options={
+                  employees?.map((emp) => ({
+                    id: emp.id,
+                    name: `${emp.user?.name} - ${emp.position}`,
+                  })) ?? []
+                }
+                placeholder="Pilih supervisor pendamping"
+                emptyMessage="Tidak ada data supervisor"
+                searchPlaceholder="Cari supervisor..."
+                open={openAccompanyingSupervisor}
+                onOpenChange={setOpenAccompanyingSupervisor}
+              />
             </div>
 
             <div className="rounded-lg border bg-muted/50 p-3">

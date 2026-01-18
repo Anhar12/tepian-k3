@@ -28,6 +28,7 @@ import {
   WORKSHEET_STATUS_LABELS,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
+import { getPublicUrl } from "@/utils/url";
 
 const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
   draft: "bg-gray-100 text-gray-700",
@@ -85,7 +86,11 @@ export function WorksheetSidebar({
             {/* Company Picture */}
             <div className="flex justify-center">
               <div className="flex size-32 items-center justify-center rounded-lg bg-muted">
-                <Building2 className="size-16 text-muted-foreground" />
+                <img
+                  src={getPublicUrl(company?.companyPictureUrl || "")}
+                  alt="Company"
+                  className="size-32 rounded-lg object-cover"
+                />
               </div>
             </div>
 

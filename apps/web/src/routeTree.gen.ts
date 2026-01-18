@@ -46,7 +46,7 @@ import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/d
 import { Route as coreBackOfficeWorksheetsIndexRouteImport } from './routes/(core)/back-office/worksheets/index'
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
-import { Route as coreBackOfficeTestingIndexRouteImport } from './routes/(core)/back-office/testing/index'
+import { Route as coreBackOfficeTestingsIndexRouteImport } from './routes/(core)/back-office/testings/index'
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
 import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
 import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './routes/(core)/back-office/parameter-categories/index'
@@ -65,7 +65,7 @@ import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/
 import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
 import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
 import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.edit'
-import { Route as coreBackOfficeTestingTestingIdDetailRouteImport } from './routes/(core)/back-office/testing/$testingId.detail'
+import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
 import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
 import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(core)/back-office/roles/$roleId.detail'
 import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './routes/(core)/back-office/parameters/$parameterId.edit'
@@ -265,10 +265,10 @@ const coreBackOfficeToolsIndexRoute =
     path: '/tools/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeTestingIndexRoute =
-  coreBackOfficeTestingIndexRouteImport.update({
-    id: '/testing/',
-    path: '/testing/',
+const coreBackOfficeTestingsIndexRoute =
+  coreBackOfficeTestingsIndexRouteImport.update({
+    id: '/testings/',
+    path: '/testings/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeRolesIndexRoute =
@@ -379,10 +379,10 @@ const coreBackOfficeToolsToolIdEditRoute =
     path: '/tools/$toolId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeTestingTestingIdDetailRoute =
-  coreBackOfficeTestingTestingIdDetailRouteImport.update({
-    id: '/testing/$testingId/detail',
-    path: '/testing/$testingId/detail',
+const coreBackOfficeTestingsTestingIdDetailRoute =
+  coreBackOfficeTestingsTestingIdDetailRouteImport.update({
+    id: '/testings/$testingId/detail',
+    path: '/testings/$testingId/detail',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeRolesRoleIdEditRoute =
@@ -480,7 +480,7 @@ export interface FileRoutesByFullPath {
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
-  '/back-office/testing': typeof coreBackOfficeTestingIndexRoute
+  '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
@@ -493,7 +493,7 @@ export interface FileRoutesByFullPath {
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
-  '/back-office/testing/$testingId/detail': typeof coreBackOfficeTestingTestingIdDetailRoute
+  '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
@@ -541,7 +541,7 @@ export interface FileRoutesByTo {
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
-  '/back-office/testing': typeof coreBackOfficeTestingIndexRoute
+  '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
@@ -554,7 +554,7 @@ export interface FileRoutesByTo {
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
-  '/back-office/testing/$testingId/detail': typeof coreBackOfficeTestingTestingIdDetailRoute
+  '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
@@ -609,7 +609,7 @@ export interface FileRoutesById {
   '/(core)/back-office/parameter-categories/': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
-  '/(core)/back-office/testing/': typeof coreBackOfficeTestingIndexRoute
+  '/(core)/back-office/testings/': typeof coreBackOfficeTestingsIndexRoute
   '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
   '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
   '/(core)/back-office/worksheets/': typeof coreBackOfficeWorksheetsIndexRoute
@@ -622,7 +622,7 @@ export interface FileRoutesById {
   '/(core)/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/(core)/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
-  '/(core)/back-office/testing/$testingId/detail': typeof coreBackOfficeTestingTestingIdDetailRoute
+  '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/(core)/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/(core)/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
@@ -676,7 +676,7 @@ export interface FileRouteTypes {
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
     | '/back-office/roles'
-    | '/back-office/testing'
+    | '/back-office/testings'
     | '/back-office/tools'
     | '/back-office/users'
     | '/back-office/worksheets'
@@ -689,7 +689,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters/$parameterId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
-    | '/back-office/testing/$testingId/detail'
+    | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/edit'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
@@ -737,7 +737,7 @@ export interface FileRouteTypes {
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
     | '/back-office/roles'
-    | '/back-office/testing'
+    | '/back-office/testings'
     | '/back-office/tools'
     | '/back-office/users'
     | '/back-office/worksheets'
@@ -750,7 +750,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters/$parameterId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
-    | '/back-office/testing/$testingId/detail'
+    | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/edit'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
@@ -804,7 +804,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/parameter-categories/'
     | '/(core)/back-office/parameters/'
     | '/(core)/back-office/roles/'
-    | '/(core)/back-office/testing/'
+    | '/(core)/back-office/testings/'
     | '/(core)/back-office/tools/'
     | '/(core)/back-office/users/'
     | '/(core)/back-office/worksheets/'
@@ -817,7 +817,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/parameters/$parameterId/edit'
     | '/(core)/back-office/roles/$roleId/detail'
     | '/(core)/back-office/roles/$roleId/edit'
-    | '/(core)/back-office/testing/$testingId/detail'
+    | '/(core)/back-office/testings/$testingId/detail'
     | '/(core)/back-office/tools/$toolId/edit'
     | '/(core)/back-office/users/$userId/edit'
     | '/(core)/dashboard/company/$companyId/detail'
@@ -1095,11 +1095,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeToolsIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/testing/': {
-      id: '/(core)/back-office/testing/'
-      path: '/testing'
-      fullPath: '/back-office/testing'
-      preLoaderRoute: typeof coreBackOfficeTestingIndexRouteImport
+    '/(core)/back-office/testings/': {
+      id: '/(core)/back-office/testings/'
+      path: '/testings'
+      fullPath: '/back-office/testings'
+      preLoaderRoute: typeof coreBackOfficeTestingsIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/roles/': {
@@ -1228,11 +1228,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeToolsToolIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/testing/$testingId/detail': {
-      id: '/(core)/back-office/testing/$testingId/detail'
-      path: '/testing/$testingId/detail'
-      fullPath: '/back-office/testing/$testingId/detail'
-      preLoaderRoute: typeof coreBackOfficeTestingTestingIdDetailRouteImport
+    '/(core)/back-office/testings/$testingId/detail': {
+      id: '/(core)/back-office/testings/$testingId/detail'
+      path: '/testings/$testingId/detail'
+      fullPath: '/back-office/testings/$testingId/detail'
+      preLoaderRoute: typeof coreBackOfficeTestingsTestingIdDetailRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/roles/$roleId/edit': {
@@ -1329,7 +1329,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute
   coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
-  coreBackOfficeTestingIndexRoute: typeof coreBackOfficeTestingIndexRoute
+  coreBackOfficeTestingsIndexRoute: typeof coreBackOfficeTestingsIndexRoute
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
   coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
   coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
@@ -1341,7 +1341,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute
   coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
   coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
-  coreBackOfficeTestingTestingIdDetailRoute: typeof coreBackOfficeTestingTestingIdDetailRoute
+  coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
   coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
   coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
 }
@@ -1363,7 +1363,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeParameterCategoriesIndexRoute,
   coreBackOfficeParametersIndexRoute: coreBackOfficeParametersIndexRoute,
   coreBackOfficeRolesIndexRoute: coreBackOfficeRolesIndexRoute,
-  coreBackOfficeTestingIndexRoute: coreBackOfficeTestingIndexRoute,
+  coreBackOfficeTestingsIndexRoute: coreBackOfficeTestingsIndexRoute,
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
   coreBackOfficeUsersIndexRoute: coreBackOfficeUsersIndexRoute,
   coreBackOfficeWorksheetsIndexRoute: coreBackOfficeWorksheetsIndexRoute,
@@ -1380,8 +1380,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeParametersParameterIdEditRoute,
   coreBackOfficeRolesRoleIdDetailRoute: coreBackOfficeRolesRoleIdDetailRoute,
   coreBackOfficeRolesRoleIdEditRoute: coreBackOfficeRolesRoleIdEditRoute,
-  coreBackOfficeTestingTestingIdDetailRoute:
-    coreBackOfficeTestingTestingIdDetailRoute,
+  coreBackOfficeTestingsTestingIdDetailRoute:
+    coreBackOfficeTestingsTestingIdDetailRoute,
   coreBackOfficeToolsToolIdEditRoute: coreBackOfficeToolsToolIdEditRoute,
   coreBackOfficeUsersUserIdEditRoute: coreBackOfficeUsersUserIdEditRoute,
 }

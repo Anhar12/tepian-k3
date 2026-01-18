@@ -113,6 +113,9 @@ function RouteComponent() {
     error,
   } = useQuery(trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }));
 
+  // TODO create worksheet notes type, schema, queries and api
+  // Fetch worksheet notes
+
   // Fetch all tools for assignment
   const { data: allToolsData } = useQuery(
     trpc.tool.getToolPaginated.queryOptions({
@@ -961,11 +964,7 @@ function RouteComponent() {
                     <SelectContent>
                       {WORKSHEET_NOTE_STATUS.map((status) => (
                         <SelectItem key={status} value={status}>
-                          {status === "info"
-                            ? "Info"
-                            : status === "warning"
-                              ? "Peringatan"
-                              : "Error"}
+                          {status}
                         </SelectItem>
                       ))}
                     </SelectContent>

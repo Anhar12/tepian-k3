@@ -34,6 +34,11 @@ export const backOfficeMenu: {
       permission: "orders.read",
     },
     {
+      title: "Testings",
+      url: `${urlStarter}/testings`,
+      icon: IconFileInvoice,
+    },
+    {
       title: "Worksheets",
       url: `${urlStarter}/worksheets`,
       icon: IconFileInvoice,

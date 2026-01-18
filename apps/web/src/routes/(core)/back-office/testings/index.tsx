@@ -39,7 +39,7 @@ const searchSchema = z.object({
   status: z.enum(TESTING_STATUSES).optional(),
 });
 
-export const Route = createFileRoute("/(core)/back-office/testing/")({
+export const Route = createFileRoute("/(core)/back-office/testings/")({
   validateSearch: (search) => searchSchema.parse(search),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "testing.read" }),
@@ -294,7 +294,7 @@ function RouteComponent() {
                         <TableCell className="text-center">
                           <Button asChild size="sm" variant="outline">
                             <Link
-                              to="/back-office/testing/$testingId/detail"
+                              to="/back-office/testings/$testingId/detail"
                               params={{ testingId: testing.id }}
                             >
                               <Eye className="mr-1 h-4 w-4" />
