@@ -3,46 +3,52 @@ import { z } from "zod";
 
 /**
  * The `useDialogs` function in TypeScript creates a customizable dialog management system with
- * validation capabilities based on provided schemas.
- * @param {T} schemas - The `schemas` parameter in the `useDialogs` function is an object that contains
+ * optional validation capabilities based on provided schemas.
+ * @param {T} schemas - The `schemas` parameter can be either:
+ * 1. A Zod schema for dialogs that need validation
+ * 2. `null` or `undefined` for simple dialogs that only need open/close state
+ *
  * IMPORTANT NOTE: use as constant when passing zod schemas to preserve literal types
  * EXAMPLE:
  * ```ts
- * const dialogSchemas = {
- * showAlert: z.object({
- * title: z.string().min(1, "Title is required"),
- * message: z.string().min(1, "Message is required"),
- * }),
- * confirmAction: z.object({
- * actionName: z.string().min(1, "Action name is required"),
- * }),
- * } as const;
- * const dialogs = useDialogs(dialogSchemas);
+ * const dialogs = useDialogs({
+ *   // Dialog with validation
+ *   showAlert: z.object({
+ *     title: z.string().min(1, "Title is required"),
+ *     message: z.string().min(1, "Message is required"),
+ *   }),
+ *   // Simple dialog without validation
+ *   confirmDelete: null,
+ *   simpleModal: null,
+ * } as const);
  * ```
- * Zod schemas for defining the shape and validation rules of data for different dialogs in your
- * application. Each key in the `schemas` object represents a dialog name, and the corresponding value
- * is a Zod schema that
- * @returns The `useDialogs` function returns an object containing the following functions:
  */
-const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
+const useDialogs = <T extends Record<string, z.ZodType | null>>(schemas: T) => {
   type DialogConfig = {
-    [K in keyof T]: z.infer<T[K]>;
+    [K in keyof T]: T[K] extends z.ZodType ? z.infer<T[K]> : never;
   };
-  type DialogName = keyof DialogConfig;
+  type DialogName = keyof T;
+  type DialogWithData = {
+    [K in DialogName]: T[K] extends z.ZodType ? K : never;
+  }[DialogName];
+  type DialogWithoutData = {
+    [K in DialogName]: T[K] extends null ? K : never;
+  }[DialogName];
 
   const [state, setState] = useState<{
     [K in DialogName]?: {
       isOpen: boolean;
-      data: DialogConfig[K];
-      errors: Partial<Record<keyof DialogConfig[K], string>>;
-      isValid: boolean;
+      data?: DialogConfig[K];
+      errors?: Partial<Record<keyof DialogConfig[K], string>>;
+      isValid?: boolean;
     };
   }>({});
 
   // Helper to create default data from schema
   const getDefaultData = useCallback(
-    <K extends DialogName>(name: K): DialogConfig[K] => {
+    <K extends DialogWithData>(name: K): DialogConfig[K] => {
       const schema = schemas[name];
+      if (!schema) return {} as DialogConfig[K];
 
       // Try to parse an empty object to get defaults
       const result = schema.safeParse({});
@@ -80,9 +86,29 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
     [schemas],
   );
 
-  const open = useCallback(
-    <K extends DialogName>(name: K, data?: Partial<DialogConfig[K]>) => {
-      const defaultData = getDefaultData(name);
+  // Overload signatures
+  function open<K extends DialogWithoutData>(name: K): void;
+  function open<K extends DialogWithData>(
+    name: K,
+    data?: Partial<DialogConfig[K]>,
+  ): void;
+  function open<K extends DialogName>(
+    name: K,
+    data?: Partial<DialogConfig[K]>,
+  ): void {
+    const schema = schemas[name];
+
+    if (schema === null) {
+      // Simple dialog without data
+      setState((prev) => ({
+        ...prev,
+        [name]: {
+          isOpen: true,
+        },
+      }));
+    } else {
+      // Dialog with data and validation
+      const defaultData = getDefaultData(name as unknown as DialogWithData);
       const finalData = data
         ? Object.assign({}, defaultData, data)
         : defaultData;
@@ -93,12 +119,11 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
           isOpen: true,
           data: finalData as DialogConfig[K],
           errors: {},
-          isValid: false, // Start as invalid to force validation
+          isValid: false,
         },
       }));
-    },
-    [getDefaultData],
-  );
+    }
+  }
 
   const close = useCallback(<K extends DialogName>(name: K) => {
     setState((prev) => {
@@ -109,14 +134,14 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
   }, []);
 
   const updateData = useCallback(
-    <K extends DialogName>(
+    <K extends DialogWithData>(
       name: K,
       updates: Partial<DialogConfig[K]>,
       validateOnChange = true,
     ) => {
       setState((prev) => {
         const currentDialog = prev[name];
-        if (!currentDialog) return prev;
+        if (!currentDialog || !currentDialog.data) return prev;
 
         const newData = Object.assign(
           {},
@@ -127,8 +152,8 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
         let errors: Partial<Record<keyof DialogConfig[K], string>> = {};
         let isValid = true;
 
-        if (validateOnChange) {
-          const result = schemas[name].safeParse(newData);
+        if (validateOnChange && schemas[name]) {
+          const result = schemas[name]!.safeParse(newData);
 
           if (!result.success) {
             errors = result.error.issues.reduce(
@@ -157,13 +182,16 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
   );
 
   const validate = useCallback(
-    <K extends DialogName>(
+    <K extends DialogWithData>(
       name: K,
     ): { success: false } | { success: true; data: DialogConfig[K] } => {
       const currentDialog = state[name];
-      if (!currentDialog) return { success: false };
+      if (!currentDialog || !currentDialog.data) return { success: false };
 
-      const result = schemas[name].safeParse(currentDialog.data);
+      const schema = schemas[name];
+      if (!schema) return { success: false };
+
+      const result = schema.safeParse(currentDialog.data);
 
       if (!result.success) {
         const errors = result.error.issues.reduce(
@@ -201,7 +229,7 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
   );
 
   const reset = useCallback(
-    <K extends DialogName>(name: K) => {
+    <K extends DialogWithData>(name: K) => {
       const defaultData = getDefaultData(name);
 
       setState((prev) => {
@@ -223,14 +251,14 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
   );
 
   const getData = useCallback(
-    <K extends DialogName>(name: K): DialogConfig[K] | undefined => {
+    <K extends DialogWithData>(name: K): DialogConfig[K] | undefined => {
       return state[name]?.data;
     },
     [state],
   );
 
   const getErrors = useCallback(
-    <K extends DialogName>(
+    <K extends DialogWithData>(
       name: K,
     ): Partial<Record<keyof DialogConfig[K], string>> => {
       return (state[name]?.errors ?? {}) as Partial<
@@ -241,7 +269,7 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
   );
 
   const getFieldError = useCallback(
-    <K extends DialogName>(
+    <K extends DialogWithData>(
       name: K,
       field: keyof DialogConfig[K],
     ): string | undefined => {
@@ -258,13 +286,13 @@ const useDialogs = <T extends Record<string, z.ZodType>>(schemas: T) => {
   );
 
   const isValid = useCallback(
-    <K extends DialogName>(name: K): boolean => {
+    <K extends DialogWithData>(name: K): boolean => {
       return state[name]?.isValid ?? false;
     },
     [state],
   );
 
-  const clearErrors = useCallback(<K extends DialogName>(name: K) => {
+  const clearErrors = useCallback(<K extends DialogWithData>(name: K) => {
     setState((prev) => {
       const currentDialog = prev[name];
       if (!currentDialog) return prev;
