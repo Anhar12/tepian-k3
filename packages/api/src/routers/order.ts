@@ -756,7 +756,7 @@ export const orderRouter = createTRPCRouter({
               type: "order_status_changed",
               orderId: order.id,
               metadata: {
-                orderStatus: "in_progress",
+                orderStatus: "pembayaran_diterima",
               },
             });
 
@@ -764,14 +764,14 @@ export const orderRouter = createTRPCRouter({
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
                 userId: order.userId,
-                newStatus: "in_progress",
-                oldStatus: "pending",
+                newStatus: "pembayaran_diterima",
+                oldStatus: "proses_validasi_pembayaran",
                 triggeredBy: ctx.user.id,
               }),
             );
 
-            // update order status to in_progress
-            yield* orderQueries.updateOrderStatus(order.id, "in_progress");
+            // update order status to pembayaran_diterima
+            yield* orderQueries.updateOrderStatus(order.id, "pembayaran_diterima");
 
             return order;
           }),

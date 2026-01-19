@@ -2,7 +2,7 @@ import { Effect, pipe } from "effect";
 import fs from "fs/promises";
 import path from "path";
 import { v7 as uuidv7 } from "uuid";
-import type { UploadOptions, UploadResult } from "@/storage/types";
+import type { UploadOptions, UploadResult } from "../types";
 import { UploadFailedError, FileNotFoundError } from "../types";
 import { generateDateBasedPath } from "../utils";
 
@@ -35,7 +35,7 @@ export class FileSystemProvider {
 
   private generateKey(
     filename?: string,
-    folder?: string
+    folder?: string,
   ): { filename: string; key: string } {
     const ext = filename ? path.extname(filename) : "";
     const name = filename ? path.basename(filename, ext) : "file";
@@ -59,7 +59,7 @@ export class FileSystemProvider {
 
   upload(
     file: Buffer,
-    options: UploadOptions = {}
+    options: UploadOptions = {},
   ): Effect.Effect<UploadResult, UploadFailedError> {
     return pipe(
       Effect.sync(() => this.generateKey(options.filename, options.folder)),
@@ -85,10 +85,10 @@ export class FileSystemProvider {
               },
               catch: (error) =>
                 new UploadFailedError("Failed to write file", error),
-            })
-          )
+            }),
+          ),
         );
-      })
+      }),
     );
   }
 
@@ -104,7 +104,7 @@ export class FileSystemProvider {
   }
 
   download(
-    key: string
+    key: string,
   ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
     const filePath = path.join(this.uploadsDir, key);
     return Effect.tryPromise({

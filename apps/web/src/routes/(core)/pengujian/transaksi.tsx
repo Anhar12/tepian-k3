@@ -17,7 +17,11 @@ export const Route = createFileRoute("/(core)/pengujian/transaksi")({
 const statusFilters: { label: string; value: OrderStatus | "all" }[] = [
   { label: "Semua", value: "all" },
   { label: "Menunggu", value: "pending" },
-  { label: "Dalam Proses", value: "in_progress" },
+  { label: "Kaji Ulang", value: "kaji_ulang" },
+  { label: "Penawaran", value: "penawaran_diterbitkan" },
+  { label: "Persetujuan", value: "persetujuan_disetujui" },
+  { label: "Pembayaran", value: "proses_validasi_pembayaran" },
+  { label: "Pengujian", value: "proses_pengambilan_sampel" },
   { label: "Selesai", value: "completed" },
   { label: "Dibatalkan", value: "cancelled" },
 ];

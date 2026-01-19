@@ -625,12 +625,15 @@ const orderQueries = {
         );
       }
 
-      // update order status to confirmed
+      // update order status to upload_surat_persetujuan (customer accepted offer, now needs to upload approval letter)
       const [updatedOrder] = yield* Effect.tryPromise({
         try: () =>
           db
             .update(order)
-            .set({ status: "confirmed", approvedAt: new Date().toISOString() })
+            .set({
+              status: "upload_surat_persetujuan",
+              approvedAt: new Date().toISOString(),
+            })
             .where(eq(order.id, orderId))
             .returning(),
         catch: (error) => {
@@ -655,11 +658,11 @@ const orderQueries = {
         );
       }
 
-      // create order status history - confirmed
+      // create order status history - upload_surat_persetujuan
       yield* orderStatusHistoryQueries.createOrderStatusHistory(
         db,
         orderId,
-        "confirmed",
+        "upload_surat_persetujuan",
         userId,
         "Offer accepted by customer",
       );
@@ -1092,11 +1095,11 @@ const orderQueries = {
         );
       }
 
-      // create order status history - paid
+      // create order status history - pembayaran_diterima
       yield* orderStatusHistoryQueries.createOrderStatusHistory(
         db,
         orderId,
-        "confirmed",
+        "pembayaran_diterima",
         adminId,
         "Order payment verified by admin",
       );

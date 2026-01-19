@@ -469,7 +469,7 @@ function RouteComponent() {
     !isRevisionRequested;
   const isAcceptingDocuments =
     order.approvalStatus === "approved" &&
-    order.status === "confirmed" &&
+    order.status === "surat_persetujuan_diproses" &&
     hasBothApprovalLetter &&
     !isRevisionRequested;
   const isAwaitingPayment =
@@ -1722,10 +1722,10 @@ function RouteComponent() {
                           </Badge>
                         </div>
                       </div>
-                      {order.testing?.worksheet && (
+                      {order.worksheet && (
                         <div>
                           <Label className="text-muted-foreground">
-                            Worksheet ({order.testing.worksheet.id})
+                            Worksheet ({order.worksheet.id})
                           </Label>
                           <Button
                             variant="link"
@@ -1735,7 +1735,7 @@ function RouteComponent() {
                                 to: "/worksheets",
 
                                 search: {
-                                  worksheetId: order.testing!.worksheet.id,
+                                  worksheetId: order.worksheet.id,
                                 },
                               })
                             }
@@ -1759,7 +1759,7 @@ function RouteComponent() {
                         <Eye className="mr-2 h-4 w-4" />
                         Lihat Detail Testing
                       </Button>
-                      {!order.testing?.worksheet && (
+                      {!order.worksheet && (
                         <Button
                           className="bg-blue-500 hover:bg-blue-600"
                           onClick={() =>

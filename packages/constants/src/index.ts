@@ -53,12 +53,33 @@ export const TOOLS_AVAILABILITY_COLORS: Record<ToolsAvailability, string> = {
 };
 
 export const ORDER_STATUS = [
+  // Initial state
   "pending",
-  "confirmed",
-  "revision",
-  "rejected",
-  "in_progress",
+  // Kaji ulang phase
+  "kaji_ulang",
+  "kaji_ulang_disetujui",
+  // Penawaran phase
+  "penawaran_diterbitkan",
+  "revision", // Can go back to kaji_ulang
+  // Persetujuan phase
+  "upload_surat_persetujuan",
+  "surat_persetujuan_diproses",
+  "persetujuan_disetujui",
+  // Pembayaran phase
+  "tagihan_diterbitkan",
+  "proses_validasi_pembayaran",
+  "pembayaran_diterima",
+  // SPT & Pengujian phase
+  "menunggu_penerbitan_spt_jadwal",
+  "proses_pengambilan_sampel",
+  "sampel_dalam_proses_penyerahan",
+  "sampel_telah_dianalisis",
+  "sampel_selesai_dianalisis",
+  // Completion
+  "laporan_diterbitkan",
   "completed",
+  // Terminal states
+  "rejected",
   "cancelled",
 ] as const;
 
@@ -66,28 +87,67 @@ export type OrderStatus = (typeof ORDER_STATUS)[number];
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
-  confirmed: "Confirmed",
-  revision: "Revision",
-  rejected: "Rejected",
-  in_progress: "In Progress",
-  completed: "Completed",
-  cancelled: "Cancelled",
+  kaji_ulang: "Kaji Ulang",
+  kaji_ulang_disetujui: "Kaji Ulang Disetujui",
+  penawaran_diterbitkan: "Penawaran Diterbitkan",
+  revision: "Revisi",
+  upload_surat_persetujuan: "Upload Surat Persetujuan",
+  surat_persetujuan_diproses: "Surat Persetujuan Diproses",
+  persetujuan_disetujui: "Persetujuan Disetujui",
+  tagihan_diterbitkan: "Tagihan Diterbitkan",
+  proses_validasi_pembayaran: "Proses Validasi Pembayaran",
+  pembayaran_diterima: "Pembayaran Diterima",
+  menunggu_penerbitan_spt_jadwal: "Menunggu Penerbitan SPT & Jadwal",
+  proses_pengambilan_sampel: "Proses Pengambilan Sampel",
+  sampel_dalam_proses_penyerahan: "Sampel Dalam Proses Penyerahan",
+  sampel_telah_dianalisis: "Sampel Telah Dianalisis",
+  sampel_selesai_dianalisis: "Sampel Selesai Dianalisis",
+  laporan_diterbitkan: "Laporan Diterbitkan",
+  completed: "Selesai",
+  rejected: "Ditolak",
+  cancelled: "Dibatalkan",
 };
 
 export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   pending: "bg-yellow-100 text-yellow-700",
-  confirmed: "bg-blue-100 text-blue-700",
+  kaji_ulang: "bg-blue-100 text-blue-700",
+  kaji_ulang_disetujui: "bg-cyan-100 text-cyan-700",
+  penawaran_diterbitkan: "bg-indigo-100 text-indigo-700",
   revision: "bg-orange-100 text-orange-700",
-  rejected: "bg-red-100 text-red-700",
-  in_progress: "bg-purple-100 text-purple-700",
+  upload_surat_persetujuan: "bg-amber-100 text-amber-700",
+  surat_persetujuan_diproses: "bg-lime-100 text-lime-700",
+  persetujuan_disetujui: "bg-emerald-100 text-emerald-700",
+  tagihan_diterbitkan: "bg-teal-100 text-teal-700",
+  proses_validasi_pembayaran: "bg-sky-100 text-sky-700",
+  pembayaran_diterima: "bg-green-100 text-green-700",
+  menunggu_penerbitan_spt_jadwal: "bg-violet-100 text-violet-700",
+  proses_pengambilan_sampel: "bg-purple-100 text-purple-700",
+  sampel_dalam_proses_penyerahan: "bg-fuchsia-100 text-fuchsia-700",
+  sampel_telah_dianalisis: "bg-pink-100 text-pink-700",
+  sampel_selesai_dianalisis: "bg-rose-100 text-rose-700",
+  laporan_diterbitkan: "bg-emerald-100 text-emerald-700",
   completed: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
   cancelled: "bg-gray-100 text-gray-700",
 };
 
 export const ORDER_STATUS_FLOW: OrderStatus[] = [
   "pending",
-  "confirmed",
-  "in_progress",
+  "kaji_ulang",
+  "kaji_ulang_disetujui",
+  "penawaran_diterbitkan",
+  "upload_surat_persetujuan",
+  "surat_persetujuan_diproses",
+  "persetujuan_disetujui",
+  "tagihan_diterbitkan",
+  "proses_validasi_pembayaran",
+  "pembayaran_diterima",
+  "menunggu_penerbitan_spt_jadwal",
+  "proses_pengambilan_sampel",
+  "sampel_dalam_proses_penyerahan",
+  "sampel_telah_dianalisis",
+  "sampel_selesai_dianalisis",
+  "laporan_diterbitkan",
   "completed",
 ];
 

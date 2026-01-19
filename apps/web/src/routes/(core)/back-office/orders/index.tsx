@@ -84,10 +84,16 @@ function RouteComponent() {
             <SelectContent>
               <SelectItem value="all">Semua Status</SelectItem>
               <SelectItem value="pending">Menunggu</SelectItem>
-              <SelectItem value="approved">Disetujui</SelectItem>
-              <SelectItem value="rejected">Ditolak</SelectItem>
-              <SelectItem value="in_progress">Dalam Proses</SelectItem>
+              <SelectItem value="kaji_ulang">Kaji Ulang</SelectItem>
+              <SelectItem value="kaji_ulang_disetujui">Kaji Ulang Disetujui</SelectItem>
+              <SelectItem value="penawaran_diterbitkan">Penawaran Diterbitkan</SelectItem>
+              <SelectItem value="revision">Revisi</SelectItem>
+              <SelectItem value="persetujuan_disetujui">Persetujuan Disetujui</SelectItem>
+              <SelectItem value="tagihan_diterbitkan">Tagihan Diterbitkan</SelectItem>
+              <SelectItem value="pembayaran_diterima">Pembayaran Diterima</SelectItem>
+              <SelectItem value="proses_pengambilan_sampel">Proses Pengambilan Sampel</SelectItem>
               <SelectItem value="completed">Selesai</SelectItem>
+              <SelectItem value="rejected">Ditolak</SelectItem>
               <SelectItem value="cancelled">Dibatalkan</SelectItem>
             </SelectContent>
           </Select>

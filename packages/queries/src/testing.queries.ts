@@ -237,11 +237,11 @@ const testingQueries = {
               .values(testingItemsData)
               .returning();
 
-            // 5. Update order status to in_progress
+            // 5. Update order status to menunggu_penerbitan_spt_jadwal
             await tx
               .update(order)
               .set({
-                status: "in_progress",
+                status: "menunggu_penerbitan_spt_jadwal",
                 updatedAt: sql`CURRENT_TIMESTAMP`,
               })
               .where(eq(order.id, orderId));
@@ -251,7 +251,7 @@ const testingQueries = {
               orderStatusHistoryQueries.createOrderStatusHistory(
                 tx,
                 orderId,
-                "in_progress",
+                "menunggu_penerbitan_spt_jadwal",
                 orderData.userId,
                 "Testing record created",
               ),

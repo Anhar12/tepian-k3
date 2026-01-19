@@ -256,7 +256,14 @@ function RouteComponent() {
   const isPendingPaymentVerification =
     orderDetail.paymentStatus === "pending_verification";
   const isPaymentVerified = orderDetail.paymentStatus === "paid";
-  const isInProgress = orderDetail.status === "in_progress";
+  // Check if order is in testing/sampling phase (any of the testing-related statuses)
+  const isInProgress =
+    orderDetail.status === "menunggu_penerbitan_spt_jadwal" ||
+    orderDetail.status === "proses_pengambilan_sampel" ||
+    orderDetail.status === "sampel_dalam_proses_penyerahan" ||
+    orderDetail.status === "sampel_telah_dianalisis" ||
+    orderDetail.status === "sampel_selesai_dianalisis" ||
+    orderDetail.status === "laporan_diterbitkan";
   const isCompleted = orderDetail.status === "completed";
   const freshlySubmitted = orderDetail.status === "pending" && !offeringDoc;
 
