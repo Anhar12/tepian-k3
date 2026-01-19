@@ -705,13 +705,13 @@ const orderQueries = {
         );
       }
 
-      const hasInvoiceDocument = yield* Effect.tryPromise({
+      const hasOfferingDocument = yield* Effect.tryPromise({
         try: () =>
           db.query.documents.findFirst({
             where: and(
               eq(documents.entityId, orderId),
               eq(documents.entityType, "order"),
-              eq(documents.type, "invoice"),
+              eq(documents.type, "offering_document"),
             ),
           }),
         catch: (error) => {
@@ -731,11 +731,11 @@ const orderQueries = {
         },
       });
 
-      if (!hasInvoiceDocument) {
+      if (!hasOfferingDocument) {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Dokumen invoice tidak ditemukan untuk pesanan ini",
+            message: "Dokumen penawaran tidak ditemukan untuk pesanan ini",
           }),
         );
       }
