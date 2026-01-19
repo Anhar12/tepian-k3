@@ -11,6 +11,8 @@ import {
   StatusState7,
   StatusState8,
   StatusStateWaitingForRevision,
+  StatusStateWorksheetInReview,
+  StatusStateWorksheetVerified,
 } from "@/components/status-state";
 import {
   AlertDialog,
@@ -68,6 +70,13 @@ function RouteComponent() {
 
   const { data: orderDetail, isLoading } = useQuery(
     trpc.order.getOrderWithDocuments.queryOptions({
+      orderId,
+    }),
+  );
+
+  // Fetch worksheet data for this order
+  const { data: worksheet } = useQuery(
+    trpc.worksheet.getByOrderId.queryOptions({
       orderId,
     }),
   );
@@ -251,9 +260,20 @@ function RouteComponent() {
   const isCompleted = orderDetail.status === "completed";
   const freshlySubmitted = orderDetail.status === "pending" && !offeringDoc;
 
-  // Determine the current workflow state
-  // 1. Waiting for customer to approve offer
-  // 2. Customer approved, waiting for approval letter upload
+  // Worksheet status flags (new flow: worksheet created BEFORE offering)
+  const hasWorksheet = !!worksheet;
+  const worksheetStatus = worksheet?.status;
+  const isWorksheetInReview =
+    hasWorksheet &&
+    (worksheetStatus === "draft" || worksheetStatus === "pending_verification");
+  const isWorksheetVerified = hasWorksheet && worksheetStatus === "verified";
+
+  // Determine the current workflow state (updated for new flow)
+  // 0. Freshly submitted - no worksheet yet, waiting for kaji ulang
+  // 0a. Worksheet in review (draft/pending_verification)
+  // 0b. Worksheet verified, waiting for offering document
+  // 1. Offer sent, waiting for customer to approve
+  // 2. Customer approved, needs to upload approval letter
   // 3. Approval letter uploaded, waiting for invoice & cooperation agreement
   // 4. Invoice ready, user uploads payment proof & signed cooperation agreement
   // 5. Payment pending verification
@@ -342,7 +362,17 @@ function RouteComponent() {
                 (!hasInvoice || !hasCooperationAgreement) ? (
                 // State 3: Approval letter uploaded, waiting for invoice & cooperation agreement
                 <StatusState3 />
-              ) : freshlySubmitted ? (
+              ) : isWorksheetInReview ? (
+                // State 0a: Worksheet in review (kaji ulang phase)
+                <StatusStateWorksheetInReview
+                  orderDetail={orderDetail}
+                  worksheetStatus={worksheetStatus || "draft"}
+                />
+              ) : isWorksheetVerified && !offeringDoc ? (
+                // State 0b: Worksheet verified, waiting for offering document
+                <StatusStateWorksheetVerified orderDetail={orderDetail} />
+              ) : freshlySubmitted && !hasWorksheet ? (
+                // State 0: Freshly submitted, no worksheet yet
                 <StatusState0 orderDetail={orderDetail} />
               ) : (
                 // State 1: Offer sent, waiting for customer to approve
@@ -353,8 +383,13 @@ function RouteComponent() {
               )}
             </div>
 
-            {/* Action Buttons - Bottom Right (only show when not approved yet) */}
-            {!isRevisionStatus && !isApproved && !freshlySubmitted && (
+            {/* Action Buttons - Bottom Right (only show when offer is available and not approved yet) */}
+            {!isRevisionStatus &&
+              !isApproved &&
+              !freshlySubmitted &&
+              !isWorksheetInReview &&
+              !isWorksheetVerified &&
+              offeringDoc && (
               <div className="mt-8 flex justify-end gap-3 pt-6">
                 {/* Batal Dialog */}
                 <AlertDialog open={openCancelDialog}>

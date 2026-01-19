@@ -25,18 +25,11 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import {
+  WORKSHEET_STATUS_COLORS,
   WORKSHEET_STATUS_LABELS,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
 import { getPublicUrl } from "@/utils/url";
-
-const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
-  approved: "bg-emerald-100 text-emerald-700",
-  rejected: "bg-red-100 text-red-700",
-};
 
 const routeApi = getRouteApi("/(core)/worksheets");
 
@@ -50,9 +43,9 @@ export function WorksheetSidebar({
     trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
   );
 
-  const company = worksheet?.testing?.order?.company;
-  const testing = worksheet?.testing;
-  const order = worksheet?.testing?.order;
+  const company = worksheet?.order?.company;
+  const testing = worksheet?.testing ?? null;
+  const order = worksheet?.order;
   const mainSupervisor = worksheet?.mainSupervisor;
 
   return (

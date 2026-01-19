@@ -30,7 +30,8 @@
       "Skill(web-design-guidelines)",
       "Skill(web-design-guidelines:*)",
       "Bash(xargs cat:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep:*)"
     ]
   }
 }

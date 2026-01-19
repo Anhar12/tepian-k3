@@ -63,6 +63,87 @@ export const worksheetRouter = createTRPCRouter({
     ),
 
   /**
+   * Get worksheet by order ID
+   */
+  getByOrderId: withPermission("worksheets.read")
+    .input(z.object({ orderId: z.uuidv7() }))
+    .query(
+      async ({ input }) =>
+        await runEffect(worksheetQueries.getWorksheetByOrderId(input.orderId)),
+    ),
+
+  /**
+   * Create worksheet from order (Admin - Kaji Ulang Phase)
+   * This creates worksheet with testingId = NULL, to be linked later after payment
+   */
+  createFromOrder: withPermission("worksheets.create")
+    .input(worksheetSchema.createWorksheetFromOrderSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.createWorksheetFromOrder(
+            input.orderId,
+            ctx.user.id,
+            input.startDate,
+            input.mainSupervisorId,
+            input.accompanyingSupervisorId,
+          ),
+        ),
+    ),
+
+  /**
+   * Submit worksheet for coordinator verification
+   * Changes status from 'draft' to 'pending_verification'
+   */
+  submitForVerification: withPermission("worksheets.update")
+    .input(worksheetSchema.submitForVerificationSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.submitForVerification(input.worksheetId, ctx.user.id),
+        ),
+    ),
+
+  /**
+   * Verify worksheet (Coordinator action)
+   * Changes status from 'pending_verification' to 'verified'
+   */
+  verify: withPermission("worksheets.update")
+    .input(worksheetSchema.verifyWorksheetSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.verifyWorksheet(
+            input.worksheetId,
+            ctx.user.id,
+            input.mainSupervisorId,
+            input.accompanyingSupervisorId,
+          ),
+        ),
+    ),
+
+  /**
+   * Link worksheet to testing (called after testing is created post-payment)
+   */
+  linkToTesting: withPermission("worksheets.update")
+    .input(
+      z.object({
+        worksheetId: z.uuidv7(),
+        testingId: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.linkWorksheetToTesting(
+            input.worksheetId,
+            input.testingId,
+            ctx.user.id,
+          ),
+        ),
+    ),
+
+  /**
    * Create worksheet from testing (Admin - Phase 6)
    */
   createFromTesting: withPermission("worksheets.create")

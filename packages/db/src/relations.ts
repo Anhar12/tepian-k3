@@ -251,6 +251,10 @@ export const orderRelations = relations(order, ({ one, many }) => ({
     fields: [order.id],
     references: [testing.orderId],
   }),
+  worksheet: one(worksheets, {
+    fields: [order.id],
+    references: [worksheets.orderId],
+  }),
   items: many(orderItem),
   statusHistory: many(orderStatusHistory),
   // Polymorphic relation: documents where entityType = 'order' and entityId = order.id
@@ -403,6 +407,10 @@ export const employeeRelations = relations(employees, ({ one }) => ({
 }));
 
 export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
+  order: one(order, {
+    fields: [worksheets.orderId],
+    references: [order.id],
+  }),
   testing: one(testing, {
     fields: [worksheets.testingId],
     references: [testing.id],

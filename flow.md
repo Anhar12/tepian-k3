@@ -1,133 +1,209 @@
-## Complete Transaction Workflow (Based on Actual Schema)
+## Alur Transaksi Lengkap (Diperbarui)
 
-### Phase 1: Order Creation & Offering
+### Fase 1: Pembuatan Order
 
-1. Admin creates order from approved cart
-   - Order status: `pending` → `approved`
-2. Admin uploads `offering_document` (Offering Letter)
-   - Document type: `ORDER`, category: `OFFERING_LETTER`
+1. **Customer membuat order**
+   - User memilih parameter dan membuat order dari cart
+   - Status order: `pending`
+   - Order menunggu review admin
 
-### Phase 2: Customer Approval
+### Fase 2: Review Admin & Daftar Order
 
-3. Admin uploads `cooperation_agreement_template` (Surat Persetujuan)
-4. Customer downloads, signs, and uploads `signed_offering_approval`
-5. Order `approvedAt` timestamp is set
+2. **Admin mereview order yang masuk**
+   - Melihat daftar order yang pending
+   - Memeriksa detail order, parameter, jumlah
+   - Mempersiapkan untuk review teknis (kaji ulang)
 
-### Phase 3: Agreement & Invoice
+### Fase 3: Kaji Ulang Teknis - Pembuatan Worksheet
 
-6. Admin uploads `invoice` + `cooperation_agreement` (Surat Perjanjian Kerjasama)
-   - Document types: `ORDER` and `LEGAL`
+3. **Admin membuat worksheet awal**
+   - Melakukan review dan konfirmasi:
+     - **Parameter** yang dibutuhkan untuk pengujian
+     - **Bahan** yang diperlukan
+     - **Alat/Peralatan** yang dibutuhkan
+     - **Estimasi durasi** (kemungkinan hari yang akan dikerjakan)
+     - **Jumlah tim** (total anggota yang dibutuhkan)
+   - Membuat worksheet dengan:
+     - Daftar parameter
+     - Alat yang dibutuhkan (`worksheetTools`)
+     - Estimasi jadwal (`startDate`, estimasi `endDate`)
+     - Kebutuhan tim
+   - Status worksheet: `draft` atau `pending_verification`
+   - **CATATAN**: Worksheet ini belum terhubung ke testing karena testing belum dibuat
 
-### Phase 4: Payment
+4. **Admin membuat worksheet items**
+   - Untuk setiap parameter yang akan diuji
+   - Menentukan lokasi, jumlah
+   - Menghubungkan alat yang dibutuhkan via `parameterTools`
 
-7. Customer uploads:
-   - `signed_cooperation_agreement`
-   - `proof_of_payment`
-8. Admin verifies payment
-   - Order status: `approved` → `unpaid` → `paid`
+### Fase 4: Verifikasi Koordinator
 
-### Phase 5: Testing Creation
+5. **Koordinator mereview dan memverifikasi worksheet**
+   - Mereview kelayakan teknis:
+     - Spesifikasi parameter
+     - Ketersediaan alat
+     - Ketersediaan bahan
+     - Kelayakan jadwal
+     - Kapasitas tim
+   - Menunjuk supervisor:
+     - `mainSupervisorId` (Supervisor utama)
+     - `accompanyingSupervisorId` (Supervisor pendamping)
+   - Menunjuk teknisi lab (`worksheetAssignments`)
+   - Status worksheet: `pending_verification` → `verified`
 
-9. **Admin creates testing record** (linked to orderId)
-   - Generates unique `testingNumber`
-   - Links to: `orderId`, `userId`, `companyId`, `testingType` (parameter category)
-   - Testing status: `start_testing`
-   - No schedule info here - that's in worksheet!
+### Fase 5: Detail Transaksi & Perhitungan Biaya
 
-10. **System creates testing items**
-    - One `testingItem` per `orderItem`
-    - Each testingItem contains:
-      - `testingId` (links to testing)
-      - `orderItemId` (links to original order item)
-      - `parameterId` (which parameter to test)
-      - `locationId` (testing location)
-      - `quantity`, `price`, `subTotal`
-      - `result` (filled later by technician)
-      - `note` (optional notes)
+6. **Koordinator/Admin menghitung biaya transaksi**
+   - Mereview worksheet yang sudah diverifikasi
+   - Menghitung total biaya berdasarkan:
+     - Parameter dan jumlah
+     - Durasi pengujian
+     - Anggota tim yang dibutuhkan
+     - Penggunaan alat/peralatan
+   - Membuat rincian biaya detail
+   - Memperbarui harga order jika diperlukan
+   - Status order: `pending` → `approved`
 
-### Phase 6: Worksheet Creation & Scheduling
+### Fase 6: Upload Surat Penawaran
 
-11. **Admin creates worksheet** (linked to testingId)
-    - Sets schedule:
-      - `startDate` (when testing starts)
-      - `endDate` (when testing completes - optional initially)
-    - Assigns supervisors:
-      - `mainSupervisorId` (employee - main supervisor)
-      - `accompanyingSupervisorId` (employee - accompanying supervisor)
-    - Worksheet status: `in_progress`
-    - `createdBy` (user who created worksheet)
+7. **Admin mengupload surat penawaran** (Offering Document)
+   - Dokumen mencakup:
+     - Parameter pengujian
+     - Estimasi jadwal
+     - Komposisi tim
+     - Rincian total biaya
+   - Tipe dokumen: `ORDER`, kategori: `OFFERING_LETTER`
+   - Customer dinotifikasi untuk review penawaran
 
-12. **Admin creates worksheet items**
-    - For each parameter in testingItems, create `worksheetItem`
-    - Each worksheetItem contains:
-      - `worksheetId`
-      - `parameterId` (from testingItem)
-      - `locationId` (testing location)
-      - `quantity`
-      - `value` (test result value - filled by technician)
-      - `note` (optional notes)
-      - `isReady` (false initially, true when ready to test)
+### Fase 7: Persetujuan Customer
 
-13. **Admin assigns tools to worksheet**
-    - Create `worksheetTools` entries
-    - Links required tools to this worksheet
-    - Based on `parameterTools` relationships
+8. **Admin mengupload template surat persetujuan** (Cooperation Agreement Template)
+   - Template untuk direview dan ditandatangani customer
 
-14. **Admin assigns employees to worksheet**
-    - Create `worksheetAssignments` entries
-    - Assigns lab technicians/staff who will execute testing
-    - `assignedBy` tracks who made the assignment
+9. **Customer download, tanda tangan, dan upload** `signed_offering_approval`
+   - Customer mereview penawaran
+   - Menandatangani dokumen persetujuan
+   - Mengupload dokumen yang sudah ditandatangani
+   - Timestamp `approvedAt` pada order diset
 
-15. **Admin issues documents**
-    - Generate `worksheet_document` (PDF with all worksheet details)
-    - Generate `spt_document` (Surat Perintah Tugas - assigns supervisors)
-    - Generate `testing_schedule` (confirms dates)
-    - Document type: `TESTING`, categories: `WORKSHEET`, `SPT`, `SCHEDULE`
-    - Testing status: `start_testing` → `in_progress`
+### Fase 8: Perjanjian & Invoice
 
-### Phase 7: Testing Execution
+10. **Admin mengupload**:
+    - `invoice` (Invoice dengan detail pembayaran)
+    - `cooperation_agreement` (Surat Perjanjian Kerjasama)
+    - Tipe dokumen: `ORDER` dan `LEGAL`
 
-16. **Assigned employees access worksheet**
-    - View `worksheetItems` to see what needs testing
-    - View `worksheetTools` to see required equipment
-    - Review testing parameters and methods
+### Fase 9: Pembayaran
 
-17. **Lab technicians perform tests**
-    - For each `worksheetItem`:
-      - Perform test according to parameter specification
-      - Record `value` (test result)
-      - Add `note` if needed
-      - Mark `isReady` as true when complete
-    - Supervisors can add `worksheetNotes` with severity levels
-      - Severity: info, warning, critical
+11. **Customer mengupload**:
+    - `signed_cooperation_agreement` (Surat perjanjian yang sudah ditandatangani)
+    - `proof_of_payment` (Bukti pembayaran)
 
-18. **Update testing item results**
-    - Copy results from `worksheetItems` to `testingItem.result`
-    - Both tables store results for different purposes:
-      - `worksheetItem.value` - raw test value
-      - `testingItem.result` - final formatted result for certificate
+12. **Admin memverifikasi pembayaran**
+    - Status order: `approved` → `unpaid` → `paid`
 
-19. **Complete worksheet**
-    - Set `worksheet.endDate` when all items complete
+### Fase 10: Pembuatan Testing Record (SETELAH PEMBAYARAN)
+
+13. **Admin membuat record testing** (terhubung ke orderId)
+    - Generate `testingNumber` yang unik
+    - Menghubungkan ke: `orderId`, `userId`, `companyId`, `testingType`
+    - Status testing: `start_testing`
+    - **Testing record dibuat setelah pembayaran dikonfirmasi**
+
+14. **Sistem membuat testing items**
+    - Satu `testingItem` per `orderItem`
+    - Setiap testingItem berisi:
+      - `testingId`, `orderItemId`, `parameterId`
+      - `locationId`, `quantity`, `price`, `subTotal`
+      - `result` (akan diisi saat pengujian)
+
+15. **Worksheet dihubungkan ke testing**
+    - Update `worksheet.testingId` untuk menghubungkan worksheet yang sudah ada ke testing yang baru dibuat
+    - Worksheet items otomatis terhubung ke testing melalui worksheet
+
+### Fase 11: Finalisasi Worksheet & Persiapan Pelaksanaan
+
+16. **Admin finalisasi worksheet**
+    - Update jadwal final jika diperlukan
+    - Konfirmasi tim yang ditunjuk
+    - Status worksheet: `verified` → `ready` atau `in_progress`
+
+17. **Admin menerbitkan dokumen**:
+    - `worksheet_document` (PDF dengan semua detail worksheet)
+    - `spt_document` (Surat Perintah Tugas)
+    - `testing_schedule` (Konfirmasi jadwal final)
+    - Tipe dokumen: `TESTING`, kategori: `WORKSHEET`, `SPT`, `SCHEDULE`
+    - Status testing: `start_testing` → `in_progress`
+
+### Fase 12: Pelaksanaan Pengujian
+
+18. **Karyawan yang ditunjuk mengakses worksheet**
+    - Melihat `worksheetItems` untuk kebutuhan pengujian
+    - Melihat `worksheetTools` untuk peralatan yang dibutuhkan
+    - Mereview parameter dan metode pengujian
+
+19. **Teknisi lab melakukan pengujian**
+    - Untuk setiap `worksheetItem`:
+      - Melakukan pengujian sesuai spesifikasi
+      - Mencatat `value` (hasil pengujian)
+      - Menambah `note` jika diperlukan
+      - Menandai `isReady` sebagai true saat selesai
+    - Supervisor menambahkan `worksheetNotes` dengan level severity
+
+20. **Update hasil testing item**
+    - Menyalin hasil dari `worksheetItems` ke `testingItem.result`
+    - Kedua tabel menyimpan hasil untuk tujuan berbeda:
+      - `worksheetItem.value` - nilai pengujian mentah
+      - `testingItem.result` - hasil final terformat untuk sertifikat
+
+21. **Menyelesaikan worksheet**
+    - Set `worksheet.endDate` saat semua item selesai
     - Set `worksheet.status`: `in_progress` → `completed`
-    - Set `worksheet.result` (overall summary/conclusion)
+    - Set `worksheet.result` (ringkasan/kesimpulan keseluruhan)
 
-20. **Complete testing**
-    - Testing status: `in_progress` → `completed`
-    - All `testingItems` have results filled
+22. **Menyelesaikan testing**
+    - Status testing: `in_progress` → `completed`
+    - Semua `testingItems` memiliki hasil yang terisi
 
-### Phase 8: Certificate & Delivery
+### Fase 13: Sertifikat & Pengiriman
 
-21. **Admin generates certificate**
-    - Pull data from completed `testingItems`
-    - Generate PDF certificate with QR verification
-    - Document type: `TESTING`, category: `CERTIFICATE`
+23. **Admin generate sertifikat**
+    - Mengambil data dari `testingItems` yang sudah selesai
+    - Generate PDF sertifikat dengan verifikasi QR
+    - Tipe dokumen: `TESTING`, kategori: `CERTIFICATE`
 
-22. **Authorized users sign certificate**
-    - Digital signature recorded in `documentSignatures`
-    - Uses document signing service with JWT
+24. **User yang berwenang menandatangani sertifikat**
+    - Tanda tangan digital via layanan document signing
+    - Dicatat dalam `documentSignatures`
 
-23. **Delivery**
-    - Customer receives signed certificate
-    - Order status: `paid` → `completed` → `delivered`
-    - Testing status remains: `completed`
+25. **Pengiriman**
+    - Customer menerima sertifikat yang sudah ditandatangani
+    - Status order: `paid` → `completed` → `delivered`
+    - Status testing tetap: `completed`
+
+---
+
+## Ringkasan Perubahan Utama
+
+### Alur Proses Utama:
+
+1. **User Order** → 2. **Admin Review List** → 3. **Kaji Ulang (Pembuatan Worksheet)** → 4. **Verifikasi Koordinator** → 5. **Perhitungan Biaya Transaksi** → 6. **Upload Penawaran** → 7-9. **Persetujuan Customer** → 10-12. **Pembayaran** → **13-15. Pembuatan Testing Record** → 16-22. **Pelaksanaan Pengujian** → 23-25. **Sertifikat & Pengiriman**
+
+### Urutan Pembuatan:
+
+1. **Worksheet dibuat PERTAMA** (fase kaji ulang - sebelum penawaran)
+2. **Testing record dibuat TERAKHIR** (setelah pembayaran dikonfirmasi)
+3. **Worksheet dihubungkan ke testing** setelah testing record dibuat
+
+### Keuntungan Pendekatan Ini:
+
+- **Worksheet sebagai blueprint** untuk perencanaan dan penawaran
+- **Testing record hanya dibuat** setelah customer bayar (komitmen pasti)
+- **Worksheet dapat digunakan** untuk estimasi sebelum ada testing record
+- **Testing record menandakan** pengujian resmi dimulai
+
+### Penambahan Schema yang Diperlukan:
+
+- Tambahkan field `worksheet.testingId` (nullable, diisi setelah testing record dibuat)
+- Tambahkan field `worksheet.status` dengan nilai: `draft`, `pending_verification`, `verified`, `ready`, `in_progress`, `completed`
+- Field `worksheet.testingId` bisa NULL saat worksheet dibuat untuk kaji ulang

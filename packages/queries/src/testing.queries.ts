@@ -3,7 +3,7 @@ import { db, type DBorTx } from "@tepian-k3/db/client";
 import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
 import { and, eq, sql } from "@tepian-k3/db";
-import { order, testing, testingItem } from "@tepian-k3/db/schema";
+import { order, testing, testingItem, worksheets } from "@tepian-k3/db/schema";
 import { generateTestingNumberWithSequence } from "@tepian-k3/db/utils";
 import orderStatusHistoryQueries from "./order-status-history.queries";
 import { logCreate } from "./helpers/audit.helpers";
@@ -257,10 +257,28 @@ const testingQueries = {
               ),
             );
 
+            // 7. Link existing worksheet to this testing (if worksheet was created during kaji ulang)
+            const existingWorksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.orderId, orderId),
+            });
+
+            if (existingWorksheet) {
+              // Update worksheet with testingId and set status to 'ready'
+              await tx
+                .update(worksheets)
+                .set({
+                  testingId: newTesting.id,
+                  status: "ready",
+                  updatedAt: sql`CURRENT_TIMESTAMP`,
+                })
+                .where(eq(worksheets.id, existingWorksheet.id));
+            }
+
             return {
               testing: newTesting,
               items: newTestingItems,
               order: orderData,
+              linkedWorksheetId: existingWorksheet?.id || null,
             };
           }),
         catch: (error) => {
@@ -285,7 +303,7 @@ const testingQueries = {
         },
       });
 
-      // 7. Log audit for testing creation (deferred, don't block)
+      // 8. Log audit for testing creation (deferred, don't block)
       yield* Effect.forkDaemon(
         logCreate(
           "testing",
@@ -297,6 +315,7 @@ const testingQueries = {
             orderId: result.order.id,
             orderNumber: result.order.orderNumber,
             itemCount: result.items.length,
+            linkedWorksheetId: result.linkedWorksheetId,
           },
         ),
       );

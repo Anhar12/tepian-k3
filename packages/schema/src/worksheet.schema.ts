@@ -16,6 +16,26 @@ const createWorksheetFromTestingSchema = z.object({
   accompanyingSupervisorId: z.string().uuid().optional(),
 });
 
+// Create worksheet from order (kaji ulang phase - before offering)
+const createWorksheetFromOrderSchema = z.object({
+  orderId: z.string().uuid(),
+  startDate: z.string().datetime(),
+  mainSupervisorId: z.string().uuid().optional(),
+  accompanyingSupervisorId: z.string().uuid().optional(),
+});
+
+// Submit worksheet for verification
+const submitForVerificationSchema = z.object({
+  worksheetId: z.string().uuid(),
+});
+
+// Verify worksheet (coordinator action)
+const verifyWorksheetSchema = z.object({
+  worksheetId: z.string().uuid(),
+  mainSupervisorId: z.string().uuid().optional(),
+  accompanyingSupervisorId: z.string().uuid().optional(),
+});
+
 // Update worksheet status
 const updateWorksheetStatusSchema = z.object({
   worksheetId: z.string().uuid(),
@@ -90,6 +110,9 @@ const worksheetSchema = {
   baseWorksheetItemSchema,
   baseWorksheetNoteSchema,
   createWorksheetFromTestingSchema,
+  createWorksheetFromOrderSchema,
+  submitForVerificationSchema,
+  verifyWorksheetSchema,
   updateWorksheetStatusSchema,
   updateWorksheetSupervisorsSchema,
   updateWorksheetItemValueSchema,

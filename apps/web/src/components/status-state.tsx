@@ -86,16 +86,92 @@ export function StatusState0({ orderDetail }: SharedStatusStateProps) {
   return (
     <StateLayout>
       <h2 className="mb-2 text-xl font-semibold text-foreground">
-        {`Order #${orderDetail.orderNumber} - Menunggu Penawaran`}
+        {`Order #${orderDetail.orderNumber} - Menunggu Kaji Ulang`}
       </h2>
       <p className="mb-6 text-sm text-muted-foreground">
-        Order pengujian telah diterima. Mohon tunggu admin untuk menerbitkan
-        penawaran.
+        Order pengujian telah diterima. Admin sedang melakukan kaji ulang teknis
+        untuk menentukan parameter, alat, dan estimasi waktu pengujian.
       </p>
       <div className="flex h-full w-full flex-col items-center justify-center self-center py-8">
         <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50">
           <FileCheckIcon className="h-10 w-10 text-green-500" />
         </div>
+      </div>
+    </StateLayout>
+  );
+}
+
+// State: Worksheet sedang dalam kaji ulang (draft/pending_verification)
+interface StatusStateWorksheetInReviewProps extends SharedStatusStateProps {
+  worksheetStatus: string;
+}
+
+export function StatusStateWorksheetInReview({
+  orderDetail,
+  worksheetStatus,
+}: StatusStateWorksheetInReviewProps) {
+  const statusText =
+    worksheetStatus === "draft"
+      ? "Worksheet sedang dibuat"
+      : worksheetStatus === "pending_verification"
+        ? "Worksheet menunggu verifikasi koordinator"
+        : "Worksheet dalam proses kaji ulang";
+
+  return (
+    <StateLayout>
+      <h2 className="mb-2 text-xl font-semibold text-foreground">
+        {`Order #${orderDetail.orderNumber} - Kaji Ulang Teknis`}
+      </h2>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Tim kami sedang melakukan kaji ulang teknis untuk order pengujian Anda.
+      </p>
+
+      <div className="flex h-full w-full flex-col items-center justify-center self-center py-8">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50">
+          <div className="relative">
+            <FileText className="h-10 w-10 text-blue-500" />
+            <Clock className="absolute -right-1 -bottom-1 h-5 w-5 text-blue-500" />
+          </div>
+        </div>
+        <h3 className="mb-2 text-center text-lg font-medium text-foreground">
+          {statusText}
+        </h3>
+        <p className="max-w-md text-center text-sm text-muted-foreground">
+          Koordinator akan memverifikasi kelayakan teknis, menentukan tim
+          pengujian, dan menyiapkan dokumen penawaran.
+        </p>
+      </div>
+    </StateLayout>
+  );
+}
+
+// State: Worksheet sudah verified, menunggu penawaran dikirim
+export function StatusStateWorksheetVerified({
+  orderDetail,
+}: SharedStatusStateProps) {
+  return (
+    <StateLayout>
+      <h2 className="mb-2 text-xl font-semibold text-foreground">
+        {`Order #${orderDetail.orderNumber} - Menunggu Penawaran`}
+      </h2>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Kaji ulang teknis telah selesai. Mohon tunggu admin untuk menerbitkan
+        dokumen penawaran.
+      </p>
+
+      <div className="flex h-full w-full flex-col items-center justify-center self-center py-8">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50">
+          <div className="relative">
+            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+          </div>
+        </div>
+        <h3 className="mb-2 text-center text-lg font-medium text-foreground">
+          Kaji Ulang Teknis Selesai
+        </h3>
+        <p className="max-w-md text-center text-sm text-muted-foreground">
+          Worksheet telah diverifikasi. Admin sedang menyiapkan dokumen
+          penawaran untuk Anda.
+        </p>
       </div>
     </StateLayout>
   );

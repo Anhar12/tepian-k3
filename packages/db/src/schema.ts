@@ -1095,10 +1095,13 @@ export const worksheets = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    testingId: uuid("testing_id")
+    orderId: uuid("order_id")
       .notNull()
-      .references(() => testing.id, { onDelete: "cascade" }),
-    status: worksheetStatusEnum("status").notNull().default("in_progress"),
+      .references(() => order.id, { onDelete: "cascade" }),
+    testingId: uuid("testing_id").references(() => testing.id, {
+      onDelete: "set null",
+    }),
+    status: worksheetStatusEnum("status").notNull().default("draft"),
     startDate: timestamp("start_date", {
       withTimezone: true,
       mode: "string",
@@ -1132,6 +1135,7 @@ export const worksheets = createTable(
   },
   (table) => [
     index("worksheet_id_idx").using("btree", table.id),
+    index("worksheet_order_id_idx").using("btree", table.orderId),
     index("worksheet_testing_id_idx").using("btree", table.testingId),
     index("worksheet_status_idx").using("btree", table.status),
     index("worksheet_main_supervisor_id_idx").using(

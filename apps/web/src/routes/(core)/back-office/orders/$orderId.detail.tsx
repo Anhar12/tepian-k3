@@ -129,6 +129,13 @@ function RouteComponent() {
     }),
   );
 
+  // Fetch worksheet for this order
+  const { data: worksheet, isLoading: worksheetLoading } = useQuery(
+    trpc.worksheet.getByOrderId.queryOptions({
+      orderId,
+    }),
+  );
+
   // Approval mutations
   const approveMutation = useMutation(
     trpc.order.approveOrder.mutationOptions({
@@ -213,10 +220,68 @@ function RouteComponent() {
         await queryClient.invalidateQueries(
           trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
         );
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+        );
         globalSuccessToast("Testing berhasil dibuat");
       },
       onError: (error) => {
         globalErrorToast("Gagal membuat testing: " + error.message);
+      },
+    }),
+  );
+
+  // Create worksheet mutation (kaji ulang phase)
+  const createWorksheetMutation = useMutation(
+    trpc.worksheet.createFromOrder.mutationOptions({
+      onSuccess: async (data) => {
+        await queryClient.invalidateQueries(
+          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+        );
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+        );
+        globalSuccessToast("Worksheet berhasil dibuat");
+        // Navigate to worksheet detail
+        navigate({
+          to: "/worksheets",
+          search: {
+            worksheetId: data.id,
+          },
+        });
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal membuat worksheet: " + error.message);
+      },
+    }),
+  );
+
+  // Submit worksheet for verification
+  const submitWorksheetMutation = useMutation(
+    trpc.worksheet.submitForVerification.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+        );
+        globalSuccessToast("Worksheet berhasil diajukan untuk verifikasi");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal mengajukan worksheet: " + error.message);
+      },
+    }),
+  );
+
+  // Verify worksheet (coordinator action)
+  const verifyWorksheetMutation = useMutation(
+    trpc.worksheet.verify.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+        );
+        globalSuccessToast("Worksheet berhasil diverifikasi");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal memverifikasi worksheet: " + error.message);
       },
     }),
   );
@@ -345,6 +410,23 @@ function RouteComponent() {
     createTestingMutation.mutate({ orderId });
   };
 
+  const handleCreateWorksheet = () => {
+    createWorksheetMutation.mutate({
+      orderId,
+      startDate: new Date().toISOString(),
+    });
+  };
+
+  const handleSubmitWorksheetForVerification = () => {
+    if (!worksheet?.id) return;
+    submitWorksheetMutation.mutate({ worksheetId: worksheet.id });
+  };
+
+  const handleVerifyWorksheet = () => {
+    if (!worksheet?.id) return;
+    verifyWorksheetMutation.mutate({ worksheetId: worksheet.id });
+  };
+
   if (isLoading || !order) {
     return (
       <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
@@ -400,6 +482,15 @@ function RouteComponent() {
   const isPaymentVerifiedNeedsTesting =
     order.paymentStatus === "paid" && !order.testing;
   const hasTestingCreated = !!order.testing;
+
+  // Worksheet status flags (new flow: worksheet created during kaji ulang)
+  const hasWorksheet = !!worksheet;
+  const worksheetStatus = worksheet?.status;
+  const needsWorksheet = isPendingApproval && !hasWorksheet;
+  const worksheetInDraft = hasWorksheet && worksheetStatus === "draft";
+  const worksheetPendingVerification =
+    hasWorksheet && worksheetStatus === "pending_verification";
+  const worksheetVerified = hasWorksheet && worksheetStatus === "verified";
 
   // Get revision notes from the latest revision status history
   const revisionHistory = order.statusHistory
@@ -529,6 +620,184 @@ function RouteComponent() {
                       )}
                       Setujui Order
                     </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Worksheet Management Card - Kaji Ulang Phase */}
+            {(needsWorksheet ||
+              worksheetInDraft ||
+              worksheetPendingVerification ||
+              worksheetVerified) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {needsWorksheet && "Buat Worksheet untuk Kaji Ulang"}
+                    {worksheetInDraft && "Worksheet dalam Draft"}
+                    {worksheetPendingVerification &&
+                      "Worksheet Menunggu Verifikasi"}
+                    {worksheetVerified && "Worksheet Terverifikasi"}
+                  </CardTitle>
+                  <CardDescription>
+                    {needsWorksheet &&
+                      "Buat worksheet untuk melakukan kaji ulang sebelum menerbitkan surat penawaran."}
+                    {worksheetInDraft &&
+                      "Worksheet sedang diisi. Ajukan untuk verifikasi setelah selesai."}
+                    {worksheetPendingVerification &&
+                      "Worksheet telah diajukan dan menunggu verifikasi dari koordinator."}
+                    {worksheetVerified &&
+                      "Worksheet telah diverifikasi. Lanjutkan ke tahap penerbitan surat penawaran."}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Worksheet Info */}
+                    {hasWorksheet && worksheet && (
+                      <div className="rounded-lg border bg-muted/50 p-4">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <Label className="text-muted-foreground">
+                              ID Worksheet
+                            </Label>
+                            <p className="font-medium">
+                              {worksheet.id.slice(0, 8).toUpperCase()}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-muted-foreground">
+                              Status
+                            </Label>
+                            <div className="mt-1">
+                              <Badge
+                                className={
+                                  worksheetStatus === "draft"
+                                    ? "bg-gray-100 text-gray-800"
+                                    : worksheetStatus === "pending_verification"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : worksheetStatus === "verified"
+                                        ? "bg-green-100 text-green-800"
+                                        : "bg-blue-100 text-blue-800"
+                                }
+                              >
+                                {worksheetStatus}
+                              </Badge>
+                            </div>
+                          </div>
+                          {worksheet.startDate && (
+                            <div>
+                              <Label className="text-muted-foreground">
+                                Tanggal Mulai
+                              </Label>
+                              <p className="font-medium">
+                                {format(new Date(worksheet.startDate), "PPP")}
+                              </p>
+                            </div>
+                          )}
+                          {worksheet.mainSupervisor && (
+                            <div>
+                              <Label className="text-muted-foreground">
+                                Pengawas Utama
+                              </Label>
+                              <p className="font-medium">
+                                {worksheet.mainSupervisor.name}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-3">
+                      {needsWorksheet && (
+                        <Button
+                          className="bg-blue-500 hover:bg-blue-600"
+                          onClick={handleCreateWorksheet}
+                          disabled={createWorksheetMutation.isPending}
+                        >
+                          {createWorksheetMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Plus className="mr-2 h-4 w-4" />
+                          )}
+                          Buat Worksheet
+                        </Button>
+                      )}
+
+                      {worksheetInDraft && (
+                        <>
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              navigate({
+                                to: "/worksheets",
+                                search: { worksheetId: worksheet!.id },
+                              })
+                            }
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                          </Button>
+                          <Button
+                            className="bg-yellow-500 hover:bg-yellow-600"
+                            onClick={handleSubmitWorksheetForVerification}
+                            disabled={submitWorksheetMutation.isPending}
+                          >
+                            {submitWorksheetMutation.isPending ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <FileText className="mr-2 h-4 w-4" />
+                            )}
+                            Ajukan Verifikasi
+                          </Button>
+                        </>
+                      )}
+
+                      {worksheetPendingVerification && (
+                        <>
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              navigate({
+                                to: "/worksheets",
+                                search: { worksheetId: worksheet!.id },
+                              })
+                            }
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                          </Button>
+                          <Button
+                            className="bg-green-500 hover:bg-green-600"
+                            onClick={handleVerifyWorksheet}
+                            disabled={verifyWorksheetMutation.isPending}
+                          >
+                            {verifyWorksheetMutation.isPending ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <FileText className="mr-2 h-4 w-4" />
+                            )}
+                            Verifikasi Worksheet
+                          </Button>
+                        </>
+                      )}
+
+                      {worksheetVerified && (
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            navigate({
+                              to: "/worksheets",
+                              search: { worksheetId: worksheet!.id },
+                            })
+                          }
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Lihat Worksheet
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

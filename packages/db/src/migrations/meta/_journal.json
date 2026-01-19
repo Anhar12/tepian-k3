@@ -127,6 +127,13 @@
       "when": 1768786395037,
       "tag": "0017_oval_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1768791097090,
+      "tag": "0018_clever_puma",
+      "breakpoints": true
     }
   ]
 }
