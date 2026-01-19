@@ -295,10 +295,6 @@ export const testingRelations = relations(testing, ({ one, many }) => ({
     fields: [testing.testingType],
     references: [parameterCategories.id],
   }),
-  worksheet: one(worksheets, {
-    fields: [testing.id],
-    references: [worksheets.testingId],
-  }),
   items: many(testingItem),
   // Polymorphic relation: documents where entityType = 'testing' and entityId = testing.id
   documents: many(documents, {

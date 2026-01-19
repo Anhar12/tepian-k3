@@ -179,11 +179,8 @@ export type OrderDetailWithStatus = InferQueryModel<
           };
         };
       };
-      testing: {
-        with: {
-          worksheet: true;
-        };
-      };
+      testing: true;
+      worksheet: true;
       statusHistory: true;
       documents: true;
     };

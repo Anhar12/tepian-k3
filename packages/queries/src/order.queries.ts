@@ -254,11 +254,8 @@ const orderQueries = {
                 },
               },
             },
-            testing: {
-              with: {
-                worksheet: true,
-              },
-            },
+            testing: true,
+            worksheet: true,
             statusHistory: {
               orderBy: (statusHistory, { desc }) => [
                 desc(statusHistory.createdAt),
@@ -327,11 +324,8 @@ const orderQueries = {
                 },
               },
             },
-            testing: {
-              with: {
-                worksheet: true,
-              },
-            },
+            testing: true,
+            worksheet: true,
             statusHistory: true,
             documents: {
               orderBy: (documents, { desc }) => [desc(documents.createdAt)],
