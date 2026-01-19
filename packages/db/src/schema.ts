@@ -694,6 +694,14 @@ export const order = createTable(
     revisionCount: integer("revision_count").notNull().default(0),
     revisionNotes: text("revision_notes"),
 
+    // Boolean flags
+    coverTransportationIncluded: boolean(
+      "cover_transportation_included",
+    ).default(false),
+    coverAccommodationIncluded: boolean("cover_accommodation_included").default(
+      false,
+    ),
+
     // Key timestamps
     approvedAt: timestamp("approved_at", {
       withTimezone: true,
@@ -1110,6 +1118,13 @@ export const worksheets = createTable(
       { onDelete: "set null" },
     ),
     result: text("result"),
+    coverTransportationIncluded: boolean(
+      "cover_transportation_included",
+    ).default(false),
+    coverAccommodationIncluded: boolean("cover_accommodation_included").default(
+      false,
+    ),
+    note: text("note"),
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id, { onDelete: "set null" }),

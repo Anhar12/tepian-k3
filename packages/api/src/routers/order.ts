@@ -332,22 +332,30 @@ export const orderRouter = createTRPCRouter({
 
   createOrder: withProtectedRateLimit(rateLimiters.moderate())
     .input(
-      z.array(
-        z.object({
-          orderData: orderSchema.createOrderSchema,
-          orderItems: z.array(orderItemSchema.createOrderItem),
-        }),
-      ),
+      z.object({
+        coverTransportationIncluded: z.boolean(),
+        coverAccommodationIncluded: z.boolean(),
+        data: z.array(
+          z.object({
+            orderData: orderSchema.createOrderSchema,
+            orderItems: z.array(orderItemSchema.createOrderItem),
+          }),
+        ),
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       await runEffect(
         Effect.gen(function* () {
-          const createdOrders = yield* Effect.forEach(input, (orderPayload) =>
-            orderQueries.createOrder(
-              ctx.user.id,
-              orderPayload.orderData,
-              orderPayload.orderItems,
-            ),
+          const createdOrders = yield* Effect.forEach(
+            input.data,
+            (orderPayload) =>
+              orderQueries.createOrder(
+                ctx.user.id,
+                input.coverTransportationIncluded,
+                input.coverAccommodationIncluded,
+                orderPayload.orderData,
+                orderPayload.orderItems,
+              ),
           );
           return createdOrders;
         }),

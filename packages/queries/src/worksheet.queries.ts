@@ -283,6 +283,10 @@ const worksheetQueries = {
                 mainSupervisorId: mainSupervisorId || null,
                 accompanyingSupervisorId: accompanyingSupervisorId || null,
                 createdBy: userId,
+                coverAccommodationIncluded:
+                  testingData.order.coverAccommodationIncluded,
+                coverTransportationIncluded:
+                  testingData.order.coverTransportationIncluded,
               })
               .returning();
 

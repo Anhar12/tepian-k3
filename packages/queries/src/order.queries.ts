@@ -357,6 +357,8 @@ const orderQueries = {
 
   createOrder(
     userId: string,
+    coverTransportationIncluded: boolean,
+    coverAccommodationIncluded: boolean,
     orderData: z.infer<typeof orderSchema.createOrderSchema>,
     orderItems: z.infer<typeof orderItemSchema.createOrderItem>[],
   ) {
@@ -468,6 +470,8 @@ const orderQueries = {
                 status: "pending",
                 approvalStatus: "pending",
                 paymentStatus: "unpaid",
+                coverTransportationIncluded,
+                coverAccommodationIncluded,
               })
               .returning();
 

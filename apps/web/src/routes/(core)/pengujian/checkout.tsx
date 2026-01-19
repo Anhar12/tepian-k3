@@ -35,6 +35,10 @@ function RouteComponent() {
     new Set(),
   );
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [coverTransportationIncluded, setCoverTransportationIncluded] =
+    useState(false);
+  const [coverAccommodationIncluded, setCoverAccommodationIncluded] =
+    useState(false);
 
   const { data: cartItems } = useQuery(
     trpc.cart.getAllCartItems.queryOptions(),
@@ -210,6 +214,8 @@ function RouteComponent() {
         setCurrentCompany(null);
         setCurrentLocation(null);
         setIsConfirmed(false);
+        setCoverTransportationIncluded(false);
+        setCoverAccommodationIncluded(false);
       },
       onError: (error) => {
         globalErrorToast(`Gagal membuat order: ${error.message}`);
@@ -292,31 +298,11 @@ function RouteComponent() {
       }),
     );
 
-    // const orderItems = cartItems
-    //   .map((company) =>
-    //     company.locations.map((location) => ({
-    //       orderData: {
-    //         companyId: company.id,
-    //       },
-    //       orderItems: [
-    //         {
-    //           id: location.id,
-    //           name: location.name,
-    //           items: location.clusters.flatMap((cluster) =>
-    //             cluster.items.map((item) => ({
-    //               id: item.id,
-    //               parameterId: item.parameter.id,
-    //               price: item.price,
-    //               quantity: item.quantity,
-    //             })),
-    //           ),
-    //         },
-    //       ],
-    //     })),
-    //   )
-    //   .flat();
-
-    createOrderMutation.mutate(orderItems);
+    createOrderMutation.mutate({
+      coverTransportationIncluded,
+      coverAccommodationIncluded,
+      data: orderItems,
+    });
   };
 
   return (
@@ -497,7 +483,7 @@ function RouteComponent() {
           </CardContent>
         </Card>
         <div className="w-96 shrink-0">
-          <Card className="sticky top-4 space-y-6 border-0 p-6 shadow-sm">
+          <Card className="sticky top-4 border-0 p-6 shadow-sm">
             {/* Transportasi Section */}
             <div>
               <div className="mb-4 flex items-start gap-2">
@@ -506,41 +492,97 @@ function RouteComponent() {
                     Transportasi
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Pilih opsi transportasi selama pengujian berlangsung.
                   </p>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex cursor-pointer items-center gap-3 rounded-lg bg-blue-50 p-3">
+              <div className="space-y-4">
+                <div className="flex cursor-pointer items-center gap-3">
                   <RadioGroup
-                    value="transport1"
-                    className="flex w-full items-center gap-2"
+                    defaultValue="false"
+                    value={String(coverTransportationIncluded)}
+                    onValueChange={(value) =>
+                      setCoverTransportationIncluded(value === "true")
+                    }
+                    className="flex w-full flex-col gap-4"
                   >
-                    <Label
-                      htmlFor="transport1"
-                      className="flex-1 cursor-pointer font-normal"
-                    >
-                      Akomodasi mandiri
-                    </Label>
-                    <RadioGroupItem
-                      value="transport1"
-                      id="transport1"
-                      className="self-end"
-                    />
+                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
+                      <RadioGroupItem
+                        value="false"
+                        id="cover-transportation-false"
+                      />
+                      <Label
+                        htmlFor="cover-transportation-false"
+                        className="cursor-pointer font-normal"
+                      >
+                        Transportasi ditanggung pemohon pengujian
+                      </Label>
+                    </div>
+                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
+                      <RadioGroupItem
+                        value="true"
+                        id="cover-transportation-true"
+                      />
+                      <Label
+                        htmlFor="cover-transportation-true"
+                        className="cursor-pointer font-normal"
+                      >
+                        Transportasi di tanggung Balai K3
+                      </Label>
+                    </div>
                   </RadioGroup>
                 </div>
-                <div className="flex cursor-pointer items-center gap-3 rounded-lg border border-blue-300 p-3">
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Akomodasi Section */}
+            <div>
+              <div className="mb-4 flex items-start gap-2">
+                <div>
+                  <h3 className="mb-1 font-semibold text-gray-900">
+                    Akomodasi
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Pilih opsi akomodasi selama pengujian berlangsung.
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex cursor-pointer items-center gap-3">
                   <RadioGroup
-                    value="transport2"
-                    className="flex w-full items-center gap-2"
+                    defaultValue="false"
+                    value={String(coverAccommodationIncluded)}
+                    onValueChange={(value) =>
+                      setCoverAccommodationIncluded(value === "true")
+                    }
+                    className="flex w-full flex-col gap-4"
                   >
-                    <Label
-                      htmlFor="transport2"
-                      className="flex-1 cursor-pointer font-normal"
-                    >
-                      Akomodasi di tanggung Balai K3
-                    </Label>
-                    <RadioGroupItem value="transport2" id="transport2" />
+                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
+                      <RadioGroupItem
+                        value="false"
+                        id="cover-accommodation-false"
+                      />
+                      <Label
+                        htmlFor="cover-accommodation-false"
+                        className="cursor-pointer font-normal"
+                      >
+                        Akomodasi ditanggung pemohon pengujian
+                      </Label>
+                    </div>
+                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
+                      <RadioGroupItem
+                        value="true"
+                        id="cover-accommodation-true"
+                      />
+                      <Label
+                        htmlFor="cover-accommodation-true"
+                        className="cursor-pointer font-normal"
+                      >
+                        Akomodasi di tanggung Balai K3
+                      </Label>
+                    </div>
                   </RadioGroup>
                 </div>
               </div>
@@ -563,6 +605,11 @@ function RouteComponent() {
 
             {/* Total and CTA */}
             <div className="space-y-4">
+              {coverTransportationIncluded || coverAccommodationIncluded ? (
+                <div className="text-sm text-gray-600">
+                  * Total biaya akan diupdate pada saat penawaran dikirimkan
+                </div>
+              ) : null}
               <div className="flex items-center justify-between">
                 <span className="font-medium text-gray-600">Total :</span>
                 <span className="text-lg font-semibold text-gray-900">
