@@ -9,7 +9,6 @@ import {
   worksheetTools,
   worksheetAssignments,
   worksheetNotes,
-  testing,
   testingItem,
   order,
 } from "@tepian-k3/db/schema";
@@ -262,46 +261,6 @@ const worksheetQueries = {
   },
 
   /**
-   * Get worksheets by testing ID
-   */
-  getWorksheetsByTestingId(testingId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db.query.worksheets.findMany({
-          where: eq(worksheets.testingId, testingId),
-          orderBy: (worksheets, { desc }) => [desc(worksheets.createdAt)],
-          with: {
-            items: true,
-            mainSupervisor: {
-              with: {
-                user: true,
-              },
-            },
-            accompanyingSupervisor: {
-              with: {
-                user: true,
-              },
-            },
-          },
-        }),
-      catch: (error) => {
-        logError(
-          "worksheetQueries.getWorksheetsByTestingId",
-          "Failed to fetch worksheets by testing ID",
-          {
-            error,
-            testingId,
-          },
-        );
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengambil worksheet berdasarkan testing",
-        });
-      },
-    });
-  },
-
-  /**
    * Create worksheet from order (kaji ulang phase - before offering)
    * This creates worksheet with testingId = NULL, to be linked later
    */
@@ -362,7 +321,6 @@ const worksheetQueries = {
               .insert(worksheets)
               .values({
                 orderId: orderData.id,
-                testingId: null, // Will be linked after payment when testing is created
                 status: "draft",
                 startDate,
                 mainSupervisorId: mainSupervisorId || null,
@@ -438,140 +396,6 @@ const worksheetQueries = {
           {
             orderId: result.order.id,
             orderNumber: result.order.orderNumber,
-            itemCount: result.items.length,
-          },
-        ),
-      );
-
-      return result.worksheet;
-    });
-  },
-
-  /**
-   * Create worksheet from testing with transaction
-   */
-  createWorksheetFromTesting(
-    testingId: string,
-    userId: string,
-    startDate: string,
-    mainSupervisorId?: string,
-    accompanyingSupervisorId?: string,
-  ) {
-    return Effect.gen(function* () {
-      // Perform all operations in a transaction
-      const result = yield* Effect.tryPromise({
-        try: () =>
-          db.transaction(async (tx) => {
-            // 1. Get testing with items and validate
-            const testingData = await tx.query.testing.findFirst({
-              where: eq(testing.id, testingId),
-              with: {
-                items: {
-                  with: {
-                    parameter: true,
-                    location: true,
-                  },
-                },
-                order: true,
-              },
-            });
-
-            if (!testingData) {
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Testing tidak ditemukan",
-              });
-            }
-
-            // Validate testing has items
-            if (testingData.items.length === 0) {
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Testing tidak memiliki item untuk worksheet",
-              });
-            }
-
-            // 2. Create worksheet record
-            const [newWorksheet] = await tx
-              .insert(worksheets)
-              .values({
-                orderId: testingData.order.id,
-                testingId: testingData.id,
-                status: "in_progress",
-                startDate,
-                mainSupervisorId: mainSupervisorId || null,
-                accompanyingSupervisorId: accompanyingSupervisorId || null,
-                createdBy: userId,
-                coverAccommodationIncluded:
-                  testingData.order.coverAccommodationIncluded,
-                coverTransportationIncluded:
-                  testingData.order.coverTransportationIncluded,
-              })
-              .returning();
-
-            if (!newWorksheet) {
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal membuat worksheet",
-              });
-            }
-
-            // 3. Create worksheet items from testing items
-            const worksheetItemsData = testingData.items.map((item) => ({
-              worksheetId: newWorksheet.id,
-              parameterId: item.parameterId,
-              locationId: item.locationId,
-              quantity: item.quantity,
-              value: null,
-              note: null,
-              isReady: false,
-            }));
-
-            const newWorksheetItems = await tx
-              .insert(worksheetItems)
-              .values(worksheetItemsData)
-              .returning();
-
-            return {
-              worksheet: newWorksheet,
-              items: newWorksheetItems,
-              testing: testingData,
-            };
-          }),
-        catch: (error) => {
-          logError(
-            "worksheetQueries.createWorksheetFromTesting",
-            "Failed to create worksheet from testing",
-            {
-              error,
-              testingId,
-              userId,
-            },
-          );
-
-          // Re-throw TRPCError as-is, wrap others
-          if (error instanceof TRPCError) {
-            throw error;
-          }
-
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat worksheet dari testing",
-          });
-        },
-      });
-
-      // 4. Log audit for worksheet creation (deferred)
-      yield* Effect.forkDaemon(
-        logCreate(
-          "worksheet",
-          result.worksheet.id,
-          result.worksheet as Record<string, unknown>,
-          userId,
-          undefined,
-          {
-            testingId: result.testing.id,
-            testingNumber: result.testing.testingNumber,
             itemCount: result.items.length,
           },
         ),
@@ -1218,75 +1042,6 @@ const worksheetQueries = {
           updated as Record<string, unknown>,
           userId,
           "verify",
-        ),
-      );
-
-      return updated;
-    });
-  },
-
-  /**
-   * Link worksheet to testing (called after testing is created)
-   * Updates worksheet.testingId and optionally changes status to 'ready'
-   */
-  linkWorksheetToTesting(
-    worksheetId: string,
-    testingId: string,
-    userId: string,
-  ) {
-    return Effect.gen(function* () {
-      const updated = yield* Effect.tryPromise({
-        try: async () => {
-          const [updatedWorksheet] = await db
-            .update(worksheets)
-            .set({
-              testingId,
-              status: "ready",
-              updatedAt: sql`CURRENT_TIMESTAMP`,
-            })
-            .where(eq(worksheets.id, worksheetId))
-            .returning();
-
-          if (!updatedWorksheet) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Worksheet tidak ditemukan",
-            });
-          }
-
-          return updatedWorksheet;
-        },
-        catch: (error) => {
-          logError(
-            "worksheetQueries.linkWorksheetToTesting",
-            "Failed to link worksheet to testing",
-            {
-              error,
-              worksheetId,
-              testingId,
-            },
-          );
-
-          if (error instanceof TRPCError) {
-            throw error;
-          }
-
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menghubungkan worksheet ke testing",
-          });
-        },
-      });
-
-      // Log audit
-      yield* Effect.forkDaemon(
-        logUpdate(
-          "worksheet",
-          worksheetId,
-          { testingId, status: "ready" },
-          updated as Record<string, unknown>,
-          userId,
-          "link_to_testing",
         ),
       );
 

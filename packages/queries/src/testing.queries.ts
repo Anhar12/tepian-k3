@@ -158,6 +158,18 @@ const testingQueries = {
                 message: "Order tidak ditemukan atau belum disetujui/dibayar",
               });
             }
+            // check if worksheet is created from kaji ulang
+            const worksheetFromKajiUlang = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.orderId, orderId),
+            });
+
+            if (!worksheetFromKajiUlang) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Worksheet belum dibuat dari kaji ulang. Tidak dapat membuat testing.",
+              });
+            }
 
             // Check if testing already exists for this order
             const existingTesting = await tx.query.testing.findFirst({
@@ -203,6 +215,7 @@ const testingQueries = {
               .insert(testing)
               .values({
                 orderId: orderData.id,
+                worksheetId: worksheetFromKajiUlang.id,
                 userId: orderData.userId,
                 companyId: orderData.companyId,
                 testingNumber,
@@ -257,28 +270,11 @@ const testingQueries = {
               ),
             );
 
-            // 7. Link existing worksheet to this testing (if worksheet was created during kaji ulang)
-            const existingWorksheet = await tx.query.worksheets.findFirst({
-              where: eq(worksheets.orderId, orderId),
-            });
-
-            if (existingWorksheet) {
-              // Update worksheet with testingId and set status to 'ready'
-              await tx
-                .update(worksheets)
-                .set({
-                  testingId: newTesting.id,
-                  status: "ready",
-                  updatedAt: sql`CURRENT_TIMESTAMP`,
-                })
-                .where(eq(worksheets.id, existingWorksheet.id));
-            }
-
             return {
               testing: newTesting,
               items: newTestingItems,
               order: orderData,
-              linkedWorksheetId: existingWorksheet?.id || null,
+              linkedWorksheetId: worksheetFromKajiUlang.id,
             };
           }),
         catch: (error) => {

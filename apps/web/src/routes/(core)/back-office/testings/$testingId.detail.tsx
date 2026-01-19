@@ -119,11 +119,6 @@ function RouteComponent() {
     trpc.testing.getTestingWithDocuments.queryOptions({ testingId }),
   );
 
-  // Get worksheets for this testing
-  const { data: worksheets, isLoading: worksheetsLoading } = useQuery(
-    trpc.worksheet.getWorksheetsByTestingId.queryOptions({ testingId }),
-  );
-
   // Get employees for supervisor selection
   const { data: employees } = useQuery(trpc.employee.getAll.queryOptions());
 
@@ -145,31 +140,6 @@ function RouteComponent() {
       },
       onError: (error) => {
         globalErrorToast("Gagal memperbarui status: " + error.message);
-      },
-    }),
-  );
-
-  const createWorksheetMutation = useMutation(
-    trpc.worksheet.createFromTesting.mutationOptions({
-      onSuccess: async (data) => {
-        await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetsByTestingId.queryOptions({ testingId }),
-        );
-        await queryClient.invalidateQueries(
-          trpc.testing.getTestingWithDocuments.queryOptions({ testingId }),
-        );
-        setWorksheetDialogOpen(false);
-        globalSuccessToast("Worksheet berhasil dibuat");
-        // Navigate to the new worksheet detail
-        navigate({
-          to: "/worksheets",
-          search: {
-            worksheetId: data.id,
-          },
-        });
-      },
-      onError: (error) => {
-        globalErrorToast("Gagal membuat worksheet: " + error.message);
       },
     }),
   );
@@ -206,15 +176,6 @@ function RouteComponent() {
     } finally {
       setUploading(false);
     }
-  };
-
-  const handleCreateWorksheet = () => {
-    createWorksheetMutation.mutate({
-      testingId,
-      startDate: new Date(worksheetStartDate).toISOString(),
-      mainSupervisorId: selectedMainSupervisor || undefined,
-      accompanyingSupervisorId: selectedAccompanyingSupervisor || undefined,
-    });
   };
 
   if (isLoading) {
@@ -273,21 +234,6 @@ function RouteComponent() {
                     className="ml-1 h-5 px-1.5 text-xs"
                   >
                     {testing.items.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="worksheets"
-                className="flex items-center gap-1.5 px-3 py-2 text-xs sm:gap-2 sm:px-4 sm:text-sm"
-              >
-                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span>Worksheet</span>
-                {worksheets && worksheets.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 h-5 px-1.5 text-xs"
-                  >
-                    {worksheets.length}
                   </Badge>
                 )}
               </TabsTrigger>
@@ -522,141 +468,6 @@ function RouteComponent() {
             )}
           </TabsContent>
 
-          {/* Worksheets Tab */}
-          <TabsContent value="worksheets" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            {/* Create Worksheet Button */}
-            <div className="mb-4 flex justify-end">
-              <Button
-                onClick={() => setWorksheetDialogOpen(true)}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Buat Worksheet Baru
-              </Button>
-            </div>
-
-            {worksheetsLoading ? (
-              <div className="py-12 text-center">
-                <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
-                  Memuat worksheet...
-                </p>
-              </div>
-            ) : !worksheets?.length ? (
-              <div className="py-12 text-center">
-                <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mb-2 text-lg font-medium">
-                  Belum ada worksheet
-                </h3>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  Buat worksheet untuk memulai proses pengujian.
-                </p>
-                <Button
-                  onClick={() => setWorksheetDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Buat Worksheet
-                </Button>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-xl border">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/50">
-                        <TableHead className="text-xs font-semibold sm:text-sm">
-                          ID
-                        </TableHead>
-                        <TableHead className="text-xs font-semibold sm:text-sm">
-                          <div className="flex items-center gap-2">
-                            <UserCheck className="h-4 w-4" />
-                            Supervisor Utama
-                          </div>
-                        </TableHead>
-                        <TableHead className="text-xs font-semibold sm:text-sm">
-                          Status
-                        </TableHead>
-                        <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Tanggal
-                          </div>
-                        </TableHead>
-                        <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                          Aksi
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {worksheets.map((worksheet) => (
-                        <TableRow
-                          key={worksheet.id}
-                          className="cursor-pointer transition-colors hover:bg-muted/30"
-                        >
-                          <TableCell className="font-mono text-xs font-medium sm:text-sm">
-                            {worksheet.id.slice(0, 8).toUpperCase()}
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm">
-                            {worksheet.mainSupervisor?.user?.name || "-"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              className={`${WORKSHEET_STATUS_COLORS[worksheet.status]} text-xs`}
-                            >
-                              {
-                                WORKSHEET_STATUS_LABELS[
-                                  worksheet.status as WorksheetStatus
-                                ]
-                              }
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                            <div className="flex flex-col">
-                              <span>
-                                Mulai:{" "}
-                                {new Date(
-                                  worksheet.startDate,
-                                ).toLocaleDateString("id-ID", {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
-                              </span>
-                              {worksheet.endDate && (
-                                <span>
-                                  Selesai:{" "}
-                                  {new Date(
-                                    worksheet.endDate,
-                                  ).toLocaleDateString("id-ID", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                  })}
-                                </span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button asChild size="sm" variant="outline">
-                              <Link
-                                to="/worksheets"
-                                search={{ worksheetId: worksheet.id }}
-                              >
-                                <Eye className="mr-1 h-4 w-4" />
-                                <span className="hidden sm:inline">Detail</span>
-                              </Link>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
-          </TabsContent>
-
           {/* Documents Tab */}
           <TabsContent value="documents" className="p-3 pt-4 sm:p-4 sm:pt-6">
             {/* Upload Form */}
@@ -859,93 +670,6 @@ function RouteComponent() {
           </TabsContent>
         </Tabs>
       </Card>
-
-      {/* Create Worksheet Dialog */}
-      <Dialog open={worksheetDialogOpen} onOpenChange={setWorksheetDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Buat Worksheet Baru</DialogTitle>
-            <DialogDescription>
-              Buat worksheet untuk testing {testing.testingNumber}. Worksheet
-              akan berisi semua parameter dari testing items.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Tanggal Mulai</Label>
-              <Input
-                type="datetime-local"
-                value={worksheetStartDate}
-                onChange={(e) => setWorksheetStartDate(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Supervisor Utama (Opsional)</Label>
-              <ComboBox
-                value={selectedMainSupervisor}
-                onChange={(val) => setSelectedMainSupervisor(val)}
-                options={
-                  employees?.map((emp) => ({
-                    id: emp.id,
-                    name: `${emp.user?.name} - ${emp.position}`,
-                  })) ?? []
-                }
-                placeholder="Pilih supervisor utama"
-                emptyMessage="Tidak ada data supervisor"
-                searchPlaceholder="Cari supervisor..."
-                open={openMainSupervisor}
-                onOpenChange={setOpenMainSupervisor}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Supervisor Pendamping (Opsional)</Label>
-              <ComboBox
-                value={selectedAccompanyingSupervisor}
-                onChange={(val) => setSelectedAccompanyingSupervisor(val)}
-                options={
-                  employees?.map((emp) => ({
-                    id: emp.id,
-                    name: `${emp.user?.name} - ${emp.position}`,
-                  })) ?? []
-                }
-                placeholder="Pilih supervisor pendamping"
-                emptyMessage="Tidak ada data supervisor"
-                searchPlaceholder="Cari supervisor..."
-                open={openAccompanyingSupervisor}
-                onOpenChange={setOpenAccompanyingSupervisor}
-              />
-            </div>
-
-            <div className="rounded-lg border bg-muted/50 p-3">
-              <p className="text-sm text-muted-foreground">
-                <strong>{testing.items?.length || 0}</strong> parameter akan
-                ditambahkan ke worksheet.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setWorksheetDialogOpen(false)}
-            >
-              Batal
-            </Button>
-            <Button
-              onClick={handleCreateWorksheet}
-              disabled={createWorksheetMutation.isPending}
-            >
-              {createWorksheetMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Buat Worksheet
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

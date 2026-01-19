@@ -6,7 +6,6 @@ import { worksheetItems } from "@tepian-k3/db/schema";
 import { eq, sql } from "@tepian-k3/db";
 import { createTRPCRouter, protectedProcedure, withPermission } from "../index";
 import worksheetQueries from "@tepian-k3/queries/worksheet.queries";
-import testingQueries from "@tepian-k3/queries/testing.queries";
 import worksheetSchema from "@tepian-k3/schema/worksheet.schema";
 import { runEffect } from "../utils/run-effect";
 import { WORKSHEET_STATUS } from "@tepian-k3/constants";
@@ -51,18 +50,6 @@ export const worksheetRouter = createTRPCRouter({
     }),
 
   /**
-   * Get worksheets by testing ID
-   */
-  getWorksheetsByTestingId: withPermission("worksheets.read")
-    .input(z.object({ testingId: z.uuidv7() }))
-    .query(
-      async ({ input }) =>
-        await runEffect(
-          worksheetQueries.getWorksheetsByTestingId(input.testingId),
-        ),
-    ),
-
-  /**
    * Get worksheet by order ID
    */
   getByOrderId: withPermission("worksheets.read")
@@ -100,7 +87,10 @@ export const worksheetRouter = createTRPCRouter({
     .mutation(
       async ({ input, ctx }) =>
         await runEffect(
-          worksheetQueries.submitForVerification(input.worksheetId, ctx.user.id),
+          worksheetQueries.submitForVerification(
+            input.worksheetId,
+            ctx.user.id,
+          ),
         ),
     ),
 
@@ -116,45 +106,6 @@ export const worksheetRouter = createTRPCRouter({
           worksheetQueries.verifyWorksheet(
             input.worksheetId,
             ctx.user.id,
-            input.mainSupervisorId,
-            input.accompanyingSupervisorId,
-          ),
-        ),
-    ),
-
-  /**
-   * Link worksheet to testing (called after testing is created post-payment)
-   */
-  linkToTesting: withPermission("worksheets.update")
-    .input(
-      z.object({
-        worksheetId: z.uuidv7(),
-        testingId: z.uuidv7(),
-      }),
-    )
-    .mutation(
-      async ({ input, ctx }) =>
-        await runEffect(
-          worksheetQueries.linkWorksheetToTesting(
-            input.worksheetId,
-            input.testingId,
-            ctx.user.id,
-          ),
-        ),
-    ),
-
-  /**
-   * Create worksheet from testing (Admin - Phase 6)
-   */
-  createFromTesting: withPermission("worksheets.create")
-    .input(worksheetSchema.createWorksheetFromTestingSchema)
-    .mutation(
-      async ({ input, ctx }) =>
-        await runEffect(
-          worksheetQueries.createWorksheetFromTesting(
-            input.testingId,
-            ctx.user.id,
-            input.startDate,
             input.mainSupervisorId,
             input.accompanyingSupervisorId,
           ),
@@ -522,26 +473,26 @@ export const worksheetRouter = createTRPCRouter({
             input.result,
           );
 
-          // Check if all worksheets for this testing are completed
-          // If so, update testing status to testing_completed
-          if (worksheet.testing?.id) {
-            const allWorksheets =
-              yield* worksheetQueries.getWorksheetsByTestingId(
-                worksheet.testing.id,
-              );
+          // // Check if all worksheets for this testing are completed
+          // // If so, update testing status to testing_completed
+          // if (worksheet.testing?.id) {
+          //   const allWorksheets =
+          //     yield* worksheetQueries.getWorksheetsByTestingId(
+          //       worksheet.testing.id,
+          //     );
 
-            const allCompleted = allWorksheets.every(
-              (ws) => ws.id === input.worksheetId || ws.status === "completed",
-            );
+          //   const allCompleted = allWorksheets.every(
+          //     (ws) => ws.id === input.worksheetId || ws.status === "completed",
+          //   );
 
-            if (allCompleted && allWorksheets.length > 0) {
-              yield* testingQueries.updateTestingStatus(
-                worksheet.testing.id,
-                "completed",
-                "Semua worksheet telah selesai",
-              );
-            }
-          }
+          //   if (allCompleted && allWorksheets.length > 0) {
+          //     yield* testingQueries.updateTestingStatus(
+          //       worksheet.testing.id,
+          //       "completed",
+          //       "Semua worksheet telah selesai",
+          //     );
+          //   }
+          // }
 
           return result;
         }),
