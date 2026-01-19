@@ -19,7 +19,7 @@ const createWorksheetFromTestingSchema = z.object({
 // Create worksheet from order (kaji ulang phase - before offering)
 const createWorksheetFromOrderSchema = z.object({
   orderId: z.string().uuid(),
-  startDate: z.string().datetime(),
+  startDate: z.string().datetime().optional(),
   mainSupervisorId: z.string().uuid().optional(),
   accompanyingSupervisorId: z.string().uuid().optional(),
 });
@@ -78,10 +78,12 @@ const assignToolsToWorksheetSchema = z.object({
   toolIds: z.array(z.string().uuid()),
 });
 
-// Assign employees to worksheet
+// Assign employees to worksheet (with optional schedule dates)
 const assignEmployeesToWorksheetSchema = z.object({
   worksheetId: z.string().uuid(),
   employeeIds: z.array(z.string().uuid()),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
 });
 
 // Add worksheet note

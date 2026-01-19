@@ -769,7 +769,7 @@ export const worksheets = createTable(
     startDate: timestamp("start_date", {
       withTimezone: true,
       mode: "string",
-    }).notNull(),
+    }),
     endDate: timestamp("end_date", {
       withTimezone: true,
       mode: "string",

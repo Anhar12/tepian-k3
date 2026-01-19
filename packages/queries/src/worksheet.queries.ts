@@ -267,7 +267,6 @@ const worksheetQueries = {
   createWorksheetFromOrder(
     orderId: string,
     userId: string,
-    startDate: string,
     mainSupervisorId?: string,
     accompanyingSupervisorId?: string,
   ) {
@@ -322,7 +321,6 @@ const worksheetQueries = {
               .values({
                 orderId: orderData.id,
                 status: "draft",
-                startDate,
                 mainSupervisorId: mainSupervisorId || null,
                 accompanyingSupervisorId: accompanyingSupervisorId || null,
                 createdBy: userId,
@@ -580,12 +578,15 @@ const worksheetQueries = {
 
   /**
    * Assign employees to worksheet with transaction
+   * Optionally updates startDate and endDate for scheduling
    */
   assignEmployeesToWorksheet(
     tx: DBorTx,
     worksheetId: string,
     employeeIds: string[],
     assignedBy: string,
+    startDate?: string,
+    endDate?: string,
   ) {
     return Effect.tryPromise({
       try: async () => {
@@ -593,6 +594,18 @@ const worksheetQueries = {
         await tx
           .delete(worksheetAssignments)
           .where(eq(worksheetAssignments.worksheetId, worksheetId));
+
+        // Update worksheet dates if provided
+        if (startDate !== undefined || endDate !== undefined) {
+          await tx
+            .update(worksheets)
+            .set({
+              ...(startDate !== undefined && { startDate }),
+              ...(endDate !== undefined && { endDate }),
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+            })
+            .where(eq(worksheets.id, worksheetId));
+        }
 
         // Then, add new assignments
         if (employeeIds.length > 0) {

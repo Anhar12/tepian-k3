@@ -71,7 +71,6 @@ export const worksheetRouter = createTRPCRouter({
           worksheetQueries.createWorksheetFromOrder(
             input.orderId,
             ctx.user.id,
-            input.startDate,
             input.mainSupervisorId,
             input.accompanyingSupervisorId,
           ),
@@ -292,7 +291,7 @@ export const worksheetRouter = createTRPCRouter({
     }),
 
   /**
-   * Assign employees to worksheet
+   * Assign employees to worksheet (with optional schedule dates)
    */
   assignEmployees: withPermission("worksheet-assignments.update")
     .input(worksheetSchema.assignEmployeesToWorksheetSchema)
@@ -323,6 +322,8 @@ export const worksheetRouter = createTRPCRouter({
                     input.worksheetId,
                     input.employeeIds,
                     ctx.user.id,
+                    input.startDate,
+                    input.endDate,
                   ),
                 );
               }),
