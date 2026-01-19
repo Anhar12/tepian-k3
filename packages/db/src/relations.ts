@@ -278,6 +278,88 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
   }),
 }));
 
+export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
+  order: one(order, {
+    fields: [worksheets.orderId],
+    references: [order.id],
+  }),
+  testing: one(testing, {
+    fields: [worksheets.id],
+    references: [testing.worksheetId],
+  }),
+  mainSupervisor: one(employees, {
+    fields: [worksheets.mainSupervisorId],
+    references: [employees.id],
+  }),
+  accompanyingSupervisor: one(employees, {
+    fields: [worksheets.accompanyingSupervisorId],
+    references: [employees.id],
+  }),
+  createdBy: one(users, {
+    fields: [worksheets.createdBy],
+    references: [users.id],
+  }),
+  assignments: many(worksheetAssignments),
+  items: many(worksheetItems),
+  tools: many(worksheetTools),
+  notes: many(worksheetNotes),
+}));
+
+export const worksheetItemRelations = relations(worksheetItems, ({ one }) => ({
+  worksheet: one(worksheets, {
+    fields: [worksheetItems.worksheetId],
+    references: [worksheets.id],
+  }),
+  parameter: one(parameters, {
+    fields: [worksheetItems.parameterId],
+    references: [parameters.id],
+  }),
+  location: one(userCompanyTestingLocation, {
+    fields: [worksheetItems.locationId],
+    references: [userCompanyTestingLocation.id],
+  }),
+}));
+
+export const worksheetToolRelations = relations(worksheetTools, ({ one }) => ({
+  worksheet: one(worksheets, {
+    fields: [worksheetTools.worksheetId],
+    references: [worksheets.id],
+  }),
+  tool: one(tools, {
+    fields: [worksheetTools.toolId],
+    references: [tools.id],
+  }),
+}));
+
+export const worksheetNoteRelations = relations(worksheetNotes, ({ one }) => ({
+  worksheet: one(worksheets, {
+    fields: [worksheetNotes.worksheetId],
+    references: [worksheets.id],
+  }),
+  createdBy: one(users, {
+    fields: [worksheetNotes.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const worksheetAssignmentRelations = relations(
+  worksheetAssignments,
+  ({ one }) => ({
+    worksheet: one(worksheets, {
+      fields: [worksheetAssignments.worksheetId],
+      references: [worksheets.id],
+    }),
+    employee: one(employees, {
+      fields: [worksheetAssignments.employeeId],
+      references: [employees.id],
+    }),
+    assignedBy: one(users, {
+      fields: [worksheetAssignments.assignedBy],
+      references: [users.id],
+    }),
+  }),
+);
+
 export const testingRelations = relations(testing, ({ one, many }) => ({
   order: one(order, {
     fields: [testing.orderId],
@@ -401,85 +483,3 @@ export const employeeRelations = relations(employees, ({ one }) => ({
     references: [users.id],
   }),
 }));
-
-export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
-  order: one(order, {
-    fields: [worksheets.orderId],
-    references: [order.id],
-  }),
-  testing: one(testing, {
-    fields: [worksheets.testingId],
-    references: [testing.id],
-  }),
-  mainSupervisor: one(employees, {
-    fields: [worksheets.mainSupervisorId],
-    references: [employees.id],
-  }),
-  accompanyingSupervisor: one(employees, {
-    fields: [worksheets.accompanyingSupervisorId],
-    references: [employees.id],
-  }),
-  createdBy: one(users, {
-    fields: [worksheets.createdBy],
-    references: [users.id],
-  }),
-  assignments: many(worksheetAssignments),
-  items: many(worksheetItems),
-  tools: many(worksheetTools),
-  notes: many(worksheetNotes),
-}));
-
-export const worksheetItemRelations = relations(worksheetItems, ({ one }) => ({
-  worksheet: one(worksheets, {
-    fields: [worksheetItems.worksheetId],
-    references: [worksheets.id],
-  }),
-  parameter: one(parameters, {
-    fields: [worksheetItems.parameterId],
-    references: [parameters.id],
-  }),
-  location: one(userCompanyTestingLocation, {
-    fields: [worksheetItems.locationId],
-    references: [userCompanyTestingLocation.id],
-  }),
-}));
-
-export const worksheetToolRelations = relations(worksheetTools, ({ one }) => ({
-  worksheet: one(worksheets, {
-    fields: [worksheetTools.worksheetId],
-    references: [worksheets.id],
-  }),
-  tool: one(tools, {
-    fields: [worksheetTools.toolId],
-    references: [tools.id],
-  }),
-}));
-
-export const worksheetNoteRelations = relations(worksheetNotes, ({ one }) => ({
-  worksheet: one(worksheets, {
-    fields: [worksheetNotes.worksheetId],
-    references: [worksheets.id],
-  }),
-  createdBy: one(users, {
-    fields: [worksheetNotes.createdBy],
-    references: [users.id],
-  }),
-}));
-
-export const worksheetAssignmentRelations = relations(
-  worksheetAssignments,
-  ({ one }) => ({
-    worksheet: one(worksheets, {
-      fields: [worksheetAssignments.worksheetId],
-      references: [worksheets.id],
-    }),
-    employee: one(employees, {
-      fields: [worksheetAssignments.employeeId],
-      references: [employees.id],
-    }),
-    assignedBy: one(users, {
-      fields: [worksheetAssignments.assignedBy],
-      references: [users.id],
-    }),
-  }),
-);

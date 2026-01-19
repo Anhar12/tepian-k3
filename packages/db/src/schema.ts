@@ -754,54 +754,75 @@ export const orderItem = createTable(
   ],
 );
 
-export const testing = createTable(
-  "testing",
+export const worksheets = createTable(
+  "worksheets",
   {
     id: uuid("id")
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    testingNumber: varchar("testing_number", { length: 100 })
-      .notNull()
-      .unique(),
     orderId: uuid("order_id")
       .notNull()
       .references(() => order.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    companyId: uuid("company_id")
-      .notNull()
-      .references(() => userCompanies.id, { onDelete: "cascade" }),
-    testingType: uuid("testing_type")
-      .notNull()
-      .references(() => parameterCategories.id, { onDelete: "cascade" }),
-    status: testingStatusEnum("status").notNull().default("start_testing"),
+
+    status: worksheetStatusEnum("status").notNull().default("draft"),
+    startDate: timestamp("start_date", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    endDate: timestamp("end_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    mainSupervisorId: uuid("main_supervisor_id").references(
+      () => employees.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    accompanyingSupervisorId: uuid("accompanying_supervisor_id").references(
+      () => employees.id,
+      { onDelete: "set null" },
+    ),
+    result: text("result"),
+    coverTransportationIncluded: boolean(
+      "cover_transportation_included",
+    ).default(false),
+    coverAccommodationIncluded: boolean("cover_accommodation_included").default(
+      false,
+    ),
     note: text("note"),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
     ...timestamps,
   },
   (table) => [
-    index("testing_id_idx").using("btree", table.id),
-    index("testing_testing_number_idx").using("btree", table.testingNumber),
-    index("testing_testing_type_idx").using("btree", table.testingType),
-    index("testing_user_id_idx").using("btree", table.userId),
-    index("testing_company_id_idx").using("btree", table.companyId),
+    index("worksheet_id_idx").using("btree", table.id),
+    index("worksheet_order_id_idx").using("btree", table.orderId),
+    index("worksheet_status_idx").using("btree", table.status),
+    index("worksheet_main_supervisor_id_idx").using(
+      "btree",
+      table.mainSupervisorId,
+    ),
+    index("worksheet_accompanying_supervisor_id_idx").using(
+      "btree",
+      table.accompanyingSupervisorId,
+    ),
+    index("worksheet_created_by_idx").using("btree", table.createdBy),
   ],
 );
 
-export const testingItem = createTable(
-  "testing_item",
+export const worksheetItems = createTable(
+  "worksheet_items",
   {
     id: uuid("id")
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    testingId: uuid("testing_id")
+    worksheetId: uuid("worksheet_id")
       .notNull()
-      .references(() => testing.id, { onDelete: "cascade" }),
-    orderItemId: uuid("order_item_id")
-      .notNull()
-      .references(() => orderItem.id, { onDelete: "cascade" }),
+      .references(() => worksheets.id, { onDelete: "cascade" }),
     parameterId: uuid("parameter_id")
       .notNull()
       .references(() => parameters.id, { onDelete: "cascade" }),
@@ -809,16 +830,92 @@ export const testingItem = createTable(
       .notNull()
       .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
-    price: integer("price").notNull(),
-    subTotal: integer("sub_total").notNull(),
-    result: text("result"),
+    value: real("value"),
     note: text("note"),
+    isReady: boolean("is_ready").notNull().default(false),
     ...timestamps,
   },
   (table) => [
-    index("testing_item_id_idx").using("btree", table.id),
-    index("testing_item_testing_id_idx").using("btree", table.testingId),
-    index("testing_item_parameter_id_idx").using("btree", table.parameterId),
+    index("worksheet_item_id_idx").using("btree", table.id),
+    index("worksheet_item_worksheet_id_idx").using("btree", table.worksheetId),
+    index("worksheet_item_parameter_id_idx").using("btree", table.parameterId),
+    index("worksheet_item_location_id_idx").using("btree", table.locationId),
+  ],
+);
+
+export const worksheetTools = createTable(
+  "worksheet_tools",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    toolId: uuid("tool_id")
+      .notNull()
+      .references(() => tools.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_tool_id_idx").using("btree", table.id),
+    index("worksheet_tool_worksheet_id_idx").using("btree", table.worksheetId),
+    index("worksheet_tool_tool_id_idx").using("btree", table.toolId),
+  ],
+);
+
+export const worksheetNotes = createTable(
+  "worksheet_notes",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    note: text("note").notNull(),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    severity: worksheetNoteStatusEnum("severity").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_note_id_idx").using("btree", table.id),
+    index("worksheet_note_worksheet_id_idx").using("btree", table.worksheetId),
+  ],
+);
+
+export const worksheetAssignments = createTable(
+  "worksheet_assignments",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    employeeId: uuid("employee_id")
+      .notNull()
+      .references(() => employees.id, { onDelete: "cascade" }),
+    assignedBy: uuid("assigned_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_assignment_id_idx").using("btree", table.id),
+    index("worksheet_assignment_worksheet_id_idx").using(
+      "btree",
+      table.worksheetId,
+    ),
+    index("worksheet_assignment_employee_id_idx").using(
+      "btree",
+      table.employeeId,
+    ),
   ],
 );
 
@@ -1088,78 +1185,57 @@ export const employees = createTable(
   ],
 );
 
-export const worksheets = createTable(
-  "worksheets",
+export const testing = createTable(
+  "testing",
   {
     id: uuid("id")
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
+    testingNumber: varchar("testing_number", { length: 100 })
+      .notNull()
+      .unique(),
     orderId: uuid("order_id")
       .notNull()
       .references(() => order.id, { onDelete: "cascade" }),
-    testingId: uuid("testing_id").references(() => testing.id, {
-      onDelete: "set null",
-    }),
-    status: worksheetStatusEnum("status").notNull().default("draft"),
-    startDate: timestamp("start_date", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-    endDate: timestamp("end_date", {
-      withTimezone: true,
-      mode: "string",
-    }),
-    mainSupervisorId: uuid("main_supervisor_id").references(
-      () => employees.id,
-      {
-        onDelete: "set null",
-      },
-    ),
-    accompanyingSupervisorId: uuid("accompanying_supervisor_id").references(
-      () => employees.id,
-      { onDelete: "set null" },
-    ),
-    result: text("result"),
-    coverTransportationIncluded: boolean(
-      "cover_transportation_included",
-    ).default(false),
-    coverAccommodationIncluded: boolean("cover_accommodation_included").default(
-      false,
-    ),
-    note: text("note"),
-    createdBy: uuid("created_by")
+    worksheetId: uuid("worksheet_id")
       .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id")
+      .notNull()
+      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    testingType: uuid("testing_type")
+      .notNull()
+      .references(() => parameterCategories.id, { onDelete: "cascade" }),
+    status: testingStatusEnum("status").notNull().default("start_testing"),
+    note: text("note"),
     ...timestamps,
   },
   (table) => [
-    index("worksheet_id_idx").using("btree", table.id),
-    index("worksheet_order_id_idx").using("btree", table.orderId),
-    index("worksheet_testing_id_idx").using("btree", table.testingId),
-    index("worksheet_status_idx").using("btree", table.status),
-    index("worksheet_main_supervisor_id_idx").using(
-      "btree",
-      table.mainSupervisorId,
-    ),
-    index("worksheet_accompanying_supervisor_id_idx").using(
-      "btree",
-      table.accompanyingSupervisorId,
-    ),
-    index("worksheet_created_by_idx").using("btree", table.createdBy),
+    index("testing_id_idx").using("btree", table.id),
+    index("testing_testing_number_idx").using("btree", table.testingNumber),
+    index("testing_testing_type_idx").using("btree", table.testingType),
+    index("testing_user_id_idx").using("btree", table.userId),
+    index("testing_company_id_idx").using("btree", table.companyId),
   ],
 );
 
-export const worksheetItems = createTable(
-  "worksheet_items",
+export const testingItem = createTable(
+  "testing_item",
   {
     id: uuid("id")
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
-    worksheetId: uuid("worksheet_id")
+    testingId: uuid("testing_id")
       .notNull()
-      .references(() => worksheets.id, { onDelete: "cascade" }),
+      .references(() => testing.id, { onDelete: "cascade" }),
+    orderItemId: uuid("order_item_id")
+      .notNull()
+      .references(() => orderItem.id, { onDelete: "cascade" }),
     parameterId: uuid("parameter_id")
       .notNull()
       .references(() => parameters.id, { onDelete: "cascade" }),
@@ -1167,92 +1243,16 @@ export const worksheetItems = createTable(
       .notNull()
       .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
-    value: real("value"),
+    price: integer("price").notNull(),
+    subTotal: integer("sub_total").notNull(),
+    result: text("result"),
     note: text("note"),
-    isReady: boolean("is_ready").notNull().default(false),
     ...timestamps,
   },
   (table) => [
-    index("worksheet_item_id_idx").using("btree", table.id),
-    index("worksheet_item_worksheet_id_idx").using("btree", table.worksheetId),
-    index("worksheet_item_parameter_id_idx").using("btree", table.parameterId),
-    index("worksheet_item_location_id_idx").using("btree", table.locationId),
-  ],
-);
-
-export const worksheetTools = createTable(
-  "worksheet_tools",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .notNull()
-      .$default(() => uuidv7()),
-    worksheetId: uuid("worksheet_id")
-      .notNull()
-      .references(() => worksheets.id, { onDelete: "cascade" }),
-    toolId: uuid("tool_id")
-      .notNull()
-      .references(() => tools.id, { onDelete: "cascade" }),
-    ...timestamps,
-  },
-  (table) => [
-    index("worksheet_tool_id_idx").using("btree", table.id),
-    index("worksheet_tool_worksheet_id_idx").using("btree", table.worksheetId),
-    index("worksheet_tool_tool_id_idx").using("btree", table.toolId),
-  ],
-);
-
-export const worksheetNotes = createTable(
-  "worksheet_notes",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .notNull()
-      .$default(() => uuidv7()),
-    worksheetId: uuid("worksheet_id")
-      .notNull()
-      .references(() => worksheets.id, { onDelete: "cascade" }),
-    note: text("note").notNull(),
-    createdBy: uuid("created_by")
-      .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
-    severity: worksheetNoteStatusEnum("severity").notNull(),
-    ...timestamps,
-  },
-  (table) => [
-    index("worksheet_note_id_idx").using("btree", table.id),
-    index("worksheet_note_worksheet_id_idx").using("btree", table.worksheetId),
-  ],
-);
-
-export const worksheetAssignments = createTable(
-  "worksheet_assignments",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .notNull()
-      .$default(() => uuidv7()),
-    worksheetId: uuid("worksheet_id")
-      .notNull()
-      .references(() => worksheets.id, { onDelete: "cascade" }),
-    employeeId: uuid("employee_id")
-      .notNull()
-      .references(() => employees.id, { onDelete: "cascade" }),
-    assignedBy: uuid("assigned_by")
-      .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
-    ...timestamps,
-  },
-  (table) => [
-    index("worksheet_assignment_id_idx").using("btree", table.id),
-    index("worksheet_assignment_worksheet_id_idx").using(
-      "btree",
-      table.worksheetId,
-    ),
-    index("worksheet_assignment_employee_id_idx").using(
-      "btree",
-      table.employeeId,
-    ),
+    index("testing_item_id_idx").using("btree", table.id),
+    index("testing_item_testing_id_idx").using("btree", table.testingId),
+    index("testing_item_parameter_id_idx").using("btree", table.parameterId),
   ],
 );
 
