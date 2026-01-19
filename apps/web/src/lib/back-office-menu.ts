@@ -34,13 +34,13 @@ export const backOfficeMenu: {
       permission: "orders.read",
     },
     {
-      title: "Testings",
-      url: `${urlStarter}/testings`,
+      title: "Worksheets",
+      url: `${urlStarter}/worksheets`,
       icon: IconFileInvoice,
     },
     {
-      title: "Worksheets",
-      url: `${urlStarter}/worksheets`,
+      title: "Testings",
+      url: `${urlStarter}/testings`,
       icon: IconFileInvoice,
     },
     {
