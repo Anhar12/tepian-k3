@@ -33,7 +33,8 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(turbo:*)",
-      "Bash(pnpm turbo:*)"
+      "Bash(pnpm turbo:*)",
+      "Bash(pnpm build:*)"
     ]
   }
 }

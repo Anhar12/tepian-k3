@@ -1203,12 +1203,27 @@ const worksheetQueries = {
               });
             }
 
-            // 3. Delete existing operational costs
+            // 3. Check if operational costs are applicable
+            // Only allow operational costs when at least one of transportation or accommodation
+            // is covered by K3 Lab (value = true)
+            const canHaveOperationalCosts =
+              worksheet.coverTransportationIncluded === true ||
+              worksheet.coverAccommodationIncluded === true;
+
+            if (!canHaveOperationalCosts && costs.length > 0) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Biaya operasional tidak dapat ditambahkan karena transportasi dan akomodasi ditanggung oleh pemohon pengujian",
+              });
+            }
+
+            // 4. Delete existing operational costs
             await tx
               .delete(worksheetOperationalCosts)
               .where(eq(worksheetOperationalCosts.worksheetId, worksheetId));
 
-            // 4. Insert new operational costs
+            // 5. Insert new operational costs
             if (costs.length > 0) {
               const costsData = costs.map((cost, index) => ({
                 worksheetId,

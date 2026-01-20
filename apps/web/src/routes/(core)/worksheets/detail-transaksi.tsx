@@ -11,6 +11,7 @@ import {
   Plus,
   Trash2,
   Loader2,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +34,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getPublicUrl } from "@/utils/url";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const searchParamsSchema = z.object({
   worksheetId: z.string().uuidv7().optional(),
@@ -195,22 +199,62 @@ function RouteComponent() {
     return ["draft", "revision"].includes(worksheet.status);
   }, [worksheet?.status]);
 
-  const locations = useMemo(() => {
+  // Check if operational costs should be shown
+  // Only show if at least one of transportation or accommodation is covered by K3 Lab (value = true)
+  const showOperationalCosts = useMemo(() => {
+    if (!worksheet) return false;
+    return (
+      worksheet.coverTransportationIncluded === true ||
+      worksheet.coverAccommodationIncluded === true
+    );
+  }, [worksheet]);
+
+  const locations: {
+    regencyName: string;
+    districtName: string;
+  }[] = useMemo(() => {
     if (!worksheet?.items) return [];
-    const uniqueLocations = new Map<string, string>();
+    const uniqueLocations: { regencyName: string; districtName: string }[] = [];
     worksheet.items.forEach((item) => {
-      if (item.location?.district?.name) {
-        uniqueLocations.set(item.location.id, item.location.district.name);
+      if (
+        !uniqueLocations.find(
+          (loc) => loc.districtName === item.location.district.name,
+        )
+      ) {
+        uniqueLocations.push({
+          regencyName: item.location.regency.name,
+          districtName: item.location.district.name,
+        });
       }
     });
-    return Array.from(uniqueLocations.values());
+    return uniqueLocations;
   }, [worksheet?.items]);
 
-  const assignedPersonnel = useMemo(() => {
+  const assignedPersonnel: {
+    name: string;
+    position: string;
+    avatar: string | null;
+  }[] = useMemo(() => {
     if (!worksheet?.assignments) return [];
-    return worksheet.assignments.map(
-      (a) => a.employee?.user?.name || a.employee?.name || "Unknown",
-    );
+    const uniquePersonnel: {
+      name: string;
+      position: string;
+      avatar: string | null;
+    }[] = [];
+    worksheet.assignments.forEach((assignment) => {
+      if (
+        !uniquePersonnel.find(
+          (person) => person.name === assignment.employee.user.name,
+        )
+      ) {
+        uniquePersonnel.push({
+          name: assignment.employee.user.name,
+          position: assignment.employee.position.name,
+          avatar: assignment.employee.user.profilePictureUrl,
+        });
+      }
+    });
+    return uniquePersonnel;
   }, [worksheet?.assignments]);
 
   const parameterData = useMemo(() => {
@@ -248,7 +292,7 @@ function RouteComponent() {
     }, 0);
   }, [operationalCosts]);
 
-  const grandTotal = parameterTotal + operationalTotal;
+  const grandTotal = parameterTotal + (showOperationalCosts ? operationalTotal : 0);
 
   const handleAddOperationalCost = useCallback(() => {
     setOperationalCosts((prev) => [
@@ -394,78 +438,115 @@ function RouteComponent() {
         </CardHeader>
         <CardContent className="px-3 sm:px-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Check className="h-3 w-3 text-emerald-500 sm:h-4 sm:w-4" />
-                <span className="text-xs font-medium text-muted-foreground sm:text-sm">
-                  Lokasi Pengujian (Kecamatan)
-                </span>
+            <div className="flex flex-col overflow-hidden rounded-xl border border-muted/50">
+              <div className="border-b bg-primary/40 p-4 sm:px-6">
+                <h2 className="text-base font-semibold text-primary sm:text-lg">
+                  List Personel
+                </h2>
               </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:text-sm">
-                {locations.length > 0 ? (
-                  locations.map((loc, idx) => (
-                    <span key={idx}>
-                      {idx + 1}. {loc}
+              <ScrollArea className="h-50 sm:h-60">
+                <div className="flex flex-col space-y-3 p-4 sm:p-6">
+                  {assignedPersonnel.length > 0 ? (
+                    assignedPersonnel.map((person, idx) => (
+                      <div className="flex flex-row gap-3" key={idx}>
+                        <Avatar className="size-10 shrink-0 sm:size-8">
+                          <AvatarImage
+                            src={
+                              person.avatar
+                                ? getPublicUrl(person.avatar)
+                                : undefined
+                            }
+                            alt={person.name}
+                          />
+                          <AvatarFallback className="bg-primary/40 text-sm font-semibold text-primary">
+                            {person.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex min-w-0 flex-col gap-1">
+                          <p className="truncate text-sm font-medium sm:text-base">
+                            {person.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground sm:text-sm">
+                            {person.position}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      Belum ada personel
                     </span>
-                  ))
-                ) : (
-                  <span className="text-muted-foreground">
-                    Belum ada lokasi
-                  </span>
-                )}
-              </div>
+                  )}
+                </div>
+              </ScrollArea>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Check className="h-3 w-3 text-emerald-500 sm:h-4 sm:w-4" />
-                <span className="text-xs font-medium text-muted-foreground sm:text-sm">
-                  Durasi Pengujian
-                </span>
+            <div className="space-y-2 rounded-xl border border-muted/50">
+              <div className="flex flex-1 flex-col justify-center rounded-t-xl border-b bg-primary/40 p-3 sm:px-6 sm:pb-4">
+                <h2 className="text-xl font-semibold text-primary sm:text-base">
+                  Area Pengujian
+                </h2>
               </div>
-              <div className="space-y-1">
-                <p className="text-xl font-bold sm:text-2xl">
+              <ScrollArea className="h-50 sm:h-60">
+                <div className="flex flex-col space-y-1 p-3 sm:px-3 sm:pt-4">
+                  {locations.length > 0 ? (
+                    locations.map((loc, idx) => (
+                      <div className="flex flex-row gap-4" key={idx}>
+                        <p className="flex size-8 items-center justify-center rounded-full bg-primary/40 font-semibold text-primary sm:h-6 sm:w-6 sm:text-sm">
+                          {idx + 1}
+                        </p>
+                        <p className="text-base font-medium text-ellipsis sm:text-sm">
+                          {loc.regencyName}, {loc.districtName}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground">
+                      Belum ada lokasi
+                    </span>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+
+            <div className="flex flex-col overflow-hidden rounded-xl border border-muted/50">
+              <div className="border-b bg-primary/40 p-4 sm:px-6">
+                <h2 className="text-base font-semibold text-primary sm:text-lg">
+                  Durasi Pengujian
+                </h2>
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-4 sm:p-6">
+                <p className="text-3xl font-bold sm:text-4xl">
                   {duration > 0 ? `${duration} Hari` : "-"}
                 </p>
-                <p className="text-xs text-muted-foreground sm:text-sm">
-                  Tanggal
-                </p>
-                <p className="text-xs font-medium text-primary sm:text-sm">
-                  {dateRange}
-                </p>
+                <div className="mt-6 flex flex-col gap-1.5 pt-4">
+                  <p className="text-xs text-muted-foreground sm:text-sm">
+                    Tanggal
+                  </p>
+                  <p className="text-sm font-medium wrap-break-word text-primary">
+                    {dateRange}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Check className="h-3 w-3 text-emerald-500 sm:h-4 sm:w-4" />
-                <span className="text-xs font-medium text-muted-foreground sm:text-sm">
-                  Personel
-                </span>
+            <div className="space-y-2 rounded-xl border border-muted/50">
+              <div className="flex flex-1 flex-col justify-center rounded-t-xl border-b bg-primary/40 p-3 sm:px-6 sm:pb-4">
+                <h2 className="text-xl font-semibold text-primary sm:text-base">
+                  Total Personel
+                </h2>
               </div>
-              <div className="space-y-1 text-xs sm:text-sm">
-                {assignedPersonnel.length > 0 ? (
-                  assignedPersonnel.map((person, idx) => (
-                    <p key={idx}>
-                      {idx + 1}. {person}
-                    </p>
-                  ))
-                ) : (
-                  <span className="text-muted-foreground">
-                    Belum ada personel
-                  </span>
-                )}
+              <div className="flex flex-col space-y-1 p-3 sm:px-3 sm:pt-4">
+                <div className="flex items-center gap-2">
+                  <p className="text-3xl font-bold sm:text-4xl">
+                    {assignedPersonnel.length} Orang
+                  </p>
+                </div>
               </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center rounded-xl bg-primary/5 p-4">
-              <Users className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
-              <p className="text-2xl font-bold text-primary sm:text-3xl">
-                {assignedPersonnel.length}
-              </p>
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                Total Personel
-              </p>
             </div>
           </div>
         </CardContent>
@@ -590,189 +671,191 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="px-3 pb-3 sm:px-6 sm:pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
-              Rincian Operasional
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAddOperationalCost}
-              disabled={!isEditable}
-            >
-              <Plus className="mr-1 h-4 w-4" />
-              Tambah Item
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="text-xs font-semibold sm:text-sm">
-                    Item
-                  </TableHead>
-                  <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                    Orang/Unit
-                  </TableHead>
-                  <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                    Hari
-                  </TableHead>
-                  <TableHead className="hidden text-center text-xs font-semibold sm:text-sm md:table-cell">
-                    Keterangan
-                  </TableHead>
-                  <TableHead className="hidden text-right text-xs font-semibold sm:table-cell sm:text-sm">
-                    Biaya/Unit
-                  </TableHead>
-                  <TableHead className="text-right text-xs font-semibold sm:text-sm">
-                    Total
-                  </TableHead>
-                  <TableHead className="w-10"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {operationalCosts.map((item, index) => {
-                  const itemTotal =
-                    item.unitCost !== null && item.unitCost > 0
-                      ? item.unitCount * item.days * item.unitCost
-                      : null;
+      {showOperationalCosts && (
+        <Card>
+          <CardHeader className="px-3 pb-3 sm:px-6 sm:pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+                Rincian Operasional
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddOperationalCost}
+                disabled={!isEditable}
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Tambah Item
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="text-xs font-semibold sm:text-sm">
+                      Item
+                    </TableHead>
+                    <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                      Orang/Unit
+                    </TableHead>
+                    <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                      Hari
+                    </TableHead>
+                    <TableHead className="hidden text-center text-xs font-semibold sm:text-sm md:table-cell">
+                      Keterangan
+                    </TableHead>
+                    <TableHead className="hidden text-right text-xs font-semibold sm:table-cell sm:text-sm">
+                      Biaya/Unit
+                    </TableHead>
+                    <TableHead className="text-right text-xs font-semibold sm:text-sm">
+                      Total
+                    </TableHead>
+                    <TableHead className="w-10"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {operationalCosts.map((item, index) => {
+                    const itemTotal =
+                      item.unitCost !== null && item.unitCost > 0
+                        ? item.unitCount * item.days * item.unitCost
+                        : null;
 
-                  return (
-                    <TableRow key={index} className="hover:bg-muted/30">
-                      <TableCell className="text-xs sm:text-sm">
-                        <Input
-                          value={item.item}
-                          onChange={(e) =>
-                            handleUpdateOperationalCost(
-                              index,
-                              "item",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="Nama item"
-                          className="h-8 w-full min-w-30 text-xs sm:text-sm"
-                          disabled={!isEditable}
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min={0}
-                          value={item.unitCount}
-                          onChange={(e) =>
-                            handleUpdateOperationalCost(
-                              index,
-                              "unitCount",
-                              parseInt(e.target.value) || 0,
-                            )
-                          }
-                          className="h-8 w-16 text-center text-xs sm:text-sm"
-                          disabled={!isEditable}
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min={0}
-                          value={item.days}
-                          onChange={(e) =>
-                            handleUpdateOperationalCost(
-                              index,
-                              "days",
-                              parseInt(e.target.value) || 0,
-                            )
-                          }
-                          className="h-8 w-16 text-center text-xs sm:text-sm"
-                          disabled={!isEditable}
-                        />
-                      </TableCell>
-                      <TableCell className="hidden text-center text-xs sm:text-sm md:table-cell">
-                        <Input
-                          value={item.note || ""}
-                          onChange={(e) =>
-                            handleUpdateOperationalCost(
-                              index,
-                              "note",
-                              e.target.value || null,
-                            )
-                          }
-                          placeholder="-"
-                          className="h-8 w-full min-w-25 text-center text-xs sm:text-sm"
-                          disabled={!isEditable}
-                        />
-                      </TableCell>
-                      <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
-                        <Input
-                          type="number"
-                          min={0}
-                          value={item.unitCost ?? ""}
-                          onChange={(e) =>
-                            handleUpdateOperationalCost(
-                              index,
-                              "unitCost",
-                              e.target.value === ""
-                                ? null
-                                : parseInt(e.target.value) || 0,
-                            )
-                          }
-                          placeholder="-"
-                          className="h-8 w-24 text-right text-xs sm:text-sm"
-                          disabled={!isEditable}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right text-xs font-medium sm:text-sm">
-                        {itemTotal !== null ? formatCurrency(itemTotal) : "-"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          onClick={() => handleRemoveOperationalCost(index)}
-                          disabled={!isEditable}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    return (
+                      <TableRow key={index} className="hover:bg-muted/30">
+                        <TableCell className="text-xs sm:text-sm">
+                          <Input
+                            value={item.item}
+                            onChange={(e) =>
+                              handleUpdateOperationalCost(
+                                index,
+                                "item",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="Nama item"
+                            className="h-8 w-full min-w-30 text-xs sm:text-sm"
+                            disabled={!isEditable}
+                          />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Input
+                            type="number"
+                            min={0}
+                            value={item.unitCount}
+                            onChange={(e) =>
+                              handleUpdateOperationalCost(
+                                index,
+                                "unitCount",
+                                parseInt(e.target.value) || 0,
+                              )
+                            }
+                            className="h-8 w-16 text-center text-xs sm:text-sm"
+                            disabled={!isEditable}
+                          />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Input
+                            type="number"
+                            min={0}
+                            value={item.days}
+                            onChange={(e) =>
+                              handleUpdateOperationalCost(
+                                index,
+                                "days",
+                                parseInt(e.target.value) || 0,
+                              )
+                            }
+                            className="h-8 w-16 text-center text-xs sm:text-sm"
+                            disabled={!isEditable}
+                          />
+                        </TableCell>
+                        <TableCell className="hidden text-center text-xs sm:text-sm md:table-cell">
+                          <Input
+                            value={item.note || ""}
+                            onChange={(e) =>
+                              handleUpdateOperationalCost(
+                                index,
+                                "note",
+                                e.target.value || null,
+                              )
+                            }
+                            placeholder="-"
+                            className="h-8 w-full min-w-25 text-center text-xs sm:text-sm"
+                            disabled={!isEditable}
+                          />
+                        </TableCell>
+                        <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
+                          <Input
+                            type="number"
+                            min={0}
+                            value={item.unitCost ?? ""}
+                            onChange={(e) =>
+                              handleUpdateOperationalCost(
+                                index,
+                                "unitCost",
+                                e.target.value === ""
+                                  ? null
+                                  : parseInt(e.target.value) || 0,
+                              )
+                            }
+                            placeholder="-"
+                            className="h-8 w-24 text-right text-xs sm:text-sm"
+                            disabled={!isEditable}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right text-xs font-medium sm:text-sm">
+                          {itemTotal !== null ? formatCurrency(itemTotal) : "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => handleRemoveOperationalCost(index)}
+                            disabled={!isEditable}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {operationalCosts.length === 0 && (
+                    <TableRow>
+                      <TableCell
+                        colSpan={7}
+                        className="py-8 text-center text-muted-foreground"
+                      >
+                        Belum ada biaya operasional. Klik &quot;Tambah Item&quot;
+                        untuk menambahkan.
                       </TableCell>
                     </TableRow>
-                  );
-                })}
-                {operationalCosts.length === 0 && (
-                  <TableRow>
+                  )}
+                  <TableRow className="bg-muted/50 font-semibold">
                     <TableCell
-                      colSpan={7}
-                      className="py-8 text-center text-muted-foreground"
+                      colSpan={5}
+                      className="text-right text-xs sm:text-sm"
                     >
-                      Belum ada biaya operasional. Klik &quot;Tambah Item&quot;
-                      untuk menambahkan.
+                      TOTAL
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Input
+                        value={formatCurrency(operationalTotal)}
+                        readOnly
+                        className="ml-auto w-24 text-right text-xs font-bold sm:w-32 sm:text-sm"
+                      />
+                    </TableCell>
+                    <TableCell></TableCell>
                   </TableRow>
-                )}
-                <TableRow className="bg-muted/50 font-semibold">
-                  <TableCell
-                    colSpan={5}
-                    className="text-right text-xs sm:text-sm"
-                  >
-                    TOTAL
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Input
-                      value={formatCurrency(operationalTotal)}
-                      readOnly
-                      className="ml-auto w-24 text-right text-xs font-bold sm:w-32 sm:text-sm"
-                    />
-                  </TableCell>
-                  <TableCell></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col items-stretch justify-between gap-3 rounded-xl border bg-card p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
         <div className="flex items-center justify-center gap-2 sm:justify-start">
@@ -783,35 +866,39 @@ function RouteComponent() {
           >
             <Printer className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 bg-transparent"
-            onClick={handleSave}
-            disabled={
-              !isEditable || !isDirty || saveOperationalCostsMutation.isPending
-            }
-          >
-            {saveOperationalCostsMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-          </Button>
-          <Button
-            className="flex-1 gap-2 sm:flex-initial"
-            onClick={handleSave}
-            disabled={
-              !isEditable || !isDirty || saveOperationalCostsMutation.isPending
-            }
-          >
-            {saveOperationalCostsMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            SIMPAN
-          </Button>
+          {showOperationalCosts && (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 bg-transparent"
+                onClick={handleSave}
+                disabled={
+                  !isEditable || !isDirty || saveOperationalCostsMutation.isPending
+                }
+              >
+                {saveOperationalCostsMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                className="flex-1 gap-2 sm:flex-initial"
+                onClick={handleSave}
+                disabled={
+                  !isEditable || !isDirty || saveOperationalCostsMutation.isPending
+                }
+              >
+                {saveOperationalCostsMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                SIMPAN
+              </Button>
+            </>
+          )}
         </div>
         <div className="flex items-center justify-between gap-3 border-t pt-3 sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
           <span className="text-sm font-semibold text-muted-foreground sm:text-base">
