@@ -1,3 +1,4 @@
+import { PermissionGate } from "@/components/permission-gate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -292,15 +293,25 @@ function RouteComponent() {
                           )}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button asChild size="sm" variant="outline">
-                            <Link
-                              to="/back-office/testings/$testingId/detail"
-                              params={{ testingId: testing.id }}
-                            >
-                              <Eye className="mr-1 h-4 w-4" />
-                              <span className="hidden sm:inline">Detail</span>
-                            </Link>
-                          </Button>
+                          <PermissionGate
+                            permission="testing.view"
+                            fallback={
+                              <Badge variant="outline" className="text-xs">
+                                <Eye className="mr-1 inline-block h-3 w-3" />
+                                Tidak ada akses
+                              </Badge>
+                            }
+                          >
+                            <Button asChild size="sm" variant="outline">
+                              <Link
+                                to="/back-office/testings/$testingId/detail"
+                                params={{ testingId: testing.id }}
+                              >
+                                <Eye className="mr-1 h-4 w-4" />
+                                <span className="hidden sm:inline">Detail</span>
+                              </Link>
+                            </Button>
+                          </PermissionGate>
                         </TableCell>
                       </TableRow>
                     ))
