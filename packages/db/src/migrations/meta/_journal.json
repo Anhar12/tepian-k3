@@ -36,6 +36,13 @@
       "when": 1768947457010,
       "tag": "0004_wide_karnak",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1768947521522,
+      "tag": "0005_right_iron_lad",
+      "breakpoints": true
     }
   ]
 }

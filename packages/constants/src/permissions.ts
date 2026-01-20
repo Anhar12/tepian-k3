@@ -9,6 +9,8 @@ export const PERMISSION_ACTION = [
   "update",
   "delete",
   "review",
+  "verify",
+  "approve",
 ] as const;
 
 export type PermissionAction = (typeof PERMISSION_ACTION)[number];
