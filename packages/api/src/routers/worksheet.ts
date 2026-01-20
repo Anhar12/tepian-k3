@@ -631,4 +631,128 @@ export const worksheetRouter = createTRPCRouter({
           ),
         ),
     ),
+
+  /**
+   * Get worksheet chemical materials with full material details
+   */
+  getChemicalMaterials: withPermission("worksheets.read")
+    .input(worksheetSchema.getWorksheetChemicalMaterialsSchema)
+    .query(
+      async ({ input }) =>
+        await runEffect(
+          worksheetQueries.getWorksheetChemicalMaterials(input.worksheetId),
+        ),
+    ),
+
+  /**
+   * Save worksheet chemical materials (batch upsert)
+   */
+  saveChemicalMaterials: withPermission("worksheets.update")
+    .input(worksheetSchema.saveWorksheetChemicalMaterialsSchema)
+    .mutation(async ({ input }) => {
+      return await runEffect(
+        Effect.gen(function* () {
+          // Verify worksheet exists
+          const worksheet = yield* worksheetQueries.getWorksheetById(
+            input.worksheetId,
+          );
+
+          if (!worksheet) {
+            return yield* Effect.fail(
+              new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              }),
+            );
+          }
+
+          // Save materials in transaction
+          const results = yield* Effect.tryPromise({
+            try: () =>
+              db.transaction(async (tx) => {
+                return await runEffect(
+                  worksheetQueries.saveWorksheetChemicalMaterials(
+                    tx,
+                    input.worksheetId,
+                    input.materials,
+                  ),
+                );
+              }),
+            catch: (error) => {
+              logError(
+                "worksheetRouter.saveChemicalMaterials",
+                "Failed to save chemical materials to worksheet",
+                {
+                  input,
+                  error,
+                },
+              );
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal menyimpan bahan kimia worksheet",
+              });
+            },
+          });
+
+          return results;
+        }),
+      );
+    }),
+
+  /**
+   * Update single worksheet chemical material required quantity
+   */
+  updateChemicalMaterialRequired: withPermission("worksheets.update")
+    .input(worksheetSchema.updateWorksheetChemicalMaterialRequiredSchema)
+    .mutation(async ({ input }) => {
+      return await runEffect(
+        Effect.gen(function* () {
+          // Verify worksheet exists
+          const worksheet = yield* worksheetQueries.getWorksheetById(
+            input.worksheetId,
+          );
+
+          if (!worksheet) {
+            return yield* Effect.fail(
+              new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              }),
+            );
+          }
+
+          // Update material in transaction
+          const result = yield* Effect.tryPromise({
+            try: () =>
+              db.transaction(async (tx) => {
+                return await runEffect(
+                  worksheetQueries.updateWorksheetChemicalMaterialRequired(
+                    tx,
+                    input.worksheetId,
+                    input.chemicalMaterialId,
+                    input.required,
+                    input.requiredUnit,
+                  ),
+                );
+              }),
+            catch: (error) => {
+              logError(
+                "worksheetRouter.updateChemicalMaterialRequired",
+                "Failed to update worksheet chemical material",
+                {
+                  input,
+                  error,
+                },
+              );
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal memperbarui kebutuhan bahan kimia",
+              });
+            },
+          });
+
+          return result;
+        }),
+      );
+    }),
 });

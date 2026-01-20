@@ -5,9 +5,6 @@ export type PaginatedParameters = InferQueryModel<
   "parameters",
   {
     with: {
-      cluster: {
-        columns: { id: true; name: true };
-      };
       category: {
         columns: { id: true; name: true };
       };
@@ -19,7 +16,6 @@ export type Parameters = InferQueryModel<
   "parameters",
   {
     with: {
-      cluster: true;
       category: true;
     };
   }

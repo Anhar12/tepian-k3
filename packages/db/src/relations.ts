@@ -32,6 +32,7 @@ import {
   users,
   villages,
   worksheetAssignments,
+  worksheetChemicalMaterials,
   worksheetItems,
   worksheetNotes,
   worksheetOperationalCosts,
@@ -201,7 +202,8 @@ export const chemicalMaterialsRelations = relations(
   chemicalMaterials,
   ({ many }) => ({
     parameters: many(parameterChemicalMaterials),
-  })
+    worksheets: many(worksheetChemicalMaterials),
+  }),
 );
 
 export const parameterChemicalMaterialsRelations = relations(
@@ -328,6 +330,7 @@ export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
   assignments: many(worksheetAssignments),
   items: many(worksheetItems),
   tools: many(worksheetTools),
+  chemicalMaterials: many(worksheetChemicalMaterials),
   notes: many(worksheetNotes),
   operationalCosts: many(worksheetOperationalCosts),
 }));
@@ -357,6 +360,20 @@ export const worksheetToolRelations = relations(worksheetTools, ({ one }) => ({
     references: [tools.id],
   }),
 }));
+
+export const worksheetChemicalMaterialRelations = relations(
+  worksheetChemicalMaterials,
+  ({ one }) => ({
+    worksheet: one(worksheets, {
+      fields: [worksheetChemicalMaterials.worksheetId],
+      references: [worksheets.id],
+    }),
+    chemicalMaterial: one(chemicalMaterials, {
+      fields: [worksheetChemicalMaterials.chemicalMaterialId],
+      references: [chemicalMaterials.id],
+    }),
+  }),
+);
 
 export const worksheetNoteRelations = relations(worksheetNotes, ({ one }) => ({
   worksheet: one(worksheets, {

@@ -6,7 +6,7 @@ import Redis from "ioredis";
 import { RateLimiter } from "./rate-limiter";
 import type { RateLimiterConfig, RateLimiterResult } from "./types";
 import { RateLimiterPresets } from "./types";
-import { env } from "env";
+import { env } from "../../env";
 
 // Export types and presets
 export type { RateLimiterConfig, RateLimiterResult };

@@ -7,12 +7,14 @@ import {
   worksheets,
   worksheetItems,
   worksheetTools,
+  worksheetChemicalMaterials,
   worksheetAssignments,
   worksheetNotes,
   worksheetOperationalCosts,
   testingItem,
   order,
 } from "@tepian-k3/db/schema";
+import type { BahanUnit } from "@tepian-k3/constants";
 import { logCreate, logUpdate } from "./helpers/audit.helpers";
 import type { WorksheetNoteStatus } from "@tepian-k3/constants";
 
@@ -86,11 +88,13 @@ const worksheetQueries = {
             mainSupervisor: {
               with: {
                 user: true,
+                position: true,
               },
             },
             accompanyingSupervisor: {
               with: {
                 user: true,
+                position: true,
               },
             },
             createdBy: true,
@@ -572,6 +576,164 @@ const worksheetQueries = {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengassign alat ke worksheet",
+        });
+      },
+    });
+  },
+
+  /**
+   * Get worksheet chemical materials with full material details
+   */
+  getWorksheetChemicalMaterials(worksheetId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.worksheetChemicalMaterials.findMany({
+          where: eq(worksheetChemicalMaterials.worksheetId, worksheetId),
+          with: {
+            chemicalMaterial: true,
+          },
+          orderBy: (wcm, { asc }) => [asc(wcm.createdAt)],
+        }),
+      catch: (error) => {
+        logError(
+          "worksheetQueries.getWorksheetChemicalMaterials",
+          "Failed to fetch worksheet chemical materials",
+          {
+            error,
+            worksheetId,
+          },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data bahan kimia worksheet",
+        });
+      },
+    });
+  },
+
+  /**
+   * Save worksheet chemical materials (batch upsert)
+   * This will replace all existing materials for the worksheet
+   */
+  saveWorksheetChemicalMaterials(
+    tx: DBorTx,
+    worksheetId: string,
+    materials: Array<{
+      chemicalMaterialId: string;
+      required: number;
+      requiredUnit?: BahanUnit | null;
+    }>,
+  ) {
+    return Effect.tryPromise({
+      try: async () => {
+        // First, remove existing chemical materials
+        await tx
+          .delete(worksheetChemicalMaterials)
+          .where(eq(worksheetChemicalMaterials.worksheetId, worksheetId));
+
+        // Then, add new materials
+        if (materials.length > 0) {
+          const materialsData = materials.map((m) => ({
+            worksheetId,
+            chemicalMaterialId: m.chemicalMaterialId,
+            required: m.required,
+            requiredUnit: m.requiredUnit,
+          }));
+
+          const newMaterials = await tx
+            .insert(worksheetChemicalMaterials)
+            .values(materialsData)
+            .returning();
+
+          return newMaterials;
+        }
+
+        return [];
+      },
+      catch: (error) => {
+        logError(
+          "worksheetQueries.saveWorksheetChemicalMaterials",
+          "Failed to save worksheet chemical materials",
+          {
+            error,
+            worksheetId,
+            materialsCount: materials.length,
+          },
+        );
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menyimpan bahan kimia worksheet",
+        });
+      },
+    });
+  },
+
+  /**
+   * Update single worksheet chemical material required quantity
+   * Creates the record if it doesn't exist (upsert behavior)
+   */
+  updateWorksheetChemicalMaterialRequired(
+    tx: DBorTx,
+    worksheetId: string,
+    chemicalMaterialId: string,
+    required: number,
+    requiredUnit?: BahanUnit | null,
+  ) {
+    return Effect.tryPromise({
+      try: async () => {
+        // Check if record exists
+        const existing = await tx.query.worksheetChemicalMaterials.findFirst({
+          where: (wcm, { and, eq }) =>
+            and(
+              eq(wcm.worksheetId, worksheetId),
+              eq(wcm.chemicalMaterialId, chemicalMaterialId),
+            ),
+        });
+
+        if (existing) {
+          // Update existing record
+          const [updated] = await tx
+            .update(worksheetChemicalMaterials)
+            .set({
+              required,
+              requiredUnit,
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+            })
+            .where(eq(worksheetChemicalMaterials.id, existing.id))
+            .returning();
+
+          return updated;
+        } else {
+          // Create new record
+          const [created] = await tx
+            .insert(worksheetChemicalMaterials)
+            .values({
+              worksheetId,
+              chemicalMaterialId,
+              required,
+              requiredUnit,
+            })
+            .returning();
+
+          return created;
+        }
+      },
+      catch: (error) => {
+        logError(
+          "worksheetQueries.updateWorksheetChemicalMaterialRequired",
+          "Failed to update worksheet chemical material",
+          {
+            error,
+            worksheetId,
+            chemicalMaterialId,
+            required,
+          },
+        );
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal memperbarui kebutuhan bahan kimia",
         });
       },
     });

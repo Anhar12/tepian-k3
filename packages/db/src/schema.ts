@@ -933,6 +933,36 @@ export const worksheetTools = createTable(
   ],
 );
 
+export const worksheetChemicalMaterials = createTable(
+  "worksheet_chemical_materials",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    chemicalMaterialId: uuid("chemical_material_id")
+      .notNull()
+      .references(() => chemicalMaterials.id, { onDelete: "cascade" }),
+    required: real("required").notNull().default(0),
+    requiredUnit: BahanUnitEnum("required_unit"),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_chemical_material_id_idx").using("btree", table.id),
+    index("worksheet_chemical_material_worksheet_id_idx").using(
+      "btree",
+      table.worksheetId,
+    ),
+    index("worksheet_chemical_material_chemical_material_id_idx").using(
+      "btree",
+      table.chemicalMaterialId,
+    ),
+  ],
+);
+
 export const worksheetNotes = createTable(
   "worksheet_notes",
   {

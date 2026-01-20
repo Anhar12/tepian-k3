@@ -32,7 +32,6 @@ import { TabsContent } from "@radix-ui/react-tabs";
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import {
   BAHAN_STATUS,
-  BAHAN_STATUS_COLORS,
   BAHAN_STATUS_LABELS,
   BAHAN_UNIT_LABELS,
   TOOLS_AVAILABILITY,
@@ -49,7 +48,6 @@ import {
 import {
   AlertCircle,
   AlertTriangle,
-  Beaker,
   CheckCircle2,
   ClipboardList,
   Loader2,
@@ -82,6 +80,7 @@ interface Tool {
   id: string;
   toolCode: string;
   toolName: string;
+  parameterName: string;
   condition: ToolsCondition;
   availability: ToolsAvailability;
   selected?: boolean;
@@ -98,17 +97,6 @@ interface WorksheetItemWithMeta {
   note: string | null;
   isReady: boolean;
   locationName: string;
-}
-
-interface WorksheetNote {
-  id: string;
-  note: string;
-  severity: WorksheetNoteStatus;
-  createdAt: string;
-  createdBy: {
-    id: string;
-    name: string;
-  };
 }
 
 function RouteComponent() {
@@ -137,11 +125,16 @@ function RouteComponent() {
     }),
   );
 
-  // Fetch chemical materials for this worksheet
+  // Fetch chemical materials linked to parameters in this worksheet
   const { data: chemicalMaterialsData, isLoading: isLoadingChemicalMaterials } =
     useQuery(
       trpc.chemicalMaterial.getForWorksheet.queryOptions({ worksheetId }),
     );
+
+  // Fetch worksheet-specific chemical materials (with required quantities)
+  const { data: worksheetChemicalMaterialsData } = useQuery(
+    trpc.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
+  );
 
   // Mutations
   const batchUpdateMutation = useMutation(
@@ -189,6 +182,21 @@ function RouteComponent() {
     }),
   );
 
+  const saveChemicalMaterialsMutation = useMutation(
+    trpc.worksheet.saveChemicalMaterials.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
+        );
+        globalSuccessToast("Bahan berhasil disimpan");
+        setLocalRequiredUpdates(new Map());
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal menyimpan bahan : " + error.message);
+      },
+    }),
+  );
+
   // Local state
   const [selectedCluster, setSelectedCluster] = useState("Semua Cluster");
   const [newNote, setNewNote] = useState("");
@@ -214,6 +222,9 @@ function RouteComponent() {
   const [bahanStatusFilter, setBahanStatusFilter] = useState<string>("all");
   const [bahanPage, setBahanPage] = useState(1);
   const [bahanPageSize, setBahanPageSize] = useState(5);
+  const [localRequiredUpdates, setLocalRequiredUpdates] = useState<
+    Map<string, number>
+  >(new Map());
 
   // Initialize selected tools from worksheet data
   useMemo(() => {
@@ -261,6 +272,7 @@ function RouteComponent() {
       id: tool.id,
       toolCode: tool.toolCode,
       toolName: tool.toolName,
+      parameterName: tool.parameterName,
       condition: tool.condition,
       availability: tool.availability,
       selected: selectedToolIds.has(tool.id),
@@ -283,10 +295,55 @@ function RouteComponent() {
     });
   }, [tools, toolSearch, conditionFilter, availabilityFilter]);
 
+  // Merge chemical materials with worksheet required quantities
+  const consumablesWithRequired = useMemo(() => {
+    if (!chemicalMaterialsData) return [];
+
+    // Create a map of worksheet chemical materials (material id -> required)
+    const worksheetMaterialsMap = new Map<
+      string,
+      { required: number; requiredUnit: BahanUnit | null }
+    >();
+    if (worksheetChemicalMaterialsData) {
+      for (const wcm of worksheetChemicalMaterialsData) {
+        worksheetMaterialsMap.set(wcm.chemicalMaterialId, {
+          required: wcm.required,
+          requiredUnit: wcm.requiredUnit,
+        });
+      }
+    }
+
+    return chemicalMaterialsData.map((material) => {
+      const worksheetData = worksheetMaterialsMap.get(material.id);
+      const localRequired = localRequiredUpdates.get(material.id);
+      const required = localRequired ?? worksheetData?.required ?? 0;
+
+      // Calculate total stock (usedStock + sealedStock)
+      const totalStock =
+        (material.usedStock ?? 0) + (material.sealedStock ?? 0);
+
+      return {
+        ...material,
+        required,
+        requiredUnit: worksheetData?.requiredUnit ?? material.usedStockUnit,
+        totalStock,
+        stockStatus:
+          required === 0
+            ? ("none" as const)
+            : required <= totalStock
+              ? ("sufficient" as const)
+              : ("insufficient" as const),
+      };
+    });
+  }, [
+    chemicalMaterialsData,
+    worksheetChemicalMaterialsData,
+    localRequiredUpdates,
+  ]);
+
   // Filter chemical materials
   const filteredChemicalMaterials = useMemo(() => {
-    if (!chemicalMaterialsData) return [];
-    return chemicalMaterialsData.filter((material) => {
+    return consumablesWithRequired.filter((material) => {
       const matchesSearch =
         material.code.toLowerCase().includes(bahanSearch.toLowerCase()) ||
         material.name.toLowerCase().includes(bahanSearch.toLowerCase()) ||
@@ -298,18 +355,42 @@ function RouteComponent() {
         bahanStatusFilter === "all" || material.status === bahanStatusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [chemicalMaterialsData, bahanSearch, bahanStatusFilter]);
+  }, [consumablesWithRequired, bahanSearch, bahanStatusFilter]);
 
-  // Get low stock / out of stock items
-  const lowStockItems = useMemo(() => {
-    if (!chemicalMaterialsData) return [];
-    return chemicalMaterialsData.filter(
+  // Get items with insufficient stock (for ready parameters)
+  const insufficientStockItems = useMemo(() => {
+    return consumablesWithRequired.filter(
       (material) =>
-        material.status === "hampir_habis" ||
-        material.status === "habis" ||
-        material.status === "expired",
+        material.required > 0 && material.stockStatus === "insufficient",
     );
-  }, [chemicalMaterialsData]);
+  }, [consumablesWithRequired]);
+
+  // Get low stock / out of stock items based on material status
+  const outOfStockMaterials = useMemo(() => {
+    return consumablesWithRequired.filter(
+      (material) => material.status === "habis",
+    );
+  }, [consumablesWithRequired]);
+
+  const lowStockMaterials = useMemo(() => {
+    return consumablesWithRequired.filter(
+      (material) => material.status === "hampir_habis",
+    );
+  }, [consumablesWithRequired]);
+
+  const expiredMaterials = useMemo(() => {
+    return consumablesWithRequired.filter(
+      (material) => material.status === "expired",
+    );
+  }, [consumablesWithRequired]);
+
+  const criticalStockCount = useMemo(() => {
+    return (
+      outOfStockMaterials.length +
+      lowStockMaterials.length +
+      expiredMaterials.length
+    );
+  }, [outOfStockMaterials, lowStockMaterials, expiredMaterials]);
 
   // Pagination
   const parameterPagination = usePagination(
@@ -410,6 +491,31 @@ function RouteComponent() {
     });
   };
 
+  const handleRequiredChange = (materialId: string, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setLocalRequiredUpdates((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(materialId, numValue);
+      return newMap;
+    });
+  };
+
+  const handleSaveBahan = () => {
+    // Build the materials array from consumablesWithRequired with local updates applied
+    const materials = consumablesWithRequired.map((material) => ({
+      chemicalMaterialId: material.id,
+      required: localRequiredUpdates.has(material.id)
+        ? localRequiredUpdates.get(material.id)!
+        : material.required,
+      requiredUnit: material.requiredUnit,
+    }));
+
+    saveChemicalMaterialsMutation.mutate({
+      worksheetId,
+      materials,
+    });
+  };
+
   const selectedToolsCount = selectedToolIds.size;
   const allToolsSelected =
     filteredTools.length > 0 &&
@@ -423,6 +529,7 @@ function RouteComponent() {
   }).length;
 
   const hasLocalChanges = localItemUpdates.size > 0;
+  const hasLocalBahanChanges = localRequiredUpdates.size > 0;
 
   useSubscription({
     ...trpc.event.onWorksheetNoteCreated.subscriptionOptions(),
@@ -601,11 +708,11 @@ function RouteComponent() {
                       <TableHead className="text-center text-xs font-semibold sm:text-sm">
                         Nilai
                       </TableHead>
-                      <TableHead className="hidden text-xs font-semibold sm:table-cell sm:text-sm">
-                        Catatan
-                      </TableHead>
                       <TableHead className="text-center text-xs font-semibold sm:text-sm">
                         Ready
+                      </TableHead>
+                      <TableHead className="hidden text-xs font-semibold sm:table-cell sm:text-sm">
+                        Catatan
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -653,6 +760,20 @@ function RouteComponent() {
                               step="any"
                             />
                           </TableCell>
+                          <TableCell className="text-center">
+                            <Checkbox
+                              checked={itemState.isReady}
+                              onCheckedChange={(checked) =>
+                                handleItemChange(
+                                  item.id,
+                                  "isReady",
+                                  checked as boolean,
+                                )
+                              }
+                              className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
+                            />
+                          </TableCell>
+
                           <TableCell className="hidden sm:table-cell">
                             <Input
                               value={itemState.note ?? ""}
@@ -665,19 +786,6 @@ function RouteComponent() {
                               }
                               className="h-8 text-xs"
                               placeholder="Catatan..."
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Checkbox
-                              checked={itemState.isReady}
-                              onCheckedChange={(checked) =>
-                                handleItemChange(
-                                  item.id,
-                                  "isReady",
-                                  checked as boolean,
-                                )
-                              }
-                              className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
                             />
                           </TableCell>
                         </TableRow>
@@ -842,6 +950,9 @@ function RouteComponent() {
                         Nama Alat
                       </TableHead>
                       <TableHead className="text-xs font-semibold sm:text-sm">
+                        Untuk Parameter
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold sm:text-sm">
                         Kondisi
                       </TableHead>
                       <TableHead className="text-xs font-semibold sm:text-sm">
@@ -876,6 +987,9 @@ function RouteComponent() {
                         </TableCell>
                         <TableCell className="text-xs font-medium sm:text-sm">
                           {tool.toolName}
+                        </TableCell>
+                        <TableCell className="text-xs font-medium sm:text-sm">
+                          {tool.parameterName}
                         </TableCell>
                         <TableCell>
                           <StatusBadge
@@ -917,15 +1031,49 @@ function RouteComponent() {
 
           {/* Bahan Tab */}
           <TabsContent value="bahan" className="p-3 pt-4 sm:p-4 sm:pt-6">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Cari bahan (kode, nama, rumus kimia)..."
+                  value={bahanSearch}
+                  onChange={(e) => {
+                    setBahanSearch(e.target.value);
+                    setBahanPage(1);
+                  }}
+                  className="pl-9"
+                />
+              </div>
+              <Select
+                value={bahanStatusFilter}
+                onValueChange={(v) => {
+                  setBahanStatusFilter(v);
+                  setBahanPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  {BAHAN_STATUS.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {BAHAN_STATUS_LABELS[s]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {isLoadingChemicalMaterials ? (
               <div className="flex h-48 items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
-            ) : chemicalMaterialsData && chemicalMaterialsData.length === 0 ? (
+            ) : filteredChemicalMaterials.length === 0 ? (
               <div className="py-12 text-center">
-                <Beaker className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+                <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
                 <h3 className="mb-2 text-lg font-medium">
-                  Tidak Ada Bahan Kimia
+                  Tidak ada bahan yang dibutuhkan
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Parameter pada worksheet ini tidak memerlukan bahan kimia.
@@ -933,103 +1081,70 @@ function RouteComponent() {
               </div>
             ) : (
               <>
-                <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-                  <div className="relative flex-1">
-                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Cari bahan (kode, nama, rumus kimia)..."
-                      value={bahanSearch}
-                      onChange={(e) => {
-                        setBahanSearch(e.target.value);
-                        setBahanPage(1);
-                      }}
-                      className="pl-9"
-                    />
-                  </div>
-                  <Select
-                    value={bahanStatusFilter}
-                    onValueChange={(v) => {
-                      setBahanStatusFilter(v);
-                      setBahanPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-full sm:w-40">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Semua Status</SelectItem>
-                      {BAHAN_STATUS.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {BAHAN_STATUS_LABELS[status]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+                  <Card className="border-0 shadow-sm">
+                    <CardContent className="p-2 text-center sm:p-3">
+                      <p className="text-lg font-bold sm:text-xl">
+                        {filteredChemicalMaterials.length}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Total Bahan
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-0 shadow-sm">
+                    <CardContent className="p-2 text-center sm:p-3">
+                      <p className="text-lg font-bold text-emerald-600 sm:text-xl">
+                        {
+                          consumablesWithRequired.filter(
+                            (c) => c.stockStatus === "sufficient",
+                          ).length
+                        }
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Stok Cukup
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-0 shadow-sm">
+                    <CardContent className="p-2 text-center sm:p-3">
+                      <p className="text-lg font-bold text-amber-600 sm:text-xl">
+                        {insufficientStockItems.length}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Stok Kurang
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-0 shadow-sm">
+                    <CardContent className="p-2 text-center sm:p-3">
+                      <p className="text-lg font-bold text-primary sm:text-xl">
+                        {consumablesWithRequired.reduce(
+                          (sum, c) => sum + c.required,
+                          0,
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Total Dibutuhkan
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                {/* Summary Cards */}
-                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
-                  {[
-                    {
-                      label: "Total",
-                      count: chemicalMaterialsData?.length ?? 0,
-                      color: "bg-slate-100 text-slate-700",
-                    },
-                    {
-                      label: "Tersedia",
-                      count:
-                        chemicalMaterialsData?.filter(
-                          (m) => m.status === "tersedia",
-                        ).length ?? 0,
-                      color: "bg-green-100 text-green-700",
-                    },
-                    {
-                      label: "Hampir Habis",
-                      count:
-                        chemicalMaterialsData?.filter(
-                          (m) => m.status === "hampir_habis",
-                        ).length ?? 0,
-                      color: "bg-yellow-100 text-yellow-700",
-                    },
-                    {
-                      label: "Habis",
-                      count:
-                        chemicalMaterialsData?.filter(
-                          (m) => m.status === "habis",
-                        ).length ?? 0,
-                      color: "bg-red-100 text-red-700",
-                    },
-                    {
-                      label: "Expired",
-                      count:
-                        chemicalMaterialsData?.filter(
-                          (m) => m.status === "expired",
-                        ).length ?? 0,
-                      color: "bg-gray-100 text-gray-700",
-                    },
-                    {
-                      label: "Dipesan",
-                      count:
-                        chemicalMaterialsData?.filter(
-                          (m) => m.status === "dipesan",
-                        ).length ?? 0,
-                      color: "bg-blue-100 text-blue-700",
-                    },
-                  ].map((stat) => (
-                    <Card key={stat.label} className="border-0 shadow-sm">
-                      <CardContent className="p-2 text-center sm:p-3">
-                        <p className="text-lg font-bold sm:text-xl">
-                          {stat.count}
-                        </p>
-                        <p
-                          className={`rounded-full px-2 py-0.5 text-xs ${stat.color}`}
-                        >
-                          {stat.label}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                {hasLocalBahanChanges && (
+                  <div className="mb-4 flex justify-end">
+                    <Button
+                      onClick={handleSaveBahan}
+                      disabled={saveChemicalMaterialsMutation.isPending}
+                      className="gap-2"
+                    >
+                      {saveChemicalMaterialsMutation.isPending && (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      )}
+                      Simpan Bahan ({localRequiredUpdates.size} perubahan)
+                    </Button>
+                  </div>
+                )}
 
                 <div className="overflow-hidden rounded-xl border">
                   <div className="overflow-x-auto">
@@ -1037,22 +1152,22 @@ function RouteComponent() {
                       <TableHeader>
                         <TableRow className="bg-muted/50">
                           <TableHead className="text-xs font-semibold sm:text-sm">
-                            Kode
+                            Nama Bahan
                           </TableHead>
                           <TableHead className="text-xs font-semibold sm:text-sm">
-                            Nama Bahan
+                            Untuk Parameter
                           </TableHead>
                           <TableHead className="hidden text-xs font-semibold sm:text-sm md:table-cell">
                             Rumus Kimia
                           </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Stok Terpakai
+                          <TableHead className="text-xs font-semibold sm:text-sm">
+                            Satuan
                           </TableHead>
                           <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Stok Tersegel
+                            Dibutuhkan
                           </TableHead>
-                          <TableHead className="hidden text-center text-xs font-semibold sm:text-sm lg:table-cell">
-                            Expired
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Stok
                           </TableHead>
                           <TableHead className="text-center text-xs font-semibold sm:text-sm">
                             Status
@@ -1060,60 +1175,60 @@ function RouteComponent() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {bahanPagination.paginatedData.map((material) => (
+                        {bahanPagination.paginatedData.map((item) => (
                           <TableRow
-                            key={material.id}
-                            className={`hover:bg-muted/30 ${
-                              material.status === "habis" ||
-                              material.status === "expired"
-                                ? "bg-red-50/50"
-                                : material.status === "hampir_habis"
-                                  ? "bg-yellow-50/50"
-                                  : ""
-                            }`}
+                            key={item.id}
+                            className={`hover:bg-muted/30 ${item.required > 0 ? "bg-primary/5" : ""}`}
                           >
-                            <TableCell className="font-mono text-xs">
-                              {material.code}
+                            <TableCell className="text-xs font-medium sm:text-sm">
+                              {item.name}
                             </TableCell>
                             <TableCell className="text-xs font-medium sm:text-sm">
-                              {material.name}
+                              {item.parameterName}
                             </TableCell>
                             <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
-                              {material.chemicalFormula ?? "-"}
+                              {item.chemicalFormula ?? "-"}
                             </TableCell>
-                            <TableCell className="text-center text-xs sm:text-sm">
-                              {material.usedStock ?? 0}{" "}
-                              {material.usedStockUnit
+                            <TableCell className="text-xs sm:text-sm">
+                              {item.usedStockUnit
                                 ? BAHAN_UNIT_LABELS[
-                                    material.usedStockUnit as BahanUnit
+                                    item.usedStockUnit as BahanUnit
                                   ]
-                                : ""}
-                            </TableCell>
-                            <TableCell className="text-center text-xs sm:text-sm">
-                              {material.sealedStock ?? 0}{" "}
-                              {material.sealedStockUnit
-                                ? BAHAN_UNIT_LABELS[
-                                    material.sealedStockUnit as BahanUnit
-                                  ]
-                                : ""}
-                            </TableCell>
-                            <TableCell className="hidden text-center text-xs sm:text-sm lg:table-cell">
-                              {material.expiredDate
-                                ? new Date(
-                                    material.expiredDate,
-                                  ).toLocaleDateString("id-ID")
                                 : "-"}
                             </TableCell>
                             <TableCell className="text-center">
-                              <Badge
-                                className={`${BAHAN_STATUS_COLORS[material.status as BahanStatus]} text-xs`}
-                              >
-                                {
-                                  BAHAN_STATUS_LABELS[
-                                    material.status as BahanStatus
-                                  ]
+                              <Input
+                                type="number"
+                                value={item.required}
+                                onChange={(e) =>
+                                  handleRequiredChange(item.id, e.target.value)
                                 }
+                                className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
+                                min={0}
+                              />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge
+                                variant="outline"
+                                className="bg-background text-xs"
+                              >
+                                {item.totalStock}
                               </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {item.stockStatus === "none" ? (
+                                <span className="text-xs text-muted-foreground">
+                                  -
+                                </span>
+                              ) : item.stockStatus === "sufficient" ? (
+                                <Badge className="bg-emerald-100 text-xs text-emerald-700">
+                                  Cukup
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-amber-100 text-xs text-amber-700">
+                                  Kurang
+                                </Badge>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -1138,120 +1253,209 @@ function RouteComponent() {
 
           {/* Stok Habis Tab */}
           <TabsContent value="stok-habis" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            {isLoadingChemicalMaterials ? (
-              <div className="flex h-48 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : lowStockItems.length === 0 ? (
+            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-2 text-center sm:p-3">
+                  <p className="text-lg font-bold sm:text-xl">
+                    {consumablesWithRequired.length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Total Bahan</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 border-red-200 bg-red-50/50 shadow-sm">
+                <CardContent className="p-2 text-center sm:p-3">
+                  <p className="text-lg font-bold text-red-600 sm:text-xl">
+                    {outOfStockMaterials.length}
+                  </p>
+                  <p className="text-xs text-red-600">Habis</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 border-amber-200 bg-amber-50/50 shadow-sm">
+                <CardContent className="p-2 text-center sm:p-3">
+                  <p className="text-lg font-bold text-amber-600 sm:text-xl">
+                    {lowStockMaterials.length}
+                  </p>
+                  <p className="text-xs text-amber-600">Stok Rendah</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 border-emerald-200 bg-emerald-50/50 shadow-sm">
+                <CardContent className="p-2 text-center sm:p-3">
+                  <p className="text-lg font-bold text-emerald-600 sm:text-xl">
+                    {
+                      consumablesWithRequired.filter(
+                        (c) => c.status === "tersedia",
+                      ).length
+                    }
+                  </p>
+                  <p className="text-xs text-emerald-600">Stok Aman</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {criticalStockCount === 0 ? (
               <div className="py-12 text-center">
                 <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-emerald-500" />
                 <h3 className="mb-2 text-lg font-medium">
-                  Semua Stok Tersedia
+                  Semua stok dalam kondisi aman
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Tidak ada bahan kimia yang hampir habis, habis, atau expired.
+                  Tidak ada bahan yang perlu di-restock saat ini.
                 </p>
               </div>
             ) : (
-              <>
-                <Alert className="mb-4 border-red-200 bg-red-50">
-                  <AlertTriangle className="h-4 w-4 text-red-500" />
-                  <AlertDescription className="text-sm text-red-700">
-                    Terdapat <strong>{lowStockItems.length}</strong> bahan kimia
-                    yang perlu diperhatikan (hampir habis, habis, atau expired).
-                  </AlertDescription>
-                </Alert>
-
-                <div className="overflow-hidden rounded-xl border">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-muted/50">
-                          <TableHead className="text-xs font-semibold sm:text-sm">
-                            Kode
-                          </TableHead>
-                          <TableHead className="text-xs font-semibold sm:text-sm">
-                            Nama Bahan
-                          </TableHead>
-                          <TableHead className="hidden text-xs font-semibold sm:text-sm md:table-cell">
-                            Rumus Kimia
-                          </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Stok Terpakai
-                          </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Stok Tersegel
-                          </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Expired
-                          </TableHead>
-                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                            Status
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {lowStockItems.map((material) => (
-                          <TableRow
-                            key={material.id}
-                            className={`hover:bg-muted/30 ${
-                              material.status === "habis" ||
-                              material.status === "expired"
-                                ? "bg-red-50"
-                                : "bg-yellow-50"
-                            }`}
-                          >
-                            <TableCell className="font-mono text-xs">
-                              {material.code}
-                            </TableCell>
-                            <TableCell className="text-xs font-medium sm:text-sm">
-                              {material.name}
-                            </TableCell>
-                            <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
-                              {material.chemicalFormula ?? "-"}
-                            </TableCell>
-                            <TableCell className="text-center text-xs sm:text-sm">
-                              {material.usedStock ?? 0}{" "}
-                              {material.usedStockUnit
-                                ? BAHAN_UNIT_LABELS[
-                                    material.usedStockUnit as BahanUnit
-                                  ]
-                                : ""}
-                            </TableCell>
-                            <TableCell className="text-center text-xs sm:text-sm">
-                              {material.sealedStock ?? 0}{" "}
-                              {material.sealedStockUnit
-                                ? BAHAN_UNIT_LABELS[
-                                    material.sealedStockUnit as BahanUnit
-                                  ]
-                                : ""}
-                            </TableCell>
-                            <TableCell className="text-center text-xs sm:text-sm">
-                              {material.expiredDate
-                                ? new Date(
-                                    material.expiredDate,
-                                  ).toLocaleDateString("id-ID")
-                                : "-"}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge
-                                className={`${BAHAN_STATUS_COLORS[material.status as BahanStatus]} text-xs`}
-                              >
-                                {
-                                  BAHAN_STATUS_LABELS[
-                                    material.status as BahanStatus
-                                  ]
-                                }
-                              </Badge>
-                            </TableCell>
+              <div className="space-y-6">
+                {outOfStockMaterials.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 flex items-center gap-2 font-semibold text-red-600">
+                      <AlertTriangle className="h-4 w-4" />
+                      Stok Habis ({outOfStockMaterials.length})
+                    </h3>
+                    <div className="overflow-hidden rounded-xl border border-red-200">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-red-50">
+                            <TableHead className="text-xs font-semibold sm:text-sm">
+                              Nama Bahan
+                            </TableHead>
+                            <TableHead className="text-xs font-semibold sm:text-sm">
+                              Satuan
+                            </TableHead>
+                            <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                              Stok
+                            </TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {outOfStockMaterials.map((item) => (
+                            <TableRow key={item.id} className="bg-red-50/30">
+                              <TableCell className="text-xs font-medium sm:text-sm">
+                                {item.name}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {item.usedStockUnit
+                                  ? BAHAN_UNIT_LABELS[
+                                      item.usedStockUnit as BahanUnit
+                                    ]
+                                  : "-"}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
+                                  {item.totalStock}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
-                </div>
-              </>
+                )}
+
+                {lowStockMaterials.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 flex items-center gap-2 font-semibold text-amber-600">
+                      <AlertCircle className="h-4 w-4" />
+                      Stok Rendah ({lowStockMaterials.length})
+                    </h3>
+                    <div className="overflow-hidden rounded-xl border border-amber-200">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-amber-50">
+                            <TableHead className="text-xs font-semibold sm:text-sm">
+                              Nama Bahan
+                            </TableHead>
+                            <TableHead className="text-xs font-semibold sm:text-sm">
+                              Satuan
+                            </TableHead>
+                            <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                              Stok
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {lowStockMaterials.map((item) => (
+                            <TableRow key={item.id} className="bg-amber-50/30">
+                              <TableCell className="text-xs font-medium sm:text-sm">
+                                {item.name}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {item.usedStockUnit
+                                  ? BAHAN_UNIT_LABELS[
+                                      item.usedStockUnit as BahanUnit
+                                    ]
+                                  : "-"}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge className="bg-amber-100 text-xs text-amber-700">
+                                  {item.totalStock}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {expiredMaterials.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-600">
+                      <AlertCircle className="h-4 w-4" />
+                      Expired ({expiredMaterials.length})
+                    </h3>
+                    <div className="overflow-hidden rounded-xl border border-gray-200">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50">
+                            <TableHead className="text-xs font-semibold sm:text-sm">
+                              Nama Bahan
+                            </TableHead>
+                            <TableHead className="text-xs font-semibold sm:text-sm">
+                              Expired Date
+                            </TableHead>
+                            <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                              Stok
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {expiredMaterials.map((item) => (
+                            <TableRow key={item.id} className="bg-gray-50/30">
+                              <TableCell className="text-xs font-medium sm:text-sm">
+                                {item.name}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {item.expiredDate
+                                  ? new Date(
+                                      item.expiredDate,
+                                    ).toLocaleDateString("id-ID")
+                                  : "-"}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge className="bg-gray-100 text-xs text-gray-700">
+                                  {item.totalStock}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
+            <div className="mt-6 rounded-lg bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">
+                <strong>Catatan:</strong> Bahan dengan status "Hampir Habis"
+                dianggap stok rendah. Stok dikelola melalui dashboard inventory.
+                Hubungi admin untuk melakukan restocking.
+              </p>
+            </div>
           </TabsContent>
 
           {/* Catatan Tab */}

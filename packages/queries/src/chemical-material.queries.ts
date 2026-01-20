@@ -17,6 +17,7 @@ import {
 import {
   chemicalMaterials,
   parameterChemicalMaterials,
+  parameters,
 } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
@@ -346,10 +347,11 @@ const chemicalMaterialQueries = {
 
         if (parameterIds.length === 0) return [];
 
-        // Get chemical materials linked to these parameters
+        // Get chemical materials linked to these parameters with parameter name
         const results = await db
-          .selectDistinct({
+          .select({
             ...getTableColumns(chemicalMaterials),
+            parameterName: parameters.name,
           })
           .from(chemicalMaterials)
           .innerJoin(
@@ -359,13 +361,17 @@ const chemicalMaterialQueries = {
               parameterChemicalMaterials.chemicalMaterialId,
             ),
           )
+          .innerJoin(
+            parameters,
+            eq(parameterChemicalMaterials.parameterId, parameters.id),
+          )
           .where(
             and(
               inArray(parameterChemicalMaterials.parameterId, parameterIds),
               isNull(chemicalMaterials.deletedAt),
             ),
           )
-          .orderBy(asc(chemicalMaterials.name));
+          .orderBy(asc(chemicalMaterials.name), asc(parameters.name));
 
         return results;
       },

@@ -199,7 +199,7 @@ export function WorksheetSidebar({
                 </div>
                 {mainSupervisor.position && (
                   <div className="ml-7 text-xs text-muted-foreground">
-                    {mainSupervisor.position}
+                    {mainSupervisor.position.name}
                   </div>
                 )}
               </div>

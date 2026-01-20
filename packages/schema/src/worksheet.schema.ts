@@ -3,10 +3,15 @@ import {
   worksheetItems,
   worksheetNotes,
   worksheetOperationalCosts,
+  worksheetChemicalMaterials,
 } from "@tepian-k3/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
-import { WORKSHEET_STATUS, WORKSHEET_NOTE_STATUS } from "@tepian-k3/constants";
+import {
+  WORKSHEET_STATUS,
+  WORKSHEET_NOTE_STATUS,
+  BAHAN_UNITS,
+} from "@tepian-k3/constants";
 
 // Base schemas from drizzle
 const baseWorksheetSchema = createInsertSchema(worksheets);
@@ -14,6 +19,9 @@ const baseWorksheetItemSchema = createInsertSchema(worksheetItems);
 const baseWorksheetNoteSchema = createInsertSchema(worksheetNotes);
 const baseWorksheetOperationalCostSchema = createInsertSchema(
   worksheetOperationalCosts,
+);
+const baseWorksheetChemicalMaterialSchema = createInsertSchema(
+  worksheetChemicalMaterials,
 );
 
 // Create worksheet from testing
@@ -137,11 +145,38 @@ const saveWorksheetOperationalCostsSchema = z.object({
   costs: z.array(operationalCostItemSchema),
 });
 
+// Chemical material item schema for batch operations
+const worksheetChemicalMaterialItemSchema = z.object({
+  chemicalMaterialId: z.uuidv7(),
+  required: z.number().min(0).default(0),
+  requiredUnit: z.enum(BAHAN_UNITS).optional().nullable(),
+});
+
+// Save worksheet chemical materials (batch upsert)
+const saveWorksheetChemicalMaterialsSchema = z.object({
+  worksheetId: z.uuidv7(),
+  materials: z.array(worksheetChemicalMaterialItemSchema),
+});
+
+// Update single worksheet chemical material required quantity
+const updateWorksheetChemicalMaterialRequiredSchema = z.object({
+  worksheetId: z.uuidv7(),
+  chemicalMaterialId: z.uuidv7(),
+  required: z.number().min(0),
+  requiredUnit: z.enum(BAHAN_UNITS).optional().nullable(),
+});
+
+// Get worksheet chemical materials schema
+const getWorksheetChemicalMaterialsSchema = z.object({
+  worksheetId: z.uuidv7(),
+});
+
 const worksheetSchema = {
   baseWorksheetSchema,
   baseWorksheetItemSchema,
   baseWorksheetNoteSchema,
   baseWorksheetOperationalCostSchema,
+  baseWorksheetChemicalMaterialSchema,
   createWorksheetFromTestingSchema,
   createWorksheetFromOrderSchema,
   submitForVerificationSchema,
@@ -158,6 +193,10 @@ const worksheetSchema = {
   getWorksheetTransactionDetailSchema,
   operationalCostItemSchema,
   saveWorksheetOperationalCostsSchema,
+  worksheetChemicalMaterialItemSchema,
+  saveWorksheetChemicalMaterialsSchema,
+  updateWorksheetChemicalMaterialRequiredSchema,
+  getWorksheetChemicalMaterialsSchema,
 };
 
 export default worksheetSchema;

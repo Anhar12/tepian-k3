@@ -14,7 +14,7 @@ import {
   isNull,
   sql,
 } from "@tepian-k3/db";
-import { parameterTools, tools } from "@tepian-k3/db/schema";
+import { parameterTools, parameters, tools } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { Effect } from "effect";
@@ -259,20 +259,22 @@ const toolsQueries = {
 
         if (parameterIds.length === 0) return [];
 
-        // Get tools linked to these parameter IDs
+        // Get tools linked to these parameter IDs with parameter name
         const result = await db
-          .selectDistinct({
+          .select({
             ...getTableColumns(tools),
+            parameterName: parameters.name,
           })
           .from(tools)
           .innerJoin(parameterTools, eq(parameterTools.toolId, tools.id))
+          .innerJoin(parameters, eq(parameterTools.parameterId, parameters.id))
           .where(
             and(
               inArray(parameterTools.parameterId, parameterIds),
               isNull(tools.deletedAt),
             ),
           )
-          .orderBy(asc(tools.toolName));
+          .orderBy(asc(tools.toolName), asc(parameters.name));
 
         return result;
       },
