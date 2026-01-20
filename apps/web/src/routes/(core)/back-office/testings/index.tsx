@@ -42,7 +42,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/(core)/back-office/testings/")({
   validateSearch: (search) => searchSchema.parse(search),
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "testing.read" }),
+    await requirePermission(context, { permission: "testing.view" }),
   component: RouteComponent,
 });
 

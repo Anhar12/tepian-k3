@@ -51,7 +51,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/(core)/back-office/worksheets/")({
   validateSearch: (search) => searchSchema.parse(search),
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "worksheets.read" }),
+    await requirePermission(context, { permission: "worksheets.view" }),
   component: RouteComponent,
 });
 

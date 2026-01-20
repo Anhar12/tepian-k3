@@ -11,7 +11,7 @@ export const Route = createFileRoute("/(core)/worksheets")({
   }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: "worksheets.view",
+      permission: "worksheets.read",
     }),
   component: RouteComponent,
 });
