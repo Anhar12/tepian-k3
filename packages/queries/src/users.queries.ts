@@ -24,6 +24,25 @@ import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import userRolesQueries from "./user-roles.queries";
 
 const usersQueries = {
+  getAllUsers() {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.users.findMany({
+          where: isNull(users.deletedAt),
+        }),
+      catch: (error) => {
+        logError("usersQueries.getAllUsers", "Failed to get all users", {
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Gagal mengambil data pengguna.`,
+          cause: error,
+        });
+      },
+    });
+  },
+
   getUserByEmail(email: string) {
     return Effect.tryPromise({
       try: () =>
@@ -49,9 +68,9 @@ const usersQueries = {
               new TRPCError({
                 code: "NOT_FOUND",
                 message: `Pengguna tidak ditemukan.`,
-              })
-            )
-      )
+              }),
+            ),
+      ),
     );
   },
 
@@ -91,9 +110,9 @@ const usersQueries = {
               new TRPCError({
                 code: "NOT_FOUND",
                 message: `Pengguna tidak ditemukan.`,
-              })
-            )
-      )
+              }),
+            ),
+      ),
     );
   },
 
@@ -110,7 +129,7 @@ const usersQueries = {
           {
             userId,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -126,9 +145,9 @@ const usersQueries = {
               new TRPCError({
                 code: "NOT_FOUND",
                 message: `Pengguna tidak ditemukan.`,
-              })
-            )
-      )
+              }),
+            ),
+      ),
     );
   },
 
@@ -154,7 +173,7 @@ const usersQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -164,20 +183,20 @@ const usersQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(users.deletedAt)
-              : isNull(users.deletedAt)
+              : isNull(users.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(users[item.id]) : asc(users[item.id])
+              item.desc ? desc(users[item.id]) : asc(users[item.id]),
             )
           : [desc(users.createdAt)];
 
@@ -218,7 +237,7 @@ const usersQueries = {
           logError(
             "usersQueries.getOffsetPaginatedUsers",
             "Failed to get all users",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -238,7 +257,7 @@ const usersQueries = {
   },
 
   getOffsetPaginatedDeletedUsers(
-    input: z.infer<typeof userSchema.getAllUsersSchema>
+    input: z.infer<typeof userSchema.getAllUsersSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -261,7 +280,7 @@ const usersQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -271,18 +290,18 @@ const usersQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
-            isNotNull(users.deletedAt)
+            isNotNull(users.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(users[item.id]) : asc(users[item.id])
+              item.desc ? desc(users[item.id]) : asc(users[item.id]),
             )
           : [desc(users.createdAt)];
 
@@ -323,7 +342,7 @@ const usersQueries = {
           logError(
             "usersQueries.getOffsetPaginatedUsers",
             "Failed to get all users",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -356,7 +375,7 @@ const usersQueries = {
             {
               email: data.email,
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -371,7 +390,7 @@ const usersQueries = {
           new TRPCError({
             code: "CONFLICT",
             message: `Email sudah digunakan.`,
-          })
+          }),
         );
       }
 
@@ -410,7 +429,7 @@ const usersQueries = {
 
             // Assign default role to user
             await Effect.runPromise(
-              userRolesQueries.assignDefaultRoleToUser(newUser.id, tx)
+              userRolesQueries.assignDefaultRoleToUser(newUser.id, tx),
             );
 
             return newUser;
@@ -447,7 +466,7 @@ const usersQueries = {
             {
               email: data.email,
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -462,7 +481,7 @@ const usersQueries = {
           new TRPCError({
             code: "CONFLICT",
             message: `Email sudah digunakan.`,
-          })
+          }),
         );
       }
 
@@ -497,8 +516,8 @@ const usersQueries = {
                 emailVerifiedAt: data.emailVerified
                   ? new Date().toISOString()
                   : data.emailVerifiedAt
-                  ? new Date(data.emailVerifiedAt).toISOString()
-                  : null,
+                    ? new Date(data.emailVerifiedAt).toISOString()
+                    : null,
                 password: hashedPassword,
               })
               .returning();
@@ -512,7 +531,7 @@ const usersQueries = {
 
             data.roleId.forEach(async (roleId) => {
               await Effect.runPromise(
-                userRolesQueries.assignRoleToUser(user.id, roleId, tx)
+                userRolesQueries.assignRoleToUser(user.id, roleId, tx),
               );
             });
 
@@ -537,7 +556,7 @@ const usersQueries = {
 
   updateUser(
     data: z.infer<typeof userSchema.adminUpdateUserSchema>,
-    id: string
+    id: string,
   ) {
     return Effect.gen(this, function* () {
       const existingUser = yield* this.getUserByIdWithPassword(id);
@@ -549,7 +568,7 @@ const usersQueries = {
               logError(
                 "usersQueries.adminUpdateUser",
                 "Failed to hash password",
-                { id, error }
+                { id, error },
               );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
@@ -572,8 +591,8 @@ const usersQueries = {
                 .where(
                   and(
                     eq(userRoles.userId, id),
-                    inArray(userRoles.roleId, data.deletedRoleIds ?? [])
-                  )
+                    inArray(userRoles.roleId, data.deletedRoleIds ?? []),
+                  ),
                 );
             }
 
@@ -585,7 +604,7 @@ const usersQueries = {
                   data.newRoleIds!.map((roleId) => ({
                     userId: id,
                     roleId,
-                  }))
+                  })),
                 )
                 .onConflictDoNothing();
             }
@@ -637,7 +656,7 @@ const usersQueries = {
 
   updateUserProfile(
     id: string,
-    data: z.infer<typeof userSchema.updateUserSchema>
+    data: z.infer<typeof userSchema.updateUserSchema>,
   ) {
     return Effect.gen(this, function* () {
       yield* this.getUserById(id);
@@ -649,7 +668,7 @@ const usersQueries = {
           logError(
             "usersQueries.updateUserProfile",
             "Failed to update user profile",
-            { id, data, error }
+            { id, data, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -663,13 +682,13 @@ const usersQueries = {
         logError(
           "usersQueries.updateUserProfile",
           "No user returned after profile update",
-          { id }
+          { id },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui profil pengguna.`,
-          })
+          }),
         );
       }
 
@@ -694,7 +713,7 @@ const usersQueries = {
           logError(
             "usersQueries.updateUserAvatar",
             "Failed to update user profile",
-            { id, error }
+            { id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -708,13 +727,13 @@ const usersQueries = {
         logError(
           "usersQueries.updateUserAvatar",
           "No user returned after profile update",
-          { id }
+          { id },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui profil pengguna.`,
-          })
+          }),
         );
       }
 
@@ -726,13 +745,13 @@ const usersQueries = {
           logError(
             "usersQueries.updateUserAvatar",
             "Failed to extract key from existing company picture URL",
-            { url: user.profilePictureUrl }
+            { url: user.profilePictureUrl },
           );
           return yield* Effect.fail(
             new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: "Gagal menghapus gambar profil sebelumnya.",
-            })
+            }),
           );
         }
 
@@ -753,7 +772,7 @@ const usersQueries = {
           logError(
             "usersQueries.updateUserPassword",
             "Failed to hash new password",
-            { userId, error }
+            { userId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -776,7 +795,7 @@ const usersQueries = {
           logError(
             "usersQueries.updateUserPassword",
             "Failed to update user password",
-            { userId, error }
+            { userId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -790,13 +809,13 @@ const usersQueries = {
         logError(
           "usersQueries.updateUserPassword",
           "No user returned after password update",
-          { userId }
+          { userId },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui password pengguna.`,
-          })
+          }),
         );
       }
 
@@ -822,7 +841,7 @@ const usersQueries = {
           logError(
             "usersQueries.markUserEmailAsVerified",
             "Failed to mark user email as verified",
-            { userId, error }
+            { userId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -836,13 +855,13 @@ const usersQueries = {
         logError(
           "usersQueries.markUserEmailAsVerified",
           "No user returned after marking email as verified",
-          { userId }
+          { userId },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal memperbarui status verifikasi email pengguna.`,
-          })
+          }),
         );
       }
 
@@ -884,7 +903,7 @@ const usersQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal menghapus pengguna.`,
-          })
+          }),
         );
       }
 
@@ -906,7 +925,7 @@ const usersQueries = {
             {
               userId,
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -921,7 +940,7 @@ const usersQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: `Pengguna tidak ditemukan.`,
-          })
+          }),
         );
       }
 
@@ -953,13 +972,13 @@ const usersQueries = {
           "No user returned after restoration",
           {
             userId,
-          }
+          },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengembalikan pengguna.`,
-          })
+          }),
         );
       }
 

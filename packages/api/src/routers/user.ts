@@ -11,11 +11,16 @@ import { imageService } from "@tepian-k3/services/image";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userRouter = createTRPCRouter({
+  // TODO this should support combobox search or something
+  getAllUsers: withPermission("users.view").query(
+    async () => await runEffect(usersQueries.getAllUsers()),
+  ),
+
   getUserPaginated: withPermission("users.read")
     .input(userSchema.getAllUsersSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        usersQueries.getOffsetPaginatedUsers(input)
+        usersQueries.getOffsetPaginatedUsers(input),
       );
 
       return { data, pageCount };
@@ -25,7 +30,7 @@ export const userRouter = createTRPCRouter({
     .input(userSchema.getAllUsersSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        usersQueries.getOffsetPaginatedDeletedUsers(input)
+        usersQueries.getOffsetPaginatedDeletedUsers(input),
       );
       return { data, pageCount };
     }),
@@ -34,22 +39,22 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(usersQueries.getUserById(input.userId))
+        await runEffect(usersQueries.getUserById(input.userId)),
     ),
 
   getUserDetailWithRolesAndPermissions: withPermission("users.read")
     .input(
       z.object({
         userId: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const user = await runEffect(
-        permissionQueries.getUserWithPermissions(input.userId)
+        permissionQueries.getUserWithPermissions(input.userId),
       );
 
       if (!user) {
@@ -70,20 +75,20 @@ export const userRouter = createTRPCRouter({
   createUser: withPermission("users.create")
     .input(userSchema.adminCreateUserSchema)
     .mutation(
-      async ({ input }) => await runEffect(usersQueries.adminCreateUser(input))
+      async ({ input }) => await runEffect(usersQueries.adminCreateUser(input)),
     ),
 
   updateUser: withPermission("users.update")
     .input(userSchema.adminUpdateUserSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(usersQueries.updateUser(input, input.id))
+        await runEffect(usersQueries.updateUser(input, input.id)),
     ),
 
   updateProfile: withProtectedRateLimit(rateLimiters.moderate())
     .input(userSchema.updateUserSchema)
     .mutation(async ({ input, ctx: { user } }) =>
-      runEffect(usersQueries.updateUserProfile(user.id, input))
+      runEffect(usersQueries.updateUserProfile(user.id, input)),
     ),
 
   updateAvatar: withProtectedRateLimit(rateLimiters.moderate())
@@ -93,7 +98,7 @@ export const userRouter = createTRPCRouter({
         Effect.gen(function* () {
           // Convert file to buffer
           const arrayBuffer = yield* Effect.tryPromise(() =>
-            input.avatar.arrayBuffer()
+            input.avatar.arrayBuffer(),
           );
           const buffer = Buffer.from(arrayBuffer);
 
@@ -108,12 +113,12 @@ export const userRouter = createTRPCRouter({
             {
               filename: convertedImage.filename!,
               folder: "avatars",
-            }
+            },
           );
 
           yield* usersQueries.updateUserAvatar(user.id, uploadedFile.key);
-        })
-      )
+        }),
+      ),
     ),
 
   updatePassword: withProtectedRateLimit(rateLimiters.moderate())
@@ -122,27 +127,27 @@ export const userRouter = createTRPCRouter({
       runEffect(
         Effect.gen(function* () {
           yield* usersQueries.updateUserPassword(user.id, input.newPassword);
-        })
-      )
+        }),
+      ),
     ),
 
   deleteUser: withPermission("users.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
-      async ({ input }) => await runEffect(usersQueries.deleteUser(input.id))
+      async ({ input }) => await runEffect(usersQueries.deleteUser(input.id)),
     ),
 
   restoreUser: withPermission("users.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
-      async ({ input }) => await runEffect(usersQueries.restoreUser(input.id))
+      async ({ input }) => await runEffect(usersQueries.restoreUser(input.id)),
     ),
 });

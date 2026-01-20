@@ -19,7 +19,7 @@ const getAllEmployeesSchema = z.object({
       z.object({
         id: z.enum(SORTABLE_EMPLOYEE_FIELDS),
         desc: z.boolean(),
-      })
+      }),
     )
     .default([{ id: "createdAt", desc: false }]),
   name: z.string().default(""),
@@ -33,6 +33,7 @@ const createEmployeeSchema = createInsertSchema(employees, {
   name: z.string().min(1),
   email: z.email(),
   userId: z.uuidv7(),
+  positionId: z.uuidv7(),
 });
 
 const updateEmployeeSchema = createUpdateSchema(employees, {
@@ -40,6 +41,7 @@ const updateEmployeeSchema = createUpdateSchema(employees, {
   name: z.string().min(1),
   email: z.email(),
   userId: z.uuidv7(),
+  positionId: z.uuidv7(),
 });
 
 const employeeSchemas = {

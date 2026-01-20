@@ -6,12 +6,13 @@ import {
   count,
   desc,
   eq,
+  getTableColumns,
   gte,
   ilike,
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { employees } from "@tepian-k3/db/schema";
+import { employees, positions, users } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import employeeSchema from "@tepian-k3/schema/employee.schema";
 import { Effect } from "effect";
@@ -184,11 +185,21 @@ const employeeQueries = {
         try: () =>
           db.transaction(async (tx) => {
             const data = await tx
-              .select()
+              .select({
+                ...getTableColumns(employees),
+                position: {
+                  ...getTableColumns(positions),
+                },
+                user: {
+                  ...getTableColumns(users),
+                },
+              })
               .from(employees)
               .limit(input.perPage)
               .offset(offset)
               .where(where)
+              .leftJoin(positions, eq(employees.positionId, positions.id))
+              .leftJoin(users, eq(employees.userId, users.id))
               .orderBy(...orderBy);
 
             const total = await tx

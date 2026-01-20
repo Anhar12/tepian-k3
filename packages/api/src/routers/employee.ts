@@ -24,12 +24,12 @@ export const employeeRouter = createTRPCRouter({
   getEmployeeDetails: withPermission("employees.read")
     .input(
       z.object({
-        employeeId: z.uuidv7(),
+        id: z.uuidv7(),
       }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(employeeQueries.getEmployeeById(input.employeeId)),
+        await runEffect(employeeQueries.getEmployeeById(input.id)),
     ),
 
   createEmployee: withPermission("employees.create")
@@ -55,13 +55,13 @@ export const employeeRouter = createTRPCRouter({
   updateEmployeeStatus: withPermission("employees.update")
     .input(
       z.object({
-        employeeId: z.uuidv7(),
+        id: z.uuidv7(),
         status: z.enum(EMPLOYEE_STATUS),
       }),
     )
     .mutation(async ({ input }) => {
       const updatedEmployee = await runEffect(
-        employeeQueries.updateEmployeeStatus(input.employeeId, input.status),
+        employeeQueries.updateEmployeeStatus(input.id, input.status),
       );
 
       return updatedEmployee;
@@ -70,12 +70,12 @@ export const employeeRouter = createTRPCRouter({
   deleteEmployee: withPermission("employees.delete")
     .input(
       z.object({
-        employeeId: z.uuidv7(),
+        id: z.uuidv7(),
       }),
     )
     .mutation(async ({ input }) => {
       const [deletedEmployee] = await runEffect(
-        employeeQueries.deleteEmployee(input.employeeId),
+        employeeQueries.deleteEmployee(input.id),
       );
 
       if (!deletedEmployee) {
@@ -91,12 +91,12 @@ export const employeeRouter = createTRPCRouter({
   restoreEmployee: withPermission("employees.delete")
     .input(
       z.object({
-        employeeId: z.uuidv7(),
+        id: z.uuidv7(),
       }),
     )
     .mutation(async ({ input }) => {
       const [restoredEmployee] = await runEffect(
-        employeeQueries.restoreEmployee(input.employeeId),
+        employeeQueries.restoreEmployee(input.id),
       );
 
       if (!restoredEmployee) {

@@ -9,6 +9,7 @@ export type Employees = InferQueryModel<
   "employees",
   {
     with: {
+      position: true;
       user: true;
     };
   }
