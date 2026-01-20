@@ -9,6 +9,7 @@ import {
   getTableColumns,
   gte,
   ilike,
+  inArray,
   isNotNull,
   isNull,
   sql,
@@ -36,8 +37,8 @@ const toolsQueries = {
               SELECT 1 FROM ${parameterTools} 
               WHERE ${parameterTools.toolId} = ${tools.id}
             )`,
-              isNull(tools.deletedAt)
-            )
+              isNull(tools.deletedAt),
+            ),
           ),
       catch: (error) => {
         logError(
@@ -45,7 +46,7 @@ const toolsQueries = {
           "Error fetching unassigned tools",
           {
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -79,9 +80,9 @@ const toolsQueries = {
               new TRPCError({
                 code: "NOT_FOUND",
                 message: "Alat tidak ditemukan",
-              })
-            )
-      )
+              }),
+            ),
+      ),
     );
   },
 
@@ -98,7 +99,7 @@ const toolsQueries = {
           {
             error,
             toolId,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -113,9 +114,9 @@ const toolsQueries = {
               new TRPCError({
                 code: "NOT_FOUND",
                 message: "Alat yang dihapus tidak ditemukan",
-              })
-            )
-      )
+              }),
+            ),
+      ),
     );
   },
 
@@ -137,13 +138,13 @@ const toolsQueries = {
       },
     }).pipe(
       Effect.flatMap((tool) =>
-        tool ? Effect.succeed(tool) : Effect.succeed(null)
-      )
+        tool ? Effect.succeed(tool) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginatedTools(
-    input: z.infer<typeof toolsSchema.getAllToolsSchema>
+    input: z.infer<typeof toolsSchema.getAllToolsSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -168,7 +169,7 @@ const toolsQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -178,20 +179,20 @@ const toolsQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(tools.deletedAt)
-              : isNull(tools.deletedAt)
+              : isNull(tools.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(tools[item.id]) : asc(tools[item.id])
+              item.desc ? desc(tools[item.id]) : asc(tools[item.id]),
             )
           : [desc(tools.createdAt)];
 
@@ -224,7 +225,7 @@ const toolsQueries = {
             {
               error,
               input,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -240,6 +241,53 @@ const toolsQueries = {
         data,
         pageCount,
       };
+    });
+  },
+
+  getForWorksheet(worksheetId: string) {
+    return Effect.tryPromise({
+      try: async () => {
+        // First get worksheet items' parameter IDs
+        const worksheetItems = await db.query.worksheetItems.findMany({
+          where: (items, { eq }) => eq(items.worksheetId, worksheetId),
+          columns: {
+            parameterId: true,
+          },
+        });
+
+        const parameterIds = worksheetItems.map((item) => item.parameterId);
+
+        if (parameterIds.length === 0) return [];
+
+        // Get tools linked to these parameter IDs
+        const result = await db
+          .selectDistinct({
+            ...getTableColumns(tools),
+          })
+          .from(tools)
+          .innerJoin(parameterTools, eq(parameterTools.toolId, tools.id))
+          .where(
+            and(
+              inArray(parameterTools.parameterId, parameterIds),
+              isNull(tools.deletedAt),
+            ),
+          )
+          .orderBy(asc(tools.toolName));
+
+        return result;
+      },
+      catch: (error) => {
+        logError(
+          "toolsQueries.getForWorksheet",
+          "Error fetching tools for worksheet",
+          { error, worksheetId },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data alat untuk lembar kerja",
+          cause: error,
+        });
+      },
     });
   },
 
@@ -274,7 +322,7 @@ const toolsQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat alat baru.",
-          })
+          }),
         );
       }
 
@@ -319,7 +367,7 @@ const toolsQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui alat.",
-          })
+          }),
         );
       }
 
@@ -357,7 +405,7 @@ const toolsQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus alat.",
-          })
+          }),
         );
       }
 
@@ -395,7 +443,7 @@ const toolsQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan alat.",
-          })
+          }),
         );
       }
 

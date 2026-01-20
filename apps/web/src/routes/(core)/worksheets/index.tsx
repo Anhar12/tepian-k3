@@ -31,11 +31,17 @@ import { usePagination } from "@/lib/pagination";
 import { TabsContent } from "@radix-ui/react-tabs";
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import {
+  BAHAN_STATUS,
+  BAHAN_STATUS_COLORS,
+  BAHAN_STATUS_LABELS,
+  BAHAN_UNIT_LABELS,
   TOOLS_AVAILABILITY,
   TOOLS_AVAILABILITY_LABELS,
   TOOLS_CONDITIONS,
   TOOLS_CONDITIONS_LABELS,
   WORKSHEET_NOTE_STATUS,
+  type BahanStatus,
+  type BahanUnit,
   type ToolsAvailability,
   type ToolsCondition,
   type WorksheetNoteStatus,
@@ -43,6 +49,7 @@ import {
 import {
   AlertCircle,
   AlertTriangle,
+  Beaker,
   CheckCircle2,
   ClipboardList,
   Loader2,
@@ -125,13 +132,16 @@ function RouteComponent() {
 
   // Fetch all tools for assignment
   const { data: allToolsData } = useQuery(
-    trpc.tool.getToolPaginated.queryOptions({
-      page: 1,
-      perPage: 100,
-      sort: [],
-      createdAt: [],
+    trpc.tool.getForWorksheet.queryOptions({
+      worksheetId,
     }),
   );
+
+  // Fetch chemical materials for this worksheet
+  const { data: chemicalMaterialsData, isLoading: isLoadingChemicalMaterials } =
+    useQuery(
+      trpc.chemicalMaterial.getForWorksheet.queryOptions({ worksheetId }),
+    );
 
   // Mutations
   const batchUpdateMutation = useMutation(
@@ -200,6 +210,10 @@ function RouteComponent() {
   const [parameterPageSize, setParameterPageSize] = useState(5);
   const [toolPage, setToolPage] = useState(1);
   const [toolPageSize, setToolPageSize] = useState(5);
+  const [bahanSearch, setBahanSearch] = useState("");
+  const [bahanStatusFilter, setBahanStatusFilter] = useState<string>("all");
+  const [bahanPage, setBahanPage] = useState(1);
+  const [bahanPageSize, setBahanPageSize] = useState(5);
 
   // Initialize selected tools from worksheet data
   useMemo(() => {
@@ -242,8 +256,8 @@ function RouteComponent() {
 
   // Transform tools data
   const tools: Tool[] = useMemo(() => {
-    if (!allToolsData?.data) return [];
-    return allToolsData.data.map((tool) => ({
+    if (!allToolsData) return [];
+    return allToolsData.map((tool) => ({
       id: tool.id,
       toolCode: tool.toolCode,
       toolName: tool.toolName,
@@ -251,7 +265,7 @@ function RouteComponent() {
       availability: tool.availability,
       selected: selectedToolIds.has(tool.id),
     }));
-  }, [allToolsData?.data, selectedToolIds]);
+  }, [allToolsData, selectedToolIds]);
 
   // Filter tools
   const filteredTools = useMemo(() => {
@@ -269,6 +283,34 @@ function RouteComponent() {
     });
   }, [tools, toolSearch, conditionFilter, availabilityFilter]);
 
+  // Filter chemical materials
+  const filteredChemicalMaterials = useMemo(() => {
+    if (!chemicalMaterialsData) return [];
+    return chemicalMaterialsData.filter((material) => {
+      const matchesSearch =
+        material.code.toLowerCase().includes(bahanSearch.toLowerCase()) ||
+        material.name.toLowerCase().includes(bahanSearch.toLowerCase()) ||
+        (material.chemicalFormula
+          ?.toLowerCase()
+          .includes(bahanSearch.toLowerCase()) ??
+          false);
+      const matchesStatus =
+        bahanStatusFilter === "all" || material.status === bahanStatusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [chemicalMaterialsData, bahanSearch, bahanStatusFilter]);
+
+  // Get low stock / out of stock items
+  const lowStockItems = useMemo(() => {
+    if (!chemicalMaterialsData) return [];
+    return chemicalMaterialsData.filter(
+      (material) =>
+        material.status === "hampir_habis" ||
+        material.status === "habis" ||
+        material.status === "expired",
+    );
+  }, [chemicalMaterialsData]);
+
   // Pagination
   const parameterPagination = usePagination(
     filteredItems,
@@ -276,6 +318,11 @@ function RouteComponent() {
     parameterPage,
   );
   const toolPagination = usePagination(filteredTools, toolPageSize, toolPage);
+  const bahanPagination = usePagination(
+    filteredChemicalMaterials,
+    bahanPageSize,
+    bahanPage,
+  );
 
   // Handlers
   const getItemState = (itemId: string) => {
@@ -411,7 +458,7 @@ function RouteComponent() {
     <div className="flex flex-col gap-4">
       <WorksheetHeaderCard
         title="Rincian parameter"
-        subtitle={`Worksheet untuk ${worksheet.testing?.order?.company?.name ?? "Unknown"}`}
+        subtitle={`Worksheet untuk ${worksheet?.order?.company?.name ?? "Unknown"}`}
       />
 
       <Card>
@@ -868,30 +915,343 @@ function RouteComponent() {
             )}
           </TabsContent>
 
-          {/* Bahan Tab - Placeholder for now */}
+          {/* Bahan Tab */}
           <TabsContent value="bahan" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            <div className="py-12 text-center">
-              <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mb-2 text-lg font-medium">
-                Manajemen Bahan Belum Tersedia
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Fitur pengelolaan bahan akan ditambahkan pada versi selanjutnya.
-              </p>
-            </div>
+            {isLoadingChemicalMaterials ? (
+              <div className="flex h-48 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : chemicalMaterialsData && chemicalMaterialsData.length === 0 ? (
+              <div className="py-12 text-center">
+                <Beaker className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+                <h3 className="mb-2 text-lg font-medium">
+                  Tidak Ada Bahan Kimia
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Parameter pada worksheet ini tidak memerlukan bahan kimia.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+                  <div className="relative flex-1">
+                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari bahan (kode, nama, rumus kimia)..."
+                      value={bahanSearch}
+                      onChange={(e) => {
+                        setBahanSearch(e.target.value);
+                        setBahanPage(1);
+                      }}
+                      className="pl-9"
+                    />
+                  </div>
+                  <Select
+                    value={bahanStatusFilter}
+                    onValueChange={(v) => {
+                      setBahanStatusFilter(v);
+                      setBahanPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-full sm:w-40">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Status</SelectItem>
+                      {BAHAN_STATUS.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {BAHAN_STATUS_LABELS[status]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Summary Cards */}
+                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
+                  {[
+                    {
+                      label: "Total",
+                      count: chemicalMaterialsData?.length ?? 0,
+                      color: "bg-slate-100 text-slate-700",
+                    },
+                    {
+                      label: "Tersedia",
+                      count:
+                        chemicalMaterialsData?.filter(
+                          (m) => m.status === "tersedia",
+                        ).length ?? 0,
+                      color: "bg-green-100 text-green-700",
+                    },
+                    {
+                      label: "Hampir Habis",
+                      count:
+                        chemicalMaterialsData?.filter(
+                          (m) => m.status === "hampir_habis",
+                        ).length ?? 0,
+                      color: "bg-yellow-100 text-yellow-700",
+                    },
+                    {
+                      label: "Habis",
+                      count:
+                        chemicalMaterialsData?.filter(
+                          (m) => m.status === "habis",
+                        ).length ?? 0,
+                      color: "bg-red-100 text-red-700",
+                    },
+                    {
+                      label: "Expired",
+                      count:
+                        chemicalMaterialsData?.filter(
+                          (m) => m.status === "expired",
+                        ).length ?? 0,
+                      color: "bg-gray-100 text-gray-700",
+                    },
+                    {
+                      label: "Dipesan",
+                      count:
+                        chemicalMaterialsData?.filter(
+                          (m) => m.status === "dipesan",
+                        ).length ?? 0,
+                      color: "bg-blue-100 text-blue-700",
+                    },
+                  ].map((stat) => (
+                    <Card key={stat.label} className="border-0 shadow-sm">
+                      <CardContent className="p-2 text-center sm:p-3">
+                        <p className="text-lg font-bold sm:text-xl">
+                          {stat.count}
+                        </p>
+                        <p
+                          className={`rounded-full px-2 py-0.5 text-xs ${stat.color}`}
+                        >
+                          {stat.label}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <div className="overflow-hidden rounded-xl border">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="text-xs font-semibold sm:text-sm">
+                            Kode
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold sm:text-sm">
+                            Nama Bahan
+                          </TableHead>
+                          <TableHead className="hidden text-xs font-semibold sm:text-sm md:table-cell">
+                            Rumus Kimia
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Stok Terpakai
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Stok Tersegel
+                          </TableHead>
+                          <TableHead className="hidden text-center text-xs font-semibold sm:text-sm lg:table-cell">
+                            Expired
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Status
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {bahanPagination.paginatedData.map((material) => (
+                          <TableRow
+                            key={material.id}
+                            className={`hover:bg-muted/30 ${
+                              material.status === "habis" ||
+                              material.status === "expired"
+                                ? "bg-red-50/50"
+                                : material.status === "hampir_habis"
+                                  ? "bg-yellow-50/50"
+                                  : ""
+                            }`}
+                          >
+                            <TableCell className="font-mono text-xs">
+                              {material.code}
+                            </TableCell>
+                            <TableCell className="text-xs font-medium sm:text-sm">
+                              {material.name}
+                            </TableCell>
+                            <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
+                              {material.chemicalFormula ?? "-"}
+                            </TableCell>
+                            <TableCell className="text-center text-xs sm:text-sm">
+                              {material.usedStock ?? 0}{" "}
+                              {material.usedStockUnit
+                                ? BAHAN_UNIT_LABELS[
+                                    material.usedStockUnit as BahanUnit
+                                  ]
+                                : ""}
+                            </TableCell>
+                            <TableCell className="text-center text-xs sm:text-sm">
+                              {material.sealedStock ?? 0}{" "}
+                              {material.sealedStockUnit
+                                ? BAHAN_UNIT_LABELS[
+                                    material.sealedStockUnit as BahanUnit
+                                  ]
+                                : ""}
+                            </TableCell>
+                            <TableCell className="hidden text-center text-xs sm:text-sm lg:table-cell">
+                              {material.expiredDate
+                                ? new Date(
+                                    material.expiredDate,
+                                  ).toLocaleDateString("id-ID")
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge
+                                className={`${BAHAN_STATUS_COLORS[material.status as BahanStatus]} text-xs`}
+                              >
+                                {
+                                  BAHAN_STATUS_LABELS[
+                                    material.status as BahanStatus
+                                  ]
+                                }
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <WorksheetDataTable
+                    currentPage={bahanPagination.currentPage}
+                    totalPages={bahanPagination.totalPages}
+                    pageSize={bahanPageSize}
+                    totalItems={bahanPagination.totalItems}
+                    onPageChange={setBahanPage}
+                    onPageSizeChange={(size) => {
+                      setBahanPageSize(size);
+                      setBahanPage(1);
+                    }}
+                  />
+                </div>
+              </>
+            )}
           </TabsContent>
 
-          {/* Stok Habis Tab - Placeholder for now */}
+          {/* Stok Habis Tab */}
           <TabsContent value="stok-habis" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            <div className="py-12 text-center">
-              <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mb-2 text-lg font-medium">
-                Peringatan Stok Belum Tersedia
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Fitur peringatan stok akan ditambahkan pada versi selanjutnya.
-              </p>
-            </div>
+            {isLoadingChemicalMaterials ? (
+              <div className="flex h-48 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : lowStockItems.length === 0 ? (
+              <div className="py-12 text-center">
+                <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-emerald-500" />
+                <h3 className="mb-2 text-lg font-medium">
+                  Semua Stok Tersedia
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Tidak ada bahan kimia yang hampir habis, habis, atau expired.
+                </p>
+              </div>
+            ) : (
+              <>
+                <Alert className="mb-4 border-red-200 bg-red-50">
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                  <AlertDescription className="text-sm text-red-700">
+                    Terdapat <strong>{lowStockItems.length}</strong> bahan kimia
+                    yang perlu diperhatikan (hampir habis, habis, atau expired).
+                  </AlertDescription>
+                </Alert>
+
+                <div className="overflow-hidden rounded-xl border">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="text-xs font-semibold sm:text-sm">
+                            Kode
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold sm:text-sm">
+                            Nama Bahan
+                          </TableHead>
+                          <TableHead className="hidden text-xs font-semibold sm:text-sm md:table-cell">
+                            Rumus Kimia
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Stok Terpakai
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Stok Tersegel
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Expired
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Status
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {lowStockItems.map((material) => (
+                          <TableRow
+                            key={material.id}
+                            className={`hover:bg-muted/30 ${
+                              material.status === "habis" ||
+                              material.status === "expired"
+                                ? "bg-red-50"
+                                : "bg-yellow-50"
+                            }`}
+                          >
+                            <TableCell className="font-mono text-xs">
+                              {material.code}
+                            </TableCell>
+                            <TableCell className="text-xs font-medium sm:text-sm">
+                              {material.name}
+                            </TableCell>
+                            <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
+                              {material.chemicalFormula ?? "-"}
+                            </TableCell>
+                            <TableCell className="text-center text-xs sm:text-sm">
+                              {material.usedStock ?? 0}{" "}
+                              {material.usedStockUnit
+                                ? BAHAN_UNIT_LABELS[
+                                    material.usedStockUnit as BahanUnit
+                                  ]
+                                : ""}
+                            </TableCell>
+                            <TableCell className="text-center text-xs sm:text-sm">
+                              {material.sealedStock ?? 0}{" "}
+                              {material.sealedStockUnit
+                                ? BAHAN_UNIT_LABELS[
+                                    material.sealedStockUnit as BahanUnit
+                                  ]
+                                : ""}
+                            </TableCell>
+                            <TableCell className="text-center text-xs sm:text-sm">
+                              {material.expiredDate
+                                ? new Date(
+                                    material.expiredDate,
+                                  ).toLocaleDateString("id-ID")
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge
+                                className={`${BAHAN_STATUS_COLORS[material.status as BahanStatus]} text-xs`}
+                              >
+                                {
+                                  BAHAN_STATUS_LABELS[
+                                    material.status as BahanStatus
+                                  ]
+                                }
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </>
+            )}
           </TabsContent>
 
           {/* Catatan Tab */}

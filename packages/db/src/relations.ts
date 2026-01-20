@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   cart,
+  chemicalMaterials,
   clusters,
   districts,
   documents,
@@ -12,6 +13,7 @@ import {
   orderItem,
   orderStatusHistory,
   parameterCategories,
+  parameterChemicalMaterials,
   parameters,
   parameterTools,
   permission,
@@ -181,6 +183,7 @@ export const parametersRelations = relations(parameters, ({ one, many }) => ({
     references: [parameterCategories.id],
   }),
   tools: many(parameterTools),
+  chemicalMaterials: many(parameterChemicalMaterials),
 }));
 
 export const parameterToolsRelations = relations(parameterTools, ({ one }) => ({
@@ -193,6 +196,27 @@ export const parameterToolsRelations = relations(parameterTools, ({ one }) => ({
     references: [tools.id],
   }),
 }));
+
+export const chemicalMaterialsRelations = relations(
+  chemicalMaterials,
+  ({ many }) => ({
+    parameters: many(parameterChemicalMaterials),
+  })
+);
+
+export const parameterChemicalMaterialsRelations = relations(
+  parameterChemicalMaterials,
+  ({ one }) => ({
+    parameter: one(parameters, {
+      fields: [parameterChemicalMaterials.parameterId],
+      references: [parameters.id],
+    }),
+    chemicalMaterial: one(chemicalMaterials, {
+      fields: [parameterChemicalMaterials.chemicalMaterialId],
+      references: [chemicalMaterials.id],
+    }),
+  })
+);
 
 export const provinceRelations = relations(provinces, ({ many }) => ({
   regencies: many(regencies),

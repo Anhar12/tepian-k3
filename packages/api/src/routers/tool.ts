@@ -6,58 +6,64 @@ import { runEffect } from "../utils/run-effect";
 
 export const toolRouter = createTRPCRouter({
   getAllUnassignedTools: withPermission("tools.view").query(
-    async () => await runEffect(toolsQureies.getAllUnassignedTools())
+    async () => await runEffect(toolsQureies.getAllUnassignedTools()),
   ),
 
   getToolPaginated: withPermission("tools.view")
     .input(toolsSchema.getAllToolsSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        toolsQureies.getOffsetPaginatedTools(input)
+        toolsQureies.getOffsetPaginatedTools(input),
       );
 
       return { data, pageCount };
+    }),
+
+  getForWorksheet: withPermission("tools.view")
+    .input(z.object({ worksheetId: z.uuidv7() }))
+    .query(async ({ input }) => {
+      return await runEffect(toolsQureies.getForWorksheet(input.worksheetId));
     }),
 
   getToolDetails: withPermission("tools.read")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(
-      async ({ input }) => await runEffect(toolsQureies.getToolById(input.id))
+      async ({ input }) => await runEffect(toolsQureies.getToolById(input.id)),
     ),
 
   createTool: withPermission("tools.create")
     .input(toolsSchema.createToolSchema)
     .mutation(
-      async ({ input }) => await runEffect(toolsQureies.createTool(input))
+      async ({ input }) => await runEffect(toolsQureies.createTool(input)),
     ),
 
   updateTool: withPermission("tools.update")
     .input(toolsSchema.updateToolSchema)
     .mutation(
-      async ({ input }) => await runEffect(toolsQureies.updateTool(input))
+      async ({ input }) => await runEffect(toolsQureies.updateTool(input)),
     ),
 
   deleteTool: withPermission("tools.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
-      async ({ input }) => await runEffect(toolsQureies.deleteTool(input.id))
+      async ({ input }) => await runEffect(toolsQureies.deleteTool(input.id)),
     ),
 
   restoreTool: withPermission("tools.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
-      async ({ input }) => await runEffect(toolsQureies.restoreTool(input.id))
+      async ({ input }) => await runEffect(toolsQureies.restoreTool(input.id)),
     ),
 });

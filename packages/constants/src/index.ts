@@ -52,6 +52,50 @@ export const TOOLS_AVAILABILITY_COLORS: Record<ToolsAvailability, string> = {
   dipinjam: "bg-blue-100 text-blue-700",
 };
 
+export const BAHAN_UNITS = [
+  "gram",
+  "kg",
+  "botol",
+  "ml",
+  "liter",
+] as const;
+
+export type BahanUnit = (typeof BAHAN_UNITS)[number];
+
+export const BAHAN_UNIT_LABELS: Record<BahanUnit, string> = {
+  gram: "Gram",
+  kg: "Kilogram",
+  botol: "Botol",
+  ml: "Mililiter",
+  liter: "Liter",
+};
+
+export const BAHAN_STATUS = [
+  "tersedia",
+  "hampir_habis",
+  "habis",
+  "expired",
+  "dipesan",
+] as const;
+
+export type BahanStatus = (typeof BAHAN_STATUS)[number];
+
+export const BAHAN_STATUS_LABELS: Record<BahanStatus, string> = {
+  tersedia: "Tersedia",
+  hampir_habis: "Hampir Habis",
+  habis: "Habis",
+  expired: "Expired",
+  dipesan: "Dipesan",
+};
+
+export const BAHAN_STATUS_COLORS: Record<BahanStatus, string> = {
+  tersedia: "bg-green-100 text-green-700",
+  hampir_habis: "bg-yellow-100 text-yellow-700",
+  habis: "bg-red-100 text-red-700",
+  expired: "bg-gray-100 text-gray-700",
+  dipesan: "bg-blue-100 text-blue-700",
+};
+
 export const ORDER_STATUS = [
   // Initial state
   "pending",

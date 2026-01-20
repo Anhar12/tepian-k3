@@ -17,6 +17,8 @@ import seedDistricts from "./districts";
 import seedVillages from "./villages";
 import seedKblis from "./kblis";
 import seedParameters from "./parameter";
+import seedTools from "./tools";
+import seedChemicalMaterials from "./chemical-materials";
 import seedEmployees from "./employee";
 import {
   generatePermissionsList,
@@ -226,6 +228,8 @@ async function seed() {
   await seedClusters();
   await seedParameterCategories();
   await seedParameters();
+  await seedTools();
+  await seedChemicalMaterials();
   await seedProvinces();
   await seedRegencies();
   await seedDistricts();

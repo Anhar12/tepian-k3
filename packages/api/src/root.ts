@@ -2,6 +2,7 @@ import { createCallerFactory, createTRPCRouter } from ".";
 import { auditRouter } from "./routers/audit";
 import { authRouter } from "./routers/auth";
 import { cartRouter } from "./routers/cart";
+import { chemicalMaterialRouter } from "./routers/chemical-material";
 import { clusterRouter } from "./routers/cluster";
 import { districtRouter } from "./routers/district";
 import { documentRouter } from "./routers/document";
@@ -38,6 +39,7 @@ export const appRouter = createTRPCRouter({
   role: roleRouters,
   permission: permissionRouters,
   tool: toolRouter,
+  chemicalMaterial: chemicalMaterialRouter,
   cluster: clusterRouter,
   parameterCategories: parameterCategoriesRouter,
   parameter: parameterRouter,

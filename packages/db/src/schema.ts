@@ -41,6 +41,8 @@ import {
   TOOLS_CONDITIONS,
   WORKSHEET_NOTE_STATUS,
   WORKSHEET_STATUS,
+  BAHAN_UNITS,
+  BAHAN_STATUS,
 } from "@tepian-k3/constants";
 
 export const createTable = pgTableCreator((name) => `${name}`);
@@ -67,6 +69,10 @@ export const ToolsAvailabilityEnum = pgEnum(
   "tools_availability",
   TOOLS_AVAILABILITY,
 );
+
+export const BahanUnitEnum = pgEnum("bahan_unit", BAHAN_UNITS);
+
+export const BahanStatusEnum = pgEnum("bahan_status", BAHAN_STATUS);
 
 export const auditActionEnum = pgEnum("audit_action", AUDIT_ACTIONS);
 
@@ -538,6 +544,68 @@ export const parameterTools = createTable(
     index("parameter_tool_id_idx").using("btree", table.id),
     index("parameter_tool_parameter_id_idx").using("btree", table.parameterId),
     index("parameter_tool_tool_id_idx").using("btree", table.toolId),
+  ],
+);
+
+export const chemicalMaterials = createTable(
+  "chemical_materials",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    code: varchar("code", { length: 100 }).notNull().unique(),
+    catalogNumber: varchar("catalog_number", { length: 100 }),
+    chemicalFormula: varchar("chemical_formula", { length: 100 }),
+    name: varchar("name", { length: 256 }).notNull(),
+    usedStock: real("used_stock").default(0),
+    usedStockUnit: BahanUnitEnum("used_stock_unit"),
+    sealedStock: real("sealed_stock").default(0),
+    sealedStockUnit: BahanUnitEnum("sealed_stock_unit"),
+    monthlyUsage: real("monthly_usage"),
+    monthlyUsageUnit: BahanUnitEnum("monthly_usage_unit"),
+    remainingUsedMaterial: real("remaining_used_material"),
+    remainingUsedMaterialUnit: BahanUnitEnum("remaining_used_material_unit"),
+    incomingMaterialNote: text("incoming_material_note"),
+    expiredDate: timestamp("expired_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    status: BahanStatusEnum("status").notNull().default("tersedia"),
+    ...timestamps,
+  },
+  (table) => [
+    index("chemical_material_id_idx").using("btree", table.id),
+    index("chemical_material_code_idx").using("btree", table.code),
+    index("chemical_material_name_idx").using("btree", table.name),
+  ],
+);
+
+export const parameterChemicalMaterials = createTable(
+  "parameter_chemical_materials",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    parameterId: uuid("parameter_id")
+      .notNull()
+      .references(() => parameters.id, { onDelete: "cascade" }),
+    chemicalMaterialId: uuid("chemical_material_id")
+      .notNull()
+      .references(() => chemicalMaterials.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("parameter_chemical_material_id_idx").using("btree", table.id),
+    index("parameter_chemical_material_parameter_id_idx").using(
+      "btree",
+      table.parameterId,
+    ),
+    index("parameter_chemical_material_chemical_material_id_idx").using(
+      "btree",
+      table.chemicalMaterialId,
+    ),
   ],
 );
 
