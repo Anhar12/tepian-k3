@@ -8,6 +8,7 @@ export const PERMISSION_ACTION = [
   "read",
   "update",
   "delete",
+  "review",
 ] as const;
 
 export type PermissionAction = (typeof PERMISSION_ACTION)[number];
@@ -24,7 +25,9 @@ export type Permission = `${Resource}.${PermissionAction}`;
  * @returns Array of all permissions for that resource
  */
 export function getResourcePermissions(resource: Resource): Permission[] {
-  return PERMISSION_ACTION.map((action) => `${resource}.${action}` as Permission);
+  return PERMISSION_ACTION.map(
+    (action) => `${resource}.${action}` as Permission,
+  );
 }
 
 /**
@@ -32,9 +35,7 @@ export function getResourcePermissions(resource: Resource): Permission[] {
  * @returns Array of all 165 permissions (33 resources × 5 actions)
  */
 export function getAllPermissions(): Permission[] {
-  return RESOURCES.flatMap((resource) =>
-    getResourcePermissions(resource)
-  );
+  return RESOURCES.flatMap((resource) => getResourcePermissions(resource));
 }
 
 /**
@@ -42,7 +43,9 @@ export function getAllPermissions(): Permission[] {
  * @param permission - The permission string to validate
  * @returns True if the permission is valid
  */
-export function isValidPermission(permission: string): permission is Permission {
+export function isValidPermission(
+  permission: string,
+): permission is Permission {
   const [resource, action] = permission.split(".") as [string, string];
   return (
     RESOURCES.includes(resource as Resource) &&
@@ -59,7 +62,10 @@ export function parsePermission(permission: Permission): {
   resource: Resource;
   action: PermissionAction;
 } | null {
-  const [resource, action] = permission.split(".") as [Resource, PermissionAction];
+  const [resource, action] = permission.split(".") as [
+    Resource,
+    PermissionAction,
+  ];
   if (!isValidPermission(permission)) {
     return null;
   }
@@ -74,7 +80,7 @@ export function parsePermission(permission: Permission): {
  */
 export function createPermission(
   resource: Resource,
-  action: PermissionAction
+  action: PermissionAction,
 ): Permission {
   return `${resource}.${action}`;
 }
@@ -97,6 +103,6 @@ export function generatePermissionsList() {
       name: `${resource}.${action}` as Permission,
       resource,
       action,
-    }))
+    })),
   );
 }
