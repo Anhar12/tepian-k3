@@ -1,4 +1,8 @@
-import { worksheets, worksheetItems, worksheetNotes } from "@tepian-k3/db/schema";
+import {
+  worksheets,
+  worksheetItems,
+  worksheetNotes,
+} from "@tepian-k3/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
 import { WORKSHEET_STATUS, WORKSHEET_NOTE_STATUS } from "@tepian-k3/constants";
@@ -10,35 +14,35 @@ const baseWorksheetNoteSchema = createInsertSchema(worksheetNotes);
 
 // Create worksheet from testing
 const createWorksheetFromTestingSchema = z.object({
-  testingId: z.string().uuid(),
+  testingId: z.uuidv7(),
   startDate: z.string().datetime(),
-  mainSupervisorId: z.string().uuid().optional(),
-  accompanyingSupervisorId: z.string().uuid().optional(),
+  mainSupervisorId: z.uuidv7().optional(),
+  accompanyingSupervisorId: z.uuidv7().optional(),
 });
 
 // Create worksheet from order (kaji ulang phase - before offering)
 const createWorksheetFromOrderSchema = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.uuidv7(),
   startDate: z.string().datetime().optional(),
-  mainSupervisorId: z.string().uuid().optional(),
-  accompanyingSupervisorId: z.string().uuid().optional(),
+  mainSupervisorId: z.uuidv7().optional(),
+  accompanyingSupervisorId: z.uuidv7().optional(),
 });
 
 // Submit worksheet for verification
 const submitForVerificationSchema = z.object({
-  worksheetId: z.string().uuid(),
+  worksheetId: z.uuidv7(),
 });
 
 // Verify worksheet (coordinator action)
 const verifyWorksheetSchema = z.object({
-  worksheetId: z.string().uuid(),
-  mainSupervisorId: z.string().uuid().optional(),
-  accompanyingSupervisorId: z.string().uuid().optional(),
+  worksheetId: z.uuidv7(),
+  mainSupervisorId: z.uuidv7().optional(),
+  accompanyingSupervisorId: z.uuidv7().optional(),
 });
 
 // Update worksheet status
 const updateWorksheetStatusSchema = z.object({
-  worksheetId: z.string().uuid(),
+  worksheetId: z.uuidv7(),
   status: z.enum(WORKSHEET_STATUS),
   endDate: z.string().datetime().optional(),
   result: z.string().optional(),
@@ -46,14 +50,14 @@ const updateWorksheetStatusSchema = z.object({
 
 // Update worksheet supervisors
 const updateWorksheetSupervisorsSchema = z.object({
-  worksheetId: z.string().uuid(),
-  mainSupervisorId: z.string().uuid().optional().nullable(),
-  accompanyingSupervisorId: z.string().uuid().optional().nullable(),
+  worksheetId: z.uuidv7(),
+  mainSupervisorId: z.uuidv7().optional().nullable(),
+  accompanyingSupervisorId: z.uuidv7().optional().nullable(),
 });
 
 // Update worksheet item value (for lab technicians)
 const updateWorksheetItemValueSchema = z.object({
-  itemId: z.string().uuid(),
+  itemId: z.uuidv7(),
   value: z.number(),
   note: z.string().optional(),
   isReady: z.boolean().optional(),
@@ -61,34 +65,34 @@ const updateWorksheetItemValueSchema = z.object({
 
 // Batch update worksheet items
 const batchUpdateWorksheetItemsSchema = z.object({
-  worksheetId: z.string().uuid(),
+  worksheetId: z.uuidv7(),
   items: z.array(
     z.object({
-      itemId: z.string().uuid(),
+      itemId: z.uuidv7(),
       value: z.number().nullable(),
       note: z.string().optional().nullable(),
       isReady: z.boolean().optional(),
-    })
+    }),
   ),
 });
 
 // Assign tools to worksheet
 const assignToolsToWorksheetSchema = z.object({
-  worksheetId: z.string().uuid(),
-  toolIds: z.array(z.string().uuid()),
+  worksheetId: z.uuidv7(),
+  toolIds: z.array(z.uuidv7()),
 });
 
 // Assign employees to worksheet (with optional schedule dates)
 const assignEmployeesToWorksheetSchema = z.object({
-  worksheetId: z.string().uuid(),
-  employeeIds: z.array(z.string().uuid()),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  worksheetId: z.uuidv7(),
+  employeeIds: z.array(z.uuidv7()),
+  startDate: z.iso.datetime().optional(),
+  endDate: z.iso.datetime().optional(),
 });
 
 // Add worksheet note
 const addWorksheetNoteSchema = z.object({
-  worksheetId: z.string().uuid(),
+  worksheetId: z.uuidv7(),
   note: z.string().min(1).max(1000),
   severity: z.enum(WORKSHEET_NOTE_STATUS).default("info"),
 });
@@ -103,7 +107,7 @@ const getWorksheetsSchema = z.object({
 
 // Complete worksheet (marks all items as ready and updates status)
 const completeWorksheetSchema = z.object({
-  worksheetId: z.string().uuid(),
+  worksheetId: z.uuidv7(),
   result: z.string().optional(),
 });
 

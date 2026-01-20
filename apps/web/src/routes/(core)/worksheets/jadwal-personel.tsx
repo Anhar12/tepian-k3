@@ -187,7 +187,7 @@ function JadwalPersonilPage() {
     return employeesData.map((emp, index) => ({
       id: emp.id,
       name: emp.name,
-      role: emp.position ?? "Personil",
+      role: emp.position.name ?? "Personil",
       initials: getInitials(emp.name),
       status: emp.status,
       color: getColorForIndex(index),
@@ -231,7 +231,12 @@ function JadwalPersonilPage() {
         setSelectedEndDate(new Date(worksheet.endDate));
       }
     }
-  }, [showAssignDialog, assignedPersonnelIds, worksheet?.startDate, worksheet?.endDate]);
+  }, [
+    showAssignDialog,
+    assignedPersonnelIds,
+    worksheet?.startDate,
+    worksheet?.endDate,
+  ]);
 
   // Set current date to worksheet start date
   useEffect(() => {
@@ -321,7 +326,10 @@ function JadwalPersonilPage() {
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
-    const allDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+    const allDays = eachDayOfInterval({
+      start: calendarStart,
+      end: calendarEnd,
+    });
     const weeks: Date[][] = [];
     for (let i = 0; i < allDays.length; i += 7) {
       weeks.push(allDays.slice(i, i + 7));
@@ -334,7 +342,8 @@ function JadwalPersonilPage() {
       if (!worksheetSchedule || !worksheetSchedule.startDate) return [];
       const weekStart = weekDays[0];
       const weekEnd = weekDays[6];
-      const scheduleEnd = worksheetSchedule.endDate ?? worksheetSchedule.startDate;
+      const scheduleEnd =
+        worksheetSchedule.endDate ?? worksheetSchedule.startDate;
 
       // Check if schedule overlaps with this week
       if (worksheetSchedule.startDate <= weekEnd && scheduleEnd >= weekStart) {
@@ -417,10 +426,13 @@ function JadwalPersonilPage() {
                     isSameDay(d, eventEndInWeek),
                   );
 
-                  const leftPercent =
-                    (Math.max(0, startColIndex) / 7) * 100;
+                  const leftPercent = (Math.max(0, startColIndex) / 7) * 100;
                   const widthPercent =
-                    ((Math.max(0, endColIndex) - Math.max(0, startColIndex) + 1) / 7) * 100;
+                    ((Math.max(0, endColIndex) -
+                      Math.max(0, startColIndex) +
+                      1) /
+                      7) *
+                    100;
 
                   const startsThisWeek = event.startDate >= weekStart;
                   const endsThisWeek = scheduleEnd <= weekEnd;
@@ -514,7 +526,9 @@ function JadwalPersonilPage() {
                 <div
                   key={idx}
                   className={`relative min-h-20 border-r border-b p-1 ${
-                    isDateInSchedule(date) ? "bg-blue-50 dark:bg-blue-950/20" : ""
+                    isDateInSchedule(date)
+                      ? "bg-blue-50 dark:bg-blue-950/20"
+                      : ""
                   }`}
                 >
                   {time === "08:00" &&
@@ -543,9 +557,10 @@ function JadwalPersonilPage() {
   };
 
   const renderDayView = () => {
-    const dayEvents: WorksheetSchedule[] = worksheetSchedule && isDateInSchedule(currentDate)
-      ? [worksheetSchedule]
-      : [];
+    const dayEvents: WorksheetSchedule[] =
+      worksheetSchedule && isDateInSchedule(currentDate)
+        ? [worksheetSchedule]
+        : [];
 
     return (
       <div className="overflow-hidden rounded-xl border">
@@ -580,7 +595,9 @@ function JadwalPersonilPage() {
               <div className="w-20 shrink-0 border-r bg-muted/20 p-3 text-sm text-muted-foreground">
                 {time}
               </div>
-              <div className={`min-h-15 flex-1 p-2 ${isDateInSchedule(currentDate) ? "bg-blue-50 dark:bg-blue-950/20" : ""}`}>
+              <div
+                className={`min-h-15 flex-1 p-2 ${isDateInSchedule(currentDate) ? "bg-blue-50 dark:bg-blue-950/20" : ""}`}
+              >
                 {idx === 0 &&
                   dayEvents.map((event) => (
                     <button
@@ -717,7 +734,7 @@ function JadwalPersonilPage() {
           </Card>
         </div>
 
-        <div className="w-full shrink-0 lg:w-80 space-y-4">
+        <div className="w-full shrink-0 space-y-4 lg:w-80">
           {/* Assigned Personnel Card */}
           <Card>
             <CardContent className="p-3 sm:p-4">
@@ -728,9 +745,7 @@ function JadwalPersonilPage() {
                     Personel Ditugaskan
                   </h3>
                 </div>
-                <Badge variant="secondary">
-                  {assignedPersonnelIds.length}
-                </Badge>
+                <Badge variant="secondary">{assignedPersonnelIds.length}</Badge>
               </div>
 
               {assignedPersonnelIds.length > 0 ? (
@@ -741,7 +756,7 @@ function JadwalPersonilPage() {
                     return (
                       <div
                         key={person.id}
-                        className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/20 p-2 sm:gap-3"
+                        className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-2 sm:gap-3"
                       >
                         <Avatar
                           className={`h-8 w-8 sm:h-10 sm:w-10 ${person.color}`}
@@ -792,9 +807,7 @@ function JadwalPersonilPage() {
                     Semua Personel
                   </h3>
                 </div>
-                <Badge variant="outline">
-                  {personnelData.length}
-                </Badge>
+                <Badge variant="outline">{personnelData.length}</Badge>
               </div>
 
               <ScrollArea className="h-60 sm:h-80">
@@ -806,7 +819,7 @@ function JadwalPersonilPage() {
                         key={person.id}
                         className={`flex items-center gap-2 rounded-lg p-2 transition-colors sm:gap-3 ${
                           isAssigned
-                            ? "bg-primary/5 border border-primary/20"
+                            ? "border border-primary/20 bg-primary/5"
                             : "hover:bg-muted/50"
                         }`}
                       >
@@ -901,7 +914,11 @@ function JadwalPersonilPage() {
                         onSelect={(date) => {
                           setSelectedStartDate(date);
                           // If end date is before start date, clear it
-                          if (date && selectedEndDate && selectedEndDate < date) {
+                          if (
+                            date &&
+                            selectedEndDate &&
+                            selectedEndDate < date
+                          ) {
                             setSelectedEndDate(undefined);
                           }
                         }}
@@ -960,7 +977,9 @@ function JadwalPersonilPage() {
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium">Pilih Personel (Status: Siap)</p>
+              <p className="text-sm font-medium">
+                Pilih Personel (Status: Siap)
+              </p>
               <p className="text-xs text-muted-foreground">
                 Hanya personel dengan status "Siap" yang dapat ditugaskan
               </p>
@@ -1156,7 +1175,9 @@ function JadwalPersonilPage() {
                       <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
                         {event.startDate
-                          ? format(event.startDate, "d MMM", { locale: localeId })
+                          ? format(event.startDate, "d MMM", {
+                              locale: localeId,
+                            })
                           : "Belum dijadwalkan"}
                         {event.endDate &&
                           ` - ${format(event.endDate, "d MMM", { locale: localeId })}`}

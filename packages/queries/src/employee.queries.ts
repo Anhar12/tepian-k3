@@ -28,6 +28,7 @@ const employeeQueries = {
         db.query.employees.findMany({
           where: isNull(employees.deletedAt),
           with: {
+            position: true,
             user: true,
           },
         }),
@@ -235,7 +236,7 @@ const employeeQueries = {
             .insert(employees)
             .values({
               name: input.name,
-              position: input.position,
+              positionId: input.positionId,
               userId: input.userId,
               email: isUserExist.email,
             })
@@ -289,7 +290,7 @@ const employeeQueries = {
             .update(employees)
             .set({
               name: input.name,
-              position: input.position,
+              positionId: input.positionId,
               userId: input.userId,
               email: isUserExist.email,
             })
