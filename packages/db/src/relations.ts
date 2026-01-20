@@ -32,6 +32,7 @@ import {
   worksheetAssignments,
   worksheetItems,
   worksheetNotes,
+  worksheetOperationalCosts,
   worksheets,
   worksheetTools,
 } from "./schema";
@@ -304,6 +305,7 @@ export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
   items: many(worksheetItems),
   tools: many(worksheetTools),
   notes: many(worksheetNotes),
+  operationalCosts: many(worksheetOperationalCosts),
 }));
 
 export const worksheetItemRelations = relations(worksheetItems, ({ one }) => ({
@@ -357,6 +359,16 @@ export const worksheetAssignmentRelations = relations(
     assignedBy: one(users, {
       fields: [worksheetAssignments.assignedBy],
       references: [users.id],
+    }),
+  }),
+);
+
+export const worksheetOperationalCostRelations = relations(
+  worksheetOperationalCosts,
+  ({ one }) => ({
+    worksheet: one(worksheets, {
+      fields: [worksheetOperationalCosts.worksheetId],
+      references: [worksheets.id],
     }),
   }),
 );

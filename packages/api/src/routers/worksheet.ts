@@ -594,4 +594,41 @@ export const worksheetRouter = createTRPCRouter({
         }),
       );
     }),
+
+  /**
+   * Get worksheet transaction detail for document generation
+   * Returns worksheet with ready items, assignments, and operational costs
+   */
+  getTransactionDetail: withPermission("worksheets.read")
+    .input(worksheetSchema.getWorksheetTransactionDetailSchema)
+    .query(async ({ input }) => {
+      const worksheet = await runEffect(
+        worksheetQueries.getWorksheetTransactionDetail(input.worksheetId),
+      );
+
+      if (!worksheet) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Worksheet tidak ditemukan",
+        });
+      }
+
+      return worksheet;
+    }),
+
+  /**
+   * Save operational costs for worksheet
+   */
+  saveOperationalCosts: withPermission("worksheets.update")
+    .input(worksheetSchema.saveWorksheetOperationalCostsSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.saveWorksheetOperationalCosts(
+            input.worksheetId,
+            input.costs,
+            ctx.user.id,
+          ),
+        ),
+    ),
 });

@@ -9,6 +9,7 @@ import {
   worksheetTools,
   worksheetAssignments,
   worksheetNotes,
+  worksheetOperationalCosts,
   testingItem,
   order,
 } from "@tepian-k3/db/schema";
@@ -1059,6 +1060,201 @@ const worksheetQueries = {
       );
 
       return updated;
+    });
+  },
+
+  /**
+   * Get worksheet transaction detail for document generation
+   * Returns worksheet with ready items, assignments, and operational costs
+   */
+  getWorksheetTransactionDetail(worksheetId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.worksheets.findFirst({
+          where: eq(worksheets.id, worksheetId),
+          with: {
+            order: {
+              with: {
+                company: true,
+                items: {
+                  with: {
+                    parameter: {
+                      with: {
+                        category: {
+                          with: {
+                            cluster: true,
+                          },
+                        },
+                      },
+                    },
+                    location: {
+                      with: {
+                        regency: true,
+                        district: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            items: {
+              with: {
+                parameter: {
+                  with: {
+                    category: {
+                      with: {
+                        cluster: true,
+                      },
+                    },
+                  },
+                },
+                location: {
+                  with: {
+                    regency: true,
+                    district: true,
+                  },
+                },
+              },
+            },
+            assignments: {
+              with: {
+                employee: {
+                  with: {
+                    user: true,
+                    position: true,
+                  },
+                },
+              },
+            },
+            mainSupervisor: {
+              with: {
+                user: true,
+                position: true,
+              },
+            },
+            accompanyingSupervisor: {
+              with: {
+                user: true,
+                position: true,
+              },
+            },
+            operationalCosts: {
+              orderBy: (costs, { asc }) => [asc(costs.sortOrder)],
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "worksheetQueries.getWorksheetTransactionDetail",
+          "Failed to fetch worksheet transaction detail",
+          {
+            error,
+            worksheetId,
+          },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil detail transaksi worksheet",
+        });
+      },
+    });
+  },
+
+  /**
+   * Save operational costs for worksheet (batch upsert)
+   * Deletes existing costs and inserts new ones
+   */
+  saveWorksheetOperationalCosts(
+    worksheetId: string,
+    costs: Array<{
+      id?: string;
+      item: string;
+      unitCount: number;
+      days: number;
+      unitCost: number | null;
+      note?: string | null;
+      sortOrder: number;
+    }>,
+    userId: string,
+  ) {
+    return Effect.gen(function* () {
+      const result = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            // 1. Verify worksheet exists
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
+            });
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            // 2. Delete existing operational costs
+            await tx
+              .delete(worksheetOperationalCosts)
+              .where(eq(worksheetOperationalCosts.worksheetId, worksheetId));
+
+            // 3. Insert new operational costs
+            if (costs.length > 0) {
+              const costsData = costs.map((cost, index) => ({
+                worksheetId,
+                item: cost.item,
+                unitCount: cost.unitCount,
+                days: cost.days,
+                unitCost: cost.unitCost,
+                note: cost.note || null,
+                sortOrder: cost.sortOrder ?? index,
+              }));
+
+              const newCosts = await tx
+                .insert(worksheetOperationalCosts)
+                .values(costsData)
+                .returning();
+
+              return newCosts;
+            }
+
+            return [];
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.saveWorksheetOperationalCosts",
+            "Failed to save operational costs",
+            {
+              error,
+              worksheetId,
+              costsCount: costs.length,
+            },
+          );
+
+          if (error instanceof TRPCError) {
+            throw error;
+          }
+
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menyimpan biaya operasional",
+          });
+        },
+      });
+
+      // Log audit
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          { action: "save_operational_costs" },
+          { costsCount: result.length } as Record<string, unknown>,
+          userId,
+          "operational_costs",
+        ),
+      );
+
+      return result;
     });
   },
 };

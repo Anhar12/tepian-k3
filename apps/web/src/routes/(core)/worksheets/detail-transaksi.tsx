@@ -1,6 +1,6 @@
 import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Check,
   Users,
@@ -8,7 +8,9 @@ import {
   Calendar,
   Printer,
   Save,
-  CheckCircle,
+  Plus,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,236 +26,355 @@ import {
 } from "@/components/ui/table";
 import { usePagination } from "@/lib/pagination";
 import { WorksheetDataTable } from "@/components/ui/worksheet-data-table";
+import { trpc } from "@/utils/trpc";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery, useMutation } from "@tanstack/react-query";
+
+const searchParamsSchema = z.object({
+  worksheetId: z.string().uuidv7().optional(),
+});
 
 export const Route = createFileRoute("/(core)/worksheets/detail-transaksi")({
+  validateSearch: searchParamsSchema,
   component: RouteComponent,
 });
 
-const transactionParameterData = [
-  {
-    id: 1,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Kebisingan",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 20,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 2,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Kebisingan Personal",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 15,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 3,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Iklim Kerja",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 5,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 4,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Fisik",
-    parameter: "Penerangan Umum",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 26,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 5,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "Benzen",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 5,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 6,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "Toluen",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 5,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 7,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Kimia",
-    parameter: "Xylen",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 5,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 8,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Biologi",
-    parameter: "Koloni Jamur",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 7,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 9,
-    cluster: "Lingkungan Kerja",
-    jenisPengujian: "Faktor Biologi",
-    parameter: "Koloni Bakteri",
-    acuan: "Permenaker 05 Thn 2018",
-    jumlah: 7,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 10,
-    cluster: "Lingkungan Hidup",
-    jenisPengujian: "Udara Ambien",
-    parameter: "Karbon Monoksida (CO)",
-    acuan: "PP 22 Thn 2021",
-    jumlah: 4,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 11,
-    cluster: "Lingkungan Hidup",
-    jenisPengujian: "Udara Ambien",
-    parameter: "Natrium Dioksida (NO2)",
-    acuan: "PP 22 Thn 2021",
-    jumlah: 4,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 12,
-    cluster: "Lingkungan Hidup",
-    jenisPengujian: "Udara Ambien",
-    parameter: "Sulfur Dioksida (SO2)",
-    acuan: "PP 22 Thn 2021",
-    jumlah: 4,
-    status: "siap",
-    biaya: 150000,
-  },
-  {
-    id: 13,
-    cluster: "Lingkungan Hidup",
-    jenisPengujian: "Emisi Tidak Bergerak",
-    parameter: "Karbon Monoksida (CO)",
-    acuan: "Permen LH 11 Thn 2021",
-    jumlah: 3,
-    status: "tidak siap",
-    biaya: 150000,
-  },
-  {
-    id: 14,
-    cluster: "Lingkungan Hidup",
-    jenisPengujian: "Emisi Tidak Bergerak",
-    parameter: "Natrium Dioksida (NO2)",
-    acuan: "Permen LH 11 Thn 2021",
-    jumlah: 3,
-    status: "tidak siap",
-    biaya: 150000,
-  },
-  {
-    id: 15,
-    cluster: "Lingkungan Hidup",
-    jenisPengujian: "Emisi Tidak Bergerak",
-    parameter: "Partikulat",
-    acuan: "Permen LH 11 Thn 2021",
-    jumlah: 3,
-    status: "tidak siap",
-    biaya: 150000,
-  },
-];
+interface OperationalCostItem {
+  id?: string;
+  item: string;
+  unitCount: number;
+  days: number;
+  unitCost: number | null;
+  note: string | null;
+  sortOrder: number;
+}
 
-const operationalData = [
-  {
-    id: 1,
-    item: "Uang Harian",
-    orangUnit: 20,
-    hari: 20,
-    keterangan: "-",
-    biaya: 150000,
-  },
-  {
-    id: 2,
-    item: "Transportasi",
-    orangUnit: 1,
-    hari: 2,
-    keterangan: "Disediakan Perusahaan",
-    biaya: null,
-  },
-  {
-    id: 3,
-    item: "Penginapan",
-    orangUnit: 5,
-    hari: 5,
-    keterangan: "-",
-    biaya: 150000,
-  },
-];
+function formatCurrency(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "-";
+  return `${value.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace("IDR", "Rp")},-`;
+}
 
-const locations = [
-  "Loa Janan Ilir",
-  "Loa Janan Ilir",
-  "Loa Tebu",
-  "Loa Tebu",
-  "Loa Duri",
-  "Loa Duri",
-  "Loa Janan",
-  "Loa Janan",
-  "Tenggarong Seberang",
-  "Tenggarong Seberang",
-  "Samarinda Ulu",
-  "Samarinda Seberang",
-];
+function calculateDuration(
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+): number {
+  if (!startDate || !endDate) return 0;
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays + 1;
+}
 
-const assignedPersonnel = [
-  "Ugeng Priyanto, ST",
-  "Ahmad Yani, SKM",
-  "Hidayatullah, SKM",
-  "Moh. Anugerah Ramadhan Arief",
-  "Novantio Saputra",
-  "Alif",
-];
+function formatDateRange(
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+): string {
+  if (!startDate || !endDate) return "-";
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const options: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  };
+  return `${start.toLocaleDateString("id-ID", options)} - ${end.toLocaleDateString("id-ID", options)}`;
+}
 
 function RouteComponent() {
-  const [parameterData] = useState(transactionParameterData);
+  const navigate = useNavigate();
+  const { worksheetId } = Route.useSearch();
 
   const [paramPage, setParamPage] = useState(1);
   const [paramPageSize, setParamPageSize] = useState(10);
+  const [operationalCosts, setOperationalCosts] = useState<
+    OperationalCostItem[]
+  >([]);
+  const [isDirty, setIsDirty] = useState(false);
 
-  const parameterTotal = parameterData.reduce(
-    (sum, item) => sum + item.jumlah * item.biaya,
-    0,
+  const {
+    data: worksheet,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery(
+    trpc.worksheet.getTransactionDetail.queryOptions(
+      { worksheetId: worksheetId! },
+      { enabled: !!worksheetId },
+    ),
   );
-  const operationalTotal = operationalData.reduce((sum, item) => {
-    if (item.biaya) return sum + item.orangUnit * item.hari * item.biaya;
-    return sum;
-  }, 0);
-  const grandTotal = parameterTotal + operationalTotal;
+
+  const saveOperationalCostsMutation = useMutation(
+    trpc.worksheet.saveOperationalCosts.mutationOptions({
+      onSuccess: () => {
+        toast.success("Biaya operasional berhasil disimpan");
+        setIsDirty(false);
+        refetch();
+      },
+      onError: (error: { message?: string }) => {
+        toast.error(error.message || "Gagal menyimpan biaya operasional");
+      },
+    }),
+  );
+
+  useEffect(() => {
+    if (worksheet?.operationalCosts) {
+      setOperationalCosts(
+        worksheet.operationalCosts.map((cost) => ({
+          id: cost.id,
+          item: cost.item,
+          unitCount: cost.unitCount,
+          days: cost.days,
+          unitCost: cost.unitCost,
+          note: cost.note,
+          sortOrder: cost.sortOrder,
+        })),
+      );
+    } else if (worksheet && worksheet.operationalCosts?.length === 0) {
+      const defaultCosts: OperationalCostItem[] = [
+        {
+          item: "Uang Harian",
+          unitCount: 1,
+          days: 1,
+          unitCost: 0,
+          note: null,
+          sortOrder: 0,
+        },
+      ];
+
+      if (worksheet.coverTransportationIncluded === false) {
+        defaultCosts.push({
+          item: "Transportasi",
+          unitCount: 1,
+          days: 1,
+          unitCost: null,
+          note: "Disediakan Perusahaan",
+          sortOrder: 1,
+        });
+      } else {
+        defaultCosts.push({
+          item: "Transportasi",
+          unitCount: 1,
+          days: 1,
+          unitCost: 0,
+          note: null,
+          sortOrder: 1,
+        });
+      }
+
+      if (worksheet.coverAccommodationIncluded === false) {
+        defaultCosts.push({
+          item: "Penginapan",
+          unitCount: 1,
+          days: 1,
+          unitCost: null,
+          note: "Disediakan Perusahaan",
+          sortOrder: 2,
+        });
+      } else {
+        defaultCosts.push({
+          item: "Penginapan",
+          unitCount: 1,
+          days: 1,
+          unitCost: 0,
+          note: null,
+          sortOrder: 2,
+        });
+      }
+
+      setOperationalCosts(defaultCosts);
+    }
+  }, [worksheet]);
+
+  const readyItems = useMemo(() => {
+    if (!worksheet?.items) return [];
+    return worksheet.items.filter((item) => item.isReady);
+  }, [worksheet?.items]);
+
+  const locations = useMemo(() => {
+    if (!worksheet?.items) return [];
+    const uniqueLocations = new Map<string, string>();
+    worksheet.items.forEach((item) => {
+      if (item.location?.district?.name) {
+        uniqueLocations.set(item.location.id, item.location.district.name);
+      }
+    });
+    return Array.from(uniqueLocations.values());
+  }, [worksheet?.items]);
+
+  const assignedPersonnel = useMemo(() => {
+    if (!worksheet?.assignments) return [];
+    return worksheet.assignments.map(
+      (a) => a.employee?.user?.name || a.employee?.name || "Unknown",
+    );
+  }, [worksheet?.assignments]);
+
+  const parameterData = useMemo(() => {
+    return readyItems.map((item) => ({
+      id: item.id,
+      cluster: item.parameter?.category?.cluster?.name || "-",
+      jenisPengujian: item.parameter?.category?.name || "-",
+      parameter: item.parameter?.name || "-",
+      acuan: item.parameter?.reference || "-",
+      jumlah: item.quantity,
+      status: item.isReady ? "siap" : "tidak siap",
+      biaya: item.parameter?.price || 0,
+    }));
+  }, [readyItems]);
 
   const paramPagination = usePagination(
     parameterData,
     paramPageSize,
     paramPage,
   );
+
+  const parameterTotal = useMemo(() => {
+    return parameterData.reduce(
+      (sum, item) => sum + item.jumlah * item.biaya,
+      0,
+    );
+  }, [parameterData]);
+
+  const operationalTotal = useMemo(() => {
+    return operationalCosts.reduce((sum, item) => {
+      if (item.unitCost !== null && item.unitCost > 0) {
+        return sum + item.unitCount * item.days * item.unitCost;
+      }
+      return sum;
+    }, 0);
+  }, [operationalCosts]);
+
+  const grandTotal = parameterTotal + operationalTotal;
+
+  const handleAddOperationalCost = useCallback(() => {
+    setOperationalCosts((prev) => [
+      ...prev,
+      {
+        item: "",
+        unitCount: 1,
+        days: 1,
+        unitCost: 0,
+        note: null,
+        sortOrder: prev.length,
+      },
+    ]);
+    setIsDirty(true);
+  }, []);
+
+  const handleRemoveOperationalCost = useCallback((index: number) => {
+    setOperationalCosts((prev) => prev.filter((_, i) => i !== index));
+    setIsDirty(true);
+  }, []);
+
+  const handleUpdateOperationalCost = useCallback(
+    (index: number, field: keyof OperationalCostItem, value: unknown) => {
+      setOperationalCosts((prev) =>
+        prev.map((item, i) =>
+          i === index ? { ...item, [field]: value } : item,
+        ),
+      );
+      setIsDirty(true);
+    },
+    [],
+  );
+
+  const handleSave = useCallback(() => {
+    if (!worksheetId) return;
+
+    const validCosts = operationalCosts.filter(
+      (cost) => cost.item.trim() !== "",
+    );
+
+    saveOperationalCostsMutation.mutate({
+      worksheetId,
+      costs: validCosts.map((cost, index) => ({
+        ...cost,
+        sortOrder: index,
+      })),
+    });
+  }, [worksheetId, operationalCosts, saveOperationalCostsMutation]);
+
+  if (!worksheetId) {
+    return (
+      <div className="space-y-4">
+        <WorksheetHeaderCard
+          title="Detail Transaksi"
+          subtitle="Rincian biaya parameter dan operasional pengujian"
+        />
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-muted-foreground">
+              Worksheet ID tidak ditemukan. Silakan pilih worksheet dari daftar.
+            </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() =>
+                navigate({
+                  to: "/back-office/worksheets",
+                  search: { page: 1, perPage: 10 },
+                })
+              }
+            >
+              Kembali ke Daftar Worksheet
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <WorksheetHeaderCard
+          title="Detail Transaksi"
+          subtitle="Rincian biaya parameter dan operasional pengujian"
+        />
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !worksheet) {
+    return (
+      <div className="space-y-4">
+        <WorksheetHeaderCard
+          title="Detail Transaksi"
+          subtitle="Rincian biaya parameter dan operasional pengujian"
+        />
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-destructive">
+              {error?.message || "Gagal memuat data worksheet"}
+            </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => refetch()}
+            >
+              Coba Lagi
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const duration = calculateDuration(worksheet.startDate, worksheet.endDate);
+  const dateRange = formatDateRange(worksheet.startDate, worksheet.endDate);
 
   return (
     <div className="space-y-4">
@@ -279,11 +400,17 @@ function RouteComponent() {
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:text-sm">
-                {locations.map((loc, idx) => (
-                  <span key={idx}>
-                    {idx + 1}. {loc}
+                {locations.length > 0 ? (
+                  locations.map((loc, idx) => (
+                    <span key={idx}>
+                      {idx + 1}. {loc}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-muted-foreground">
+                    Belum ada lokasi
                   </span>
-                ))}
+                )}
               </div>
             </div>
 
@@ -295,12 +422,14 @@ function RouteComponent() {
                 </span>
               </div>
               <div className="space-y-1">
-                <p className="text-xl font-bold sm:text-2xl">10 Hari</p>
+                <p className="text-xl font-bold sm:text-2xl">
+                  {duration > 0 ? `${duration} Hari` : "-"}
+                </p>
                 <p className="text-xs text-muted-foreground sm:text-sm">
                   Tanggal
                 </p>
                 <p className="text-xs font-medium text-primary sm:text-sm">
-                  01 Desember - 10 Desember 2025
+                  {dateRange}
                 </p>
               </div>
             </div>
@@ -313,11 +442,17 @@ function RouteComponent() {
                 </span>
               </div>
               <div className="space-y-1 text-xs sm:text-sm">
-                {assignedPersonnel.map((person, idx) => (
-                  <p key={idx}>
-                    {idx + 1}. {person}
-                  </p>
-                ))}
+                {assignedPersonnel.length > 0 ? (
+                  assignedPersonnel.map((person, idx) => (
+                    <p key={idx}>
+                      {idx + 1}. {person}
+                    </p>
+                  ))
+                ) : (
+                  <span className="text-muted-foreground">
+                    Belum ada personel
+                  </span>
+                )}
               </div>
             </div>
 
@@ -338,7 +473,7 @@ function RouteComponent() {
         <CardHeader className="px-3 pb-3 sm:px-6 sm:pb-4">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Calendar className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
-            Rincian Parameter
+            Rincian Parameter (Siap)
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -373,51 +508,52 @@ function RouteComponent() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paramPagination.paginatedData.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-muted/30">
-                    <TableCell className="text-xs font-medium sm:text-sm">
-                      {item.cluster}
-                    </TableCell>
-                    <TableCell className="hidden text-xs sm:text-sm md:table-cell">
-                      {item.jenisPengujian}
-                    </TableCell>
-                    <TableCell className="text-xs sm:text-sm">
-                      {item.parameter}
-                    </TableCell>
-                    <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                      {item.acuan}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant="outline"
-                        className="bg-background text-xs"
-                      >
-                        {item.jumlah}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        className={`text-xs ${
-                          item.status === "siap"
-                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                            : "bg-red-100 text-red-700 hover:bg-red-100"
-                        }`}
-                      >
-                        {item.status === "siap" ? "Siap" : "Tidak"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
-                      {item.biaya
-                        ? `${item.biaya.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace("IDR", "Rp")},-`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right text-xs font-medium sm:text-sm">
-                      {item.biaya
-                        ? `${(item.jumlah * item.biaya).toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace("IDR", "Rp")},-`
-                        : "-"}
+                {paramPagination.paginatedData.length > 0 ? (
+                  paramPagination.paginatedData.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-muted/30">
+                      <TableCell className="text-xs font-medium sm:text-sm">
+                        {item.cluster}
+                      </TableCell>
+                      <TableCell className="hidden text-xs sm:text-sm md:table-cell">
+                        {item.jenisPengujian}
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        {item.parameter}
+                      </TableCell>
+                      <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
+                        {item.acuan}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          variant="outline"
+                          className="bg-background text-xs"
+                        >
+                          {item.jumlah}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-emerald-100 text-xs text-emerald-700 hover:bg-emerald-100">
+                          Siap
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
+                        {formatCurrency(item.biaya)}
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-medium sm:text-sm">
+                        {formatCurrency(item.jumlah * item.biaya)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      className="py-8 text-center text-muted-foreground"
+                    >
+                      Belum ada parameter yang siap
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
                 <TableRow className="bg-muted/50 font-semibold">
                   <TableCell
                     colSpan={7}
@@ -427,14 +563,7 @@ function RouteComponent() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Input
-                      value={parameterTotal
-                        .toLocaleString("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        })
-                        .replace("IDR", "Rp")}
+                      value={formatCurrency(parameterTotal)}
                       readOnly
                       className="ml-auto w-24 text-right text-xs font-bold sm:w-32 sm:text-sm"
                     />
@@ -443,26 +572,38 @@ function RouteComponent() {
               </TableBody>
             </Table>
           </div>
-          <WorksheetDataTable
-            currentPage={paramPagination.currentPage}
-            totalPages={paramPagination.totalPages}
-            pageSize={paramPageSize}
-            totalItems={paramPagination.totalItems}
-            onPageChange={setParamPage}
-            onPageSizeChange={(size) => {
-              setParamPageSize(size);
-              setParamPage(1);
-            }}
-          />
+          {parameterData.length > 0 && (
+            <WorksheetDataTable
+              currentPage={paramPagination.currentPage}
+              totalPages={paramPagination.totalPages}
+              pageSize={paramPageSize}
+              totalItems={paramPagination.totalItems}
+              onPageChange={setParamPage}
+              onPageSizeChange={(size) => {
+                setParamPageSize(size);
+                setParamPage(1);
+              }}
+            />
+          )}
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="px-3 pb-3 sm:px-6 sm:pb-4">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
-            Rincian Operasional
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+              Rincian Operasional
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddOperationalCost}
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Tambah Item
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -482,56 +623,126 @@ function RouteComponent() {
                     Keterangan
                   </TableHead>
                   <TableHead className="hidden text-right text-xs font-semibold sm:table-cell sm:text-sm">
-                    Biaya
+                    Biaya/Unit
                   </TableHead>
                   <TableHead className="text-right text-xs font-semibold sm:text-sm">
                     Total
                   </TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {operationalData.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-muted/30">
-                    <TableCell className="text-xs font-medium sm:text-sm">
-                      {item.item}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant="outline"
-                        className="bg-background text-xs"
-                      >
-                        {item.orangUnit}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant="outline"
-                        className="bg-background text-xs"
-                      >
-                        {item.hari}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden text-center text-xs sm:text-sm md:table-cell">
-                      {item.keterangan === "Disediakan Perusahaan" ? (
-                        <Badge className="bg-amber-100 text-xs text-amber-700 hover:bg-amber-100">
-                          {item.keterangan}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
-                      {item.biaya
-                        ? `${item.biaya.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace("IDR", "Rp")},-`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right text-xs font-medium sm:text-sm">
-                      {item.biaya
-                        ? `${(item.orangUnit * item.hari * item.biaya).toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace("IDR", "Rp")},-`
-                        : "-"}
+                {operationalCosts.map((item, index) => {
+                  const itemTotal =
+                    item.unitCost !== null && item.unitCost > 0
+                      ? item.unitCount * item.days * item.unitCost
+                      : null;
+
+                  return (
+                    <TableRow key={index} className="hover:bg-muted/30">
+                      <TableCell className="text-xs sm:text-sm">
+                        <Input
+                          value={item.item}
+                          onChange={(e) =>
+                            handleUpdateOperationalCost(
+                              index,
+                              "item",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Nama item"
+                          className="h-8 w-full min-w-30 text-xs sm:text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Input
+                          type="number"
+                          min={0}
+                          value={item.unitCount}
+                          onChange={(e) =>
+                            handleUpdateOperationalCost(
+                              index,
+                              "unitCount",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          className="h-8 w-16 text-center text-xs sm:text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Input
+                          type="number"
+                          min={0}
+                          value={item.days}
+                          onChange={(e) =>
+                            handleUpdateOperationalCost(
+                              index,
+                              "days",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          className="h-8 w-16 text-center text-xs sm:text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="hidden text-center text-xs sm:text-sm md:table-cell">
+                        <Input
+                          value={item.note || ""}
+                          onChange={(e) =>
+                            handleUpdateOperationalCost(
+                              index,
+                              "note",
+                              e.target.value || null,
+                            )
+                          }
+                          placeholder="-"
+                          className="h-8 w-full min-w-25 text-center text-xs sm:text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
+                        <Input
+                          type="number"
+                          min={0}
+                          value={item.unitCost ?? ""}
+                          onChange={(e) =>
+                            handleUpdateOperationalCost(
+                              index,
+                              "unitCost",
+                              e.target.value === ""
+                                ? null
+                                : parseInt(e.target.value) || 0,
+                            )
+                          }
+                          placeholder="-"
+                          className="h-8 w-24 text-right text-xs sm:text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-medium sm:text-sm">
+                        {itemTotal !== null ? formatCurrency(itemTotal) : "-"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => handleRemoveOperationalCost(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {operationalCosts.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={7}
+                      className="py-8 text-center text-muted-foreground"
+                    >
+                      Belum ada biaya operasional. Klik &quot;Tambah Item&quot;
+                      untuk menambahkan.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
                 <TableRow className="bg-muted/50 font-semibold">
                   <TableCell
                     colSpan={5}
@@ -541,18 +752,12 @@ function RouteComponent() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Input
-                      value={operationalTotal
-                        .toLocaleString("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        })
-                        .replace("IDR", "Rp")}
+                      value={formatCurrency(operationalTotal)}
                       readOnly
                       className="ml-auto w-24 text-right text-xs font-bold sm:w-32 sm:text-sm"
                     />
                   </TableCell>
+                  <TableCell></TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -573,12 +778,26 @@ function RouteComponent() {
             variant="outline"
             size="icon"
             className="h-9 w-9 bg-transparent"
+            onClick={handleSave}
+            disabled={!isDirty || saveOperationalCostsMutation.isPending}
           >
-            <Save className="h-4 w-4" />
+            {saveOperationalCostsMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
           </Button>
-          <Button className="flex-1 gap-2 sm:flex-initial">
-            <CheckCircle className="h-4 w-4" />
-            SUBMIT
+          <Button
+            className="flex-1 gap-2 sm:flex-initial"
+            onClick={handleSave}
+            disabled={!isDirty || saveOperationalCostsMutation.isPending}
+          >
+            {saveOperationalCostsMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            SIMPAN
           </Button>
         </div>
         <div className="flex items-center justify-between gap-3 border-t pt-3 sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">
@@ -587,14 +806,7 @@ function RouteComponent() {
           </span>
           <div className="rounded-lg bg-primary/10 px-3 py-2 sm:px-4">
             <span className="text-lg font-bold text-primary sm:text-xl">
-              {grandTotal
-                .toLocaleString("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })
-                .replace("IDR", "Rp")}
+              {formatCurrency(grandTotal)}
             </span>
           </div>
         </div>

@@ -24,10 +24,12 @@ import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  WORKSHEET_STATUS_COLORS,
   WORKSHEET_STATUS,
   WORKSHEET_STATUS_LABELS,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
+import { format } from "date-fns";
 import {
   Building2,
   Calendar,
@@ -52,14 +54,6 @@ export const Route = createFileRoute("/(core)/back-office/worksheets/")({
     await requirePermission(context, { permission: "worksheets.read" }),
   component: RouteComponent,
 });
-
-const STATUS_COLORS: Record<WorksheetStatus, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
-  approved: "bg-emerald-100 text-emerald-700",
-  rejected: "bg-red-100 text-red-700",
-};
 
 function RouteComponent() {
   const params = Route.useSearch();
@@ -151,27 +145,27 @@ function RouteComponent() {
               {
                 label: "Draft",
                 count: 0,
-                color: STATUS_COLORS.draft,
+                color: WORKSHEET_STATUS_COLORS["draft"],
               },
               {
                 label: "In Progress",
                 count: 0,
-                color: STATUS_COLORS.in_progress,
+                color: WORKSHEET_STATUS_COLORS["in_progress"],
               },
               {
                 label: "Completed",
                 count: 0,
-                color: STATUS_COLORS.completed,
+                color: WORKSHEET_STATUS_COLORS["completed"],
               },
               {
-                label: "Approved",
+                label: "Verified",
                 count: 0,
-                color: STATUS_COLORS.approved,
+                color: WORKSHEET_STATUS_COLORS["verified"],
               },
               {
                 label: "Rejected",
                 count: 0,
-                color: STATUS_COLORS.rejected,
+                color: WORKSHEET_STATUS_COLORS["rejected"],
               },
             ].map((stat) => (
               <Card key={stat.label} className="border-0 shadow-sm">
@@ -265,7 +259,7 @@ function RouteComponent() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            className={`${STATUS_COLORS[worksheet.status as WorksheetStatus]} text-xs`}
+                            className={`${WORKSHEET_STATUS_COLORS[worksheet.status as WorksheetStatus]} text-xs`}
                           >
                             {
                               WORKSHEET_STATUS_LABELS[
@@ -278,26 +272,16 @@ function RouteComponent() {
                           <div className="flex flex-col">
                             <span>
                               Mulai:{" "}
-                              {new Date(worksheet.startDate).toLocaleDateString(
-                                "id-ID",
-                                {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                },
-                              )}
+                              {worksheet.startDate
+                                ? format(worksheet.startDate, "dd MMM yyyy")
+                                : "-"}
                             </span>
                             {worksheet.endDate && (
                               <span>
                                 Selesai:{" "}
-                                {new Date(worksheet.endDate).toLocaleDateString(
-                                  "id-ID",
-                                  {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                  },
-                                )}
+                                {worksheet.endDate
+                                  ? format(worksheet.endDate, "dd MMM yyyy")
+                                  : "-"}
                               </span>
                             )}
                           </div>

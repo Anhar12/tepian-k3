@@ -919,6 +919,33 @@ export const worksheetAssignments = createTable(
   ],
 );
 
+export const worksheetOperationalCosts = createTable(
+  "worksheet_operational_costs",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    item: varchar("item", { length: 255 }).notNull(),
+    unitCount: integer("unit_count").notNull().default(1),
+    days: integer("days").notNull().default(1),
+    unitCost: integer("unit_cost"),
+    note: text("note"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_operational_cost_id_idx").using("btree", table.id),
+    index("worksheet_operational_cost_worksheet_id_idx").using(
+      "btree",
+      table.worksheetId,
+    ),
+  ],
+);
+
 export const orderStatusHistory = createTable(
   "order_status_history",
   {

@@ -31,7 +31,9 @@
       "Skill(web-design-guidelines:*)",
       "Bash(xargs cat:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(turbo:*)",
+      "Bash(pnpm turbo:*)"
     ]
   }
 }

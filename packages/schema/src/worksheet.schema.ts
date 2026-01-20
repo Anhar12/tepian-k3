@@ -2,6 +2,7 @@ import {
   worksheets,
   worksheetItems,
   worksheetNotes,
+  worksheetOperationalCosts,
 } from "@tepian-k3/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
@@ -11,6 +12,9 @@ import { WORKSHEET_STATUS, WORKSHEET_NOTE_STATUS } from "@tepian-k3/constants";
 const baseWorksheetSchema = createInsertSchema(worksheets);
 const baseWorksheetItemSchema = createInsertSchema(worksheetItems);
 const baseWorksheetNoteSchema = createInsertSchema(worksheetNotes);
+const baseWorksheetOperationalCostSchema = createInsertSchema(
+  worksheetOperationalCosts,
+);
 
 // Create worksheet from testing
 const createWorksheetFromTestingSchema = z.object({
@@ -111,10 +115,33 @@ const completeWorksheetSchema = z.object({
   result: z.string().optional(),
 });
 
+// Get worksheet transaction detail
+const getWorksheetTransactionDetailSchema = z.object({
+  worksheetId: z.uuidv7(),
+});
+
+// Operational cost item schema
+const operationalCostItemSchema = z.object({
+  id: z.uuidv7().optional(),
+  item: z.string().min(1).max(255),
+  unitCount: z.number().int().min(0).default(1),
+  days: z.number().int().min(0).default(1),
+  unitCost: z.number().int().min(0).nullable(),
+  note: z.string().nullable().optional(),
+  sortOrder: z.number().int().default(0),
+});
+
+// Save operational costs (batch upsert)
+const saveWorksheetOperationalCostsSchema = z.object({
+  worksheetId: z.uuidv7(),
+  costs: z.array(operationalCostItemSchema),
+});
+
 const worksheetSchema = {
   baseWorksheetSchema,
   baseWorksheetItemSchema,
   baseWorksheetNoteSchema,
+  baseWorksheetOperationalCostSchema,
   createWorksheetFromTestingSchema,
   createWorksheetFromOrderSchema,
   submitForVerificationSchema,
@@ -128,6 +155,9 @@ const worksheetSchema = {
   addWorksheetNoteSchema,
   getWorksheetsSchema,
   completeWorksheetSchema,
+  getWorksheetTransactionDetailSchema,
+  operationalCostItemSchema,
+  saveWorksheetOperationalCostsSchema,
 };
 
 export default worksheetSchema;

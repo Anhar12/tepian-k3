@@ -351,6 +351,7 @@ export const WORKSHEET_STATUS = [
   "ready",
   "in_progress",
   "completed",
+  "rejected",
 ] as const;
 
 export type WorksheetStatus = (typeof WORKSHEET_STATUS)[number];
@@ -362,6 +363,7 @@ export const WORKSHEET_STATUS_LABELS: Record<WorksheetStatus, string> = {
   ready: "Ready",
   in_progress: "In Progress",
   completed: "Completed",
+  rejected: "Rejected",
 };
 
 export const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
@@ -371,6 +373,7 @@ export const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
   ready: "bg-indigo-100 text-indigo-700",
   in_progress: "bg-purple-100 text-purple-700",
   completed: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
 };
 
 export const WORKSHEET_NOTE_STATUS = [
