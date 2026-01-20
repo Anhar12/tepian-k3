@@ -1193,12 +1193,22 @@ const worksheetQueries = {
               });
             }
 
-            // 2. Delete existing operational costs
+            // 2. Check if worksheet status allows editing
+            const editableStatuses = ["draft", "revision"];
+            if (!editableStatuses.includes(worksheet.status)) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Biaya operasional hanya dapat diubah jika status worksheet adalah 'draft' atau 'revision'",
+              });
+            }
+
+            // 3. Delete existing operational costs
             await tx
               .delete(worksheetOperationalCosts)
               .where(eq(worksheetOperationalCosts.worksheetId, worksheetId));
 
-            // 3. Insert new operational costs
+            // 4. Insert new operational costs
             if (costs.length > 0) {
               const costsData = costs.map((cost, index) => ({
                 worksheetId,

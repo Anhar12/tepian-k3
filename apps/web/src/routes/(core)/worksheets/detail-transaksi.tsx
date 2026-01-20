@@ -193,6 +193,12 @@ function RouteComponent() {
     return worksheet.items.filter((item) => item.isReady);
   }, [worksheet?.items]);
 
+  // Check if worksheet is editable (only draft or revision status)
+  const isEditable = useMemo(() => {
+    if (!worksheet?.status) return false;
+    return ["draft", "revision"].includes(worksheet.status);
+  }, [worksheet?.status]);
+
   const locations = useMemo(() => {
     if (!worksheet?.items) return [];
     const uniqueLocations = new Map<string, string>();
@@ -599,6 +605,7 @@ function RouteComponent() {
               variant="outline"
               size="sm"
               onClick={handleAddOperationalCost}
+              disabled={!isEditable}
             >
               <Plus className="mr-1 h-4 w-4" />
               Tambah Item
@@ -652,6 +659,7 @@ function RouteComponent() {
                           }
                           placeholder="Nama item"
                           className="h-8 w-full min-w-30 text-xs sm:text-sm"
+                          disabled={!isEditable}
                         />
                       </TableCell>
                       <TableCell className="text-center">
@@ -667,6 +675,7 @@ function RouteComponent() {
                             )
                           }
                           className="h-8 w-16 text-center text-xs sm:text-sm"
+                          disabled={!isEditable}
                         />
                       </TableCell>
                       <TableCell className="text-center">
@@ -682,6 +691,7 @@ function RouteComponent() {
                             )
                           }
                           className="h-8 w-16 text-center text-xs sm:text-sm"
+                          disabled={!isEditable}
                         />
                       </TableCell>
                       <TableCell className="hidden text-center text-xs sm:text-sm md:table-cell">
@@ -696,6 +706,7 @@ function RouteComponent() {
                           }
                           placeholder="-"
                           className="h-8 w-full min-w-25 text-center text-xs sm:text-sm"
+                          disabled={!isEditable}
                         />
                       </TableCell>
                       <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
@@ -714,6 +725,7 @@ function RouteComponent() {
                           }
                           placeholder="-"
                           className="h-8 w-24 text-right text-xs sm:text-sm"
+                          disabled={!isEditable}
                         />
                       </TableCell>
                       <TableCell className="text-right text-xs font-medium sm:text-sm">
@@ -725,6 +737,7 @@ function RouteComponent() {
                           size="icon"
                           className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                           onClick={() => handleRemoveOperationalCost(index)}
+                          disabled={!isEditable}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -779,7 +792,9 @@ function RouteComponent() {
             size="icon"
             className="h-9 w-9 bg-transparent"
             onClick={handleSave}
-            disabled={!isDirty || saveOperationalCostsMutation.isPending}
+            disabled={
+              !isEditable || !isDirty || saveOperationalCostsMutation.isPending
+            }
           >
             {saveOperationalCostsMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -790,7 +805,9 @@ function RouteComponent() {
           <Button
             className="flex-1 gap-2 sm:flex-initial"
             onClick={handleSave}
-            disabled={!isDirty || saveOperationalCostsMutation.isPending}
+            disabled={
+              !isEditable || !isDirty || saveOperationalCostsMutation.isPending
+            }
           >
             {saveOperationalCostsMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

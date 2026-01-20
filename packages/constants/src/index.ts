@@ -347,6 +347,7 @@ export const EMPLOYEE_STATUS_COLORS: Record<EmployeeStatus, string> = {
 export const WORKSHEET_STATUS = [
   "draft",
   "pending_verification",
+  "revision",
   "verified",
   "ready",
   "in_progress",
@@ -359,6 +360,7 @@ export type WorksheetStatus = (typeof WORKSHEET_STATUS)[number];
 export const WORKSHEET_STATUS_LABELS: Record<WorksheetStatus, string> = {
   draft: "Draft",
   pending_verification: "Pending Verification",
+  revision: "Revision",
   verified: "Verified",
   ready: "Ready",
   in_progress: "In Progress",
@@ -369,6 +371,7 @@ export const WORKSHEET_STATUS_LABELS: Record<WorksheetStatus, string> = {
 export const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
   draft: "bg-gray-100 text-gray-700",
   pending_verification: "bg-yellow-100 text-yellow-700",
+  revision: "bg-orange-100 text-orange-700",
   verified: "bg-blue-100 text-blue-700",
   ready: "bg-indigo-100 text-indigo-700",
   in_progress: "bg-purple-100 text-purple-700",
