@@ -14,6 +14,7 @@ import { parameterRouter } from "./routers/parameter";
 import { parameterCategoriesRouter } from "./routers/parameter-categories";
 import { parameterToolRouter } from "./routers/parameter-tool";
 import { permissionRouters } from "./routers/permission";
+import { positionRouter } from "./routers/position";
 import { provinceRouter } from "./routers/province";
 import { regencyRouter } from "./routers/regency";
 import { roleRouters } from "./routers/role";
@@ -55,6 +56,7 @@ export const appRouter = createTRPCRouter({
   testing: testingRouter,
   audit: auditRouter,
   document: documentRouter,
+  position: positionRouter,
   employee: employeeRouter,
   notifications: notificationsRouter,
   worksheet: worksheetRouter,

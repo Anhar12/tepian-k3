@@ -20,7 +20,7 @@ const ActionCell = createCrudActionCell<
   PaginatedParameters,
   (typeof Route)["types"]["searchSchema"]
 >({
-  resourceName: "cluster",
+  resourceName: "parameter",
   resourcePath: "parameters",
   permissionPrefix: "parameters",
   deleteMutation: trpc.parameter.deleteParameter,

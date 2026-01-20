@@ -1,6 +1,7 @@
 import {
   IconAdjustments,
   IconBook,
+  IconBriefcase,
   IconBuilding,
   IconCategory,
   IconCategoryPlus,
@@ -13,6 +14,7 @@ import {
   IconTools,
   IconUserPlus,
   IconUsers,
+  IconUserShield,
 } from "@tabler/icons-react";
 import type { NavMainProps } from "@/components/nav-main";
 
@@ -31,23 +33,37 @@ export const backOfficeMenu: {
       title: "Orders",
       url: `${urlStarter}/orders`,
       icon: IconShoppingCart,
-      permission: "orders.read",
+      permission: "orders.view",
     },
     {
       title: "Worksheets",
       url: `${urlStarter}/worksheets`,
       icon: IconFileInvoice,
+      permission: "worksheets.view",
     },
     {
       title: "Testings",
       url: `${urlStarter}/testings`,
       icon: IconFileInvoice,
+      permission: "testing.view",
     },
     {
       title: "Users",
       url: `${urlStarter}/users`,
       icon: IconUsers,
       permission: "users.view",
+    },
+    {
+      title: "Positions",
+      url: `${urlStarter}/positions`,
+      icon: IconBriefcase,
+      permission: "positions.view",
+    },
+    {
+      title: "Employees",
+      url: `${urlStarter}/employees`,
+      icon: IconUserShield,
+      permission: "employees.view",
     },
     {
       title: "Roles",

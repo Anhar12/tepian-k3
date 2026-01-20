@@ -48,6 +48,7 @@ import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/ba
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
 import { Route as coreBackOfficeTestingsIndexRouteImport } from './routes/(core)/back-office/testings/index'
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
+import { Route as coreBackOfficePositionsIndexRouteImport } from './routes/(core)/back-office/positions/index'
 import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
 import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './routes/(core)/back-office/parameter-categories/index'
 import { Route as coreBackOfficeOrdersIndexRouteImport } from './routes/(core)/back-office/orders/index'
@@ -57,6 +58,7 @@ import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/
 import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
 import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
 import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/back-office/roles/create'
+import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
 import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(core)/back-office/parameters/create'
 import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from './routes/(core)/back-office/parameter-categories/create'
 import { Route as coreBackOfficeKblisCreateRouteImport } from './routes/(core)/back-office/kblis/create'
@@ -68,6 +70,7 @@ import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(cor
 import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
 import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
 import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(core)/back-office/roles/$roleId.detail'
+import { Route as coreBackOfficePositionsPositionIdEditRouteImport } from './routes/(core)/back-office/positions/$positionId.edit'
 import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './routes/(core)/back-office/parameters/$parameterId.edit'
 import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from './routes/(core)/back-office/parameters/$parameterId.detail'
 import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
@@ -277,6 +280,12 @@ const coreBackOfficeRolesIndexRoute =
     path: '/roles/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficePositionsIndexRoute =
+  coreBackOfficePositionsIndexRouteImport.update({
+    id: '/positions/',
+    path: '/positions/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeParametersIndexRoute =
   coreBackOfficeParametersIndexRouteImport.update({
     id: '/parameters/',
@@ -329,6 +338,12 @@ const coreBackOfficeRolesCreateRoute =
   coreBackOfficeRolesCreateRouteImport.update({
     id: '/roles/create',
     path: '/roles/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficePositionsCreateRoute =
+  coreBackOfficePositionsCreateRouteImport.update({
+    id: '/positions/create',
+    path: '/positions/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeParametersCreateRoute =
@@ -395,6 +410,12 @@ const coreBackOfficeRolesRoleIdDetailRoute =
   coreBackOfficeRolesRoleIdDetailRouteImport.update({
     id: '/roles/$roleId/detail',
     path: '/roles/$roleId/detail',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficePositionsPositionIdEditRoute =
+  coreBackOfficePositionsPositionIdEditRouteImport.update({
+    id: '/positions/$positionId/edit',
+    path: '/positions/$positionId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeParametersParameterIdEditRoute =
@@ -470,6 +491,7 @@ export interface FileRoutesByFullPath {
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
+  '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
@@ -479,6 +501,7 @@ export interface FileRoutesByFullPath {
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
+  '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
@@ -491,6 +514,7 @@ export interface FileRoutesByFullPath {
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
+  '/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
@@ -531,6 +555,7 @@ export interface FileRoutesByTo {
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
+  '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
@@ -540,6 +565,7 @@ export interface FileRoutesByTo {
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
+  '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
@@ -552,6 +578,7 @@ export interface FileRoutesByTo {
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
+  '/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
@@ -599,6 +626,7 @@ export interface FileRoutesById {
   '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
   '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/(core)/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
+  '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/(core)/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
@@ -608,6 +636,7 @@ export interface FileRoutesById {
   '/(core)/back-office/orders/': typeof coreBackOfficeOrdersIndexRoute
   '/(core)/back-office/parameter-categories/': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
+  '/(core)/back-office/positions/': typeof coreBackOfficePositionsIndexRoute
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
   '/(core)/back-office/testings/': typeof coreBackOfficeTestingsIndexRoute
   '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
@@ -620,6 +649,7 @@ export interface FileRoutesById {
   '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/(core)/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
   '/(core)/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
+  '/(core)/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
   '/(core)/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
@@ -666,6 +696,7 @@ export interface FileRouteTypes {
     | '/back-office/kblis/create'
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
+    | '/back-office/positions/create'
     | '/back-office/roles/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
@@ -675,6 +706,7 @@ export interface FileRouteTypes {
     | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
+    | '/back-office/positions'
     | '/back-office/roles'
     | '/back-office/testings'
     | '/back-office/tools'
@@ -687,6 +719,7 @@ export interface FileRouteTypes {
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
     | '/back-office/parameters/$parameterId/edit'
+    | '/back-office/positions/$positionId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
     | '/back-office/testings/$testingId/detail'
@@ -727,6 +760,7 @@ export interface FileRouteTypes {
     | '/back-office/kblis/create'
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
+    | '/back-office/positions/create'
     | '/back-office/roles/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
@@ -736,6 +770,7 @@ export interface FileRouteTypes {
     | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
+    | '/back-office/positions'
     | '/back-office/roles'
     | '/back-office/testings'
     | '/back-office/tools'
@@ -748,6 +783,7 @@ export interface FileRouteTypes {
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
     | '/back-office/parameters/$parameterId/edit'
+    | '/back-office/positions/$positionId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
     | '/back-office/testings/$testingId/detail'
@@ -794,6 +830,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/kblis/create'
     | '/(core)/back-office/parameter-categories/create'
     | '/(core)/back-office/parameters/create'
+    | '/(core)/back-office/positions/create'
     | '/(core)/back-office/roles/create'
     | '/(core)/back-office/tools/create'
     | '/(core)/back-office/users/create'
@@ -803,6 +840,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/orders/'
     | '/(core)/back-office/parameter-categories/'
     | '/(core)/back-office/parameters/'
+    | '/(core)/back-office/positions/'
     | '/(core)/back-office/roles/'
     | '/(core)/back-office/testings/'
     | '/(core)/back-office/tools/'
@@ -815,6 +853,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/(core)/back-office/parameters/$parameterId/detail'
     | '/(core)/back-office/parameters/$parameterId/edit'
+    | '/(core)/back-office/positions/$positionId/edit'
     | '/(core)/back-office/roles/$roleId/detail'
     | '/(core)/back-office/roles/$roleId/edit'
     | '/(core)/back-office/testings/$testingId/detail'
@@ -1109,6 +1148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeRolesIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/positions/': {
+      id: '/(core)/back-office/positions/'
+      path: '/positions'
+      fullPath: '/back-office/positions'
+      preLoaderRoute: typeof coreBackOfficePositionsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/parameters/': {
       id: '/(core)/back-office/parameters/'
       path: '/parameters'
@@ -1170,6 +1216,13 @@ declare module '@tanstack/react-router' {
       path: '/roles/create'
       fullPath: '/back-office/roles/create'
       preLoaderRoute: typeof coreBackOfficeRolesCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/positions/create': {
+      id: '/(core)/back-office/positions/create'
+      path: '/positions/create'
+      fullPath: '/back-office/positions/create'
+      preLoaderRoute: typeof coreBackOfficePositionsCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/parameters/create': {
@@ -1249,6 +1302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeRolesRoleIdDetailRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/positions/$positionId/edit': {
+      id: '/(core)/back-office/positions/$positionId/edit'
+      path: '/positions/$positionId/edit'
+      fullPath: '/back-office/positions/$positionId/edit'
+      preLoaderRoute: typeof coreBackOfficePositionsPositionIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/parameters/$parameterId/edit': {
       id: '/(core)/back-office/parameters/$parameterId/edit'
       path: '/parameters/$parameterId/edit'
@@ -1320,6 +1380,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute
   coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
   coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute
+  coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
   coreBackOfficeRolesCreateRoute: typeof coreBackOfficeRolesCreateRoute
   coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
   coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
@@ -1328,6 +1389,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeOrdersIndexRoute: typeof coreBackOfficeOrdersIndexRoute
   coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute
   coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
+  coreBackOfficePositionsIndexRoute: typeof coreBackOfficePositionsIndexRoute
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
   coreBackOfficeTestingsIndexRoute: typeof coreBackOfficeTestingsIndexRoute
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
@@ -1339,6 +1401,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute
   coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute
+  coreBackOfficePositionsPositionIdEditRoute: typeof coreBackOfficePositionsPositionIdEditRoute
   coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
   coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
   coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
@@ -1353,6 +1416,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeParameterCategoriesCreateRoute:
     coreBackOfficeParameterCategoriesCreateRoute,
   coreBackOfficeParametersCreateRoute: coreBackOfficeParametersCreateRoute,
+  coreBackOfficePositionsCreateRoute: coreBackOfficePositionsCreateRoute,
   coreBackOfficeRolesCreateRoute: coreBackOfficeRolesCreateRoute,
   coreBackOfficeToolsCreateRoute: coreBackOfficeToolsCreateRoute,
   coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
@@ -1362,6 +1426,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeParameterCategoriesIndexRoute:
     coreBackOfficeParameterCategoriesIndexRoute,
   coreBackOfficeParametersIndexRoute: coreBackOfficeParametersIndexRoute,
+  coreBackOfficePositionsIndexRoute: coreBackOfficePositionsIndexRoute,
   coreBackOfficeRolesIndexRoute: coreBackOfficeRolesIndexRoute,
   coreBackOfficeTestingsIndexRoute: coreBackOfficeTestingsIndexRoute,
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
@@ -1378,6 +1443,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeParametersParameterIdDetailRoute,
   coreBackOfficeParametersParameterIdEditRoute:
     coreBackOfficeParametersParameterIdEditRoute,
+  coreBackOfficePositionsPositionIdEditRoute:
+    coreBackOfficePositionsPositionIdEditRoute,
   coreBackOfficeRolesRoleIdDetailRoute: coreBackOfficeRolesRoleIdDetailRoute,
   coreBackOfficeRolesRoleIdEditRoute: coreBackOfficeRolesRoleIdEditRoute,
   coreBackOfficeTestingsTestingIdDetailRoute:

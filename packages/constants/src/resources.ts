@@ -49,6 +49,7 @@ export const RESOURCES = [
   "audits",
 
   // ==================== EMPLOYEES ====================
+  "positions",
   "employees",
 
   // ==================== WORKSHEETS ====================
