@@ -15,6 +15,7 @@ import {
   parameters,
   parameterTools,
   permission,
+  positions,
   provinces,
   regencies,
   rolePermissions,
@@ -477,9 +478,17 @@ export const documentSignaturesRelations = relations(
   }),
 );
 
+export const positionRelations = relations(positions, ({ many }) => ({
+  employees: many(employees),
+}));
+
 export const employeeRelations = relations(employees, ({ one }) => ({
   user: one(users, {
     fields: [employees.userId],
     references: [users.id],
+  }),
+  position: one(positions, {
+    fields: [employees.positionId],
+    references: [positions.id],
   }),
 }));

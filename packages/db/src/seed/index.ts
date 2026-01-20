@@ -24,6 +24,7 @@ import {
   ROLE_PERMISSIONS,
   type Role,
 } from "@tepian-k3/constants";
+import { seedPositions } from "./positions";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -39,7 +40,7 @@ async function seed() {
   const existingPermNames = new Set(existingPerms.map((p) => p.name));
 
   const newPermissions = permissionsList.filter(
-    (p) => !existingPermNames.has(p.name)
+    (p) => !existingPermNames.has(p.name),
   );
 
   let allPerms = [...existingPerms];
@@ -68,10 +69,7 @@ async function seed() {
 
   if (newRoles.length > 0) {
     console.log(`   ➕ Adding ${newRoles.length} new roles...`);
-    const insertedRoles = await db
-      .insert(roles)
-      .values(newRoles)
-      .returning();
+    const insertedRoles = await db.insert(roles).values(newRoles).returning();
     allRoles = [...allRoles, ...insertedRoles];
   }
 
@@ -86,7 +84,7 @@ async function seed() {
   // Get existing role permissions
   const existingRolePerms = await db.query.rolePermissions.findMany();
   const existingRolePermSet = new Set(
-    existingRolePerms.map((rp) => `${rp.roleId}-${rp.permissionId}`)
+    existingRolePerms.map((rp) => `${rp.roleId}-${rp.permissionId}`),
   );
 
   // Create a permission name to ID map for easy lookup
@@ -105,7 +103,9 @@ async function seed() {
     for (const permissionName of permissionNames) {
       const permissionId = permissionMap.get(permissionName);
       if (!permissionId) {
-        console.warn(`⚠️  Permission '${permissionName}' not found for role '${roleName}', skipping...`);
+        console.warn(
+          `⚠️  Permission '${permissionName}' not found for role '${roleName}', skipping...`,
+        );
         continue;
       }
 
@@ -121,7 +121,7 @@ async function seed() {
 
   if (rolePermissionsToAdd.length > 0) {
     console.log(
-      `   ➕ Adding ${rolePermissionsToAdd.length} role-permission assignments...`
+      `   ➕ Adding ${rolePermissionsToAdd.length} role-permission assignments...`,
     );
     await db.insert(rolePermissions).values(rolePermissionsToAdd);
   }
@@ -231,6 +231,7 @@ async function seed() {
   await seedDistricts();
   await seedVillages();
   await seedKblis();
+  await seedPositions();
   await seedEmployees();
 
   console.log("✅ User roles synced");

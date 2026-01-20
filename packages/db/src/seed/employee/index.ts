@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import { db } from "../../client";
-import { employees, users, roles, userRoles } from "../../schema";
+import { employees, users, roles, userRoles, positions } from "../../schema";
 import { fakerID_ID as faker } from "@faker-js/faker";
 import { eq } from "drizzle-orm";
 
@@ -124,12 +124,23 @@ async function seedEmployees() {
       where: eq(employees.userId, user.id),
     });
 
+    // find position id from positions table
+    const positionRecord = await db.query.positions.findFirst({
+      where: eq(positions.name, emp.position),
+    });
+
+    if (!positionRecord) {
+      throw new Error(
+        `Position '${emp.position}' not found for employee '${emp.name}'. Please run positions seed first.`,
+      );
+    }
+
     // Create employee record if doesn't exist
     if (!existingEmployee) {
       await db.insert(employees).values({
+        positionId: positionRecord.id,
         userId: user.id,
         name: emp.name,
-        position: emp.position,
         email: email,
       });
       console.log(`   ➕ Created employee: ${emp.name} (${emp.position})`);

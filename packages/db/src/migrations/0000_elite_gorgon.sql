@@ -131,10 +131,10 @@ CREATE TABLE "documents" (
 --> statement-breakpoint
 CREATE TABLE "employees" (
 	"id" uuid PRIMARY KEY NOT NULL,
+	"position_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"name" varchar(250) NOT NULL,
 	"email" varchar(250) NOT NULL,
-	"position" varchar(250) NOT NULL,
 	"status" "employee_status" DEFAULT 'siap' NOT NULL,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone NOT NULL,
@@ -280,6 +280,16 @@ CREATE TABLE "permissions" (
 	"created_at" timestamp with time zone NOT NULL,
 	"updated_at" timestamp with time zone,
 	CONSTRAINT "permissions_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
+CREATE TABLE "positions" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"name" varchar(250) NOT NULL,
+	"description" text,
+	"deleted_at" timestamp with time zone,
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone,
+	CONSTRAINT "positions_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
 CREATE TABLE "provinces" (
@@ -519,7 +529,7 @@ CREATE TABLE "worksheets" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"order_id" uuid NOT NULL,
 	"status" "worksheet_status" DEFAULT 'draft' NOT NULL,
-	"start_date" timestamp with time zone NOT NULL,
+	"start_date" timestamp with time zone,
 	"end_date" timestamp with time zone,
 	"main_supervisor_id" uuid,
 	"accompanying_supervisor_id" uuid,
@@ -545,6 +555,7 @@ ALTER TABLE "document_verifications" ADD CONSTRAINT "document_verifications_docu
 ALTER TABLE "document_verifications" ADD CONSTRAINT "document_verifications_verified_by_user_id_users_id_fk" FOREIGN KEY ("verified_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "documents" ADD CONSTRAINT "documents_uploaded_by_user_id_users_id_fk" FOREIGN KEY ("uploaded_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "documents" ADD CONSTRAINT "documents_signed_by_user_id_users_id_fk" FOREIGN KEY ("signed_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "employees" ADD CONSTRAINT "employees_position_id_positions_id_fk" FOREIGN KEY ("position_id") REFERENCES "public"."positions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "employees" ADD CONSTRAINT "employees_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -662,6 +673,7 @@ CREATE INDEX "parameter_id_idx" ON "parameters" USING btree ("id");--> statement
 CREATE INDEX "parameter_parameter_category_id_idx" ON "parameters" USING btree ("parameter_category_id");--> statement-breakpoint
 CREATE INDEX "parameter_name_idx" ON "parameters" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "permission_name_resource_action_idx" ON "permissions" USING btree ("name","resource","action");--> statement-breakpoint
+CREATE INDEX "position_name_idx" ON "positions" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "province_name_idx" ON "provinces" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "province_old_id_idx" ON "provinces" USING btree ("old_id");--> statement-breakpoint
 CREATE INDEX "refresh_token_user_id_idx" ON "refresh_tokens" USING btree ("user_id");--> statement-breakpoint

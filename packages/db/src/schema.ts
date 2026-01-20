@@ -1161,6 +1161,20 @@ export const documentSignatures = createTable(
   ],
 );
 
+export const positions = createTable(
+  "positions",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    name: varchar("name", { length: 250 }).notNull().unique(),
+    description: text("description"),
+    ...timestamps,
+  },
+  (table) => [index("position_name_idx").using("btree", table.name)],
+);
+
 export const employees = createTable(
   "employees",
   {
@@ -1168,13 +1182,15 @@ export const employees = createTable(
       .primaryKey()
       .notNull()
       .$default(() => uuidv7()),
+    positionId: uuid("position_id")
+      .notNull()
+      .references(() => positions.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .notNull()
       .unique()
       .references(() => users.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 250 }).notNull(),
     email: varchar("email", { length: 250 }).notNull().unique(),
-    position: varchar("position", { length: 250 }).notNull(),
     status: employeeStatusEnum("status").notNull().default("siap"),
     ...timestamps,
   },
