@@ -31,6 +31,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { differenceInDays, format, parseISO } from "date-fns";
+import { id } from "date-fns/locale";
 
 const searchParamsSchema = z.object({
   worksheetId: z.string().uuidv7().optional(),
@@ -61,11 +63,9 @@ function calculateDuration(
   endDate: string | null | undefined,
 ): number {
   if (!startDate || !endDate) return 0;
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays + 1;
+  const start = parseISO(startDate);
+  const end = parseISO(endDate);
+  return Math.abs(differenceInDays(end, start)) + 1;
 }
 
 function formatDateRange(
@@ -73,14 +73,10 @@ function formatDateRange(
   endDate: string | null | undefined,
 ): string {
   if (!startDate || !endDate) return "-";
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const options: Intl.DateTimeFormatOptions = {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  };
-  return `${start.toLocaleDateString("id-ID", options)} - ${end.toLocaleDateString("id-ID", options)}`;
+  const start = parseISO(startDate);
+  const end = parseISO(endDate);
+  const dateFormat = "dd MMMM yyyy";
+  return `${format(start, dateFormat, { locale: id })} - ${format(end, dateFormat, { locale: id })}`;
 }
 
 function RouteComponent() {
