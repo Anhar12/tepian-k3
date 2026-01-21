@@ -66,6 +66,7 @@ import {
 } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { requirePermission } from "@/utils/require-permission";
+import { PermissionGate } from "@/components/permission-gate";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
@@ -677,15 +678,17 @@ function JadwalPersonilPage() {
                 </div>
 
                 <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-4">
-                  <Button
-                    onClick={() => setShowAssignDialog(true)}
-                    className="gap-2"
-                    size="sm"
-                  >
-                    <Users className="h-4 w-4" />
-                    <span className="hidden sm:inline">Tugaskan Personil</span>
-                    <span className="sm:hidden">Tugaskan</span>
-                  </Button>
+                  <PermissionGate permission="worksheet-assignments.update">
+                    <Button
+                      onClick={() => setShowAssignDialog(true)}
+                      className="gap-2"
+                      size="sm"
+                    >
+                      <Users className="h-4 w-4" />
+                      <span className="hidden sm:inline">Tugaskan Personil</span>
+                      <span className="sm:hidden">Tugaskan</span>
+                    </Button>
+                  </PermissionGate>
 
                   <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
                     <Button
@@ -804,14 +807,16 @@ function JadwalPersonilPage() {
                   <p className="mt-2 text-sm text-muted-foreground">
                     Belum ada personel ditugaskan
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => setShowAssignDialog(true)}
-                  >
-                    Tugaskan Sekarang
-                  </Button>
+                  <PermissionGate permission="worksheet-assignments.update">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => setShowAssignDialog(true)}
+                    >
+                      Tugaskan Sekarang
+                    </Button>
+                  </PermissionGate>
                 </div>
               )}
             </CardContent>
@@ -1056,20 +1061,22 @@ function JadwalPersonilPage() {
             <Button variant="outline" onClick={resetDialogState}>
               Batal
             </Button>
-            <Button
-              onClick={handleSaveAssignments}
-              disabled={
-                selectedPersonnel.length === 0 ||
-                assignEmployeesMutation.isPending
-              }
-            >
-              {assignEmployeesMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              Simpan Penugasan
-            </Button>
+            <PermissionGate permission="worksheet-assignments.update">
+              <Button
+                onClick={handleSaveAssignments}
+                disabled={
+                  selectedPersonnel.length === 0 ||
+                  assignEmployeesMutation.isPending
+                }
+              >
+                {assignEmployeesMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Simpan Penugasan
+              </Button>
+            </PermissionGate>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1143,16 +1150,18 @@ function JadwalPersonilPage() {
             </div>
 
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowEventDetail(false);
-                  setShowAssignDialog(true);
-                }}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Edit Penugasan
-              </Button>
+              <PermissionGate permission="worksheet-assignments.update">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowEventDetail(false);
+                    setShowAssignDialog(true);
+                  }}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Edit Penugasan
+                </Button>
+              </PermissionGate>
             </DialogFooter>
           </div>
         </DialogContent>

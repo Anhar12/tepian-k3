@@ -38,6 +38,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getPublicUrl } from "@/utils/url";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { requirePermission } from "@/utils/require-permission";
+import { PermissionGate } from "@/components/permission-gate";
 
 const searchParamsSchema = z.object({
   worksheetId: z.uuidv7().optional(),
@@ -747,15 +748,17 @@ function RouteComponent() {
                 <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
                 Rincian Operasional
               </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAddOperationalCost}
-                disabled={!isEditable}
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Tambah Item
-              </Button>
+              <PermissionGate permission="worksheets.update">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddOperationalCost}
+                  disabled={!isEditable}
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Tambah Item
+                </Button>
+              </PermissionGate>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -878,15 +881,17 @@ function RouteComponent() {
                           {itemTotal !== null ? formatCurrency(itemTotal) : "-"}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => handleRemoveOperationalCost(index)}
-                            disabled={!isEditable}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <PermissionGate permission="worksheets.update">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => handleRemoveOperationalCost(index)}
+                              disabled={!isEditable}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </PermissionGate>
                         </TableCell>
                       </TableRow>
                     );
@@ -935,7 +940,7 @@ function RouteComponent() {
             <Printer className="h-4 w-4" />
           </Button>
           {showOperationalCosts && (
-            <>
+            <PermissionGate permission="worksheets.update">
               <Button
                 variant="outline"
                 size="icon"
@@ -969,7 +974,7 @@ function RouteComponent() {
                 )}
                 SIMPAN
               </Button>
-            </>
+            </PermissionGate>
           )}
         </div>
         <div className="flex items-center justify-between gap-3 border-t pt-3 sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4">

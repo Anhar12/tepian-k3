@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import TestingLocationCard from "./testing-location-card";
 import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
 import CreateCompanyLocationDialog from "./create-company-location-dialog";

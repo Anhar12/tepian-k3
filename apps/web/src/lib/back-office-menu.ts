@@ -7,6 +7,7 @@ import {
   IconCategoryPlus,
   IconDashboard,
   IconFileInvoice,
+  IconFlask,
   IconFolderCog,
   IconLayersSubtract,
   IconShieldCheckFilled,
@@ -94,6 +95,12 @@ export const backOfficeMenu: {
       url: `${urlStarter}/tools`,
       icon: IconTools,
       permission: "tools.view",
+    },
+    {
+      title: "Chemical Materials",
+      url: `${urlStarter}/chemical-materials`,
+      icon: IconFlask,
+      permission: "chemical-materials.view",
     },
     {
       title: "KBLIs",

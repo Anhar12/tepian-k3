@@ -11,6 +11,7 @@ import { Eye } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { PaginatedOrder } from "@tepian-k3/types/order.types";
+import { PermissionGate } from "@/components/permission-gate";
 
 interface OrdersColumnsProps {
   currentPage: number;
@@ -164,14 +165,16 @@ export default function getOrdersColumns({
     },
     createDateColumn<PaginatedOrder>("createdAt", "Tanggal Order"),
     createActionColumn<PaginatedOrder>(({ row }) => (
-      <Link
-        to="/back-office/orders/$orderId/detail"
-        params={{ orderId: row.original.id }}
-      >
-        <Button variant="ghost" size="sm">
-          <Eye className="h-4 w-4" />
-        </Button>
-      </Link>
+      <PermissionGate permission="orders.read">
+        <Link
+          to="/back-office/orders/$orderId/detail"
+          params={{ orderId: row.original.id }}
+        >
+          <Button variant="ghost" size="sm">
+            <Eye className="h-4 w-4" />
+          </Button>
+        </Link>
+      </PermissionGate>
     )),
   ];
 }

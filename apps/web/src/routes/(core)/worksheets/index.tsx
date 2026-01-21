@@ -1201,7 +1201,7 @@ function RouteComponent() {
                 </div>
 
                 {hasLocalBahanChanges && (
-                  <PermissionGate permission="worksheet-chemical-materials.update">
+                  <PermissionGate permission="worksheets.update">
                     <div className="mb-4 flex justify-end">
                       <Button
                         onClick={handleSaveBahan}
@@ -1269,7 +1269,7 @@ function RouteComponent() {
                             </TableCell>
                             <TableCell className="text-center">
                               <PermissionGate
-                                permission="worksheet-chemical-materials.update"
+                                permission="worksheets.update"
                                 fallback={
                                   <span className="text-xs text-muted-foreground">
                                     {item.required}

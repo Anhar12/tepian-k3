@@ -46,6 +46,7 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient } from "@/utils/trpc";
 import { format } from "date-fns";
 import { requirePermission } from "@/utils/require-permission";
+import { PermissionGate } from "@/components/permission-gate";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { cn } from "@/lib/utils";
 import { useFileUpload } from "@/hooks/use-file-upload";
@@ -603,23 +604,27 @@ function RouteComponent() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex justify-end gap-3">
-                    <Button
-                      variant="outline"
-                      className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                      onClick={() => dialogs.open("reject")}
-                    >
-                      Tolak Order
-                    </Button>
-                    <Button
-                      className="bg-green-500 hover:bg-green-600"
-                      onClick={handleApprove}
-                      disabled={approveMutation.isPending}
-                    >
-                      {approveMutation.isPending && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      Setujui Order
-                    </Button>
+                    <PermissionGate permission="orders.update">
+                      <Button
+                        variant="outline"
+                        className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
+                        onClick={() => dialogs.open("reject")}
+                      >
+                        Tolak Order
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate permission="orders.approve">
+                      <Button
+                        className="bg-green-500 hover:bg-green-600"
+                        onClick={handleApprove}
+                        disabled={approveMutation.isPending}
+                      >
+                        {approveMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Setujui Order
+                      </Button>
+                    </PermissionGate>
                   </div>
                 </CardContent>
               </Card>
@@ -711,18 +716,20 @@ function RouteComponent() {
                     {/* Action Buttons */}
                     <div className="flex justify-end gap-3">
                       {needsWorksheet && (
-                        <Button
-                          className="bg-blue-500 hover:bg-blue-600"
-                          onClick={handleCreateWorksheet}
-                          disabled={createWorksheetMutation.isPending}
-                        >
-                          {createWorksheetMutation.isPending ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <Plus className="mr-2 h-4 w-4" />
-                          )}
-                          Buat Worksheet
-                        </Button>
+                        <PermissionGate permission="worksheets.create">
+                          <Button
+                            className="bg-blue-500 hover:bg-blue-600"
+                            onClick={handleCreateWorksheet}
+                            disabled={createWorksheetMutation.isPending}
+                          >
+                            {createWorksheetMutation.isPending ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Plus className="mr-2 h-4 w-4" />
+                            )}
+                            Buat Worksheet
+                          </Button>
+                        </PermissionGate>
                       )}
 
                       {worksheetInDraft && (
@@ -739,18 +746,20 @@ function RouteComponent() {
                             <Eye className="mr-2 h-4 w-4" />
                             Lihat Detail
                           </Button>
-                          <Button
-                            className="bg-yellow-500 hover:bg-yellow-600"
-                            onClick={handleSubmitWorksheetForVerification}
-                            disabled={submitWorksheetMutation.isPending}
-                          >
-                            {submitWorksheetMutation.isPending ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <FileText className="mr-2 h-4 w-4" />
-                            )}
-                            Ajukan Verifikasi
-                          </Button>
+                          <PermissionGate permission="worksheets.update">
+                            <Button
+                              className="bg-yellow-500 hover:bg-yellow-600"
+                              onClick={handleSubmitWorksheetForVerification}
+                              disabled={submitWorksheetMutation.isPending}
+                            >
+                              {submitWorksheetMutation.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <FileText className="mr-2 h-4 w-4" />
+                              )}
+                              Ajukan Verifikasi
+                            </Button>
+                          </PermissionGate>
                         </>
                       )}
 
@@ -768,18 +777,20 @@ function RouteComponent() {
                             <Eye className="mr-2 h-4 w-4" />
                             Lihat Detail
                           </Button>
-                          <Button
-                            className="bg-green-500 hover:bg-green-600"
-                            onClick={handleVerifyWorksheet}
-                            disabled={verifyWorksheetMutation.isPending}
-                          >
-                            {verifyWorksheetMutation.isPending ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <FileText className="mr-2 h-4 w-4" />
-                            )}
-                            Verifikasi Worksheet
-                          </Button>
+                          <PermissionGate permission="worksheets.verify">
+                            <Button
+                              className="bg-green-500 hover:bg-green-600"
+                              onClick={handleVerifyWorksheet}
+                              disabled={verifyWorksheetMutation.isPending}
+                            >
+                              {verifyWorksheetMutation.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <FileText className="mr-2 h-4 w-4" />
+                              )}
+                              Verifikasi Worksheet
+                            </Button>
+                          </PermissionGate>
                         </>
                       )}
 
@@ -905,36 +916,40 @@ function RouteComponent() {
                           <span className="text-sm">
                             {offeringLetter.file.name}
                           </span>
-                          <Button
-                            size="sm"
-                            onClick={handleUploadOfferingLetter}
-                            disabled={offeringLetter.uploading}
-                          >
-                            {offeringLetter.uploading ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <Upload className="mr-2 h-4 w-4" />
-                            )}
-                            Upload
-                          </Button>
+                          <PermissionGate permission="documents.create">
+                            <Button
+                              size="sm"
+                              onClick={handleUploadOfferingLetter}
+                              disabled={offeringLetter.uploading}
+                            >
+                              {offeringLetter.uploading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Upload className="mr-2 h-4 w-4" />
+                              )}
+                              Upload
+                            </Button>
+                          </PermissionGate>
                         </div>
                       )}
                     </div>
                   </div>
 
                   <div className="flex justify-end pt-4">
-                    <Button
-                      className="bg-blue-500 hover:bg-blue-600"
-                      onClick={handleNotifyCustomer}
-                      disabled={notifyCustomerMutation.isPending}
-                    >
-                      {notifyCustomerMutation.isPending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Mail className="mr-2 h-4 w-4" />
-                      )}
-                      Kirim Dokumen Revisi ke Pelanggan
-                    </Button>
+                    <PermissionGate permission="notifications.create">
+                      <Button
+                        className="bg-blue-500 hover:bg-blue-600"
+                        onClick={handleNotifyCustomer}
+                        disabled={notifyCustomerMutation.isPending}
+                      >
+                        {notifyCustomerMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Mail className="mr-2 h-4 w-4" />
+                        )}
+                        Kirim Dokumen Revisi ke Pelanggan
+                      </Button>
+                    </PermissionGate>
                   </div>
                 </CardContent>
               </Card>
@@ -1028,18 +1043,20 @@ function RouteComponent() {
                             <span className="text-sm">
                               {offeringLetter.file.name}
                             </span>
-                            <Button
-                              size="sm"
-                              onClick={handleUploadOfferingLetter}
-                              disabled={offeringLetter.uploading}
-                            >
-                              {offeringLetter.uploading ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Upload className="mr-2 h-4 w-4" />
-                              )}
-                              Upload
-                            </Button>
+                            <PermissionGate permission="documents.create">
+                              <Button
+                                size="sm"
+                                onClick={handleUploadOfferingLetter}
+                                disabled={offeringLetter.uploading}
+                              >
+                                {offeringLetter.uploading ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Upload className="mr-2 h-4 w-4" />
+                                )}
+                                Upload
+                              </Button>
+                            </PermissionGate>
                           </div>
                         )}
                       </div>
@@ -1048,18 +1065,20 @@ function RouteComponent() {
 
                   {hasOfferingLetter && (
                     <div className="flex justify-end pt-4">
-                      <Button
-                        className="bg-blue-500 hover:bg-blue-600"
-                        onClick={handleNotifyCustomer}
-                        disabled={notifyCustomerMutation.isPending}
-                      >
-                        {notifyCustomerMutation.isPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Mail className="mr-2 h-4 w-4" />
-                        )}
-                        Kirim Dokumen ke Pelanggan
-                      </Button>
+                      <PermissionGate permission="notifications.create">
+                        <Button
+                          className="bg-blue-500 hover:bg-blue-600"
+                          onClick={handleNotifyCustomer}
+                          disabled={notifyCustomerMutation.isPending}
+                        >
+                          {notifyCustomerMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Mail className="mr-2 h-4 w-4" />
+                          )}
+                          Kirim Dokumen ke Pelanggan
+                        </Button>
+                      </PermissionGate>
                     </div>
                   )}
                 </CardContent>
@@ -1153,18 +1172,20 @@ function RouteComponent() {
                             <span className="text-sm">
                               {approvalLetter.file.name}
                             </span>
-                            <Button
-                              size="sm"
-                              onClick={handleUploadApprovalLetter}
-                              disabled={approvalLetter.uploading}
-                            >
-                              {approvalLetter.uploading ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Upload className="mr-2 h-4 w-4" />
-                              )}
-                              Upload
-                            </Button>
+                            <PermissionGate permission="documents.create">
+                              <Button
+                                size="sm"
+                                onClick={handleUploadApprovalLetter}
+                                disabled={approvalLetter.uploading}
+                              >
+                                {approvalLetter.uploading ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Upload className="mr-2 h-4 w-4" />
+                                )}
+                                Upload
+                              </Button>
+                            </PermissionGate>
                           </div>
                         )}
                       </div>
