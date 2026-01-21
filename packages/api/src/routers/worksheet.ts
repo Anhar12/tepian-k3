@@ -352,7 +352,7 @@ export const worksheetRouter = createTRPCRouter({
    * Get worksheet notes
    */
   getNotes: withPermission("worksheet-notes.read")
-    .input(z.object({ worksheetId: z.string().uuidv7() }))
+    .input(z.object({ worksheetId: z.uuidv7() }))
     .query(
       async ({ input }) =>
         await runEffect(

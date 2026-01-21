@@ -39,7 +39,6 @@ import {
   TOOLS_CONDITIONS,
   TOOLS_CONDITIONS_LABELS,
   WORKSHEET_NOTE_STATUS,
-  type BahanStatus,
   type BahanUnit,
   type ToolsAvailability,
   type ToolsCondition,
@@ -61,9 +60,10 @@ import { useMemo, useState } from "react";
 import z from "zod";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { requirePermission } from "@/utils/require-permission";
+import { PermissionGate } from "@/components/permission-gate";
 
 export const Route = createFileRoute("/(core)/worksheets/")({
   validateSearch: z.object({
@@ -71,6 +71,8 @@ export const Route = createFileRoute("/(core)/worksheets/")({
       .enum(["parameter", "alat", "bahan", "stok", "catatan"])
       .default("parameter"),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "worksheets.read" }),
   component: RouteComponent,
 });
 
@@ -663,16 +665,18 @@ function RouteComponent() {
               </Select>
 
               {hasLocalChanges && (
-                <Button
-                  onClick={handleSaveItems}
-                  disabled={batchUpdateMutation.isPending}
-                  className="gap-2"
-                >
-                  {batchUpdateMutation.isPending && (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  )}
-                  Simpan Perubahan
-                </Button>
+                <PermissionGate permission="worksheet-items.update">
+                  <Button
+                    onClick={handleSaveItems}
+                    disabled={batchUpdateMutation.isPending}
+                    className="gap-2"
+                  >
+                    {batchUpdateMutation.isPending && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                    Simpan Perubahan
+                  </Button>
+                </PermissionGate>
               )}
             </div>
 
@@ -744,49 +748,78 @@ function RouteComponent() {
                             {item.quantity}
                           </TableCell>
                           <TableCell className="text-center">
-                            <Input
-                              type="number"
-                              value={itemState.value ?? ""}
-                              onChange={(e) =>
-                                handleItemChange(
-                                  item.id,
-                                  "value",
-                                  e.target.value
-                                    ? parseFloat(e.target.value)
-                                    : null,
-                                )
+                            <PermissionGate
+                              permission="worksheet-items.update"
+                              fallback={
+                                <span className="text-xs text-muted-foreground sm:text-sm">
+                                  {itemState.value ?? "-"}
+                                </span>
                               }
-                              className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
-                              step="any"
-                            />
+                            >
+                              <Input
+                                type="number"
+                                value={itemState.value ?? ""}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    item.id,
+                                    "value",
+                                    e.target.value
+                                      ? parseFloat(e.target.value)
+                                      : null,
+                                  )
+                                }
+                                className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
+                                step="any"
+                              />
+                            </PermissionGate>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Checkbox
-                              checked={itemState.isReady}
-                              onCheckedChange={(checked) =>
-                                handleItemChange(
-                                  item.id,
-                                  "isReady",
-                                  checked as boolean,
+                            <PermissionGate
+                              permission="worksheet-items.update"
+                              fallback={
+                                itemState.isReady ? (
+                                  <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-500" />
+                                ) : (
+                                  <AlertTriangle className="mx-auto h-5 w-5 text-muted-foreground" />
                                 )
                               }
-                              className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
-                            />
+                            >
+                              <Checkbox
+                                checked={itemState.isReady}
+                                onCheckedChange={(checked) =>
+                                  handleItemChange(
+                                    item.id,
+                                    "isReady",
+                                    checked as boolean,
+                                  )
+                                }
+                                className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
+                              />
+                            </PermissionGate>
                           </TableCell>
 
                           <TableCell className="hidden sm:table-cell">
-                            <Input
-                              value={itemState.note ?? ""}
-                              onChange={(e) =>
-                                handleItemChange(
-                                  item.id,
-                                  "note",
-                                  e.target.value || null,
-                                )
+                            <PermissionGate
+                              permission="worksheet-items.update"
+                              fallback={
+                                <span className="text-xs text-muted-foreground sm:text-sm">
+                                  {itemState.note ?? "-"}
+                                </span>
                               }
-                              className="h-8 text-xs"
-                              placeholder="Catatan..."
-                            />
+                            >
+                              <Input
+                                value={itemState.note ?? ""}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    item.id,
+                                    "note",
+                                    e.target.value || null,
+                                  )
+                                }
+                                className="h-8 text-xs"
+                                placeholder="Catatan..."
+                              />
+                            </PermissionGate>
                           </TableCell>
                         </TableRow>
                       );
@@ -913,18 +946,20 @@ function RouteComponent() {
               ))}
             </div>
 
-            <div className="mb-4 flex justify-end">
-              <Button
-                onClick={handleSaveTools}
-                disabled={assignToolsMutation.isPending}
-                className="gap-2"
-              >
-                {assignToolsMutation.isPending && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
-                Simpan Alat ({selectedToolsCount})
-              </Button>
-            </div>
+            <PermissionGate permission="worksheet-tools.update">
+              <div className="mb-4 flex justify-end">
+                <Button
+                  onClick={handleSaveTools}
+                  disabled={assignToolsMutation.isPending}
+                  className="gap-2"
+                >
+                  {assignToolsMutation.isPending && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
+                  Simpan Alat ({selectedToolsCount})
+                </Button>
+              </div>
+            </PermissionGate>
 
             <div className="overflow-hidden rounded-xl border">
               <div className="overflow-x-auto">
@@ -932,16 +967,18 @@ function RouteComponent() {
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="w-12">
-                        <Checkbox
-                          checked={allToolsSelected}
-                          onCheckedChange={handleSelectAllTools}
-                          aria-label="Select all"
-                          className={
-                            someToolsSelected && !allToolsSelected
-                              ? "data-[state=checked]:bg-primary/50"
-                              : ""
-                          }
-                        />
+                        <PermissionGate permission="worksheet-tools.update">
+                          <Checkbox
+                            checked={allToolsSelected}
+                            onCheckedChange={handleSelectAllTools}
+                            aria-label="Select all"
+                            className={
+                              someToolsSelected && !allToolsSelected
+                                ? "data-[state=checked]:bg-primary/50"
+                                : ""
+                            }
+                          />
+                        </PermissionGate>
                       </TableHead>
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Kode
@@ -975,12 +1012,23 @@ function RouteComponent() {
                         }
                       >
                         <TableCell onClick={(e) => e.stopPropagation()}>
-                          <Checkbox
-                            checked={selectedToolIds.has(tool.id)}
-                            onCheckedChange={(checked) =>
-                              handleToolSelect(tool.id, checked as boolean)
+                          <PermissionGate
+                            permission="worksheet-tools.update"
+                            fallback={
+                              selectedToolIds.has(tool.id) ? (
+                                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                              ) : (
+                                <div className="h-5 w-5" />
+                              )
                             }
-                          />
+                          >
+                            <Checkbox
+                              checked={selectedToolIds.has(tool.id)}
+                              onCheckedChange={(checked) =>
+                                handleToolSelect(tool.id, checked as boolean)
+                              }
+                            />
+                          </PermissionGate>
                         </TableCell>
                         <TableCell className="font-mono text-xs">
                           {tool.toolCode}
@@ -1132,18 +1180,20 @@ function RouteComponent() {
                 </div>
 
                 {hasLocalBahanChanges && (
-                  <div className="mb-4 flex justify-end">
-                    <Button
-                      onClick={handleSaveBahan}
-                      disabled={saveChemicalMaterialsMutation.isPending}
-                      className="gap-2"
-                    >
-                      {saveChemicalMaterialsMutation.isPending && (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      )}
-                      Simpan Bahan ({localRequiredUpdates.size} perubahan)
-                    </Button>
-                  </div>
+                  <PermissionGate permission="worksheet-chemical-materials.update">
+                    <div className="mb-4 flex justify-end">
+                      <Button
+                        onClick={handleSaveBahan}
+                        disabled={saveChemicalMaterialsMutation.isPending}
+                        className="gap-2"
+                      >
+                        {saveChemicalMaterialsMutation.isPending && (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        )}
+                        Simpan Bahan ({localRequiredUpdates.size} perubahan)
+                      </Button>
+                    </div>
+                  </PermissionGate>
                 )}
 
                 <div className="overflow-hidden rounded-xl border">
@@ -1197,15 +1247,27 @@ function RouteComponent() {
                                 : "-"}
                             </TableCell>
                             <TableCell className="text-center">
-                              <Input
-                                type="number"
-                                value={item.required}
-                                onChange={(e) =>
-                                  handleRequiredChange(item.id, e.target.value)
+                              <PermissionGate
+                                permission="worksheet-chemical-materials.update"
+                                fallback={
+                                  <span className="text-xs text-muted-foreground">
+                                    {item.required}
+                                  </span>
                                 }
-                                className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
-                                min={0}
-                              />
+                              >
+                                <Input
+                                  type="number"
+                                  value={item.required}
+                                  onChange={(e) =>
+                                    handleRequiredChange(
+                                      item.id,
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
+                                  min={0}
+                                />
+                              </PermissionGate>
                             </TableCell>
                             <TableCell className="text-center">
                               <Badge
@@ -1557,18 +1619,20 @@ function RouteComponent() {
                       }
                     }}
                   />
-                  <Button
-                    onClick={handleSendNote}
-                    size="icon"
-                    className="size-15"
-                    disabled={!newNote.trim() || addNoteMutation.isPending}
-                  >
-                    {addNoteMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
+                  <PermissionGate permission="worksheet-notes.create">
+                    <Button
+                      onClick={handleSendNote}
+                      size="icon"
+                      className="size-15"
+                      disabled={!newNote.trim() || addNoteMutation.isPending}
+                    >
+                      {addNoteMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </PermissionGate>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
                   Tekan Enter untuk mengirim, Shift+Enter untuk baris baru

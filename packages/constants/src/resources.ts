@@ -59,6 +59,7 @@ export const RESOURCES = [
   "worksheet-tools",
   "worksheet-notes",
   "worksheet-assignments",
+  "worksheet-chemical-materials",
 
   // ==================== NOTIFICATIONS ====================
   "notifications",
