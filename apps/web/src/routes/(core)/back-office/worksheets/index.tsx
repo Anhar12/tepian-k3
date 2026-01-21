@@ -97,7 +97,8 @@ function RouteComponent() {
     <div className="flex flex-col gap-4">
       <WorksheetHeaderCard
         title="Manajemen Worksheet"
-        subtitle="Kelola worksheet pengujian laboratorium dan pelaksanaan testing"
+        subtitle="Kelola worksheet pengujian laboratorium dan pelaksanaan pengujian"
+        actionButton={[]}
       />
 
       <Card>

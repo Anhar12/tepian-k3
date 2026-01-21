@@ -108,7 +108,8 @@ function RouteComponent() {
     <div className="flex flex-col gap-4">
       <WorksheetHeaderCard
         title="Manajemen Testing"
-        subtitle="Kelola pengujian laboratorium dan dokumen hasil testing"
+        subtitle="Kelola pengujian laboratorium dan dokumen hasil pengujian"
+        actionButton={[]}
       />
 
       <Card>
@@ -118,7 +119,7 @@ function RouteComponent() {
             <div className="relative flex-1">
               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Cari nomor testing, perusahaan..."
+                placeholder="Cari nomor pengujian, perusahaan..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
