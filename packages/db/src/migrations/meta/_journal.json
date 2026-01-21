@@ -43,6 +43,13 @@
       "when": 1768947521522,
       "tag": "0005_right_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768991692662,
+      "tag": "0006_cool_hellfire_club",
+      "breakpoints": true
     }
   ]
 }

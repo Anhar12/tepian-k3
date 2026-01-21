@@ -24,6 +24,9 @@ import {
   roles,
   testing,
   testingItem,
+  toolCalibrationCertificates,
+  toolCalibrationDocumentations,
+  toolCalibrations,
   tools,
   userCompanies,
   userCompanyTestingLocation,
@@ -160,7 +163,43 @@ export const userPermissionsRelations = relations(
 
 export const toolsRelations = relations(tools, ({ many }) => ({
   parameterTools: many(parameterTools),
+  calibrations: many(toolCalibrations),
 }));
+
+export const toolCalibrationsRelations = relations(
+  toolCalibrations,
+  ({ one, many }) => ({
+    tool: one(tools, {
+      fields: [toolCalibrations.toolId],
+      references: [tools.id],
+    }),
+    certificate: one(toolCalibrationCertificates, {
+      fields: [toolCalibrations.id],
+      references: [toolCalibrationCertificates.toolCalibrationId],
+    }),
+    documentations: many(toolCalibrationDocumentations),
+  }),
+);
+
+export const toolCalibrationCertificateRelations = relations(
+  toolCalibrationCertificates,
+  ({ one }) => ({
+    toolCalibration: one(toolCalibrations, {
+      fields: [toolCalibrationCertificates.toolCalibrationId],
+      references: [toolCalibrations.id],
+    }),
+  }),
+);
+
+export const toolCalibrationDocumentationRelations = relations(
+  toolCalibrationDocumentations,
+  ({ one }) => ({
+    toolCalibration: one(toolCalibrations, {
+      fields: [toolCalibrationDocumentations.toolCalibrationId],
+      references: [toolCalibrations.id],
+    }),
+  }),
+);
 
 export const clustersRelations = relations(users, ({ many }) => ({
   parameterCategories: many(parameterCategories),
@@ -217,7 +256,7 @@ export const parameterChemicalMaterialsRelations = relations(
       fields: [parameterChemicalMaterials.chemicalMaterialId],
       references: [chemicalMaterials.id],
     }),
-  })
+  }),
 );
 
 export const provinceRelations = relations(provinces, ({ many }) => ({

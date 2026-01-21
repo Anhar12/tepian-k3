@@ -8,3 +8,11 @@ export const katalogMask = createRouteMask({
   params: true,
   search: {},
 });
+
+export const detailToolsMask = createRouteMask({
+  routeTree,
+  from: "/back-office/tools/$toolId/detail",
+  to: "/back-office/tools/$toolId/detail",
+  params: true,
+  search: {},
+});

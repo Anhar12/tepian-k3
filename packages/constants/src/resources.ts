@@ -12,6 +12,9 @@ export const RESOURCES = [
 
   // ==================== TOOLS ====================
   "tools",
+  "tool-calibrations",
+  "tool-certifications",
+  "tool-documentations",
   "chemical-materials",
   "clusters",
   "parameter-categories",

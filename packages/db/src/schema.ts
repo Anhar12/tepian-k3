@@ -461,6 +461,73 @@ export const tools = createTable(
   ],
 );
 
+export const toolCalibrations = createTable(
+  "tool_calibrations",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    toolId: uuid("tool_id")
+      .notNull()
+      .references(() => tools.id, { onDelete: "cascade" }),
+    calibrationDate: timestamp("calibration_date", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    note: text("note"),
+    ...timestamps,
+  },
+  (table) => [
+    index("tool_calibration_id_idx").using("btree", table.id),
+    index("tool_calibration_tool_id_idx").using("btree", table.toolId),
+  ],
+);
+
+export const toolCalibrationCertificates = createTable(
+  "tool_calibration_certificates",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    toolCalibrationId: uuid("tool_calibration_id")
+      .notNull()
+      .references(() => toolCalibrations.id, { onDelete: "cascade" }),
+    ...createFileUrlColumn("certificateFile"),
+    ...timestamps,
+  },
+  (table) => [
+    index("tool_calibration_certificate_id_idx").using("btree", table.id),
+    index("tool_calibration_certificate_tool_calibration_id_idx").using(
+      "btree",
+      table.toolCalibrationId,
+    ),
+  ],
+);
+
+export const toolCalibrationDocumentations = createTable(
+  "tool_calibration_documentations",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    toolCalibrationId: uuid("tool_calibration_id")
+      .notNull()
+      .references(() => toolCalibrations.id, { onDelete: "cascade" }),
+    ...createFileUrlColumn("documentationFile"),
+    ...timestamps,
+  },
+  (table) => [
+    index("tool_calibration_documentation_id_idx").using("btree", table.id),
+    index("tool_calibration_documentation_tool_calibration_id_idx").using(
+      "btree",
+      table.toolCalibrationId,
+    ),
+  ],
+);
+
 export const clusters = createTable(
   "clusters",
   {
