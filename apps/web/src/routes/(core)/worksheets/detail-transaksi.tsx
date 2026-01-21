@@ -37,13 +37,16 @@ import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getPublicUrl } from "@/utils/url";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { requirePermission } from "@/utils/require-permission";
 
 const searchParamsSchema = z.object({
-  worksheetId: z.string().uuidv7().optional(),
+  worksheetId: z.uuidv7().optional(),
 });
 
 export const Route = createFileRoute("/(core)/worksheets/detail-transaksi")({
   validateSearch: searchParamsSchema,
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "worksheets.read" }),
   component: RouteComponent,
 });
 
@@ -292,7 +295,8 @@ function RouteComponent() {
     }, 0);
   }, [operationalCosts]);
 
-  const grandTotal = parameterTotal + (showOperationalCosts ? operationalTotal : 0);
+  const grandTotal =
+    parameterTotal + (showOperationalCosts ? operationalTotal : 0);
 
   const handleAddOperationalCost = useCallback(() => {
     setOperationalCosts((prev) => [
@@ -829,8 +833,8 @@ function RouteComponent() {
                         colSpan={7}
                         className="py-8 text-center text-muted-foreground"
                       >
-                        Belum ada biaya operasional. Klik &quot;Tambah Item&quot;
-                        untuk menambahkan.
+                        Belum ada biaya operasional. Klik &quot;Tambah
+                        Item&quot; untuk menambahkan.
                       </TableCell>
                     </TableRow>
                   )}
@@ -874,7 +878,9 @@ function RouteComponent() {
                 className="h-9 w-9 bg-transparent"
                 onClick={handleSave}
                 disabled={
-                  !isEditable || !isDirty || saveOperationalCostsMutation.isPending
+                  !isEditable ||
+                  !isDirty ||
+                  saveOperationalCostsMutation.isPending
                 }
               >
                 {saveOperationalCostsMutation.isPending ? (
@@ -887,7 +893,9 @@ function RouteComponent() {
                 className="flex-1 gap-2 sm:flex-initial"
                 onClick={handleSave}
                 disabled={
-                  !isEditable || !isDirty || saveOperationalCostsMutation.isPending
+                  !isEditable ||
+                  !isDirty ||
+                  saveOperationalCostsMutation.isPending
                 }
               >
                 {saveOperationalCostsMutation.isPending ? (

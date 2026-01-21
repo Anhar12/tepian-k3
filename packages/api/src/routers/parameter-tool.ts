@@ -9,48 +9,48 @@ export const parameterToolRouter = createTRPCRouter({
     .input(
       z.object({
         parameterId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
         await runEffect(
-          parameterToolQueries.getAllToolsByParameterId(input.parameterId)
-        )
+          parameterToolQueries.getAllToolsByParameterId(input.parameterId),
+        ),
     ),
 
   getParameterToolById: withPermission("parameter-tool.read")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(parameterToolQueries.getParameterToolById(input.id))
+        await runEffect(parameterToolQueries.getParameterToolById(input.id)),
     ),
 
   assignToolsToParameter: withPermission("parameter-tool.create")
     .input(parameterToolSchema.createParameterToolSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(parameterToolQueries.assignToolToParameter(input))
+        await runEffect(parameterToolQueries.assignToolToParameter(input)),
     ),
 
   updateParameterTool: withPermission("parameter-tool.update")
     .input(parameterToolSchema.updateParameterToolSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(parameterToolQueries.updateParameterTool(input))
+        await runEffect(parameterToolQueries.updateParameterTool(input)),
     ),
 
   deleteParameterTool: withPermission("parameter-tool.delete")
     .input(
       z.object({
-        id: z.string().uuidv7(),
-      })
+        id: z.uuidv7(),
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(parameterToolQueries.removeToolFromParameter(input.id))
+        await runEffect(parameterToolQueries.removeToolFromParameter(input.id)),
     ),
 });
