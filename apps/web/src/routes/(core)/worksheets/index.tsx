@@ -64,6 +64,7 @@ import { useSubscription } from "@trpc/tanstack-react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 export const Route = createFileRoute("/(core)/worksheets/")({
   validateSearch: z.object({
@@ -104,6 +105,8 @@ interface WorksheetItemWithMeta {
 function RouteComponent() {
   const { worksheetId } = routeApi.useSearch();
   const queryClient = useQueryClient();
+
+  const { profile } = useUserProfile();
 
   // Fetch worksheet data
   const {
@@ -1524,7 +1527,7 @@ function RouteComponent() {
           <TabsContent value="catatan" className="p-3 pt-4 sm:p-4 sm:pt-6">
             <div className="flex h-125 flex-col">
               <ScrollArea className="mb-4 flex-1 pr-4">
-                <div className="space-y-4">
+                <div className="flex flex-col space-y-4">
                   {notes?.length === 0 ? (
                     <div className="py-12 text-center">
                       <MessageSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
@@ -1533,55 +1536,70 @@ function RouteComponent() {
                       </p>
                     </div>
                   ) : (
-                    notes?.map((note) => (
-                      <div key={note.id} className="flex gap-3">
-                        <Avatar className="h-8 w-8 shrink-0">
-                          <AvatarFallback className="bg-muted">
-                            {note.createdBy.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .toUpperCase()
-                              .slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="max-w-[80%] flex-1">
+                    notes?.map((note) => {
+                      const isCurrentUser = note.createdBy.id === profile.id; // You'll need to pass currentUserId as a prop
+
+                      return (
+                        <div
+                          key={note.id}
+                          className={`flex gap-3 ${isCurrentUser ? "flex-row-reverse" : "flex-row"}`}
+                        >
+                          <Avatar className="h-8 w-8 shrink-0">
+                            <AvatarFallback className="bg-muted">
+                              {note.createdBy.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .toUpperCase()
+                                .slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
                           <div
-                            className={`inline-block rounded-2xl px-4 py-2 ${
-                              note.severity === "warning"
-                                ? "bg-amber-100 text-amber-900"
-                                : note.severity === "danger"
-                                  ? "bg-red-100 text-red-900"
-                                  : "bg-muted"
-                            }`}
+                            className={`max-w-[80%] flex-1 ${isCurrentUser ? "flex flex-col items-end" : ""}`}
                           >
-                            <p className="text-sm">{note.note}</p>
-                          </div>
-                          <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="font-medium">
-                              {note.createdBy.name}
-                            </span>
-                            <span>
-                              {new Date(note.createdAt).toLocaleString("id-ID")}
-                            </span>
-                            {note.severity !== "info" && (
-                              <Badge
-                                variant="outline"
-                                className={`text-xs ${
-                                  note.severity === "warning"
-                                    ? "border-amber-300 text-amber-600"
-                                    : "border-red-300 text-red-600"
-                                }`}
-                              >
-                                {note.severity === "warning"
-                                  ? "Peringatan"
-                                  : "Error"}
-                              </Badge>
-                            )}
+                            <div
+                              className={`inline-block rounded-2xl px-4 py-2 ${
+                                note.severity === "warning"
+                                  ? "bg-amber-100 text-amber-900"
+                                  : note.severity === "danger"
+                                    ? "bg-red-100 text-red-900"
+                                    : isCurrentUser
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-muted"
+                              }`}
+                            >
+                              <p className="text-sm">{note.note}</p>
+                            </div>
+                            <div
+                              className={`mt-1 flex items-center gap-2 text-xs text-muted-foreground ${isCurrentUser ? "flex-row-reverse" : ""}`}
+                            >
+                              <span className="font-medium">
+                                {note.createdBy.name}
+                              </span>
+                              <span>
+                                {new Date(note.createdAt).toLocaleString(
+                                  "id-ID",
+                                )}
+                              </span>
+                              {note.severity !== "info" && (
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs ${
+                                    note.severity === "warning"
+                                      ? "border-amber-300 text-amber-600"
+                                      : "border-red-300 text-red-600"
+                                  }`}
+                                >
+                                  {note.severity === "warning"
+                                    ? "Peringatan"
+                                    : "Error"}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </ScrollArea>

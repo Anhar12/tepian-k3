@@ -64,8 +64,11 @@ import {
   isWithinInterval,
 } from "date-fns";
 import { id as localeId } from "date-fns/locale";
+import { requirePermission } from "@/utils/require-permission";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "worksheets.read" }),
   component: JadwalPersonilPage,
 });
 
