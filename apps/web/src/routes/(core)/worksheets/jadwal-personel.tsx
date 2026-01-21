@@ -13,6 +13,7 @@ import {
   Loader2,
   AlertCircle,
   Save,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -645,6 +646,22 @@ function JadwalPersonilPage() {
       <WorksheetHeaderCard
         title="Jadwal Personil"
         subtitle="Penjadwalan dan penugasan personel pengujian"
+        actionButton={[
+          {
+            label: "Simpan",
+            icon: <Save className="h-4 w-4" />,
+            variant: "outline",
+            size: "sm",
+            onClick: () => {},
+          },
+          {
+            label: "Export",
+            icon: <Download className="h-4 w-4" />,
+            variant: "default",
+            size: "sm",
+            onClick: () => {},
+          },
+        ]}
       />
 
       <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row">

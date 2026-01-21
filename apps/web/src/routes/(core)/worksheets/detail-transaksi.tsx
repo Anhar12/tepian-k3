@@ -352,6 +352,22 @@ function RouteComponent() {
         <WorksheetHeaderCard
           title="Detail Transaksi"
           subtitle="Rincian biaya parameter dan operasional pengujian"
+          actionButton={[
+            {
+              label: "Simpan",
+              icon: <Save />,
+              variant: "default",
+              size: "default",
+              onClick: () => {},
+            },
+            {
+              label: "Cetak",
+              icon: <Printer />,
+              variant: "outline",
+              size: "default",
+              onClick: () => {},
+            },
+          ]}
         />
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -382,6 +398,22 @@ function RouteComponent() {
         <WorksheetHeaderCard
           title="Detail Transaksi"
           subtitle="Rincian biaya parameter dan operasional pengujian"
+          actionButton={[
+            {
+              label: "Simpan",
+              icon: <Save />,
+              variant: "default",
+              size: "default",
+              onClick: () => {},
+            },
+            {
+              label: "Cetak",
+              icon: <Printer />,
+              variant: "outline",
+              size: "default",
+              onClick: () => {},
+            },
+          ]}
         />
         <Card>
           <CardHeader>
@@ -404,6 +436,22 @@ function RouteComponent() {
         <WorksheetHeaderCard
           title="Detail Transaksi"
           subtitle="Rincian biaya parameter dan operasional pengujian"
+          actionButton={[
+            {
+              label: "Simpan",
+              icon: <Save />,
+              variant: "default",
+              size: "default",
+              onClick: () => {},
+            },
+            {
+              label: "Cetak",
+              icon: <Printer />,
+              variant: "outline",
+              size: "default",
+              onClick: () => {},
+            },
+          ]}
         />
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -431,6 +479,22 @@ function RouteComponent() {
       <WorksheetHeaderCard
         title="Detail Transaksi"
         subtitle="Rincian biaya parameter dan operasional pengujian"
+        actionButton={[
+          {
+            label: "Simpan",
+            icon: <Save />,
+            variant: "default",
+            size: "default",
+            onClick: () => {},
+          },
+          {
+            label: "Cetak",
+            icon: <Printer />,
+            variant: "outline",
+            size: "default",
+            onClick: () => {},
+          },
+        ]}
       />
 
       <Card>

@@ -1,15 +1,30 @@
 "use client";
 
 import { Activity, Download, Save } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import type { VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
 interface HeaderCardProps {
   title: string;
   subtitle: string;
+  actionButton: {
+    label: string;
+    icon: React.ReactNode;
+    className?: string;
+    labelClassName?: string;
+    variant: VariantProps<typeof buttonVariants>["variant"];
+    size: VariantProps<typeof buttonVariants>["size"];
+    onClick: () => void;
+  }[];
 }
 
-export function WorksheetHeaderCard({ title, subtitle }: HeaderCardProps) {
+export function WorksheetHeaderCard({
+  title,
+  subtitle,
+  actionButton,
+}: HeaderCardProps) {
   return (
     <Card className="overflow-hidden border-0 bg-linear-to-r from-primary/5 via-primary/10 to-primary/5">
       <CardContent className="p-4 sm:p-6">
@@ -28,14 +43,20 @@ export function WorksheetHeaderCard({ title, subtitle }: HeaderCardProps) {
             </div>
           </div>
           <div className="flex gap-2 sm:gap-3">
-            <Button variant="outline" size="sm" className="gap-2 bg-background">
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-            <Button size="sm" className="gap-2">
-              <Save className="h-4 w-4" />
-              <span className="hidden sm:inline">Simpan</span>
-            </Button>
+            {actionButton.map((button, index) => (
+              <Button
+                key={index}
+                variant={button.variant}
+                size={button.size}
+                className={cn("flex items-center gap-2", button.className)}
+                onClick={button.onClick}
+              >
+                {button.icon}
+                <span className={cn("hidden sm:inline", button.labelClassName)}>
+                  {button.label}
+                </span>
+              </Button>
+            ))}
           </div>
         </div>
       </CardContent>

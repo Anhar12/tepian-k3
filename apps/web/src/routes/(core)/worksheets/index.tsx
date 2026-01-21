@@ -49,9 +49,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   ClipboardList,
+  Download,
   Loader2,
   MessageSquare,
   Package,
+  Save,
   Search,
   Send,
   Wrench,
@@ -571,6 +573,22 @@ function RouteComponent() {
       <WorksheetHeaderCard
         title="Rincian parameter"
         subtitle={`Worksheet untuk ${worksheet?.order?.company?.name ?? "Unknown"}`}
+        actionButton={[
+          {
+            label: "Simpan",
+            icon: <Save className="h-4 w-4" />,
+            variant: "outline",
+            size: "sm",
+            onClick: () => {},
+          },
+          {
+            label: "Export",
+            icon: <Download className="h-4 w-4" />,
+            variant: "default",
+            size: "sm",
+            onClick: () => {},
+          },
+        ]}
       />
 
       <Card>
