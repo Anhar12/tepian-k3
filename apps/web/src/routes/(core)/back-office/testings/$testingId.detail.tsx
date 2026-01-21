@@ -19,14 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -44,15 +36,11 @@ import {
   TESTING_STATUSES,
   TESTING_STATUS_COLORS,
   TESTING_STATUS_LABELS,
-  WORKSHEET_STATUS_COLORS,
-  WORKSHEET_STATUS_LABELS,
   type TestingDocumentType,
   type TestingStatus,
-  type WorksheetStatus,
 } from "@tepian-k3/constants";
 import {
   Building2,
-  Calendar,
   CheckCircle2,
   ClipboardList,
   Download,
@@ -61,14 +49,11 @@ import {
   FlaskConical,
   Loader2,
   MapPin,
-  Plus,
   Upload,
-  UserCheck,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import z from "zod";
-import ComboBox from "@/components/ui/combobox";
 
 const searchSchema = z.object({
   createWorksheet: z.string().optional(),
@@ -205,6 +190,7 @@ function RouteComponent() {
       <WorksheetHeaderCard
         title={`Testing ${testing.testingNumber}`}
         subtitle={`${testing.order?.company?.name || "Perusahaan"} - ${TESTING_STATUS_LABELS[testing.status as TestingStatus]}`}
+        actionButton={[]}
       />
 
       <Card>
