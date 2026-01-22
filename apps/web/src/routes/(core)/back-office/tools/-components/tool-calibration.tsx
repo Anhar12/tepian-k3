@@ -30,7 +30,7 @@ export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
     from: "/(core)/back-office/tools/$toolId/calibration/",
   });
   const navigate = useNavigate({
-    from: "/(core)/back-office/tools/$toolId/calibration",
+    from: "/back-office/tools/$toolId/calibration",
   });
 
   const {
