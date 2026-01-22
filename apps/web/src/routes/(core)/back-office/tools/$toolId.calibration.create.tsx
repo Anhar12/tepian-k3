@@ -9,14 +9,9 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
-  FieldContent,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
-  FieldSet,
-  FieldTitle,
 } from "@/components/ui/field";
 import MultipleImageUpload from "@/components/ui/multiple-image-upload";
 import {

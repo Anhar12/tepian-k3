@@ -120,6 +120,70 @@ const toolCalibrationQueries = {
     }),
 
   /**
+   * Get tool calibrations certificates by calibration Tool ID
+   * @param calibrationId string
+   */
+  getToolCalibrationCertificatesById: (calibrationId: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.toolCalibrationCertificates.findFirst({
+          where: eq(
+            toolCalibrationCertificates.toolCalibrationId,
+            calibrationId,
+          ),
+          with: {
+            toolCalibration: true,
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "toolCalibrationQueries.getToolCalibrationCertificatesByToolId",
+          "Error fetching tool calibration certificates by Tool ID",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Gagal mendapatkan data sertifikat kalibrasi alat berdasarkan ID Kalibrasi",
+        });
+      },
+    }).pipe(
+      Effect.flatMap((certificate) =>
+        certificate ? Effect.succeed(certificate) : Effect.succeed(null),
+      ),
+    ),
+
+  /**
+   * Get tool calibrations documentations by calibration Tool ID
+   * @param calibrationId string
+   */
+  getToolCalibrationDocumentationsById: (calibrationId: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.toolCalibrationDocumentations.findMany({
+          where: eq(
+            toolCalibrationDocumentations.toolCalibrationId,
+            calibrationId,
+          ),
+          with: {
+            toolCalibration: true,
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "toolCalibrationQueries.getToolCalibrationDocumentationsByToolId",
+          "Error fetching tool calibration documentations by Tool ID",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Gagal mendapatkan data dokumentasi kalibrasi alat berdasarkan ID Kalibrasi",
+        });
+      },
+    }),
+
+  /**
    * Get paginated tool calibrations
    */
   getPaginatedToolCalibrations: (
