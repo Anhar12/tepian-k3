@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import CalibrationDetail from "./-components/calibration-detail";
 import { CalibrationCertificate } from "./-components/calibration-certificate";
+import { CalibrationDocumentation } from "./-components/calibration-documentation";
 
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
@@ -47,9 +48,7 @@ function RouteComponent() {
           <CalibrationCertificate calibrationId={calibrationId} />
         </TabsContent>
         <TabsContent value="documentation">
-          <div>
-            Documentation Content for {calibrationId} of Tool {toolId}
-          </div>
+          <CalibrationDocumentation calibrationId={calibrationId} />
         </TabsContent>
       </Tabs>
     </div>

@@ -195,16 +195,16 @@ export function SkeletonInput({ className }: { className?: string }) {
   return (
     <div className={cn("space-y-2", className)}>
       <Skeleton className="h-4 w-24" />
-      <Skeleton className="h-10 w-full rounded-md" />
+      <Skeleton className={cn("h-10 w-full rounded-md", className)} />
     </div>
   );
 }
 
 export function SkeletonTextArea({ className }: { className?: string }) {
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-2")}>
       <Skeleton className="h-4 w-28" />
-      <Skeleton className="h-20 w-full rounded-md" />
+      <Skeleton className={cn("h-20 w-full rounded-md", className)} />
     </div>
   );
 }

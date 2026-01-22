@@ -9,12 +9,10 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 import {
+  SkeletonButton,
   SkeletonInput,
   SkeletonTextArea,
 } from "@/components/ui/skeleton-generator";
-import { EmptyState } from "@/components/ui/empty-state";
-import { IconAlertCircle } from "@tabler/icons-react";
-import { useNavigate, useRouter } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import SingleFileUpload from "@/components/ui/single-file-upload";
@@ -31,8 +29,6 @@ interface CalibrationCertificateProps {
 export function CalibrationCertificate({
   calibrationId,
 }: CalibrationCertificateProps) {
-  const router = useRouter();
-
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
 
   const { data: calibration, isLoading } = useQuery(
@@ -75,6 +71,7 @@ export function CalibrationCertificate({
               <div className="flex flex-col gap-7">
                 <SkeletonTextArea />
                 <SkeletonInput />
+                <SkeletonButton className="w-full" />
               </div>
             </div>
           </CardContent>
@@ -94,19 +91,25 @@ export function CalibrationCertificate({
       <CardContent>
         {calibration ? (
           <div className="flex flex-col gap-4">
-            <div className="grid gap-4">
-              <div className="flex flex-col gap-2">
-                <Label className="font-medium">Catatan Kalibrasi</Label>
-                <span>{calibration.toolCalibration.note}</span>
+            <div className="grid gap-7">
+              <div className="space-y-1">
+                <Label className="ml-1 text-sm font-bold">
+                  Catatan Kalibrasi
+                </Label>
+                <span className="block h-20 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-50">
+                  {calibration.toolCalibration.note || "-"}
+                </span>
               </div>
-              <div className="flex flex-col gap-2">
-                <Label className="font-medium">Tanggal Kalibrasi</Label>
-                <span>
+              <div className="space-y-1">
+                <Label className="ml-1 text-sm font-bold">
+                  Tanggal Kalibrasi
+                </Label>
+                <div className="block w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-50">
                   {format(
                     new Date(calibration.toolCalibration.calibrationDate),
                     "EEEE, dd MMMM yyyy",
                   )}
-                </span>
+                </div>
               </div>
               {/* This should download certificate file */}
               <div className="flex flex-col gap-2">
