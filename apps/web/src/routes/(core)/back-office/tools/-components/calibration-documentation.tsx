@@ -29,6 +29,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "@tanstack/react-router";
 
 interface CalibrationDocumentationProps {
   calibrationId: string;
@@ -37,6 +38,10 @@ interface CalibrationDocumentationProps {
 export function CalibrationDocumentation({
   calibrationId,
 }: CalibrationDocumentationProps) {
+  const navigate = useNavigate({
+    from: "/back-office/tools/$toolId/calibration/$calibrationId/detail",
+  });
+
   const [documentationFile, setDocumentationFile] = useState<File[]>([]);
 
   const { data: calibration, isLoading } = useQuery(
@@ -135,9 +140,14 @@ export function CalibrationDocumentation({
                           alt={`Dokumentasi Kalibrasi ${index + 1}`}
                           className="size-64 rounded-md object-cover sm:h-64 sm:w-64"
                           onClick={() => {
-                            window.open(
-                              getPublicUrl(item?.documentationFileUrl || ""),
-                            );
+                            navigate({
+                              to: "/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal",
+                              params: {
+                                toolId: item.toolCalibration.toolId,
+                                calibrationId: item.toolCalibration.id,
+                                documentationId: item.id,
+                              },
+                            });
                           }}
                         />
                       </CarouselItem>

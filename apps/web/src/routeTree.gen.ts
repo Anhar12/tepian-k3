@@ -88,6 +88,7 @@ import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from '.
 import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.create'
 import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit'
 import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.detail'
+import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.detail.$documentationId.modal'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -531,6 +532,15 @@ const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute =
     path: '/tools/$toolId/calibration/$calibrationId/detail',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute =
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRouteImport.update(
+    {
+      id: '/$documentationId/modal',
+      path: '/$documentationId/modal',
+      getParentRoute: () =>
+        coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -608,8 +618,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
   '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteWithChildren
   '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -683,8 +694,9 @@ export interface FileRoutesByTo {
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
   '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteWithChildren
   '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -765,8 +777,9 @@ export interface FileRoutesById {
   '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
   '/(core)/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   '/(core)/back-office/tools/$toolId/calibration/': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteWithChildren
   '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -848,6 +861,7 @@ export interface FileRouteTypes {
     | '/back-office/tools/$toolId/calibration'
     | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
     | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
+    | '/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -923,6 +937,7 @@ export interface FileRouteTypes {
     | '/back-office/tools/$toolId/calibration'
     | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
     | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
+    | '/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal'
   id:
     | '__root__'
     | '/'
@@ -1004,6 +1019,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/tools/$toolId/calibration/'
     | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
     | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
+    | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1571,6 +1587,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal': {
+      id: '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal'
+      path: '/$documentationId/modal'
+      fullPath: '/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRouteImport
+      parentRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+    }
   }
 }
 
@@ -1593,6 +1616,21 @@ const authRouteRouteChildren: authRouteRouteChildren = {
 const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
+
+interface coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteChildren {
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute
+}
+
+const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteChildren: coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteChildren =
+  {
+    coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute:
+      coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailDocumentationIdModalRoute,
+  }
+
+const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteWithChildren =
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute._addFileChildren(
+    coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteChildren,
+  )
 
 interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeIndexRoute: typeof coreBackOfficeIndexRoute
@@ -1636,7 +1674,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
   coreBackOfficeToolsToolIdCalibrationCreateRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   coreBackOfficeToolsToolIdCalibrationIndexRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteWithChildren
   coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
 }
 
@@ -1698,7 +1736,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeToolsToolIdCalibrationIndexRoute:
     coreBackOfficeToolsToolIdCalibrationIndexRoute,
   coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute:
-    coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute,
+    coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteWithChildren,
   coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute:
     coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute,
 }
