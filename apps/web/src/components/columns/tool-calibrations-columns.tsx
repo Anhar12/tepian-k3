@@ -50,8 +50,8 @@ export default function getToolCalibrationColumns({
       enableFilter: true,
       placeholder: "Cari catatan...",
     }),
-    createTextColumn<ToolCalibration>("calibrationDate", "Tanggal Kalibrasi", {
-      width: "w-64",
+    createDateColumn<ToolCalibration>("calibrationDate", "Tanggal Kalibrasi", {
+      format: "EEEE, dd MMMM yyyy",
     }),
     createDateColumn<ToolCalibration>("createdAt", "Dibuat"),
     createDateColumn<ToolCalibration>("updatedAt", "Diubah", {
