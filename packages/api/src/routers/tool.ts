@@ -13,6 +13,7 @@ import toolCalibrationQueries from "@tepian-k3/queries/tool-calibration.queries"
 import { Effect } from "effect";
 import { imageService } from "@tepian-k3/services/image";
 import { storageService } from "@tepian-k3/services/storage";
+import { TRPCError } from "@trpc/server";
 
 export const toolRouter = createTRPCRouter({
   getAllUnassignedTools: withPermission("tools.view").query(
@@ -68,12 +69,20 @@ export const toolRouter = createTRPCRouter({
         id: z.uuidv7(),
       }),
     )
-    .query(
-      async ({ input }) =>
-        await runEffect(
-          toolCalibrationQueries.getToolCalibrationById(input.id),
-        ),
-    ),
+    .query(async ({ input }) => {
+      const result = await runEffect(
+        toolCalibrationQueries.getToolCalibrationById(input.id),
+      );
+
+      if (!result) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Kalibrasi alat dengan ID ${input.id} tidak ditemukan`,
+        });
+      }
+
+      return result;
+    }),
 
   createTool: withPermission("tools.create")
     .input(toolsSchema.createToolSchema)

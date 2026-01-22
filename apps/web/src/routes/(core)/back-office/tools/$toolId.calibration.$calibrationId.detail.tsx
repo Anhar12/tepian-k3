@@ -1,15 +1,58 @@
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { createFileRoute } from "@tanstack/react-router";
+import z from "zod";
+import CalibrationDetail from "./-components/calibration-detail";
 
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
 )({
+  validateSearch: z.object({
+    tabs: z.enum(["detail", "certificate", "documentation"]).default("detail"),
+  }),
+  params: z.object({
+    toolId: z.uuidv7(),
+    calibrationId: z.uuidv7(),
+  }),
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { toolId, calibrationId } = Route.useParams();
+  const { tabs } = Route.useSearch();
+  const navigate = Route.useNavigate();
+
   return (
-    <div>
-      Hello "/(core)/back-office/tools/calibration/$calibrationId/detail"!
+    <div className="flex flex-col gap-6">
+      <Tabs
+        defaultValue={tabs}
+        onValueChange={(value) => {
+          navigate({
+            search: (old) => ({
+              ...old,
+              tabs: value as "detail" | "certificate" | "documentation",
+            }),
+          });
+        }}
+      >
+        <TabsList>
+          <TabsTrigger value="detail">Detail</TabsTrigger>
+          <TabsTrigger value="certificate">Certificate</TabsTrigger>
+          <TabsTrigger value="documentation">Documentation</TabsTrigger>
+        </TabsList>
+        <TabsContent value="detail">
+          <CalibrationDetail calibrationId={calibrationId} />
+        </TabsContent>
+        <TabsContent value="certificate">
+          <div>
+            Certificate Content for {calibrationId} of Tool {toolId}
+          </div>
+        </TabsContent>
+        <TabsContent value="documentation">
+          <div>
+            Documentation Content for {calibrationId} of Tool {toolId}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

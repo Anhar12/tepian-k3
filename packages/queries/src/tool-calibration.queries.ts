@@ -53,6 +53,10 @@ const toolCalibrationQueries = {
       try: () =>
         db.query.toolCalibrations.findFirst({
           where: eq(toolCalibrations.id, id),
+          with: {
+            certificate: true,
+            documentations: true,
+          },
         }),
       catch: (error) => {
         logError(

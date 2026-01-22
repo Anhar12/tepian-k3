@@ -1,4 +1,4 @@
-import { getRouteApi, Link, useMatchRoute } from "@tanstack/react-router";
+import { Link, useMatchRoute } from "@tanstack/react-router";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TabsLayoutProps {
