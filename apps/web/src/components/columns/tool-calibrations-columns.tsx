@@ -1,7 +1,7 @@
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import type { ToolCalibration } from "@tepian-k3/types/tool-calibration.types";
 import { trpc } from "@/utils/trpc";
-import { Route } from "@/routes/(core)/back-office/tools/$toolId.detail";
+import { Route } from "@/routes/(core)/back-office/tools/$toolId.calibration.index";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
 import {
   createActionColumn,

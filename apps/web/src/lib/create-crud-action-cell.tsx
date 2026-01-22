@@ -10,6 +10,11 @@ import { ArchiveRestore, Trash } from "lucide-react";
 interface CrudActionCellConfig<T, TParams> {
   /** Resource name (singular) for display messages */
   resourceName: string;
+  /** Nested path route for routing (e.g., '(core)/back-office')
+   * use only if the resource is nested in another resource
+   * eg: "/back-office/tools/$toolId/detail/calibration"
+   */
+  nestedPathRoute?: string;
   /**
    * @deprecated currently not being used,
    * Resource path for routing (e.g., 'clusters', 'tools') */
@@ -41,6 +46,7 @@ export function createCrudActionCell<
 >(config: CrudActionCellConfig<T, TParams>) {
   const {
     resourceName,
+    nestedPathRoute,
     resourcePath,
     permissionPrefix,
     deleteMutation,
@@ -117,12 +123,16 @@ export function createCrudActionCell<
             : `Apakah anda yakin ingin menghapus data ${resourceName} ini? Data yang sudah dihapus tidak dapat dikembalikan.`
         }
         btnClassName="bg-red-600 text-white hover:bg-red-500"
-        onEditAction={`${row.original.id}/edit`}
+        onEditAction={`${nestedPathRoute ?? ""}${row.original.id}/edit`}
         onHoverEdit={() => onHoverEdit && onHoverEdit(row.original.id)}
         showEdit={canEdit}
         showDelete={canDelete}
         showDetail={showDetail && canSeeDetail}
-        onDetailAction={showDetail ? `${row.original.id}/detail` : undefined}
+        onDetailAction={
+          showDetail
+            ? `${nestedPathRoute ?? ""}${row.original.id}/detail`
+            : undefined
+        }
         onHoverDetail={() => onHoverDetail && onHoverDetail(row.original.id)}
         onConfirm={() =>
           row.original.deletedAt

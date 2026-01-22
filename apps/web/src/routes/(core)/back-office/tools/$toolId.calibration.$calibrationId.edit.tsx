@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute(
-  '/(core)/back-office/tools/calibration/$calibrationId/detail',
+  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit',
 )({
   component: RouteComponent,
 })
@@ -9,7 +9,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
   return (
     <div>
-      Hello "/(core)/back-office/tools/calibration/$calibrationId/detail"!
+      Hello "/(core)/back-office/tools/calibration/$calibrationId/edit"!
     </div>
   )
 }

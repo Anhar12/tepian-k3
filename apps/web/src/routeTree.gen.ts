@@ -70,7 +70,6 @@ import { Route as coreBackOfficeChemicalMaterialsCreateRouteImport } from './rou
 import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
 import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
 import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
-import { Route as coreBackOfficeToolsCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/calibration/create'
 import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.edit'
 import { Route as coreBackOfficeToolsToolIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.detail'
 import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
@@ -85,8 +84,10 @@ import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(cor
 import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './routes/(core)/back-office/employees/$employeeId.edit'
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
 import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialEditRouteImport } from './routes/(core)/back-office/chemical-materials/$chemicalMaterial.edit'
-import { Route as coreBackOfficeToolsCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/calibration/$calibrationId.edit'
-import { Route as coreBackOfficeToolsCalibrationCalibrationIdDetailRouteImport } from './routes/(core)/back-office/tools/calibration/$calibrationId.detail'
+import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.index'
+import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.create'
+import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit'
+import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.detail'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -422,12 +423,6 @@ const coreBackOfficeUsersUserIdEditRoute =
     path: '/users/$userId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeToolsCalibrationCreateRoute =
-  coreBackOfficeToolsCalibrationCreateRouteImport.update({
-    id: '/tools/calibration/create',
-    path: '/tools/calibration/create',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
 const coreBackOfficeToolsToolIdEditRoute =
   coreBackOfficeToolsToolIdEditRouteImport.update({
     id: '/tools/$toolId/edit',
@@ -512,16 +507,28 @@ const coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute =
     path: '/chemical-materials/$chemicalMaterial/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeToolsCalibrationCalibrationIdEditRoute =
-  coreBackOfficeToolsCalibrationCalibrationIdEditRouteImport.update({
-    id: '/tools/calibration/$calibrationId/edit',
-    path: '/tools/calibration/$calibrationId/edit',
+const coreBackOfficeToolsToolIdCalibrationIndexRoute =
+  coreBackOfficeToolsToolIdCalibrationIndexRouteImport.update({
+    id: '/tools/$toolId/calibration/',
+    path: '/tools/$toolId/calibration/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeToolsCalibrationCalibrationIdDetailRoute =
-  coreBackOfficeToolsCalibrationCalibrationIdDetailRouteImport.update({
-    id: '/tools/calibration/$calibrationId/detail',
-    path: '/tools/calibration/$calibrationId/detail',
+const coreBackOfficeToolsToolIdCalibrationCreateRoute =
+  coreBackOfficeToolsToolIdCalibrationCreateRouteImport.update({
+    id: '/tools/$toolId/calibration/create',
+    path: '/tools/$toolId/calibration/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute =
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport.update({
+    id: '/tools/$toolId/calibration/$calibrationId/edit',
+    path: '/tools/$toolId/calibration/$calibrationId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute =
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport.update({
+    id: '/tools/$toolId/calibration/$calibrationId/detail',
+    path: '/tools/$toolId/calibration/$calibrationId/detail',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 
@@ -596,12 +603,13 @@ export interface FileRoutesByFullPath {
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
-  '/back-office/tools/calibration/create': typeof coreBackOfficeToolsCalibrationCreateRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/back-office/tools/calibration/$calibrationId/detail': typeof coreBackOfficeToolsCalibrationCalibrationIdDetailRoute
-  '/back-office/tools/calibration/$calibrationId/edit': typeof coreBackOfficeToolsCalibrationCalibrationIdEditRoute
+  '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -670,12 +678,13 @@ export interface FileRoutesByTo {
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
-  '/back-office/tools/calibration/create': typeof coreBackOfficeToolsCalibrationCreateRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/back-office/tools/calibration/$calibrationId/detail': typeof coreBackOfficeToolsCalibrationCalibrationIdDetailRoute
-  '/back-office/tools/calibration/$calibrationId/edit': typeof coreBackOfficeToolsCalibrationCalibrationIdEditRoute
+  '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -751,12 +760,13 @@ export interface FileRoutesById {
   '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/(core)/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/(core)/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
-  '/(core)/back-office/tools/calibration/create': typeof coreBackOfficeToolsCalibrationCreateRoute
   '/(core)/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/(core)/back-office/tools/calibration/$calibrationId/detail': typeof coreBackOfficeToolsCalibrationCalibrationIdDetailRoute
-  '/(core)/back-office/tools/calibration/$calibrationId/edit': typeof coreBackOfficeToolsCalibrationCalibrationIdEditRoute
+  '/(core)/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  '/(core)/back-office/tools/$toolId/calibration/': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -831,12 +841,13 @@ export interface FileRouteTypes {
     | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/tools/$toolId/edit'
-    | '/back-office/tools/calibration/create'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
-    | '/back-office/tools/calibration/$calibrationId/detail'
-    | '/back-office/tools/calibration/$calibrationId/edit'
+    | '/back-office/tools/$toolId/calibration/create'
+    | '/back-office/tools/$toolId/calibration'
+    | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
+    | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -905,12 +916,13 @@ export interface FileRouteTypes {
     | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/tools/$toolId/edit'
-    | '/back-office/tools/calibration/create'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
-    | '/back-office/tools/calibration/$calibrationId/detail'
-    | '/back-office/tools/calibration/$calibrationId/edit'
+    | '/back-office/tools/$toolId/calibration/create'
+    | '/back-office/tools/$toolId/calibration'
+    | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
+    | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
   id:
     | '__root__'
     | '/'
@@ -985,12 +997,13 @@ export interface FileRouteTypes {
     | '/(core)/back-office/testings/$testingId/detail'
     | '/(core)/back-office/tools/$toolId/detail'
     | '/(core)/back-office/tools/$toolId/edit'
-    | '/(core)/back-office/tools/calibration/create'
     | '/(core)/back-office/users/$userId/edit'
     | '/(core)/dashboard/company/$companyId/detail'
     | '/(core)/dashboard/company/$companyId/edit'
-    | '/(core)/back-office/tools/calibration/$calibrationId/detail'
-    | '/(core)/back-office/tools/calibration/$calibrationId/edit'
+    | '/(core)/back-office/tools/$toolId/calibration/create'
+    | '/(core)/back-office/tools/$toolId/calibration/'
+    | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
+    | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1432,13 +1445,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeUsersUserIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/tools/calibration/create': {
-      id: '/(core)/back-office/tools/calibration/create'
-      path: '/tools/calibration/create'
-      fullPath: '/back-office/tools/calibration/create'
-      preLoaderRoute: typeof coreBackOfficeToolsCalibrationCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
     '/(core)/back-office/tools/$toolId/edit': {
       id: '/(core)/back-office/tools/$toolId/edit'
       path: '/tools/$toolId/edit'
@@ -1537,18 +1543,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/tools/calibration/$calibrationId/edit': {
-      id: '/(core)/back-office/tools/calibration/$calibrationId/edit'
-      path: '/tools/calibration/$calibrationId/edit'
-      fullPath: '/back-office/tools/calibration/$calibrationId/edit'
-      preLoaderRoute: typeof coreBackOfficeToolsCalibrationCalibrationIdEditRouteImport
+    '/(core)/back-office/tools/$toolId/calibration/': {
+      id: '/(core)/back-office/tools/$toolId/calibration/'
+      path: '/tools/$toolId/calibration'
+      fullPath: '/back-office/tools/$toolId/calibration'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/tools/calibration/$calibrationId/detail': {
-      id: '/(core)/back-office/tools/calibration/$calibrationId/detail'
-      path: '/tools/calibration/$calibrationId/detail'
-      fullPath: '/back-office/tools/calibration/$calibrationId/detail'
-      preLoaderRoute: typeof coreBackOfficeToolsCalibrationCalibrationIdDetailRouteImport
+    '/(core)/back-office/tools/$toolId/calibration/create': {
+      id: '/(core)/back-office/tools/$toolId/calibration/create'
+      path: '/tools/$toolId/calibration/create'
+      fullPath: '/back-office/tools/$toolId/calibration/create'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': {
+      id: '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
+      path: '/tools/$toolId/calibration/$calibrationId/edit'
+      fullPath: '/back-office/tools/$toolId/calibration/$calibrationId/edit'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': {
+      id: '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
+      path: '/tools/$toolId/calibration/$calibrationId/detail'
+      fullPath: '/back-office/tools/$toolId/calibration/$calibrationId/detail'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
   }
@@ -1613,10 +1633,11 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
   coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute
   coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
-  coreBackOfficeToolsCalibrationCreateRoute: typeof coreBackOfficeToolsCalibrationCreateRoute
   coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
-  coreBackOfficeToolsCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsCalibrationCalibrationIdDetailRoute
-  coreBackOfficeToolsCalibrationCalibrationIdEditRoute: typeof coreBackOfficeToolsCalibrationCalibrationIdEditRoute
+  coreBackOfficeToolsToolIdCalibrationCreateRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  coreBackOfficeToolsToolIdCalibrationIndexRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
 }
 
 const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
@@ -1671,13 +1692,15 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeTestingsTestingIdDetailRoute,
   coreBackOfficeToolsToolIdDetailRoute: coreBackOfficeToolsToolIdDetailRoute,
   coreBackOfficeToolsToolIdEditRoute: coreBackOfficeToolsToolIdEditRoute,
-  coreBackOfficeToolsCalibrationCreateRoute:
-    coreBackOfficeToolsCalibrationCreateRoute,
   coreBackOfficeUsersUserIdEditRoute: coreBackOfficeUsersUserIdEditRoute,
-  coreBackOfficeToolsCalibrationCalibrationIdDetailRoute:
-    coreBackOfficeToolsCalibrationCalibrationIdDetailRoute,
-  coreBackOfficeToolsCalibrationCalibrationIdEditRoute:
-    coreBackOfficeToolsCalibrationCalibrationIdEditRoute,
+  coreBackOfficeToolsToolIdCalibrationCreateRoute:
+    coreBackOfficeToolsToolIdCalibrationCreateRoute,
+  coreBackOfficeToolsToolIdCalibrationIndexRoute:
+    coreBackOfficeToolsToolIdCalibrationIndexRoute,
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute:
+    coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute,
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute:
+    coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute,
 }
 
 const coreBackOfficeRouteRouteWithChildren =

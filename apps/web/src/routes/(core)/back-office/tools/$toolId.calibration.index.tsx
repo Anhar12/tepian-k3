@@ -1,15 +1,14 @@
-import { requirePermission } from "@/utils/require-permission";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
-import ToolDetail from "./-components/tool-detail";
 import { TabsLayout } from "./-components/tabs-layout";
-import { TabsContent } from "@radix-ui/react-tabs";
+import ToolCalibration from "./-components/tool-calibration";
+import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
+import { TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute(
-  "/(core)/back-office/tools/$toolId/detail",
+  "/(core)/back-office/tools/$toolId/calibration/",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "tools.read" }),
+  validateSearch: toolCalibrationSchema.getAllToolCalibrationsSchema,
   params: z.object({
     toolId: z.uuidv7(),
   }),
@@ -21,8 +20,8 @@ function RouteComponent() {
 
   return (
     <TabsLayout toolId={toolId}>
-      <TabsContent value="detail">
-        <ToolDetail toolId={toolId} />
+      <TabsContent value="calibration">
+        <ToolCalibration toolId={toolId} />
       </TabsContent>
     </TabsLayout>
   );

@@ -27,10 +27,10 @@ interface ToolCalibrationProps {
 
 export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
   const params = useSearch({
-    from: "/(core)/back-office/tools/$toolId/detail",
+    from: "/(core)/back-office/tools/$toolId/calibration/",
   });
   const navigate = useNavigate({
-    from: "/back-office/tools/$toolId/detail",
+    from: "/(core)/back-office/tools/$toolId/calibration",
   });
 
   const {
@@ -101,7 +101,8 @@ export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
               <Button
                 onClick={() =>
                   navigate({
-                    to: "/back-office/tools/calibration/create",
+                    to: "/back-office/tools/$toolId/calibration/create",
+                    params: { toolId },
                   })
                 }
               >

@@ -82,10 +82,13 @@ export const toolRouter = createTRPCRouter({
     ),
 
   createToolCalibration: withPermission("tool-calibrations.create")
-    .input(toolCalibrationSchema.createToolCalibrationSchema)
+    .input(formDataInput)
+    .use(formDataProcedure(toolCalibrationSchema.createToolCalibrationSchema))
     .mutation(
-      async ({ input }) =>
-        await runEffect(toolCalibrationQueries.createToolCalibration(input)),
+      async ({ ctx }) =>
+        await runEffect(
+          toolCalibrationQueries.createToolCalibration(ctx.input.data),
+        ),
     ),
 
   createToolCertification: withPermission("tool-certifications.create")

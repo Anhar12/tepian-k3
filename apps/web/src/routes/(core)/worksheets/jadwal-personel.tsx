@@ -685,7 +685,9 @@ function JadwalPersonilPage() {
                       size="sm"
                     >
                       <Users className="h-4 w-4" />
-                      <span className="hidden sm:inline">Tugaskan Personil</span>
+                      <span className="hidden sm:inline">
+                        Tugaskan Personil
+                      </span>
                       <span className="sm:hidden">Tugaskan</span>
                     </Button>
                   </PermissionGate>
@@ -947,7 +949,7 @@ function JadwalPersonilPage() {
                             setSelectedEndDate(undefined);
                           }
                         }}
-                        initialFocus
+                        autoFocus
                       />
                     </PopoverContent>
                   </Popover>
@@ -983,7 +985,7 @@ function JadwalPersonilPage() {
                         disabled={(date) =>
                           selectedStartDate ? date < selectedStartDate : false
                         }
-                        initialFocus
+                        autoFocus
                       />
                     </PopoverContent>
                   </Popover>
