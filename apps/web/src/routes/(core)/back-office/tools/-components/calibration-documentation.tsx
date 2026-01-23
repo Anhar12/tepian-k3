@@ -81,7 +81,7 @@ export function CalibrationDocumentation({
                   loop: true,
                 }}
               >
-                <CarouselContent>
+                <CarouselContent className="gap-4">
                   {Array.from({ length: 5 }).map((_, index) => (
                     <CarouselItem key={index} className="basis-1/3">
                       <Skeleton className="size-64 rounded-md" />
