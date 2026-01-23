@@ -4,12 +4,14 @@ import z from "zod";
 import CalibrationDetail from "./-components/calibration-detail";
 import { CalibrationCertificate } from "./-components/calibration-certificate";
 import { CalibrationDocumentation } from "./-components/calibration-documentation";
+import DocumentationImageModal from "./-components/documentation-image-modal";
 
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
 )({
   validateSearch: z.object({
     tabs: z.enum(["detail", "certificate", "documentation"]).default("detail"),
+    modalId: z.uuidv7().optional(),
   }),
   params: z.object({
     toolId: z.uuidv7(),
@@ -19,7 +21,7 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  const { toolId, calibrationId } = Route.useParams();
+  const { calibrationId } = Route.useParams();
   const { tabs } = Route.useSearch();
   const navigate = Route.useNavigate();
 
@@ -51,6 +53,7 @@ function RouteComponent() {
           <CalibrationDocumentation calibrationId={calibrationId} />
         </TabsContent>
       </Tabs>
+      <DocumentationImageModal />
     </div>
   );
 }

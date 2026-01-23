@@ -184,6 +184,44 @@ const toolCalibrationQueries = {
     }),
 
   /**
+   * Get tool calibration documentation by calibration documentation ID
+   * @param documentationId string
+   */
+  getToolCalibrationDocumentationById: (documentationId: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.toolCalibrationDocumentations.findFirst({
+          where: eq(toolCalibrationDocumentations.id, documentationId),
+          with: {
+            toolCalibration: true,
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "toolCalibrationQueries.getToolCalibrationDocumentationById",
+          "Error fetching tool calibration documentation by documentation ID",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Gagal mendapatkan data dokumentasi kalibrasi alat berdasarkan ID Dokumentasi",
+        });
+      },
+    }).pipe(
+      Effect.flatMap((documentation) =>
+        documentation
+          ? Effect.succeed(documentation)
+          : Effect.fail(
+              new TRPCError({
+                code: "NOT_FOUND",
+                message: `Dokumentasi kalibrasi alat dengan ID ${documentationId} tidak ditemukan`,
+              }),
+            ),
+      ),
+    ),
+
+  /**
    * Get paginated tool calibrations
    */
   getPaginatedToolCalibrations: (

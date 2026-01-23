@@ -1,0 +1,74 @@
+import { getRouteApi } from "@tanstack/react-router";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { SkeletonButton } from "@/components/ui/skeleton-generator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo } from "react";
+import { getPublicUrl } from "@/utils/url";
+
+interface DocumentationImageModalProps {}
+
+export default function DocumentationImageModal({}: DocumentationImageModalProps) {
+  const calibrationDetailApi = getRouteApi(
+    "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
+  );
+
+  const navigate = calibrationDetailApi.useNavigate();
+  const { modalId } = calibrationDetailApi.useSearch();
+
+  const isOpen = useMemo(() => !!modalId, [modalId]);
+
+  const { data: documentationImage, isLoading } = useQuery({
+    ...trpc.tool.getToolCalibrationDocumentationById.queryOptions({
+      id: modalId!,
+    }),
+    enabled: !!modalId,
+  });
+
+  const handleClose = () => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        modalId: undefined,
+      }),
+    });
+  };
+
+  if (isLoading && isOpen) {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="w-full sm:max-w-2xl">
+          <div className="grid gap-4 p-4">
+            <Skeleton className="h-150 w-full rounded-md" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (!documentationImage) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="w-full sm:max-w-2xl">
+        <div className="grid gap-4 p-4">
+          <img
+            src={getPublicUrl(documentationImage.documentationFileUrl || "")}
+            alt="Dokumentasi Kalibrasi"
+            className="max-h-150 w-full rounded-md object-cover"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

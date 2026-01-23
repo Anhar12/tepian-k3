@@ -110,6 +110,19 @@ export const toolRouter = createTRPCRouter({
         ),
     ),
 
+  getToolCalibrationDocumentationById: withPermission("tool-calibrations.read")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .query(
+      async ({ input }) =>
+        await runEffect(
+          toolCalibrationQueries.getToolCalibrationDocumentationById(input.id),
+        ),
+    ),
+
   createTool: withPermission("tools.create")
     .input(toolsSchema.createToolSchema)
     .mutation(

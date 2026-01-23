@@ -7,13 +7,7 @@ import {
 } from "@/components/ui/card";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Label } from "@/components/ui/label";
-import {
-  SkeletonButton,
-  SkeletonInput,
-  SkeletonTextArea,
-} from "@/components/ui/skeleton-generator";
-import { format } from "date-fns";
+import { SkeletonButton } from "@/components/ui/skeleton-generator";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -136,16 +130,27 @@ export function CalibrationDocumentation({
                     {calibration.map((item, index) => (
                       <CarouselItem key={index} className="basis-1/3">
                         <img
+                          data-testid={`calibration-documentation-image-${item.id}`}
                           src={getPublicUrl(item?.documentationFileUrl || "")}
                           alt={`Dokumentasi Kalibrasi ${index + 1}`}
                           className="size-64 rounded-md object-cover sm:h-64 sm:w-64"
                           onClick={() => {
                             navigate({
-                              to: "/back-office/tools/$toolId/calibration/$calibrationId/detail/$documentationId/modal",
+                              to: "/back-office/tools/$toolId/calibration/$calibrationId/detail",
                               params: {
                                 toolId: item.toolCalibration.toolId,
                                 calibrationId: item.toolCalibration.id,
-                                documentationId: item.id,
+                              },
+                              search: (old) => ({
+                                ...old,
+                                modalId: item.id,
+                              }),
+                              mask: {
+                                to: "/back-office/tools/$toolId/calibration/$calibrationId/detail",
+                                search: (old) => ({
+                                  ...old,
+                                  modalId: undefined,
+                                }),
                               },
                             });
                           }}
