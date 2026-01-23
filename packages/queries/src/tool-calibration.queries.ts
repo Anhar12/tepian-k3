@@ -684,7 +684,8 @@ const toolCalibrationQueries = {
       const [result] = yield* Effect.tryPromise({
         try: () =>
           db
-            .delete(toolCalibrations)
+            .update(toolCalibrations)
+            .set({ deletedAt: new Date().toISOString() })
             .where(eq(toolCalibrations.id, id))
             .returning(),
         catch: (error) => {

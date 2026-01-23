@@ -86,7 +86,7 @@ export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
                 checked={showDeleted}
                 onCheckedChange={(checked) => {
                   navigate({
-                    to: "/back-office/tools/$toolId/detail",
+                    to: "/back-office/tools/$toolId/calibration",
                     search: {
                       ...params,
                       showDeleted: Boolean(checked),
