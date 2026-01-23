@@ -214,6 +214,13 @@ export const toolRouter = createTRPCRouter({
       async ({ input }) => await runEffect(toolsQureies.updateTool(input)),
     ),
 
+  updateToolCalibration: withPermission("tool-calibrations.update")
+    .input(toolCalibrationSchema.updateToolCalibrationSchema)
+    .mutation(
+      async ({ input }) =>
+        await runEffect(toolCalibrationQueries.updateToolCalibration(input)),
+    ),
+
   deleteTool: withPermission("tools.delete")
     .input(
       z.object({

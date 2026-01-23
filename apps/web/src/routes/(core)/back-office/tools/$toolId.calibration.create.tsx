@@ -23,6 +23,7 @@ import SingleFileUpload from "@/components/ui/single-file-upload";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { requirePermission } from "@/utils/require-permission";
 import { cn } from "@/lib/utils";
 import { toFormData } from "@/utils/form-data-mapper";
 import { trpc } from "@/utils/trpc";
@@ -37,6 +38,10 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/create",
 )({
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: "tool-calibrations.create",
+    }),
   component: RouteComponent,
 });
 
@@ -145,6 +150,9 @@ function RouteComponent() {
                         />
                       </PopoverContent>
                     </Popover>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
