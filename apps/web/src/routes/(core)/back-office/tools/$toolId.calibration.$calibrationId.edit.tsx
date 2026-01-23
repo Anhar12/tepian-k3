@@ -13,7 +13,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import MultipleImageUpload from "@/components/ui/multiple-image-upload";
 import {
   Popover,
   PopoverContent,
@@ -29,13 +28,12 @@ import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { cn } from "@/lib/utils";
-import { toFormData } from "@/utils/form-data-mapper";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
 import { format } from "date-fns";
-import { CalendarIcon, LoaderCircle } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -86,7 +84,7 @@ function LoaderComponent() {
 }
 
 function RouteComponent() {
-  const { toolId, calibrationId } = Route.useParams();
+  const { calibrationId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: calibration } = useSuspenseQuery(

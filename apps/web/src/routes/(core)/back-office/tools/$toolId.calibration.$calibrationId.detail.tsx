@@ -5,10 +5,15 @@ import CalibrationDetail from "./-components/calibration-detail";
 import { CalibrationCertificate } from "./-components/calibration-certificate";
 import { CalibrationDocumentation } from "./-components/calibration-documentation";
 import DocumentationImageModal from "./-components/documentation-image-modal";
+import { requirePermission } from "@/utils/require-permission";
 
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
 )({
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: "tool-calibrations.view",
+    }),
   validateSearch: z.object({
     tabs: z.enum(["detail", "certificate", "documentation"]).default("detail"),
     modalId: z.uuidv7().optional(),
