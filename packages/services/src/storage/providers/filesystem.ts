@@ -5,6 +5,7 @@ import { v7 as uuidv7 } from "uuid";
 import type { UploadOptions, UploadResult } from "../types";
 import { UploadFailedError, FileNotFoundError } from "../types";
 import { generateDateBasedPath } from "../utils";
+import { logInfo } from "../../logger";
 
 export class FileSystemProvider {
   private uploadsDir: string;
@@ -16,7 +17,10 @@ export class FileSystemProvider {
       process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads");
     this.baseUrl = process.env.BASE_URL || "http://localhost:3000";
 
-    console.log(`📁 FileSystem storage: ${this.uploadsDir}`);
+    logInfo(
+      "FileSystemProvider",
+      `Using uploads directory: ${this.uploadsDir}`,
+    );
   }
 
   private ensureDir(dir: string): Effect.Effect<void, UploadFailedError> {

@@ -7,6 +7,7 @@ import { RateLimiter } from "./rate-limiter";
 import type { RateLimiterConfig, RateLimiterResult } from "./types";
 import { RateLimiterPresets } from "./types";
 import { env } from "../../env";
+import { logInfo, logWarn } from "../logger";
 
 // Export types and presets
 export type { RateLimiterConfig, RateLimiterResult };
@@ -42,7 +43,10 @@ export class RateLimiterService {
         db: config?.db ?? 0,
         retryStrategy: (times: number) => {
           if (times > 3) {
-            console.warn("Redis connection failed, using in-memory fallback");
+            logWarn(
+              "RateLimiterService.retryStrategy",
+              "Exceeded maximum Redis reconnection attempts",
+            );
             return null; // Stop retrying
           }
           return Math.min(times * 50, 2000);
@@ -53,22 +57,25 @@ export class RateLimiterService {
       this.redis = new Redis(redisConfig);
 
       this.redis.on("error", (err) => {
-        console.warn("Redis error:", err.message);
+        logWarn("RateLimiterService.Redis", `Redis error: ${err.message}`);
       });
 
       this.redis.on("connect", () => {
-        console.info("Rate limiter connected to Redis");
+        logInfo("RateLimiterService.Redis", "Connected to Redis server");
       });
 
       // Try to connect
       this.redis.connect().catch((err) => {
-        console.warn(
-          "Failed to connect to Redis, using in-memory fallback:",
-          err.message,
+        logWarn(
+          "RateLimiterService.Redis",
+          `Failed to connect to Redis: ${err.message}`,
         );
       });
     } catch (error) {
-      console.warn("Failed to initialize Redis:", error);
+      logWarn(
+        "RateLimiterService",
+        `Failed to initialize Redis: ${(error as Error).message}`,
+      );
     }
   }
 

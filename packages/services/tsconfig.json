@@ -15,8 +15,5 @@
       "env": ["./env.ts"]
     }
   },
-  "exclude": [
-    "src/**/docs/**/*.example.ts",
-    "src/**/docs/**/*.example.md"
-  ]
+  "exclude": ["src/**/docs/**/*.example.ts", "src/**/docs/**/*.example.md"]
 }

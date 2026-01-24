@@ -5,6 +5,7 @@ import path from "path";
 import type { UploadOptions, UploadResult } from "../types";
 import { UploadFailedError, FileNotFoundError } from "../types";
 import { generateDateBasedPath } from "../utils";
+import { logInfo } from "../../logger";
 
 export class MinioProvider {
   private client: Minio.Client;
@@ -26,6 +27,11 @@ export class MinioProvider {
       accessKey: process.env.MINIO_ACCESS_KEY || "",
       secretKey: process.env.MINIO_SECRET_KEY || "",
     });
+
+    logInfo(
+      "MinioProvider",
+      `Connected to MinIO at ${this.endpoint}:${this.port}, bucket: ${this.bucket}`,
+    );
   }
 
   private ensureBucket(): Effect.Effect<void, UploadFailedError> {
@@ -43,7 +49,7 @@ export class MinioProvider {
 
   private generateKey(
     filename?: string,
-    folder?: string
+    folder?: string,
   ): {
     filename: string;
     key: string;
@@ -70,12 +76,12 @@ export class MinioProvider {
 
   upload(
     file: Buffer,
-    options: UploadOptions = {}
+    options: UploadOptions = {},
   ): Effect.Effect<UploadResult, UploadFailedError> {
     return pipe(
       this.ensureBucket(),
       Effect.flatMap(() =>
-        Effect.sync(() => this.generateKey(options.filename, options.folder))
+        Effect.sync(() => this.generateKey(options.filename, options.folder)),
       ),
       Effect.flatMap(({ filename, key }) => {
         const metadata = {
@@ -90,7 +96,7 @@ export class MinioProvider {
                 key,
                 file,
                 file.length,
-                metadata
+                metadata,
               );
             },
             catch: (error) =>
@@ -99,7 +105,7 @@ export class MinioProvider {
           Effect.flatMap(() =>
             options.isPublic
               ? Effect.succeed(this.getPublicUrl(key))
-              : this.getSignedUrl(key)
+              : this.getSignedUrl(key),
           ),
           Effect.map((url) => ({
             filename,
@@ -107,9 +113,9 @@ export class MinioProvider {
             url,
             size: file.length,
             contentType: options.contentType || "application/octet-stream",
-          }))
+          })),
         );
-      })
+      }),
     );
   }
 
@@ -123,7 +129,7 @@ export class MinioProvider {
   }
 
   download(
-    key: string
+    key: string,
   ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
     return Effect.tryPromise({
       try: async () => {
@@ -141,7 +147,7 @@ export class MinioProvider {
             reject(
               err.name === "NoSuchKey"
                 ? new FileNotFoundError(key)
-                : new UploadFailedError("Failed to download file", err)
+                : new UploadFailedError("Failed to download file", err),
             );
           });
         });
@@ -155,7 +161,7 @@ export class MinioProvider {
 
   getSignedUrl(
     key: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Effect.Effect<string, UploadFailedError> {
     return Effect.tryPromise({
       try: async () =>
