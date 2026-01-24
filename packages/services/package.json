@@ -50,6 +50,7 @@
     "pdf-lib": "catalog:",
     "qrcode": "catalog:",
     "react": "catalog:react19",
+    "react-pdf-tailwind": "^3.0.0",
     "resend": "^6.6.0",
     "sharp": "^0.34.5",
     "uuid": "catalog:",

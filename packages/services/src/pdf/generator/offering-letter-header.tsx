@@ -1,12 +1,10 @@
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
-import { OfferingLetter } from "../templates/offering-letter";
 import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
-import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
+import { OfferingLetterHeader } from "../templates/offering-letter-header";
 
-interface GenerateOfferingLetterOptions {
+interface GenerateOfferingLetterHeaderOptions {
   order: OrderWithCompanyAndItems;
-  worksheet: WorksheetTransactionDetail;
   letterNumber: string;
   referenceNumber: string;
   referenceDate: string;
@@ -17,10 +15,10 @@ interface GenerateOfferingLetterOptions {
   verificationURL?: string;
 }
 
-export const generateOfferingLetterPdf = async (
-  options: GenerateOfferingLetterOptions,
+export const generateOfferingLetterHeaderPdf = async (
+  options: GenerateOfferingLetterHeaderOptions,
 ): Promise<Buffer> => {
-  const stream = await renderToStream(<OfferingLetter {...options} />);
+  const stream = await renderToStream(<OfferingLetterHeader {...options} />);
 
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];

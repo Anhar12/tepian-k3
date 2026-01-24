@@ -4,6 +4,9 @@ export { generateInvoicePdf } from "./generator/invoice";
 // Offering Letter generator
 export { generateOfferingLetterPdf } from "./generator/offering-letter";
 
+// Offering Letter Header generator
+export { generateOfferingLetterHeaderPdf } from "./generator/offering-letter-header";
+
 // QR Code utilities (server-side)
 export {
   generateQRCodeDataURL,

@@ -198,4 +198,78 @@ export type WorksheetSidebar = InferQueryModel<
   }
 >;
 
+export type WorksheetTransactionDetail = InferQueryModel<
+  "worksheets",
+  {
+    with: {
+      order: {
+        with: {
+          company: true;
+          items: {
+            with: {
+              parameter: {
+                with: {
+                  category: {
+                    with: {
+                      cluster: true;
+                    };
+                  };
+                };
+              };
+              location: {
+                with: {
+                  regency: true;
+                  district: true;
+                };
+              };
+            };
+          };
+        };
+      };
+      items: {
+        with: {
+          parameter: {
+            with: {
+              category: {
+                with: {
+                  cluster: true;
+                };
+              };
+            };
+          };
+          location: {
+            with: {
+              regency: true;
+              district: true;
+            };
+          };
+        };
+      };
+      assignments: {
+        with: {
+          employee: {
+            with: {
+              user: true;
+              position: true;
+            };
+          };
+        };
+      };
+      mainSupervisor: {
+        with: {
+          user: true;
+          position: true;
+        };
+      };
+      accompanyingSupervisor: {
+        with: {
+          user: true;
+          position: true;
+        };
+      };
+      operationalCosts: true;
+    };
+  }
+>;
+
 export type CreateWorksheet = InferInsertModel<typeof worksheets>;

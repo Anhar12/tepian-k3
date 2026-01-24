@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",
+    "@tepian-k3/types": "workspace:*",
     "@types/mime-types": "catalog:",
     "@types/node": "^22.13.11",
     "dotenv-cli": "^11.0.0",

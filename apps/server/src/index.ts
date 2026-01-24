@@ -16,6 +16,7 @@ import {
   shutdownEventBus,
 } from "@tepian-k3/services/notifications";
 import { logInfo } from "@tepian-k3/services/logger";
+import { devRouter } from "./routes/dev";
 
 const redisConfig = {
   host: env.MEMURAI_HOST,
@@ -43,6 +44,8 @@ app.use(
     allowMethods: ["GET", "POST", "OPTIONS"],
   }),
 );
+
+app.route("/dev", devRouter);
 
 // Only for local testing
 app.use("*", async (c, next) => {

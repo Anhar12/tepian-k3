@@ -71,14 +71,14 @@ export const Letterhead: React.FC<LetterheadProps> = ({ logoUrl }) => (
           DAN KESELAMATAN DAN KESEHATAN KERJA
         </Text>
         <Text style={styles.office}>BALAI KESELAMATAN DAN KESEHATAN KERJA</Text>
+        <Text style={styles.address}>
+          Jalan Sentosa No. 09 Samarinda Telp./Fax. (0541) 771306, 732941
+          Samarinda 75117
+        </Text>
+        <Text style={styles.website}>
+          Laman: https://balaik3samarinda.kemnaker.go.id
+        </Text>
       </View>
     </View>
-    <Text style={styles.address}>
-      Jalan Sentosa No. 09 Samarinda Telp./Fax. (0541) 771306, 732941 Samarinda
-      75117
-    </Text>
-    <Text style={styles.website}>
-      Laman: https://balaik3samarinda.kemnaker.go.id
-    </Text>
   </View>
 );
