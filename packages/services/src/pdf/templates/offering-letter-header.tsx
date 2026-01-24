@@ -103,8 +103,6 @@ interface OfferingLetterHeaderProps {
   adminEmail: string;
   adminContact: string;
   logoUrl?: string;
-  qrCodeDataURL?: string;
-  verificationURL?: string;
 }
 
 export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
@@ -115,8 +113,6 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
   adminEmail,
   adminContact,
   logoUrl,
-  qrCodeDataURL,
-  verificationURL,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
     day: "numeric",
@@ -302,15 +298,6 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
               NIP. 19760718 200312 1 001
             </Text>
           </View>
-
-          {/* QR Code for verification */}
-          {qrCodeDataURL && (
-            <QRCodeImage
-              qrCodeDataURL={qrCodeDataURL}
-              label="Scan untuk verifikasi keaslian dokumen"
-              verificationText={verificationURL}
-            />
-          )}
         </View>
       </Page>
     </Document>
