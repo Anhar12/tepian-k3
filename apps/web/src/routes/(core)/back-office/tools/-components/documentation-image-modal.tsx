@@ -1,17 +1,14 @@
 import { getRouteApi } from "@tanstack/react-router";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { SkeletonButton } from "@/components/ui/skeleton-generator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
 import { getPublicUrl } from "@/utils/url";
@@ -47,6 +44,12 @@ export default function DocumentationImageModal({}: DocumentationImageModalProps
   if (isLoading && isOpen) {
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogHeader>
+          <DialogTitle>Dokumentasi Kalibrasi</DialogTitle>
+          <DialogDescription>
+            Melihat detail dokumentasi kalibrasi alat.
+          </DialogDescription>
+        </DialogHeader>
         <DialogContent className="w-full sm:max-w-2xl">
           <div className="grid gap-4 p-4">
             <Skeleton className="h-150 w-full rounded-md" />
@@ -60,6 +63,12 @@ export default function DocumentationImageModal({}: DocumentationImageModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogHeader>
+        <DialogTitle>Dokumentasi Kalibrasi</DialogTitle>
+        <DialogDescription>
+          Melihat detail dokumentasi kalibrasi alat.
+        </DialogDescription>
+      </DialogHeader>
       <DialogContent className="w-full sm:max-w-2xl">
         <div className="grid gap-4 p-4">
           <img
