@@ -20,6 +20,7 @@ export const RESOURCES = [
   "parameter-categories",
   "parameters",
   "parameter-tool",
+  "parameter-chemical-material",
 
   // ==================== GEOGRAPHY ====================
   "provinces",

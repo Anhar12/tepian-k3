@@ -9,7 +9,8 @@ export const chemicalMaterialRouter = createTRPCRouter({
    * Get all chemical materials (without pagination)
    */
   getAll: withPermission("chemical-materials.view").query(
-    async () => await runEffect(chemicalMaterialQueries.getAllChemicalMaterials())
+    async () =>
+      await runEffect(chemicalMaterialQueries.getAllChemicalMaterials()),
   ),
 
   /**
@@ -19,7 +20,7 @@ export const chemicalMaterialRouter = createTRPCRouter({
     .input(chemicalMaterialSchema.getAllChemicalMaterialsSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        chemicalMaterialQueries.getOffsetPaginatedChemicalMaterials(input)
+        chemicalMaterialQueries.getOffsetPaginatedChemicalMaterials(input),
       );
 
       return { data, pageCount };
@@ -31,12 +32,14 @@ export const chemicalMaterialRouter = createTRPCRouter({
   getById: withPermission("chemical-materials.read")
     .input(
       z.object({
-        id: z.string().uuid(),
-      })
+        id: z.uuidv7(),
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(chemicalMaterialQueries.getChemicalMaterialById(input.id))
+        await runEffect(
+          chemicalMaterialQueries.getChemicalMaterialById(input.id),
+        ),
     ),
 
   /**
@@ -48,9 +51,9 @@ export const chemicalMaterialRouter = createTRPCRouter({
       async ({ input }) =>
         await runEffect(
           chemicalMaterialQueries.getChemicalMaterialsByParameterIds(
-            input.parameterIds
-          )
-        )
+            input.parameterIds,
+          ),
+        ),
     ),
 
   /**
@@ -63,9 +66,9 @@ export const chemicalMaterialRouter = createTRPCRouter({
       async ({ input }) =>
         await runEffect(
           chemicalMaterialQueries.getChemicalMaterialsForWorksheet(
-            input.worksheetId
-          )
-        )
+            input.worksheetId,
+          ),
+        ),
     ),
 
   /**
@@ -75,7 +78,7 @@ export const chemicalMaterialRouter = createTRPCRouter({
     .input(chemicalMaterialSchema.createChemicalMaterialSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(chemicalMaterialQueries.createChemicalMaterial(input))
+        await runEffect(chemicalMaterialQueries.createChemicalMaterial(input)),
     ),
 
   /**
@@ -85,7 +88,7 @@ export const chemicalMaterialRouter = createTRPCRouter({
     .input(chemicalMaterialSchema.updateChemicalMaterialSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(chemicalMaterialQueries.updateChemicalMaterial(input))
+        await runEffect(chemicalMaterialQueries.updateChemicalMaterial(input)),
     ),
 
   /**
@@ -94,12 +97,14 @@ export const chemicalMaterialRouter = createTRPCRouter({
   delete: withPermission("chemical-materials.delete")
     .input(
       z.object({
-        id: z.string().uuid(),
-      })
+        id: z.uuidv7(),
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(chemicalMaterialQueries.deleteChemicalMaterial(input.id))
+        await runEffect(
+          chemicalMaterialQueries.deleteChemicalMaterial(input.id),
+        ),
     ),
 
   /**
@@ -108,11 +113,13 @@ export const chemicalMaterialRouter = createTRPCRouter({
   restore: withPermission("chemical-materials.delete")
     .input(
       z.object({
-        id: z.string().uuid(),
-      })
+        id: z.uuidv7(),
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(chemicalMaterialQueries.restoreChemicalMaterial(input.id))
+        await runEffect(
+          chemicalMaterialQueries.restoreChemicalMaterial(input.id),
+        ),
     ),
 });

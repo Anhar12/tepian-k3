@@ -12,6 +12,7 @@ import ParameterToolCard from "./parameter-tool-card";
 import { useParameterToolDialogStore } from "@/stores/parameter-tool-dialog.stores";
 import { SkeletonCard } from "@/components/ui/skeleton-generator";
 import { EmptyState } from "@/components/ui/empty-state";
+import CreateParameterToolDialog from "./create-parameter-tool-dialog";
 
 interface ParameterToolsProps {
   parameterId: string;
@@ -69,6 +70,7 @@ export default function ParameterTools({ parameterId }: ParameterToolsProps) {
             </div>
           )}
         </CardContent>
+        <CreateParameterToolDialog parameterId={parameterId} />
       </Card>
     </div>
   );

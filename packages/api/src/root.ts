@@ -13,6 +13,7 @@ import { notificationsRouter } from "./routers/notifications";
 import { orderRouter } from "./routers/order";
 import { parameterRouter } from "./routers/parameter";
 import { parameterCategoriesRouter } from "./routers/parameter-categories";
+import { parameterChemicalMaterialRouter } from "./routers/parameter-chemical-material";
 import { parameterToolRouter } from "./routers/parameter-tool";
 import { permissionRouters } from "./routers/permission";
 import { positionRouter } from "./routers/position";
@@ -44,6 +45,7 @@ export const appRouter = createTRPCRouter({
   parameterCategories: parameterCategoriesRouter,
   parameter: parameterRouter,
   parameterTool: parameterToolRouter,
+  parameterChemicalMaterial: parameterChemicalMaterialRouter,
   province: provinceRouter,
   regency: regencyRouter,
   district: districtRouter,

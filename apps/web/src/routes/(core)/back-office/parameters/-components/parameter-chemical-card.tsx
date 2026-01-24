@@ -15,39 +15,44 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Calendar, LoaderCircle, Trash2 } from "lucide-react";
+import { Calendar, Trash2 } from "lucide-react";
 import { useState } from "react";
-import type { ParameterTools } from "@tepian-k3/types/parameter-tool.types";
-import { IconTools } from "@tabler/icons-react";
+import type { ParameterChemicals } from "@tepian-k3/types/parameter-chemical-material.types";
+import { IconFlask } from "@tabler/icons-react";
+import { Spinner } from "@/components/ui/spinner";
 
-interface ParameterToolCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  parameterTool: ParameterTools;
+interface ParameterChemicalCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  parameterChemical: ParameterChemicals;
 }
 
-export default function ParameterToolCard({
-  parameterTool,
+export default function ParameterChemicalCard({
+  parameterChemical,
   ...props
-}: ParameterToolCardProps) {
+}: ParameterChemicalCardProps) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-  const deleteParameterToolMutation = useMutation(
-    trpc.parameterTool.deleteParameterTool.mutationOptions({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.parameterTool.getAllParameterToolsByParameterId.queryOptions({
-            parameterId: parameterTool.parameterId,
-          }),
-        );
+  const deleteParameterChemicalMutation = useMutation(
+    trpc.parameterChemicalMaterial.deleteParameterChemicalMaterial.mutationOptions(
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(
+            trpc.parameterChemicalMaterial.getAllChemicalMaterialsByParameterId.queryOptions(
+              {
+                parameterId: parameterChemical.parameterId,
+              },
+            ),
+          );
 
-        globalSuccessToast("Alat berhasil dihapus dari parameter.");
-        setOpenDeleteDialog(false);
+          globalSuccessToast("Bahan kimia berhasil dihapus dari parameter.");
+          setOpenDeleteDialog(false);
+        },
+        onError: (error) => {
+          globalErrorToast(
+            "Gagal menghapus bahan kimia dari parameter: " + error.message,
+          );
+        },
       },
-      onError: (error) => {
-        globalErrorToast(
-          "Gagal menghapus alat dari parameter: " + error.message,
-        );
-      },
-    }),
+    ),
   );
 
   return (
@@ -61,7 +66,8 @@ export default function ParameterToolCard({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="truncate text-sm font-semibold text-foreground">
-                {parameterTool.tool.toolName} - ({parameterTool.tool.toolCode})
+                {parameterChemical.chemicalMaterial.name} - (
+                {parameterChemical.chemicalMaterial.code})
               </h2>
             </div>
           </div>
@@ -96,15 +102,13 @@ export default function ParameterToolCard({
                   <AlertDialogAction
                     className="bg-destructive text-white hover:bg-destructive/90"
                     onClick={() =>
-                      deleteParameterToolMutation.mutate({
-                        id: parameterTool.id,
+                      deleteParameterChemicalMutation.mutate({
+                        id: parameterChemical.id,
                       })
                     }
-                    disabled={deleteParameterToolMutation.isPending}
+                    disabled={deleteParameterChemicalMutation.isPending}
                   >
-                    {deleteParameterToolMutation.isPending && (
-                      <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                    {deleteParameterChemicalMutation.isPending && <Spinner />}
                     Hapus
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -115,16 +119,17 @@ export default function ParameterToolCard({
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <IconTools className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <IconFlask className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="truncate text-xs text-foreground">
-              {parameterTool.tool.toolCode} - {parameterTool.tool.toolName}
+              {parameterChemical.chemicalMaterial.code} -{" "}
+              {parameterChemical.chemicalMaterial.name}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="truncate text-xs text-muted-foreground">
-              {format(new Date(parameterTool.createdAt), "dd MMMM yyyy")}
+              {format(new Date(parameterChemical.createdAt), "dd MMMM yyyy")}
             </p>
           </div>
         </div>

@@ -18,6 +18,7 @@ import { EventSourcePolyfill } from "event-source-polyfill";
 import SuperJSON from "superjson";
 import { observable } from "@trpc/server/observable";
 import { auth } from "./auth";
+import { globalErrorToast } from "@/lib/toast";
 
 // Token management
 let isRefreshing = false;
@@ -142,14 +143,7 @@ const tokenRefreshLink: TRPCLink<AppRouter> = () => {
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
-      toast.error(error.message, {
-        action: {
-          label: "retry",
-          onClick: () => {
-            queryClient.invalidateQueries();
-          },
-        },
-      });
+      globalErrorToast(error.message || "An unexpected error occurred");
     },
   }),
 });
