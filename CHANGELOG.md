@@ -268,6 +268,7 @@ feat(storage): add methods to extract folder paths and keys from public URLs in 
 - Add loading skeleton and header to documentation image modal ([16d87d6](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/16d87d6b441131e339afb38a66f84b845a4ff642))
 - Refactor chemical materials routes to use chemicalMaterialId and remove deprecated edit route ([c771dca](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c771dcaed977ed1565360249a31a09f5b1695148))
 - Add parameter chemical management with create, update, and delete functionalities ([ee06aba](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ee06abaabc01385a8f280834ce174de858554fab))
+- Add changelog generation support with git-cliff ([2fcd42a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2fcd42af1da333b9f05bf888546dd6a36216e0e7))
 
 ### 🐛 Bug Fixes
 
@@ -297,7 +298,6 @@ feat(storage): add methods to extract folder paths and keys from public URLs in 
 
 ### 📦 Other Changes
 
-- Initial commit ([00ef8b8](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/00ef8b87e5417db271568f17a28fd5fbf0b6795b))
 - Add auth package with environment configuration, JWT handling, and utility functions ([e73559e](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e73559e606609687f75ad1c78fdf74b5876c3243))
 - Remove lint-staged from pre-commit hook ([ffa7747](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ffa7747e9e9f075068b0f6b6cfebb900810b2648))
 - Refactor code structure for improved readability and maintainability ([e5b7d2d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e5b7d2dbcc607b80302dcb36e348e8aea3d1e91d))
