@@ -1,16 +1,7 @@
 import React from "react";
 import { Document, Page, View, Text } from "@react-pdf/renderer";
 import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
-import { registerLiberationSans } from "../fonts/register-liberation-sans";
-import { createTw } from "react-pdf-tailwind";
-
-registerLiberationSans();
-
-const tw = createTw({
-  fontFamily: {
-    sans: ["Liberation Sans"],
-  },
-});
+import { tw } from "../utils/tw";
 
 interface OfferingLetterProps {
   worksheet: WorksheetTransactionDetail;
