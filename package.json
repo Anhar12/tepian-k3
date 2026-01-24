@@ -11,6 +11,15 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
+    "changelog": "git-cliff --output CHANGELOG.md",
+    "changelog:unreleased": "git-cliff --unreleased --output CHANGELOG.md",
+    "changelog:branch": "git-cliff main..HEAD --output CHANGELOG.md",
+    "changelog:current": "git-cliff --current --output CHANGELOG.md",
+    "changelog:last": "git-cliff HEAD~10..HEAD --output CHANGELOG.md",
+    "changelog:last-5": "git-cliff HEAD~5..HEAD --output CHANGELOG.md",
+    "changelog:today": "git-cliff --since today --output CHANGELOG.md",
+    "changelog:tag": "git-cliff --tag",
+    "changelog:latest": "git-cliff --latest --output CHANGELOG.md",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F @tepian-k3/web dev",
     "dev:server": "turbo -F @tepian-k3/server dev",
@@ -29,11 +38,12 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "turbo": "^2.6.3",
+    "@types/node": "^22.13.11",
+    "git-cliff": "^2.12.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
-    "typescript": "catalog:",
-    "@types/node": "^22.13.11"
+    "turbo": "^2.6.3",
+    "typescript": "catalog:"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": ""

@@ -15,7 +15,7 @@ import { villages } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import villageSchema from "@tepian-k3/schema/village.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -27,7 +27,11 @@ const villageQueries = {
           where: isNull(villages.deletedAt),
         }),
       catch: (error) => {
-        logger.error("villageQueries.getAllVillages", { error });
+        logError(
+          "villageQueries.getAllVillages",
+          "Failed to get all villages",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data Desa",
@@ -46,7 +50,11 @@ const villageQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error("villageQueries.getAllVillagesByDistrictId", { error });
+        logError(
+          "villageQueries.getAllVillagesByDistrictId",
+          "Failed to get all villages by district ID",
+          { districtId, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data Desa berdasarkan Kecamatan",
@@ -62,7 +70,11 @@ const villageQueries = {
           where: and(eq(villages.id, id), isNull(villages.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("villageQueries.getVillageById", { error });
+        logError(
+          "villageQueries.getVillageById",
+          "Failed to get village by ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data Desa berdasarkan ID",
@@ -82,7 +94,11 @@ const villageQueries = {
           where: and((eq(villages.id, id), isNotNull(villages.deletedAt))),
         }),
       catch: (error) => {
-        logger.error("villageQueries.getDeletedVillageById", { error });
+        logError(
+          "villageQueries.getDeletedVillageById",
+          "Failed to get deleted village by ID",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -103,7 +119,11 @@ const villageQueries = {
           where: eq(villages.name, name),
         }),
       catch: (error) => {
-        logger.error("villageQueries.getVillageByName", { error });
+        logError(
+          "villageQueries.getVillageByName",
+          "Failed to get village by name",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data Desa berdasarkan nama",
@@ -190,10 +210,14 @@ const villageQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated villages", {
-            error,
-            input,
-          });
+          logError(
+            "villageQueries.getOffsetPaginationVillages",
+            "Error fetching paginated villages",
+            {
+              error,
+              input,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data Desa.`,
@@ -236,7 +260,10 @@ const villageQueries = {
             })
             .returning(),
         catch: (error) => {
-          logger.error("villageQueries.createVillage", { error, data });
+          logError("villageQueries.createVillage", "Failed to create village", {
+            error,
+            data,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data Desa.",
@@ -284,7 +311,10 @@ const villageQueries = {
             .where(eq(villages.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("villageQueries.updateVillage", { error, data });
+          logError("villageQueries.updateVillage", "Failed to update village", {
+            error,
+            data,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data Desa.",
@@ -328,7 +358,10 @@ const villageQueries = {
             .where(eq(villages.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("villageQueries.deleteVillage", { error, id });
+          logError("villageQueries.deleteVillage", "Failed to delete village", {
+            error,
+            id,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data Desa.",
@@ -373,7 +406,11 @@ const villageQueries = {
             .returning(),
 
         catch: (error) => {
-          logger.error("villageQueries.restoreVillage", { error, id });
+          logError(
+            "villageQueries.restoreVillage",
+            "Failed to restore deleted village",
+            { error, id }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data Desa yang dihapus.",

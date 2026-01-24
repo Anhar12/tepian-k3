@@ -17,218 +17,24 @@ import seedDistricts from "./districts";
 import seedVillages from "./villages";
 import seedKblis from "./kblis";
 import seedParameters from "./parameter";
+import seedTools from "./tools";
+import seedChemicalMaterials from "./chemical-materials";
+import seedEmployees from "./employee";
+import {
+  generatePermissionsList,
+  generateRolesList,
+  ROLE_PERMISSIONS,
+  type Role,
+} from "@tepian-k3/constants";
+import { seedPositions } from "./positions";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
 
-  // Define all permissions
-  const permissionsList = [
-    { name: "users.create", resource: "users", action: "create" },
-    { name: "users.read", resource: "users", action: "read" },
-    { name: "users.update", resource: "users", action: "update" },
-    { name: "users.delete", resource: "users", action: "delete" },
-    { name: "users.manage", resource: "users", action: "manage" },
-    { name: "roles.create", resource: "roles", action: "create" },
-    { name: "roles.read", resource: "roles", action: "read" },
-    { name: "roles.update", resource: "roles", action: "update" },
-    { name: "roles.delete", resource: "roles", action: "delete" },
-    { name: "roles.manage", resource: "roles", action: "manage" },
-    { name: "permissions.create", resource: "permissions", action: "create" },
-    { name: "permissions.read", resource: "permissions", action: "read" },
-    { name: "permissions.update", resource: "permissions", action: "update" },
-    { name: "permissions.delete", resource: "permissions", action: "delete" },
-    { name: "permissions.manage", resource: "permissions", action: "manage" },
-    {
-      name: "role-permissions.create",
-      resource: "role-permissions",
-      action: "create",
-    },
-    {
-      name: "role-permissions.read",
-      resource: "role-permissions",
-      action: "read",
-    },
-    {
-      name: "role-permissions.update",
-      resource: "role-permissions",
-      action: "update",
-    },
-    {
-      name: "role-permissions.delete",
-      resource: "role-permissions",
-      action: "delete",
-    },
-    {
-      name: "role-permissions.manage",
-      resource: "role-permissions",
-      action: "manage",
-    },
-    {
-      name: "user-permissions.create",
-      resource: "user-permissions",
-      action: "create",
-    },
-    {
-      name: "user-permissions.read",
-      resource: "user-permissions",
-      action: "read",
-    },
-    {
-      name: "user-permissions.update",
-      resource: "user-permissions",
-      action: "update",
-    },
-    {
-      name: "user-permissions.delete",
-      resource: "user-permissions",
-      action: "delete",
-    },
-    {
-      name: "user-permissions.manage",
-      resource: "user-permissions",
-      action: "manage",
-    },
-    { name: "tools.create", resource: "tools", action: "create" },
-    { name: "tools.read", resource: "tools", action: "read" },
-    { name: "tools.update", resource: "tools", action: "update" },
-    { name: "tools.delete", resource: "tools", action: "delete" },
-    { name: "tools.manage", resource: "tools", action: "manage" },
-    { name: "clusters.create", resource: "clusters", action: "create" },
-    { name: "clusters.read", resource: "clusters", action: "read" },
-    { name: "clusters.update", resource: "clusters", action: "update" },
-    { name: "clusters.delete", resource: "clusters", action: "delete" },
-    { name: "clusters.manage", resource: "clusters", action: "manage" },
-    {
-      name: "parameter-categories.create",
-      resource: "parameter-categories",
-      action: "create",
-    },
-    {
-      name: "parameter-categories.read",
-      resource: "parameter-categories",
-      action: "read",
-    },
-    {
-      name: "parameter-categories.update",
-      resource: "parameter-categories",
-      action: "update",
-    },
-    {
-      name: "parameter-categories.delete",
-      resource: "parameter-categories",
-      action: "delete",
-    },
-    {
-      name: "parameter-categories.manage",
-      resource: "parameter-categories",
-      action: "manage",
-    },
-    { name: "parameters.create", resource: "parameters", action: "create" },
-    { name: "parameters.read", resource: "parameters", action: "read" },
-    { name: "parameters.update", resource: "parameters", action: "update" },
-    { name: "parameters.delete", resource: "parameters", action: "delete" },
-    { name: "parameters.manage", resource: "parameters", action: "manage" },
-    {
-      name: "parameter-tool.create",
-      resource: "parameter-tool",
-      action: "create",
-    },
-    {
-      name: "parameter-tool.read",
-      resource: "parameter-tool",
-      action: "read",
-    },
-    {
-      name: "parameter-tool.update",
-      resource: "parameter-tool",
-      action: "update",
-    },
-    {
-      name: "parameter-tool.delete",
-      resource: "parameter-tool",
-      action: "delete",
-    },
-    {
-      name: "parameter-tool.manage",
-      resource: "parameter-tool",
-      action: "manage",
-    },
-    { name: "provinces.create", resource: "provinces", action: "create" },
-    { name: "provinces.read", resource: "provinces", action: "read" },
-    { name: "provinces.update", resource: "provinces", action: "update" },
-    { name: "provinces.delete", resource: "provinces", action: "delete" },
-    { name: "provinces.manage", resource: "provinces", action: "manage" },
-    { name: "regency.create", resource: "regency", action: "create" },
-    { name: "regency.read", resource: "regency", action: "read" },
-    { name: "regency.update", resource: "regency", action: "update" },
-    { name: "regency.delete", resource: "regency", action: "delete" },
-    { name: "regency.manage", resource: "regency", action: "manage" },
-    { name: "district.create", resource: "districts", action: "create" },
-    { name: "district.read", resource: "districts", action: "read" },
-    { name: "district.update", resource: "districts", action: "update" },
-    { name: "district.delete", resource: "districts", action: "delete" },
-    { name: "district.manage", resource: "districts", action: "manage" },
-    { name: "village.create", resource: "village", action: "create" },
-    { name: "village.read", resource: "village", action: "read" },
-    { name: "village.update", resource: "village", action: "update" },
-    { name: "village.delete", resource: "village", action: "delete" },
-    { name: "village.manage", resource: "village", action: "manage" },
-    { name: "kbli.create", resource: "kbli", action: "create" },
-    { name: "kbli.read", resource: "kbli", action: "read" },
-    { name: "kbli.update", resource: "kbli", action: "update" },
-    { name: "kbli.delete", resource: "kbli", action: "delete" },
-    { name: "kbli.manage", resource: "kbli", action: "manage" },
-    {
-      name: "user-company.create",
-      resource: "user-company",
-      action: "create",
-    },
-    {
-      name: "user-company.read",
-      resource: "user-company",
-      action: "read",
-    },
-    {
-      name: "user-company.update",
-      resource: "user-company",
-      action: "update",
-    },
-    {
-      name: "user-company.delete",
-      resource: "user-company",
-      action: "delete",
-    },
-    {
-      name: "user-company.manage",
-      resource: "user-company",
-      action: "manage",
-    },
-    {
-      name: "user-company-testing-location.create",
-      resource: "user-company-testing-location",
-      action: "create",
-    },
-    {
-      name: "user-company-testing-location.read",
-      resource: "user-company-testing-location",
-      action: "read",
-    },
-    {
-      name: "user-company-testing-location.update",
-      resource: "user-company-testing-location",
-      action: "update",
-    },
-    {
-      name: "user-company-testing-location.delete",
-      resource: "user-company-testing-location",
-      action: "delete",
-    },
-    {
-      name: "user-company-testing-location.manage",
-      resource: "user-company-testing-location",
-      action: "manage",
-    },
-  ] as const;
+  // Generate all permissions using type-safe utility
+  // This generates 165 permissions (33 resources × 5 actions)
+  // Each resource has: view, create, read, update, delete
+  const permissionsList = generatePermissionsList();
 
   // Create or get all permissions
   console.log("📋 Syncing permissions...");
@@ -236,7 +42,7 @@ async function seed() {
   const existingPermNames = new Set(existingPerms.map((p) => p.name));
 
   const newPermissions = permissionsList.filter(
-    (p) => !existingPermNames.has(p.name)
+    (p) => !existingPermNames.has(p.name),
   );
 
   let allPerms = [...existingPerms];
@@ -252,115 +58,72 @@ async function seed() {
 
   console.log(`✅ ${allPerms.length} permissions in database`);
 
-  // Create or get roles
+  // Create or get roles using type-safe role definitions
   console.log("👥 Syncing roles...");
-  const existingSuperAdmin = await db.query.roles.findFirst({
-    where: eq(roles.name, "super_admin"),
-  });
 
-  const existingAdmin = await db.query.roles.findFirst({
-    where: eq(roles.name, "admin"),
-  });
+  const rolesList = generateRolesList();
+  const existingRoles = await db.query.roles.findMany();
+  const existingRoleNames = new Set(existingRoles.map((r) => r.name));
 
-  const existingUser = await db.query.roles.findFirst({
-    where: eq(roles.name, "user"),
-  });
+  const newRoles = rolesList.filter((r) => !existingRoleNames.has(r.name));
 
-  const superAdminRole =
-    existingSuperAdmin ||
-    (
-      await db
-        .insert(roles)
-        .values({
-          name: "super_admin",
-          description: "All permissions",
-        })
-        .returning()
-    )[0];
+  let allRoles = [...existingRoles];
 
-  const adminRole =
-    existingAdmin ||
-    (
-      await db
-        .insert(roles)
-        .values({
-          name: "admin",
-          description: "Full access",
-        })
-        .returning()
-    )[0];
-
-  const userRole =
-    existingUser ||
-    (
-      await db
-        .insert(roles)
-        .values({
-          name: "user",
-          description: "Regular user",
-        })
-        .returning()
-    )[0];
-
-  if (!superAdminRole || !adminRole || !userRole) {
-    throw new Error("Failed to create or retrieve roles");
+  if (newRoles.length > 0) {
+    console.log(`   ➕ Adding ${newRoles.length} new roles...`);
+    const insertedRoles = await db.insert(roles).values(newRoles).returning();
+    allRoles = [...allRoles, ...insertedRoles];
   }
 
-  console.log("✅ Roles synced: super_admin, admin, user");
+  console.log(`✅ ${allRoles.length} roles in database`);
 
-  // Sync permissions to roles (idempotent)
+  // Create a map for easy role lookup
+  const roleMap = new Map(allRoles.map((r) => [r.name as Role, r]));
+
+  // Sync permissions to roles using type-safe definitions
   console.log("🔐 Syncing permissions to roles...");
 
   // Get existing role permissions
   const existingRolePerms = await db.query.rolePermissions.findMany();
   const existingRolePermSet = new Set(
-    existingRolePerms.map((rp) => `${rp.roleId}-${rp.permissionId}`)
+    existingRolePerms.map((rp) => `${rp.roleId}-${rp.permissionId}`),
   );
+
+  // Create a permission name to ID map for easy lookup
+  const permissionMap = new Map(allPerms.map((p) => [p.name, p.id]));
 
   const rolePermissionsToAdd = [];
 
-  // Super Admin and Admin get all permissions
-  for (const perm of allPerms) {
-    const superAdminKey = `${superAdminRole.id}-${perm.id}`;
-    const adminKey = `${adminRole.id}-${perm.id}`;
-
-    if (!existingRolePermSet.has(superAdminKey)) {
-      rolePermissionsToAdd.push({
-        roleId: superAdminRole.id,
-        permissionId: perm.id,
-      });
+  // Assign permissions to each role based on ROLE_PERMISSIONS
+  for (const [roleName, permissionNames] of Object.entries(ROLE_PERMISSIONS)) {
+    const role = roleMap.get(roleName as Role);
+    if (!role) {
+      console.warn(`⚠️  Role '${roleName}' not found in database, skipping...`);
+      continue;
     }
 
-    if (!existingRolePermSet.has(adminKey)) {
-      rolePermissionsToAdd.push({
-        roleId: adminRole.id,
-        permissionId: perm.id,
-      });
-    }
-  }
+    for (const permissionName of permissionNames) {
+      const permissionId = permissionMap.get(permissionName);
+      if (!permissionId) {
+        console.warn(
+          `⚠️  Permission '${permissionName}' not found for role '${roleName}', skipping...`,
+        );
+        continue;
+      }
 
-  // User role gets only user-company and user-company-testing-location permissions
-  const userPermissionResources = [
-    "user-company",
-    "user-company-testing-location",
-  ];
-  const userPermissions = allPerms.filter((perm) =>
-    userPermissionResources.includes(perm.resource)
-  );
-
-  for (const perm of userPermissions) {
-    const userKey = `${userRole.id}-${perm.id}`;
-    if (!existingRolePermSet.has(userKey)) {
-      rolePermissionsToAdd.push({
-        roleId: userRole.id,
-        permissionId: perm.id,
-      });
+      const key = `${role.id}-${permissionId}`;
+      if (!existingRolePermSet.has(key)) {
+        rolePermissionsToAdd.push({
+          roleId: role.id,
+          permissionId: permissionId,
+        });
+      }
     }
   }
 
   if (rolePermissionsToAdd.length > 0) {
     console.log(
-      `   ➕ Adding ${rolePermissionsToAdd.length} role-permission assignments...`
+      `   ➕ Adding ${rolePermissionsToAdd.length} role-permission assignments...`,
     );
     await db.insert(rolePermissions).values(rolePermissionsToAdd);
   }
@@ -443,6 +206,15 @@ async function seed() {
 
   // Assign roles to users (idempotent)
   console.log("🔗 Syncing user roles...");
+
+  const superAdminRole = roleMap.get("super_admin");
+  const adminRole = roleMap.get("admin");
+  const userRole = roleMap.get("user");
+
+  if (!superAdminRole || !adminRole || !userRole) {
+    throw new Error("Required roles not found in database");
+  }
+
   await db
     .insert(userRoles)
     .values([
@@ -456,11 +228,15 @@ async function seed() {
   await seedClusters();
   await seedParameterCategories();
   await seedParameters();
+  await seedTools();
+  await seedChemicalMaterials();
   await seedProvinces();
   await seedRegencies();
   await seedDistricts();
   await seedVillages();
   await seedKblis();
+  await seedPositions();
+  await seedEmployees();
 
   console.log("✅ User roles synced");
   console.log("\n🎉 Database seeding completed successfully!");

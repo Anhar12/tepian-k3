@@ -20,6 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Separator } from "./ui/separator";
+import { auth } from "@/utils/auth";
 
 export function LoginForm({
   className,
@@ -40,7 +41,7 @@ export function LoginForm({
   const loginMutation = useMutation(
     trpc.auth.login.mutationOptions({
       onSuccess: async (data) => {
-        localStorage.setItem("token", data.token);
+        auth.setTokens(data.accessToken, data.refreshToken);
         await queryClient.refetchQueries(trpc.auth.me.queryFilter());
         globalSuccessToast("Login berhasil");
 
@@ -62,23 +63,22 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="border-slate-200 shadow-sm bg-white rounded-lg">
-        <CardHeader className="pb-6 pt-6 px-6 space-y-1">
-          <CardTitle className="text-[#4D4D4D] text-[20px] font-semibold font-['Poppins'] leading-6">
+      <Card className="rounded-lg border-slate-200 bg-white shadow-sm">
+        <CardHeader className="space-y-1 px-6 pt-6 pb-6">
+          <CardTitle className="font-['Poppins'] text-[20px] leading-6 font-semibold text-[#4D4D4D]">
             Login ke akun Anda
           </CardTitle>
-          <CardDescription className="text-[#64748B] text-[16px] font-normal font-['Poppins'] leading-5.25">
+          <CardDescription className="font-['Poppins'] text-[16px] leading-5.25 font-normal text-[#64748B]">
             Masukkan email Anda di bawah untuk login ke akun Anda
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="px-6 pb-6">
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="grid gap-7" 
+            className="grid gap-7"
           >
             <FieldGroup className="gap-7">
-
               <Controller
                 control={form.control}
                 name="email"
@@ -87,13 +87,13 @@ export function LoginForm({
                     data-invalid={fieldState.invalid}
                     className="flex flex-col gap-1.5"
                   >
-                    <FieldLabel className="text-[#4D4D4D] text-[16px] font-medium font-['Poppins'] leading-5.25">
+                    <FieldLabel className="font-['Poppins'] text-[16px] leading-5.25 font-medium text-[#4D4D4D]">
                       Email
                     </FieldLabel>
                     <Input
                       type="email"
                       placeholder="Masukkan email Anda"
-                      className="h-9 border-slate-200 rounded-lg focus-visible:ring-offset-0 focus-visible:ring-[#1061D6] font-['Poppins'] text-[14px]"
+                      className="h-9 rounded-lg border-slate-200 font-['Poppins'] text-[14px] focus-visible:ring-[#1061D6] focus-visible:ring-offset-0"
                       {...field}
                       aria-invalid={fieldState.invalid}
                     />
@@ -113,16 +113,16 @@ export function LoginForm({
                     className="flex flex-col gap-1.5"
                   >
                     <div className="flex items-center justify-between">
-                      <FieldLabel className="text-[#4D4D4D] text-[16px] font-medium font-['Poppins'] leading-5.25">
+                      <FieldLabel className="font-['Poppins'] text-[16px] leading-5.25 font-medium text-[#4D4D4D]">
                         Password
                       </FieldLabel>
                     </div>
-                    
+
                     <div className="relative">
                       <Input
                         placeholder="Masukkan password Anda"
                         type={type}
-                        className="h-9 border-slate-200 rounded-lg pr-10 focus-visible:ring-offset-0 focus-visible:ring-[#1061D6] font-['Poppins'] text-[14px]"
+                        className="h-9 rounded-lg border-slate-200 pr-10 font-['Poppins'] text-[14px] focus-visible:ring-[#1061D6] focus-visible:ring-offset-0"
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
@@ -130,12 +130,13 @@ export function LoginForm({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent text-slate-500 hover:text-slate-700"
+                        className="absolute top-0 right-0 h-full px-3 py-2 text-slate-500 hover:bg-transparent hover:text-slate-700"
                         onClick={() => {
                           setType((prev) =>
                             prev === "password" ? "text" : "password",
                           );
                         }}
+                        aria-label={type === "password" ? "Tampilkan password" : "Sembunyikan password"}
                       >
                         {type === "password" ? (
                           <EyeOff className="h-4 w-4" />
@@ -144,11 +145,11 @@ export function LoginForm({
                         )}
                       </Button>
                     </div>
-                    
-                    <div className="flex justify-end mt-1">
+
+                    <div className="mt-1 flex justify-end">
                       <Link
                         to="/forgot-password"
-                        className="text-[14px] text-[#4D4D4D] font-normal font-['Poppins'] hover:underline leading-5.25"
+                        className="font-['Poppins'] text-[14px] leading-5.25 font-normal text-[#4D4D4D] hover:underline"
                       >
                         Lupa password?
                       </Link>
@@ -163,7 +164,7 @@ export function LoginForm({
 
               <Button
                 type="submit"
-                className="w-full bg-[#1061D6] hover:bg-blue-700 text-[#F8FAFC] text-[16px] font-semibold font-['Poppins'] h-9 rounded-lg mt-2"
+                className="mt-2 h-9 w-full rounded-lg bg-[#1061D6] font-['Poppins'] text-[16px] font-semibold text-[#F8FAFC] hover:bg-blue-700"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? (
@@ -174,17 +175,16 @@ export function LoginForm({
 
               <div className="flex flex-col gap-3">
                 <Separator className="bg-slate-100" />
-                <div className="text-center text-[14px] font-normal font-['Poppins'] leading-5.25 text-[#4D4D4D]">
+                <div className="text-center font-['Poppins'] text-[14px] leading-5.25 font-normal text-[#4D4D4D]">
                   <span>Belum punya akun? </span>
                   <Link
                     to="/register"
-                    className="text-[#1061D6] font-medium hover:underline"
+                    className="font-medium text-[#1061D6] hover:underline"
                   >
                     Daftar di sini
                   </Link>
                 </div>
               </div>
-
             </FieldGroup>
           </form>
         </CardContent>

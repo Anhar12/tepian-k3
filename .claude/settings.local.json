@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm list:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(pnpm --filter @tepian-k3/db exec tsc:*)",
+      "Bash(pnpm --filter @tepian-k3/queries exec tsc:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run db:generate:*)",
+      "Bash(npm run dev:*)",
+      "Bash(test:*)",
+      "Bash(wc:*)",
+      "Bash(pnpm turbo run:*)",
+      "Bash(pnpm check-types:*)",
+      "Bash(pnpm -F @tepian-k3/server check-types:*)",
+      "Bash(pnpm db:generate:*)",
+      "Bash(pnpm db:migrate:*)",
+      "Bash(pnpm --filter @tepian-k3/constants run tsc:*)",
+      "Bash(for file in *.ts)",
+      "Bash(do if ! grep -q \"logError.*from.*@tepian-k3/services/logger\" \"$file\")",
+      "Bash(then echo \"$file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(pnpm -F @tepian-k3/queries exec tsc:*)",
+      "Bash(pnpm tsc:*)",
+      "Skill(vercel-react-best-practices)",
+      "Skill(vercel-react-best-practices:*)",
+      "Skill(web-design-guidelines)",
+      "Skill(web-design-guidelines:*)",
+      "Bash(xargs cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(turbo:*)",
+      "Bash(pnpm turbo:*)",
+      "Bash(pnpm build:*)"
+    ]
+  }
+}

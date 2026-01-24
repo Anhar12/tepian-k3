@@ -13,21 +13,57 @@ const logger = winston.createLogger({
 });
 
 // Create a stream for Morgan (HTTP logging middleware)
-export const stream = {
+const stream = {
   write: (message: string) => {
     logger.http(message.trim());
   },
 };
 
 // Helper methods for structured logging
-export const logWithContext = (
+const logWithContext = (
   level: string,
   message: string,
   context?: Record<string, any>
 ) => {
-  logger.log(level, message, context);
+  // Winston expects metadata to be passed as the third argument
+  // Use the splat format or pass metadata directly
+  if (context && Object.keys(context).length > 0) {
+    logger.log({ level, message, ...context });
+  } else {
+    logger.log({ level, message });
+  }
 };
 
-// Export logger instance
-export { logger };
-export default logger;
+const logInfo = (
+  service: string,
+  message: string,
+  context?: Record<string, any>
+) => {
+  logWithContext("info", `[${service}] ${message}`, context);
+};
+
+const logError = (
+  service: string,
+  message: string,
+  context?: Record<string, any>
+) => {
+  logWithContext("error", `[${service}] ${message}`, context);
+};
+
+const logDebug = (
+  service: string,
+  message: string,
+  context?: Record<string, any>
+) => {
+  logWithContext("debug", `[${service}] ${message}`, context);
+};
+
+const logWarn = (
+  service: string,
+  message: string,
+  context?: Record<string, any>
+) => {
+  logWithContext("warn", `[${service}] ${message}`, context);
+};
+
+export { logger, stream, logWithContext, logInfo, logError, logDebug, logWarn };

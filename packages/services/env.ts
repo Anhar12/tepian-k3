@@ -3,7 +3,9 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    // NODE_ENV: z.enum(["development", "production", "test"]),
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
     BASE_URL: z.url(),
     STORAGE_TYPE: z.enum(["filesystem", "s3", "minio"]).default("filesystem"),
     UPLOADS_DIR: z.string().default("uploads"),
@@ -42,7 +44,26 @@ export const env = createEnv({
     RESEND_API_KEY: z.string().optional(),
     ETHEREAL_USER: z.string().optional(),
     ETHEREAL_PASSWORD: z.string().optional(),
-    DASHBOARD_URL: z.string().url().optional(),
+    DASHBOARD_URL: z.url().optional(),
+
+    // Memurai / Redis configuration
+    MEMURAI_HOST: z.string().default("localhost"),
+    MEMURAI_PORT: z.string().default("6379"),
+    MEMURAI_PASSWORD: z.string().default(""),
+
+    // Main document secret
+    JWT_DOCUMENT_SECRET: z.string().min(32),
+
+    // Optional: Type-specific secrets
+    JWT_LEGAL_DOCUMENT_SECRET: z.string().min(32).optional(),
+    JWT_TESTING_DOCUMENT_SECRET: z.string().min(32).optional(),
+    JWT_COMPANY_DOCUMENT_SECRET: z.string().min(32).optional(),
+
+    // Configuration
+    DOCUMENT_QR_EXPIRATION: z.string().default("10y"),
+    DOCUMENT_VERIFICATION_BASE_URL: z
+      .url()
+      .default("http://localhost:3001/verify/"),
   },
 
   /**

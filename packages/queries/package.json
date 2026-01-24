@@ -12,10 +12,12 @@
   "scripts": {},
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",
+    "@types/qrcode": "catalog:",
     "typescript": "catalog:"
   },
   "dependencies": {
     "@tepian-k3/db": "workspace:*",
+    "@tepian-k3/constants": "workspace:*",
     "@tepian-k3/services": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/types": "workspace:*",
@@ -23,6 +25,7 @@
     "@trpc/server": "catalog:",
     "@node-rs/argon2": "catalog:",
     "effect": "catalog:",
+    "qrcode": "catalog:",
     "zod": "catalog:"
   }
 }

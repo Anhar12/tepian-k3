@@ -1,0 +1,1 @@
+- create loader component for all pending routes

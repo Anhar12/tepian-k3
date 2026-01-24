@@ -6,6 +6,27 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import fs from "fs/promises";
 import { lookup } from "mime-types";
+import { serve } from "@hono/node-server";
+import { env } from "env";
+import { createTRPCContext } from "@tepian-k3/api";
+import { appRouter } from "@tepian-k3/api/root";
+import path from "path";
+import {
+  initializeEventBus,
+  shutdownEventBus,
+} from "@tepian-k3/services/notifications";
+import { logInfo } from "@tepian-k3/services/logger";
+
+const redisConfig = {
+  host: env.MEMURAI_HOST,
+  port: parseInt(env.MEMURAI_PORT, 10),
+  password: env.MEMURAI_PASSWORD,
+  maxRetriesPerRequest: 3,
+  enableReadyCheck: true,
+  connectTimeout: 10000,
+};
+
+initializeEventBus(redisConfig);
 
 // Set Zod locale to Indonesian
 z.config(z.locales.id());
@@ -20,8 +41,16 @@ app.use(
   cors({
     origin: env.CORS_ORIGIN || "",
     allowMethods: ["GET", "POST", "OPTIONS"],
-  })
+  }),
 );
+
+// Only for local testing
+app.use("*", async (c, next) => {
+  if (env.NODE_ENV === "development") {
+    c.req.raw.headers.set("x-forwarded-for", "127.0.0.1"); // test IP
+  }
+  await next();
+});
 
 app.use(
   "/trpc/*",
@@ -30,22 +59,43 @@ app.use(
     createContext: (_opts, context) => {
       return createTRPCContext(context);
     },
-  })
+  }),
 );
 
 app.get("/", (c) => {
   return c.text("OK");
 });
 
-app.get("/api/uploads/:folder/:filename", async (c) => {
-  const folder = c.req.param("folder");
-  const filename = c.req.param("filename");
+app.get("/api/public/*", async (c) => {
+  // Get the full path after /api/public/
+  const fullPath = c.req.path.replace("/api/public/", "");
+  const filePath = path.join("public", fullPath);
 
-  if (folder.includes("..") || filename.includes("..")) {
+  try {
+    await fs.access(filePath);
+
+    const file = await fs.readFile(filePath);
+
+    const mimeType = lookup(filePath) || "application/octet-stream";
+    c.header("Content-Type", mimeType);
+    c.header("Content-Length", file.length.toString());
+    c.header("Cache-Control", "public, max-age=31536000");
+    return c.body(file);
+  } catch (error) {
+    return c.text("File not found", 404);
+  }
+});
+
+app.get("/api/uploads/*", async (c) => {
+  // Get the full path after /api/uploads/
+  const fullPath = c.req.path.replace("/api/uploads/", "");
+
+  // Security check: prevent directory traversal
+  if (fullPath.includes("..")) {
     return c.text("Invalid path", 400);
   }
 
-  const filePath = path.join(uploadsDir, folder, filename);
+  const filePath = path.join(uploadsDir, fullPath);
 
   try {
     await fs.access(filePath);
@@ -64,12 +114,6 @@ app.get("/api/uploads/:folder/:filename", async (c) => {
   }
 });
 
-import { serve } from "@hono/node-server";
-import { env } from "env";
-import { createTRPCContext } from "@tepian-k3/api";
-import { appRouter } from "@tepian-k3/api/root";
-import path from "path";
-
 serve(
   {
     fetch: app.fetch,
@@ -77,6 +121,19 @@ serve(
     port: env.SERVER_PORT || 3000,
   },
   (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
-  }
+    logInfo("Server", `Running on http://${env.SERVER_HOSTNAME}:${info.port}`);
+  },
 );
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("Shutting down...");
+  await shutdownEventBus();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  console.log("Shutting down...");
+  await shutdownEventBus();
+  process.exit(0);
+});

@@ -3,7 +3,7 @@ import { eq } from "@tepian-k3/db";
 import { parameterTools } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import parameterToolSchema from "@tepian-k3/schema/parameter-tool.schema";
 import { TRPCError } from "@trpc/server";
 import parameterQueries from "./parameter.queries";
@@ -32,13 +32,14 @@ const parameterToolQueries = {
           },
         }),
       catch: (error) => {
-        logger.error("Error fetching tools by parameter ID", {
-          error,
-          parameterId,
-        });
+        logError(
+          "parameterToolQueries.getAllToolsByParameterId",
+          "Failed to fetch tools by parameter ID",
+          { parameterId, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch tools for the given parameter ID.",
+          message: "Gagal mengambil tools untuk parameter tersebut.",
         });
       },
     });
@@ -65,10 +66,14 @@ const parameterToolQueries = {
           },
         }),
       catch: (error) => {
-        logger.error("Error fetching parameter tool by ID", { error, id });
+        logError(
+          "parameterToolQueries.getParameterToolById",
+          "Failed to fetch parameter tool by ID",
+          { id, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch parameter tool for the given ID.",
+          message: "Gagal mengambil parameter tool berdasarkan ID.",
         });
       },
     });
@@ -85,7 +90,7 @@ const parameterToolQueries = {
       if (!isParameterExist) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Parameter does not exist.",
+          message: "Parameter tidak ditemukan.",
         });
       }
 
@@ -95,7 +100,7 @@ const parameterToolQueries = {
         return Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Tool does not exist.",
+            message: "Tool tidak ditemukan.",
           })
         );
       }
@@ -112,7 +117,7 @@ const parameterToolQueries = {
         return Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Tool is already assigned to the parameter.",
+            message: "Tool sudah ditugaskan ke parameter tersebut.",
           })
         );
       }
@@ -120,10 +125,14 @@ const parameterToolQueries = {
       const [result] = yield* Effect.tryPromise({
         try: () => db.insert(parameterTools).values(data).returning(),
         catch: (error) => {
-          logger.error("Error assigning tool to parameter", { error, data });
+          logError(
+            "parameterToolQueries.assignToolToParameter",
+            "Failed to assign tool to parameter",
+            { data, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to assign tool to parameter.",
+            message: "Gagal menugaskan tool ke parameter.",
           });
         },
       });
@@ -132,7 +141,7 @@ const parameterToolQueries = {
         return Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to assign tool to parameter.",
+            message: "Gagal menugaskan tool ke parameter.",
           })
         );
       }
@@ -152,7 +161,7 @@ const parameterToolQueries = {
       if (!existingRecord) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Parameter tool record not found.",
+          message: "Data parameter tool tidak ditemukan.",
         });
       }
 
@@ -163,7 +172,7 @@ const parameterToolQueries = {
       if (!isParameterExist) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Parameter does not exist.",
+          message: "Parameter tidak ditemukan.",
         });
       }
 
@@ -173,7 +182,7 @@ const parameterToolQueries = {
         return Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Tool does not exist.",
+            message: "Tool tidak ditemukan.",
           })
         );
       }
@@ -189,10 +198,14 @@ const parameterToolQueries = {
             .where(eq(parameterTools.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("Error updating parameter tool", { error, data });
+          logError(
+            "parameterToolQueries.updateParameterTool",
+            "Failed to update parameter tool",
+            { data, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to update parameter tool.",
+            message: "Gagal memperbarui parameter tool.",
           });
         },
       });
@@ -201,7 +214,7 @@ const parameterToolQueries = {
         return Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to update parameter tool.",
+            message: "Gagal memperbarui parameter tool.",
           })
         );
       }
@@ -220,7 +233,7 @@ const parameterToolQueries = {
         return Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
-            message: "Parameter tool record not found.",
+            message: "Data parameter tool tidak ditemukan.",
           })
         );
       }
@@ -232,10 +245,14 @@ const parameterToolQueries = {
             .where(eq(parameterTools.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error removing tool from parameter", { error, id });
+          logError(
+            "parameterToolQueries.removeToolFromParameter",
+            "Failed to remove tool from parameter",
+            { id, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to remove tool from parameter.",
+            message: "Gagal menghapus tool dari parameter.",
           });
         },
       });
@@ -244,7 +261,7 @@ const parameterToolQueries = {
         return Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to remove tool from parameter.",
+            message: "Gagal menghapus tool dari parameter.",
           })
         );
       }

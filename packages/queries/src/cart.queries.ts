@@ -1,53 +1,138 @@
 import { TRPCError } from "@trpc/server";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { and, count, eq } from "@tepian-k3/db";
-import { cart } from "@tepian-k3/db/schema";
+import { cart, parameters, userCompanies } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import cartSchema from "@tepian-k3/schema/cart.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
+import parameterQueries from "./parameter.queries";
 
 const cartQueries = {
   getUserCartList(userId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db.query.cart.findMany({
-          where: eq(cart.userId, userId),
-          with: {
-            parameter: {
-              columns: {
-                id: true,
-                name: true,
+    return Effect.gen(this, function* () {
+      const cartItems = yield* Effect.tryPromise({
+        try: () =>
+          db.query.cart.findMany({
+            where: eq(cart.userId, userId),
+            with: {
+              company: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
               },
-              with: {
-                category: {
-                  columns: {
-                    id: true,
-                    name: true,
-                  },
-                  with: {
-                    cluster: {
-                      columns: {
-                        id: true,
-                        name: true,
+              location: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
+              },
+              parameter: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
+                with: {
+                  category: {
+                    columns: {
+                      id: true,
+                      name: true,
+                    },
+                    with: {
+                      cluster: {
+                        columns: {
+                          id: true,
+                          name: true,
+                        },
                       },
                     },
                   },
                 },
               },
             },
-          },
-        }),
-      catch: (error) => {
-        logger.error("Error fetching user cart list", {
-          error,
-          userId,
+          }),
+        catch: (error) => {
+          logError(
+            "cartQueries.getUserCartList",
+            "Error fetching user cart list",
+            {
+              error,
+              userId,
+            }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil daftar keranjang pengguna.",
+          });
+        },
+      });
+
+      // Group cart items by companyId
+      const groupedByCompany = cartItems.reduce((acc, item) => {
+        const companyId = item.companyId;
+
+        if (!acc[companyId]) {
+          acc[companyId] = {
+            id: item.companyId,
+            name: item.company.name, // Assuming company name is same as location name for this example
+            items: [],
+          };
+        }
+        acc[companyId].items.push(item);
+
+        return acc;
+      }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+
+      // should return array of companies with their locations and items
+      return Object.values(groupedByCompany).map((company) => {
+        // Group item based on location
+        const itemsGroupedByLocation = company.items.reduce((acc, item) => {
+          const locationId = item.locationId;
+          if (!acc[locationId]) {
+            acc[locationId] = {
+              id: item.locationId,
+              name: item.location.name,
+              items: [],
+            };
+          }
+
+          acc[locationId].items.push(item);
+          return acc;
+        }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+
+        // Group item based on cluster inside each location
+        const finalItemsGroupedByLocation = Object.values(
+          itemsGroupedByLocation
+        ).map((location) => {
+          const itemsGroupedByCluster = location.items.reduce((acc, item) => {
+            const clusterId = item.parameter.category.cluster.id;
+            if (!acc[clusterId]) {
+              acc[clusterId] = {
+                id: clusterId,
+                name: item.parameter.category.cluster.name,
+                items: [],
+              };
+            }
+
+            acc[clusterId].items.push(item);
+
+            return acc;
+          }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+
+          return {
+            id: location.id,
+            name: location.name,
+            clusters: Object.values(itemsGroupedByCluster),
+          };
         });
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch user cart list",
-        });
-      },
+
+        return {
+          id: company.id,
+          name: company.name,
+          locations: finalItemsGroupedByLocation,
+        };
+      });
     });
   },
 
@@ -62,13 +147,17 @@ const cartQueries = {
           .where(eq(cart.userId, userId))
           .then((result) => Number(result[0]?.count)),
       catch: (error) => {
-        logger.error("Error fetching user cart count", {
-          error,
-          userId,
-        });
+        logError(
+          "cartQueries.getUserCartCount",
+          "Error fetching user cart count",
+          {
+            error,
+            userId,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch user cart count",
+          message: "Gagal mengambil jumlah keranjang pengguna.",
         });
       },
     });
@@ -81,36 +170,50 @@ const cartQueries = {
           where: eq(cart.id, cartItemId),
         }),
       catch: (error) => {
-        logger.error("Error fetching cart item by ID", {
-          error,
-          cartItemId,
-        });
+        logError(
+          "cartQueries.getCartItemById",
+          "Error fetching cart item by ID",
+          {
+            error,
+            cartItemId,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch cart item by ID",
+          message: "Gagal mengambil item keranjang berdasarkan ID",
         });
       },
     });
   },
 
-  getCartItemByParameterId(userId: string, parameterId: string) {
+  getCartItemByParameterId(
+    userId: string,
+    parameterId: string,
+    locationId: string
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.cart.findFirst({
           where: and(
             eq(cart.userId, userId),
-            eq(cart.parameterId, parameterId)
+            eq(cart.parameterId, parameterId),
+            eq(cart.locationId, locationId)
           ),
         }),
       catch: (error) => {
-        logger.error("Error fetching cart item by parameter ID", {
-          error,
-          userId,
-          parameterId,
-        });
+        logError(
+          "cartQueries.getCartItemByParameterId",
+          "Error fetching cart item by parameter ID",
+          {
+            error,
+            userId,
+            parameterId,
+            locationId,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch cart item by parameter ID",
+          message: "Gagal mengambil item keranjang berdasarkan ID",
         });
       },
     });
@@ -121,9 +224,93 @@ const cartQueries = {
     data: z.infer<typeof cartSchema.createCartSchema>
   ) {
     return Effect.gen(this, function* () {
-      const existingCartItem = yield* this.getCartItemByParameterId(
-        userId,
+      const isParameterExisting = yield* parameterQueries.getParameterById(
         data.parameterId
+      );
+
+      if (!isParameterExisting) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Parameter tidak ditemukan.",
+          })
+        );
+      }
+
+      // 2. Validate company ownership
+      const company = yield* Effect.tryPromise({
+        try: () =>
+          db.query.userCompanies.findFirst({
+            where: and(
+              eq(userCompanies.id, data.companyId),
+              eq(userCompanies.userId, userId)
+            ),
+          }),
+        catch: (error) => {
+          logError(
+            "cartQueries.insertCartItem",
+            "Error validating company ownership",
+            { error, userId, companyId: data.companyId }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memvalidasi perusahaan.",
+          });
+        },
+      });
+
+      if (!company) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "FORBIDDEN",
+            message: "Anda tidak memiliki akses ke perusahaan ini.",
+          })
+        );
+      }
+
+      // 5. Validate parameters and prices
+      const params = yield* Effect.tryPromise({
+        try: () =>
+          db.query.parameters.findFirst({
+            where: eq(parameters.id, data.parameterId),
+          }),
+        catch: (error) => {
+          logError(
+            "cartQueries.insertCartItem",
+            "Error validating parameters",
+            { error, parameterId: data.parameterId }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memvalidasi parameter",
+          });
+        },
+      });
+
+      if (!params) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Parameter tidak ditemukan.",
+          })
+        );
+      }
+
+      // 6. Validate price matches
+      const invalidPrice = params.price !== data.price;
+      if (invalidPrice) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Harga tidak sesuai. Silakan segarkan dan coba lagi.",
+          })
+        );
+      }
+
+      const existingCartItem = yield* cartQueries.getCartItemByParameterId(
+        userId,
+        data.parameterId,
+        data.locationId
       );
 
       const result = yield* Effect.tryPromise({
@@ -141,7 +328,7 @@ const cartQueries = {
               if (!updated) {
                 throw new TRPCError({
                   code: "INTERNAL_SERVER_ERROR",
-                  message: "Failed to update cart item",
+                  message: "Gagal memperbarui item keranjang",
                 });
               }
 
@@ -156,21 +343,21 @@ const cartQueries = {
             if (!newCartItem) {
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
-                message: "Failed to create new cart item",
+                message: "Gagal membuat item keranjang baru",
               });
             }
 
             return newCartItem;
           }),
         catch: (error) => {
-          logger.error("Error inserting cart item", {
+          logError("cartQueries.insertCartItem", "Error inserting cart item", {
             error,
             userId,
             data,
           });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to insert cart item",
+            message: "Gagal memasukkan item keranjang.",
           });
         },
       });
@@ -198,14 +385,18 @@ const cartQueries = {
           })
           .returning(),
       catch: (error) => {
-        logger.error("Error inserting new cart item", {
-          error,
-          userId,
-          data,
-        });
+        logError(
+          "cartQueries.insertNewCartItem",
+          "Error inserting new cart item",
+          {
+            error,
+            userId,
+            data,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to insert new cart item",
+          message: "Gagal memasukkan item keranjang baru",
         });
       },
     });
@@ -224,13 +415,18 @@ const cartQueries = {
           .where(eq(cart.id, cartItemId))
           .returning(),
       catch: (error) => {
-        logger.error("Error updating cart item quantity", {
-          error,
-          cartItemId,
-        });
+        logError(
+          "cartQueries.updateCartItemQuantity",
+          "Error updating cart item quantity",
+          {
+            error,
+            cartItemId,
+            quantity,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update cart item quantity",
+          message: "Gagal memperbarui jumlah item keranjang",
         });
       },
     });
@@ -248,7 +444,7 @@ const cartQueries = {
       if (!cartItem) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Cart item not found",
+          message: "Item keranjang tidak ditemukan",
         });
       }
 
@@ -262,14 +458,18 @@ const cartQueries = {
             .where(eq(cart.id, cartItemId))
             .returning(),
         catch: (error) => {
-          logger.error("Error incrementing cart item quantity", {
-            error,
-            cartItemId,
-            incrementBy,
-          });
+          logError(
+            "cartQueries.incrementCartItemQuantity",
+            "Error incrementing cart item quantity",
+            {
+              error,
+              cartItemId,
+              incrementBy,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to increment cart item quantity",
+            message: "Gagal menambah jumlah item keranjang",
           });
         },
       });
@@ -277,7 +477,7 @@ const cartQueries = {
       if (!result) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to increment cart item quantity",
+          message: "Gagal menambah jumlah item keranjang",
         });
       }
 
@@ -298,7 +498,7 @@ const cartQueries = {
       if (!cartItem) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Cart item not found",
+          message: "Item keranjang tidak ditemukan",
         });
       }
 
@@ -318,14 +518,18 @@ const cartQueries = {
             .where(eq(cart.id, cartItemId))
             .returning(),
         catch: (error) => {
-          logger.error("Error decrementing cart item quantity", {
-            error,
-            cartItemId,
-            decrementBy,
-          });
+          logError(
+            "cartQueries.decrementCartItemQuantity",
+            "Error decrementing cart item quantity",
+            {
+              error,
+              cartItemId,
+              decrementBy,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to decrement cart item quantity",
+            message: "Gagal mengurangi jumlah item keranjang",
           });
         },
       });
@@ -333,7 +537,7 @@ const cartQueries = {
       if (!result) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to decrement cart item quantity",
+          message: "Gagal mengurangi jumlah item keranjang",
         });
       }
 
@@ -345,13 +549,13 @@ const cartQueries = {
     return Effect.tryPromise({
       try: () => tx.delete(cart).where(eq(cart.id, cartItemId)).returning(),
       catch: (error) => {
-        logger.error("Error deleting cart item", {
+        logError("cartQueries.deleteCartItem", "Error deleting cart item", {
           error,
           cartItemId,
         });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete cart item",
+          message: "Gagal menghapus item keranjang",
         });
       },
     });

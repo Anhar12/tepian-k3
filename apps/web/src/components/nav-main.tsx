@@ -8,13 +8,14 @@ import {
 } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import type { Permission } from "@tepian-k3/constants";
 
 export interface NavMainProps {
   items: {
     title: string;
     url: string;
     icon?: Icon;
-    permission?: string;
+    permission?: Permission;
   }[];
 }
 

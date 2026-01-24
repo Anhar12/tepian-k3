@@ -1,1 +1,0 @@
-ALTER TABLE "parameters" ALTER COLUMN "unit" SET NOT NULL;

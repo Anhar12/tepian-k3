@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { AlertDialog } from "@radix-ui/react-alert-dialog";
+import { useNavigate } from "@tanstack/react-router";
 import { Ellipsis, Eye, LoaderCircle, Pencil, Printer } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -87,6 +88,8 @@ export default function DataTableActionCell({
   showEdit = true,
   showDelete = true,
 }: DataTableActionCellProps) {
+  const navigate = useNavigate();
+
   const [isOpen, setIsOpen] = useState(false);
 
   // wait for the isLoading to be false before closing the dialog
@@ -128,7 +131,7 @@ export default function DataTableActionCell({
   return (
     <AlertDialog open={isOpen}>
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger aria-label="Buka menu aksi">
           <Ellipsis className="size-4 text-black dark:text-white" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="group">
@@ -138,9 +141,9 @@ export default function DataTableActionCell({
             (typeof onDetailAction === "string" ? (
               <DropdownMenuItem asChild>
                 <a
-                  href={onDetailAction}
                   className="flex flex-row"
                   onMouseEnter={() => onHoverDetail && onHoverDetail()}
+                  onClick={() => navigate({ to: onDetailAction })}
                 >
                   {detailIcon}
                   {detailText}
@@ -164,9 +167,9 @@ export default function DataTableActionCell({
             (typeof onEditAction === "string" ? (
               <DropdownMenuItem asChild>
                 <a
-                  href={onEditAction}
                   className="flex flex-row"
                   onMouseEnter={() => onHoverEdit && onHoverEdit()}
+                  onClick={() => navigate({ to: onEditAction })}
                 >
                   {editIcon}
                   {editText}

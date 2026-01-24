@@ -17,7 +17,7 @@ import {
   userRoles,
   users,
 } from "@tepian-k3/db/schema";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import type z from "zod";
@@ -31,7 +31,9 @@ const rolesQueries = {
     return Effect.tryPromise({
       try: () => db.query.roles.findMany(),
       catch: (error) => {
-        logger.error("Error fetching roles:", error);
+        logError("rolesQueries.getAllRoles", "Failed to get all roles", {
+          error,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data peran.",
@@ -48,7 +50,11 @@ const rolesQueries = {
           where: eq(roles.id, roleId),
         }),
       catch: (error) => {
-        logger.error(`Error fetching role with ID ${roleId}:`, error);
+        logError(
+          "rolesQueries.getRoleById",
+          `Error fetching role with ID ${roleId}:`,
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data peran.",
@@ -91,7 +97,11 @@ const rolesQueries = {
           rolePerms = rolePermsData.map((rp) => rp.permission);
         },
         catch: (error) => {
-          logger.error("Error fetching role permissions", { error });
+          logError(
+            "rolesQueries.getRoleWithPermissionsById",
+            "Error fetching role permissions",
+            { error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data izin peran",
@@ -119,7 +129,11 @@ const rolesQueries = {
           where: and(eq(roles.id, roleId), isNotNull(roles.deletedAt)),
         }),
       catch: (error) => {
-        logger.error(`Error fetching deleted role with ID ${roleId}:`, error);
+        logError(
+          "rolesQueries.getDeletedRoleById",
+          `Error fetching deleted role with ID ${roleId}:`,
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data peran yang dihapus.",
@@ -136,7 +150,11 @@ const rolesQueries = {
           where: eq(roles.name, roleName),
         }),
       catch: (error) => {
-        logger.error(`Error fetching role with name ${roleName}:`, error);
+        logError(
+          "rolesQueries.getRoleByName",
+          `Error fetching role with name ${roleName}:`,
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch role.",
@@ -159,7 +177,9 @@ const rolesQueries = {
             where: eq(roles.name, roleName),
           }),
         catch: (error) => {
-          logger.error("Error fetching role", { error });
+          logError("rolesQueries.getUsersByRole", "Error fetching role", {
+            error,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data peran",
@@ -179,7 +199,13 @@ const rolesQueries = {
             .innerJoin(users, eq(userRoles.userId, users.id))
             .where(and(eq(userRoles.roleId, role.id), isNull(users.deletedAt))),
         catch: (error) => {
-          logger.error("Error fetching users by role", { error });
+          logError(
+            "rolesQueries.getUsersByRole",
+            "Error fetching users by role",
+            {
+              error,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data user berdasarkan peran",
@@ -265,10 +291,14 @@ const rolesQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated roles", {
-            error,
-            input,
-          });
+          logError(
+            "rolesQueries.getOffsetPaginatedRoles",
+            "Error fetching paginated roles",
+            {
+              error,
+              input,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data roles`,
@@ -302,7 +332,7 @@ const rolesQueries = {
       const [newRole] = yield* Effect.tryPromise({
         try: () => db.insert(roles).values(data).returning(),
         catch: (error) => {
-          logger.error("Error creating role:", error);
+          logError("rolesQueries.createRole", "Error creating role", { error });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat peran.",
@@ -348,7 +378,7 @@ const rolesQueries = {
             .where(eq(roles.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("Error updating role:", error);
+          logError("rolesQueries.updateRole", "Error updating role", { error });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui peran.",
@@ -391,7 +421,7 @@ const rolesQueries = {
             .where(eq(roles.id, roleId))
             .returning(),
         catch: (error) => {
-          logger.error("Error deleting role:", error);
+          logError("rolesQueries.deleteRole", "Error deleting role", { error });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus peran.",
@@ -434,7 +464,9 @@ const rolesQueries = {
             .where(eq(roles.id, roleId))
             .returning(),
         catch: (error) => {
-          logger.error("Error restoring role:", error);
+          logError("rolesQueries.restoreRole", "Error restoring role", {
+            error,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan peran.",

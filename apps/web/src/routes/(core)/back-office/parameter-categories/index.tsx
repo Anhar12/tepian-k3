@@ -23,7 +23,7 @@ export const Route = createFileRoute(
   validateSearch: parameterCategoriesSchema.getAllParameterCategoriesSchema,
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: "parameter-categories.read",
+      permission: "parameter-categories.view",
     }),
 
   component: RouteComponent,

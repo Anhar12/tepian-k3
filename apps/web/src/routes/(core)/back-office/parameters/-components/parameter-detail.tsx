@@ -5,22 +5,73 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SkeletonInput } from "@/components/ui/skeleton-generator";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconAlertCircle } from "@tabler/icons-react";
+import CreateParameterChemicalDialog from "./create-parameter-chemical-dialog";
 
 interface ParameterDetailProps {
   parameterId: string;
 }
 
 export default function ParameterDetail({ parameterId }: ParameterDetailProps) {
-  const { data: parameter } = useSuspenseQuery(
+  const { data: parameter, isLoading } = useQuery(
     trpc.parameter.getParameterById.queryOptions({
       id: parameterId,
     }),
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Detail Parameter</CardTitle>
+            <CardDescription>
+              Lihat detail informasi parameter Anda di sini.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              <SkeletonInput />
+              <SkeletonInput />
+              <SkeletonInput />
+              <SkeletonInput />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!parameter) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Detail Parameter</CardTitle>
+            <CardDescription>
+              Lihat detail informasi parameter Anda di sini.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              <EmptyState
+                icon={<IconAlertCircle />}
+                title="Parameter tidak ditemukan"
+                description="Parameter yang Anda cari tidak ada atau telah dihapus."
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,10 +1,11 @@
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { Permission } from "@tepian-k3/constants";
 import type { ReactNode } from "react";
 
 interface PermissionGateProps {
   /** Single permission or array of permissions to check */
-  permission: string | string[];
+  permission: Permission | Permission[];
   /** If true, user must have ALL permissions. If false, user needs at least ONE permission */
   requireAll?: boolean;
   /** Content to render if user has permission */
@@ -13,6 +14,20 @@ interface PermissionGateProps {
   fallback?: ReactNode;
 }
 
+/**
+ *  A component that conditionally renders its children based on user permissions.
+ * @param permission permission Single permission or array of permissions to check
+ * @param requireAll If true, user must have ALL permissions. If false, user needs at least ONE permission
+ * @param children Content to render if user has permission
+ * @param fallback Optional fallback content if user doesn't have permission
+ * @example
+ * ```tsx
+ * <PermissionGate permission="worksheets.edit" fallback={<div>Access Denied</div>}>
+ *  <WorksheetEditor />
+ * </PermissionGate>
+ * ```
+ * @returns The children if the user has the required permissions, otherwise the fallback content
+ */
 export function PermissionGate({
   permission,
   requireAll = false,

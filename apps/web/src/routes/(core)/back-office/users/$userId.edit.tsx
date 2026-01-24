@@ -29,6 +29,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
@@ -59,19 +60,90 @@ export const Route = createFileRoute("/(core)/back-office/users/$userId/edit")({
   params: z.object({
     userId: z.uuidv7(),
   }),
-  loader: ({ params, context }) => {
+  loader: async ({ params, context }) => {
     context.queryClient.ensureQueryData(
       context.trpc.user.getUserDetailWithRolesAndPermissions.queryOptions({
         userId: params.userId,
       }),
     );
-
     context.queryClient.ensureQueryData(
       context.trpc.role.getAllRoles.queryOptions(),
     );
   },
   component: RouteComponent,
+  pendingComponent: LoadingComponent,
 });
+
+function LoadingComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Perbarui User</CardTitle>
+          <CardDescription>
+            Perbarui informasi user di bawah ini
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Roles Combobox */}
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Name Field */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Address Field */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Phone Field */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Email Verified Checkbox */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+
+            {/* Email Verified At */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-44" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Submit Button */}
+            <Skeleton className="mt-2 h-10 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function RouteComponent() {
   const { userId } = Route.useParams();
@@ -97,7 +169,7 @@ function RouteComponent() {
   );
 
   // Derive added/removed roles when needed (e.g., for save button or dirty check)
-  const { addedRoles, removedRoles, hasChanges } = useMemo(() => {
+  const { addedRoles, removedRoles } = useMemo(() => {
     const added = [...selectedRoles].filter(
       (role) => !originalUserRoles.has(role),
     );

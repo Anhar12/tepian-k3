@@ -4,6 +4,8 @@ import { v7 as uuidv7 } from "uuid";
 import path from "path";
 import type { UploadOptions, UploadResult } from "../types";
 import { UploadFailedError, FileNotFoundError } from "../types";
+import { generateDateBasedPath } from "../utils";
+import { logInfo } from "../../logger";
 
 export class MinioProvider {
   private client: Minio.Client;
@@ -25,6 +27,11 @@ export class MinioProvider {
       accessKey: process.env.MINIO_ACCESS_KEY || "",
       secretKey: process.env.MINIO_SECRET_KEY || "",
     });
+
+    logInfo(
+      "MinioProvider",
+      `Connected to MinIO at ${this.endpoint}:${this.port}, bucket: ${this.bucket}`,
+    );
   }
 
   private ensureBucket(): Effect.Effect<void, UploadFailedError> {
@@ -42,7 +49,7 @@ export class MinioProvider {
 
   private generateKey(
     filename?: string,
-    folder?: string
+    folder?: string,
   ): {
     filename: string;
     key: string;
@@ -50,22 +57,31 @@ export class MinioProvider {
     const ext = filename ? path.extname(filename) : "";
     const name = filename ? path.basename(filename, ext) : "file";
     const uniqueId = uuidv7();
-    const key = `${name}-${uniqueId}${ext}`;
+
+    // Clean filename: remove special chars, keep only alphanumeric, dash, underscore
+    const cleanName = name.replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase();
+
+    // Format: [folder]/[year]/[month]/[day]/[cleanName]-[uuid].[ext]
+    const generatedFileName = `${cleanName}-${uniqueId}${ext}`;
+
+    // Use date-based path with folder prefix (default to 'general' if not provided)
+    const folderName = folder || "general";
+    const dateBasedPath = generateDateBasedPath(folderName);
 
     return {
-      filename: key,
-      key: folder ? `${folder}/${key}` : key,
+      filename: generatedFileName,
+      key: `${dateBasedPath}/${generatedFileName}`,
     };
   }
 
   upload(
     file: Buffer,
-    options: UploadOptions = {}
+    options: UploadOptions = {},
   ): Effect.Effect<UploadResult, UploadFailedError> {
     return pipe(
       this.ensureBucket(),
       Effect.flatMap(() =>
-        Effect.sync(() => this.generateKey(options.filename, options.folder))
+        Effect.sync(() => this.generateKey(options.filename, options.folder)),
       ),
       Effect.flatMap(({ filename, key }) => {
         const metadata = {
@@ -80,7 +96,7 @@ export class MinioProvider {
                 key,
                 file,
                 file.length,
-                metadata
+                metadata,
               );
             },
             catch: (error) =>
@@ -89,7 +105,7 @@ export class MinioProvider {
           Effect.flatMap(() =>
             options.isPublic
               ? Effect.succeed(this.getPublicUrl(key))
-              : this.getSignedUrl(key)
+              : this.getSignedUrl(key),
           ),
           Effect.map((url) => ({
             filename,
@@ -97,9 +113,9 @@ export class MinioProvider {
             url,
             size: file.length,
             contentType: options.contentType || "application/octet-stream",
-          }))
+          })),
         );
-      })
+      }),
     );
   }
 
@@ -112,9 +128,40 @@ export class MinioProvider {
     });
   }
 
+  download(
+    key: string,
+  ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
+    return Effect.tryPromise({
+      try: async () => {
+        const stream = await this.client.getObject(this.bucket, key);
+        const chunks: Buffer[] = [];
+
+        return await new Promise<Buffer>((resolve, reject) => {
+          stream.on("data", (chunk) => {
+            chunks.push(chunk);
+          });
+          stream.on("end", () => {
+            resolve(Buffer.concat(chunks));
+          });
+          stream.on("error", (err) => {
+            reject(
+              err.name === "NoSuchKey"
+                ? new FileNotFoundError(key)
+                : new UploadFailedError("Failed to download file", err),
+            );
+          });
+        });
+      },
+      catch: (error) =>
+        error instanceof FileNotFoundError
+          ? error
+          : new UploadFailedError("Failed to download file", error),
+    });
+  }
+
   getSignedUrl(
     key: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Effect.Effect<string, UploadFailedError> {
     return Effect.tryPromise({
       try: async () =>
@@ -127,5 +174,66 @@ export class MinioProvider {
   getPublicUrl(key: string): string {
     const protocol = this.useSSL ? "https" : "http";
     return `${protocol}://${this.endpoint}:${this.port}/${this.bucket}/${key}`;
+  }
+
+  /**
+   * Returns the public URL for an asset given its key
+   * @param key The key of the asset
+   * @returns  The public URL of the asset not from uploads endpoint
+   */
+  getAssetUrl(key: string): string {
+    const protocol = this.useSSL ? "https" : "http";
+    return `${protocol}://${this.endpoint}:${this.port}/${this.bucket}/${key}`;
+  }
+
+  /**
+   * Extracts the folder path from a public URL
+   * @param url - The public URL (e.g., http://localhost:9000/uploads/avatars/2026/01/09/file.jpg)
+   * @returns The folder path (e.g., avatars/2026/01/09)
+   */
+  getFolderFromUrl(url: string): string | null {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      // Remove the bucket prefix (e.g., /uploads/)
+      const bucketPrefix = `/${this.bucket}/`;
+      if (!pathname.startsWith(bucketPrefix)) {
+        return null;
+      }
+
+      const key = pathname.slice(bucketPrefix.length);
+
+      // Get directory path (remove filename)
+      const lastSlashIndex = key.lastIndexOf("/");
+      if (lastSlashIndex === -1) {
+        return null;
+      }
+
+      return key.slice(0, lastSlashIndex);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Extracts the key (full path including filename) from a public URL
+   * @param url - The public URL
+   * @returns The key (e.g., avatars/2026/01/09/file.jpg)
+   */
+  getKeyFromUrl(url: string): string | null {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+
+      const bucketPrefix = `/${this.bucket}/`;
+      if (!pathname.startsWith(bucketPrefix)) {
+        return null;
+      }
+
+      return pathname.slice(bucketPrefix.length);
+    } catch {
+      return null;
+    }
   }
 }

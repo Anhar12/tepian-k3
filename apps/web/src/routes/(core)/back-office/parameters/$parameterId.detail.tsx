@@ -4,17 +4,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import ParameterDetail from "./-components/parameter-detail";
 import ParameterTools from "./-components/parameter-tool";
-import CreateParameterToolDialog from "./-components/create-parameter-tool-dialog";
+import ParameterChemical from "./-components/parameter-chemical";
 
 export const Route = createFileRoute(
   "/(core)/back-office/parameters/$parameterId/detail",
 )({
   validateSearch: z.object({
-    tabs: z.enum(["parameter", "tool"]).default("parameter"),
+    tabs: z.enum(["parameter", "tool", "chemical"]).default("parameter"),
   }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: ["parameter.read", "parameter-tool.read"],
+      permission: ["parameters.read", "parameter-tool.view"],
     }),
   params: z.object({
     parameterId: z.string(),
@@ -43,7 +43,7 @@ function RouteComponent() {
           navigate({
             search: (old) => ({
               ...old,
-              tabs: value as "parameter" | "tool",
+              tabs: value as "parameter" | "tool" | "chemical",
             }),
           });
         }}
@@ -51,6 +51,7 @@ function RouteComponent() {
         <TabsList>
           <TabsTrigger value="parameter">Parameter</TabsTrigger>
           <TabsTrigger value="tool">Tool</TabsTrigger>
+          <TabsTrigger value="chemical">Chemical</TabsTrigger>
         </TabsList>
         <TabsContent value="parameter">
           <ParameterDetail parameterId={parameterId} />
@@ -58,8 +59,10 @@ function RouteComponent() {
         <TabsContent value="tool">
           <ParameterTools parameterId={parameterId} />
         </TabsContent>
+        <TabsContent value="chemical">
+          <ParameterChemical parameterId={parameterId} />
+        </TabsContent>
       </Tabs>
-      <CreateParameterToolDialog parameterId={parameterId} />
     </div>
   );
 }

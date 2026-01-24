@@ -4,6 +4,7 @@ import {
   IconHome,
   IconLogout,
   IconNotification,
+  IconSettings,
   IconUserCircle,
 } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,9 +24,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { queryClient, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import { useNavigate } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
+import { logout } from "@/lib/logout";
 
 export function NavUser() {
   const navigate = useNavigate();
@@ -34,12 +36,7 @@ export function NavUser() {
   const { data: user } = useSuspenseQuery(trpc.auth.profile.queryOptions());
 
   function onLogout() {
-    localStorage.removeItem("token");
-
-    queryClient.invalidateQueries(trpc.auth.me.queryFilter());
-    queryClient.refetchQueries(trpc.auth.me.queryFilter());
-
-    navigate({ to: "/" });
+    logout();
   }
 
   return (
@@ -114,6 +111,10 @@ export function NavUser() {
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <ModeToggle />
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}>
+                <IconSettings />
+                Pengaturan
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

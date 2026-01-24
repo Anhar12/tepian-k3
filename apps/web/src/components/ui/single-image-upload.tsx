@@ -1,6 +1,5 @@
-"use client";
-
 import { useCallback, useState, forwardRef, useEffect } from "react";
+import mime from "mime-types";
 import {
   Alert,
   AlertContent,
@@ -68,16 +67,25 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
         setPreview(value);
         setImage(null);
       } else if (value instanceof File) {
-        // File object provided
-        if (!image || image.file !== value) {
-          const newPreview = URL.createObjectURL(value);
-          setImage({
-            file: value,
-            preview: newPreview,
-            progress: 100,
-            status: "completed",
-          });
-          setPreview(newPreview);
+        // Only handle non-empty File objects
+        if (value.size > 0) {
+          if (!image || image.file !== value) {
+            const newPreview = URL.createObjectURL(value);
+            setImage({
+              file: value,
+              preview: newPreview,
+              progress: 100,
+              status: "completed",
+            });
+            setPreview(newPreview);
+          }
+        } else {
+          // Empty file - clear the preview
+          if (image) {
+            URL.revokeObjectURL(image.preview);
+          }
+          setImage(null);
+          setPreview(null);
         }
       }
     }, [value]);
@@ -228,7 +236,7 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
     const displayError = error || uploadError;
 
     return (
-      <div ref={ref} className={cn("w-full max-w-4xl", className)}>
+      <div ref={ref} className={cn("w-full", className)}>
         {/* Image Preview */}
         {preview && (
           <div className="mb-6">
@@ -281,7 +289,8 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
                 Choose a file or drag & drop here.
               </h3>
               <span className="mb-3 block text-xs font-normal text-secondary-foreground">
-                JPEG, PNG, up to {formatBytes(maxSize)}.
+                {mime.extension(accept).toString().toUpperCase()} up to{" "}
+                {formatBytes(maxSize)}.
               </span>
               <Button
                 size="sm"

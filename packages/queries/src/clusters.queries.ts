@@ -15,7 +15,7 @@ import { clusters } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import clusterSchema from "@tepian-k3/schema/cluster.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -27,7 +27,13 @@ const clustersQueries = {
           where: isNull(clusters.deletedAt),
         }),
       catch: (error) => {
-        logger.error("Error fetching all clusters", { error });
+        logError(
+          "clustersQueries.getAllClusters",
+          "Error fetching all clusters",
+          {
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster",
@@ -43,7 +49,14 @@ const clustersQueries = {
           where: and(eq(clusters.id, id), isNull(clusters.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching cluster by ID", { error });
+        logError(
+          "clustersQueries.getClusterById",
+          "Error fetching cluster by ID",
+          {
+            id,
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster",
@@ -63,7 +76,14 @@ const clustersQueries = {
           where: and(eq(clusters.id, id), isNotNull(clusters.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted cluster by ID", { error });
+        logError(
+          "clustersQueries.getDeletedClusterById",
+          "Error fetching deleted cluster by ID",
+          {
+            id,
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster yang dihapus",
@@ -83,7 +103,14 @@ const clustersQueries = {
           where: and(eq(clusters.name, name), isNull(clusters.deletedAt)),
         }),
       catch: (error) => {
-        logger.error("Error fetching cluster by name", { error });
+        logError(
+          "clustersQueries.getClusterByName",
+          "Error fetching cluster by name",
+          {
+            name,
+            error,
+          }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data cluster",
@@ -170,10 +197,14 @@ const clustersQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated clusters", {
-            error,
-            input,
-          });
+          logError(
+            "clustersQueries.getOffsetPaginatedClusters",
+            "Error fetching paginated clusters",
+            {
+              input,
+              error,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data cluster`,
@@ -207,7 +238,11 @@ const clustersQueries = {
       const [newCluster] = yield* Effect.tryPromise({
         try: () => db.insert(clusters).values(data).returning(),
         catch: (error) => {
-          logger.error("Error creating new cluster", { error, data });
+          logError(
+            "clustersQueries.createCluster",
+            "Error creating new cluster",
+            { error, data }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat cluster baru",
@@ -264,7 +299,10 @@ const clustersQueries = {
             .where(eq(clusters.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("Error updating cluster", { error, data });
+          logError("clustersQueries.updateCluster", "Error updating cluster", {
+            error,
+            data,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui cluster",
@@ -307,7 +345,10 @@ const clustersQueries = {
             .where(eq(clusters.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error deleting cluster", { error, id });
+          logError("clustersQueries.deleteCluster", "Error deleting cluster", {
+            error,
+            id,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus cluster",
@@ -350,7 +391,14 @@ const clustersQueries = {
             .where(eq(clusters.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error restoring cluster", { error, id });
+          logError(
+            "clustersQueries.restoreCluster",
+            "Error restoring cluster",
+            {
+              error,
+              id,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan cluster",

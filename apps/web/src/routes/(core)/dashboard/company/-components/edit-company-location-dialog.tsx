@@ -16,6 +16,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -50,7 +51,7 @@ export default function EditCompanyLocationDialog({
   const [regencyOpen, setRegencyOpen] = useState(false);
   const [districtOpen, setDistrictOpen] = useState(false);
 
-  const { data: editingTestingLocation } = useQuery({
+  const { data: editingTestingLocation, isLoading } = useQuery({
     ...trpc.userCompanyTestingLocation.getUserCompanyTestingLocationById.queryOptions(
       {
         id: editingTestingLocationId!,
@@ -162,96 +163,116 @@ export default function EditCompanyLocationDialog({
             Isi formulir di bawah untuk menambahkan lokasi pengujian baru
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-          <FieldGroup>
-            <Controller
-              control={form.control}
-              name="name"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="space-y-1">
-                  <FieldLabel className="ml-1 text-sm font-bold">
-                    Nama Perusahaan
-                  </FieldLabel>
-                  <Input
-                    type="text"
-                    placeholder="Masukkan nama perusahaan"
-                    className="h-10 text-sm"
-                    {...field}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+        {isLoading ? (
+          <div className="grid gap-4">
+            <SkeletonGenerator variant="input" />
+            <SkeletonGenerator variant="combobox" />
+            <SkeletonGenerator variant="combobox" />
+          </div>
+        ) : (
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="grid gap-4"
+          >
+            <FieldGroup>
+              <Controller
+                control={form.control}
+                name="name"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Nama Perusahaan
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nama perusahaan"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
-            <Controller
-              control={form.control}
-              name="regencyId"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="space-y-1">
-                  <FieldLabel className="ml-1 text-sm font-bold">
-                    Kabupaten/Kota
-                  </FieldLabel>
-                  <ComboBox
-                    options={regency || []}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    placeholder="Pilih kabupaten/kota..."
-                    searchPlaceholder="Cari kabupaten/kota..."
-                    emptyMessage="Tidak ada kabupaten/kota yang ditemukan."
-                    open={regencyOpen}
-                    onOpenChange={setRegencyOpen}
-                    invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+              <Controller
+                control={form.control}
+                name="regencyId"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Kabupaten/Kota
+                    </FieldLabel>
+                    <ComboBox
+                      options={regency || []}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      placeholder="Pilih kabupaten/kota..."
+                      searchPlaceholder="Cari kabupaten/kota..."
+                      emptyMessage="Tidak ada kabupaten/kota yang ditemukan."
+                      open={regencyOpen}
+                      onOpenChange={setRegencyOpen}
+                      invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
-            <Controller
-              control={form.control}
-              name="districtId"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="space-y-1">
-                  <FieldLabel className="ml-1 text-sm font-bold">
-                    Kecamatan
-                  </FieldLabel>
-                  <ComboBox
-                    options={districts || []}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    placeholder="Pilih kecamatan..."
-                    searchPlaceholder="Cari kecamatan..."
-                    emptyMessage="Tidak ada kecamatan yang ditemukan."
-                    open={districtOpen}
-                    onOpenChange={setDistrictOpen}
-                    disabled={!regencyId}
-                    invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-          <DialogFooter>
-            <DialogClose>Batal</DialogClose>
-            <Button
-              type="submit"
-              disabled={updateCompanyTestingLocationMutation.isPending}
-            >
-              {updateCompanyTestingLocationMutation.isPending ? (
-                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Simpan Perubahan
-            </Button>
-          </DialogFooter>
-        </form>
+              <Controller
+                control={form.control}
+                name="districtId"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Kecamatan
+                    </FieldLabel>
+                    <ComboBox
+                      options={districts || []}
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      placeholder="Pilih kecamatan..."
+                      searchPlaceholder="Cari kecamatan..."
+                      emptyMessage="Tidak ada kecamatan yang ditemukan."
+                      open={districtOpen}
+                      onOpenChange={setDistrictOpen}
+                      disabled={!regencyId}
+                      invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+            <DialogFooter>
+              <DialogClose>Batal</DialogClose>
+              <Button
+                type="submit"
+                disabled={updateCompanyTestingLocationMutation.isPending}
+              >
+                {updateCompanyTestingLocationMutation.isPending ? (
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Simpan Perubahan
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

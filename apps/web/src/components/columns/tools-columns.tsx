@@ -26,6 +26,7 @@ const ActionCell = createCrudActionCell<
   restoreMutation: trpc.tool.restoreTool,
   getQueryOptions: (params) => trpc.tool.getToolPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
+  showDetail: true,
 });
 
 export default function getToolsColumns({

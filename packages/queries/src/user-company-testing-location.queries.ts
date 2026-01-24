@@ -15,7 +15,7 @@ import { userCompanyTestingLocation } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -27,8 +27,9 @@ const userCompanyTestingLocationQueries = {
           where: isNull(userCompanyTestingLocation.deletedAt),
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations",
+          "Error fetching all user company testing locations",
           { error }
         );
         throw new TRPCError({
@@ -49,8 +50,9 @@ const userCompanyTestingLocationQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByUserId",
+          "Error fetching all user company testing locations by user ID",
           { error }
         );
         throw new TRPCError({
@@ -99,8 +101,9 @@ const userCompanyTestingLocationQueries = {
           },
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId",
+          "Error fetching all user company testing locations by company ID and user ID",
           { error }
         );
         throw new TRPCError({
@@ -126,8 +129,9 @@ const userCompanyTestingLocationQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationById",
+          "Error fetching user company testing location by user ID and company ID",
           { error }
         );
         throw new TRPCError({
@@ -149,8 +153,9 @@ const userCompanyTestingLocationQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationById",
+          "Error fetching user company testing location by ID",
           { error }
         );
         throw new TRPCError({
@@ -178,8 +183,9 @@ const userCompanyTestingLocationQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getDeletedUserCompanyTestingLocationById",
+          "Error fetching deleted user company testing location by ID",
           { error }
         );
         throw new TRPCError({
@@ -204,8 +210,9 @@ const userCompanyTestingLocationQueries = {
           where: eq(userCompanyTestingLocation.name, name),
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationByName",
+          "Error fetching user company testing location by name",
           { error }
         );
         throw new TRPCError({
@@ -233,8 +240,9 @@ const userCompanyTestingLocationQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error(
+        logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationsNameByUserId",
+          "Error fetching user company testing location by user ID and name",
           { error }
         );
         throw new TRPCError({
@@ -357,10 +365,14 @@ const userCompanyTestingLocationQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated userCompanyTestingLocation", {
-            error,
-            input,
-          });
+          logError(
+            "userCompanyTestingLocationQueries.getOffsetPaginationUserCompanyTestingLocationsByUserIdAndCompanyId",
+            "Error fetching paginated user company testing locations by user ID and company ID",
+            {
+              error,
+              input,
+            }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data Kabupaten/Kota.`,
@@ -460,10 +472,11 @@ const userCompanyTestingLocationQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated userCompanyTestingLocation", {
-            error,
-            input,
-          });
+          logError(
+            "userCompanyTestingLocationQueries.getOffsetPaginationUserCompanyTestingLocations",
+            "Error fetching paginated user company testing locations",
+            { error, input }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data Kabupaten/Kota.`,
@@ -514,8 +527,9 @@ const userCompanyTestingLocationQueries = {
             })
             .returning(),
         catch: (error) => {
-          logger.error(
+          logError(
             "userCompanyTestingLocationQueries.createUserCompanyTestingLocation",
+            "Error creating user company testing location",
             { error, data }
           );
           throw new TRPCError({
@@ -580,8 +594,9 @@ const userCompanyTestingLocationQueries = {
             .where(eq(userCompanyTestingLocation.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error(
+          logError(
             "userCompanyTestingLocationQueries.updateUserCompanyTestingLocation",
+            "Error updating user company testing location",
             { error, data }
           );
           throw new TRPCError({
@@ -640,8 +655,9 @@ const userCompanyTestingLocationQueries = {
             .where(eq(userCompanyTestingLocation.id, id))
             .returning(),
         catch: (error) => {
-          logger.error(
+          logError(
             "userCompanyTestingLocationQueries.deleteUserCompanyTestingLocation",
+            "Error deleting user company testing location",
             { error, id }
           );
           throw new TRPCError({
@@ -701,8 +717,9 @@ const userCompanyTestingLocationQueries = {
             .returning(),
 
         catch: (error) => {
-          logger.error(
+          logError(
             "userCompanyTestingLocationQueries.restoreUserCompanyTestingLocation",
+            "Error restoring user company testing location",
             { error, id }
           );
           throw new TRPCError({

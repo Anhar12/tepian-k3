@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
-import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import userCompanySchema from "@tepian-k3/schema/user-company.schema";
 import type { UserCompaniesWithRelations } from "@tepian-k3/types/user-company.types";
@@ -19,8 +18,6 @@ import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/(core)/dashboard/company/")({
   validateSearch: userCompanySchema.getAllUserCompaniesSchema,
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "user-company.read" }),
   component: RouteComponent,
 });
 

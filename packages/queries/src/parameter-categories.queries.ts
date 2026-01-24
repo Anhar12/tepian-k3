@@ -16,7 +16,7 @@ import { clusters, parameterCategories } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
 import { Effect } from "effect";
-import { logger } from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 
@@ -28,7 +28,11 @@ const parameterCategoriesQueries = {
           where: isNull(parameterCategories.deletedAt),
         }),
       catch: (error) => {
-        logger.error("Error fetching all parameter categories", { error });
+        logError(
+          "parameterCategoriesQueries.getAllParameterCategories",
+          "Failed to fetch all parameter categories",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data semua kategori parameter",
@@ -47,7 +51,11 @@ const parameterCategoriesQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error("Error fetching parameter category by ID", { error });
+        logError(
+          "parameterCategoriesQueries.getParameterCategoryById",
+          "Failed to fetch parameter category by ID",
+          { id, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data kategori parameter berdasarkan ID",
@@ -72,9 +80,11 @@ const parameterCategoriesQueries = {
           ),
         }),
       catch: (error) => {
-        logger.error("Error fetching deleted parameter category by ID", {
-          error,
-        });
+        logError(
+          "parameterCategoriesQueries.getDeletedParameterCategoryById",
+          "Failed to fetch deleted parameter category by ID",
+          { id, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -97,7 +107,11 @@ const parameterCategoriesQueries = {
           where: eq(parameterCategories.name, name),
         }),
       catch: (error) => {
-        logger.error("Error fetching parameter category by name", { error });
+        logError(
+          "parameterCategoriesQueries.getParameterCategoryByName",
+          "Failed to fetch parameter category by name",
+          { name, error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data kategori parameter berdasarkan nama",
@@ -204,10 +218,11 @@ const parameterCategoriesQueries = {
             return { data, total };
           }),
         catch: (error) => {
-          logger.error("Error fetching paginated parameter categories", {
-            error,
-            input,
-          });
+          logError(
+            "parameterCategoriesQueries.getOffsetPaginatedParameterCategories",
+            "Failed to fetch paginated parameter categories",
+            { input, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal mengambil data kategori parameter`,
@@ -245,7 +260,11 @@ const parameterCategoriesQueries = {
       const [parameterCategory] = yield* Effect.tryPromise({
         try: () => db.insert(parameterCategories).values(data).returning(),
         catch: (error) => {
-          logger.error("Error creating parameter category", { error, data });
+          logError(
+            "parameterCategoriesQueries.createParameterCategory",
+            "Failed to create new parameter category",
+            { data, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat kategori parameter baru",
@@ -307,7 +326,11 @@ const parameterCategoriesQueries = {
             .where(eq(parameterCategories.id, data.id))
             .returning(),
         catch: (error) => {
-          logger.error("Error updating parameter category", { error, data });
+          logError(
+            "parameterCategoriesQueries.updateParameterCategory",
+            "Failed to update parameter category",
+            { data, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui kategori parameter",
@@ -349,7 +372,11 @@ const parameterCategoriesQueries = {
             .where(eq(parameterCategories.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error deleting parameter category", { error, id });
+          logError(
+            "parameterCategoriesQueries.deleteParameterCategory",
+            "Failed to delete parameter category",
+            { id, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus kategori parameter",
@@ -391,7 +418,11 @@ const parameterCategoriesQueries = {
             .where(eq(parameterCategories.id, id))
             .returning(),
         catch: (error) => {
-          logger.error("Error restoring parameter category", { error, id });
+          logError(
+            "parameterCategoriesQueries.restoreParameterCategory",
+            "Failed to restore parameter category",
+            { id, error }
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan kategori parameter",

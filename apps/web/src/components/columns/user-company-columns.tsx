@@ -29,7 +29,6 @@ const ActionCell = createCrudActionCell<
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
   onHoverDetail: (id) => {
-    console.log("hover detail", id);
     queryClient.prefetchQuery(
       trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({ id }),
     );

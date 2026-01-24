@@ -15,16 +15,43 @@
     },
     "./storage": {
       "default": "./src/storage/index.ts"
+    },
+    "./notifications": {
+      "default": "./src/notifications/index.ts"
+    },
+    "./pdf": {
+      "default": "./src/pdf/index.ts"
+    },
+    "./pdf/client": {
+      "default": "./src/pdf/client.ts"
+    },
+    "./document-signing": {
+      "default": "./src/document-signing/index.ts"
+    },
+    "./image": {
+      "default": "./src/image/index.ts"
+    },
+    "./rate-limiter": {
+      "default": "./src/rate-limiter/index.ts"
     }
   },
   "dependencies": {
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.0",
+    "@react-pdf/renderer": "^4.3.2",
+    "@tepian-k3/constants": "workspace:*",
+    "@trpc/server": "catalog:",
+    "file-saver": "^2.0.5",
+    "ioredis": "^5.9.1",
+    "jose": "catalog:",
     "logform": "^2.7.0",
     "minio": "^8.0.6",
     "nodemailer": "^7.0.11",
-    "react": "19.2.3",
+    "pdf-lib": "catalog:",
+    "qrcode": "catalog:",
+    "react": "catalog:react19",
     "resend": "^6.6.0",
+    "sharp": "^0.34.5",
     "uuid": "catalog:",
     "winston": "^3.19.0"
   },
@@ -32,8 +59,13 @@
     "@react-email/preview-server": "5.0.8",
     "@t3-oss/env-core": "^0.13.10",
     "@tepian-k3/config": "workspace:*",
+    "@tepian-k3/schema": "workspace:*",
+    "@tepian-k3/types": "workspace:*",
+    "@tepian-k3/utils": "workspace:*",
+    "@types/file-saver": "^2.0.7",
     "@types/nodemailer": "^7.0.4",
-    "@types/react": "19.2.3",
+    "@types/qrcode": "catalog:",
+    "@types/react": "catalog:react19",
     "dotenv-cli": "^11.0.0",
     "effect": "catalog:",
     "react-email": "^5.0.8",

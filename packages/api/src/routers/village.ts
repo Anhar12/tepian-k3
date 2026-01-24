@@ -1,16 +1,17 @@
 import villageSchema from "@tepian-k3/schema/village.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import villageQueries from "@tepian-k3/queries/village.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const villageRouter = createTRPCRouter({
-  getAllVillages: publicProcedure.query(
-    async () => await Effect.runPromise(villageQueries.getAllVillages())
+  getAllVillages: withRateLimit(rateLimiters.moderate()).query(
+    async () => await runEffect(villageQueries.getAllVillages())
   ),
 
-  getAllVillagesByDistrictId: publicProcedure
+  getAllVillagesByDistrictId: withRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         districtId: z.uuidv7(),
@@ -18,7 +19,7 @@ export const villageRouter = createTRPCRouter({
     )
     .query(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           villageQueries.getAllVillagesByDistrictId(input.districtId)
         )
     ),
@@ -26,7 +27,7 @@ export const villageRouter = createTRPCRouter({
   getPaginatedVillages: withPermission("village.read")
     .input(villageSchema.getAllVillagesSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         villageQueries.getOffsetPaginationVillages(input)
       );
 
@@ -40,9 +41,7 @@ export const villageRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const village = await Effect.runPromise(
-        villageQueries.getVillageById(input.id)
-      );
+      const village = await runEffect(villageQueries.getVillageById(input.id));
 
       if (!village) {
         throw new TRPCError({
@@ -57,15 +56,13 @@ export const villageRouter = createTRPCRouter({
   createVillage: withPermission("village.create")
     .input(villageSchema.createVillageSchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(villageQueries.createVillage(input))
+      async ({ input }) => await runEffect(villageQueries.createVillage(input))
     ),
 
   updateVillage: withPermission("village.update")
     .input(villageSchema.updateVillageSchema)
     .mutation(
-      async ({ input }) =>
-        await Effect.runPromise(villageQueries.updateVillage(input))
+      async ({ input }) => await runEffect(villageQueries.updateVillage(input))
     ),
 
   deleteVillage: withPermission("village.delete")
@@ -76,7 +73,7 @@ export const villageRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(villageQueries.deleteVillage(input.id))
+        await runEffect(villageQueries.deleteVillage(input.id))
     ),
 
   restoreVillage: withPermission("village.delete")
@@ -87,6 +84,6 @@ export const villageRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(villageQueries.restoreVillage(input.id))
+        await runEffect(villageQueries.restoreVillage(input.id))
     ),
 });

@@ -3,26 +3,32 @@ import {
   createTRPCRouter,
   formDataInput,
   formDataProcedure,
-  protectedProcedure,
-  publicProcedure,
   withPermission,
+  withProtectedRateLimit,
 } from "..";
-import { Effect } from "effect";
 import userCompanyQueries from "@tepian-k3/queries/user-company.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { storageService, type UploadResult } from "@tepian-k3/services/storage";
+import { runEffect } from "../utils/run-effect";
+import { Effect } from "effect";
+import { imageService } from "@tepian-k3/services/image";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userCompanyRouter = createTRPCRouter({
-  getAllUserCompanies: publicProcedure.query(
-    async () =>
-      await Effect.runPromise(userCompanyQueries.getAllUserCompanies())
+  getAllUserCompaniesByUserId: withProtectedRateLimit(
+    rateLimiters.moderate()
+  ).query(
+    async ({ ctx: { user } }) =>
+      await runEffect(userCompanyQueries.getAllUserCompaniesByUserId(user.id))
   ),
 
-  getPaginatedUserCompaniesByUserId: protectedProcedure
+  getPaginatedUserCompaniesByUserId: withProtectedRateLimit(
+    rateLimiters.moderate()
+  )
     .input(userCompanySchema.getAllUserCompaniesSchema)
     .query(async ({ input, ctx: { user } }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         userCompanyQueries.getOffsetPaginatedUserCompaniesByUserId(
           user.id,
           input
@@ -32,10 +38,10 @@ export const userCompanyRouter = createTRPCRouter({
       return { data, pageCount };
     }),
 
-  getPaginatedUserCompanies: withPermission("user-company.read")
+  getPaginatedUserCompanies: withPermission("user-company.view")
     .input(userCompanySchema.getAllUserCompaniesSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         userCompanyQueries.getOffsetPaginatedUserCompanies(input)
       );
 
@@ -49,7 +55,7 @@ export const userCompanyRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const userCompany = await Effect.runPromise(
+      const userCompany = await runEffect(
         userCompanyQueries.getUserCompanyById(input.id)
       );
 
@@ -63,14 +69,14 @@ export const userCompanyRouter = createTRPCRouter({
       return userCompany;
     }),
 
-  getUserCompanyByIdAndUserId: protectedProcedure
+  getUserCompanyByIdAndUserId: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         id: z.uuidv7(),
       })
     )
     .query(async ({ input, ctx: { user } }) => {
-      const userCompany = await Effect.runPromise(
+      const userCompany = await runEffect(
         userCompanyQueries.getUserCompanyDetailsByUserIdAndId(user.id, input.id)
       );
 
@@ -89,11 +95,11 @@ export const userCompanyRouter = createTRPCRouter({
       };
     }),
 
-  userCreateUserCompany: protectedProcedure
+  userCreateUserCompany: withProtectedRateLimit(rateLimiters.moderate())
     .input(formDataInput)
     .use(formDataProcedure(userCompanySchema.createUserCompanySchema))
     .mutation(async ({ ctx }) =>
-      Effect.runPromise(
+      runEffect(
         Effect.gen(function* () {
           // convert file to buffer
           const arrayBuffer = yield* Effect.tryPromise(() =>
@@ -102,15 +108,23 @@ export const userCompanyRouter = createTRPCRouter({
 
           const buffer = Buffer.from(arrayBuffer);
 
-          const uploadedFile = yield* storageService.upload(buffer, {
+          const convertedImage = yield* imageService.convertToWebP(buffer, {
+            quality: 80,
+            effort: 4,
             filename: ctx.input.data.picture.name,
-            folder: "company-pictures",
           });
+
+          const uploadedFile = yield* storageService.upload(
+            convertedImage.buffer,
+            {
+              filename: convertedImage.filename!,
+              folder: "company-pictures",
+            }
+          );
 
           const result = yield* userCompanyQueries.userCreateUserCompany(
             ctx.user.id,
             ctx.input.data,
-            uploadedFile.filename,
             uploadedFile.key
           );
 
@@ -119,11 +133,11 @@ export const userCompanyRouter = createTRPCRouter({
       )
     ),
 
-  userUpdateUserCompany: protectedProcedure
+  userUpdateUserCompany: withProtectedRateLimit(rateLimiters.moderate())
     .input(formDataInput)
     .use(formDataProcedure(userCompanySchema.updateUserCompanySchema))
     .mutation(async ({ ctx: { user, input } }) =>
-      Effect.runPromise(
+      runEffect(
         Effect.gen(function* () {
           let uploadedFile: UploadResult | null = null;
 
@@ -135,8 +149,14 @@ export const userCompanyRouter = createTRPCRouter({
 
             const buffer = Buffer.from(arrayBuffer);
 
-            uploadedFile = yield* storageService.upload(buffer, {
+            const convertedImage = yield* imageService.convertToWebP(buffer, {
+              quality: 80,
+              effort: 4,
               filename: input.data.picture.name,
+            });
+
+            uploadedFile = yield* storageService.upload(convertedImage.buffer, {
+              filename: convertedImage.filename!,
               folder: "company-pictures",
             });
           }
@@ -144,7 +164,6 @@ export const userCompanyRouter = createTRPCRouter({
           const result = yield* userCompanyQueries.userUpdateUserCompany(
             user.id,
             input.data,
-            uploadedFile?.filename,
             uploadedFile?.key
           );
 
@@ -153,7 +172,7 @@ export const userCompanyRouter = createTRPCRouter({
       )
     ),
 
-  userDeleteUserCompany: protectedProcedure
+  userDeleteUserCompany: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         id: z.uuidv7(),
@@ -161,12 +180,12 @@ export const userCompanyRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyQueries.userDeleteUserCompany(user.id, input.id)
         )
     ),
 
-  userRestoreUserCompany: protectedProcedure
+  userRestoreUserCompany: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         id: z.uuidv7(),
@@ -174,7 +193,7 @@ export const userCompanyRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyQueries.userRestoreUserCompany(user.id, input.id)
         )
     ),

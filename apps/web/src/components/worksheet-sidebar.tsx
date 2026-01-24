@@ -1,0 +1,227 @@
+import * as React from "react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Building2,
+  Calendar,
+  ClipboardList,
+  Home,
+  Loader2,
+  Mail,
+  MapPin,
+  PhoneCall,
+  User,
+} from "lucide-react";
+import { Button } from "./ui/button";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
+import {
+  WORKSHEET_STATUS_COLORS,
+  WORKSHEET_STATUS_LABELS,
+  type WorksheetStatus,
+} from "@tepian-k3/constants";
+import { getPublicUrl } from "@/utils/url";
+
+const routeApi = getRouteApi("/(core)/worksheets");
+
+export function WorksheetSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const navigate = useNavigate();
+  const { worksheetId } = routeApi.useSearch();
+
+  const { data: worksheet, isLoading } = useQuery(
+    trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+  );
+
+  const company = worksheet?.order?.company;
+  const testing = worksheet?.testing ?? null;
+  const order = worksheet?.order;
+  const mainSupervisor = worksheet?.mainSupervisor;
+
+  return (
+    <Sidebar collapsible="offcanvas" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:p-1.5!"
+            >
+              <a href="#" className="flex flex-row items-center justify-start">
+                <img
+                  src="/assets/tepian-k3.png"
+                  alt="Tepian K3 Logo"
+                  className="size-6"
+                />
+                <span className="text-base font-semibold">Tepian K3</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent className="p-4">
+        {isLoading ? (
+          <div className="flex h-64 items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : worksheet ? (
+          <div className="mx-auto flex flex-col gap-6">
+            {/* Company Picture */}
+            <div className="flex justify-center">
+              <div className="flex size-32 items-center justify-center rounded-lg bg-muted">
+                <img
+                  src={getPublicUrl(company?.companyPictureUrl || "")}
+                  alt="Company"
+                  className="size-32 rounded-lg object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Company Name */}
+            <div className="text-center">
+              <h2 className="text-lg font-semibold">
+                {company?.name ?? "Unknown Company"}
+              </h2>
+              {worksheet.status && (
+                <Badge
+                  className={`mt-2 ${WORKSHEET_STATUS_COLORS[worksheet.status]}`}
+                >
+                  {WORKSHEET_STATUS_LABELS[worksheet.status]}
+                </Badge>
+              )}
+            </div>
+
+            {/* Worksheet Info */}
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <div className="flex items-center gap-2 text-sm">
+                <ClipboardList className="size-4 text-muted-foreground" />
+                <span className="font-medium">Testing:</span>
+                <span className="text-muted-foreground">
+                  {testing?.testingNumber ?? "N/A"}
+                </span>
+              </div>
+              {order?.orderNumber && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <ClipboardList className="size-4 text-muted-foreground" />
+                  <span className="font-medium">Order:</span>
+                  <span className="text-muted-foreground">
+                    {order.orderNumber}
+                  </span>
+                </div>
+              )}
+              {worksheet.startDate && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <Calendar className="size-4 text-muted-foreground" />
+                  <span className="font-medium">Mulai:</span>
+                  <span className="text-muted-foreground">
+                    {new Date(worksheet.startDate).toLocaleDateString("id-ID")}
+                  </span>
+                </div>
+              )}
+              {worksheet.endDate && (
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <Calendar className="size-4 text-muted-foreground" />
+                  <span className="font-medium">Selesai:</span>
+                  <span className="text-muted-foreground">
+                    {new Date(worksheet.endDate).toLocaleDateString("id-ID")}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Company Details */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Detail Perusahaan
+              </h3>
+              {/* Address */}
+              {company?.address && (
+                <div className="flex gap-3">
+                  <MapPin className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.address}
+                  </span>
+                </div>
+              )}
+
+              {/* Contact Person */}
+              {company?.responsibleTestingPerson && (
+                <div className="flex gap-3">
+                  <User className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.responsibleTestingPerson}
+                  </span>
+                </div>
+              )}
+
+              {/* Contact Number */}
+              {company?.responsibleTestingPersonPhone && (
+                <div className="flex gap-3">
+                  <PhoneCall className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.responsibleTestingPersonPhone}
+                  </span>
+                </div>
+              )}
+
+              {/* Contact Email */}
+              {company?.responsibleTestingPersonEmail && (
+                <div className="flex gap-3">
+                  <Mail className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {company.responsibleTestingPersonEmail}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Supervisor Info */}
+            {mainSupervisor && (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-muted-foreground">
+                  Supervisor
+                </h3>
+                <div className="flex gap-3">
+                  <User className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {mainSupervisor.user?.name ?? mainSupervisor.name ?? "N/A"}
+                  </span>
+                </div>
+                {mainSupervisor.position && (
+                  <div className="ml-7 text-xs text-muted-foreground">
+                    {mainSupervisor.position.name}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
+            <ClipboardList className="size-8" />
+            <span className="text-sm">Worksheet tidak ditemukan</span>
+          </div>
+        )}
+      </SidebarContent>
+      <SidebarFooter>
+        <Button
+          variant="secondary"
+          className="w-full"
+          onClick={() => navigate({ to: "/dashboard" })}
+        >
+          <Home className="size-5" />
+          Back to Dashboard
+        </Button>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}

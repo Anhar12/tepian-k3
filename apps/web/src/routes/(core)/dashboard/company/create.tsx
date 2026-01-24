@@ -24,7 +24,6 @@ import SingleImageUpload from "@/components/ui/single-image-upload";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { toFormData } from "@/utils/form-data-mapper";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,12 +35,9 @@ import { LoaderCircle, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
+import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 
 export const Route = createFileRoute("/(core)/dashboard/company/create")({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "user-company.create",
-    }),
   loader: async ({ context }) => {
     context.queryClient.ensureQueryData(
       context.trpc.kbli.getAllKblis.queryOptions(),
@@ -51,7 +47,26 @@ export const Route = createFileRoute("/(core)/dashboard/company/create")({
     );
   },
   component: RouteComponent,
+  pendingComponent: LoaderComponent,
 });
+
+function LoaderComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Buat Perusahaan Baru</CardTitle>
+          <CardDescription>
+            Isi form di bawah untuk membuat perusahaan baru.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SkeletonGenerator variant="companyForm" />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
@@ -421,7 +436,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <FieldLabel htmlFor={`form-wlkp-radiogroup-yes`}>
                         <Field
-                          orientation="vertical"
+                          orientation="horizontal"
                           data-invalid={fieldState.invalid}
                         >
                           <FieldContent>
@@ -577,7 +592,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <FieldLabel htmlFor={`form-rhf-radiogroup-yes`}>
                         <Field
-                          orientation="vertical"
+                          orientation="horizontal"
                           data-invalid={fieldState.invalid}
                         >
                           <FieldContent>

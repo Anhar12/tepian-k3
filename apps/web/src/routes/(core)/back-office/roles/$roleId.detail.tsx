@@ -9,6 +9,11 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  SkeletonButton,
+  SkeletonInput,
+} from "@/components/ui/skeleton-generator";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -18,7 +23,9 @@ import { LoaderCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
 
-export const Route = createFileRoute("/(core)/back-office/roles/$roleId/detail")({
+export const Route = createFileRoute(
+  "/(core)/back-office/roles/$roleId/detail",
+)({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "roles.read" }),
   params: z.object({
@@ -36,7 +43,34 @@ export const Route = createFileRoute("/(core)/back-office/roles/$roleId/detail")
     );
   },
   component: RouteComponent,
+  pendingComponent: LoaderComponent,
 });
+
+function LoaderComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Detail Role & Izin: </CardTitle>
+          <CardDescription>
+            Kelola izin yang dimiliki oleh role ini.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4">
+            <SkeletonInput className="mb-6 h-10 w-full" />
+
+            <SkeletonButton className="w-full" />
+
+            <Skeleton className="h-48 w-full" />
+
+            <SkeletonButton className="w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function RouteComponent() {
   const { roleId } = Route.useParams();
@@ -137,9 +171,9 @@ function RouteComponent() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Buat Alat Baru</CardTitle>
+          <CardTitle>Detail Role & Izin: {role.name}</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk membuat alat baru.
+            Kelola izin yang dimiliki oleh role ini.
           </CardDescription>
         </CardHeader>
         <CardContent>

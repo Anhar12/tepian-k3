@@ -40,10 +40,6 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/dashboard/company/$companyId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "user-company.update",
-    }),
   params: z.object({
     companyId: z.uuidv7(),
   }),

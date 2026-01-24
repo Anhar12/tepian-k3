@@ -1,20 +1,28 @@
 import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
+import {
+  createTRPCRouter,
+  withProtectedRateLimit,
+  withPermission,
+  withRateLimit,
+} from "..";
 import userCompanyTestingLocationQueries from "@tepian-k3/queries/user-company-testing-location.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userCompanyTestingLocationRouter = createTRPCRouter({
-  getAllUserCompanyTestingLocations: publicProcedure.query(
+  getAllUserCompanyTestingLocations: withRateLimit(
+    rateLimiters.moderate()
+  ).query(
     async () =>
-      await Effect.runPromise(
+      await runEffect(
         userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations()
       )
   ),
 
-  getAllUserCompanyTestingLocationsByCompanyIdAndUserId: withPermission(
-    "user-company-testing-location.read"
+  getAllUserCompanyTestingLocationsByCompanyIdAndUserId: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       z.object({
@@ -22,24 +30,25 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         showDeleted: z.boolean().optional(),
       })
     )
-    .query(async ({ input, ctx: { user } }) => {
-      return await Effect.runPromise(
-        userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
-          input.companyId,
-          user.id,
-          input.showDeleted ?? false
+    .query(
+      async ({ input, ctx: { user } }) =>
+        await runEffect(
+          userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
+            input.companyId,
+            user.id,
+            input.showDeleted ?? false
+          )
         )
-      );
-    }),
+    ),
 
   getPaginatedUserCompanyTestingLocations: withPermission(
-    "user-company-testing-location.read"
+    "user-company-testing-location.view"
   )
     .input(
       userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema
     )
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         userCompanyTestingLocationQueries.getOffsetPaginationUserCompanyTestingLocations(
           input
         )
@@ -49,7 +58,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     }),
 
   getUserCompanyTestingLocationByUserIdAndCompanyId: withPermission(
-    "user-company-testing-location.read"
+    "user-company-testing-location.view"
   )
     .input(
       z.object({
@@ -57,7 +66,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx: { user } }) => {
-      const userCompanyTestingLocation = await Effect.runPromise(
+      const userCompanyTestingLocation = await runEffect(
         userCompanyTestingLocationQueries.getUserCompanyTestingLocationByUserIdAndCompanyId(
           user.id,
           input.companyId
@@ -68,7 +77,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     }),
 
   getUserCompanyTestingLocationById: withPermission(
-    "user-company-testing-location.read"
+    "user-company-testing-location.view"
   )
     .input(
       z.object({
@@ -76,7 +85,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const userCompanyTestingLocation = await Effect.runPromise(
+      const userCompanyTestingLocation = await runEffect(
         userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
           input.id
         )
@@ -92,15 +101,15 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
       return userCompanyTestingLocation;
     }),
 
-  userCreateUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.create"
+  userCreateUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userCreateUserCompanyTestingLocation(
             user.id,
             input
@@ -108,15 +117,15 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  userUpdateUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.update"
+  userUpdateUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userUpdateUserCompanyTestingLocation(
             user.id,
             input
@@ -124,8 +133,8 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  userDeleteUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.delete"
+  userDeleteUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       z.object({
@@ -134,7 +143,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userDeleteUserCompanyTestingLocation(
             user.id,
             input.id
@@ -142,8 +151,8 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
         )
     ),
 
-  userRestoreUserCompanyTestingLocation: withPermission(
-    "user-company-testing-location.delete"
+  userRestoreUserCompanyTestingLocation: withProtectedRateLimit(
+    rateLimiters.moderate()
   )
     .input(
       z.object({
@@ -152,7 +161,7 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
-        await Effect.runPromise(
+        await runEffect(
           userCompanyTestingLocationQueries.userRestoreUserCompanyTestingLocation(
             user.id,
             input.id

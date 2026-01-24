@@ -1,16 +1,17 @@
 import districtSchema from "@tepian-k3/schema/district.schema";
-import { createTRPCRouter, publicProcedure, withPermission } from "..";
-import { Effect } from "effect";
+import { createTRPCRouter, withPermission, withRateLimit } from "..";
 import districtQueries from "@tepian-k3/queries/district.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { runEffect } from "../utils/run-effect";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const districtRouter = createTRPCRouter({
-  getAllDistricts: publicProcedure.query(
-    async () => await Effect.runPromise(districtQueries.getAllDistricts())
+  getAllDistricts: withRateLimit(rateLimiters.moderate()).query(
+    async () => await runEffect(districtQueries.getAllDistricts())
   ),
 
-  getAllDistrictsByRegencyId: publicProcedure
+  getAllDistrictsByRegencyId: withRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         regencyId: z.uuidv7(),
@@ -18,15 +19,15 @@ export const districtRouter = createTRPCRouter({
     )
     .query(
       async ({ input }) =>
-        await Effect.runPromise(
+        await runEffect(
           districtQueries.getAllDistrictsByRegencyId(input.regencyId)
         )
     ),
 
-  getPaginatedDistricts: withPermission("district.read")
+  getPaginatedDistricts: withPermission("district.view")
     .input(districtSchema.getAllDistrictsSchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await Effect.runPromise(
+      const { data, pageCount } = await runEffect(
         districtQueries.getOffsetPaginatedDistricts(input)
       );
 
@@ -40,7 +41,7 @@ export const districtRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const district = await Effect.runPromise(
+      const district = await runEffect(
         districtQueries.getDistrictById(input.id)
       );
 
@@ -58,14 +59,14 @@ export const districtRouter = createTRPCRouter({
     .input(districtSchema.createDistrictSchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(districtQueries.createDistrict(input))
+        await runEffect(districtQueries.createDistrict(input))
     ),
 
   updateDistrict: withPermission("district.update")
     .input(districtSchema.updateDistrictSchema)
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(districtQueries.updateDistrict(input))
+        await runEffect(districtQueries.updateDistrict(input))
     ),
 
   deleteDistrict: withPermission("district.delete")
@@ -76,7 +77,7 @@ export const districtRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(districtQueries.deleteDistrict(input.id))
+        await runEffect(districtQueries.deleteDistrict(input.id))
     ),
 
   restoreDistrict: withPermission("district.delete")
@@ -87,6 +88,6 @@ export const districtRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await Effect.runPromise(districtQueries.restoreDistrict(input.id))
+        await runEffect(districtQueries.restoreDistrict(input.id))
     ),
 });

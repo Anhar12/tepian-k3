@@ -1,6 +1,6 @@
 import { db } from "@tepian-k3/db/client";
 import { userPermissions } from "@tepian-k3/db/schema";
-import logger from "@tepian-k3/services/logger";
+import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 
@@ -22,7 +22,11 @@ const userPermissionsQueries = {
           })
           .returning(),
       catch: (error) => {
-        logger.error("Error granting permission to user", { error });
+        logError(
+          "userPermissionsQueries.grantPermission",
+          "Error granting permission to user",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memberikan izin ke user",
@@ -48,7 +52,11 @@ const userPermissionsQueries = {
           })
           .returning(),
       catch: (error) => {
-        logger.error("Error revoking permission from user", { error });
+        logError(
+          "userPermissionsQueries.revokePermission",
+          "Error revoking permission from user",
+          { error }
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mencabut izin dari user",

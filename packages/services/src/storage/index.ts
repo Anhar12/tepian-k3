@@ -44,6 +44,12 @@ class StorageService {
     return this.provider.delete(key);
   }
 
+  download(
+    key: string
+  ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
+    return this.provider.download(key);
+  }
+
   getSignedUrl(
     key: string,
     expiresIn: number = 3600
@@ -54,9 +60,22 @@ class StorageService {
   getPublicUrl(key: string): string {
     return this.provider.getPublicUrl(key);
   }
+
+  getAssetUrl(key: string): string {
+    return this.provider.getAssetUrl(key);
+  }
+
+  getFolderFromUrl(url: string): string | null {
+    return this.provider.getFolderFromUrl(url);
+  }
+
+  getKeyFromUrl(url: string): string | null {
+    return this.provider.getKeyFromUrl(url);
+  }
 }
 
 export const storageService = new StorageService();
+
 export { StorageService };
-export type { UploadOptions, UploadResult };
+export type { UploadOptions, UploadResult, StorageType };
 export { StorageError, UploadFailedError, FileNotFoundError };

@@ -2,10 +2,11 @@ import { redirect } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type { AppRouter } from "@tepian-k3/api/root";
+import type { Permission } from "@tepian-k3/constants";
 
 interface RequirePermissionOptions {
   /** Single permission or array of permissions to check */
-  permission: string | string[];
+  permission: Permission | Permission[];
   /** If true, user must have ALL permissions. If false, user needs at least ONE permission */
   requireAll?: boolean;
   /** Redirect path if permission check fails (defaults to /unauthorized) */

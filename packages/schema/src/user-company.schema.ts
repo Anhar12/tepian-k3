@@ -51,7 +51,6 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
     updatedAt: true,
     deletedAt: true,
     userId: true,
-    companyPictureFileName: true,
     companyPictureUrl: true,
   })
   .extend({
@@ -82,7 +81,7 @@ const updateUserCompanySchema = createUpdateSchema(userCompanies, {
     updatedAt: true,
     deletedAt: true,
     userId: true,
-    companyPictureFileName: true,
+
     companyPictureUrl: true,
   })
   .extend({

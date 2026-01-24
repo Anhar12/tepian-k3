@@ -28,7 +28,12 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { TOOLS_AVAILABILITY, TOOLS_CONDITIONS } from "@tepian-k3/constants";
+import {
+  TOOLS_AVAILABILITY,
+  TOOLS_AVAILABILITY_LABELS,
+  TOOLS_CONDITIONS,
+  TOOLS_CONDITIONS_LABELS,
+} from "@tepian-k3/constants";
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
@@ -448,7 +453,7 @@ function RouteComponent() {
                       <SelectContent>
                         {TOOLS_CONDITIONS.map((condition) => (
                           <SelectItem key={condition} value={condition}>
-                            {condition}
+                            {TOOLS_CONDITIONS_LABELS[condition]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -485,7 +490,7 @@ function RouteComponent() {
                       <SelectContent>
                         {TOOLS_AVAILABILITY.map((availability) => (
                           <SelectItem key={availability} value={availability}>
-                            {availability}
+                            {TOOLS_AVAILABILITY_LABELS[availability]}
                           </SelectItem>
                         ))}
                       </SelectContent>

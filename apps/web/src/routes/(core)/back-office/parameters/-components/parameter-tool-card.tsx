@@ -39,11 +39,13 @@ export default function ParameterToolCard({
           }),
         );
 
-        globalSuccessToast("Lokasi pengujian berhasil dihapus.");
+        globalSuccessToast("Alat berhasil dihapus dari parameter.");
         setOpenDeleteDialog(false);
       },
       onError: (error) => {
-        globalErrorToast("Gagal menghapus lokasi pengujian: " + error.message);
+        globalErrorToast(
+          "Gagal menghapus alat dari parameter: " + error.message,
+        );
       },
     }),
   );

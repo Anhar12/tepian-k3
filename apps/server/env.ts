@@ -3,11 +3,17 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
     APP_NAME: z.string().min(1).default("server"),
     SERVER_HOSTNAME: z.string().min(1),
     SERVER_PORT: z.coerce.number().default(3000),
     CORS_ORIGIN: z.url().optional(),
     UPLOADS_DIR: z.string().min(1).default("uploads"),
+    MEMURAI_HOST: z.string().default("localhost"),
+    MEMURAI_PORT: z.string().default("6379"),
+    MEMURAI_PASSWORD: z.string().default(""),
   },
 
   /**
