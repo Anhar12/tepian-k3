@@ -15,6 +15,7 @@ import {
   initializeEventBus,
   shutdownEventBus,
 } from "@tepian-k3/services/notifications";
+import { logInfo } from "@tepian-k3/services/logger";
 
 const redisConfig = {
   host: env.MEMURAI_HOST,
@@ -89,8 +90,6 @@ app.get("/api/uploads/*", async (c) => {
   // Get the full path after /api/uploads/
   const fullPath = c.req.path.replace("/api/uploads/", "");
 
-  console.log("Requested file:", fullPath);
-
   // Security check: prevent directory traversal
   if (fullPath.includes("..")) {
     return c.text("Invalid path", 400);
@@ -122,7 +121,7 @@ serve(
     port: env.SERVER_PORT || 3000,
   },
   (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
+    logInfo("Server", `Running on http://${env.SERVER_HOSTNAME}:${info.port}`);
   },
 );
 
