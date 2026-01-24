@@ -5,10 +5,10 @@ import { createTw } from "react-pdf-tailwind";
 registerLiberationSans();
 registerFontArimo();
 
-const tw = createTw({
+const tw: ReturnType<typeof createTw> = createTw({
   fontFamily: {
     sans: ["Liberation Sans", "Arimo"],
   },
-}) as ReturnType<typeof createTw>;
+});
 
 export { tw };

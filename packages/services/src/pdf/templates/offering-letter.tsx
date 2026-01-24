@@ -5,10 +5,12 @@ import { tw } from "../utils/tw";
 
 interface OfferingLetterProps {
   worksheet: WorksheetTransactionDetail;
+  letterNumber: string;
 }
 
 export const OfferingLetter: React.FC<OfferingLetterProps> = ({
   worksheet,
+  letterNumber,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
     day: "numeric",
@@ -20,11 +22,20 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
     <Document>
       <Page size="A4" style={tw("p-4 text-[11px] font-sans")}>
         {/*  Header with letterhead */}
-        <View style={tw("mb-4")}>
-          <Text style={tw("text-center text-[12px]")}>
-            Lampiran: {worksheet.items.length} (dua) lembar
-          </Text>
-          <Text style={tw("text-center text-[12px]")}>Tanggal: {today}</Text>
+        <View style={tw("mb-4 flex-col justify-between items-center")}>
+          <View style={tw("flex-row justify-between items-center w-1/2 gap-2")}>
+            <Text style={tw("text-[12px]")}>Lampiran</Text>
+            <Text style={tw("text-[12px]")}>:</Text>
+            <Text style={tw("text-[12px]")}>
+              Surat Kepala Balai K3 Nomor {letterNumber}
+            </Text>
+          </View>
+
+          <View style={tw("flex-row justify-between items-center gap-2")}>
+            <Text style={tw("text-[12px]")}>Tanggal</Text>
+            <Text style={tw("text-[12px]")}>:</Text>
+            <Text style={tw("text-[12px]")}>{today}</Text>
+          </View>
         </View>
 
         {/* Header */}
@@ -44,7 +55,7 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
             <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
               No.
             </Text>
-            <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
+            <Text style={tw("w-3/12 border-r border-black p-2 text-center")}>
               Jenis
             </Text>
             <View style={tw("w-2/12 border-r border-black p-2 text-center")}>
@@ -59,17 +70,21 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
               <Text>Lokasi</Text>
               <Text>Pengujian</Text>
             </View>
-            <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
-              Total
+            <Text style={tw("w-2/12 border-black p-2 text-center")}>Total</Text>
+          </View>
+          {/* Section Header Row - spans all columns */}
+          <View style={tw("flex-row border-b border-black bg-gray-100")}>
+            <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
+              I
             </Text>
-            <Text style={tw("w-2/12 p-2 text-center")}>Biaya (Rp)</Text>
+            <Text style={tw("w-11/12 p-2")}>Jasa Pelayanan Pengujian</Text>
           </View>
           {worksheet.items.map((item, index) => (
             <View key={item.id} style={tw("flex-row border-black")}>
               <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
                 {index + 1}
               </Text>
-              <Text style={tw("w-2/12 border-r border-black p-2")}>
+              <Text style={tw("w-3/12 border-r border-black p-2")}>
                 {item.parameter?.name || "-"}
               </Text>
               <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
@@ -87,7 +102,7 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
               <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
                 {item.location ? item.location.name : "-"}
               </Text>
-              <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
+              <Text style={tw("w-2/12 border-black p-2 text-center")}>
                 {item.value
                   ? item.value.toLocaleString("id-ID", {
                       style: "currency",
@@ -95,17 +110,105 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
                     })
                   : "-"}
               </Text>
-              <Text style={tw("w-2/12 p-2 text-center")}>
-                {item.value && item.quantity
-                  ? (item.value * item.quantity).toLocaleString("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    })
-                  : "-"}
-              </Text>
             </View>
           ))}
+          <View style={tw("flex-row border-t border-black")}>
+            <Text
+              style={tw(
+                "w-10/12 border-r border-black p-2 font-bold text-center",
+              )}
+            >
+              Total I
+            </Text>
+            <Text style={tw("w-2/12 p-2 font-bold text-center")}>1</Text>
+          </View>
         </View>
+
+        {/* Operational Cost Table */}
+        {worksheet.operationalCosts.length > 0 && (
+          <View style={tw("mb-6 border border-black")}>
+            <View style={tw("flex-row border-b border-black")}>
+              <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
+                No.
+              </Text>
+              <Text style={tw("w-3/12 border-r border-black p-2 text-center")}>
+                Jenis
+              </Text>
+              <View style={tw("w-2/12 border-r border-black p-2 text-center")}>
+                <Text>Harga</Text>
+                <Text>Satuan</Text>
+              </View>
+              <View style={tw("w-2/12 border-r border-black p-2 text-center")}>
+                <Text>Jumlah</Text>
+                <Text>Orang</Text>
+              </View>
+              <View style={tw("w-2/12 border-r border-black p-2 text-center")}>
+                <Text>Jumlah</Text>
+                <Text>Hari</Text>
+              </View>
+              <Text style={tw("w-2/12 border-black p-2 text-center")}>
+                Total
+              </Text>
+            </View>
+            {/* Section Header Row - spans all columns */}
+            <View style={tw("flex-row border-b border-black bg-gray-100")}>
+              <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
+                I
+              </Text>
+              <Text style={tw("w-11/12 p-2")}>Operasional Pengujian</Text>
+            </View>
+            {worksheet.operationalCosts?.map((cost, index) => (
+              <View key={cost.id} style={tw("flex-row border-black")}>
+                <Text
+                  style={tw("w-1/12 border-r border-black p-2 text-center")}
+                >
+                  {index + 1}
+                </Text>
+                <Text style={tw("w-3/12 border-r border-black p-2")}>
+                  {cost.item}
+                </Text>
+                <Text
+                  style={tw("w-2/12 border-r border-black p-2 text-center")}
+                >
+                  {cost.unitCost?.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    maximumFractionDigits: 0,
+                  })}
+                </Text>
+                <Text
+                  style={tw("w-2/12 border-r border-black p-2 text-center")}
+                >
+                  {cost.unitCount}
+                </Text>
+                <Text
+                  style={tw("w-2/12 border-r border-black p-2 text-center")}
+                >
+                  {cost.days}
+                </Text>
+                <Text style={tw("w-2/12 p-2 text-center")}>
+                  {cost.unitCost != null
+                    ? (cost.unitCount * cost.unitCost).toLocaleString("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                        maximumFractionDigits: 0,
+                      })
+                    : "-"}
+                </Text>
+              </View>
+            ))}
+            <View style={tw("flex-row border-t border-black")}>
+              <Text
+                style={tw(
+                  "w-10/12 border-r border-black p-2 font-bold text-center",
+                )}
+              >
+                Total II
+              </Text>
+              <Text style={tw("w-2/12 p-2 font-bold text-center")}>1</Text>
+            </View>
+          </View>
+        )}
 
         {/* Signature  */}
         <View style={tw("flex-row justify-between items-start mt-8")}>

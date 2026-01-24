@@ -312,7 +312,21 @@ const mockData = {
     mainSupervisor: null,
     accompanyingSupervisor: null,
     assignments: [],
-    operationalCosts: [],
+    operationalCosts: [
+      {
+        id: "opcost-1",
+        createdAt: new Date().toISOString(),
+        updatedAt: null,
+        deletedAt: null,
+        days: 2,
+        item: "Transportasi",
+        note: "Biaya transportasi ke lokasi",
+        sortOrder: 1,
+        unitCost: 50000,
+        worksheetId: "worksheet-mock-id",
+        unitCount: 2,
+      },
+    ],
   } satisfies WorksheetTransactionDetail,
   invoiceNumber: "INV-2024-001",
   dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)

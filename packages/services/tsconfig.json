@@ -9,7 +9,6 @@
     "outDir": "dist",
     "composite": true,
     "noUnusedLocals": false,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "env": ["./env.ts"]
