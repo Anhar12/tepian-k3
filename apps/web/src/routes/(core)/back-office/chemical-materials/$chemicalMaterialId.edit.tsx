@@ -29,12 +29,12 @@ import {
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { createFileRoute } from "@tanstack/react-router";
 import { requirePermission } from "@/utils/require-permission";
-import type z from "zod";
+import z from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
-import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient, trpc } from "@/utils/trpc";
 import { Spinner } from "@/components/ui/spinner";
 import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
 import {
@@ -47,62 +47,97 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import {
+  SkeletonButton,
+  SkeletonInput,
+  SkeletonTextArea,
+} from "@/components/ui/skeleton-generator";
 
 export const Route = createFileRoute(
-  "/(core)/back-office/chemical-materials/create",
+  "/(core)/back-office/chemical-materials/$chemicalMaterialId/edit",
 )({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
-      permission: "chemical-materials.create",
+      permission: "chemical-materials.update",
     }),
+  params: z.object({
+    chemicalMaterialId: z.uuidv7(),
+  }),
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { chemicalMaterialId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
+  const { data: chemicalMaterial, isLoading } = useQuery(
+    trpc.chemicalMaterial.getById.queryOptions({ id: chemicalMaterialId }),
+  );
+
   const form = useForm<
-    z.infer<typeof chemicalMaterialSchema.createChemicalMaterialSchema>
+    z.infer<typeof chemicalMaterialSchema.updateChemicalMaterialSchema>
   >({
-    resolver: zodResolver(chemicalMaterialSchema.createChemicalMaterialSchema),
-    defaultValues: {
-      code: "",
-      catalogNumber: "",
-      chemicalFormula: "",
-      name: "",
-      usedStock: 0,
-      sealedStock: 0,
-      monthlyUsage: 0,
-      remainingUsedMaterial: 0,
-      incomingMaterialNote: "",
-    },
+    resolver: zodResolver(chemicalMaterialSchema.updateChemicalMaterialSchema),
+    defaultValues: chemicalMaterial,
   });
 
-  const createChemicalMaterialMutation = useMutation(
-    trpc.chemicalMaterial.create.mutationOptions({
+  const updateChemicalMaterialMutation = useMutation(
+    trpc.chemicalMaterial.update.mutationOptions({
       onSuccess: async () => {
-        globalSuccessToast("Bahan kimia berhasil dibuat");
+        await queryClient.invalidateQueries(
+          trpc.chemicalMaterial.getById.queryOptions({
+            id: chemicalMaterialId,
+          }),
+        );
+        globalSuccessToast("Berhasil memperbarui bahan kimia");
         await redirectBack();
       },
       onError: (error) => {
-        globalErrorToast(`Gagal membuat bahan kimia: ${error.message}`);
+        globalErrorToast("Gagal memperbarui bahan kimia: " + error.message);
       },
     }),
   );
 
   function handleSubmit(
-    data: z.infer<typeof chemicalMaterialSchema.createChemicalMaterialSchema>,
+    data: z.infer<typeof chemicalMaterialSchema.updateChemicalMaterialSchema>,
   ) {
-    createChemicalMaterialMutation.mutate(data);
+    updateChemicalMaterialMutation.mutate(data);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Perbarui Bahan Kimia</CardTitle>
+            <CardDescription>
+              Isi formulir di bawah untuk memperbarui informasi bahan kimia.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 15 }).map((_, index) =>
+                index === 13 ? (
+                  <SkeletonTextArea key={index} />
+                ) : (
+                  <SkeletonInput className="w-full" key={index} />
+                ),
+              )}
+              <SkeletonButton className="w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Buat Bahan Kimia Baru</CardTitle>
+          <CardTitle>Perbarui Bahan Kimia</CardTitle>
           <CardDescription>
-            Isi formulir di bawah untuk menambahkan bahan kimia baru ke sistem.
+            Isi formulir di bawah untuk memperbarui informasi bahan kimia.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -536,10 +571,10 @@ function RouteComponent() {
 
             <Button
               type="submit"
-              disabled={createChemicalMaterialMutation.isPending}
+              disabled={updateChemicalMaterialMutation.isPending}
             >
-              {createChemicalMaterialMutation.isPending ? <Spinner /> : null}
-              Buat Bahan Kimia
+              {updateChemicalMaterialMutation.isPending ? <Spinner /> : null}
+              Perbarui Bahan Kimia
             </Button>
           </form>
         </CardContent>

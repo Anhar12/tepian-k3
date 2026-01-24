@@ -83,7 +83,7 @@ import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from './routes/
 import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
 import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './routes/(core)/back-office/employees/$employeeId.edit'
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
-import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialEditRouteImport } from './routes/(core)/back-office/chemical-materials/$chemicalMaterial.edit'
+import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport } from './routes/(core)/back-office/chemical-materials/$chemicalMaterialId.edit'
 import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.index'
 import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.create'
 import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit'
@@ -501,10 +501,10 @@ const coreBackOfficeClustersClusterIdEditRoute =
     path: '/clusters/$clusterId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute =
-  coreBackOfficeChemicalMaterialsChemicalMaterialEditRouteImport.update({
-    id: '/chemical-materials/$chemicalMaterial/edit',
-    path: '/chemical-materials/$chemicalMaterial/edit',
+const coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute =
+  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport.update({
+    id: '/chemical-materials/$chemicalMaterialId/edit',
+    path: '/chemical-materials/$chemicalMaterialId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeToolsToolIdCalibrationIndexRoute =
@@ -589,7 +589,7 @@ export interface FileRoutesByFullPath {
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
-  '/back-office/chemical-materials/$chemicalMaterial/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute
+  '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
@@ -664,7 +664,7 @@ export interface FileRoutesByTo {
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
-  '/back-office/chemical-materials/$chemicalMaterial/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute
+  '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
@@ -746,7 +746,7 @@ export interface FileRoutesById {
   '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
   '/(core)/back-office/worksheets/': typeof coreBackOfficeWorksheetsIndexRoute
   '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
-  '/(core)/back-office/chemical-materials/$chemicalMaterial/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute
+  '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
@@ -827,7 +827,7 @@ export interface FileRouteTypes {
     | '/back-office/users'
     | '/back-office/worksheets'
     | '/dashboard/company'
-    | '/back-office/chemical-materials/$chemicalMaterial/edit'
+    | '/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
@@ -902,7 +902,7 @@ export interface FileRouteTypes {
     | '/back-office/users'
     | '/back-office/worksheets'
     | '/dashboard/company'
-    | '/back-office/chemical-materials/$chemicalMaterial/edit'
+    | '/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
@@ -983,7 +983,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/users/'
     | '/(core)/back-office/worksheets/'
     | '/(core)/dashboard/company/'
-    | '/(core)/back-office/chemical-materials/$chemicalMaterial/edit'
+    | '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/employees/$employeeId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
@@ -1536,11 +1536,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeClustersClusterIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/chemical-materials/$chemicalMaterial/edit': {
-      id: '/(core)/back-office/chemical-materials/$chemicalMaterial/edit'
-      path: '/chemical-materials/$chemicalMaterial/edit'
-      fullPath: '/back-office/chemical-materials/$chemicalMaterial/edit'
-      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialEditRouteImport
+    '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': {
+      id: '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
+      path: '/chemical-materials/$chemicalMaterialId/edit'
+      fullPath: '/back-office/chemical-materials/$chemicalMaterialId/edit'
+      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/tools/$toolId/calibration/': {
@@ -1619,7 +1619,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
   coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
   coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
-  coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute
+  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeEmployeesEmployeeIdEditRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
@@ -1669,8 +1669,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
   coreBackOfficeUsersIndexRoute: coreBackOfficeUsersIndexRoute,
   coreBackOfficeWorksheetsIndexRoute: coreBackOfficeWorksheetsIndexRoute,
-  coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute:
-    coreBackOfficeChemicalMaterialsChemicalMaterialEditRoute,
+  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute:
+    coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute,
   coreBackOfficeClustersClusterIdEditRoute:
     coreBackOfficeClustersClusterIdEditRoute,
   coreBackOfficeEmployeesEmployeeIdEditRoute:
