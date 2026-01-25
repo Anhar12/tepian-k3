@@ -195,6 +195,78 @@ const worksheetQueries = {
   },
 
   /**
+   * Get all worksheets for schedule calendar display
+   * Returns worksheets with schedule dates, company, location, and assignments
+   */
+  getWorksheetsForSchedule() {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.worksheets.findMany({
+          columns: {
+            id: true,
+            status: true,
+            startDate: true,
+            endDate: true,
+          },
+          orderBy: (worksheets, { desc }) => [desc(worksheets.startDate)],
+          with: {
+            order: {
+              with: {
+                company: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            testing: {
+              with: {
+                items: {
+                  columns: {
+                    id: true,
+                  },
+                  with: {
+                    location: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      },
+                    },
+                  },
+                  limit: 1,
+                },
+              },
+            },
+            assignments: {
+              columns: {
+                id: true,
+              },
+              with: {
+                employee: {
+                  columns: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "worksheetQueries.getWorksheetsForSchedule",
+          "Failed to fetch worksheets for schedule",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil jadwal worksheet",
+        });
+      },
+    });
+  },
+
+  /**
    * Get worksheet by order ID
    */
   getWorksheetByOrderId(orderId: string) {

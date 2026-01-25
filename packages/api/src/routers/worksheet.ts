@@ -30,6 +30,13 @@ export const worksheetRouter = createTRPCRouter({
     ),
 
   /**
+   * Get all worksheets for schedule calendar display
+   */
+  getWorksheetsForSchedule: withPermission("worksheets.read").query(
+    async () => await runEffect(worksheetQueries.getWorksheetsForSchedule()),
+  ),
+
+  /**
    * Get worksheet by ID with all relations
    */
   getWorksheetById: withPermission("worksheets.read")

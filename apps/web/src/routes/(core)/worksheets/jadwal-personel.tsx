@@ -147,6 +147,11 @@ function JadwalPersonilPage() {
     trpc.employee.getAll.queryOptions(),
   );
 
+  // Fetch all worksheets for schedule calendar display
+  const { data: allWorksheetsData, isLoading: allWorksheetsLoading } = useQuery(
+    trpc.worksheet.getWorksheetsForSchedule.queryOptions(),
+  );
+
   const [calendarView, setCalendarView] = useState<CalendarView>("month");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<WorksheetSchedule | null>(
@@ -201,21 +206,27 @@ function JadwalPersonilPage() {
     }));
   }, [employeesData]);
 
-  // Transform worksheet data to schedule format for calendar display
-  const worksheetSchedule: WorksheetSchedule | null = useMemo(() => {
-    if (!worksheet) return null;
-    return {
-      id: worksheet.id,
-      company: worksheet.order?.company?.name ?? "Perusahaan",
-      location:
-        worksheet.testing?.items?.[0]?.location?.name ?? "Lokasi Pengujian",
-      color: "bg-blue-500",
-      startDate: worksheet.startDate ? new Date(worksheet.startDate) : null,
-      endDate: worksheet.endDate ? new Date(worksheet.endDate) : null,
+  // Transform all worksheets data to schedule format for calendar display
+  const allSchedules: WorksheetSchedule[] = useMemo(() => {
+    if (!allWorksheetsData) return [];
+    return allWorksheetsData.map((ws, index) => ({
+      id: ws.id,
+      company: ws.order?.company?.name ?? "Perusahaan",
+      location: ws.testing?.items?.[0]?.location?.name ?? "Lokasi Pengujian",
+      // Use different color for current worksheet, cycle through palette for others
+      color:
+        ws.id === worksheetId ? "bg-blue-600" : getColorForIndex(index + 1),
+      startDate: ws.startDate ? new Date(ws.startDate) : null,
+      endDate: ws.endDate ? new Date(ws.endDate) : null,
       personnel:
-        worksheet.assignments?.map((a) => a.employee?.id).filter(Boolean) ?? [],
-    };
-  }, [worksheet]);
+        ws.assignments?.map((a) => a.employee?.id).filter(Boolean) ?? [],
+    }));
+  }, [allWorksheetsData, worksheetId]);
+
+  // Get current worksheet schedule for highlighting
+  const currentWorksheetSchedule = useMemo(() => {
+    return allSchedules.find((s) => s.id === worksheetId) ?? null;
+  }, [allSchedules, worksheetId]);
 
   // Get currently assigned personnel IDs
   const assignedPersonnelIds = useMemo(() => {
@@ -323,12 +334,14 @@ function JadwalPersonilPage() {
     });
   };
 
-  // Check if a date falls within the worksheet schedule
-  const isDateInSchedule = (date: Date) => {
-    if (!worksheetSchedule || !worksheetSchedule.startDate) return false;
-    const endDate = worksheetSchedule.endDate ?? worksheetSchedule.startDate;
+  // Check if a date falls within the current worksheet schedule (for highlighting)
+  const isDateInCurrentSchedule = (date: Date) => {
+    if (!currentWorksheetSchedule || !currentWorksheetSchedule.startDate)
+      return false;
+    const endDate =
+      currentWorksheetSchedule.endDate ?? currentWorksheetSchedule.startDate;
     return isWithinInterval(date, {
-      start: worksheetSchedule.startDate,
+      start: currentWorksheetSchedule.startDate,
       end: endDate,
     });
   };
@@ -350,21 +363,18 @@ function JadwalPersonilPage() {
 
     const today = new Date();
 
-    // Check if worksheet event overlaps with a week
+    // Check if any worksheet events overlap with a week
     const getEventsForWeek = (weekDays: Date[]): WorksheetSchedule[] => {
-      if (!worksheetSchedule || !worksheetSchedule.startDate) return [];
       const weekStart = weekDays[0];
       const weekEnd = weekDays[6];
       if (!weekStart || !weekEnd) return [];
 
-      const scheduleEnd =
-        worksheetSchedule.endDate ?? worksheetSchedule.startDate;
-
-      // Check if schedule overlaps with this week
-      if (worksheetSchedule.startDate <= weekEnd && scheduleEnd >= weekStart) {
-        return [worksheetSchedule];
-      }
-      return [];
+      return allSchedules.filter((schedule) => {
+        if (!schedule.startDate) return false;
+        const scheduleEnd = schedule.endDate ?? schedule.startDate;
+        // Check if schedule overlaps with this week
+        return schedule.startDate <= weekEnd && scheduleEnd >= weekStart;
+      });
     };
 
     return (
@@ -391,7 +401,7 @@ function JadwalPersonilPage() {
                 {weekDays.map((day, dayIndex) => {
                   const isCurrentMonth = isSameMonth(day, currentDate);
                   const isToday = isSameDay(day, today);
-                  const isInSchedule = isDateInSchedule(day);
+                  const isInCurrentSchedule = isDateInCurrentSchedule(day);
 
                   return (
                     <div
@@ -399,7 +409,7 @@ function JadwalPersonilPage() {
                       className={`min-h-30 border-r border-b p-1 ${
                         !isCurrentMonth
                           ? "bg-muted/20"
-                          : isInSchedule
+                          : isInCurrentSchedule
                             ? "bg-blue-50 dark:bg-blue-950/20"
                             : "bg-background hover:bg-muted/30"
                       }`}
@@ -501,11 +511,11 @@ function JadwalPersonilPage() {
     });
 
     const getEventsForDay = (day: Date): WorksheetSchedule[] => {
-      if (!worksheetSchedule) return [];
-      if (isDateInSchedule(day)) {
-        return [worksheetSchedule];
-      }
-      return [];
+      return allSchedules.filter((schedule) => {
+        if (!schedule.startDate) return false;
+        const endDate = schedule.endDate ?? schedule.startDate;
+        return isWithinInterval(day, { start: schedule.startDate, end: endDate });
+      });
     };
 
     const today = new Date();
@@ -543,7 +553,7 @@ function JadwalPersonilPage() {
                 <div
                   key={idx}
                   className={`relative min-h-20 border-r border-b p-1 ${
-                    isDateInSchedule(date)
+                    isDateInCurrentSchedule(date)
                       ? "bg-blue-50 dark:bg-blue-950/20"
                       : ""
                   }`}
@@ -574,10 +584,14 @@ function JadwalPersonilPage() {
   };
 
   const renderDayView = () => {
-    const dayEvents: WorksheetSchedule[] =
-      worksheetSchedule && isDateInSchedule(currentDate)
-        ? [worksheetSchedule]
-        : [];
+    const dayEvents: WorksheetSchedule[] = allSchedules.filter((schedule) => {
+      if (!schedule.startDate) return false;
+      const endDate = schedule.endDate ?? schedule.startDate;
+      return isWithinInterval(currentDate, {
+        start: schedule.startDate,
+        end: endDate,
+      });
+    });
 
     return (
       <div className="overflow-hidden rounded-xl border">
@@ -613,7 +627,7 @@ function JadwalPersonilPage() {
                 {time}
               </div>
               <div
-                className={`min-h-15 flex-1 p-2 ${isDateInSchedule(currentDate) ? "bg-blue-50 dark:bg-blue-950/20" : ""}`}
+                className={`min-h-15 flex-1 p-2 ${isDateInCurrentSchedule(currentDate) ? "bg-blue-50 dark:bg-blue-950/20" : ""}`}
               >
                 {idx === 0 &&
                   dayEvents.map((event) => (
@@ -634,7 +648,7 @@ function JadwalPersonilPage() {
     );
   };
 
-  if (worksheetLoading || employeesLoading) {
+  if (worksheetLoading || employeesLoading || allWorksheetsLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -931,11 +945,11 @@ function JadwalPersonilPage() {
             <div className="rounded-lg border bg-muted/30 p-3">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Building2 className="h-4 w-4 text-primary" />
-                {worksheetSchedule?.company}
+                {currentWorksheetSchedule?.company}
               </div>
               <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-3 w-3" />
-                {worksheetSchedule?.location}
+                {currentWorksheetSchedule?.location}
               </div>
             </div>
 
