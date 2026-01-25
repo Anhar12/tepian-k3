@@ -57,9 +57,9 @@ function LoaderComponent() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Perbarui Parameter</CardTitle>
+          <CardTitle>Perbarui Posisi</CardTitle>
           <CardDescription>
-            Isi form di bawah untuk memperbarui parameter.
+            Isi form di bawah untuk memperbarui posisi.
           </CardDescription>
         </CardHeader>
         <CardContent>

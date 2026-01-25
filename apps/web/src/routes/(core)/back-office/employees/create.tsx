@@ -105,11 +105,11 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nama Posisi
+                      Nama Karyawan
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nama posisi"
+                      placeholder="Masukkan nama karyawan"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
