@@ -17,6 +17,8 @@ import {
 } from "@tepian-k3/services/notifications";
 import { logInfo } from "@tepian-k3/services/logger";
 import { devRouter } from "./routes/dev";
+import { setDefaultOptions } from "date-fns";
+import { id } from "date-fns/locale";
 
 const redisConfig = {
   host: env.MEMURAI_HOST,
@@ -31,6 +33,8 @@ initializeEventBus(redisConfig);
 
 // Set Zod locale to Indonesian
 z.config(z.locales.id());
+// Set date-fns default locale to Indonesian
+setDefaultOptions({ locale: id });
 
 const app = new Hono();
 

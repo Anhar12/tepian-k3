@@ -17,6 +17,7 @@
     "@tepian-k3/db": "workspace:*",
     "@tepian-k3/services": "workspace:*",
     "@trpc/server": "catalog:",
+    "date-fns": "catalog:",
     "dotenv": "catalog:",
     "hono": "catalog:",
     "mime-types": "catalog:",

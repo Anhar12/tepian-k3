@@ -133,6 +133,9 @@ importers:
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.8.0(typescript@5.9.3)
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
