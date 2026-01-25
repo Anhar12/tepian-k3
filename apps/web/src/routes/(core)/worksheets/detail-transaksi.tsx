@@ -39,6 +39,9 @@ import { getPublicUrl } from "@/utils/url";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import useDialogs from "@/hooks/use-dialog";
+import GenerateOfferingDialog from "./-components/generate-offering-dialog";
 
 const searchParamsSchema = z.object({
   worksheetId: z.uuidv7().optional(),
@@ -90,6 +93,10 @@ function formatDateRange(
 function RouteComponent() {
   const navigate = useNavigate();
   const { worksheetId } = Route.useSearch();
+
+  const dialogs = useDialogs({
+    generateOfferingLetter: null,
+  });
 
   const [paramPage, setParamPage] = useState(1);
   const [paramPageSize, setParamPageSize] = useState(10);
@@ -936,6 +943,9 @@ function RouteComponent() {
             variant="outline"
             size="icon"
             className="h-9 w-9 bg-transparent"
+            onClick={() => {
+              dialogs.open("generateOfferingLetter");
+            }}
           >
             <Printer className="h-4 w-4" />
           </Button>
@@ -988,6 +998,15 @@ function RouteComponent() {
           </div>
         </div>
       </div>
+      <GenerateOfferingDialog
+        worksheetId={worksheetId}
+        isOpen={dialogs.isOpen("generateOfferingLetter")}
+        setIsOpen={(isOpen) =>
+          isOpen
+            ? dialogs.open("generateOfferingLetter")
+            : dialogs.close("generateOfferingLetter")
+        }
+      />
     </div>
   );
 }

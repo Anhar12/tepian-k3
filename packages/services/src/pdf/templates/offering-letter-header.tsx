@@ -1,11 +1,11 @@
 import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
-import { QRCodeImage } from "../components/qrcode";
 import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 import { storageService } from "../../storage";
 import { registerLiberationSans } from "../fonts/register-liberation-sans";
 import { tw } from "../utils/tw";
+import { format } from "date-fns";
 
 registerLiberationSans();
 
@@ -96,7 +96,8 @@ const styles = StyleSheet.create({
 });
 
 interface OfferingLetterHeaderProps {
-  order: OrderWithCompanyAndItems;
+  companyName: string;
+  regencyName: string;
   letterNumber: string;
   referenceNumber: string;
   referenceDate: string;
@@ -106,7 +107,8 @@ interface OfferingLetterHeaderProps {
 }
 
 export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
-  order,
+  companyName,
+  regencyName,
   letterNumber,
   referenceNumber,
   referenceDate,
@@ -159,17 +161,17 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
         {/* Recipient */}
         <View style={styles.recipient}>
           <Text>Yth. Pimpinan Perusahaan</Text>
-          <Text>{order.company.name}</Text>
-          <Text>{order.company.regency.name}</Text>
+          <Text>{companyName}</Text>
+          <Text>{regencyName}</Text>
         </View>
 
         {/* Body */}
         <Text style={styles.bodyText}>
           Sesuai dengan surat saudara nomor {referenceNumber} tanggal{" "}
-          {referenceDate} perihal Permohonan Pengajuan K3 Lingkungan Kerja, pada
-          prinsipnya Balai Keselamatan dan Kesehatan Kerja Samarinda bersedia
-          untuk melakukan pengujian keselamatan dan kesehatan kerja dengan
-          hal-hal sebagai berikut:
+          {format(new Date(referenceDate), "dd MMMM yyyy")} perihal Permohonan
+          Pengajuan K3 Lingkungan Kerja, pada prinsipnya Balai Keselamatan dan
+          Kesehatan Kerja Samarinda bersedia untuk melakukan pengujian
+          keselamatan dan kesehatan kerja dengan hal-hal sebagai berikut:
         </Text>
 
         {/* Numbered List */}

@@ -5,16 +5,8 @@ import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
 
 interface GenerateOfferingLetterOptions {
-  order: OrderWithCompanyAndItems;
   worksheet: WorksheetTransactionDetail;
   letterNumber: string;
-  referenceNumber: string;
-  referenceDate: string;
-  adminEmail: string;
-  adminContact: string;
-  logoUrl?: string;
-  qrCodeDataURL?: string;
-  verificationURL?: string;
 }
 
 export const generateOfferingLetterPdf = async (

@@ -8,6 +8,7 @@ import { districtRouter } from "./routers/district";
 import { documentRouter } from "./routers/document";
 import { employeeRouter } from "./routers/employee";
 import { eventRouter } from "./routers/event";
+import { generateDocumentRouter } from "./routers/generate-document";
 import { kbliRouter } from "./routers/kbli";
 import { notificationsRouter } from "./routers/notifications";
 import { orderRouter } from "./routers/order";
@@ -64,6 +65,7 @@ export const appRouter = createTRPCRouter({
   employee: employeeRouter,
   notifications: notificationsRouter,
   worksheet: worksheetRouter,
+  generateDocument: generateDocumentRouter,
 });
 
 // export type definition of API

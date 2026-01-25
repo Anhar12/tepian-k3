@@ -18,12 +18,27 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
     year: "numeric",
   });
 
+  const totalServicesCost = worksheet.items.reduce((total, item) => {
+    return (
+      total + (item.parameter ? item.parameter.price * (item.value ?? 0) : 0)
+    );
+  }, 0);
+
+  const totalOperationalCost = worksheet.operationalCosts.reduce(
+    (total, cost) => {
+      return (
+        total + (cost.unitCost ? cost.unitCost * cost.unitCount * cost.days : 0)
+      );
+    },
+    0,
+  );
+
   return (
     <Document>
       <Page size="A4" style={tw("p-4 text-[11px] font-sans")}>
         {/*  Header with letterhead */}
         <View style={tw("mb-4 flex-col justify-between items-center")}>
-          <View style={tw("flex-row justify-between items-center w-1/2 gap-2")}>
+          <View style={tw("flex-row justify-between items-center gap-2")}>
             <Text style={tw("text-[12px]")}>Lampiran</Text>
             <Text style={tw("text-[12px]")}>:</Text>
             <Text style={tw("text-[12px]")}>
@@ -80,7 +95,14 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
             <Text style={tw("w-11/12 p-2")}>Jasa Pelayanan Pengujian</Text>
           </View>
           {worksheet.items.map((item, index) => (
-            <View key={item.id} style={tw("flex-row border-black")}>
+            <View
+              key={item.id}
+              style={tw(
+                `flex-row border-black ${
+                  index === worksheet.items.length - 1 ? "" : "border-b"
+                }`,
+              )}
+            >
               <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
                 {index + 1}
               </Text>
@@ -97,17 +119,21 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
                   : "-"}
               </Text>
               <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
-                {item.quantity}
+                {item.value}
               </Text>
               <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
                 {item.location ? item.location.name : "-"}
               </Text>
               <Text style={tw("w-2/12 border-black p-2 text-center")}>
                 {item.value
-                  ? item.value.toLocaleString("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    })
+                  ? (item.value * item.parameter.price).toLocaleString(
+                      "id-ID",
+                      {
+                        style: "currency",
+                        currency: "IDR",
+                        maximumFractionDigits: 0,
+                      },
+                    )
                   : "-"}
               </Text>
             </View>
@@ -120,7 +146,13 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
             >
               Total I
             </Text>
-            <Text style={tw("w-2/12 p-2 font-bold text-center")}>1</Text>
+            <Text style={tw("w-2/12 p-2 font-bold text-center")}>
+              {totalServicesCost.toLocaleString("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                maximumFractionDigits: 0,
+              })}
+            </Text>
           </View>
         </View>
 
@@ -153,12 +185,21 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
             {/* Section Header Row - spans all columns */}
             <View style={tw("flex-row border-b border-black bg-gray-100")}>
               <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
-                I
+                II
               </Text>
               <Text style={tw("w-11/12 p-2")}>Operasional Pengujian</Text>
             </View>
             {worksheet.operationalCosts?.map((cost, index) => (
-              <View key={cost.id} style={tw("flex-row border-black")}>
+              <View
+                key={cost.id}
+                style={tw(
+                  `flex-row border-black ${
+                    index === worksheet.operationalCosts.length - 1
+                      ? ""
+                      : "border-b"
+                  }`,
+                )}
+              >
                 <Text
                   style={tw("w-1/12 border-r border-black p-2 text-center")}
                 >
@@ -188,7 +229,11 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
                 </Text>
                 <Text style={tw("w-2/12 p-2 text-center")}>
                   {cost.unitCost != null
-                    ? (cost.unitCount * cost.unitCost).toLocaleString("id-ID", {
+                    ? (
+                        cost.unitCount *
+                        cost.unitCost *
+                        cost.days
+                      ).toLocaleString("id-ID", {
                         style: "currency",
                         currency: "IDR",
                         maximumFractionDigits: 0,
@@ -205,7 +250,32 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
               >
                 Total II
               </Text>
-              <Text style={tw("w-2/12 p-2 font-bold text-center")}>1</Text>
+              <Text style={tw("w-2/12 p-2 font-bold text-center")}>
+                {totalOperationalCost.toLocaleString("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                  maximumFractionDigits: 0,
+                })}
+              </Text>
+            </View>
+            <View style={tw("flex-row border-t border-black")}>
+              <Text
+                style={tw(
+                  "w-10/12 border-r border-black p-2 font-bold text-center",
+                )}
+              >
+                Grand Total
+              </Text>
+              <Text style={tw("w-2/12 p-2 font-bold text-center")}>
+                {(totalServicesCost + totalOperationalCost).toLocaleString(
+                  "id-ID",
+                  {
+                    style: "currency",
+                    currency: "IDR",
+                    maximumFractionDigits: 0,
+                  },
+                )}
+              </Text>
             </View>
           </View>
         )}

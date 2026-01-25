@@ -21,3 +21,6 @@ export {
   type QRCodePosition,
   type SignatureData,
 } from "./pdf-signing";
+
+// PDF Merging utilities
+export { mergePdfs, mergeTwoPdfs, addCoverPage } from "./merge";

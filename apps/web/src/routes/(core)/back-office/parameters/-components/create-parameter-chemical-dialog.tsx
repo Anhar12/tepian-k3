@@ -21,7 +21,6 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import parameterChemicalMaterialSchema from "@tepian-k3/schema/parameter-chemical-material.schema";
-import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
@@ -98,7 +97,7 @@ export default function CreateParameterChemicalDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <form>
-        <DialogContent className="sm:max-w-106.25">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Tambah Bahan Kimia Terkait Parameter</DialogTitle>
             <DialogDescription>

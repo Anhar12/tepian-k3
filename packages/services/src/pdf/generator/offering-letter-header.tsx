@@ -1,10 +1,10 @@
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
-import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 import { OfferingLetterHeader } from "../templates/offering-letter-header";
 
 interface GenerateOfferingLetterHeaderOptions {
-  order: OrderWithCompanyAndItems;
+  companyName: string;
+  regencyName: string;
   letterNumber: string;
   referenceNumber: string;
   referenceDate: string;

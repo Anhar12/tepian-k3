@@ -1237,7 +1237,20 @@ const worksheetQueries = {
           with: {
             order: {
               with: {
-                company: true,
+                company: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                  with: {
+                    regency: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      },
+                    },
+                  },
+                },
                 items: {
                   with: {
                     parameter: {

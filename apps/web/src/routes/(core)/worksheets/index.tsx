@@ -102,6 +102,7 @@ interface WorksheetItemWithMeta {
   note: string | null;
   isReady: boolean;
   locationName: string;
+  reference: string | null;
 }
 
 function RouteComponent() {
@@ -254,6 +255,7 @@ function RouteComponent() {
       note: item.note,
       isReady: item.isReady,
       locationName: item.location?.name ?? "Unknown",
+      reference: item.parameter?.reference ?? null,
     }));
   }, [worksheet?.items]);
 
@@ -725,7 +727,7 @@ function RouteComponent() {
                         Parameter
                       </TableHead>
                       <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
-                        Lokasi
+                        Acuan
                       </TableHead>
                       <TableHead className="text-center text-xs font-semibold sm:text-sm">
                         Jumlah
@@ -763,7 +765,7 @@ function RouteComponent() {
                             {item.parameterName}
                           </TableCell>
                           <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                            {item.locationName}
+                            {item.reference ?? "-"}
                           </TableCell>
                           <TableCell className="text-center text-xs sm:text-sm">
                             {item.quantity}
