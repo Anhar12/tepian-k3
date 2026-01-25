@@ -246,7 +246,7 @@ const mockData = {
         locationId: "location-3",
         quantity: 1,
         worksheetId: "",
-        value: 150000,
+        value: 3,
         isReady: true,
         location: {
           id: "location-3",
@@ -318,7 +318,7 @@ const mockData = {
         locationId: "location-3",
         quantity: 1,
         worksheetId: "",
-        value: 150000,
+        value: 2,
         isReady: true,
         location: {
           id: "location-3",
