@@ -74,13 +74,6 @@ function RouteComponent() {
     }),
   );
 
-  // Fetch worksheet data for this order
-  const { data: worksheet } = useQuery(
-    trpc.worksheet.getByOrderId.queryOptions({
-      orderId,
-    }),
-  );
-
   const acceptOfferMutation = useMutation(
     trpc.order.acceptOffer.mutationOptions({
       onSuccess: async () => {
@@ -268,8 +261,8 @@ function RouteComponent() {
   const freshlySubmitted = orderDetail.status === "pending" && !offeringDoc;
 
   // Worksheet status flags (new flow: worksheet created BEFORE offering)
-  const hasWorksheet = !!worksheet;
-  const worksheetStatus = worksheet?.status;
+  const hasWorksheet = !!orderDetail.worksheet;
+  const worksheetStatus = orderDetail.worksheet?.status;
   const isWorksheetInReview =
     hasWorksheet &&
     (worksheetStatus === "draft" || worksheetStatus === "pending_verification");
@@ -397,151 +390,155 @@ function RouteComponent() {
               !isWorksheetInReview &&
               !isWorksheetVerified &&
               offeringDoc && (
-              <div className="mt-8 flex justify-end gap-3 pt-6">
-                {/* Batal Dialog */}
-                <AlertDialog open={openCancelDialog}>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="min-w-30 border-red-400 bg-red-50 text-red-500 hover:bg-red-50 hover:text-red-600"
-                      onClick={() => setOpenCancelDialog(true)}
-                    >
-                      Batal
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Batalkan Order Pengujian
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Apakah Anda yakin ingin membatalkan order pengujian ini?
-                        Tindakan ini tidak dapat dibatalkan.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel
-                        onClick={() => setOpenCancelDialog(false)}
+                <div className="mt-8 flex justify-end gap-3 pt-6">
+                  {/* Batal Dialog */}
+                  <AlertDialog open={openCancelDialog}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="min-w-30 border-red-400 bg-red-50 text-red-500 hover:bg-red-50 hover:text-red-600"
+                        onClick={() => setOpenCancelDialog(true)}
                       >
                         Batal
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => cancelOrderMutation.mutate({ orderId })}
-                        className="border border-red-400 bg-red-50 text-red-500 hover:bg-red-50 hover:text-red-600"
-                        disabled={cancelOrderMutation.isPending}
-                      >
-                        {cancelOrderMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Tolak Order
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Batalkan Order Pengujian
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Apakah Anda yakin ingin membatalkan order pengujian
+                          ini? Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          onClick={() => setOpenCancelDialog(false)}
+                        >
+                          Batal
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            cancelOrderMutation.mutate({ orderId })
+                          }
+                          className="border border-red-400 bg-red-50 text-red-500 hover:bg-red-50 hover:text-red-600"
+                          disabled={cancelOrderMutation.isPending}
+                        >
+                          {cancelOrderMutation.isPending && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Tolak Order
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
-                {/* Revisi Dialog */}
-                <AlertDialog open={openReviseDialog}>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="min-w-30 border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
-                      onClick={() => setOpenReviseDialog(true)}
-                    >
-                      Revisi
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Revisi Order Pengujian
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Apakah Anda yakin ingin merevisi order pengujian ini?
-                        Tindakan ini akan mengirimkan notifikasi kepada pihak
-                        terkait.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="py-4">
-                      <Textarea
-                        value={reviseReason}
-                        onChange={(e) => setReviseReason(e.target.value)}
-                        placeholder="Tuliskan alasan revisi order pengujian... (min. 10 karakter)"
-                        rows={4}
-                      />
-                    </div>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel
-                        onClick={() => setOpenReviseDialog(false)}
+                  {/* Revisi Dialog */}
+                  <AlertDialog open={openReviseDialog}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="min-w-30 border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                        onClick={() => setOpenReviseDialog(true)}
                       >
-                        Batal
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() =>
-                          reviseOfferMutation.mutate({
-                            orderId,
-                            revisionNotes: reviseReason,
-                          })
-                        }
-                        className="border border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
-                        disabled={
-                          reviseOfferMutation.isPending ||
-                          reviseReason.length < 10
-                        }
-                      >
-                        {reviseOfferMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Revisi Order
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        Revisi
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Revisi Order Pengujian
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Apakah Anda yakin ingin merevisi order pengujian ini?
+                          Tindakan ini akan mengirimkan notifikasi kepada pihak
+                          terkait.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div className="py-4">
+                        <Textarea
+                          value={reviseReason}
+                          onChange={(e) => setReviseReason(e.target.value)}
+                          placeholder="Tuliskan alasan revisi order pengujian... (min. 10 karakter)"
+                          rows={4}
+                        />
+                      </div>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          onClick={() => setOpenReviseDialog(false)}
+                        >
+                          Batal
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            reviseOfferMutation.mutate({
+                              orderId,
+                              revisionNotes: reviseReason,
+                            })
+                          }
+                          className="border border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                          disabled={
+                            reviseOfferMutation.isPending ||
+                            reviseReason.length < 10
+                          }
+                        >
+                          {reviseOfferMutation.isPending && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Revisi Order
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
-                {/* Accept Dialog */}
-                <AlertDialog open={openAcceptDialog}>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      className="min-w-30 bg-amber-400 text-white hover:bg-amber-500"
-                      onClick={() => setOpenAcceptDialog(true)}
-                    >
-                      Setuju
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Setuju Order Pengujian
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Apakah Anda yakin ingin menyetujui order pengujian ini?
-                        Tindakan ini akan mengirimkan notifikasi kepada pihak
-                        terkait. Setelah disetujui, Anda tidak dapat mengubah
-                        keputusan ini. Pastikan semua detail sudah benar sebelum
-                        melanjutkan.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-
-                    <AlertDialogFooter>
-                      <AlertDialogCancel
-                        onClick={() => setOpenAcceptDialog(false)}
+                  {/* Accept Dialog */}
+                  <AlertDialog open={openAcceptDialog}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        className="min-w-30 bg-amber-400 text-white hover:bg-amber-500"
+                        onClick={() => setOpenAcceptDialog(true)}
                       >
-                        Batal
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => acceptOfferMutation.mutate({ orderId })}
-                        className="bg-amber-400 hover:bg-amber-500"
-                        disabled={acceptOfferMutation.isPending}
-                      >
-                        {acceptOfferMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
                         Setuju
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            )}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Setuju Order Pengujian
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Apakah Anda yakin ingin menyetujui order pengujian
+                          ini? Tindakan ini akan mengirimkan notifikasi kepada
+                          pihak terkait. Setelah disetujui, Anda tidak dapat
+                          mengubah keputusan ini. Pastikan semua detail sudah
+                          benar sebelum melanjutkan.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          onClick={() => setOpenAcceptDialog(false)}
+                        >
+                          Batal
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            acceptOfferMutation.mutate({ orderId })
+                          }
+                          className="bg-amber-400 hover:bg-amber-500"
+                          disabled={acceptOfferMutation.isPending}
+                        >
+                          {acceptOfferMutation.isPending && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Setuju
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
           </div>
         </Card>
       </div>
