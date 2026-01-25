@@ -1383,6 +1383,8 @@ export const employees = createTable(
       .references(() => users.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 250 }).notNull(),
     email: varchar("email", { length: 250 }).notNull().unique(),
+    type: text("type").notNull(),
+    nip: varchar("nip", { length: 100 }).notNull().unique(),
     status: employeeStatusEnum("status").notNull().default("siap"),
     ...timestamps,
   },

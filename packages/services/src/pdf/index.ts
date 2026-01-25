@@ -7,6 +7,9 @@ export { generateOfferingLetterPdf } from "./generator/offering-letter";
 // Offering Letter Header generator
 export { generateOfferingLetterHeaderPdf } from "./generator/offering-letter-header";
 
+// Assignment Letter generator
+export { generateAssignmentLetterPdf } from "./generator/assignment-letter";
+
 // QR Code utilities (server-side)
 export {
   generateQRCodeDataURL,

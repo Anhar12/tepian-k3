@@ -1,4 +1,5 @@
 import {
+  generateAssignmentLetterPdf,
   generateInvoicePdf,
   generateOfferingLetterHeaderPdf,
   generateOfferingLetterPdf,
@@ -383,7 +384,52 @@ const mockData = {
     ],
     mainSupervisor: null,
     accompanyingSupervisor: null,
-    assignments: [],
+    assignments: [
+      {
+        id: "assign-1",
+        deletedAt: null,
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: null,
+        worksheetId: "worksheet-mock-id",
+        employeeId: "emp-1",
+        assignedBy: "user-mock-id",
+        employee: {
+          id: "",
+          name: "Supervisor Mock",
+          email: "supervisor@mail.com",
+          deletedAt: null,
+          createdAt: "",
+          updatedAt: null,
+          userId: "",
+          status: "siap",
+          positionId: "",
+          nip: "1234567890",
+          type: "III/a",
+          user: {
+            id: "user-mock-id",
+            name: "user-mock",
+            password: "hashed-password",
+            email: "user@mail.com",
+            address: "user address",
+            phone: "+62 812 3456 7890",
+            emailVerified: true,
+            emailVerifiedAt: null,
+            profilePictureUrl: null,
+            deletedAt: null,
+            createdAt: "",
+            updatedAt: null,
+          },
+          position: {
+            id: "position-1",
+            name: "Supervisor",
+            deletedAt: null,
+            createdAt: "",
+            updatedAt: null,
+            description: "Responsible for supervising tests",
+          },
+        },
+      },
+    ],
     operationalCosts: [
       {
         id: "opcost-1",
@@ -498,6 +544,42 @@ devRouter.get("/offering-letter/:orderId", async (c) => {
     const pdfBuffer = await generateOfferingLetterPdf({
       ...mockData,
       letterNumber: "LET-2024-001",
+    });
+
+    return new Response(pdfBuffer, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'inline; filename="offering-letter-preview.pdf"',
+        "Cache-Control": "no-cache", // Always fresh during dev
+      },
+    });
+  } catch (error) {
+    console.error("PDF generation error:", error);
+    return c.json({ error: "Failed to generate PDF" }, 500);
+  }
+});
+
+devRouter.get("/assignment-letter/:orderId", async (c) => {
+  try {
+    // Mock data for preview - replace with actual data fetching
+
+    // Or fetch real data if you want
+    // const id = c.req.param('id');
+    // const invoiceData = await db.query.invoices.findFirst({ where: eq(invoices.id, id) });
+
+    const pdfBuffer = await generateAssignmentLetterPdf({
+      companyName: mockData.order.company.name,
+      companyRegency: mockData.order.company.regency.name,
+      orderDate: new Date().toISOString(),
+      assignmentDateStart: new Date().toISOString(),
+      assignmentDateEnd: new Date(
+        Date.now() + 3 * 24 * 60 * 60 * 1000,
+      ).toISOString(),
+      financingSource:
+        "Biaya uang harian, transportasi Samarinda – Sangatta (PP), transportasi lokal, dan akomodasi penginapan dibebankan pada RPL 046 PS Balai K3 SMD.",
+      letterNumber: "LET-2024-001",
+      assignmentLetterNumber: "123",
+      assignees: mockData.worksheet.assignments,
     });
 
     return new Response(pdfBuffer, {

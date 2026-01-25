@@ -50,6 +50,13 @@
       "when": 1768991692662,
       "tag": "0006_cool_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1769330543911,
+      "tag": "0007_late_human_fly",
+      "breakpoints": true
     }
   ]
 }

@@ -2,11 +2,20 @@ import React from "react";
 import { View, Text } from "@react-pdf/renderer";
 import { tw } from "../utils/tw";
 
-interface TableColumn<T = any> {
-  key: string;
+type NestedKeyOf<T> = {
+  [K in keyof T & string]: T[K] extends object
+    ? T[K] extends any[]
+      ? K
+      : K | `${K}.${NestedKeyOf<T[K]>}`
+    : K;
+}[keyof T & string];
+
+export interface TableColumn<T = any> {
+  key: NestedKeyOf<T> | (string & {}); // Preserves autocomplete while allowing any string
   label: string | string[]; // single string or array for multi-line headers
   width: string; // tailwind width class like "w-1/12"
   align?: "left" | "center" | "right";
+  defaultValue?: string | number; // Default value when cell is empty/undefined
   format?: (value: any, item: T, index: number) => string | number; // custom formatter
   render?: (value: any, item: T, index: number) => React.ReactNode; // custom render function
 }
@@ -29,9 +38,9 @@ export const Table = <T extends Record<string, any>>({
   showIndex = false,
   indexLabel = "No.",
   indexWidth = "w-1/12",
-  headerClassName = "",
-  rowClassName = "",
-  cellClassName = "",
+  headerClassName,
+  rowClassName,
+  cellClassName,
   bordered = true,
 }: TableProps<T>) => {
   const getAlignClass = (align?: string) => {
@@ -46,8 +55,14 @@ export const Table = <T extends Record<string, any>>({
     }
   };
 
+  // Helper function to get nested value from object using dot notation
+  const getNestedValue = (obj: any, path: string): any => {
+    return path.split(".").reduce((current, key) => current?.[key], obj);
+  };
+
   const renderCellValue = (item: T, column: TableColumn<T>, index: number) => {
-    const value = item[column.key];
+    // Get value using nested key path
+    const value = getNestedValue(item, column.key);
 
     if (column.render) {
       return column.render(value, item, index);
@@ -57,7 +72,18 @@ export const Table = <T extends Record<string, any>>({
       return column.format(value, item, index);
     }
 
-    return value?.toString() || "-";
+    // Check if value exists (not null or undefined)
+    if (value != null && value !== "") {
+      return value.toString();
+    }
+
+    // Check if defaultValue is explicitly set (even if it's an empty string or 0)
+    if (column.defaultValue !== undefined) {
+      return column.defaultValue.toString();
+    }
+
+    // Final fallback
+    return "-";
   };
 
   const allColumns = showIndex
@@ -72,44 +98,80 @@ export const Table = <T extends Record<string, any>>({
       ]
     : columns;
 
+  // Helper function to build class string without empty strings
+  const buildClassString = (
+    ...classes: (string | false | undefined | null)[]
+  ) => {
+    return classes.filter((cls) => cls && cls.trim() !== "").join(" ");
+  };
+
+  const borderClass = bordered ? "border border-black" : "";
+  const borderBottomClass = bordered ? "border-b border-black" : "";
+
   return (
-    <View style={tw(`mb-6 ${bordered ? "border border-black" : ""}`)}>
+    <View style={tw(buildClassString("mb-6", borderClass))}>
       {/* Header Row */}
       <View
         style={tw(
-          `flex-row ${bordered ? "border-b border-black" : ""} ${headerClassName}`,
+          buildClassString("flex-row", borderBottomClass, headerClassName),
         )}
       >
-        {allColumns.map((column, index) => (
-          <View
-            key={column.key}
-            style={tw(
-              `${column.width} ${bordered && index < allColumns.length - 1 ? "border-r border-black" : ""} p-2 ${getAlignClass(column.align)}`,
-            )}
-          >
-            {Array.isArray(column.label) ? (
-              column.label.map((line, i) => <Text key={i}>{line}</Text>)
-            ) : (
-              <Text>{column.label}</Text>
-            )}
-          </View>
-        ))}
+        {allColumns.map((column, index) => {
+          const borderRightClass =
+            bordered && index < allColumns.length - 1
+              ? "border-r border-black"
+              : "";
+
+          return (
+            <View
+              key={column.key}
+              style={tw(
+                buildClassString(
+                  column.width,
+                  borderRightClass,
+                  "p-2",
+                  getAlignClass(column.align),
+                ),
+              )}
+            >
+              {Array.isArray(column.label) ? (
+                column.label.map((line, i) => <Text key={i}>{line}</Text>)
+              ) : (
+                <Text>{column.label}</Text>
+              )}
+            </View>
+          );
+        })}
       </View>
 
       {/* Data Rows */}
       {data.map((item, rowIndex) => (
-        <View key={rowIndex} style={tw(`flex-row ${rowClassName}`)}>
+        <View
+          key={rowIndex}
+          style={tw(buildClassString("flex-row", rowClassName))}
+        >
           {allColumns.map((column, colIndex) => {
             const isIndexColumn = column.key === "__index__";
             const content = isIndexColumn
               ? rowIndex + 1
               : renderCellValue(item, column, rowIndex);
 
+            const borderRightClass =
+              bordered && colIndex < allColumns.length - 1
+                ? "border-r border-black"
+                : "";
+
             return (
               <View
-                key={column.key}
+                key={`${column.key}-${colIndex}`}
                 style={tw(
-                  `${column.width} ${bordered && colIndex < allColumns.length - 1 ? "border-r border-black" : ""} p-2 ${getAlignClass(column.align)} ${cellClassName}`,
+                  buildClassString(
+                    column.width,
+                    borderRightClass,
+                    "p-2",
+                    getAlignClass(column.align),
+                    cellClassName,
+                  ),
                 )}
               >
                 {typeof content === "string" || typeof content === "number" ? (

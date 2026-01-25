@@ -142,6 +142,26 @@ async function seedEmployees() {
         userId: user.id,
         name: emp.name,
         email: email,
+        type: faker.helpers.arrayElement([
+          "I/a",
+          "I/b",
+          "I/c",
+          "I/d",
+          "II/a",
+          "II/b",
+          "II/c",
+          "II/d",
+          "III/a",
+          "III/b",
+          "III/c",
+          "III/d",
+          "IV/a",
+          "IV/b",
+          "IV/c",
+          "IV/d",
+          "IV/e",
+        ]),
+        nip: faker.string.numeric(10),
       });
       console.log(`   ➕ Created employee: ${emp.name} (${emp.position})`);
     }

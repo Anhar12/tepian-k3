@@ -1,7 +1,6 @@
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
 import { OfferingLetter } from "../templates/offering-letter";
-import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
 
 interface GenerateOfferingLetterOptions {
