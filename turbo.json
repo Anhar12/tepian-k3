@@ -7,51 +7,49 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["transit"],
+      "outputs": []
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["transit"],
+      "outputs": []
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "db:push": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "db:studio": {
       "cache": false,
       "persistent": true
     },
     "db:migrate": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "db:generate": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "db:seed": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "db:reset": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
     "email:dev": {
       "cache": false,
       "persistent": true
     },
     "email:verify": {
-      "cache": false,
-      "persistent": true
+      "cache": false
     },
-    "web:prettier": {
-      "cache": false,
-      "persistent": true
+    "prettier": {
+      "cache": false
     }
   },
   "globalEnv": ["NODE_ENV", "VITE_API_URL"],
@@ -61,6 +59,7 @@
     "POSTGRES_URL",
     "CORS_ORIGIN",
     "JWT_SECRET",
+    "JWT_RESET_PASSWORD_SECRET",
     "EMAIL_FROM",
     "EMAIL_PROVIDER",
     "SMTP_HOST",
@@ -82,6 +81,8 @@
     "ETHEREAL_PASSWORD",
     "APP_URL",
     "DASHBOARD_URL",
+    "STORAGE_PROVIDER",
+    "STORAGE_PATH",
     "MEMURAI_HOST",
     "MEMURAI_PORT",
     "MEMURAI_PASSWORD",
