@@ -3,8 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "dist",
+    "baseUrl": ".",
     "paths": {
-      "*": ["./*"],
       "@/*": ["./src/*"]
     },
     "jsx": "react-jsx"

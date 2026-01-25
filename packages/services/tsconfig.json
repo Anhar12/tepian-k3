@@ -9,7 +9,6 @@
     "composite": true,
     "noUnusedLocals": false,
     "paths": {
-      "@/*": ["./src/*"],
       "env": ["./env.ts"]
     }
   },
