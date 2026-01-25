@@ -13,6 +13,7 @@ import {
   type OrderStatus,
 } from "@tepian-k3/constants";
 import { type OrderStatusHistory } from "@tepian-k3/types/order-status-history.types";
+import { format } from "date-fns";
 
 interface OrderTimelineProps {
   history: OrderStatusHistory[];
@@ -23,13 +24,8 @@ interface OrderTimelineProps {
 
 function formatDate(dateString: string): { date: string; time: string } {
   const d = new Date(dateString);
-  const date = d.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-  });
-  const time = d
-    .toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
-    .replace(":", ".");
+  const date = format(d, "dd MMM yyyy");
+  const time = format(d, "HH:mm");
   return { date, time };
 }
 

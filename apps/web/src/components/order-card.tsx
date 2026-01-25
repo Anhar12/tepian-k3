@@ -5,17 +5,14 @@ import type { Order } from "@tepian-k3/types/order.types";
 import { useNavigate } from "@tanstack/react-router";
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from "@tepian-k3/constants";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface OrderCardProps {
   order: Order;
 }
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return format(dateString, "dd MMM yyyy");
 }
 
 function formatCurrency(amount: number): string {

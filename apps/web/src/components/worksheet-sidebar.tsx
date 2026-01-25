@@ -30,6 +30,7 @@ import {
   type WorksheetStatus,
 } from "@tepian-k3/constants";
 import { getPublicUrl } from "@/utils/url";
+import { format } from "date-fns";
 
 const routeApi = getRouteApi("/(core)/worksheets");
 
@@ -124,7 +125,7 @@ export function WorksheetSidebar({
                   <Calendar className="size-4 text-muted-foreground" />
                   <span className="font-medium">Mulai:</span>
                   <span className="text-muted-foreground">
-                    {new Date(worksheet.startDate).toLocaleDateString("id-ID")}
+                    {format(worksheet.startDate, "dd MMM yyyy")}
                   </span>
                 </div>
               )}
@@ -133,7 +134,7 @@ export function WorksheetSidebar({
                   <Calendar className="size-4 text-muted-foreground" />
                   <span className="font-medium">Selesai:</span>
                   <span className="text-muted-foreground">
-                    {new Date(worksheet.endDate).toLocaleDateString("id-ID")}
+                    {format(worksheet.endDate, "dd MMM yyyy")}
                   </span>
                 </div>
               )}
