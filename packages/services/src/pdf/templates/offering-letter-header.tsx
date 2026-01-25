@@ -1,7 +1,6 @@
 import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
-import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 import { storageService } from "../../storage";
 import { registerLiberationSans } from "../fonts/register-liberation-sans";
 import { tw } from "../utils/tw";

@@ -5,9 +5,14 @@ import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.type
 
 interface GenerateOfferingLetterOptions {
   worksheet: WorksheetTransactionDetail;
+  companyName: string;
   letterNumber: string;
 }
-
+/**
+ * Generates an Offering Letter PDF buffer
+ * @param options - Options for generating the Offering Letter
+ * @returns Promise that resolves to the Offering Letter PDF buffer
+ */
 export const generateOfferingLetterPdf = async (
   options: GenerateOfferingLetterOptions,
 ): Promise<Buffer> => {

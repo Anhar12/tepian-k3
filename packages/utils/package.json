@@ -1,7 +1,10 @@
 {
   "name": "@tepian-k3/utils",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc -b"
+  },
   "exports": {
     "./*": "./src/*.ts"
   },

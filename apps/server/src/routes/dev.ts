@@ -141,26 +141,6 @@ const mockData = {
       company: {
         id: "company-mock-id",
         name: "Acme Corp",
-        email: "contact@acmecorp.com",
-        address: "123 Main St, City, State 12345",
-        deletedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: null,
-        userId: "user-mock-id",
-        kbliId: "kbli-001",
-        maleWorkers: 50,
-        femaleWorkers: 30,
-        healthFacilityAvailable: true,
-        provinceId: "province-1",
-        districtId: "district-1",
-        regencyId: "regency-1",
-        villageId: "village-1",
-        responsibleTestingPerson: "John Doe",
-        responsibleTestingPersonPhone: "+62 812 3456 7890",
-        responsibleTestingPersonEmail: "john.doe@acmecorp.com",
-        wlkpStatus: true,
-        wlkp: "WLKP-2024-001",
-        companyPictureUrl: "https://example.com/company-logo.png",
       },
       items: [
         {
@@ -544,6 +524,7 @@ devRouter.get("/offering-letter/:orderId", async (c) => {
     const pdfBuffer = await generateOfferingLetterPdf({
       ...mockData,
       letterNumber: "LET-2024-001",
+      companyName: mockData.order.company.name,
     });
 
     return new Response(pdfBuffer, {

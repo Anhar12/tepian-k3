@@ -204,7 +204,12 @@ export type WorksheetTransactionDetail = InferQueryModel<
     with: {
       order: {
         with: {
-          company: true;
+          company: {
+            columns: {
+              id: true;
+              name: true;
+            };
+          };
           items: {
             with: {
               parameter: {

@@ -5,11 +5,13 @@ import { tw } from "../utils/tw";
 
 interface OfferingLetterProps {
   worksheet: WorksheetTransactionDetail;
+  companyName: string;
   letterNumber: string;
 }
 
 export const OfferingLetter: React.FC<OfferingLetterProps> = ({
   worksheet,
+  companyName,
   letterNumber,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
@@ -59,9 +61,7 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
             Penawaran harga biaya jasa dan operasional pelaksanaan pengujian K3
             pada
           </Text>
-          <Text style={tw("text-[12px] font-bold")}>
-            {worksheet.order.company.name}
-          </Text>
+          <Text style={tw("text-[12px] font-bold")}>{companyName}</Text>
         </View>
 
         {/* Offering Table */}
@@ -288,7 +288,7 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
               Menyetujui,
             </Text>
             <Text style={tw("text-[10px] font-bold text-center mb-12")}>
-              {worksheet.order.company.name}
+              {companyName}
             </Text>
 
             <Text style={tw("text-[10px] text-center")}>

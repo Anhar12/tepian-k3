@@ -1,6 +1,7 @@
 import { OTPEmail } from "../templates/otp";
 import { WelcomeEmail } from "../templates/welcome";
 import { PasswordResetEmail } from "../templates/password-reset";
+import React from "react";
 
 // Preview OTP Email
 export const OTPPreview = () => (

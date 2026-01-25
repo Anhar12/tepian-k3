@@ -45,6 +45,7 @@ export const generateDocumentRouter = createTRPCRouter({
             const offeringLetter = yield* Effect.tryPromise(() =>
               generateOfferingLetterPdf({
                 worksheet,
+                companyName: worksheet.order.company.name,
                 letterNumber: input.letterNumber,
               }),
             );

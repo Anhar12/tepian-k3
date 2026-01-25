@@ -19,6 +19,8 @@
     }
   },
   "scripts": {
+    "build": "tsc",
+    "check-types": "tsc -b",
     "db:push": "pnpm with-env drizzle-kit push",
     "db:generate": "pnpm with-env drizzle-kit generate",
     "db:studio": "pnpm with-env drizzle-kit studio",
