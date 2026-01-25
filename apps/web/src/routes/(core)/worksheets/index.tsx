@@ -1021,9 +1021,9 @@ function RouteComponent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {toolPagination.paginatedData.map((tool) => (
+                    {toolPagination.paginatedData.map((tool, idx) => (
                       <TableRow
-                        key={tool.id}
+                        key={idx}
                         className={`cursor-pointer hover:bg-muted/30 ${
                           selectedToolIds.has(tool.id) ? "bg-primary/5" : ""
                         }`}
@@ -1248,9 +1248,9 @@ function RouteComponent() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {bahanPagination.paginatedData.map((item) => (
+                        {bahanPagination.paginatedData.map((item, idx) => (
                           <TableRow
-                            key={item.id}
+                            key={idx}
                             className={`hover:bg-muted/30 ${item.required > 0 ? "bg-primary/5" : ""}`}
                           >
                             <TableCell className="text-xs font-medium sm:text-sm">
