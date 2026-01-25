@@ -266,7 +266,10 @@ function RouteComponent() {
             if (!groupedItemsByCompany[company.id]) {
               groupedItemsByCompany[company.id] = [];
             }
-            let companyEntry = groupedItemsByCompany[company.id].find(
+            const companyGroup = groupedItemsByCompany[company.id];
+            if (!companyGroup) return;
+
+            let companyEntry = companyGroup.find(
               (entry) => entry.id === location.id,
             );
             if (!companyEntry) {
@@ -275,7 +278,7 @@ function RouteComponent() {
                 name: location.name,
                 items: [],
               };
-              groupedItemsByCompany[company.id].push(companyEntry);
+              companyGroup.push(companyEntry);
             }
             companyEntry.items.push({
               id: item.id,

@@ -7,7 +7,7 @@ import type { Row } from "@tanstack/react-table";
 import type { Resource } from "@tepian-k3/constants";
 import { ArchiveRestore, Trash } from "lucide-react";
 
-interface CrudActionCellConfig<T, TParams> {
+interface CrudActionCellConfig<TParams> {
   /** Resource name (singular) for display messages */
   resourceName: string;
   /** Nested path route for routing (e.g., '(core)/back-office')
@@ -43,7 +43,7 @@ interface CrudActionCellConfig<T, TParams> {
 export function createCrudActionCell<
   T extends { id: string; deletedAt: string | null },
   TParams,
->(config: CrudActionCellConfig<T, TParams>) {
+>(config: CrudActionCellConfig<TParams>) {
   const {
     resourceName,
     nestedPathRoute,

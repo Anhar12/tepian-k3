@@ -61,15 +61,17 @@ export const useTestingFormStore = create<TestingFormStore>()(
         })),
       setStep2Data: (data) => {
         // first check if the location already exists in step2 if it does, do not add it again if not, add it
+        const firstItem = data[0];
+        if (!firstItem) return;
 
         const existingLocations = get().formData.step2 || [];
 
         const locationExists = existingLocations.some(
-          (loc) => loc.id === data[0].id,
+          (loc) => loc.id === firstItem.id,
         );
 
         if (locationExists) {
-          set({ currentSelectedLocationId: data[0].id });
+          set({ currentSelectedLocationId: firstItem.id });
           return;
         } else {
           set((state) => ({
@@ -77,7 +79,7 @@ export const useTestingFormStore = create<TestingFormStore>()(
               ...state.formData,
               step2: [...existingLocations, ...data],
             },
-            currentSelectedLocationId: data[0].id,
+            currentSelectedLocationId: firstItem.id,
           }));
         }
       },

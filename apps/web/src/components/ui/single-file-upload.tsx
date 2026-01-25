@@ -47,8 +47,8 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
       className,
       value,
       onChange,
-      onBlur,
-      name,
+      onBlur: _onBlur,
+      name: _name,
       disabled = false,
       error,
     },
@@ -108,7 +108,7 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
       [maxSize],
     );
 
-    const simulateUpload = (fileUpload: UploadFile, file: File) => {
+    const simulateUpload = (_fileUpload: UploadFile, file: File) => {
       let progress = 0;
       const interval = setInterval(() => {
         progress += Math.random() * 20;
@@ -177,8 +177,9 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
         setIsDragging(false);
 
         const files = e.dataTransfer.files;
-        if (files.length > 0) {
-          addFile(files[0]);
+        const file = files[0];
+        if (file) {
+          addFile(file);
         }
       },
       [addFile, disabled],
@@ -191,8 +192,9 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
       input.accept = accept;
       input.onchange = (e) => {
         const target = e.target as HTMLInputElement;
-        if (target.files && target.files.length > 0) {
-          addFile(target.files[0]);
+        const file = target.files?.[0];
+        if (file) {
+          addFile(file);
         }
       };
       input.click();
@@ -208,7 +210,8 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
 
     const getFileExtension = (filename: string): string => {
       const parts = filename.split(".");
-      return parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "FILE";
+      const ext = parts[parts.length - 1];
+      return parts.length > 1 && ext ? ext.toUpperCase() : "FILE";
     };
 
     const displayError = error || uploadError;

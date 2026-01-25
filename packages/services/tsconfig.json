@@ -1,20 +1,18 @@
 {
   "extends": "@tepian-k3/config/tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
     "composite": true,
-    "noUnusedLocals": false,
-    "paths": {
-      "env": ["./env.ts"]
-    }
+    "noUnusedLocals": false
   },
+  "include": ["src", "env.ts"],
   "exclude": [
     "node_modules",
-    "./dist/**/*",
+    "dist",
     "src/**/docs/**/*.example.ts",
     "src/**/docs/**/*.example.md"
   ]

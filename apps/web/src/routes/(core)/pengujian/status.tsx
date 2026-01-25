@@ -349,7 +349,7 @@ function RouteComponent() {
                   }
                   handleUploadPaymentDocs={handleUploadPaymentDocs}
                 />
-              ) : isRevisionStatus ? (
+              ) : isRevisionStatus && revisionHistory ? (
                 // State: Waiting for revision
                 <StatusStateWaitingForRevision
                   orderDetail={orderDetail}

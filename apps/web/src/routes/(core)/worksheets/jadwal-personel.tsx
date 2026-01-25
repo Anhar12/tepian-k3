@@ -126,7 +126,7 @@ function getInitials(name: string): string {
 }
 
 function getColorForIndex(index: number): string {
-  return colorPalette[index % colorPalette.length];
+  return colorPalette[index % colorPalette.length] ?? "bg-blue-500";
 }
 
 function JadwalPersonilPage() {
@@ -347,6 +347,8 @@ function JadwalPersonilPage() {
       if (!worksheetSchedule || !worksheetSchedule.startDate) return [];
       const weekStart = weekDays[0];
       const weekEnd = weekDays[6];
+      if (!weekStart || !weekEnd) return [];
+
       const scheduleEnd =
         worksheetSchedule.endDate ?? worksheetSchedule.startDate;
 
@@ -417,6 +419,8 @@ function JadwalPersonilPage() {
 
                   const weekStart = weekDays[0];
                   const weekEnd = weekDays[6];
+                  if (!weekStart || !weekEnd) return null;
+
                   const scheduleEnd = event.endDate ?? event.startDate;
 
                   const eventStartInWeek =
