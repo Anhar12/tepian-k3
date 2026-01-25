@@ -12,12 +12,16 @@ import {
   inArray,
   isNotNull,
   isNull,
+  ne,
   sql,
+  sum,
 } from "@tepian-k3/db";
 import {
   chemicalMaterials,
   parameterChemicalMaterials,
   parameters,
+  worksheetChemicalMaterials,
+  worksheets,
 } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
@@ -331,6 +335,7 @@ const chemicalMaterialQueries = {
   /**
    * Get chemical materials for worksheet
    * Returns chemical materials related to parameters in the worksheet
+   * Also calculates pending stock from other worksheets with pending statuses
    */
   getChemicalMaterialsForWorksheet(worksheetId: string) {
     return Effect.tryPromise({
@@ -347,11 +352,21 @@ const chemicalMaterialQueries = {
 
         if (parameterIds.length === 0) return [];
 
-        // Get chemical materials linked to these parameters with parameter name
+        // Statuses that count as "pending" (materials are reserved but not yet consumed)
+        const pendingStatuses = [
+          "draft",
+          "pending_verification",
+          "revision",
+          "in_progress",
+        ] as const;
+
+        // Get chemical materials linked to these parameters with aggregated parameter names
+        // and calculate pending stock from other worksheets
         const results = await db
           .select({
             ...getTableColumns(chemicalMaterials),
-            parameterName: parameters.name,
+            // Aggregate parameter names into a comma-separated string
+            parameterName: sql<string>`string_agg(DISTINCT ${parameters.name}, ', ' ORDER BY ${parameters.name})`,
           })
           .from(chemicalMaterials)
           .innerJoin(
@@ -371,9 +386,46 @@ const chemicalMaterialQueries = {
               isNull(chemicalMaterials.deletedAt),
             ),
           )
-          .orderBy(asc(chemicalMaterials.name), asc(parameters.name));
+          .groupBy(chemicalMaterials.id)
+          .orderBy(asc(chemicalMaterials.name));
 
-        return results;
+        // Get pending stock for each chemical material from other worksheets
+        const pendingStockResults = await db
+          .select({
+            chemicalMaterialId: worksheetChemicalMaterials.chemicalMaterialId,
+            pendingStock: sum(worksheetChemicalMaterials.required),
+          })
+          .from(worksheetChemicalMaterials)
+          .innerJoin(
+            worksheets,
+            eq(worksheetChemicalMaterials.worksheetId, worksheets.id),
+          )
+          .where(
+            and(
+              inArray(
+                worksheetChemicalMaterials.chemicalMaterialId,
+                results.map((r) => r.id),
+              ),
+              ne(worksheets.id, worksheetId), // Exclude current worksheet
+              inArray(worksheets.status, pendingStatuses),
+              isNull(worksheets.deletedAt),
+            ),
+          )
+          .groupBy(worksheetChemicalMaterials.chemicalMaterialId);
+
+        // Create a map of pending stock by chemical material ID
+        const pendingStockMap = new Map(
+          pendingStockResults.map((r) => [
+            r.chemicalMaterialId,
+            Number(r.pendingStock) || 0,
+          ]),
+        );
+
+        // Merge pending stock into results
+        return results.map((material) => ({
+          ...material,
+          pendingStock: pendingStockMap.get(material.id) ?? 0,
+        }));
       },
       catch: (error) => {
         logError(

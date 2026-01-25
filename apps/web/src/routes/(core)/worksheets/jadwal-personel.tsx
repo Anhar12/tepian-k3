@@ -14,9 +14,11 @@ import {
   AlertCircle,
   Save,
   Download,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -44,7 +46,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   EMPLOYEE_STATUS_COLORS,
   EMPLOYEE_STATUS_LABELS,
+  WORKSHEET_STATUS_LABELS,
   type EmployeeStatus,
+  type WorksheetStatus,
 } from "@tepian-k3/constants";
 import { toast } from "sonner";
 import {
@@ -221,6 +225,12 @@ function JadwalPersonilPage() {
       worksheet?.assignments?.map((a) => a.employee?.id).filter(Boolean) ?? []
     );
   }, [worksheet]);
+
+  // Check if worksheet is editable (only draft or revision status)
+  const isEditable = useMemo(() => {
+    if (!worksheet?.status) return false;
+    return ["draft", "revision"].includes(worksheet.status);
+  }, [worksheet?.status]);
 
   // Initialize selected personnel and dates when opening dialog
   useEffect(() => {
@@ -669,6 +679,21 @@ function JadwalPersonilPage() {
         ]}
       />
 
+      {/* Show readonly alert when worksheet is not editable */}
+      {!isEditable && worksheet && (
+        <Alert className="border-blue-200 bg-blue-50">
+          <Lock className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-sm text-blue-800">
+            Worksheet ini dalam status{" "}
+            <strong>
+              {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
+            </strong>{" "}
+            dan jadwal tidak dapat diubah. Jadwal hanya dapat diubah saat status{" "}
+            <strong>Draft</strong> atau <strong>Revision</strong>.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row">
         <div className="flex-1">
           <Card>
@@ -682,19 +707,21 @@ function JadwalPersonilPage() {
                 </div>
 
                 <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-4">
-                  <PermissionGate permission="worksheet-assignments.update">
-                    <Button
-                      onClick={() => setShowAssignDialog(true)}
-                      className="gap-2"
-                      size="sm"
-                    >
-                      <Users className="h-4 w-4" />
-                      <span className="hidden sm:inline">
-                        Tugaskan Personil
-                      </span>
-                      <span className="sm:hidden">Tugaskan</span>
-                    </Button>
-                  </PermissionGate>
+                  {isEditable && (
+                    <PermissionGate permission="worksheet-assignments.update">
+                      <Button
+                        onClick={() => setShowAssignDialog(true)}
+                        className="gap-2"
+                        size="sm"
+                      >
+                        <Users className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                          Tugaskan Personil
+                        </span>
+                        <span className="sm:hidden">Tugaskan</span>
+                      </Button>
+                    </PermissionGate>
+                  )}
 
                   <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
                     <Button
@@ -813,16 +840,18 @@ function JadwalPersonilPage() {
                   <p className="mt-2 text-sm text-muted-foreground">
                     Belum ada personel ditugaskan
                   </p>
-                  <PermissionGate permission="worksheet-assignments.update">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => setShowAssignDialog(true)}
-                    >
-                      Tugaskan Sekarang
-                    </Button>
-                  </PermissionGate>
+                  {isEditable && (
+                    <PermissionGate permission="worksheet-assignments.update">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => setShowAssignDialog(true)}
+                      >
+                        Tugaskan Sekarang
+                      </Button>
+                    </PermissionGate>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -1155,20 +1184,22 @@ function JadwalPersonilPage() {
               </div>
             </div>
 
-            <DialogFooter>
-              <PermissionGate permission="worksheet-assignments.update">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowEventDetail(false);
-                    setShowAssignDialog(true);
-                  }}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Edit Penugasan
-                </Button>
-              </PermissionGate>
-            </DialogFooter>
+            {isEditable && (
+              <DialogFooter>
+                <PermissionGate permission="worksheet-assignments.update">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowEventDetail(false);
+                      setShowAssignDialog(true);
+                    }}
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    Edit Penugasan
+                  </Button>
+                </PermissionGate>
+              </DialogFooter>
+            )}
           </div>
         </DialogContent>
       </Dialog>
