@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
+import { tw } from "../utils/tw";
 
 const styles = StyleSheet.create({
   container: {
@@ -56,28 +57,36 @@ interface LetterheadProps {
 }
 
 export const Letterhead: React.FC<LetterheadProps> = ({ logoUrl }) => (
-  <View style={styles.container}>
-    <View style={styles.header}>
+  <View style={tw("mb-4")}>
+    <View style={tw("flex-row items-center border-b-2 border-black pb-2")}>
       {logoUrl && <Image src={logoUrl} style={styles.logo} />}
-      <View style={styles.headerText}>
-        <Text style={styles.ministry}>
+      <View style={tw("flex-1")}>
+        <Text style={tw("text-center text-[12px]")}>
           KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA
         </Text>
-        <Text style={styles.department}>DIREKTORAT JENDERAL</Text>
-        <Text style={styles.department}>
+        <Text style={tw("text-center text-[12px]")}>DIREKTORAT JENDERAL</Text>
+        <Text style={tw("text-center text-[12px]")}>
           PEMBINAAN PENGAWASAN KETENAGAKERJAAN
         </Text>
-        <Text style={styles.department}>
+        <Text style={tw("text-center text-[12px]")}>
           DAN KESELAMATAN DAN KESEHATAN KERJA
         </Text>
-        <Text style={styles.office}>BALAI KESELAMATAN DAN KESEHATAN KERJA</Text>
-        <Text style={styles.address}>
+        <Text style={tw("text-center text-[16px]")}>
+          BALAI KESELAMATAN DAN KESEHATAN KERJA
+        </Text>
+        <Text style={tw("text-center text-[9px]")}>
           Jalan Sentosa No. 09 Samarinda Telp./Fax. (0541) 771306, 732941
           Samarinda 75117
         </Text>
-        <Text style={styles.website}>
-          Laman: https://balaik3samarinda.kemnaker.go.id
-        </Text>
+        <View style={tw("flex-row justify-center gap-2")}>
+          <Text style={tw("text-center text-[9px] italic")}>Laman</Text>
+          <Text style={tw("text-center text-[9px] italic")}>:</Text>
+          <Text
+            style={tw("text-center text-[9px] italic underline text-blue-600")}
+          >
+            http://bkk3.samarinda.kemnaker.go.id
+          </Text>
+        </View>
       </View>
     </View>
   </View>
