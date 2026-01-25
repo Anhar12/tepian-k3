@@ -99,7 +99,7 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
               key={item.id}
               style={tw(
                 `flex-row border-black ${
-                  index === worksheet.items.length - 1 ? "" : "border-b"
+                  index === worksheet.items.length - 1 && "border-b"
                 }`,
               )}
             >
@@ -194,9 +194,8 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
                 key={cost.id}
                 style={tw(
                   `flex-row border-black ${
-                    index === worksheet.operationalCosts.length - 1
-                      ? ""
-                      : "border-b"
+                    index === worksheet.operationalCosts.length - 1 &&
+                    "border-b"
                   }`,
                 )}
               >
