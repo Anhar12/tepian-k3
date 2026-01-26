@@ -1507,3 +1507,81 @@ export const notifications = createTable(
     index("notifications_type_idx").using("btree", table.type),
   ],
 );
+
+// ==================== SURVEY KEPUASAN ====================
+
+export const surveyQuestions = createTable(
+  "survey_questions",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    questionText: text("question_text").notNull(),
+    order: integer("order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    index("survey_question_id_idx").using("btree", table.id),
+    index("survey_question_order_idx").using("btree", table.order),
+    index("survey_question_is_active_idx").using("btree", table.isActive),
+  ],
+);
+
+export const surveyResponses = createTable(
+  "survey_responses",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    questionId: uuid("question_id")
+      .notNull()
+      .references(() => surveyQuestions.id, { onDelete: "cascade" }),
+    questionText: text("question_text").notNull(), // Copied at submission time for historical preservation
+    rating: integer("rating").notNull(), // 1-5
+    ...timestamps,
+  },
+  (table) => [
+    index("survey_response_id_idx").using("btree", table.id),
+    index("survey_response_order_id_idx").using("btree", table.orderId),
+    index("survey_response_question_id_idx").using("btree", table.questionId),
+    uniqueIndex("survey_response_order_question_unique_idx").on(
+      table.orderId,
+      table.questionId,
+    ),
+  ],
+);
+
+export const surveyFeedback = createTable(
+  "survey_feedback",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    orderId: uuid("order_id")
+      .notNull()
+      .unique()
+      .references(() => order.id, { onDelete: "cascade" }),
+    feedback: text("feedback"),
+    submittedAt: timestamp("submitted_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .$default(() => sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    submittedByUserId: uuid("submitted_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    index("survey_feedback_id_idx").using("btree", table.id),
+    index("survey_feedback_order_id_idx").using("btree", table.orderId),
+  ],
+);

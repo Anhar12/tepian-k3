@@ -11,6 +11,7 @@ import { runEffect } from "../utils/run-effect";
 import { WORKSHEET_STATUS } from "@tepian-k3/constants";
 import { logError } from "@tepian-k3/services/logger";
 import worksheetNoteQueries from "@tepian-k3/queries/worksheet-note.queries";
+import { EventTypes } from "@tepian-k3/schema/event.schema";
 
 export const worksheetRouter = createTRPCRouter({
   /**
@@ -415,6 +416,15 @@ export const worksheetRouter = createTRPCRouter({
               });
             },
           });
+
+          yield* Effect.tryPromise(() =>
+            ctx.eventBus.publish(EventTypes.WORKSHEET_NOTE_CREATED, {
+              worksheetId: input.worksheetId,
+              noteId: result.id,
+              createdBy: ctx.user.id,
+              content: input.note,
+            }),
+          );
 
           return result;
         }),

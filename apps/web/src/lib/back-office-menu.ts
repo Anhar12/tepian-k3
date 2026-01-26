@@ -10,6 +10,7 @@ import {
   IconFlask,
   IconFolderCog,
   IconLayersSubtract,
+  IconMessage2Question,
   IconShieldCheckFilled,
   IconShoppingCart,
   IconTools,
@@ -107,6 +108,12 @@ export const backOfficeMenu: {
       url: `${urlStarter}/kblis`,
       icon: IconBook,
       permission: "kbli.view",
+    },
+    {
+      title: "Survey",
+      url: `${urlStarter}/survey-questions`,
+      icon: IconMessage2Question,
+      permission: "survey-questions.view",
     },
   ],
 };

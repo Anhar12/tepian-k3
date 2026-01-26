@@ -22,6 +22,9 @@ import {
   regencies,
   rolePermissions,
   roles,
+  surveyFeedback,
+  surveyQuestions,
+  surveyResponses,
   testing,
   testingItem,
   toolCalibrationCertificates,
@@ -328,6 +331,12 @@ export const orderRelations = relations(order, ({ one, many }) => ({
   documents: many(documents, {
     relationName: "orderDocuments",
   }),
+  // Survey kepuasan
+  surveyResponses: many(surveyResponses),
+  surveyFeedback: one(surveyFeedback, {
+    fields: [order.id],
+    references: [surveyFeedback.orderId],
+  }),
 }));
 
 export const orderItemRelations = relations(orderItem, ({ one }) => ({
@@ -584,3 +593,40 @@ export const employeeRelations = relations(employees, ({ one }) => ({
     references: [positions.id],
   }),
 }));
+
+// ==================== SURVEY KEPUASAN RELATIONS ====================
+
+export const surveyQuestionRelations = relations(
+  surveyQuestions,
+  ({ many }) => ({
+    responses: many(surveyResponses),
+  }),
+);
+
+export const surveyResponseRelations = relations(
+  surveyResponses,
+  ({ one }) => ({
+    order: one(order, {
+      fields: [surveyResponses.orderId],
+      references: [order.id],
+    }),
+    question: one(surveyQuestions, {
+      fields: [surveyResponses.questionId],
+      references: [surveyQuestions.id],
+    }),
+  }),
+);
+
+export const surveyFeedbackRelations = relations(
+  surveyFeedback,
+  ({ one }) => ({
+    order: one(order, {
+      fields: [surveyFeedback.orderId],
+      references: [order.id],
+    }),
+    submittedBy: one(users, {
+      fields: [surveyFeedback.submittedByUserId],
+      references: [users.id],
+    }),
+  }),
+);

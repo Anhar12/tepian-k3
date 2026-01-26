@@ -47,6 +47,7 @@ import { Route as coreBackOfficeWorksheetsIndexRouteImport } from './routes/(cor
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
 import { Route as coreBackOfficeTestingsIndexRouteImport } from './routes/(core)/back-office/testings/index'
+import { Route as coreBackOfficeSurveyQuestionsIndexRouteImport } from './routes/(core)/back-office/survey-questions/index'
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
 import { Route as coreBackOfficePositionsIndexRouteImport } from './routes/(core)/back-office/positions/index'
 import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
@@ -59,6 +60,7 @@ import { Route as coreBackOfficeChemicalMaterialsIndexRouteImport } from './rout
 import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
 import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
 import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
+import { Route as coreBackOfficeSurveyQuestionsCreateRouteImport } from './routes/(core)/back-office/survey-questions/create'
 import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/back-office/roles/create'
 import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
 import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(core)/back-office/parameters/create'
@@ -73,6 +75,7 @@ import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(cor
 import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.edit'
 import { Route as coreBackOfficeToolsToolIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.detail'
 import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
+import { Route as coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport } from './routes/(core)/back-office/survey-questions/$questionId.edit'
 import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
 import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(core)/back-office/roles/$roleId.detail'
 import { Route as coreBackOfficePositionsPositionIdEditRouteImport } from './routes/(core)/back-office/positions/$positionId.edit'
@@ -285,6 +288,12 @@ const coreBackOfficeTestingsIndexRoute =
     path: '/testings/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeSurveyQuestionsIndexRoute =
+  coreBackOfficeSurveyQuestionsIndexRouteImport.update({
+    id: '/survey-questions/',
+    path: '/survey-questions/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeRolesIndexRoute =
   coreBackOfficeRolesIndexRouteImport.update({
     id: '/roles/',
@@ -355,6 +364,12 @@ const coreBackOfficeToolsCreateRoute =
   coreBackOfficeToolsCreateRouteImport.update({
     id: '/tools/create',
     path: '/tools/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeSurveyQuestionsCreateRoute =
+  coreBackOfficeSurveyQuestionsCreateRouteImport.update({
+    id: '/survey-questions/create',
+    path: '/survey-questions/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeRolesCreateRoute =
@@ -439,6 +454,12 @@ const coreBackOfficeTestingsTestingIdDetailRoute =
   coreBackOfficeTestingsTestingIdDetailRouteImport.update({
     id: '/testings/$testingId/detail',
     path: '/testings/$testingId/detail',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeSurveyQuestionsQuestionIdEditRoute =
+  coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport.update({
+    id: '/survey-questions/$questionId/edit',
+    path: '/survey-questions/$questionId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeRolesRoleIdEditRoute =
@@ -572,6 +593,7 @@ export interface FileRoutesByFullPath {
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
+  '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
@@ -584,6 +606,7 @@ export interface FileRoutesByFullPath {
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
+  '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
@@ -600,6 +623,7 @@ export interface FileRoutesByFullPath {
   '/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
+  '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
@@ -647,6 +671,7 @@ export interface FileRoutesByTo {
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
+  '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
@@ -659,6 +684,7 @@ export interface FileRoutesByTo {
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
+  '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
@@ -675,6 +701,7 @@ export interface FileRoutesByTo {
   '/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
+  '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
@@ -729,6 +756,7 @@ export interface FileRoutesById {
   '/(core)/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/(core)/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
+  '/(core)/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
   '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
@@ -741,6 +769,7 @@ export interface FileRoutesById {
   '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
   '/(core)/back-office/positions/': typeof coreBackOfficePositionsIndexRoute
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
+  '/(core)/back-office/survey-questions/': typeof coreBackOfficeSurveyQuestionsIndexRoute
   '/(core)/back-office/testings/': typeof coreBackOfficeTestingsIndexRoute
   '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
   '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
@@ -757,6 +786,7 @@ export interface FileRoutesById {
   '/(core)/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
   '/(core)/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
+  '/(core)/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/(core)/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/(core)/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
@@ -810,6 +840,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
     | '/back-office/roles/create'
+    | '/back-office/survey-questions/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
     | '/dashboard/company/create'
@@ -822,6 +853,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters'
     | '/back-office/positions'
     | '/back-office/roles'
+    | '/back-office/survey-questions'
     | '/back-office/testings'
     | '/back-office/tools'
     | '/back-office/users'
@@ -838,6 +870,7 @@ export interface FileRouteTypes {
     | '/back-office/positions/$positionId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
+    | '/back-office/survey-questions/$questionId/edit'
     | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/tools/$toolId/edit'
@@ -885,6 +918,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
     | '/back-office/roles/create'
+    | '/back-office/survey-questions/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
     | '/dashboard/company/create'
@@ -897,6 +931,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters'
     | '/back-office/positions'
     | '/back-office/roles'
+    | '/back-office/survey-questions'
     | '/back-office/testings'
     | '/back-office/tools'
     | '/back-office/users'
@@ -913,6 +948,7 @@ export interface FileRouteTypes {
     | '/back-office/positions/$positionId/edit'
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
+    | '/back-office/survey-questions/$questionId/edit'
     | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/tools/$toolId/edit'
@@ -966,6 +1002,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/parameters/create'
     | '/(core)/back-office/positions/create'
     | '/(core)/back-office/roles/create'
+    | '/(core)/back-office/survey-questions/create'
     | '/(core)/back-office/tools/create'
     | '/(core)/back-office/users/create'
     | '/(core)/dashboard/company/create'
@@ -978,6 +1015,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/parameters/'
     | '/(core)/back-office/positions/'
     | '/(core)/back-office/roles/'
+    | '/(core)/back-office/survey-questions/'
     | '/(core)/back-office/testings/'
     | '/(core)/back-office/tools/'
     | '/(core)/back-office/users/'
@@ -994,6 +1032,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/positions/$positionId/edit'
     | '/(core)/back-office/roles/$roleId/detail'
     | '/(core)/back-office/roles/$roleId/edit'
+    | '/(core)/back-office/survey-questions/$questionId/edit'
     | '/(core)/back-office/testings/$testingId/detail'
     | '/(core)/back-office/tools/$toolId/detail'
     | '/(core)/back-office/tools/$toolId/edit'
@@ -1284,6 +1323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeTestingsIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/survey-questions/': {
+      id: '/(core)/back-office/survey-questions/'
+      path: '/survey-questions'
+      fullPath: '/back-office/survey-questions'
+      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/roles/': {
       id: '/(core)/back-office/roles/'
       path: '/roles'
@@ -1366,6 +1412,13 @@ declare module '@tanstack/react-router' {
       path: '/tools/create'
       fullPath: '/back-office/tools/create'
       preLoaderRoute: typeof coreBackOfficeToolsCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/survey-questions/create': {
+      id: '/(core)/back-office/survey-questions/create'
+      path: '/survey-questions/create'
+      fullPath: '/back-office/survey-questions/create'
+      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/roles/create': {
@@ -1464,6 +1517,13 @@ declare module '@tanstack/react-router' {
       path: '/testings/$testingId/detail'
       fullPath: '/back-office/testings/$testingId/detail'
       preLoaderRoute: typeof coreBackOfficeTestingsTestingIdDetailRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/survey-questions/$questionId/edit': {
+      id: '/(core)/back-office/survey-questions/$questionId/edit'
+      path: '/survey-questions/$questionId/edit'
+      fullPath: '/back-office/survey-questions/$questionId/edit'
+      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/roles/$roleId/edit': {
@@ -1604,6 +1664,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute
   coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
   coreBackOfficeRolesCreateRoute: typeof coreBackOfficeRolesCreateRoute
+  coreBackOfficeSurveyQuestionsCreateRoute: typeof coreBackOfficeSurveyQuestionsCreateRoute
   coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
   coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
   coreBackOfficeChemicalMaterialsIndexRoute: typeof coreBackOfficeChemicalMaterialsIndexRoute
@@ -1615,6 +1676,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
   coreBackOfficePositionsIndexRoute: typeof coreBackOfficePositionsIndexRoute
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
+  coreBackOfficeSurveyQuestionsIndexRoute: typeof coreBackOfficeSurveyQuestionsIndexRoute
   coreBackOfficeTestingsIndexRoute: typeof coreBackOfficeTestingsIndexRoute
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
   coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
@@ -1630,6 +1692,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficePositionsPositionIdEditRoute: typeof coreBackOfficePositionsPositionIdEditRoute
   coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
   coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
+  coreBackOfficeSurveyQuestionsQuestionIdEditRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
   coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute
   coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
@@ -1652,6 +1715,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeParametersCreateRoute: coreBackOfficeParametersCreateRoute,
   coreBackOfficePositionsCreateRoute: coreBackOfficePositionsCreateRoute,
   coreBackOfficeRolesCreateRoute: coreBackOfficeRolesCreateRoute,
+  coreBackOfficeSurveyQuestionsCreateRoute:
+    coreBackOfficeSurveyQuestionsCreateRoute,
   coreBackOfficeToolsCreateRoute: coreBackOfficeToolsCreateRoute,
   coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
   coreBackOfficeChemicalMaterialsIndexRoute:
@@ -1665,6 +1730,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeParametersIndexRoute: coreBackOfficeParametersIndexRoute,
   coreBackOfficePositionsIndexRoute: coreBackOfficePositionsIndexRoute,
   coreBackOfficeRolesIndexRoute: coreBackOfficeRolesIndexRoute,
+  coreBackOfficeSurveyQuestionsIndexRoute:
+    coreBackOfficeSurveyQuestionsIndexRoute,
   coreBackOfficeTestingsIndexRoute: coreBackOfficeTestingsIndexRoute,
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
   coreBackOfficeUsersIndexRoute: coreBackOfficeUsersIndexRoute,
@@ -1688,6 +1755,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficePositionsPositionIdEditRoute,
   coreBackOfficeRolesRoleIdDetailRoute: coreBackOfficeRolesRoleIdDetailRoute,
   coreBackOfficeRolesRoleIdEditRoute: coreBackOfficeRolesRoleIdEditRoute,
+  coreBackOfficeSurveyQuestionsQuestionIdEditRoute:
+    coreBackOfficeSurveyQuestionsQuestionIdEditRoute,
   coreBackOfficeTestingsTestingIdDetailRoute:
     coreBackOfficeTestingsTestingIdDetailRoute,
   coreBackOfficeToolsToolIdDetailRoute: coreBackOfficeToolsToolIdDetailRoute,

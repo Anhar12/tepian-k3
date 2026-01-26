@@ -61,7 +61,7 @@ import {
   Send,
   Wrench,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -126,6 +126,14 @@ function RouteComponent() {
     trpc.worksheet.getNotes.queryOptions({ worksheetId }),
   );
 
+  // Ref for auto-scrolling notes to bottom
+  const notesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when notes change
+  useEffect(() => {
+    notesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [notes]);
+
   // TODO create worksheet items api to fetch items separately
   // Fetch worksheet items
 
@@ -184,10 +192,10 @@ function RouteComponent() {
   const addNoteMutation = useMutation(
     trpc.worksheet.addNote.mutationOptions({
       onSuccess: async () => {
-        (await queryClient.invalidateQueries(
+        await queryClient.invalidateQueries(
           trpc.worksheet.getNotes.queryOptions({ worksheetId }),
-        ),
-          globalSuccessToast("Catatan berhasil ditambahkan"));
+        );
+        globalSuccessToast("Catatan berhasil ditambahkan");
         setNewNote("");
         setNoteSeverity("info");
       },
@@ -1643,7 +1651,7 @@ function RouteComponent() {
           {/* Catatan Tab */}
           <TabsContent value="catatan" className="p-3 pt-4 sm:p-4 sm:pt-6">
             <div className="flex h-125 flex-col">
-              <ScrollArea className="mb-4 flex-1 pr-4">
+              <ScrollArea className="mb-4 min-h-0 flex-1 pr-4">
                 <div className="flex flex-col space-y-4">
                   {notes?.length === 0 ? (
                     <div className="py-12 text-center">
@@ -1654,7 +1662,7 @@ function RouteComponent() {
                     </div>
                   ) : (
                     notes?.map((note) => {
-                      const isCurrentUser = note.createdBy.id === profile.id; // You'll need to pass currentUserId as a prop
+                      const isCurrentUser = note.createdBy.id === profile.id;
 
                       return (
                         <div
@@ -1672,7 +1680,7 @@ function RouteComponent() {
                             </AvatarFallback>
                           </Avatar>
                           <div
-                            className={`max-w-[80%] flex-1 ${isCurrentUser ? "flex flex-col items-end" : ""}`}
+                            className={`max-w-[80%] ${isCurrentUser ? "flex flex-col items-end" : ""}`}
                           >
                             <div
                               className={`inline-block rounded-2xl px-4 py-2 ${
@@ -1718,6 +1726,7 @@ function RouteComponent() {
                       );
                     })
                   )}
+                  <div ref={notesEndRef} />
                 </div>
               </ScrollArea>
 

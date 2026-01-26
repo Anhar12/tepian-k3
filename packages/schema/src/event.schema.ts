@@ -20,7 +20,7 @@ export const orderStatusChangedEventSchema = z.object({
   userId: z.uuidv7(),
   oldStatus: z.enum(ORDER_STATUS),
   newStatus: z.enum(ORDER_STATUS),
-  timestamp: z.date(),
+  timestamp: z.string(),
   triggeredBy: z.uuidv7().optional(), // User who changed the status
 });
 
@@ -29,7 +29,7 @@ export const worksheetNoteCreatedEventSchema = z.object({
   worksheetId: z.uuidv7(),
   content: z.string(),
   createdBy: z.uuidv7(),
-  timestamp: z.date(),
+  timestamp: z.string(),
 });
 
 export const broadcastTestEventSchema = z.object({

@@ -1,5 +1,8 @@
 import { SurveyForm } from "@/components/survey-form";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
@@ -24,9 +27,23 @@ export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
 });
 
 function RouteComponent() {
+  const { orderId } = Route.useSearch();
+
+  const { data: order, isLoading } = useQuery(
+    trpc.order.getOrderById.queryOptions({ orderId }),
+  );
+
+  if (isLoading || !order) {
+    return (
+      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-muted/30">
-      <SurveyForm />
+    <div className="container min-h-[calc(100vh-8rem)]">
+      <SurveyForm order={order} />
     </div>
   );
 }

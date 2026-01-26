@@ -21,6 +21,7 @@ import { positionRouter } from "./routers/position";
 import { provinceRouter } from "./routers/province";
 import { regencyRouter } from "./routers/regency";
 import { roleRouters } from "./routers/role";
+import { surveyRouter } from "./routers/survey";
 import { testRouter } from "./routers/test";
 import { testingRouter } from "./routers/testing";
 import { toolRouter } from "./routers/tool";
@@ -66,6 +67,7 @@ export const appRouter = createTRPCRouter({
   notifications: notificationsRouter,
   worksheet: worksheetRouter,
   generateDocument: generateDocumentRouter,
+  survey: surveyRouter,
 });
 
 // export type definition of API
