@@ -14,11 +14,35 @@ export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
       });
     }
 
-    context.queryClient.ensureQueryData(
+    const data = await context.queryClient.ensureQueryData(
       context.trpc.order.getOrderById.queryOptions({
         orderId: search.orderId,
       }),
     );
+
+    if (!data) {
+      throw redirect({
+        to: "/pengujian",
+      });
+    }
+
+    if (data.surveyResponses.length > 0 || data.surveyFeedback) {
+      // already filled survey, redirect back to order detail
+      throw redirect({
+        to: `/pengujian/status`,
+        search: { orderId: search.orderId },
+      });
+    }
+
+    if (data.status !== "completed") {
+      // order not completed yet, redirect back to order detail
+      throw redirect({
+        to: `/pengujian/status`,
+        search: { orderId: search.orderId },
+      });
+    }
+
+    return;
   },
   validateSearch: z.object({
     orderId: z.uuidv7(),

@@ -132,6 +132,8 @@ const orderQueries = {
           with: {
             items: true,
             statusHistory: true,
+            surveyResponses: true,
+            surveyFeedback: true,
           },
         }),
       catch: (error) => {
