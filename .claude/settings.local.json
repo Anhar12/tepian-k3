@@ -37,7 +37,9 @@
       "Bash(pnpm build:*)",
       "WebFetch(domain:orm.drizzle.team)",
       "Bash(pnpm db:push:*)",
-      "Bash(npx @tanstack/router-cli generate)"
+      "Bash(npx @tanstack/router-cli generate)",
+      "Bash(findstr:*)",
+      "Bash(node:*)"
     ]
   }
 }
