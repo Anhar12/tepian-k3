@@ -7,7 +7,6 @@ import {
   Text,
   X,
 } from "lucide-react";
-import { useQueryState } from "nuqs";
 import * as React from "react";
 
 import { DataTableRangeFilter } from "@/components/data-table/data-table-range-filter";
@@ -41,7 +40,6 @@ import {
 } from "@tepian-k3/utils/data-table";
 import { formatDate } from "@/lib/format";
 import { generateId } from "@/lib/id";
-import { getFiltersStateParser } from "@tepian-k3/utils/parsers";
 import { cn } from "@/lib/utils";
 import type {
   ExtendedColumnFilter,
@@ -49,7 +47,6 @@ import type {
 } from "@tepian-k3/types/data-table.types";
 
 const DEBOUNCE_MS = 300;
-const THROTTLE_MS = 50;
 const FILTER_SHORTCUT_KEY = "f";
 const REMOVE_FILTER_SHORTCUTS = ["backspace", "delete"];
 
@@ -58,16 +55,12 @@ interface DataTableFilterMenuProps<TData> extends React.ComponentProps<
 > {
   table: Table<TData>;
   debounceMs?: number;
-  throttleMs?: number;
-  shallow?: boolean;
   disabled?: boolean;
 }
 
 export function DataTableFilterMenu<TData>({
   table,
   debounceMs = DEBOUNCE_MS,
-  throttleMs = THROTTLE_MS,
-  shallow = true,
   disabled,
   ...props
 }: DataTableFilterMenuProps<TData>) {
@@ -111,15 +104,26 @@ export function DataTableFilterMenu<TData>({
     [inputValue, selectedColumn],
   );
 
-  const [filters, setFilters] = useQueryState(
-    table.options.meta?.queryKeys?.filters ?? "filters",
-    getFiltersStateParser<TData>(columns.map((field) => field.id))
-      .withDefault([])
-      .withOptions({
-        clearOnDefault: true,
-        shallow,
-        throttleMs,
-      }),
+  const filters = (table.options.meta?.filters ?? []) as ExtendedColumnFilter<TData>[];
+  const metaSetFilters = table.options.meta?.setFilters as
+    | ((
+        value:
+          | ExtendedColumnFilter<TData>[]
+          | ((prev: ExtendedColumnFilter<TData>[]) => ExtendedColumnFilter<TData>[])
+          | null,
+      ) => void)
+    | undefined;
+
+  const setFilters = React.useCallback(
+    (
+      value:
+        | ExtendedColumnFilter<TData>[]
+        | ((prev: ExtendedColumnFilter<TData>[]) => ExtendedColumnFilter<TData>[])
+        | null,
+    ) => {
+      metaSetFilters?.(value);
+    },
+    [metaSetFilters],
   );
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 

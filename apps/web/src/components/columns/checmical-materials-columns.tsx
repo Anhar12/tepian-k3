@@ -37,9 +37,11 @@ export default function getChemicalMaterialsColumns({
     createNumberColumn<ChemicalMaterial>(currentPage, perPage),
     createTextColumn<ChemicalMaterial>("name", "Nama", {
       width: "w-32",
+      enableFilter: true,
     }),
     createTextColumn<ChemicalMaterial>("code", "Kode", {
       width: "w-24",
+      enableFilter: true,
     }),
     createDateColumn<ChemicalMaterial>("expiredDate", "Tanggal Kadaluarsa", {
       nullable: true,

@@ -7,10 +7,10 @@ import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useDataTable } from "@/hooks/use-data-table";
+import { useDataTableRouter } from "@/hooks/use-data-table-router";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
 import { PlusCircle } from "lucide-react";
@@ -35,7 +35,10 @@ function RouteComponent() {
     data: chemicalMaterials,
     isLoading,
     error,
-  } = useQuery(trpc.chemicalMaterial.getPaginated.queryOptions(params));
+  } = useQuery({
+    ...trpc.chemicalMaterial.getPaginated.queryOptions(params),
+    placeholderData: keepPreviousData,
+  });
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
@@ -48,16 +51,16 @@ function RouteComponent() {
     [params.page, params.perPage],
   );
 
-  const { table } = useDataTable({
+  const { table } = useDataTableRouter({
     data: chemicalMaterials?.data ?? [],
     columns,
     pageCount: chemicalMaterials?.pageCount ?? 0,
+    search: params,
+    navigate: ({ search: updater }) => {
+      navigate({ search: updater });
+    },
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
-      pagination: {
-        pageSize: params.perPage,
-        pageIndex: params.page - 1,
-      },
     },
     getRowId: (row) => row.id,
   });
