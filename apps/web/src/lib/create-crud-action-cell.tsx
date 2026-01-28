@@ -1,11 +1,23 @@
 import DataTableActionCell from "@/components/data-table-action-cell";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { queryClient, trpc } from "@/utils/trpc";
-import type { QueryKey } from "@tanstack/react-query";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useOptimisticMutation } from "@/lib/optimistic-update";
+import { trpc } from "@/utils/trpc";
+
+import type { QueryKey, UseMutationOptions } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import type { Row } from "@tanstack/react-table";
 import type { Resource } from "@tepian-k3/constants";
 import { ArchiveRestore, Trash } from "lucide-react";
+
+/** Structural type for a tRPC mutation proxy that exposes `.mutationOptions()` */
+interface TRPCMutationLike<TInput> {
+  mutationOptions: (
+    opts?: Record<string, unknown>,
+  ) => Pick<
+    UseMutationOptions<unknown, Error, TInput>,
+    "mutationFn" | "mutationKey"
+  >;
+}
 
 interface CrudActionCellConfig<TParams> {
   /** Resource name (singular) for display messages */
@@ -21,10 +33,10 @@ interface CrudActionCellConfig<TParams> {
   resourcePath: string;
   /** Permission prefix (e.g., 'clusters', 'tools') */
   permissionPrefix: Resource;
-  /** Delete mutation from tRPC no type because tRPC mutation types are complex */
-  deleteMutation: any;
-  /** Restore mutation from tRPC no type because tRPC mutation types are complex */
-  restoreMutation: any;
+  /** Delete mutation from tRPC */
+  deleteMutation: TRPCMutationLike<{ id: string }>;
+  /** Restore mutation from tRPC */
+  restoreMutation: TRPCMutationLike<{ id: string }>;
   /** Query options to invalidate */
   getQueryOptions: (params: TParams) => { queryKey: QueryKey };
   /** Get current search params */
@@ -72,32 +84,45 @@ export function createCrudActionCell<
       `${permissionPrefix}.delete`,
     );
 
-    const deleteMut = useMutation(
-      deleteMutation.mutationOptions({
-        onSuccess: async () => {
-          globalSuccessToast(`Berhasil menghapus ${resourceName}`);
-          await queryClient.invalidateQueries(getQueryOptions(params));
+    const queryOptions = getQueryOptions(params);
+
+    const deleteMut = useOptimisticMutation(
+      deleteMutation.mutationOptions(),
+      {
+        queryOptions,
+        operation: {
+          type: "soft-delete",
+          getId: (input) => input.id,
         },
-        onError: (error: Error) => {
+        onSuccess: () => {
+          globalSuccessToast(`Berhasil menghapus ${resourceName}`);
+        },
+        onError: (error) => {
           globalErrorToast(
             `Gagal menghapus ${resourceName}. ${error.message ?? "Silahkan coba lagi."}`,
           );
         },
-      }),
+      },
     );
 
-    const restoreMut = useMutation(
-      restoreMutation.mutationOptions({
-        onSuccess: async () => {
-          globalSuccessToast(`Berhasil mengembalikan ${resourceName}`);
-          await queryClient.invalidateQueries(getQueryOptions(params));
+    const restoreMut = useOptimisticMutation(
+      restoreMutation.mutationOptions(),
+      {
+        queryOptions,
+        operation: {
+          type: "update",
+          getId: (input) => input.id,
+          getUpdatedFields: () => ({ deletedAt: null }),
         },
-        onError: (error: Error) => {
+        onSuccess: () => {
+          globalSuccessToast(`Berhasil mengembalikan ${resourceName}`);
+        },
+        onError: (error) => {
           globalErrorToast(
             `Gagal mengembalikan ${resourceName}. ${error.message ?? "Silahkan coba lagi."}`,
           );
         },
-      }),
+      },
     );
 
     return (
@@ -136,12 +161,8 @@ export function createCrudActionCell<
         onHoverDetail={() => onHoverDetail && onHoverDetail(row.original.id)}
         onConfirm={() =>
           row.original.deletedAt
-            ? (restoreMut.mutate as unknown as (input: { id: string }) => void)(
-                { id: row.original.id },
-              )
-            : (deleteMut.mutate as unknown as (input: { id: string }) => void)({
-                id: row.original.id,
-              })
+            ? restoreMut.mutate({ id: row.original.id })
+            : deleteMut.mutate({ id: row.original.id })
         }
       />
     );

@@ -39,7 +39,8 @@
       "Bash(pnpm db:push:*)",
       "Bash(npx @tanstack/router-cli generate)",
       "Bash(findstr:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(dir /s /b \"f:\\\\Monorepo\\\\tepian-k3\\\\node_modules\\\\.pnpm\\\\*trpc*tanstack*\")"
     ]
   }
 }
