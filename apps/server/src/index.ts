@@ -7,7 +7,7 @@ import { logger } from "hono/logger";
 import fs from "fs/promises";
 import { lookup } from "mime-types";
 import { serve } from "@hono/node-server";
-import { env } from "env";
+import { env } from "@/env";
 import { createTRPCContext } from "@tepian-k3/api";
 import { appRouter } from "@tepian-k3/api/root";
 import path from "path";
@@ -17,6 +17,7 @@ import {
 } from "@tepian-k3/services/notifications";
 import { logInfo } from "@tepian-k3/services/logger";
 import { devRouter } from "./routes/dev";
+import { secureHeaders } from "./middleware/secure-headers";
 import { setDefaultOptions } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -40,12 +41,43 @@ const app = new Hono();
 
 const uploadsDir = env.UPLOADS_DIR || path.join(process.cwd(), "uploads");
 
+// Validate JWT secrets in production
+if (env.NODE_ENV === "production") {
+  const placeholders = ["your-secret", "change-this", "secret", "password"];
+  const secrets = [env.JWT_SECRET, env.JWT_RESET_PASSWORD_SECRET];
+  for (const secret of secrets) {
+    if (placeholders.some((p) => secret.toLowerCase().includes(p))) {
+      throw new Error(
+        "JWT secrets contain placeholder values. Set secure secrets for production.",
+      );
+    }
+  }
+}
+
 app.use(logger());
+app.use(secureHeaders());
+
+// Parse CORS origins (supports comma-separated values)
+const corsOrigins: string[] = env.CORS_ORIGIN
+  ? env.CORS_ORIGIN.split(",")
+      .map((o) => o.trim())
+      .filter(Boolean)
+  : [];
+
+const corsOrigin: string | string[] =
+  corsOrigins.length === 1
+    ? corsOrigins[0]!
+    : corsOrigins.length > 1
+      ? corsOrigins
+      : "*";
+
 app.use(
   "/*",
   cors({
-    origin: env.CORS_ORIGIN || "",
-    allowMethods: ["GET", "POST", "OPTIONS"],
+    origin: corsOrigin,
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   }),
 );
 
@@ -88,7 +120,7 @@ app.get("/api/public/*", async (c) => {
     c.header("Content-Length", file.length.toString());
     c.header("Cache-Control", "public, max-age=31536000");
     return c.body(file);
-  } catch (error) {
+  } catch (_) {
     return c.text("File not found", 404);
   }
 });
@@ -116,7 +148,7 @@ app.get("/api/uploads/*", async (c) => {
     c.header("Cache-Control", "public, max-age=31536000");
 
     return c.body(file);
-  } catch (error) {
+  } catch (_) {
     return c.text("File not found", 404);
   }
 });
@@ -134,13 +166,13 @@ serve(
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
-  console.log("Shutting down...");
+  logInfo("Server", "Shutting down...");
   await shutdownEventBus();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
-  console.log("Shutting down...");
+  logInfo("Server", "Shutting down...");
   await shutdownEventBus();
   process.exit(0);
 });

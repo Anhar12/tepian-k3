@@ -44,8 +44,8 @@ export const Tagihan: React.FC<TagihanProps> = ({
   operationalBankAccount,
   operationalBankAccountName,
   billingExpiryDate,
-  adminEmail,
-  adminContact,
+  adminEmail: _adminEmail,
+  adminContact: _adminContact,
 }) => {
   const today = format(new Date(), "dd MMMM yyyy", { locale: id });
   const refDateFormatted = format(new Date(referenceDate), "dd MMMM yyyy", {
