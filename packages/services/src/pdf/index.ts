@@ -10,6 +10,12 @@ export { generateOfferingLetterHeaderPdf } from "./generator/offering-letter-hea
 // Assignment Letter generator
 export { generateAssignmentLetterPdf } from "./generator/assignment-letter";
 
+// SPK generator
+export { generateSpkPdf } from "./generator/spk";
+
+// Tagihan generator
+export { generateTagihanPdf } from "./generator/tagihan";
+
 // QR Code utilities (server-side)
 export {
   generateQRCodeDataURL,
@@ -45,6 +51,7 @@ export { SignatureTable } from "./components/signature-table";
 export { Spacer, SpacerSizes } from "./components/spacer";
 export { SummaryRow } from "./components/summary-row";
 export { Table, type TableColumn } from "./components/table";
+export { PricingTable } from "./components/pricing-table";
 
 // Tailwind styling utility
 export { tw } from "./utils/tw";

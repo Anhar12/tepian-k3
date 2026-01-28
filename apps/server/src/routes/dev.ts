@@ -3,6 +3,8 @@ import {
   generateInvoicePdf,
   generateOfferingLetterHeaderPdf,
   generateOfferingLetterPdf,
+  generateSpkPdf,
+  generateTagihanPdf,
 } from "@tepian-k3/services/pdf";
 import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
 import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
@@ -568,6 +570,70 @@ devRouter.get("/assignment-letter/:orderId", async (c) => {
         "Content-Type": "application/pdf",
         "Content-Disposition": 'inline; filename="offering-letter-preview.pdf"',
         "Cache-Control": "no-cache", // Always fresh during dev
+      },
+    });
+  } catch (error) {
+    console.error("PDF generation error:", error);
+    return c.json({ error: "Failed to generate PDF" }, 500);
+  }
+});
+
+devRouter.get("/spk/:orderId", async (c) => {
+  try {
+    const pdfBuffer = await generateSpkPdf({
+      worksheet: mockData.worksheet,
+      companyName: mockData.order.company.name,
+      letterNumber: "5.4/028/AS.03/XI/2025",
+      agreementDate: new Date().toISOString(),
+      companyRepName: "Radhitya",
+      companyRepPosition: "HSE",
+      companyRepAddress: "Jl. Cipto Mangunkusumo No. 1, Samarinda",
+      companyBankName: "Mandiri",
+      companyBankAccount: "1480016872783",
+      companyBankAccountName: "TRAKINDO UTAMA",
+      operationalBankName: "Mandiri",
+      operationalBankAccount: "1480024954110",
+      operationalBankAccountName: "RPL 046 PS BALAI K3 SMD Utk Ops",
+    });
+
+    return new Response(pdfBuffer, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'inline; filename="spk-preview.pdf"',
+        "Cache-Control": "no-cache",
+      },
+    });
+  } catch (error) {
+    console.error("PDF generation error:", error);
+    return c.json({ error: "Failed to generate PDF" }, 500);
+  }
+});
+
+devRouter.get("/tagihan/:orderId", async (c) => {
+  try {
+    const pdfBuffer = await generateTagihanPdf({
+      companyName: mockData.order.company.name,
+      companyRegency: mockData.order.company.regency.name,
+      letterNumber: "TAG-2024-001",
+      referenceNumber: "REF-2024-001",
+      referenceDate: new Date().toISOString(),
+      billingCode: "820251203334581",
+      billingAmount: 500000,
+      operationalAmount: 400000,
+      operationalBankAccount: "1480024954110",
+      operationalBankAccountName: "RPL 046 PS BALAI K3 SMD Utk Ops",
+      billingExpiryDate: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000,
+      ).toISOString(),
+      adminEmail: "admin@balai-k3.go.id",
+      adminContact: "0812-3456-7890",
+    });
+
+    return new Response(pdfBuffer, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'inline; filename="tagihan-preview.pdf"',
+        "Cache-Control": "no-cache",
       },
     });
   } catch (error) {
