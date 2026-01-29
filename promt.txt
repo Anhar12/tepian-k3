@@ -1,1 +1,0 @@
-not about put tugaskan button but an estimated works days for detail-transaksi check @packages/db/src/schema.ts the akomodation/transportation table is there because there flag that if it true it will count accomodation or transportation and the list of paramerter is get from the isReady 
