@@ -198,26 +198,22 @@ export const worksheetRouter = createTRPCRouter({
           const results = yield* Effect.tryPromise({
             try: () =>
               db.transaction(async (tx) => {
-                const updatedItems = [];
+                const updates = await Promise.all(
+                  input.items.map((item) =>
+                    tx
+                      .update(worksheetItems)
+                      .set({
+                        note: item.note,
+                        isReady: item.isReady ?? false,
+                        updatedAt: sql`CURRENT_TIMESTAMP`,
+                      })
+                      .where(eq(worksheetItems.id, item.itemId))
+                      .returning(),
+                  ),
+                );
 
-                for (const item of input.items) {
-                  const [updated] = await tx
-                    .update(worksheetItems)
-                    .set({
-                      value: item.value,
-                      note: item.note,
-                      isReady: item.isReady ?? false,
-                      updatedAt: sql`CURRENT_TIMESTAMP`,
-                    })
-                    .where(eq(worksheetItems.id, item.itemId))
-                    .returning();
-
-                  if (updated) {
-                    updatedItems.push(updated);
-                  }
-                }
-
-                return updatedItems;
+                // Flatten and filter out empty results
+                return updates.map((result) => result[0]).filter(Boolean);
               }),
             catch: (error) => {
               logError(
@@ -242,6 +238,22 @@ export const worksheetRouter = createTRPCRouter({
         }),
       );
     }),
+
+  /**
+   * Create worksheet estimate
+   */
+  createEstimate: withPermission("worksheets.update")
+    .input(worksheetSchema.createWorksheetEstimatedSchema)
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          worksheetQueries.createWorksheetEstimates(
+            input.worksheetId,
+            input.estimatedAmountOfDays,
+            input.estimatedAmountOfMembers,
+          ),
+        ),
+    ),
 
   /**
    * Assign tools to worksheet
@@ -269,13 +281,20 @@ export const worksheetRouter = createTRPCRouter({
           const results = yield* Effect.tryPromise({
             try: () =>
               db.transaction(async (tx) => {
-                return await runEffect(
-                  worksheetQueries.assignToolsToWorksheet(
-                    tx,
-                    input.worksheetId,
-                    input.toolIds,
+                const assignedTools = await Promise.all(
+                  input.items.map((item) =>
+                    runEffect(
+                      worksheetQueries.assignToolsToWorksheet(
+                        tx,
+                        input.worksheetId,
+                        item.itemId,
+                        item.toolNeeded,
+                      ),
+                    ),
                   ),
                 );
+
+                return assignedTools;
               }),
             catch: (error) => {
               logError(

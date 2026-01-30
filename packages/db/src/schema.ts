@@ -282,7 +282,7 @@ export const userCompanies = createTable(
     }).notNull(),
     email: varchar("email", { length: 250 }).notNull(),
     wlkpStatus: boolean("wlkp_status").notNull().default(false),
-    wlkp: text("wlkp").notNull(),
+    wlkp: text("wlkp"),
     ...createRequiredFileUrlColumn("companyPicture"),
     ...timestamps,
   },
@@ -899,8 +899,13 @@ export const worksheets = createTable(
     orderId: uuid("order_id")
       .notNull()
       .references(() => order.id, { onDelete: "cascade" }),
-
     status: worksheetStatusEnum("status").notNull().default("draft"),
+    estimatedAmountOfMembers: integer("estimated_amount_of_members")
+      .notNull()
+      .default(0),
+    estimatedAmountOfDays: integer("estimated_amount_of_days")
+      .notNull()
+      .default(0),
     startDate: timestamp("start_date", {
       withTimezone: true,
       mode: "string",
@@ -965,7 +970,6 @@ export const worksheetItems = createTable(
       .notNull()
       .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
-    value: real("value"),
     note: text("note"),
     isReady: boolean("is_ready").notNull().default(false),
     ...timestamps,
@@ -991,6 +995,7 @@ export const worksheetTools = createTable(
     toolId: uuid("tool_id")
       .notNull()
       .references(() => tools.id, { onDelete: "cascade" }),
+    toolNeeded: integer("tool_needed").notNull().default(0),
     ...timestamps,
   },
   (table) => [

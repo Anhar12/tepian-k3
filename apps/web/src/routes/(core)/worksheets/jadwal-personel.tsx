@@ -237,10 +237,10 @@ function JadwalPersonilPage() {
     );
   }, [worksheet]);
 
-  // Check if worksheet is editable (only draft or revision status)
+  // Check if worksheet is editable (status is 'verified')
   const isEditable = useMemo(() => {
     if (!worksheet?.status) return false;
-    return ["draft", "revision"].includes(worksheet.status);
+    return ["verified"].includes(worksheet.status);
   }, [worksheet?.status]);
 
   // Initialize selected personnel and dates when opening dialog
@@ -706,7 +706,7 @@ function JadwalPersonilPage() {
               {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
             </strong>{" "}
             dan jadwal tidak dapat diubah. Jadwal hanya dapat diubah saat status{" "}
-            <strong>Draft</strong> atau <strong>Revision</strong>.
+            <strong>Verified</strong>
           </AlertDescription>
         </Alert>
       )}

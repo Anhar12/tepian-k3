@@ -41,7 +41,7 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
   maleWorkers: z.string().regex(/^\d+$/).max(10),
   healthFacilityAvailable: z.boolean(),
   wlkpStatus: z.boolean(),
-  wlkp: z.string().regex(/^\d+$/).max(10),
+  wlkp: z.string().regex(/^\d+$/).max(10).optional(),
   responsibleTestingPerson: z.string().min(1).max(256),
   responsibleTestingPersonEmail: z.email().max(256),
   responsibleTestingPersonPhone: z.string().min(1).max(20),

@@ -59,6 +59,9 @@ export const RESOURCES = [
 
   // ==================== WORKSHEETS ====================
   "worksheets",
+  "worksheets-parameters",
+  "worksheets-personnel-assignments",
+  "worksheets-transaction-details",
   "worksheet-items",
   "worksheet-tools",
   "worksheet-notes",

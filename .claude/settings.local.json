@@ -55,7 +55,10 @@
       "Bash(git -C /home/rizrmdhn/Project/Monorepo/tepian-k3 remote get-url origin)",
       "Bash(git tag:*)",
       "Bash(git push:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(if exist \"f:\\\\Monorepo\\\\tepian-k3\\\\apps\\\\web\\\\src\\\\lib\\\\form-field.ts\" del \"f:\\\\Monorepo\\\\tepian-k3\\\\apps\\\\web\\\\src\\\\lib\\\\form-field.ts\")",
+      "Bash(node -e \"const m = require\\(''./node_modules/@tanstack/react-query/build/modern/useMutation.d.ts''\\); console.log\\(''check file''\\)\")"
     ]
   }
 }

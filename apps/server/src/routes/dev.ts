@@ -118,6 +118,8 @@ const mockData = {
     accompanyingSupervisorId: null,
     result: null,
     createdBy: "user-mock-id",
+    estimatedAmountOfMembers: 2,
+    estimatedAmountOfDays: 3,
     order: {
       id: "order-mock-id",
       deletedAt: null,
@@ -229,7 +231,6 @@ const mockData = {
         locationId: "location-3",
         quantity: 1,
         worksheetId: "",
-        value: 3,
         isReady: true,
         location: {
           id: "location-3",
@@ -301,7 +302,6 @@ const mockData = {
         locationId: "location-3",
         quantity: 1,
         worksheetId: "",
-        value: 2,
         isReady: true,
         location: {
           id: "location-3",

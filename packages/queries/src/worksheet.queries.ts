@@ -485,6 +485,78 @@ const worksheetQueries = {
   },
 
   /**
+   * Create worksheet estimated members and days
+   * This is a separate function to allow updating estimates later
+   */
+  createWorksheetEstimates(
+    worksheetId: string,
+    estimatedAmountOfMembers: number,
+    estimatedAmountOfDays: number,
+  ) {
+    return Effect.gen(this, function* () {
+      const isExisting = yield* this.getWorksheetById(worksheetId);
+
+      if (!isExisting) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Worksheet tidak ditemukan",
+          }),
+        );
+      }
+
+      if (["draft", "revision"].includes(isExisting.status) === false) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Estimasi hanya dapat ditambahkan pada worksheet dengan status 'draft' atau 'revision'",
+          }),
+        );
+      }
+
+      const [updated] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(worksheets)
+            .set({
+              estimatedAmountOfDays,
+              estimatedAmountOfMembers,
+            })
+            .where(eq(worksheets.id, worksheetId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.createWorksheetEstimates",
+            "Failed to create worksheet estimates",
+            {
+              error,
+              worksheetId,
+              estimatedAmountOfMembers,
+              estimatedAmountOfDays,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menambahkan estimasi worksheet",
+          });
+        },
+      });
+
+      if (!updated) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menambahkan estimasi worksheet",
+          }),
+        );
+      }
+
+      return updated;
+    });
+  },
+
+  /**
    * Update worksheet status
    */
   updateWorksheetStatus(
@@ -570,7 +642,6 @@ const worksheetQueries = {
         const [updatedItem] = await tx
           .update(worksheetItems)
           .set({
-            value,
             note: note || sql`${worksheetItems.note}`,
             isReady: isReady ?? sql`${worksheetItems.isReady}`,
             updatedAt: sql`CURRENT_TIMESTAMP`,
@@ -613,7 +684,12 @@ const worksheetQueries = {
   /**
    * Assign tools to worksheet with transaction
    */
-  assignToolsToWorksheet(tx: DBorTx, worksheetId: string, toolIds: string[]) {
+  assignToolsToWorksheet(
+    tx: DBorTx,
+    worksheetId: string,
+    toolId: string,
+    toolNeeded: number,
+  ) {
     return Effect.tryPromise({
       try: async () => {
         // First, remove existing tools
@@ -621,22 +697,23 @@ const worksheetQueries = {
           .delete(worksheetTools)
           .where(eq(worksheetTools.worksheetId, worksheetId));
 
-        // Then, add new tools
-        if (toolIds.length > 0) {
-          const toolsData = toolIds.map((toolId) => ({
+        const [newTools] = await tx
+          .insert(worksheetTools)
+          .values({
             worksheetId,
             toolId,
-          }));
+            toolNeeded,
+          })
+          .returning();
 
-          const newTools = await tx
-            .insert(worksheetTools)
-            .values(toolsData)
-            .returning();
-
-          return newTools;
+        if (!newTools) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengassign alat ke worksheet",
+          });
         }
 
-        return [];
+        return newTools;
       },
       catch: (error) => {
         logError(
@@ -645,7 +722,8 @@ const worksheetQueries = {
           {
             error,
             worksheetId,
-            toolIds,
+            toolId,
+            toolNeeded,
           },
         );
 
@@ -1060,12 +1138,11 @@ const worksheetQueries = {
                   ti.locationId === worksheetItem.locationId,
               );
 
-              if (matchingTestingItem && worksheetItem.value !== null) {
+              if (matchingTestingItem) {
                 // Update testing item with worksheet value
                 const [updated] = await tx
                   .update(testingItem)
                   .set({
-                    result: String(worksheetItem.value),
                     note: worksheetItem.note,
                     updatedAt: sql`CURRENT_TIMESTAMP`,
                   })

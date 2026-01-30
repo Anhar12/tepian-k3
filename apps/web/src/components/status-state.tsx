@@ -220,7 +220,6 @@ export function StatusState1({ orderDetail, offeringDoc }: StatusState1Props) {
 }
 
 interface StatusState2Props {
-  approvalLetter: Document | undefined;
   approvalLetterFile: File | null;
   setApprovalLetterFile: (file: File | null) => void;
   uploadingApprovalLetter: boolean;
@@ -228,7 +227,6 @@ interface StatusState2Props {
 }
 
 export function StatusState2({
-  approvalLetter,
   approvalLetterFile,
   setApprovalLetterFile,
   uploadingApprovalLetter,
@@ -236,64 +234,14 @@ export function StatusState2({
 }: StatusState2Props) {
   return (
     <StateLayout>
-      {/* Processing State - Icon with clock */}
-      {approvalLetter ? (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">
-            Upload Surat Persetujuan
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Unduh template, tandatangani, lalu unggah surat persetujuan yang
-            telah ditandatangani.
-          </p>
-          <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-              <FileText className="h-5 w-5 text-blue-500" />
-            </div>
-            <span className="min-w-30 font-medium text-foreground">
-              Download Surat Persetujuan
-            </span>
-            <Button
-              size="sm"
-              className="rounded-lg bg-blue-500 hover:bg-blue-600"
-              onClick={() => {
-                window.open(getPublicUrl(approvalLetter.fileUrl), "_blank");
-              }}
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Unduh
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50">
-            <div className="relative">
-              <FileText className="h-10 w-10 text-blue-500" />
-              <Clock className="absolute -right-1 -bottom-1 h-5 w-5 text-blue-500" />
-            </div>
-          </div>
-          <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
-            Surat Persetujuan Anda Sedang diproses
-          </h2>
-          <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
-            Silakan unduh template surat persetujuan, tandatangani, dan unggah
-            kembali untuk melanjutkan proses.
-          </p>
-        </div>
-      )}
-
-      {/* Separator */}
-      <div className="my-6 border-t border-slate-200" />
-
       {/* Upload Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-foreground">
           Upload Surat Persetujuan
         </h3>
         <p className="text-sm text-muted-foreground">
-          Unduh template, tandatangani, lalu unggah surat persetujuan yang telah
-          ditandatangani.
+          Silakan unggah surat persetujuan yang telah ditandatangani untuk
+          melanjutkan ke tahap berikutnya.
         </p>
 
         {/* Document Upload Card */}

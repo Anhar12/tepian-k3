@@ -60,6 +60,7 @@ import {
   Search,
   Send,
   Wrench,
+  CalendarClock,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
@@ -70,12 +71,26 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import worksheetSchema from "@tepian-k3/schema/worksheet.schema";
+import { Field, FieldError, FieldGroup } from "@/components/ui/field";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AutoForm } from "@/components/ui/auto-form";
+
+const tabs = [
+  "parameter",
+  "estimated",
+  "alat",
+  "bahan",
+  "stok-habis",
+  "catatan",
+] as const;
+
+type TabsType = (typeof tabs)[number];
 
 export const Route = createFileRoute("/(core)/worksheets/")({
   validateSearch: z.object({
-    tabs: z
-      .enum(["parameter", "alat", "bahan", "stok", "catatan"])
-      .default("parameter"),
+    tabs: z.enum(tabs).default("parameter"),
   }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "worksheets.read" }),
@@ -83,17 +98,6 @@ export const Route = createFileRoute("/(core)/worksheets/")({
 });
 
 const routeApi = getRouteApi("/(core)/worksheets");
-
-interface ToolRaw {
-  id: string;
-  toolCode: string;
-  toolName: string;
-  parameterId: string;
-  parameterName: string;
-  condition: ToolsCondition;
-  availability: ToolsAvailability;
-  selected?: boolean;
-}
 
 interface Tool {
   id: string;
@@ -103,6 +107,7 @@ interface Tool {
   condition: ToolsCondition;
   availability: ToolsAvailability;
   selected?: boolean;
+  toolNeeded: number;
 }
 
 interface WorksheetItemWithMeta {
@@ -112,7 +117,6 @@ interface WorksheetItemWithMeta {
   clusterName: string;
   categoryName: string;
   quantity: number;
-  value: number | null;
   note: string | null;
   isReady: boolean;
   locationName: string;
@@ -166,8 +170,22 @@ function RouteComponent() {
   );
 
   // Worksheet is only editable in draft or revision status
-  const isEditable =
-    worksheet?.status === "draft" || worksheet?.status === "revision";
+  const isEditable = useMemo(() => {
+    if (!worksheet?.status) return false;
+    return ["draft", "revision"].includes(worksheet.status);
+  }, [worksheet?.status]);
+
+  // Forms
+  const noteForm = useForm<
+    z.infer<typeof worksheetSchema.addWorksheetNoteSchema>
+  >({
+    resolver: zodResolver(worksheetSchema.addWorksheetNoteSchema),
+    defaultValues: {
+      worksheetId,
+      note: "",
+      severity: "info",
+    },
+  });
 
   // Mutations
   const batchUpdateMutation = useMutation(
@@ -181,6 +199,20 @@ function RouteComponent() {
       },
       onError: (error) => {
         globalErrorToast("Gagal menyimpan perubahan : " + error.message);
+      },
+    }),
+  );
+
+  const createEstimateMutation = useMutation(
+    trpc.worksheet.createEstimate.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+        );
+        globalSuccessToast("Estimasi berhasil dibuat");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal membuat estimasi : " + error.message);
       },
     }),
   );
@@ -206,8 +238,7 @@ function RouteComponent() {
           trpc.worksheet.getNotes.queryOptions({ worksheetId }),
         );
         globalSuccessToast("Catatan berhasil ditambahkan");
-        setNewNote("");
-        setNoteSeverity("info");
+        noteForm.reset();
       },
       onError: (error) => {
         globalErrorToast("Gagal menambahkan catatan : " + error.message);
@@ -232,19 +263,19 @@ function RouteComponent() {
 
   // Local state
   const [selectedCluster, setSelectedCluster] = useState("Semua Cluster");
-  const [newNote, setNewNote] = useState("");
-  const [noteSeverity, setNoteSeverity] = useState<WorksheetNoteStatus>("info");
   const [toolSearch, setToolSearch] = useState("");
+  const [toolCodeFilter, setToolCodeFilter] = useState<string>("all");
   const [conditionFilter, setConditionFilter] = useState<string>("all");
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
-  const [activeSubTab, setActiveSubTab] = useState<
-    "parameter" | "alat" | "bahan" | "stok-habis" | "catatan"
-  >("parameter");
+  const [activeSubTab, setActiveSubTab] = useState<TabsType>("parameter");
   const [selectedToolIds, setSelectedToolIds] = useState<Set<string>>(
     new Set(),
   );
+  const [localToolUpdates, setLocalToolUpdates] = useState<
+    Map<string, { toolNeeded: number }>
+  >(new Map());
   const [localItemUpdates, setLocalItemUpdates] = useState<
-    Map<string, { value: number | null; note: string | null; isReady: boolean }>
+    Map<string, { note: string | null; isReady: boolean }>
   >(new Map());
 
   const [parameterPage, setParameterPage] = useState(1);
@@ -274,7 +305,6 @@ function RouteComponent() {
       clusterName: item.parameter.category.cluster?.name ?? "Unknown",
       categoryName: item.parameter?.category?.name ?? "Unknown",
       quantity: item.quantity,
-      value: item.value,
       note: item.note,
       isReady: item.isReady,
       locationName: item.location?.name ?? "Unknown",
@@ -296,6 +326,16 @@ function RouteComponent() {
       ? worksheetItems
       : worksheetItems.filter((item) => item.clusterName === selectedCluster);
   }, [worksheetItems, selectedCluster]);
+
+  const mappedToolsCode = useMemo((): string[] => {
+    if (!allToolsData) return [];
+
+    const codes = allToolsData
+      .map((tool) => tool.toolCode.split("-")[0])
+      .filter((code): code is string => code !== undefined && code !== "");
+
+    return [...new Set(codes)];
+  }, [allToolsData]);
 
   // Transform tools data, grouping by tool id to deduplicate
   const tools: Tool[] = useMemo(() => {
@@ -322,6 +362,7 @@ function RouteComponent() {
           condition: tool.condition,
           availability: tool.availability,
           selected: selectedToolIds.has(tool.id),
+          toolNeeded: 0,
         });
       }
     }
@@ -352,14 +393,18 @@ function RouteComponent() {
         tool.parameters.some((p) =>
           p.parameterName.toLowerCase().includes(search),
         );
+      const matchesCode =
+        toolCodeFilter === "all" || tool.toolCode.startsWith(toolCodeFilter);
       const matchesCondition =
         conditionFilter === "all" || tool.condition === conditionFilter;
       const matchesAvailability =
         availabilityFilter === "all" ||
         tool.availability === availabilityFilter;
-      return matchesSearch && matchesCondition && matchesAvailability;
+      return (
+        matchesSearch && matchesCode && matchesCondition && matchesAvailability
+      );
     });
-  }, [tools, toolSearch, conditionFilter, availabilityFilter]);
+  }, [tools, toolSearch, toolCodeFilter, conditionFilter, availabilityFilter]);
 
   // Merge chemical materials with worksheet required quantities
   const consumablesWithRequired = useMemo(() => {
@@ -485,14 +530,14 @@ function RouteComponent() {
     if (localUpdate) return localUpdate;
     const item = worksheetItems.find((i) => i.id === itemId);
     return item
-      ? { value: item.value, note: item.note, isReady: item.isReady }
-      : { value: null, note: null, isReady: false };
+      ? { note: item.note, isReady: item.isReady }
+      : { note: null, isReady: false };
   };
 
   const handleItemChange = (
     itemId: string,
-    field: "value" | "note" | "isReady",
-    value: number | string | boolean | null,
+    field: "note" | "isReady",
+    value: string | boolean | null,
   ) => {
     setLocalItemUpdates((prev) => {
       const newMap = new Map(prev);
@@ -511,7 +556,6 @@ function RouteComponent() {
     const items = Array.from(localItemUpdates.entries()).map(
       ([itemId, data]) => ({
         itemId,
-        value: data.value,
         note: data.note,
         isReady: data.isReady,
       }),
@@ -520,6 +564,29 @@ function RouteComponent() {
     batchUpdateMutation.mutate({
       worksheetId,
       items,
+    });
+  };
+
+  const getToolState = (toolId: string) => {
+    const localUpdate = localToolUpdates.get(toolId);
+    if (localUpdate) return localUpdate;
+    const tool = tools.find((t) => t.id === toolId);
+    return tool ? { toolNeeded: tool.toolNeeded } : { toolNeeded: 0 };
+  };
+
+  const handleToolChange = (
+    toolId: string,
+    field: "toolNeeded",
+    value: number,
+  ) => {
+    setLocalToolUpdates((prev) => {
+      const newMap = new Map(prev);
+      const current = getToolState(toolId);
+      newMap.set(toolId, {
+        ...current,
+        [field]: value,
+      });
+      return newMap;
     });
   };
 
@@ -549,20 +616,25 @@ function RouteComponent() {
   };
 
   const handleSaveTools = () => {
+    if (selectedToolIds.size === 0) return;
+
+    const items = Array.from(localToolUpdates.entries()).map(
+      ([itemId, data]) => ({
+        itemId,
+        toolNeeded: data.toolNeeded,
+      }),
+    );
+
     assignToolsMutation.mutate({
       worksheetId,
-      toolIds: Array.from(selectedToolIds),
+      items,
     });
   };
 
-  const handleSendNote = () => {
-    if (!newNote.trim()) return;
-
-    addNoteMutation.mutate({
-      worksheetId,
-      note: newNote.trim(),
-      severity: noteSeverity,
-    });
+  const handleSendNote = (
+    data: z.infer<typeof worksheetSchema.addWorksheetNoteSchema>,
+  ) => {
+    addNoteMutation.mutate(data);
   };
 
   const handleRequiredChange = (materialId: string, value: string) => {
@@ -676,7 +748,7 @@ function RouteComponent() {
       <Card>
         <Tabs
           value={activeSubTab}
-          onValueChange={(v) => setActiveSubTab(v as typeof activeSubTab)}
+          onValueChange={(v) => setActiveSubTab(v as TabsType)}
           className="w-full"
         >
           <div className="scrollbar-hide overflow-x-auto px-3">
@@ -696,6 +768,14 @@ function RouteComponent() {
                     *
                   </Badge>
                 )}
+              </TabsTrigger>
+              <TabsTrigger
+                value="estimated"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs sm:gap-2 sm:px-4 sm:text-sm"
+              >
+                <CalendarClock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="xs:inline hidden">Estimated</span>
+                <span className="xs:hidden">Est</span>
               </TabsTrigger>
               <TabsTrigger
                 value="alat"
@@ -813,9 +893,6 @@ function RouteComponent() {
                         Jumlah
                       </TableHead>
                       <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                        Nilai
-                      </TableHead>
-                      <TableHead className="text-center text-xs font-semibold sm:text-sm">
                         Ready
                       </TableHead>
                       <TableHead className="hidden text-xs font-semibold sm:table-cell sm:text-sm">
@@ -850,38 +927,7 @@ function RouteComponent() {
                           <TableCell className="text-center text-xs sm:text-sm">
                             {item.quantity}
                           </TableCell>
-                          <TableCell className="text-center">
-                            <PermissionGate
-                              permission="worksheet-items.update"
-                              fallback={
-                                <span className="text-xs text-muted-foreground sm:text-sm">
-                                  {itemState.value ?? "-"}
-                                </span>
-                              }
-                            >
-                              {isEditable ? (
-                                <Input
-                                  type="number"
-                                  value={itemState.value ?? ""}
-                                  onChange={(e) =>
-                                    handleItemChange(
-                                      item.id,
-                                      "value",
-                                      e.target.value
-                                        ? parseFloat(e.target.value)
-                                        : null,
-                                    )
-                                  }
-                                  className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
-                                  step="any"
-                                />
-                              ) : (
-                                <span className="text-xs text-muted-foreground sm:text-sm">
-                                  {itemState.value ?? "-"}
-                                </span>
-                              )}
-                            </PermissionGate>
-                          </TableCell>
+
                           <TableCell className="text-center">
                             <PermissionGate
                               permission="worksheet-items.update"
@@ -962,6 +1008,39 @@ function RouteComponent() {
             </div>
           </TabsContent>
 
+          {/* Estimated Tab */}
+          <TabsContent value="estimated" className="p-3 pt-4 sm:p-4 sm:pt-6">
+            <AutoForm
+              schema={worksheetSchema.createWorksheetEstimatedSchema}
+              onSubmit={(data) => createEstimateMutation.mutate(data)}
+              isPending={createEstimateMutation.isPending}
+              submitLabel="Simpan Perkiraan"
+              defaultValues={{
+                worksheetId,
+                estimatedAmountOfMembers:
+                  worksheet?.estimatedAmountOfMembers ?? 0,
+                estimatedAmountOfDays: worksheet?.estimatedAmountOfDays ?? 0,
+              }}
+              fieldOverrides={{
+                worksheetId: false,
+                estimatedAmountOfMembers: {
+                  label: "Perkiraan Jumlah Anggota",
+                  component: "number",
+                  placeholder: "Masukkan jumlah anggota...",
+                  description:
+                    "Perkiraan jumlah anggota yang akan terlibat dalam worksheet ini.",
+                },
+                estimatedAmountOfDays: {
+                  label: "Perkiraan Jumlah Hari",
+                  component: "number",
+                  placeholder: "Masukkan jumlah hari...",
+                  description:
+                    "Perkiraan jumlah hari yang dibutuhkan untuk menyelesaikan worksheet ini.",
+                },
+              }}
+            />
+          </TabsContent>
+
           {/* Alat Tab */}
           <TabsContent value="alat" className="p-3 pt-4 sm:p-4 sm:pt-6">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row">
@@ -976,6 +1055,24 @@ function RouteComponent() {
                   className="pl-9"
                 />
               </div>
+              <Select
+                value={toolCodeFilter}
+                onValueChange={(v) => {
+                  setToolCodeFilter(v);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="Kode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Kode</SelectItem>
+                  {mappedToolsCode.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select
                 value={conditionFilter}
                 onValueChange={(v) => {
@@ -1102,9 +1199,9 @@ function RouteComponent() {
                           </PermissionGate>
                         )}
                       </TableHead>
-                      <TableHead className="text-xs font-semibold sm:text-sm">
+                      {/* <TableHead className="text-xs font-semibold sm:text-sm">
                         Kode
-                      </TableHead>
+                      </TableHead> */}
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Nama Alat
                       </TableHead>
@@ -1120,6 +1217,9 @@ function RouteComponent() {
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Ketersediaan
                       </TableHead>
+                      <TableHead className="text-xs font-semibold sm:text-sm">
+                        Jumlah yang dibutuhkan
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1130,6 +1230,7 @@ function RouteComponent() {
                         ).length;
                         const totalCount = tool.parameters.length;
                         const allReady = readyCount === totalCount;
+                        const toolState = getToolState(tool.id);
 
                         return (
                           <TableRow
@@ -1137,13 +1238,13 @@ function RouteComponent() {
                             className={`hover:bg-muted/30 ${isEditable ? "cursor-pointer" : ""} ${
                               selectedToolIds.has(tool.id) ? "bg-primary/5" : ""
                             }`}
-                            onClick={() =>
-                              isEditable &&
-                              handleToolSelect(
-                                tool.id,
-                                !selectedToolIds.has(tool.id),
-                              )
-                            }
+                            // onClick={() =>
+                            //   isEditable &&
+                            //   handleToolSelect(
+                            //     tool.id,
+                            //     !selectedToolIds.has(tool.id),
+                            //   )
+                            // }
                           >
                             <TableCell onClick={(e) => e.stopPropagation()}>
                               <PermissionGate
@@ -1173,9 +1274,9 @@ function RouteComponent() {
                                 )}
                               </PermissionGate>
                             </TableCell>
-                            <TableCell className="font-mono text-xs">
+                            {/* <TableCell className="font-mono text-xs">
                               {tool.toolCode}
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell className="text-xs font-medium sm:text-sm">
                               {tool.toolName}
                             </TableCell>
@@ -1211,6 +1312,21 @@ function RouteComponent() {
                               <StatusBadge
                                 type="availability"
                                 value={tool.availability}
+                              />
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              <Input
+                                onChange={(e) =>
+                                  handleToolChange(
+                                    tool.id,
+                                    "toolNeeded",
+                                    parseInt(e.target.value) || 0,
+                                  )
+                                }
+                                type="number"
+                                value={getToolState(tool.id).toolNeeded || "0"}
+                                className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
+                                placeholder="Jumlah..."
                               />
                             </TableCell>
                           </TableRow>
@@ -1802,53 +1918,86 @@ function RouteComponent() {
               </ScrollArea>
 
               <div className="border-t pt-4">
-                <div className="mb-2 flex gap-2">
-                  <Select
-                    value={noteSeverity}
-                    onValueChange={(v) =>
-                      setNoteSeverity(v as WorksheetNoteStatus)
-                    }
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {WORKSHEET_NOTE_STATUS.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex gap-2">
-                  <Textarea
-                    placeholder="Tulis catatan baru..."
-                    value={newNote}
-                    onChange={(e) => setNewNote(e.target.value)}
-                    className="min-h-15 resize-none"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendNote();
-                      }
-                    }}
-                  />
-                  <PermissionGate permission="worksheet-notes.create">
-                    <Button
-                      onClick={handleSendNote}
-                      size="icon"
-                      className="size-15"
-                      disabled={!newNote.trim() || addNoteMutation.isPending}
-                    >
-                      {addNoteMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
+                <form
+                  className="flex gap-2"
+                  onSubmit={noteForm.handleSubmit(handleSendNote)}
+                >
+                  <FieldGroup className="flex flex-col gap-2">
+                    <Controller
+                      name="severity"
+                      control={noteForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field
+                          data-invalid={fieldState.invalid}
+                          className="w-32"
+                        >
+                          <Select
+                            name={field.name}
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {WORKSHEET_NOTE_STATUS.map((status) => (
+                                <SelectItem key={status} value={status}>
+                                  {status}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
                       )}
-                    </Button>
-                  </PermissionGate>
-                </div>
+                    />
+
+                    <div className="flex flex-row gap-2">
+                      <Controller
+                        name="note"
+                        control={noteForm.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <Textarea
+                              placeholder="Tulis catatan baru..."
+                              {...field}
+                              className="min-h-15 resize-none"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault();
+                                  noteForm.handleSubmit(handleSendNote)();
+                                }
+                              }}
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+
+                      <PermissionGate permission="worksheet-notes.create">
+                        <Button
+                          type="submit"
+                          size="icon"
+                          className="size-15"
+                          disabled={
+                            addNoteMutation.isPending ||
+                            noteForm.watch("note").trim() === ""
+                          }
+                        >
+                          {addNoteMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Send className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </PermissionGate>
+                    </div>
+                  </FieldGroup>
+                </form>
                 <p className="mt-2 text-xs text-muted-foreground">
                   Tekan Enter untuk mengirim, Shift+Enter untuk baris baru
                 </p>

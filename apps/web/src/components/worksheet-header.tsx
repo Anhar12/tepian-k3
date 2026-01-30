@@ -4,6 +4,9 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
 import { getRouteApi } from "@tanstack/react-router";
 import { useLocation } from "@tanstack/react-router";
+import type { Permission } from "@tepian-k3/constants";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { trpc } from "@/utils/trpc";
 
 const navItems: {
   href: string;
@@ -12,6 +15,7 @@ const navItems: {
   label: string;
   shortLabel: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  permission: Permission;
 }[] = [
   {
     href: "/worksheets/",
@@ -20,6 +24,7 @@ const navItems: {
     label: "Parameter",
     shortLabel: "Parameter",
     icon: Beaker,
+    permission: "worksheets-parameters.read",
   },
   {
     href: "/worksheets/jadwal-personel",
@@ -28,6 +33,7 @@ const navItems: {
     label: "Jadwal Personel",
     shortLabel: "Jadwal",
     icon: CalendarDays,
+    permission: "worksheets-personnel-assignments.read",
   },
   {
     href: "/worksheets/detail-transaksi",
@@ -36,13 +42,19 @@ const navItems: {
     label: "Detail Transaksi",
     shortLabel: "Transaksi",
     icon: Receipt,
+    permission: "worksheets-transaction-details.read",
   },
 ];
 
 export function WorksheetHeader() {
+  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
   const route = getRouteApi("/(core)/worksheets");
   const location = useLocation();
   const navigate = route.useNavigate();
+
+  const filteredNavItems = navItems.filter((item) =>
+    profile.permissions.includes(item.permission),
+  );
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -54,7 +66,7 @@ export function WorksheetHeader() {
         />
         {/* Navigation */}
         <nav className="flex items-center gap-1 border-b border-border px-2 sm:px-4">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const cleanPath = location.pathname.replace(/\/$/, "") || "/";
             const segments = cleanPath.split("/").filter(Boolean);

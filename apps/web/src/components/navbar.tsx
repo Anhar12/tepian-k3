@@ -21,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { ModeToggle } from "./mode-toggle";
 import { logout } from "@/lib/logout";
+import NavbarDropdown from "./navbar-dropdown";
 
 const navItems: {
   label: string;
@@ -70,81 +71,7 @@ export default function Navbar() {
               <Bell className="size-5" />
             </Button>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar className="size-9 rounded-full">
-                <AvatarImage
-                  src={user.profilePictureUrl || undefined}
-                  alt={user.name}
-                />
-                <AvatarFallback className="rounded-lg">
-                  {user.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage
-                      src={user.profilePictureUrl || undefined}
-                      alt={user.name}
-                    />
-                    <AvatarFallback className="rounded-lg">
-                      {user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {user.email}
-                    </span>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    if (user.roles.some((r) => r.name === "user")) {
-                      navigate({ to: "/dashboard" });
-                    } else {
-                      navigate({ to: "/back-office" });
-                    }
-                  }}
-                >
-                  <IconHome />
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => navigate({ to: "/profile" })}>
-                  <IconUserCircle />
-                  Profil Saya
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <ModeToggle />
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => navigate({ to: "/settings" })}
-                >
-                  <IconSettings />
-                  Pengaturan
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onLogout()}>
-                <IconLogout />
-                Keluar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NavbarDropdown />
         </div>
       ) : (
         <div className="flex items-center gap-4">

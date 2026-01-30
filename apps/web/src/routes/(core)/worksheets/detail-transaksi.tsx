@@ -40,7 +40,6 @@ import { getPublicUrl } from "@/utils/url";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
-import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import useDialogs from "@/hooks/use-dialog";
 import GenerateOfferingDialog from "./-components/generate-offering-dialog";
 

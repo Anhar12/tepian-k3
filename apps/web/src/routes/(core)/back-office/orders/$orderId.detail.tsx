@@ -122,7 +122,6 @@ function RouteComponent() {
 
   // Document upload states
   const offeringLetter = useFileUpload();
-  const approvalLetter = useFileUpload();
   const cooperationAgreement = useFileUpload();
   const invoice = useFileUpload();
 
@@ -348,25 +347,6 @@ function RouteComponent() {
     });
   };
 
-  const handleUploadApprovalLetter = async () => {
-    if (!approvalLetter.file) return;
-
-    await uploadDocument({
-      title: "Surat Persetujuan",
-      type: "approval_letter",
-      file: approvalLetter.file,
-      onMutate: () => {
-        approvalLetter.setUploading(true);
-      },
-      onSuccess: () => {
-        approvalLetter.reset();
-      },
-      onSettled: () => {
-        approvalLetter.setUploading(false);
-      },
-    });
-  };
-
   const handleUploadCooperationAgreement = async () => {
     if (!cooperationAgreement.file) return;
 
@@ -441,9 +421,6 @@ function RouteComponent() {
   const hasOfferingLetter = order.documents.some(
     (doc) => doc.type === "offering_document",
   );
-  const hasApprovalLetter = order.documents.some(
-    (doc) => doc.type === "approval_letter",
-  );
   const hasApprovalLetterUserDocument = order.documents.some(
     (doc) => doc.type === "approval_letter_user",
   );
@@ -454,10 +431,8 @@ function RouteComponent() {
     (doc) => doc.type === "cooperation_agreement_user",
   );
   const hasInvoice = order.documents.some((doc) => doc.type === "invoice");
-  const hasBothApprovalLetter =
-    hasApprovalLetter && hasApprovalLetterUserDocument;
   const hasBothDocuments =
-    hasOfferingLetter && hasInvoice && hasBothApprovalLetter;
+    hasOfferingLetter && hasInvoice && hasApprovalLetterUserDocument;
 
   // Determine current workflow state
   const isPendingApproval = order.approvalStatus === "pending";
@@ -466,14 +441,9 @@ function RouteComponent() {
     order.approvalStatus === "approved" &&
     !hasBothDocuments &&
     !isRevisionRequested;
-  const isApprovedNeedsApprovalLetter =
-    order.approvalStatus === "approved" &&
-    hasOfferingLetter &&
-    !isRevisionRequested;
   const isAcceptingDocuments =
     order.approvalStatus === "approved" &&
     order.status === "surat_persetujuan_diproses" &&
-    hasBothApprovalLetter &&
     !isRevisionRequested;
   const isAwaitingPayment =
     order.approvalStatus === "approved" &&
@@ -1083,116 +1053,6 @@ function RouteComponent() {
                       </PermissionGate>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            )}
-
-            {isApprovedNeedsApprovalLetter && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upload Surat Persetujuan</CardTitle>
-                  <CardDescription>
-                    Unggah surat persetujuan untuk melanjutkan ke tahap
-                    selanjutnya.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* approval letter upload */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                          <FileText className="h-5 w-5 text-blue-500" />
-                        </div>
-                        <div>
-                          <Label className="text-base font-medium">
-                            Surat Persetujuan
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Format: PDF
-                          </p>
-                        </div>
-                      </div>
-                      {hasApprovalLetter ? (
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-100 text-green-800">
-                            Sudah Diunggah
-                          </Badge>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() =>
-                              window.open(
-                                getPublicUrl(
-                                  order.documents.find(
-                                    (doc) => doc.type === "approval_letter",
-                                  )!.fileUrl,
-                                ),
-                                "_blank",
-                              )
-                            }
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Badge className="bg-yellow-100 text-yellow-800">
-                          Belum Diunggah
-                        </Badge>
-                      )}
-                    </div>
-                    {!hasApprovalLetter && (
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <Input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                if (file.type !== "application/pdf") {
-                                  globalErrorToast("Format file harus PDF");
-                                  return;
-                                }
-                                approvalLetter.setFile(file);
-                              }
-                            }}
-                            className="flex-1"
-                          />
-                          {approvalLetter.file && (
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => approvalLetter.setFile(null)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                        {approvalLetter.file && (
-                          <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                            <span className="text-sm">
-                              {approvalLetter.file.name}
-                            </span>
-                            <PermissionGate permission="documents.create">
-                              <Button
-                                size="sm"
-                                onClick={handleUploadApprovalLetter}
-                                disabled={approvalLetter.uploading}
-                              >
-                                {approvalLetter.uploading ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Upload className="mr-2 h-4 w-4" />
-                                )}
-                                Upload
-                              </Button>
-                            </PermissionGate>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
                 </CardContent>
               </Card>
             )}
