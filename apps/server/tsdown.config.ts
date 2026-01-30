@@ -6,4 +6,5 @@ export default defineConfig({
   outDir: "./dist",
   clean: true,
   noExternal: [/@tepian-k3\/.*/],
+  external: [/@node-rs\/.*/],
 });
