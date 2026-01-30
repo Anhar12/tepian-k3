@@ -7,20 +7,15 @@ import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 import { cacheService } from "@tepian-k3/services/cache";
 import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
-
-const getAllClustersFromDb = () =>
-  runEffect(clustersQueries.getAllClusters());
+import { withCache } from "../utils/cache-helper";
 
 export const clusterRouter = createTRPCRouter({
-  getAllClusters: withRateLimit(rateLimiters.moderate()).query(async () => {
-    type Clusters = Awaited<ReturnType<typeof getAllClustersFromDb>>;
-    const cached = await cacheService.get<Clusters>(CACHE_KEYS.CLUSTERS_ALL);
-    if (cached) return cached;
-
-    const result = await getAllClustersFromDb();
-    await cacheService.set(CACHE_KEYS.CLUSTERS_ALL, result, CACHE_TTL.LONG);
-    return result;
-  }),
+  getAllClusters: withRateLimit(rateLimiters.moderate()).query(
+    async () =>
+      await withCache(CACHE_KEYS.CLUSTERS_ALL, CACHE_TTL.LONG, () =>
+        runEffect(clustersQueries.getAllClusters()),
+      ),
+  ),
 
   getPaginatedClusters: withPermission("clusters.view")
     .input(clusterSchema.getAllClustersSchema)

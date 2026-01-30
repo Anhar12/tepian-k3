@@ -7,21 +7,14 @@ import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 import { cacheService } from "@tepian-k3/services/cache";
 import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
-
-const getAllCategoriesFromDb = () =>
-  runEffect(parameterCategoriesQueries.getAllParameterCategories());
+import { withCache } from "../utils/cache-helper";
 
 export const parameterCategoriesRouter = createTRPCRouter({
   getAllParameterCategories: withRateLimit(rateLimiters.moderate()).query(
-    async () => {
-      type Categories = Awaited<ReturnType<typeof getAllCategoriesFromDb>>;
-      const cached = await cacheService.get<Categories>(CACHE_KEYS.PARAMETER_CATEGORIES_ALL);
-      if (cached) return cached;
-
-      const result = await getAllCategoriesFromDb();
-      await cacheService.set(CACHE_KEYS.PARAMETER_CATEGORIES_ALL, result, CACHE_TTL.LONG);
-      return result;
-    },
+    async () =>
+      await withCache(CACHE_KEYS.PARAMETER_CATEGORIES_ALL, CACHE_TTL.LONG, () =>
+        runEffect(parameterCategoriesQueries.getAllParameterCategories()),
+      ),
   ),
 
   getPaginatedParameterCategories: withPermission("parameter-categories.view")
