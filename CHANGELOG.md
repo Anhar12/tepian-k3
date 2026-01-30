@@ -6,121 +6,6 @@ All notable changes to this project will be documented in this file.
 
 ### 🚀 Features
 
-- Add database package with environment configuration and update auth package ([f1b18d6](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f1b18d6afc80fb49266756e4db5ea5e6c6f5bf76))
-- **auth:** Add login and registration functionality with JWT support ([4f2a1fd](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4f2a1fd5e74a2a17c9c9f41f7a10dcc9460d8778))
-- **auth:** Implement registration and login forms with toast notifications and routing ([da712de](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/da712de1c9295caaf0c19c30e63041c7ce74a546))
-- **auth:** Update login and registration forms to use email instead of username, implement OTP functionality for email verification, and refactor related schemas and queries ([c6b4e0f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c6b4e0f04ce926f39ea9252282ba73015297bb2c))
-- **auth:** Add email verification checks in route handling and authentication logic ([9ab1693](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9ab169310999f48548dd1a649ba02efc22ed3e18))
-- **auth:** Implement email verification flow with OTP and new verify-email route ([3814fae](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/3814fae5e46fbd61de8ae271116ba6bd6fea92c8))
-- **auth:** Add deleted_at column and unique index for email in users table ([fa1c249](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fa1c249aa6c1246c092ae8985d517583c7c9faca))
-- **auth:** Implement resend OTP functionality with rate limiting and email checks ([053d955](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/053d955352baa12611d8047bddb93653377562b1))
-- **auth:** Add deleteOTPsByEmail method and invoke it in createOTP to invalidate old OTPs ([5c0df22](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5c0df225d15b105ed2ddf9f982956fd39c8c81cb))
-- **email:** Integrate Resend provider for email sending functionality ([1361b5b](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1361b5bde52cb01d310bb35cd5c053d3a06e98e8))
-- **email:** Add pixel-based preset configuration to email templates ([2bdfe3a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2bdfe3a38305ec244b3233bc432331b26991c757))
-- **auth:** Add address, company, and phone fields to user registration and update schemas ([0065725](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/0065725eb44a427150e1e9c10cc5ca38c7c6b5f4))
-- **auth:** Remove company field from user registration and update schemas; add userCompanies table and related queries ([d4a5603](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d4a5603b99c0eb742223e7ceb7175aab7f19a68a))
-- **auth:** Update verify email component styles and remove unused code; enhance user experience ([0e93490](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/0e934904a8782f7a4e9bdc3f6cd4d783a9c1ec4e))
-- **logger:** Implement Winston logging with custom transports and formats; enhance error handling and logging structure ([51c39c4](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/51c39c4ce322d42b913b2f48258373352c3c39e0))
-- Refactor OTP and user company queries to use Effect and improve error handling ([a99059c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a99059c13d875b23697a2f265dc3dd8b9314d84d))
-- **otp:** Simplify OTP queries by removing type definitions and enhancing error handling ([50cc145](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/50cc1450f1550297f17ec64de2a1464b094ac2c2))
-- **storage:** Implement storage service with filesystem and MinIO providers ([97eaa42](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/97eaa42bf9aaea79102c5e7cecdf5b5edffdbc67))
-- **gitignore:** Add uploads directory to .gitignore, preserving .gitkeep ([5dc6153](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5dc61539b509591f8734bb96e6049198391ae47c))
-- **env:** Add storage configuration options to environment variables ([2a6309f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2a6309fb956e4ef022f6a5524d1a3587ca349548))
-- **profile:** Add profile picture fields to users table and update schema ([fcc1f39](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fcc1f398818c0651968f11caf103374253396878))
-- Add user profile management and avatar upload functionality ([d66eaeb](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d66eaeb9006c7ad322d5bf90ff22194de85a9c77))
-- **profile:** Update avatar upload logic to handle undefined URLs and remove unnecessary state ([8d12ae6](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/8d12ae62c6de21f61400e9c7c080210efa36d9ac))
-- **password:** Implement change password functionality with validation and mutation handling ([a7133da](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a7133da22cc78817d11aee66910e166578970bac))
-- **profile:** Add user profile update functionality and integrate with the profile route ([e7b7ab7](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e7b7ab7b865cca5bb321942041f2a726f3bf8254))
-- **home:** Add grid background component and enhance home layout with new design elements ([328a375](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/328a375653ffd9b8a28d54c901f28aa31767e69e))
-- Implement role-based access control with permissions and roles ([ec6088e](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ec6088e4929df9b42521925526a0a93d5799577a))
-- **db:** Add reset database functionality and integrate with scripts ([faddab9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/faddab95e949238e1f235ba926acec9a4c892402))
-- **db:** Add role and user permission relations, indexes, and migration files ([71d966f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/71d966f7ae94037842dd8f03a21a029e6ce1fcc4))
-- **auth:** Enhance user retrieval with permissions and profile picture URL ([e42941d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e42941dfc3f2ccb222a44453eb017b7c9d0742ab))
-- **landing-page:** Added some landing page ([857e04f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/857e04f2d9a798770ba3f047b26be040a169f912))
-- **landing-page:** Add service cards and profile section with images ([aa31af6](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/aa31af6fed758c296c8f0ef6dd4f9a991582b0d8))
-- **landing-page:** Enhance landing page with new sections, images, and accordion for FAQs ([46e4a7a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/46e4a7af20b83f89651cbb262a5f2a449a4f1487))
-- Add prettier script for code formatting ([b1abe63](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b1abe63c78490e605b53a9c3983d78eb83a4b7c6))
-- Add web:prettier script and update routeTree and index files for improved formatting ([cba846d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/cba846d8ac9f62da206e7f5ddee203c3cf872f6a))
-- **tools:** Add tools table and enums for availability and condition ([5d8d6d1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5d8d6d1a9f908629894a33c0d3048e16661a4da9))
-- **dashboard:** Restructure dashboard routes and add user management page; enhance sidebar and mode toggle functionality ([8da59cd](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/8da59cdf2f92f9b7bcdb7c4b8f46dd09c963aa22))
-- Add filter and parser utilities for data table functionality ([c6eb258](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c6eb2580bbaaf14941641ed926cc62220be1dcd0))
-- **user-management:** Implement user deletion functionality and add pagination for deleted users ([3e8d3e7](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/3e8d3e7173906f5b74bb2447855436e20f8c3479))
-- **users-columns:** Handle empty updatedAt values in user columns display ([b8af943](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b8af94378e0457c33492370611f814beef5c79b5))
-- **user-management:** Add restore user functionality and toggle for deleted users ([bc6ed0c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/bc6ed0cf8b4a7941678f5f603f65dba0fed35274))
-- **permission:** Implement permission gate and requirePermission utility for route access control ([70c5cd1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/70c5cd12adb89f037707e2a1cbb85c3bc2b5cbaf))
-- **sidebar:** Enhance navigation by filtering items based on user permissions and remove unused components ([cf40681](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/cf40681b8be69417aa04ae88be8112384063ba0f))
-- **tools:** Implement CRUD operations and schema for tools management ([be39009](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/be3900929b1abd118047aa49f70288a7178dd526))
-- Add tools management dashboard and user interface ([4091405](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4091405f9657a2c5f07362e6727799aacdb208c0))
-- **tools:** Update tool edit route and form handling, enhance tool column definitions ([1f9e2fa](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1f9e2fa41d4dfa4b21ba6df8d56682ad7a327cc6))
-- **data-table:** Update import path for data table types and adjust debounce timing ([f18736d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f18736d905d1b72789e82c60646e331df4c2cb9a))
-- **queries:** Refactor permission and role management queries, add user permissions queries ([1d850cb](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1d850cbf3c2c7f16488b762c692e225e6643855c))
-- **roles:** Implement role management queries and schemas for CRUD operations ([063f015](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/063f01583b2dbdbde1e8e82f2591e9d34aee9807))
-- **roles:** Add CRUD operations for roles with enhanced error handling and pagination ([2aeed7f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2aeed7f1eb178fa6a5bd677538ce2d76ec925be9))
-- **header:** Implement dynamic page title generation based on URL segments ([b70a1e1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b70a1e1e8d6fedd7c5f8a53f6a3854aa7f7c342b))
-- Add roles management functionality ([8b3bb94](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/8b3bb94ab9c3ce60a62d61be41d46002a6780714))
-- **roles:** Add role detail view and permissions management ([2015bbe](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2015bbe5190fd2147beea2cea8c94cae83267bb6))
-- **roles:** Add toggle all permissions functionality in role detail view ([6bf0a69](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/6bf0a690ea7a0dff6d5c84ce462bacc9ebc261da))
-- **seed:** Enhance database seeding process with idempotent role and permission syncing ([3bc16fc](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/3bc16fc5cdcf288898d751b91e1f468b2580ed48))
-- Add clusters and parameters schema, queries, and seeding functionality ([9310a88](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9310a887dee340a5f4e737b751ceb64462ee90ee))
-- Update query options for user data retrieval with caching parameters ([d4a88ab](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d4a88ababda9f531c42b8333884bcfb993cb558e))
-- Conditionally show detail action based on permissions in CRUD action cell ([90d63f3](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/90d63f38f1b66bbff3fc5410abd0d733156bad00))
-- Enable detail view in roles action cell ([830ff4f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/830ff4fab13b8afb99d790f3b07104f0a8501fab))
-- Add router navigation on successful role, tool, and user updates ([d4b92af](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d4b92afa5375e91fcf463dfe1ea4ebd48b98f968))
-- Add edit and create functionality for clusters with validation and permissions ([5e0d6f4](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5e0d6f4ad7dca4c66734e2999958c974d1d577d4))
-- Change default sorting order to ascending for clusters, roles, tools, and users ([76dde1c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/76dde1c11978e5e4c27ff2bbba4a37ed9ecf571d))
-- Update cluster seeding and add parameter categories seeding functionality ([494d657](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/494d657c8319de760d0d79d42f5af9db2c5e3f81))
-- Enhance createTextColumn to support nested keys for improved data handling ([176c581](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/176c58190d773a7978ac05271b0d9a18a6c622bf))
-- Update createDateColumn to use NestedKeyOf for improved type safety and simplify createActionColumn row type ([511a908](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/511a90831d409200b632842b9f3e17b0a52670a8))
-- Add parameter categories columns with CRUD action cell integration ([a982acf](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a982acf20f0eb26d618a82e53584573daa5f9177))
-- Clarify comments for delete and restore mutations in CrudActionCellConfig ([b04eea3](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b04eea35b52cf40f7d842d4d78242065c585a0fe))
-- Update RouteComponent structure for improved layout consistency ([0126263](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/012626345201313fee7547460890f6332240d749))
-- Add parameter categories and related queries ([b67ad27](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b67ad27bb1520f0d3c5b63a5d4c9b48a849352d8))
-- Add parameter management functionality ([378a724](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/378a72491a506015c3115a8d2df480d53e4e7358))
-- Update parameter and user creation forms to use names instead of IDs for selection ([ab7f44b](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ab7f44b506525baaa4885b31b26f6da088a4f5b5))
-- Update user query to use input parameter for user ID ([3e3d511](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/3e3d511642e2fd5e9d4f62b95b506cfa83f033c5))
-- Enhance user management with role assignment and permissions handling ([b14b413](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b14b4136d798aafdb01c0db231143aa95a2fe8b3))
-- Implement logout functionality and enhance layout responsiveness ([714e836](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/714e83641320301077caa76b5227a3406f1cf15e))
-- Adjust stakeholder section height for improved layout ([5d0a72c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5d0a72c31b7d0d2cba7f5b0b82389385d55fba20))
-- Add clusterId to parameterCategories and update related queries ([88b087c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/88b087cd068bf868991910a25fc71d70408e4dd4))
-- Add LocationSection, ParameterCategories, ParameterTable, and Stepper components for testing services page ([d5149e9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d5149e97f7035d3c7f8e6be4bc8f00c9a33bcef7))
-- Implement transaksi route and enhance location section with input components ([9c36ff5](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9c36ff57a3fd24fc78b485dcad107a08f132a417))
-- Enhance OTP verification by adding user permissions and error handling ([222f221](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/222f2217678ebbe537443534d65b996383fae2bf))
-- Add password reset functionality ([32615bb](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/32615bb5e27af98cc09a99eef8f47bad717c87d9))
-- **indonesian-countries:** Add schemas and utility functions for provinces, regencies, districts, and villages ([cb6c767](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/cb6c7671a0c2fd7c9cbbc5ec01e9321f716f36dd))
-- Add Indonesian countries utilities and seeding functionality ([d2a31e7](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d2a31e7ef8a1f2ea4ea3bd4799e0a95fc30bba23))
-- Add CRUD operations and schemas for provinces, regencies, and villages ([4dea255](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4dea25552d4a4e96673e9d0ad4be5e6a7c2c4c1f))
-- Add Navbar component and integrate into Pengujian and Transaksi routes ([ba0f40e](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ba0f40e0996025574de07b31d08ebbdb115fc6d1))
-- Add routers and queries for provinces, regencies, districts, and villages; update permissions and seed data ([125a01e](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/125a01eaa07d1fc0ebbddcf83a36a2fc2486ae6d))
-- Add user company and testing location queries, schemas, and types ([919718a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/919718ab60357324ee2e3257b5dcc18df41d00b4))
-- Add user-company and user-company-testing-location queries with CRUD operations ([f562715](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f5627159ade03dd4ebb9ab19fd33cb04542db153))
-- Add company testing location management ([9664674](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9664674e073c228514d8cf2f87a10c7df0e53669))
-- Add home navigation item and update labels in user menu ([fe57ddd](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fe57ddd5005e6c31a485054645290b45c2225042))
-- Enhance company detail route with tab navigation and dynamic default value ([7d1f495](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/7d1f495782156d30b35947efaefe22ccf659e17d))
-- Remove CRUD operations for user company testing location ([7dd3f60](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/7dd3f603c6d841fdedd58209faa2f6662f6a06a9))
-- Add hover actions for edit and detail in CRUD action cells ([6511779](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/65117796137694cbf97356a44299e59a2ff20c0c))
-- Add company picture fields to user companies schema and queries ([965d392](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/965d392b7ab393befc5bddc638a3fbe11d0669d5))
-- Streamline FormData handling in user company mutations and add input schema validation ([9964688](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9964688b8adc7677627e570698cba2956dcb7569))
-- Implement LandingNavbar component for improved navigation across routes ([a58496c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a58496ccf458d0ab9a468097801521922f3f6375))
-- Add back-office tools and user management routes ([ab0fab4](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ab0fab482314a4764f1b800059a8dc10c5405125))
-- Update route imports for back-office components in clusters, kbli, parameter categories, roles, and tools columns ([9207aae](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9207aaec8b545b0afe450b694fb714f229a5f380))
-- Add back-office index route and dashboard component, implement default role assignment for new users ([cd68c2f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/cd68c2f5550b68b9def81bb5ef321cc1d9c3903d))
-- Refactor navigation structure and role-based menu rendering; remove unused LandingNavbar component ([76c8944](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/76c8944c80c5e15a61d438a8668e9c8d3a3329c1))
-- Integrate database transactions in OTP and password reset services; update queries to support transaction context ([1f6b5f0](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1f6b5f0787d52f70d39f72dd566a89b025d19c46))
-- Add parameter seeding and schema updates ([84e6997](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/84e69971ec09eed7e412d1d4d4b9144fe1d35fe7))
-- Add price column creation utility and update parameters columns to include unit and price ([f668c62](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f668c6279ec0a555f4f015e194199952aaec9561))
-- Implement cart functionality with CRUD operations and schema definitions ([3cd9b66](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/3cd9b66ac54aac2317f2daf4feee5a8820c55edc))
-- Add pagination for parameters by cluster and category ([2ab3e6b](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2ab3e6bd27b7b02c842d5bd8b3e40e886c0aace8))
-- Enhance select component and implement useDebounced hook for improved performance ([0188996](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/018899626b7bf42484107d7e6ff37b49bb7832e4))
-- Update empty index files for back-office routes ([47cc5da](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/47cc5daded86556e04a272b1a030b1b57644239f))
-- Refactor AppSidebar to merge user and back office menu items based on roles ([607e518](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/607e5187971b5464d099d6c4e8a628e9b79962e1))
-- Enhance back-office and dashboard routes with user profile integration and localization ([ef8162a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ef8162a76558735657c6a92c4cadd4a77f130f92))
-- Implement unauthorized access page with user-friendly error message ([9b5fb1f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9b5fb1f04ff6663360c8904b97a7e92758f7a1b0))
-- Implement cart functionality in TestingTable component ([677f1d1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/677f1d1d1d1c90e06a6e28f003715ee9581f7888))
-- Add testing and testing_item tables with sequences and relationships ([5b9de82](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5b9de82e3ba97e021f6821fccb56aabc2712c50f))
-- Add parameter tools management with CRUD operations and detail view ([f9a3b86](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f9a3b8624c272249662b4283b29a34ae524c7ef7))
-- Add parameter tools management with query integration and UI component ([404c898](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/404c89887bb19554220b0e3654300ee490685e74))
-- Add new migration for killraven and refactor error handling in queries ([06aadf7](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/06aadf729ed6b8adfce1674fc015e37921295c59))
-- Add query invalidation for unassigned tools after assigning tools to parameter ([a9032fc](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a9032fcb3beecf5ceb61f107d1412b0507b398f9))
 - Add order and testing sequence names and implement number generation functions ([0b884bf](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/0b884bf7d63592e93066f4272f93dda1de6c9475))
 - Refactor order and testing number generation, add order and order item tables ([e5d9747](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e5d9747633f1537ed70d322a93adc3e65913e89e))
 - Add order and testing relations, including order status history ([dd19162](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/dd19162873a34243e0c5d873c243f440e979849d))
@@ -269,25 +154,35 @@ feat(storage): add methods to extract folder paths and keys from public URLs in 
 - Refactor chemical materials routes to use chemicalMaterialId and remove deprecated edit route ([c771dca](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c771dcaed977ed1565360249a31a09f5b1695148))
 - Add parameter chemical management with create, update, and delete functionalities ([ee06aba](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ee06abaabc01385a8f280834ce174de858554fab))
 - Add changelog generation support with git-cliff ([2fcd42a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2fcd42af1da333b9f05bf888546dd6a36216e0e7))
+- Enhance changelog scripts with additional generation options ([4f7bece](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4f7bece24d37db8d7b4b7292cb6cdca6e3cd291d))
+- **pdf:** Add new Roboto SemiCondensed font variants and register Arimo and Liberation Sans fonts ([087ce3f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/087ce3f7d6f1eef63b4a9bff5d518facabbae14d))
+- **pdf:** Remove deprecated Roboto font files ([e5450c4](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e5450c463989344e69fa789c9c0fa5f7c629b7fc))
+- **pdf:** Refactor font registration and utility functions for PDF generation ([206891d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/206891dfcb931c01d07d500ffb147f046fd9b26a))
+- **pdf:** Add operational costs to mock data and implement table component for PDF generation ([3b0f965](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/3b0f965f2179f16d281655702bed44ad14b802ec))
+- **pdf:** Remove offering letter generation logic from order router ([66831a7](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/66831a7fc5a58b3d11d5df956f57a6cf7e316be4))
+- **pdf:** Remove QR code data and verification URL from offering letter header ([1c1044a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1c1044ab8a13d4d319e948d0018f25844ce7432f))
+- **pdf:** Implement offering letter generation with operational costs and refactor related components ([d63933c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d63933c1bac84c9d1a64e0eeaa0bcf53d7ce5f03))
+- **pdf:** Refactor Letterhead component to use Tailwind styles and update layout ([4889253](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4889253f564d20238b8cc1a9f381e425b2b1c3ce))
+- **deps:** Add date-fns library and set default locale to Indonesian ([4a0afa4](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4a0afa40bb7cd46016d9a2d7a024c16f76b7f212))
+- Add employee type and NIP fields to schema and seed data ([5578ded](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5578dedfeb0a7a85babdb0ebe63aec1bb52bb01c))
+- Add NIP and employee type fields to employee creation and editing forms ([c2cdbce](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c2cdbcebc5066404b19f462d8526ec77947a3a7e))
+- **pdf:** Add reusable PDF components and update dependencies ([ac5089a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ac5089a0ed56b207605600b8594ad9eb3e2fc199))
+- **turborepo:** Add task configuration reference and environment variable gotchas documentation ([f5fb6d9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f5fb6d94ec1c2685db1ea932b5dcb8088e5e399e))
+- **date-formatting:** Replace toLocaleDateString with date-fns format for consistent date formatting ([7cc571f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/7cc571f9694336dbfbfa8f19d47f58abd739562f))
+- **worksheets:** Enhance editability checks and display alerts for non-editable worksheets ([b4b652d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b4b652ddeb1cf9212cd95a91a96d90d43a2869d5))
+- **worksheets:** Implement query to fetch all worksheets for schedule calendar display ([96ff809](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/96ff809b4da1564df14e92bd714710353258a30e))
+- Add survey management features including questions, responses, and feedback ([4fddea1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4fddea119215621db94df9e525ecd2280d26ac20))
+- **survey:** Enhance survey response handling and redirect logic in survey-kepuasan route ([8b98c00](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/8b98c00b13026d94574d9c95d4b25feceb2436df))
+- **pdf:** Enhance SectionHeader component with body styling options; add SPK and Tagihan PDF generators and templates ([90af94b](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/90af94b133784ace77556b8c462ab15a4dbd2fde))
+- Restructure environment configuration and enhance security measures; add pagination schema and skeleton components ([d41481f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d41481f1eb40eac970d13c9bfa74970b724d2931))
+- **auto-form:** Implement AutoForm component with dynamic field rendering and validation; integrate with KBLI creation route ([e5ad5bc](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e5ad5bcd8069228874f9339348d2f56ed19ff52f))
+- **data-table:** Implement useDataTableRouter hook for improved data handling; refactor filtering and pagination logic ([fa9386c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fa9386c8355f443cb055192dd9f6e0c6ae1790c2))
+- Implement useOptimisticMutation hook for enhanced optimistic updates; refactor CRUD action cell and create route to utilize new hook ([1db7073](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1db7073129d4dce869cd161fefe8d7ba9771b8ac))
+- **auth:** Refactor access token functions for clarity and consistency; update validateToken to use new decryptAccessToken function ([7d226d9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/7d226d98d9550b4664fef9fe8e89c87da9b34d2c))
+- Enhance type safety across components and hooks; refactor various types to use specific types instead of 'any' ([9bcf0fc](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9bcf0fce9f864326b104d5484386b703fa1c9002))
 
 ### 🐛 Bug Fixes
 
-- Update drizzle configuration to handle missing POSTGRES_URL and adjust database URL format ([5607e78](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5607e7849be672f47b4529ef2254139368dc23be))
-- Update FAQ links and improve layout structure on landing page ([757ee81](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/757ee81319cf323d8599ff3a3d45504c13a93e91))
-- **authRouter:** Add missing line for user existence check ([1c26073](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1c260737b93433b67e4ddd3cb6598a50462e6ef2))
-- **RootComponent:** Change default theme from system to light for consistency ([912374a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/912374ab7e4b14ba1e94de7dfe6d603353ede6f1))
-- **HomeComponent:** Update navigation logic to conditionally render dashboard or login links based on user authentication ([a9f7f55](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a9f7f558c4eee66f2e4a0d311defe6fb45dbba8d))
-- **NavUser:** Update profile navigation and improve user data handling in profile route ([c35b9ee](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c35b9eeaf552d1bfb75f58d4eea261729bca0695))
-- **verify-email:** Update email validation to use z.email() and enhance redirect with email query parameter ([9256365](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9256365d50e9f9654bcab432269af702fb281c4c))
-- **users:** Adjust layout alignment in user management header ([1d8004e](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/1d8004e7c6d70fb93df703c8b351be4fc7b26b48))
-- **timestamps:** Ensure updatedAt field updates correctly with current timestamp ([042b995](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/042b995fdf2bedb7ed162c398975f6040f1859cc))
-- **tools:** Correct id type in delete and restore tool mutations to use z.uuidv7() ([75d888c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/75d888c3c6bf14ddd1eb10cf39dd0bdcb1bcce10))
-- **auth:** Translate user not found error message to Indonesian ([d367816](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d36781686272e1ed968ed11f96425f325450075e))
-- **data-table:** Add gap between delete icon and text in action cell ([43cd014](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/43cd014ae42cc8c2fe3821300d7f1664bf47d291))
-- **roles:** Update titles and descriptions for role creation and editing forms ([a332941](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a3329410fc6be7641db55c1bab3495940ae7d476))
-- **site-header:** Add 'detail' to action words for route title generation ([a8ae84d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a8ae84d23b0f29e83e931fa94f280a8f189a9a84))
-- **routes:** Adjust overflow styles for SidebarInset and main container ([75f47e8](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/75f47e8272be9ec5169681e970eebec03bb8e83e))
-- Correct permission scopes for parameter tool operations ([bb86260](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/bb86260126c0f1bfce8c1f3a60955992261ddd60))
 - Update clusterId type to string and improve loading state handling in TestingTable component ([32e1e8c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/32e1e8cee000f832eabe7f967082094bc4372bcb))
 - Correct syntax error in exampleRouter definition ([594e026](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/594e026e7d7e971aff9d7072a09511ce20b13f65))
 - Simplify loading indicator rendering in ButtonWithLoading component ([fe5b5ff](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fe5b5ff02d2056b64d33c5973aa9d9ba8e724a55))
@@ -295,63 +190,17 @@ feat(storage): add methods to extract folder paths and keys from public URLs in 
 - Update permission levels for testing and worksheets routes ([7e49ca5](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/7e49ca5bc2d82adf56e16db39fab26b7a93b51a0))
 - Correct navigation path in ToolCalibration component ([5bca58e](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/5bca58ee0c2607aa772510efa8f1e9b886158ea2))
 - The delete calibration to soft delete not permanetly deleted ([c6746f5](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c6746f57bc1f797fcc41bcd505090f45b5655ffb))
+- **pdf:** Simplify border conditionals in offering letter component ([2c68a31](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2c68a31cd1b45c7bf0daddf5bd53d83a99d2790f))
+- **mockData:** Update value fields in mock data for testing ([7877a2c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/7877a2ccf6557066e0b49c42e875d609509cf678))
+- **pdf:** Update mock data IDs and simplify border conditionals in offering letter component ([54198f9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/54198f909198358a6bbc3237a4d86baa5d0393f7))
+- Update labels and placeholders for employee and position forms ([60f54e6](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/60f54e671bb456b20f31af4490e7028f3b52da1c))
+- **tsconfig:** Remove baseUrl configuration ([2b3bde9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2b3bde9c5aa05b1592a3ebebda7e3bb3a334b174))
+- **tsconfig:** Standardize baseUrl configuration across projects ([70f757a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/70f757a9c66e9e15612118fc4ba70b3ee3a357e8))
+- **tables:** Update key prop in tool and bahan table rows to use index for stability ([45de212](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/45de2129de4326cb37e7eb07a65015d54fd44464))
+- Update permission checks for KBLI and role editing routes ([fa9353f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fa9353f57e1fa1e850dfdd5a2f7360fa9feca860))
 
 ### 📦 Other Changes
 
-- Add auth package with environment configuration, JWT handling, and utility functions ([e73559e](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e73559e606609687f75ad1c78fdf74b5876c3243))
-- Remove lint-staged from pre-commit hook ([ffa7747](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ffa7747e9e9f075068b0f6b6cfebb900810b2648))
-- Refactor code structure for improved readability and maintainability ([e5b7d2d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/e5b7d2dbcc607b80302dcb36e348e8aea3d1e91d))
-- Add email configuration options to turbo.json
-
-- Introduced new tasks for email development and verification.
-- Expanded global environment variables to include various email service configurations and AWS SES settings. ([ef5cf2c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ef5cf2c56a04b71b5a5b06a8e6ee34ad8f1b5d33))
-- Merge branch 'feature/auth' of https://github.com/rizrmdhn/tepian-k3 into feature/auth ([acf826d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/acf826d11d1b0910f30a7387404a9d95732e833c))
-- Merge branch 'feature/auth' of https://github.com/rizrmdhn/tepian-k3 into feature/auth ([3fa9719](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/3fa971906775253cbac23c27935f2ccacabd2f2a))
-- Merge pull request #1 from rizrmdhn/feature/auth
-
-add auth feature ([d3cafa1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/d3cafa161ea50f4fc0525915d96e86795881d85f))
-- Merge pull request #2 from rizrmdhn/feature/effect
-
-implement effect ([244bf62](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/244bf627fb036c4c1986d079f8c94c7635ce8ffc))
-- Merge pull request #3 from rizrmdhn/feature/file-uploads
-
-implement file uploads ([f7edf47](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f7edf47e89508160d8bd63a1a5942d32c7916e16))
-- Merge pull request #4 from rizrmdhn/feature/role-permission
-
-added role permission feature ([13ef445](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/13ef4456cdc3abc91cb993b2be7edeb55646802c))
-- Merge pull request #5 from rizrmdhn/ui/landing-page
-
-added landing page ([a748441](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a74844176dd92edd367b5c06d3a34f83647401af))
-- Merge pull request #6 from rizrmdhn/feature/tools
-
-added tools feature ([ee6d25a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ee6d25ae645e90c2a8c2e8ac0483e58ed3751e24))
-- Merge pull request #7 from rizrmdhn/feature/parameter
-
-added clusters, parameter categories and parameter ([bf32ad5](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/bf32ad531abedcf74a3ea10a5b549ae6ce376be7))
-- Merge pull request #8 from rizrmdhn/feature/parameter
-
-updated the parameter categories and parameter database schema ([9972467](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9972467a1c365970afb44410c5914c2d20820038))
-- Merge branch 'main' of https://github.com/rizrmdhn/tepian-k3 into feature/reset-password ([892a565](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/892a565774595a52f9ea84dc1028a6b9fd6e7e11))
-- Merge pull request #9 from rizrmdhn/feature/reset-password
-
-added reset password feature ([6a47216](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/6a4721654274195066d7fe8be0a73fcfb3cbeb68))
-- Merge pull request #10 from rizrmdhn/feature/indonesian-region
-
-Feature/indonesian region ([fc89004](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fc8900493ec63e48daea0bf0ec5e81c1eea38e02))
-- Merge pull request #11 from rizrmdhn/feature/company
-
-added CRUD for company and company testing location ([a7f8c37](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a7f8c37e506e7b5c98332fb3d382a331621b08b7))
-- Merge pull request #12 from rizrmdhn/refactor/transaction
-
-refactor query to use transaction instead of individual function ([364574c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/364574c328ee6f34bcc7eb9de52ebdaca5d67e6d))
-- Merge pull request #13 from rizrmdhn/feature/parameter
-
-added column unit ([9c2e042](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9c2e0428bb8277729c50d7d3593560f99732ffa5))
-- Merge branch 'main' of https://github.com/rizrmdhn/tepian-k2 into feature/parameter-tool
-merge from main merge from main ([8de9f1b](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/8de9f1b2dd3a2bb61543253bf48ee29b5d576934))
-- Merge pull request #14 from rizrmdhn/feature/parameter-tool
-
-added parameter tools ([92edba3](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/92edba3f8e920f1549686dcf35e2a4c9f371e071))
 - Add migration entry for deep beast (version 7) in journal ([9d2441f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/9d2441f98c202d4a091fe981b47234c76dbcab3b))
 - Refactor API routers to utilize runEffect utility for error handling
 
@@ -368,8 +217,6 @@ added parameter tools ([92edba3](https://github.com/YOUR_USERNAME/YOUR_REPO/comm
 - Created new routes for transaction steps (1 to 4) with appropriate components.
 - Implemented a redirect from '/transaksi' to '/transaksi/1' for better navigation flow.
 - Enhanced the form for creating user companies with validation and improved user experience. ([dd3abc7](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/dd3abc749af47f2adccae545a16ea0eb2bdfa6f6))
-- Ui/auth ([b69fd7f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b69fd7fb1066a4023325db74198ec8df4124dbe6))
-- Merge branch 'main' of https://github.com/rizrmdhn/tepian-k3 ([85c737f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/85c737f01946d14f99b9a9c19b003249dcc4732b))
 - Merge branches 'feature/order' and 'main' of https://github.com/rizrmdhn/tepian-k3 into feature/order ([204a41c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/204a41c468ab95ece726b39872eaa2ca9b5b2324))
 - Add migration entry for version 7 with tag '0003_foamy_gambit' ([65d5a17](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/65d5a17c38e15caa548514c9cb29d9476c97c866))
 - Refactor migration journal and update testing queries
@@ -379,35 +226,39 @@ added parameter tools ([92edba3](https://github.com/YOUR_USERNAME/YOUR_REPO/comm
 - Removed unused functions related to linking worksheets to testing and creating worksheets from testing, streamlining the worksheet queries. ([13464dc](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/13464dc09970678fc04f377f983d1652eebceebd))
 - Add migration entry for wide karnak version 7 in journal ([85d1414](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/85d14145f103bcc98a7c5d69491ebe04b4b1cdd3))
 - Add migration entry for version 7: 0005_right_iron_lad ([71621ac](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/71621ac2e11949e11c6055e8d77ca80d530a7144))
+- Refactor file upload components and improve error handling
+
+- Updated MultipleFileUpload, MultipleImageUpload, SingleFileUpload, and SingleImageUpload components to use destructured props for onBlur and name.
+- Enhanced getFileExtension function to handle edge cases for file extensions.
+- Improved file type handling in upload components to avoid pushing undefined types.
+- Refactored simulateUpload function to use a single file variable for clarity.
+- Added checks for undefined values in various functions to prevent runtime errors.
+- Modified CRUD action cell configuration to simplify type parameters.
+- Improved checkout route logic for better readability and performance.
+- Updated status route to include revision history check.
+- Enhanced personnel schedule page to handle edge cases for week start and end dates.
+- Updated error handling in the root component to prevent crashes on undefined lines.
+- Refactored cart and testing form stores to handle empty data cases more gracefully.
+- Updated TypeScript configuration files across multiple packages for consistency and improved type checking.
+- Introduced environment variable definitions for auth, db, and services packages.
+- Added a root tsconfig.json to manage project references for better organization. ([b3a8983](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b3a8983a4b2920c4fbc038fdb2c70ecce0fdf502))
 
 ### 🚜 Refactor
 
-- Update environment configuration and improve package scripts ([67e76f9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/67e76f9218236fda1aabfbbdfdbb3c1f80327418))
-- Improve code formatting and structure across various components ([a498c8c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a498c8cf98bd8b5159c451587d46c9eb29305be8))
-- **routeTree:** Standardize import formatting and improve code consistency ([cedf84d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/cedf84d9ae62d08f506747194caf32962cb4cc15))
-- **HomeComponent:** Remove unnecessary container classes for improved layout consistency ([508519a](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/508519a6c8c3ee3e2d8349c06d0a0975ed255937))
-- Standardize import statements and improve code formatting across UI components ([bde1928](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/bde19288f58c8014c225399753eb9798f4034d2f))
-- Remove unnecessary "use client" directives and clean up imports in sidebar components ([01e25a6](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/01e25a6434007e2b78e8b03cf619cb7039ebbea4))
-- Streamline user company creation and update logic ([79394d6](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/79394d6f8d4d7e2239efbf32b32acfa975343466))
-- Update action cell type to use search schema for multiple columns ([a111ed9](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/a111ed937b79e95f3b973ba784dc06a7e424d61b))
-- Clean up unused imports and replace icon in parameter tool card ([4c6bcc1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4c6bcc1d8b62ae764c48957817e092eeab1e7b60))
-- Improve menu filtering logic in AppSidebar component ([439a76f](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/439a76f154e5004729d5fb9b2789d4676a34640c))
 - Replace logger with structured logging in user and village queries ([09731b1](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/09731b107d8ad84f7e56548958cda62c0b161098))
 - Remove console log from onHoverDetail in ActionCell ([484d20d](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/484d20d7e91d7602cb41146be931bb58c6ecdc89))
 - Remove Redis Pub/Sub and SSE manager implementations ([87fbede](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/87fbedeaba8f5b60af180bf7775cb7e488f04421))
 - Simplify globalEnv configuration in turbo.json ([f9c0601](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/f9c0601bc96b570ed8f8b2ec25ae0180e2a9a26e))
 - Clean up notification creation mutation formatting ([0b11760](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/0b11760a7f9f4187a9ab42674ec1b262e2166f81))
 - Improve logWithContext to handle metadata correctly ([2376183](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2376183310b466fcdd439e547fd89f0e5b0d79a2))
-
-### 📚 Documentation
-
-- Update README for improved clarity and formatting ([c5cff2c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/c5cff2c529755eee67a14136885a60031c0893b9))
-- **README:** Enhance project documentation with detailed tech stack and setup instructions ([2a1e2d8](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/2a1e2d86cbc41b99d7a4bc788985f3f20a51717f))
+- Remove PDF and QR code generation services ([837ef98](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/837ef98c2f83425cd0a7d10882ad0592227f8360))
+- **status:** Streamline worksheet handling and improve dialog components ([4117e46](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/4117e46696b8a8b22ee8f540fb2ba4519d16aef7))
 
 ### ⚙️ Miscellaneous Tasks
 
-- **email:** Add a blank line for improved code readability ([bc2ec88](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/bc2ec883ed5706517523d86d8525339eb7a054e2))
-- **pre-commit:** Remove pnpm web:prettier command ([0b5c886](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/0b5c886f45e042f966930241625bdd6740e7a138))
 - Add react19 catalog with specific versions for react and related types ([0ed7e6c](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/0ed7e6c8aaea5a74e93047e60b9745223013b039))
+- **auth, db, services:** Remove unused environment variable files and related code ([fa4d809](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/fa4d809eb7038a8f9cf2bb96adce2e4dcf13f42c))
+- Remove unnecessary "use client" directives from multiple components ([b4a8395](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/b4a8395c6bfa275605c3e006a3d51bdec7f7a4b3))
+- Remove unused promt.txt file to clean up the repository ([ab3aea5](https://github.com/YOUR_USERNAME/YOUR_REPO/commit/ab3aea5ea806c749710ed403617293a03420c59a))
 
 <!-- generated by git-cliff -->

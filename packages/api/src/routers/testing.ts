@@ -45,7 +45,7 @@ export const testingRouter = createTRPCRouter({
   getTestingById: withPermission("testing.read")
     .input(
       z.object({
-        testingId: z.string(),
+        testingId: z.uuidv7(),
       }),
     )
     .query(async ({ input }) => {
@@ -69,7 +69,7 @@ export const testingRouter = createTRPCRouter({
   getTestingWithDocuments: withPermission("testing.read")
     .input(
       z.object({
-        testingId: z.string(),
+        testingId: z.uuidv7(),
       }),
     )
     .query(async ({ input }) => {
@@ -97,7 +97,7 @@ export const testingRouter = createTRPCRouter({
   updateStatus: withPermission("testing.update")
     .input(
       z.object({
-        testingId: z.string(),
+        testingId: z.uuidv7(),
         status: z.enum(TESTING_STATUSES),
         note: z.string().optional(),
       }),
@@ -121,7 +121,7 @@ export const testingRouter = createTRPCRouter({
     .use(
       formDataProcedure(
         z.object({
-          testingId: z.string(),
+          testingId: z.uuidv7(),
           documentType: z.enum(testingDocumentTypes),
           title: z.string().min(1).max(255),
           file: z.instanceof(File),

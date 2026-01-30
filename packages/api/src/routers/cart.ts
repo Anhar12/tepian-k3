@@ -26,7 +26,7 @@ export const cartRouter = createTRPCRouter({
   incrementCartItemQuantity: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
-        cartItemId: z.string(),
+        cartItemId: z.uuidv7(),
       }),
     )
     .mutation(
@@ -39,7 +39,7 @@ export const cartRouter = createTRPCRouter({
   decrementCartItemQuantity: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
-        cartItemId: z.string(),
+        cartItemId: z.uuidv7(),
       }),
     )
     .mutation(
@@ -52,7 +52,7 @@ export const cartRouter = createTRPCRouter({
   updateCartItemQuantity: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
-        cartItemId: z.string(),
+        cartItemId: z.uuidv7(),
         quantity: z.number().min(1),
       }),
     )
@@ -65,7 +65,7 @@ export const cartRouter = createTRPCRouter({
   deleteCartItem: withProtectedRateLimit(rateLimiters.lenient())
     .input(
       z.object({
-        cartItemId: z.string(),
+        cartItemId: z.uuidv7(),
       }),
     )
     .mutation(

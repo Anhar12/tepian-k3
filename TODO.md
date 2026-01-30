@@ -21,24 +21,24 @@
 
 ### Data Integrity - Transaction Handling
 
-- [ ] Wrap `createUser()` in a transaction (user creation + default role assignment)
-- [ ] Wrap `updateUser()` in a transaction (role deletion + role insertion + user update)
-- [ ] Fix `updateUserAvatar()` - DB update BEFORE file deletion (not after)
-- [ ] Fix `adminCreateUser()` - wrap in transaction
-- [ ] Implement transaction in order router (line 349: explicit TODO in code)
-- [ ] Audit `worksheet.ts` for missing transactions (37+ Effect.gen calls, only 13 use transactions)
+- [x] Wrap `createUser()` in a transaction (user creation + default role assignment)
+- [x] Wrap `updateUser()` in a transaction (role deletion + role insertion + user update)
+- [x] Fix `updateUserAvatar()` - DB update BEFORE file deletion (not after)
+- [x] Fix `adminCreateUser()` - wrap in transaction
+- [x] Implement transaction in order router (line 349: explicit TODO in code)
+- [x] Audit `worksheet.ts` for missing transactions (37+ Effect.gen calls, only 13 use transactions)
 
 ### CI/CD
 
-- [ ] Create `.github/workflows/ci.yml` (type-check, lint, test, build on PR)
-- [ ] Block merges without passing CI checks
-- [ ] Add build artifact caching for pnpm and Turborepo
+- [x] Create `.github/workflows/ci.yml` (type-check, lint, test, build on PR)
+- [x] Block merges without passing CI checks
+- [x] Add build artifact caching for pnpm and Turborepo
 
 ### Input Validation Hardening
 
-- [ ] Replace all `z.string()` ID inputs with `z.uuidv7()` across routers
-- [ ] Add min/max length validation on string fields (name, email, description)
-- [ ] Add file upload validation (size limits, MIME type whitelist)
+- [x] Replace all `z.string()` ID inputs with `z.uuidv7()` across routers
+- [x] Add min/max length validation on string fields (name, email, description)
+- [x] Add file upload validation (size limits, MIME type whitelist)
 
 ---
 
@@ -49,7 +49,7 @@
 - [x] Set up ESLint with `typescript-eslint` for the entire monorepo
 - [x] Configure lint-staged in root `package.json` (runs `eslint --fix`)
 - [x] Eliminate `any` types in `form-data-parser.ts` and `table.tsx`
-- [ ] Eliminate remaining `any` type usages across API code
+- [x] Eliminate remaining `any` type usages across API code
 - [x] Replace `console.log` calls in production code with logger service
 - [x] Remove legacy `encrypt()`/`decrypt()` auth functions
 
@@ -142,21 +142,22 @@
 
 ## Stats Snapshot
 
-| Area | Current | Target |
-|---|---|---|
-| Test files | 0 | 50+ |
-| CI/CD pipelines | 0 | 1 (GitHub Actions) |
-| ESLint config | ✅ Monorepo-wide | Monorepo-wide |
-| `any` type usages | Reduced (key files fixed) | 0 |
-| Routes with loading UI | ~9/30 | 30/30 |
-| Routes with error boundary | ✅ 16/30 | 30/30 |
-| Transaction coverage | Partial | All multi-step mutations |
+| Area                       | Current                   | Target                   |
+| -------------------------- | ------------------------- | ------------------------ |
+| Test files                 | 0                         | 50+                      |
+| CI/CD pipelines            | 0                         | 1 (GitHub Actions)       |
+| ESLint config              | ✅ Monorepo-wide          | Monorepo-wide            |
+| `any` type usages          | Reduced (key files fixed) | 0                        |
+| Routes with loading UI     | ~9/30                     | 30/30                    |
+| Routes with error boundary | ✅ 16/30                  | 30/30                    |
+| Transaction coverage       | Partial                   | All multi-step mutations |
 
 ---
 
 ## Summary of Completed Work
 
 ### Code Quality
+
 - **ESLint**: Installed `eslint`, `@eslint/js`, `typescript-eslint` at root. Created `eslint.config.js` (flat config) with TypeScript strict rules, ignoring `dist/node_modules/.turbo/drizzle/migrations`.
 - **lint-staged**: Updated root `package.json` lint-staged from empty to `"eslint --fix"`. Updated `.husky/pre-commit` to run `npx lint-staged`.
 - **Legacy auth removal**: Deleted `encrypt()`/`decrypt()` from `packages/auth/src/index.ts`. Updated `packages/auth/src/utils.ts` to use `verifyAccessToken` instead.
@@ -164,6 +165,7 @@
 - **`any` elimination**: Fixed `packages/api/src/utils/form-data-parser.ts` (introduced `FormDataRecord` type alias, typed `coerceValue` return). Fixed `packages/services/src/pdf/components/table.tsx` default generic from `any` to `unknown`.
 
 ### Security
+
 - **Security headers**: Created `apps/server/src/middleware/secure-headers.ts` — sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 0`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, and `Strict-Transport-Security` (production only).
 - **JWT validation**: Added startup check in `apps/server/src/index.ts` — throws if JWT secrets contain placeholder values (`your-secret`, `change-this`, etc.) in production.
 - **Login lockout**: Added per-email sliding-window rate limiter in `packages/api/src/routers/auth.ts` — 5 failed attempts triggers 30-minute lockout using `createRateLimiter`.
@@ -171,10 +173,12 @@
 - **Permission audit logging**: Added audit log to `updateRolePermissions` mutation in `packages/api/src/routers/permission.ts`. Added `"role"`, `"role_permission"`, `"user_permission"` to `AuditEntityType` in `packages/types/src/audit.types.ts`.
 
 ### Frontend UX
+
 - **RouteErrorBoundary**: Created `apps/web/src/components/route-error-boundary.tsx` — inline error card with reload button, Indonesian text.
 - **Skeleton wrappers**: Created `apps/web/src/components/table-skeleton.tsx` and `apps/web/src/components/form-skeleton.tsx`.
 - **errorComponent**: Added `errorComponent: RouteErrorBoundary` to all 14 back-office index routes (users, roles, parameters, parameter-categories, tools, clusters, employees, positions, kblis, orders, testings, worksheets, chemical-materials, survey-questions).
 
 ### Pagination Validation
+
 - **Shared schema**: Created `packages/schema/src/pagination.schema.ts` with `page` (int, min 1, default 1) and `perPage` (int, min 1, max 100, default 10).
 - **Applied to 16+ schemas**: cluster, tools, role, users, parameter (2 schemas), parameter-categories, employee, position, kbli, chemical-material, survey, district, regency, province, village, tool-calibration, user-company, user-company-testing-location — all now use `paginationSchema.extend({...})`.

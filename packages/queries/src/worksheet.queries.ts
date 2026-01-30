@@ -1128,45 +1128,46 @@ const worksheetQueries = {
   submitForVerification(worksheetId: string, userId: string) {
     return Effect.gen(function* () {
       const updated = yield* Effect.tryPromise({
-        try: async () => {
-          // First check current status
-          const worksheet = await db.query.worksheets.findFirst({
-            where: eq(worksheets.id, worksheetId),
-          });
-
-          if (!worksheet) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Worksheet tidak ditemukan",
+        try: () =>
+          db.transaction(async (tx) => {
+            // First check current status
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
             });
-          }
 
-          if (worksheet.status !== "draft") {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message:
-                "Worksheet harus dalam status 'draft' untuk diajukan verifikasi",
-            });
-          }
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
 
-          const [updatedWorksheet] = await db
-            .update(worksheets)
-            .set({
-              status: "pending_verification",
-              updatedAt: sql`CURRENT_TIMESTAMP`,
-            })
-            .where(eq(worksheets.id, worksheetId))
-            .returning();
+            if (worksheet.status !== "draft") {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Worksheet harus dalam status 'draft' untuk diajukan verifikasi",
+              });
+            }
 
-          if (!updatedWorksheet) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal mengajukan worksheet untuk verifikasi",
-            });
-          }
+            const [updatedWorksheet] = await tx
+              .update(worksheets)
+              .set({
+                status: "pending_verification",
+                updatedAt: sql`CURRENT_TIMESTAMP`,
+              })
+              .where(eq(worksheets.id, worksheetId))
+              .returning();
 
-          return updatedWorksheet;
-        },
+            if (!updatedWorksheet) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal mengajukan worksheet untuk verifikasi",
+              });
+            }
+
+            return updatedWorksheet;
+          }),
         catch: (error) => {
           logError(
             "worksheetQueries.submitForVerification",
@@ -1216,54 +1217,55 @@ const worksheetQueries = {
   ) {
     return Effect.gen(function* () {
       const updated = yield* Effect.tryPromise({
-        try: async () => {
-          // First check current status
-          const worksheet = await db.query.worksheets.findFirst({
-            where: eq(worksheets.id, worksheetId),
-          });
-
-          if (!worksheet) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Worksheet tidak ditemukan",
+        try: () =>
+          db.transaction(async (tx) => {
+            // First check current status
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
             });
-          }
 
-          if (
-            worksheet.status !== "draft" &&
-            worksheet.status !== "pending_verification"
-          ) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message:
-                "Worksheet harus dalam status 'draft' atau 'pending_verification' untuk diverifikasi",
-            });
-          }
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
 
-          const [updatedWorksheet] = await db
-            .update(worksheets)
-            .set({
-              status: "verified",
-              mainSupervisorId:
-                mainSupervisorId ?? worksheet.mainSupervisorId ?? null,
-              accompanyingSupervisorId:
-                accompanyingSupervisorId ??
-                worksheet.accompanyingSupervisorId ??
-                null,
-              updatedAt: sql`CURRENT_TIMESTAMP`,
-            })
-            .where(eq(worksheets.id, worksheetId))
-            .returning();
+            if (
+              worksheet.status !== "draft" &&
+              worksheet.status !== "pending_verification"
+            ) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Worksheet harus dalam status 'draft' atau 'pending_verification' untuk diverifikasi",
+              });
+            }
 
-          if (!updatedWorksheet) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal memverifikasi worksheet",
-            });
-          }
+            const [updatedWorksheet] = await tx
+              .update(worksheets)
+              .set({
+                status: "verified",
+                mainSupervisorId:
+                  mainSupervisorId ?? worksheet.mainSupervisorId ?? null,
+                accompanyingSupervisorId:
+                  accompanyingSupervisorId ??
+                  worksheet.accompanyingSupervisorId ??
+                  null,
+                updatedAt: sql`CURRENT_TIMESTAMP`,
+              })
+              .where(eq(worksheets.id, worksheetId))
+              .returning();
 
-          return updatedWorksheet;
-        },
+            if (!updatedWorksheet) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal memverifikasi worksheet",
+              });
+            }
+
+            return updatedWorksheet;
+          }),
         catch: (error) => {
           logError(
             "worksheetQueries.verifyWorksheet",

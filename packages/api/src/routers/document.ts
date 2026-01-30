@@ -210,14 +210,14 @@ export const documentRouter = createTRPCRouter({
     .input(
       z.object({
         orderId: z.uuidv7(),
-        file: z.file(),
+        file: z.file().max(10 * 1024 * 1024),
       }),
     )
     .use(
       formDataProcedure(
         z.object({
           orderId: z.uuidv7(),
-          file: z.file(),
+          file: z.file().max(10 * 1024 * 1024),
         }),
       ),
     )
@@ -274,14 +274,14 @@ export const documentRouter = createTRPCRouter({
     .input(
       z.object({
         testingId: z.uuidv7(),
-        file: z.file(),
+        file: z.file().max(10 * 1024 * 1024),
       }),
     )
     .use(
       formDataProcedure(
         z.object({
           testingId: z.uuidv7(),
-          file: z.file(),
+          file: z.file().max(10 * 1024 * 1024),
         }),
       ),
     )
@@ -340,7 +340,7 @@ export const documentRouter = createTRPCRouter({
           entityType: documentSchema.documentEntityTypeSchema,
           type: documentSchema.documentTypeSchema,
           title: z.string().min(1).max(255),
-          file: z.file(),
+          file: z.file().max(10 * 1024 * 1024),
           qrCodes: z.array(
             z.object({
               userId: z.uuidv7(),
