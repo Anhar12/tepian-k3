@@ -7,7 +7,7 @@ import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 import { cacheService } from "@tepian-k3/services/cache";
 import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
-import { withCache } from "../utils/cache-helper";
+import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 
 export const clusterRouter = createTRPCRouter({
   getAllClusters: withRateLimit(rateLimiters.moderate()).query(
@@ -48,19 +48,21 @@ export const clusterRouter = createTRPCRouter({
 
   createCluster: withPermission("clusters.create")
     .input(clusterSchema.createClusterSchema)
-    .mutation(async ({ input }) => {
-      const result = await runEffect(clustersQueries.createCluster(input));
-      await cacheService.deleteByPrefix(CACHE_KEYS.CLUSTERS_PREFIX);
-      return result;
-    }),
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.CLUSTERS_PREFIX, () =>
+          runEffect(clustersQueries.createCluster(input)),
+        ),
+    ),
 
   updateCluster: withPermission("clusters.update")
     .input(clusterSchema.updateClusterSchema)
-    .mutation(async ({ input }) => {
-      const result = await runEffect(clustersQueries.updateCluster(input));
-      await cacheService.deleteByPrefix(CACHE_KEYS.CLUSTERS_PREFIX);
-      return result;
-    }),
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.CLUSTERS_PREFIX, () =>
+          runEffect(clustersQueries.updateCluster(input)),
+        ),
+    ),
 
   deleteCluster: withPermission("clusters.delete")
     .input(
@@ -68,11 +70,12 @@ export const clusterRouter = createTRPCRouter({
         id: z.uuidv7(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const result = await runEffect(clustersQueries.deleteCluster(input.id));
-      await cacheService.deleteByPrefix(CACHE_KEYS.CLUSTERS_PREFIX);
-      return result;
-    }),
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.CLUSTERS_PREFIX, () =>
+          runEffect(clustersQueries.deleteCluster(input.id)),
+        ),
+    ),
 
   restoreCluster: withPermission("clusters.delete")
     .input(
@@ -80,9 +83,10 @@ export const clusterRouter = createTRPCRouter({
         id: z.uuidv7(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const result = await runEffect(clustersQueries.restoreCluster(input.id));
-      await cacheService.deleteByPrefix(CACHE_KEYS.CLUSTERS_PREFIX);
-      return result;
-    }),
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.CLUSTERS_PREFIX, () =>
+          runEffect(clustersQueries.restoreCluster(input.id)),
+        ),
+    ),
 });
