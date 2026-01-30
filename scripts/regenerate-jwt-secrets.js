@@ -2,11 +2,6 @@
 
 import fs from 'fs';
 import crypto from 'crypto';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const ENV_FILE = process.argv[2] || '.env';
 
