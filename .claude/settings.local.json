@@ -44,7 +44,13 @@
       "Bash(pnpm changelog:branch:*)",
       "Bash(chmod:*)",
       "Bash(pnpm start)",
-      "Bash(pnpm --filter @tepian-k3/server start)"
+      "Bash(pnpm --filter @tepian-k3/server start)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh label list:*)",
+      "Bash(gh label create:*)",
+      "Bash(gh issue create --title \"Set up Vitest with monorepo configuration\" --body \"$\\(cat <<''EOF''\n## Description\nSet up Vitest with monorepo configuration including `vitest.config.ts` and `vitest.workspace.ts`.\n\n## Tasks\n- [ ] Configure `vitest.config.ts` at root\n- [ ] Configure `vitest.workspace.ts` for monorepo packages\n- [ ] Add test scripts to root `package.json`\n\n**Source:** `TODO.md` - Critical Priority > Testing\nEOF\n\\)\" --label \"priority: critical,testing,enhancement\")",
+      "Bash(gh issue create:*)"
     ]
   }
 }

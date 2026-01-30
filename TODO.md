@@ -83,7 +83,7 @@
 - [ ] Create `docs/TESTING.md` - how to write and run tests for each package
 - [ ] Create `docs/DEPLOYMENT.md` - build process, migrations, environment setup
 - [ ] Create `docs/TROUBLESHOOTING.md` - common issues and solutions
-- [ ] Convert in-code TODOs to GitHub Issues with labels
+- [x] Convert in-code TODOs to GitHub Issues with labels
 
 ### Performance
 
@@ -103,9 +103,9 @@
 
 ### In-Code TODOs
 
-- [ ] `packages/api/src/routers/user.ts:14` - Add combobox search support for user lists
-- [ ] `packages/api/src/routers/order.ts:349` - Convert to transaction (see Critical section)
-- [ ] `apps/web/src/routes/(core)/worksheets/index.tsx:137` - Create worksheet items API
+- [x] `packages/api/src/routers/user.ts:14` - Add combobox search support for user lists
+- [x] `packages/api/src/routers/order.ts:349` - Convert to transaction (see Critical section)
+- [x] `apps/web/src/routes/(core)/worksheets/index.tsx:137` - Create worksheet items API
 
 ---
 
@@ -133,10 +133,10 @@
 
 ### Developer Experience
 
-- [ ] Add `pnpm dev:all` script to run web + server + db:studio together
+- [x] Add `pnpm dev:all` script to run web + server + db:studio together
 - [ ] Set up MSW (Mock Service Worker) for offline/test development
-- [ ] Add `db:snapshot` / `db:restore` scripts for testing workflows
-- [ ] Add Prettier config at monorepo root (currently only in web app)
+- [x] Add `db:snapshot` / `db:restore` scripts for testing workflows
+- [x] Add Prettier config at monorepo root (currently only in web app)
 
 ---
 

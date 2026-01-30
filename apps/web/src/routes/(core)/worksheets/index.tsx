@@ -134,7 +134,6 @@ function RouteComponent() {
     notesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [notes]);
 
-  // TODO create worksheet items api to fetch items separately
   // Fetch worksheet items
 
   // Fetch all tools for assignment
