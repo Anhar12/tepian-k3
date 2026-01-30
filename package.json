@@ -36,7 +36,9 @@
     "email:dev": "turbo run email:dev -F @tepian-k3/services",
     "email:verify": "turbo run email:verify -F @tepian-k3/services",
     "web:prettier": "turbo run prettier -F @tepian-k3/web",
-    "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,css,md}\" \"packages/**/*.{ts,tsx,js,jsx,json,css,md}\""
+    "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,css,md}\" \"packages/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "regenerate:jwt": "node ./scripts/regenerate-jwt-secrets.js",
+    "regenerate:jwt:unix": "sh ./scripts/regenerate-jwt-secrets.sh"
   },
   "dependencies": {
     "dotenv": "catalog:",
