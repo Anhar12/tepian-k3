@@ -1,5 +1,6 @@
 {
   "name": "@tepian-k3/server",
+  "version": "1.0.0",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
