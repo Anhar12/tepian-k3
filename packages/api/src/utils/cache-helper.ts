@@ -14,20 +14,14 @@ export async function withCache<T>(
 }
 
 export async function withCacheInvalidation<T>(
-  cacheKeys: string | string[],
+  cachePrefix: string | string[],
   mutation: () => Promise<T>,
 ): Promise<T> {
   const result = await mutation();
 
-  const keys = Array.isArray(cacheKeys) ? cacheKeys : [cacheKeys];
+  const prefixes = Array.isArray(cachePrefix) ? cachePrefix : [cachePrefix];
   await Promise.all(
-    keys.map((key) =>
-      key.endsWith("*") || key.includes("PREFIX")
-        ? cacheService.deleteByPrefix(
-            key.replace("*", "").replace("_PREFIX", ""),
-          )
-        : cacheService.delete(key),
-    ),
+    prefixes.map((prefix) => cacheService.deleteByPrefix(prefix)),
   );
 
   return result;

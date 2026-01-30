@@ -5,10 +5,15 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
+import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 
 export const provinceRouter = createTRPCRouter({
   getAllProvinces: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(provinceQueries.getAllProvinces()),
+    async () =>
+      await withCache(CACHE_KEYS.PROVINCES_ALL, CACHE_TTL.LONG, () =>
+        runEffect(provinceQueries.getAllProvinces()),
+      ),
   ),
 
   getPaginatedProvinces: withPermission("provinces.view")
@@ -46,14 +51,18 @@ export const provinceRouter = createTRPCRouter({
     .input(provinceSchema.createProvinceSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.createProvince(input)),
+        await withCacheInvalidation(CACHE_KEYS.PROVINCES_PREFIX, () =>
+          runEffect(provinceQueries.createProvince(input)),
+        ),
     ),
 
   updateProvince: withPermission("provinces.update")
     .input(provinceSchema.updateProvinceSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.updateProvince(input)),
+        await withCacheInvalidation(CACHE_KEYS.PROVINCES_PREFIX, () =>
+          runEffect(provinceQueries.updateProvince(input)),
+        ),
     ),
 
   deleteProvince: withPermission("provinces.delete")
@@ -64,7 +73,9 @@ export const provinceRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.deleteProvince(input.id)),
+        await withCacheInvalidation(CACHE_KEYS.PROVINCES_PREFIX, () =>
+          runEffect(provinceQueries.deleteProvince(input.id)),
+        ),
     ),
 
   restoreProvince: withPermission("provinces.delete")
@@ -75,6 +86,8 @@ export const provinceRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.restoreProvince(input.id)),
+        await withCacheInvalidation(CACHE_KEYS.PROVINCES_PREFIX, () =>
+          runEffect(provinceQueries.restoreProvince(input.id)),
+        ),
     ),
 });

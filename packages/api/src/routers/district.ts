@@ -5,10 +5,15 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
+import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 
 export const districtRouter = createTRPCRouter({
   getAllDistricts: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(districtQueries.getAllDistricts()),
+    async () =>
+      await withCache(CACHE_KEYS.DISTRICTS_ALL, CACHE_TTL.LONG, () =>
+        runEffect(districtQueries.getAllDistricts()),
+      ),
   ),
 
   getAllDistrictsByRegencyId: withRateLimit(rateLimiters.moderate())
@@ -19,8 +24,13 @@ export const districtRouter = createTRPCRouter({
     )
     .query(
       async ({ input }) =>
-        await runEffect(
-          districtQueries.getAllDistrictsByRegencyId(input.regencyId),
+        await withCache(
+          `${CACHE_KEYS.DISTRICTS_BY_REGENCY}${input.regencyId}`,
+          CACHE_TTL.LONG,
+          () =>
+            runEffect(
+              districtQueries.getAllDistrictsByRegencyId(input.regencyId),
+            ),
         ),
     ),
 
@@ -59,14 +69,18 @@ export const districtRouter = createTRPCRouter({
     .input(districtSchema.createDistrictSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.createDistrict(input)),
+        await withCacheInvalidation(CACHE_KEYS.DISTRICTS_PREFIX, () =>
+          runEffect(districtQueries.createDistrict(input)),
+        ),
     ),
 
   updateDistrict: withPermission("district.update")
     .input(districtSchema.updateDistrictSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.updateDistrict(input)),
+        await withCacheInvalidation(CACHE_KEYS.DISTRICTS_PREFIX, () =>
+          runEffect(districtQueries.updateDistrict(input)),
+        ),
     ),
 
   deleteDistrict: withPermission("district.delete")
@@ -77,7 +91,9 @@ export const districtRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.deleteDistrict(input.id)),
+        await withCacheInvalidation(CACHE_KEYS.DISTRICTS_PREFIX, () =>
+          runEffect(districtQueries.deleteDistrict(input.id)),
+        ),
     ),
 
   restoreDistrict: withPermission("district.delete")
@@ -88,6 +104,8 @@ export const districtRouter = createTRPCRouter({
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.restoreDistrict(input.id)),
+        await withCacheInvalidation(CACHE_KEYS.DISTRICTS_PREFIX, () =>
+          runEffect(districtQueries.restoreDistrict(input.id)),
+        ),
     ),
 });

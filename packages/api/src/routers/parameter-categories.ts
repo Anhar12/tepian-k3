@@ -5,7 +5,6 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
-import { cacheService } from "@tepian-k3/services/cache";
 import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
 import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 
