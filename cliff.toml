@@ -18,7 +18,7 @@ body = """
     {% for commit in commits %}
         - {% if commit.scope %}**{{ commit.scope }}:** {% endif %}\
             {% if commit.breaking %}[**breaking**] {% endif %}\
-            {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/${{ github.repository }}/commit/{{ commit.id }}))\
+            {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/rizrmdhn/tepian-k3/commit/{{ commit.id }}))\
     {% endfor %}
 {% endfor %}\n
 """
@@ -29,9 +29,7 @@ footer = """
 # remove the leading and trailing s
 trim = true
 # postprocessors
-postprocessors = [
-  { pattern = '\$\{\{ github\.repository \}\}', replace = "${{ github.repository }}" },
-]
+postprocessors = []
 
 [git]
 # parse the commits based on https://www.conventionalcommits.org
@@ -43,7 +41,7 @@ split_commits = false
 # regex for preprocessing the commit messages
 commit_preprocessors = [
   # Replace issue numbers
-  #{ pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/${{ github.repository }}/issues/${2}))" },
+  #{ pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/rizrmdhn/tepian-k3/issues/${2}))" },
   # Check spelling of the commit with https://github.com/crate-ci/typos
   # If the spelling is incorrect, it will be automatically fixed.
   #{ pattern = '.*', replace_command = 'typos --write-changes -' },
