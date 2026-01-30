@@ -84,22 +84,11 @@ export const Route = createFileRoute("/(core)/worksheets/")({
 
 const routeApi = getRouteApi("/(core)/worksheets");
 
-interface ToolRaw {
-  id: string;
-  toolCode: string;
-  toolName: string;
-  parameterId: string;
-  parameterName: string;
-  condition: ToolsCondition;
-  availability: ToolsAvailability;
-  selected?: boolean;
-}
-
 interface Tool {
   id: string;
   toolCode: string;
   toolName: string;
-  parameters: { parameterId: string; parameterName: string }[];
+  parameterName: string;
   condition: ToolsCondition;
   availability: ToolsAvailability;
   selected?: boolean;
@@ -249,6 +238,8 @@ function RouteComponent() {
 
   const [parameterPage, setParameterPage] = useState(1);
   const [parameterPageSize, setParameterPageSize] = useState(5);
+  const [toolPage, setToolPage] = useState(1);
+  const [toolPageSize, setToolPageSize] = useState(5);
   const [bahanSearch, setBahanSearch] = useState("");
   const [bahanStatusFilter, setBahanStatusFilter] = useState<string>("all");
   const [bahanPage, setBahanPage] = useState(1);
@@ -297,61 +288,27 @@ function RouteComponent() {
       : worksheetItems.filter((item) => item.clusterName === selectedCluster);
   }, [worksheetItems, selectedCluster]);
 
-  // Transform tools data, grouping by tool id to deduplicate
+  // Transform tools data
   const tools: Tool[] = useMemo(() => {
     if (!allToolsData) return [];
-    const toolMap = new Map<string, Tool>();
-    for (const tool of allToolsData) {
-      const existing = toolMap.get(tool.id);
-      if (existing) {
-        existing.parameters.push({
-          parameterId: tool.parameterId,
-          parameterName: tool.parameterName,
-        });
-      } else {
-        toolMap.set(tool.id, {
-          id: tool.id,
-          toolCode: tool.toolCode,
-          toolName: tool.toolName,
-          parameters: [
-            {
-              parameterId: tool.parameterId,
-              parameterName: tool.parameterName,
-            },
-          ],
-          condition: tool.condition,
-          availability: tool.availability,
-          selected: selectedToolIds.has(tool.id),
-        });
-      }
-    }
-    return Array.from(toolMap.values());
+    return allToolsData.map((tool) => ({
+      id: tool.id,
+      toolCode: tool.toolCode,
+      toolName: tool.toolName,
+      parameterName: tool.parameterName,
+      condition: tool.condition,
+      availability: tool.availability,
+      selected: selectedToolIds.has(tool.id),
+    }));
   }, [allToolsData, selectedToolIds]);
-
-  // Build a set of ready parameter IDs from worksheet items
-  const readyParameterIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const item of worksheetItems) {
-      const localUpdate = localItemUpdates.get(item.id);
-      const isReady = localUpdate ? localUpdate.isReady : item.isReady;
-      if (isReady) {
-        ids.add(item.parameterId);
-      }
-    }
-    return ids;
-  }, [worksheetItems, localItemUpdates]);
 
   // Filter tools
   const filteredTools = useMemo(() => {
-    const search = toolSearch.toLowerCase();
     return tools.filter((tool) => {
       const matchesSearch =
-        tool.id.toLowerCase().includes(search) ||
-        tool.toolCode.toLowerCase().includes(search) ||
-        tool.toolName.toLowerCase().includes(search) ||
-        tool.parameters.some((p) =>
-          p.parameterName.toLowerCase().includes(search),
-        );
+        tool.id.toLowerCase().includes(toolSearch.toLowerCase()) ||
+        tool.toolCode.toLowerCase().includes(toolSearch.toLowerCase()) ||
+        tool.toolName.toLowerCase().includes(toolSearch.toLowerCase());
       const matchesCondition =
         conditionFilter === "all" || tool.condition === conditionFilter;
       const matchesAvailability =
@@ -473,6 +430,7 @@ function RouteComponent() {
     parameterPageSize,
     parameterPage,
   );
+  const toolPagination = usePagination(filteredTools, toolPageSize, toolPage);
   const bahanPagination = usePagination(
     filteredChemicalMaterials,
     bahanPageSize,
@@ -972,6 +930,7 @@ function RouteComponent() {
                   value={toolSearch}
                   onChange={(e) => {
                     setToolSearch(e.target.value);
+                    setToolPage(1);
                   }}
                   className="pl-9"
                 />
@@ -980,6 +939,7 @@ function RouteComponent() {
                 value={conditionFilter}
                 onValueChange={(v) => {
                   setConditionFilter(v);
+                  setToolPage(1);
                 }}
               >
                 <SelectTrigger className="w-full sm:w-40">
@@ -998,6 +958,7 @@ function RouteComponent() {
                 value={availabilityFilter}
                 onValueChange={(v) => {
                   setAvailabilityFilter(v);
+                  setToolPage(1);
                 }}
               >
                 <SelectTrigger className="w-full sm:w-40">
@@ -1114,121 +1075,88 @@ function RouteComponent() {
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Kondisi
                       </TableHead>
-                      <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                        Jumlah Ready
-                      </TableHead>
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Ketersediaan
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTools.length > 0 ? (
-                      filteredTools.map((tool) => {
-                        const readyCount = tool.parameters.filter((p) =>
-                          readyParameterIds.has(p.parameterId),
-                        ).length;
-                        const totalCount = tool.parameters.length;
-                        const allReady = readyCount === totalCount;
-
-                        return (
-                          <TableRow
-                            key={tool.id}
-                            className={`hover:bg-muted/30 ${isEditable ? "cursor-pointer" : ""} ${
-                              selectedToolIds.has(tool.id) ? "bg-primary/5" : ""
-                            }`}
-                            onClick={() =>
-                              isEditable &&
-                              handleToolSelect(
-                                tool.id,
-                                !selectedToolIds.has(tool.id),
+                    {toolPagination.paginatedData.map((tool, idx) => (
+                      <TableRow
+                        key={idx}
+                        className={`hover:bg-muted/30 ${isEditable ? "cursor-pointer" : ""} ${
+                          selectedToolIds.has(tool.id) ? "bg-primary/5" : ""
+                        }`}
+                        onClick={() =>
+                          isEditable &&
+                          handleToolSelect(
+                            tool.id,
+                            !selectedToolIds.has(tool.id),
+                          )
+                        }
+                      >
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <PermissionGate
+                            permission="worksheet-tools.update"
+                            fallback={
+                              selectedToolIds.has(tool.id) ? (
+                                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                              ) : (
+                                <div className="h-5 w-5" />
                               )
                             }
                           >
-                            <TableCell onClick={(e) => e.stopPropagation()}>
-                              <PermissionGate
-                                permission="worksheet-tools.update"
-                                fallback={
-                                  selectedToolIds.has(tool.id) ? (
-                                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                                  ) : (
-                                    <div className="h-5 w-5" />
-                                  )
+                            {isEditable ? (
+                              <Checkbox
+                                checked={selectedToolIds.has(tool.id)}
+                                onCheckedChange={(checked) =>
+                                  handleToolSelect(tool.id, checked as boolean)
                                 }
-                              >
-                                {isEditable ? (
-                                  <Checkbox
-                                    checked={selectedToolIds.has(tool.id)}
-                                    onCheckedChange={(checked) =>
-                                      handleToolSelect(
-                                        tool.id,
-                                        checked as boolean,
-                                      )
-                                    }
-                                  />
-                                ) : selectedToolIds.has(tool.id) ? (
-                                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                                ) : (
-                                  <div className="h-5 w-5" />
-                                )}
-                              </PermissionGate>
-                            </TableCell>
-                            <TableCell className="font-mono text-xs">
-                              {tool.toolCode}
-                            </TableCell>
-                            <TableCell className="text-xs font-medium sm:text-sm">
-                              {tool.toolName}
-                            </TableCell>
-                            <TableCell className="text-xs font-medium sm:text-sm">
-                              <div className="flex flex-col gap-0.5">
-                                {tool.parameters.map((p) => (
-                                  <span key={p.parameterId}>
-                                    {p.parameterName}
-                                  </span>
-                                ))}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <StatusBadge
-                                type="condition"
-                                value={tool.condition}
                               />
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge
-                                className={`text-xs ${
-                                  allReady
-                                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                                    : readyCount > 0
-                                      ? "bg-amber-100 text-amber-700 hover:bg-amber-100"
-                                      : "bg-red-100 text-red-700 hover:bg-red-100"
-                                }`}
-                              >
-                                {totalCount}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <StatusBadge
-                                type="availability"
-                                value={tool.availability}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={7}
-                          className="py-6 text-center text-sm text-muted-foreground"
-                        >
-                          Tidak ada alat ditemukan
+                            ) : selectedToolIds.has(tool.id) ? (
+                              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                            ) : (
+                              <div className="h-5 w-5" />
+                            )}
+                          </PermissionGate>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {tool.toolCode}
+                        </TableCell>
+                        <TableCell className="text-xs font-medium sm:text-sm">
+                          {tool.toolName}
+                        </TableCell>
+                        <TableCell className="text-xs font-medium sm:text-sm">
+                          {tool.parameterName}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge
+                            type="condition"
+                            value={tool.condition}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge
+                            type="availability"
+                            value={tool.availability}
+                          />
                         </TableCell>
                       </TableRow>
-                    )}
+                    ))}
                   </TableBody>
                 </Table>
               </div>
+              <WorksheetDataTable
+                currentPage={toolPagination.currentPage}
+                totalPages={toolPagination.totalPages}
+                pageSize={toolPageSize}
+                totalItems={toolPagination.totalItems}
+                onPageChange={setToolPage}
+                onPageSizeChange={(size) => {
+                  setToolPageSize(size);
+                  setToolPage(1);
+                }}
+              />
             </div>
 
             {selectedToolsCount > 0 && (

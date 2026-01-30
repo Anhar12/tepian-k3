@@ -107,7 +107,9 @@ export function TestingTable({
         await queryClient.invalidateQueries(
           trpc.cart.getCartItemCount.queryOptions(),
         );
-        globalSuccessToast("Parameter berhasil ditambahkan ke keranjang");
+        globalSuccessToast(
+          `Parameter ${data.parameter.name} berhasil ditambahkan ke keranjang`,
+        );
 
         // Remove loading state for this specific parameter
         setAddingToCart((prev) => {

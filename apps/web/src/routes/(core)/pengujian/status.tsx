@@ -37,6 +37,10 @@ import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
 
+// TODO: When revision is requested, worksheets should be updated to draft again
+// TODO: When order is cancelled, make sure all related documents/worksheets are handled properly (maybe soft delete or archive)
+// TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
+
 export const Route = createFileRoute("/(core)/pengujian/status")({
   beforeLoad: async ({ search }) => {
     // check if orderId exists
@@ -388,7 +392,7 @@ function RouteComponent() {
               !isApproved &&
               !freshlySubmitted &&
               !isWorksheetInReview &&
-              !isWorksheetVerified &&
+              isWorksheetVerified &&
               offeringDoc && (
                 <div className="mt-8 flex justify-end gap-3 pt-6">
                   {/* Batal Dialog */}

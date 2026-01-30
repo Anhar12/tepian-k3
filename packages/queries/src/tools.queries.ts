@@ -263,6 +263,7 @@ const toolsQueries = {
         const result = await db
           .select({
             ...getTableColumns(tools),
+            parameterId: parameterTools.parameterId,
             parameterName: parameters.name,
           })
           .from(tools)

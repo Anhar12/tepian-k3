@@ -54,7 +54,8 @@
       "Bash(pnpm git-cliff:*)",
       "Bash(git -C /home/rizrmdhn/Project/Monorepo/tepian-k3 remote get-url origin)",
       "Bash(git tag:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

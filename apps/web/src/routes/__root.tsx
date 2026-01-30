@@ -59,7 +59,7 @@ function RootComponent() {
             <Outlet />
           </NuqsAdapter>
         </div>
-        <Toaster position="bottom-right" richColors />
+        <Toaster position="top-right" richColors />
       </ThemeProvider>
       <TanStackRouterDevtools position="bottom-left" />
       <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />

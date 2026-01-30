@@ -55,6 +55,8 @@ import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation"
 import useDialogs from "@/hooks/use-dialog";
 import z from "zod";
 
+// TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
+
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
 )({

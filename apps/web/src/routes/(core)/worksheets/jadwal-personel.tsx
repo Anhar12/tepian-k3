@@ -70,6 +70,8 @@ import { id as localeId } from "date-fns/locale";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 
+// TODO: Make this page can be edited when status is verified approved and order is payed
+
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "worksheets.read" }),
