@@ -14,7 +14,7 @@ import {
   testingItem,
   order,
 } from "@tepian-k3/db/schema";
-import type { BahanUnit } from "@tepian-k3/constants";
+import type { BahanUnit, WorksheetStatus } from "@tepian-k3/constants";
 import { logCreate, logUpdate } from "./helpers/audit.helpers";
 import type { WorksheetNoteStatus } from "@tepian-k3/constants";
 
@@ -120,7 +120,11 @@ const worksheetQueries = {
   /**
    * Get all worksheets with pagination
    */
-  getAllWorksheets(page: number = 1, limit: number = 10, status?: string) {
+  getAllWorksheets(
+    page: number = 1,
+    limit: number = 10,
+    status?: WorksheetStatus,
+  ) {
     return Effect.gen(function* () {
       const offset = (page - 1) * limit;
 
@@ -128,7 +132,7 @@ const worksheetQueries = {
         try: () =>
           Promise.all([
             db.query.worksheets.findMany({
-              where: status ? eq(worksheets.status, status as any) : undefined,
+              where: status ? eq(worksheets.status, status) : undefined,
               limit,
               offset,
               orderBy: (worksheets, { desc }) => [desc(worksheets.createdAt)],
@@ -485,7 +489,7 @@ const worksheetQueries = {
    */
   updateWorksheetStatus(
     worksheetId: string,
-    status: string,
+    status: WorksheetStatus,
     userId: string,
     endDate?: string,
     result?: string,
@@ -496,7 +500,7 @@ const worksheetQueries = {
           const [updatedWorksheet] = await db
             .update(worksheets)
             .set({
-              status: status as any,
+              status: status,
               endDate: endDate || sql`${worksheets.endDate}`,
               result: result || sql`${worksheets.result}`,
               updatedAt: sql`CURRENT_TIMESTAMP`,

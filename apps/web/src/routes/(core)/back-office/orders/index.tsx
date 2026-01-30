@@ -19,9 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { OrderStatus } from "@tepian-k3/constants";
 
 export const Route = createFileRoute("/(core)/back-office/orders/")({
-  validateSearch: (search) => orderSchema.getAllOrdersSchema.parse(search),
+  validateSearch: orderSchema.getAllOrdersSchema,
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "orders.read" }),
   component: RouteComponent,
@@ -72,7 +73,7 @@ function RouteComponent() {
                 to: "/back-office/orders",
                 search: {
                   ...params,
-                  status: value === "all" ? undefined : (value as any),
+                  status: value === "all" ? undefined : (value as OrderStatus),
                   page: 1,
                 },
               });
@@ -85,13 +86,25 @@ function RouteComponent() {
               <SelectItem value="all">Semua Status</SelectItem>
               <SelectItem value="pending">Menunggu</SelectItem>
               <SelectItem value="kaji_ulang">Kaji Ulang</SelectItem>
-              <SelectItem value="kaji_ulang_disetujui">Kaji Ulang Disetujui</SelectItem>
-              <SelectItem value="penawaran_diterbitkan">Penawaran Diterbitkan</SelectItem>
+              <SelectItem value="kaji_ulang_disetujui">
+                Kaji Ulang Disetujui
+              </SelectItem>
+              <SelectItem value="penawaran_diterbitkan">
+                Penawaran Diterbitkan
+              </SelectItem>
               <SelectItem value="revision">Revisi</SelectItem>
-              <SelectItem value="persetujuan_disetujui">Persetujuan Disetujui</SelectItem>
-              <SelectItem value="tagihan_diterbitkan">Tagihan Diterbitkan</SelectItem>
-              <SelectItem value="pembayaran_diterima">Pembayaran Diterima</SelectItem>
-              <SelectItem value="proses_pengambilan_sampel">Proses Pengambilan Sampel</SelectItem>
+              <SelectItem value="persetujuan_disetujui">
+                Persetujuan Disetujui
+              </SelectItem>
+              <SelectItem value="tagihan_diterbitkan">
+                Tagihan Diterbitkan
+              </SelectItem>
+              <SelectItem value="pembayaran_diterima">
+                Pembayaran Diterima
+              </SelectItem>
+              <SelectItem value="proses_pengambilan_sampel">
+                Proses Pengambilan Sampel
+              </SelectItem>
               <SelectItem value="completed">Selesai</SelectItem>
               <SelectItem value="rejected">Ditolak</SelectItem>
               <SelectItem value="cancelled">Dibatalkan</SelectItem>

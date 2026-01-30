@@ -10,7 +10,8 @@ import {
 } from "@tepian-k3/utils/audit";
 import { logError, logInfo } from "@tepian-k3/services/logger";
 import { Effect } from "effect";
-import { eq, and, desc, sql } from "@tepian-k3/db";
+import { eq, and, desc, sql, type SQL } from "@tepian-k3/db";
+import type { AuditAction } from "@tepian-k3/constants";
 import { TRPCError } from "@trpc/server";
 
 /**
@@ -178,14 +179,14 @@ const getAuditLogs = (filters: AuditLogFilters = {}) =>
       limit = 100,
     } = filters;
 
-    const conditions: any[] = [];
+    const conditions: SQL[] = [];
 
     if (entityType) {
       conditions.push(eq(audits.entityType, entityType));
     }
 
     if (action) {
-      conditions.push(eq(audits.action, action as any));
+      conditions.push(eq(audits.action, action as AuditAction));
     }
 
     if (userId) {

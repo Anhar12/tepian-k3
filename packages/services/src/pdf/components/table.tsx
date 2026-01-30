@@ -4,23 +4,23 @@ import { tw } from "../utils/tw";
 
 type NestedKeyOf<T> = {
   [K in keyof T & string]: T[K] extends object
-    ? T[K] extends any[]
+    ? T[K] extends unknown[]
       ? K
       : K | `${K}.${NestedKeyOf<T[K]>}`
     : K;
 }[keyof T & string];
 
-export interface TableColumn<T = any> {
+export interface TableColumn<T = Record<string, unknown>> {
   key: NestedKeyOf<T> | (string & {}); // Preserves autocomplete while allowing any string
   label: string | string[]; // single string or array for multi-line headers
   width: string; // tailwind width class like "w-1/12"
   align?: "left" | "center" | "right";
   defaultValue?: string | number; // Default value when cell is empty/undefined
-  format?: (value: any, item: T, index: number) => string | number; // custom formatter
-  render?: (value: any, item: T, index: number) => React.ReactNode; // custom render function
+  format?: (value: unknown, item: T, index: number) => string | number; // custom formatter
+  render?: (value: unknown, item: T, index: number) => React.ReactNode; // custom render function
 }
 
-interface TableProps<T = any> {
+interface TableProps<T = Record<string, unknown>> {
   columns: TableColumn<T>[];
   data: T[];
   showIndex?: boolean;
@@ -32,7 +32,7 @@ interface TableProps<T = any> {
   bordered?: boolean;
 }
 
-export const Table = <T extends Record<string, any>>({
+export const Table = <T extends Record<string, unknown>>({
   columns,
   data,
   showIndex = false,
@@ -56,8 +56,13 @@ export const Table = <T extends Record<string, any>>({
   };
 
   // Helper function to get nested value from object using dot notation
-  const getNestedValue = (obj: any, path: string): any => {
-    return path.split(".").reduce((current, key) => current?.[key], obj);
+  const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+    return path.split(".").reduce<unknown>((current, key) => {
+      if (current != null && typeof current === "object" && key in current) {
+        return (current as Record<string, unknown>)[key];
+      }
+      return undefined;
+    }, obj);
   };
 
   const renderCellValue = (item: T, column: TableColumn<T>, index: number) => {
@@ -74,7 +79,7 @@ export const Table = <T extends Record<string, any>>({
 
     // Check if value exists (not null or undefined)
     if (value != null && value !== "") {
-      return value.toString();
+      return String(value);
     }
 
     // Check if defaultValue is explicitly set (even if it's an empty string or 0)

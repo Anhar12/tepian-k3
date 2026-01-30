@@ -61,7 +61,7 @@ function MultiComboBox({
   );
 
   const handleRemove = useCallback(
-    (optionId: string, e: React.MouseEvent) => {
+    (optionId: string, e: React.MouseEvent | React.KeyboardEvent) => {
       e.stopPropagation();
       onChange(value.filter((id) => id !== optionId));
     },
@@ -104,7 +104,7 @@ function MultiComboBox({
                       className="ml-1 rounded-full ring-offset-background outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          handleRemove(option.id, e as any);
+                          handleRemove(option.id, e);
                         }
                       }}
                       onMouseDown={(e) => {

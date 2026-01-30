@@ -52,13 +52,7 @@ export const TOOLS_AVAILABILITY_COLORS: Record<ToolsAvailability, string> = {
   dipinjam: "bg-blue-100 text-blue-700",
 };
 
-export const BAHAN_UNITS = [
-  "gram",
-  "kg",
-  "botol",
-  "ml",
-  "liter",
-] as const;
+export const BAHAN_UNITS = ["gram", "kg", "botol", "ml", "liter"] as const;
 
 export type BahanUnit = (typeof BAHAN_UNITS)[number];
 
@@ -279,6 +273,32 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   update: "Update",
   delete: "Delete",
   status_change: "Status Change",
+};
+
+export const AUDIT_ENTITY_TYPES = [
+  "order",
+  "order_item",
+  "order_status_history",
+  "testing",
+  "testing_item",
+  "user",
+  "user_company",
+  "parameter",
+  "tool",
+] as const;
+
+export type AuditEntityType = (typeof AUDIT_ENTITY_TYPES)[number];
+
+export const AUDIT_ENTITY_TYPE_LABELS: Record<AuditEntityType, string> = {
+  order: "Order",
+  order_item: "Order Item",
+  order_status_history: "Order Status History",
+  testing: "Testing",
+  testing_item: "Testing Item",
+  user: "User",
+  user_company: "User Company",
+  parameter: "Parameter",
+  tool: "Tool",
 };
 
 export const DOCUMENT_ENTITY_TYPES = [

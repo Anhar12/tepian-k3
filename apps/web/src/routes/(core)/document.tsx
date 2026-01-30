@@ -105,7 +105,10 @@ function DocumentCard({
     rejected: "bg-red-500",
   };
 
-  const statusIcon: Record<DocumentStatus, React.ComponentType<any>> = {
+  const statusIcon: Record<
+    DocumentStatus,
+    React.ComponentType<React.SVGProps<SVGSVGElement>>
+  > = {
     draft: FileText,
     pending_signature: Clock,
     signed: Shield,
