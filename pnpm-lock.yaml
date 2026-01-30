@@ -158,6 +158,9 @@ importers:
         specifier: 'catalog:'
         version: 4.2.1
     devDependencies:
+      '@faker-js/faker':
+        specifier: ^10.2.0
+        version: 10.2.0
       '@tepian-k3/config':
         specifier: workspace:*
         version: link:../../packages/config
