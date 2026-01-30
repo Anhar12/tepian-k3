@@ -13,6 +13,7 @@
   "dependencies": {
     "@hono/node-server": "^1.14.4",
     "@hono/trpc-server": "^0.4.0",
+    "@node-rs/argon2": "catalog:",
     "@t3-oss/env-core": "^0.13.10",
     "@tepian-k3/api": "workspace:*",
     "@tepian-k3/db": "workspace:*",

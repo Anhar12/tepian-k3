@@ -124,6 +124,9 @@ importers:
       '@hono/trpc-server':
         specifier: ^0.4.0
         version: 0.4.1(@trpc/server@11.8.0(typescript@5.9.3))(hono@4.11.1)
+      '@node-rs/argon2':
+        specifier: 'catalog:'
+        version: 2.0.2
       '@t3-oss/env-core':
         specifier: ^0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.2.1)
