@@ -7,9 +7,10 @@
     "build": "tsdown",
     "check-types": "tsc -b",
     "compile": "bun with-env build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "pnpm with-env tsx watch src/index.ts",
-    "start": "pnpm with-env node dist/index.mjs",
-    "with-env": "dotenv -e ../../.env --"
+    "dev": "pnpm with-env:local tsx watch src/index.ts",
+    "start": "pnpm with-env:prod node dist/index.mjs",
+    "with-env:local": "dotenv -e ../../.env.local -e ../../.env --",
+    "with-env:prod": "dotenv -e ../../.env.production -e ../../.env --"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",

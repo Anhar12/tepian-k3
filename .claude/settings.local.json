@@ -43,7 +43,8 @@
       "Bash(dir /s /b \"f:\\\\Monorepo\\\\tepian-k3\\\\node_modules\\\\.pnpm\\\\*trpc*tanstack*\")",
       "Bash(pnpm changelog:branch:*)",
       "Bash(chmod:*)",
-      "Bash(pnpm start)"
+      "Bash(pnpm start)",
+      "Bash(pnpm --filter @tepian-k3/server start)"
     ]
   }
 }
