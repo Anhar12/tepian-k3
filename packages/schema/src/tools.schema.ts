@@ -23,7 +23,7 @@ const getAllToolsSchema = z.object({
       z.object({
         id: z.enum(SORTABLE_TOOL_FIELDS),
         desc: z.boolean(),
-      })
+      }),
     )
     .default([{ id: "createdAt", desc: false }]),
   toolName: z.string().default(""),

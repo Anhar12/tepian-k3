@@ -7,7 +7,7 @@ const ParamterSchema = z.array(
     satuan: z.string(),
     cluster: z.string(),
     harga: z.number(),
-  })
+  }),
 );
 
 export type Parameters = z.infer<typeof ParamterSchema>;

@@ -20,6 +20,7 @@ The notification system consists of two main components:
 2. **Real-Time Events** - Broadcast via SSE (Server-Sent Events) using Redis pub/sub
 
 Both systems work together to provide a comprehensive notification experience:
+
 - Database notifications provide a history and allow users to mark items as read
 - Real-time events provide instant updates for active users
 
@@ -47,6 +48,7 @@ CREATE TABLE "notifications" (
 ```
 
 **Key Features:**
+
 - **UUIDv7 Primary Keys**: Time-sortable identifiers
 - **Soft Deletes**: `deletedAt` column for recoverable deletion
 - **Entity Links**: Optional references to orders, testing, documents
@@ -57,18 +59,18 @@ CREATE TABLE "notifications" (
 
 The system supports the following notification types:
 
-| Type | Label | Use Case |
-|------|-------|----------|
-| `order_status_changed` | Order Status Changed | When an order status changes |
-| `payment_received` | Payment Received | Payment proof uploaded and verified |
-| `payment_rejected` | Payment Rejected | Payment proof rejected |
-| `testing_started` | Testing Started | Testing process has begun |
-| `testing_completed` | Testing Completed | Testing process finished |
-| `document_ready` | Document Ready | Document available for download |
-| `document_signed` | Document Signed | Document has been signed |
-| `assignment_received` | Assignment Received | New testing assignment |
-| `system_announcement` | System Announcement | System-wide announcements |
-| `general` | General Notification | Default notification type |
+| Type                   | Label                | Use Case                            |
+| ---------------------- | -------------------- | ----------------------------------- |
+| `order_status_changed` | Order Status Changed | When an order status changes        |
+| `payment_received`     | Payment Received     | Payment proof uploaded and verified |
+| `payment_rejected`     | Payment Rejected     | Payment proof rejected              |
+| `testing_started`      | Testing Started      | Testing process has begun           |
+| `testing_completed`    | Testing Completed    | Testing process finished            |
+| `document_ready`       | Document Ready       | Document available for download     |
+| `document_signed`      | Document Signed      | Document has been signed            |
+| `assignment_received`  | Assignment Received  | New testing assignment              |
+| `system_announcement`  | System Announcement  | System-wide announcements           |
+| `general`              | General Notification | Default notification type           |
 
 Each type has associated colors defined in `@tepian-k3/constants` for UI display.
 
@@ -88,6 +90,7 @@ const notifications = await trpc.notifications.getAll.query({
 ```
 
 **Response:**
+
 ```typescript
 {
   data: Notification[],
@@ -334,12 +337,14 @@ Events published to the event bus should match the schema in `@tepian-k3/schema/
 ### 1. Always Create Both Database and Real-Time Notifications
 
 For important user actions, create both types:
+
 - **Database notification**: Persistent history, can be reviewed later
 - **Real-time event**: Instant updates for active users
 
 ### 2. Include Metadata
 
 Use the `metadata` field to store additional context:
+
 ```typescript
 metadata: {
   oldStatus: "pending",
@@ -397,8 +402,8 @@ async function cleanupOldNotifications() {
     .where(
       and(
         eq(notifications.isRead, true),
-        lt(notifications.readAt, thirtyDaysAgo.toISOString())
-      )
+        lt(notifications.readAt, thirtyDaysAgo.toISOString()),
+      ),
     );
 }
 ```

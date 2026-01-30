@@ -5,7 +5,7 @@ import type { AuditDiff, FieldChange } from "@tepian-k3/types/audit.types";
  */
 export function compareObjects(
   oldObj: Record<string, unknown> | null | undefined,
-  newObj: Record<string, unknown> | null | undefined
+  newObj: Record<string, unknown> | null | undefined,
 ): AuditDiff {
   const changes: FieldChange[] = [];
   const addedFields: string[] = [];
@@ -129,8 +129,8 @@ function deepEqual(value1: unknown, value2: unknown): boolean {
     return keys1.every((key) =>
       deepEqual(
         (value1 as Record<string, unknown>)[key],
-        (value2 as Record<string, unknown>)[key]
-      )
+        (value2 as Record<string, unknown>)[key],
+      ),
     );
   }
 
@@ -156,12 +156,12 @@ export function generateChangeDescription(diff: AuditDiff): string {
   const modifiedFields = diff.fields.filter(
     (f) =>
       !diff.addedFields.includes(f.field) &&
-      !diff.removedFields.includes(f.field)
+      !diff.removedFields.includes(f.field),
   );
 
   if (modifiedFields.length > 0) {
     descriptions.push(
-      `Modified: ${modifiedFields.map((f) => f.field).join(", ")}`
+      `Modified: ${modifiedFields.map((f) => f.field).join(", ")}`,
     );
   }
 

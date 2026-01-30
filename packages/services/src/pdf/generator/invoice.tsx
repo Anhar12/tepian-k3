@@ -13,7 +13,7 @@ interface GenerateInvoiceOptions {
 }
 
 export const generateInvoicePdf = async (
-  options: GenerateInvoiceOptions
+  options: GenerateInvoiceOptions,
 ): Promise<Buffer> => {
   const stream = await renderToStream(<Invoice {...options} />);
 

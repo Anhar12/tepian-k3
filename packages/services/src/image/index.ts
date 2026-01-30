@@ -1,9 +1,6 @@
 import { Effect } from "effect";
 import sharp from "sharp";
-import type {
-  ImageConversionOptions,
-  ConversionResult,
-} from "./types";
+import type { ImageConversionOptions, ConversionResult } from "./types";
 import { InvalidImageError } from "./types";
 
 class ImageService {
@@ -13,7 +10,7 @@ class ImageService {
    */
   convertToWebP(
     imageBuffer: Buffer,
-    options: ImageConversionOptions = {}
+    options: ImageConversionOptions = {},
   ): Effect.Effect<ConversionResult, InvalidImageError> {
     return Effect.tryPromise({
       try: async () => {
@@ -72,7 +69,7 @@ class ImageService {
 
         // Convert filename extension if provided
         const convertedFilename = filename
-          ? filename.replace(/\.[^.]+$/, '.webp')
+          ? filename.replace(/\.[^.]+$/, ".webp")
           : undefined;
 
         return {
@@ -92,7 +89,7 @@ class ImageService {
         }
         return new InvalidImageError(
           error instanceof Error ? error.message : "Unknown error occurred",
-          error
+          error,
         );
       },
     });
@@ -102,7 +99,7 @@ class ImageService {
    * Validate if a buffer contains a valid image
    */
   validateImage(
-    imageBuffer: Buffer
+    imageBuffer: Buffer,
   ): Effect.Effect<boolean, InvalidImageError> {
     return Effect.tryPromise({
       try: async () => {
@@ -112,7 +109,7 @@ class ImageService {
       catch: (error) => {
         return new InvalidImageError(
           error instanceof Error ? error.message : "Invalid image format",
-          error
+          error,
         );
       },
     });
@@ -150,7 +147,7 @@ class ImageService {
       catch: (error) => {
         return new InvalidImageError(
           error instanceof Error ? error.message : "Unable to read image info",
-          error
+          error,
         );
       },
     });

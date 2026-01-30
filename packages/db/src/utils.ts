@@ -69,16 +69,16 @@ export async function generateSequentialNumber(
   db: DBType,
   sequenceName: string,
   prefix: string,
-  padLength: number = 6
+  padLength: number = 6,
 ): Promise<string> {
   // PostgreSQL sequences are atomic - handles race conditions automatically
   const [result] = await db.execute(
-    sql`SELECT nextval('${sql.raw(sequenceName)}')`
+    sql`SELECT nextval('${sql.raw(sequenceName)}')`,
   );
 
   if (!result || result.nextval === undefined) {
     throw new Error(
-      `Failed to retrieve next value from sequence: ${sequenceName}`
+      `Failed to retrieve next value from sequence: ${sequenceName}`,
     );
   }
 
@@ -91,21 +91,21 @@ export async function generateSequentialNumber(
 
   return `${prefix}-${year}${month}${day}-${String(sequence).padStart(
     padLength,
-    "0"
+    "0",
   )}`;
 }
 
 // Refactor existing functions to use the generic one
 export async function generateTestingNumberWithSequence(
   db: DBType,
-  prefix: string = "TEST"
+  prefix: string = "TEST",
 ): Promise<string> {
   return generateSequentialNumber(db, TESTING_SEQUENCE_NAME, prefix);
 }
 
 export async function generateOrderNumberWithSequence(
   db: DBType,
-  prefix: string = "ORD"
+  prefix: string = "ORD",
 ): Promise<string> {
   return generateSequentialNumber(db, ORDER_SEQUENCE_NAME, prefix);
 }

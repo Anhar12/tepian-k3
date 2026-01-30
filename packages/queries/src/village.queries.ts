@@ -30,7 +30,7 @@ const villageQueries = {
         logError(
           "villageQueries.getAllVillages",
           "Failed to get all villages",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -46,14 +46,14 @@ const villageQueries = {
         db.query.villages.findMany({
           where: and(
             eq(villages.districtId, districtId),
-            isNull(villages.deletedAt)
+            isNull(villages.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "villageQueries.getAllVillagesByDistrictId",
           "Failed to get all villages by district ID",
-          { districtId, error }
+          { districtId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -73,7 +73,7 @@ const villageQueries = {
         logError(
           "villageQueries.getVillageById",
           "Failed to get village by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -82,8 +82,8 @@ const villageQueries = {
       },
     }).pipe(
       Effect.flatMap((village) =>
-        village ? Effect.succeed(village) : Effect.succeed(null)
-      )
+        village ? Effect.succeed(village) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -97,7 +97,7 @@ const villageQueries = {
         logError(
           "villageQueries.getDeletedVillageById",
           "Failed to get deleted village by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -107,8 +107,8 @@ const villageQueries = {
       },
     }).pipe(
       Effect.flatMap((village) =>
-        village ? Effect.succeed(village) : Effect.succeed(null)
-      )
+        village ? Effect.succeed(village) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -122,7 +122,7 @@ const villageQueries = {
         logError(
           "villageQueries.getVillageByName",
           "Failed to get village by name",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -131,13 +131,13 @@ const villageQueries = {
       },
     }).pipe(
       Effect.flatMap((village) =>
-        village ? Effect.succeed(village) : Effect.succeed(null)
-      )
+        village ? Effect.succeed(village) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginationVillages(
-    input: z.infer<typeof villageSchema.getAllVillagesSchema>
+    input: z.infer<typeof villageSchema.getAllVillagesSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -160,7 +160,7 @@ const villageQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -170,20 +170,20 @@ const villageQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(villages.deletedAt)
-              : isNull(villages.deletedAt)
+              : isNull(villages.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(villages[item.id]) : asc(villages[item.id])
+              item.desc ? desc(villages[item.id]) : asc(villages[item.id]),
             )
           : [desc(villages.createdAt)];
 
@@ -216,7 +216,7 @@ const villageQueries = {
             {
               error,
               input,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -245,7 +245,7 @@ const villageQueries = {
             code: "CONFLICT",
             message:
               "Desa dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
-          })
+          }),
         );
       }
 
@@ -276,7 +276,7 @@ const villageQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data Desa.",
-          })
+          }),
         );
       }
 
@@ -293,7 +293,7 @@ const villageQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Desa tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -327,7 +327,7 @@ const villageQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data Desa.",
-          })
+          }),
         );
       }
 
@@ -344,7 +344,7 @@ const villageQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Desa tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -374,7 +374,7 @@ const villageQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data Desa.",
-          })
+          }),
         );
       }
 
@@ -391,7 +391,7 @@ const villageQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Desa yang dihapus tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -409,7 +409,7 @@ const villageQueries = {
           logError(
             "villageQueries.restoreVillage",
             "Failed to restore deleted village",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -423,7 +423,7 @@ const villageQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data Desa yang dihapus.",
-          })
+          }),
         );
       }
 

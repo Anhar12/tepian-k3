@@ -15,12 +15,12 @@ This is more efficient than using `withPermission()` and manually implementing r
 
 Different user roles get different rate limit tiers:
 
-| Tier | Roles | Queries/hr | Mutations/hr | API Calls/hr | Uploads/hr | Emails/hr |
-|------|-------|------------|--------------|--------------|------------|-----------|
-| **Basic** | viewer | 100 | 10 | 100 | 5 | 3 |
-| **Standard** | user, employee | 500 | 100 | 1,000 | 20 | 10 |
-| **Premium** | lab_technician, lab_manager | 2,000 | 500 | 5,000 | 100 | 50 |
-| **Unlimited** | admin, super_admin | 50,000 | 10,000 | 100,000 | 1,000 | 500 |
+| Tier          | Roles                       | Queries/hr | Mutations/hr | API Calls/hr | Uploads/hr | Emails/hr |
+| ------------- | --------------------------- | ---------- | ------------ | ------------ | ---------- | --------- |
+| **Basic**     | viewer                      | 100        | 10           | 100          | 5          | 3         |
+| **Standard**  | user, employee              | 500        | 100          | 1,000        | 20         | 10        |
+| **Premium**   | lab_technician, lab_manager | 2,000      | 500          | 5,000        | 100        | 50        |
+| **Unlimited** | admin, super_admin          | 50,000     | 10,000       | 100,000      | 1,000      | 500       |
 
 ## Basic Usage
 
@@ -40,10 +40,9 @@ export const auditRouter = createTRPCRouter({
     }),
 
   // Protect with "audits.export" permission + api rate limit
-  export: withPermissionAndRateLimit("audits.export", "api")
-    .query(async () => {
-      return await auditQueries.export();
-    }),
+  export: withPermissionAndRateLimit("audits.export", "api").query(async () => {
+    return await auditQueries.export();
+  }),
 
   // Protect with "audits.delete" permission + mutations rate limit
   delete: withPermissionAndRateLimit("audits.delete", "mutations")
@@ -57,7 +56,11 @@ export const auditRouter = createTRPCRouter({
 ### Example 2: Document Router with Custom Rate Limit Keys
 
 ```typescript
-import { createTRPCRouter, withPermissionAndRateLimit, formDataProcedure } from "@tepian-k3/api";
+import {
+  createTRPCRouter,
+  withPermissionAndRateLimit,
+  formDataProcedure,
+} from "@tepian-k3/api";
 import { uploadSchema } from "@tepian-k3/schema/document.schema";
 import documentQueries from "@tepian-k3/queries/document.queries";
 
@@ -66,7 +69,7 @@ export const documentRouter = createTRPCRouter({
   upload: withPermissionAndRateLimit(
     "documents.create",
     "uploads",
-    (ctx, input) => `upload:${ctx.user.id}:${input.entityType}`
+    (ctx, input) => `upload:${ctx.user.id}:${input.entityType}`,
   )
     .input(z.any()) // FormData handled by formDataProcedure
     .use(formDataProcedure(uploadSchema))
@@ -78,7 +81,7 @@ export const documentRouter = createTRPCRouter({
   download: withPermissionAndRateLimit(
     "documents.read",
     "api",
-    (ctx, input) => `download:${ctx.user.id}:${input.id}`
+    (ctx, input) => `download:${ctx.user.id}:${input.id}`,
   )
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
@@ -102,6 +105,7 @@ Creates a middleware that checks permission and applies role-based rate limiting
 **Returns:**
 
 A tRPC procedure that:
+
 1. Requires authentication (from `protectedProcedure`)
 2. Checks if user has the required permission
 3. Applies role-based rate limits based on user's highest role tier
@@ -111,13 +115,13 @@ A tRPC procedure that:
 
 Choose the operation type based on your endpoint's purpose:
 
-| Operation | Use For | Example Endpoints |
-|-----------|---------|-------------------|
-| `"queries"` | Read operations, data fetching | `getAll`, `getById`, `search` |
-| `"mutations"` | Create/Update/Delete operations | `create`, `update`, `delete`, `restore` |
-| `"api"` | General API calls, exports, reports | `export`, `generateReport`, `sync` |
-| `"uploads"` | File upload operations | `upload`, `uploadBulk`, `importFile` |
-| `"email"` | Email sending operations | `sendVerification`, `sendNotification` |
+| Operation     | Use For                             | Example Endpoints                       |
+| ------------- | ----------------------------------- | --------------------------------------- |
+| `"queries"`   | Read operations, data fetching      | `getAll`, `getById`, `search`           |
+| `"mutations"` | Create/Update/Delete operations     | `create`, `update`, `delete`, `restore` |
+| `"api"`       | General API calls, exports, reports | `export`, `generateReport`, `sync`      |
+| `"uploads"`   | File upload operations              | `upload`, `uploadBulk`, `importFile`    |
+| `"email"`     | Email sending operations            | `sendVerification`, `sendNotification`  |
 
 ## Error Handling
 
@@ -184,6 +188,7 @@ getAll: withPermission("audits.read")
 ```
 
 **Problems:**
+
 - No protection against abuse
 - Users can make unlimited requests
 
@@ -209,6 +214,7 @@ getAll: withPermission("audits.read")
 ```
 
 **Problems:**
+
 - Boilerplate code repeated in every endpoint
 - Easy to forget or implement incorrectly
 - Harder to maintain
@@ -224,6 +230,7 @@ getAll: withPermissionAndRateLimit("audits.read", "queries")
 ```
 
 **Benefits:**
+
 - Single line of middleware
 - Consistent behavior across all endpoints
 - Automatic role-based tier selection
@@ -246,8 +253,9 @@ describe("Audit Router", () => {
   it("should deny access without permission", async () => {
     const caller = createCaller({ user: viewerUser });
 
-    await expect(caller.audit.delete({ id: "123" }))
-      .rejects.toThrow("Anda tidak memiliki izin");
+    await expect(caller.audit.delete({ id: "123" })).rejects.toThrow(
+      "Anda tidak memiliki izin",
+    );
   });
 
   it("should enforce rate limits", async () => {
@@ -259,8 +267,9 @@ describe("Audit Router", () => {
     }
 
     // 11th request should fail
-    await expect(caller.audit.delete({ id: "11" }))
-      .rejects.toThrow("Terlalu banyak permintaan");
+    await expect(caller.audit.delete({ id: "11" })).rejects.toThrow(
+      "Terlalu banyak permintaan",
+    );
   });
 
   it("should apply different limits for admins", async () => {
@@ -272,8 +281,7 @@ describe("Audit Router", () => {
     }
 
     // Should still work
-    await expect(caller.audit.delete({ id: "101" }))
-      .resolves.toBeDefined();
+    await expect(caller.audit.delete({ id: "101" })).resolves.toBeDefined();
   });
 });
 ```

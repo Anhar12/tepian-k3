@@ -186,9 +186,7 @@ const chemicalMaterialQueries = {
         input.code
           ? ilike(chemicalMaterials.code, `%${input.code}%`)
           : undefined,
-        input.status
-          ? eq(chemicalMaterials.status, input.status)
-          : undefined,
+        input.status ? eq(chemicalMaterials.status, input.status) : undefined,
       ],
       errorContext: {
         queryName:

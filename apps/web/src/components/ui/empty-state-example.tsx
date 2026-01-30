@@ -1,6 +1,6 @@
-import { IconFolderCode } from "@tabler/icons-react"
+import { IconFolderCode } from "@tabler/icons-react";
 
-import { EmptyState } from "@/components/ui/empty-state"
+import { EmptyState } from "@/components/ui/empty-state";
 
 export function EmptyDemo() {
   return (
@@ -21,5 +21,5 @@ export function EmptyDemo() {
       ]}
       learnMoreHref="#"
     />
-  )
+  );
 }

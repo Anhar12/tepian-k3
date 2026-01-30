@@ -46,7 +46,7 @@ export const authRouter = createTRPCRouter({
   // ✅ Rate limited by email - 5 attempts per 15 minutes
   login: withRateLimit(
     rateLimiters.auth(),
-    (ctx, input) => `login:${input.email}`
+    (ctx, input) => `login:${input.email}`,
   )
     .input(authSchema.loginSchema)
     .mutation(async ({ input, ctx }) => {
@@ -64,7 +64,7 @@ export const authRouter = createTRPCRouter({
   // ✅ Rate limited by email - 3 attempts per 5 minutes
   sendOtp: withRateLimit(
     rateLimiters.otp(),
-    (ctx, input) => `otp:${input.email}`
+    (ctx, input) => `otp:${input.email}`,
   )
     .input(otpSchema.sendOtpSchema)
     .mutation(async ({ input }) => {
@@ -74,7 +74,7 @@ export const authRouter = createTRPCRouter({
   // ✅ Rate limited by email - 3 attempts per 5 minutes
   verifyOtp: withRateLimit(
     rateLimiters.otp(),
-    (ctx, input) => `verify:${input.email}`
+    (ctx, input) => `verify:${input.email}`,
   )
     .input(otpSchema.verifyOtpSchema)
     .mutation(async ({ input }) => {
@@ -84,7 +84,7 @@ export const authRouter = createTRPCRouter({
   // ✅ Rate limited by email - 3 attempts per hour
   forgotPassword: withRateLimit(
     rateLimiters.passwordReset(),
-    (ctx, input) => `reset:${input.email}`
+    (ctx, input) => `reset:${input.email}`,
   )
     .input(z.object({ email: z.string().email() }))
     .mutation(async ({ input }) => {
@@ -172,7 +172,7 @@ export const authRouter = createTRPCRouter({
    */
   login: withRateLimit(
     rateLimiters.auth(),
-    (ctx, input) => `login:${input.email}`
+    (ctx, input) => `login:${input.email}`,
   )
     .input(authSchema.loginSchema)
     .mutation(
@@ -197,7 +197,7 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "UNAUTHORIZED",
                   message: "Username atau password salah.",
-                })
+                }),
               );
             }
 
@@ -206,7 +206,7 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "FORBIDDEN",
                   message: "Email belum terverifikasi.",
-                })
+                }),
               );
             }
 
@@ -217,7 +217,7 @@ export const authRouter = createTRPCRouter({
                 email: user.email,
                 roles: [],
                 permissions: [],
-              })
+              }),
             );
 
             return {
@@ -228,8 +228,8 @@ export const authRouter = createTRPCRouter({
                 name: user.name,
               },
             };
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -244,7 +244,7 @@ export const authRouter = createTRPCRouter({
           Effect.gen(function* () {
             // Check if user exists
             const existingUser = yield* Effect.tryPromise(() =>
-              usersQueries.getUserByEmail(input.email).catch(() => null)
+              usersQueries.getUserByEmail(input.email).catch(() => null),
             );
 
             if (existingUser) {
@@ -252,7 +252,7 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "CONFLICT",
                   message: "Email sudah terdaftar.",
-                })
+                }),
               );
             }
 
@@ -265,10 +265,11 @@ export const authRouter = createTRPCRouter({
             return {
               id: user.id,
               email: user.email,
-              message: "Registrasi berhasil. Silakan cek email untuk verifikasi.",
+              message:
+                "Registrasi berhasil. Silakan cek email untuk verifikasi.",
             };
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -277,7 +278,7 @@ export const authRouter = createTRPCRouter({
    */
   sendOtp: withRateLimit(
     rateLimiters.otp(),
-    (ctx, input) => `otp:${input.email}`
+    (ctx, input) => `otp:${input.email}`,
   )
     .input(z.object({ email: z.string().email() }))
     .mutation(
@@ -291,7 +292,7 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "BAD_REQUEST",
                   message: "Email sudah terverifikasi.",
-                })
+                }),
               );
             }
 
@@ -300,8 +301,8 @@ export const authRouter = createTRPCRouter({
             return {
               message: "Kode OTP telah dikirim ke email Anda.",
             };
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -310,7 +311,7 @@ export const authRouter = createTRPCRouter({
    */
   verifyOtp: withRateLimit(
     rateLimiters.otp(),
-    (ctx, input) => `verify:${input.email}`
+    (ctx, input) => `verify:${input.email}`,
   )
     .input(z.object({ email: z.string().email(), code: z.string() }))
     .mutation(
@@ -318,7 +319,7 @@ export const authRouter = createTRPCRouter({
         await runEffect(
           Effect.gen(function* () {
             const isValid = yield* Effect.tryPromise(() =>
-              OTPService.verifyOTP(input.email, input.code)
+              OTPService.verifyOTP(input.email, input.code),
             );
 
             if (!isValid) {
@@ -326,7 +327,7 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "BAD_REQUEST",
                   message: "Kode OTP salah atau sudah kadaluarsa.",
-                })
+                }),
               );
             }
 
@@ -336,8 +337,8 @@ export const authRouter = createTRPCRouter({
             return {
               message: "Email berhasil diverifikasi.",
             };
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -346,7 +347,7 @@ export const authRouter = createTRPCRouter({
    */
   forgotPassword: withRateLimit(
     rateLimiters.passwordReset(),
-    (ctx, input) => `reset:${input.email}`
+    (ctx, input) => `reset:${input.email}`,
   )
     .input(z.object({ email: z.string().email() }))
     .mutation(
@@ -356,14 +357,14 @@ export const authRouter = createTRPCRouter({
             const user = yield* usersQueries.getUserByEmail(input.email);
 
             yield* Effect.tryPromise(() =>
-              PasswordResetService.sendResetEmail(user.email)
+              PasswordResetService.sendResetEmail(user.email),
             );
 
             return {
               message: "Link reset password telah dikirim ke email Anda.",
             };
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -372,53 +373,55 @@ export const authRouter = createTRPCRouter({
    */
   resetPassword: withRateLimit(
     rateLimiters.auth(),
-    (ctx, input) => `reset-pwd:${input.token}`
+    (ctx, input) => `reset-pwd:${input.token}`,
   )
     .input(
       z.object({
         token: z.string(),
         password: z.string().min(8),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
         await runEffect(
           Effect.gen(function* () {
             const isValid = yield* Effect.tryPromise(() =>
-              PasswordResetService.verifyToken(input.token)
+              PasswordResetService.verifyToken(input.token),
             );
 
             if (!isValid) {
               return yield* Effect.fail(
                 new TRPCError({
                   code: "BAD_REQUEST",
-                  message: "Token reset password tidak valid atau sudah kadaluarsa.",
-                })
+                  message:
+                    "Token reset password tidak valid atau sudah kadaluarsa.",
+                }),
               );
             }
 
             yield* Effect.tryPromise(() =>
-              PasswordResetService.resetPassword(input.token, input.password)
+              PasswordResetService.resetPassword(input.token, input.password),
             );
 
             return {
               message: "Password berhasil direset.",
             };
-          })
-        )
+          }),
+        ),
     ),
 
   /**
    * Logout endpoint
    * Rate limited by user ID (prevents logout spam)
    */
-  logout: withProtectedRateLimit(rateLimiters.api())
-    .mutation(async ({ ctx }) => {
+  logout: withProtectedRateLimit(rateLimiters.api()).mutation(
+    async ({ ctx }) => {
       // Logout logic (invalidate session, etc.)
       return {
         message: "Berhasil logout.",
       };
-    }),
+    },
+  ),
 
   /**
    * Refresh token endpoint

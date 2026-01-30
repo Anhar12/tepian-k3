@@ -617,16 +617,13 @@ export const surveyResponseRelations = relations(
   }),
 );
 
-export const surveyFeedbackRelations = relations(
-  surveyFeedback,
-  ({ one }) => ({
-    order: one(order, {
-      fields: [surveyFeedback.orderId],
-      references: [order.id],
-    }),
-    submittedBy: one(users, {
-      fields: [surveyFeedback.submittedByUserId],
-      references: [users.id],
-    }),
+export const surveyFeedbackRelations = relations(surveyFeedback, ({ one }) => ({
+  order: one(order, {
+    fields: [surveyFeedback.orderId],
+    references: [order.id],
   }),
-);
+  submittedBy: one(users, {
+    fields: [surveyFeedback.submittedByUserId],
+    references: [users.id],
+  }),
+}));

@@ -22,7 +22,9 @@ declare module "@tanstack/react-table" {
     setFilters?: (
       filters:
         | ExtendedColumnFilter<TData>[]
-        | ((prev: ExtendedColumnFilter<TData>[]) => ExtendedColumnFilter<TData>[])
+        | ((
+            prev: ExtendedColumnFilter<TData>[],
+          ) => ExtendedColumnFilter<TData>[])
         | null,
     ) => void;
     joinOperator?: JoinOperator;

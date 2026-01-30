@@ -59,7 +59,7 @@ const cartQueries = {
             {
               error,
               userId,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -69,56 +69,74 @@ const cartQueries = {
       });
 
       // Group cart items by companyId
-      const groupedByCompany = cartItems.reduce((acc, item) => {
-        const companyId = item.companyId;
+      const groupedByCompany = cartItems.reduce(
+        (acc, item) => {
+          const companyId = item.companyId;
 
-        if (!acc[companyId]) {
-          acc[companyId] = {
-            id: item.companyId,
-            name: item.company.name, // Assuming company name is same as location name for this example
-            items: [],
-          };
-        }
-        acc[companyId].items.push(item);
+          if (!acc[companyId]) {
+            acc[companyId] = {
+              id: item.companyId,
+              name: item.company.name, // Assuming company name is same as location name for this example
+              items: [],
+            };
+          }
+          acc[companyId].items.push(item);
 
-        return acc;
-      }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+          return acc;
+        },
+        {} as Record<
+          string,
+          { id: string; name: string; items: typeof cartItems }
+        >,
+      );
 
       // should return array of companies with their locations and items
       return Object.values(groupedByCompany).map((company) => {
         // Group item based on location
-        const itemsGroupedByLocation = company.items.reduce((acc, item) => {
-          const locationId = item.locationId;
-          if (!acc[locationId]) {
-            acc[locationId] = {
-              id: item.locationId,
-              name: item.location.name,
-              items: [],
-            };
-          }
-
-          acc[locationId].items.push(item);
-          return acc;
-        }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
-
-        // Group item based on cluster inside each location
-        const finalItemsGroupedByLocation = Object.values(
-          itemsGroupedByLocation
-        ).map((location) => {
-          const itemsGroupedByCluster = location.items.reduce((acc, item) => {
-            const clusterId = item.parameter.category.cluster.id;
-            if (!acc[clusterId]) {
-              acc[clusterId] = {
-                id: clusterId,
-                name: item.parameter.category.cluster.name,
+        const itemsGroupedByLocation = company.items.reduce(
+          (acc, item) => {
+            const locationId = item.locationId;
+            if (!acc[locationId]) {
+              acc[locationId] = {
+                id: item.locationId,
+                name: item.location.name,
                 items: [],
               };
             }
 
-            acc[clusterId].items.push(item);
-
+            acc[locationId].items.push(item);
             return acc;
-          }, {} as Record<string, { id: string; name: string; items: typeof cartItems }>);
+          },
+          {} as Record<
+            string,
+            { id: string; name: string; items: typeof cartItems }
+          >,
+        );
+
+        // Group item based on cluster inside each location
+        const finalItemsGroupedByLocation = Object.values(
+          itemsGroupedByLocation,
+        ).map((location) => {
+          const itemsGroupedByCluster = location.items.reduce(
+            (acc, item) => {
+              const clusterId = item.parameter.category.cluster.id;
+              if (!acc[clusterId]) {
+                acc[clusterId] = {
+                  id: clusterId,
+                  name: item.parameter.category.cluster.name,
+                  items: [],
+                };
+              }
+
+              acc[clusterId].items.push(item);
+
+              return acc;
+            },
+            {} as Record<
+              string,
+              { id: string; name: string; items: typeof cartItems }
+            >,
+          );
 
           return {
             id: location.id,
@@ -153,7 +171,7 @@ const cartQueries = {
           {
             error,
             userId,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -176,7 +194,7 @@ const cartQueries = {
           {
             error,
             cartItemId,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -189,7 +207,7 @@ const cartQueries = {
   getCartItemByParameterId(
     userId: string,
     parameterId: string,
-    locationId: string
+    locationId: string,
   ) {
     return Effect.tryPromise({
       try: () =>
@@ -197,7 +215,7 @@ const cartQueries = {
           where: and(
             eq(cart.userId, userId),
             eq(cart.parameterId, parameterId),
-            eq(cart.locationId, locationId)
+            eq(cart.locationId, locationId),
           ),
         }),
       catch: (error) => {
@@ -209,7 +227,7 @@ const cartQueries = {
             userId,
             parameterId,
             locationId,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -221,11 +239,11 @@ const cartQueries = {
 
   insertCartItem(
     userId: string,
-    data: z.infer<typeof cartSchema.createCartSchema>
+    data: z.infer<typeof cartSchema.createCartSchema>,
   ) {
     return Effect.gen(this, function* () {
       const isParameterExisting = yield* parameterQueries.getParameterById(
-        data.parameterId
+        data.parameterId,
       );
 
       if (!isParameterExisting) {
@@ -233,7 +251,7 @@ const cartQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Parameter tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -243,14 +261,14 @@ const cartQueries = {
           db.query.userCompanies.findFirst({
             where: and(
               eq(userCompanies.id, data.companyId),
-              eq(userCompanies.userId, userId)
+              eq(userCompanies.userId, userId),
             ),
           }),
         catch: (error) => {
           logError(
             "cartQueries.insertCartItem",
             "Error validating company ownership",
-            { error, userId, companyId: data.companyId }
+            { error, userId, companyId: data.companyId },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -264,7 +282,7 @@ const cartQueries = {
           new TRPCError({
             code: "FORBIDDEN",
             message: "Anda tidak memiliki akses ke perusahaan ini.",
-          })
+          }),
         );
       }
 
@@ -278,7 +296,7 @@ const cartQueries = {
           logError(
             "cartQueries.insertCartItem",
             "Error validating parameters",
-            { error, parameterId: data.parameterId }
+            { error, parameterId: data.parameterId },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -292,7 +310,7 @@ const cartQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Parameter tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -303,14 +321,14 @@ const cartQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Harga tidak sesuai. Silakan segarkan dan coba lagi.",
-          })
+          }),
         );
       }
 
       const existingCartItem = yield* cartQueries.getCartItemByParameterId(
         userId,
         data.parameterId,
-        data.locationId
+        data.locationId,
       );
 
       const result = yield* Effect.tryPromise({
@@ -321,8 +339,8 @@ const cartQueries = {
                 this.updateCartItemQuantity(
                   existingCartItem.id,
                   existingCartItem.quantity + data.quantity,
-                  tx
-                )
+                  tx,
+                ),
               );
 
               if (!updated) {
@@ -337,7 +355,7 @@ const cartQueries = {
 
             // Only create new item if none exists
             const [newCartItem] = await Effect.runPromise(
-              this.insertNewCartItem(userId, data, tx)
+              this.insertNewCartItem(userId, data, tx),
             );
 
             if (!newCartItem) {
@@ -369,7 +387,7 @@ const cartQueries = {
   insertNewCartItem(
     userId: string,
     data: z.infer<typeof cartSchema.createCartSchema>,
-    tx: DBorTx = db
+    tx: DBorTx = db,
   ) {
     return Effect.tryPromise({
       try: () =>
@@ -392,7 +410,7 @@ const cartQueries = {
             error,
             userId,
             data,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -405,7 +423,7 @@ const cartQueries = {
   updateCartItemQuantity(
     cartItemId: string,
     quantity: number,
-    tx: DBorTx = db
+    tx: DBorTx = db,
   ) {
     return Effect.tryPromise({
       try: () =>
@@ -422,7 +440,7 @@ const cartQueries = {
             error,
             cartItemId,
             quantity,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -435,7 +453,7 @@ const cartQueries = {
   incrementCartItemQuantity(
     cartItemId: string,
     incrementBy: number = 1,
-    tx: DBorTx = db
+    tx: DBorTx = db,
   ) {
     return Effect.gen(this, function* () {
       // First, get the current cart item
@@ -465,7 +483,7 @@ const cartQueries = {
               error,
               cartItemId,
               incrementBy,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -489,7 +507,7 @@ const cartQueries = {
   decrementCartItemQuantity(
     cartItemId: string,
     decrementBy: number = 1,
-    tx: DBorTx = db
+    tx: DBorTx = db,
   ) {
     return Effect.gen(this, function* () {
       // First, get the current cart item
@@ -525,7 +543,7 @@ const cartQueries = {
               error,
               cartItemId,
               decrementBy,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

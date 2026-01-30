@@ -51,7 +51,7 @@ const provinceQueries = {
           {
             id,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -60,8 +60,8 @@ const provinceQueries = {
       },
     }).pipe(
       Effect.flatMap((province) =>
-        province ? Effect.succeed(province) : Effect.succeed(null)
-      )
+        province ? Effect.succeed(province) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -78,7 +78,7 @@ const provinceQueries = {
           {
             id,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -87,8 +87,8 @@ const provinceQueries = {
       },
     }).pipe(
       Effect.flatMap((province) =>
-        province ? Effect.succeed(province) : Effect.succeed(null)
-      )
+        province ? Effect.succeed(province) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -102,7 +102,7 @@ const provinceQueries = {
         logError(
           "provinceQueries.getProvinceByName",
           "Failed to get province by name",
-          { name, error }
+          { name, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -111,13 +111,13 @@ const provinceQueries = {
       },
     }).pipe(
       Effect.flatMap((province) =>
-        province ? Effect.succeed(province) : Effect.succeed(null)
-      )
+        province ? Effect.succeed(province) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginatedProvince(
-    input: z.infer<typeof provinceSchema.getAllProvincesSchema>
+    input: z.infer<typeof provinceSchema.getAllProvincesSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -140,7 +140,7 @@ const provinceQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -150,20 +150,20 @@ const provinceQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(provinces.deletedAt)
-              : isNull(provinces.deletedAt)
+              : isNull(provinces.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(provinces[item.id]) : asc(provinces[item.id])
+              item.desc ? desc(provinces[item.id]) : asc(provinces[item.id]),
             )
           : [desc(provinces.createdAt)];
 
@@ -196,7 +196,7 @@ const provinceQueries = {
             {
               error,
               input,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -225,7 +225,7 @@ const provinceQueries = {
             code: "CONFLICT",
             message:
               "Provinsi dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
-          })
+          }),
         );
       }
 
@@ -238,7 +238,7 @@ const provinceQueries = {
             {
               error,
               data,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -252,7 +252,7 @@ const provinceQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data provinsi",
-          })
+          }),
         );
       }
 
@@ -269,7 +269,7 @@ const provinceQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Provinsi tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -287,7 +287,7 @@ const provinceQueries = {
             {
               error,
               data,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -301,7 +301,7 @@ const provinceQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data provinsi",
-          })
+          }),
         );
       }
 
@@ -318,7 +318,7 @@ const provinceQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Provinsi tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -336,7 +336,7 @@ const provinceQueries = {
             {
               error,
               id,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -350,7 +350,7 @@ const provinceQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data provinsi",
-          })
+          }),
         );
       }
 
@@ -367,7 +367,7 @@ const provinceQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Provinsi terhapus tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -385,7 +385,7 @@ const provinceQueries = {
             {
               error,
               id,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -399,7 +399,7 @@ const provinceQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data provinsi",
-          })
+          }),
         );
       }
       return restoredProvince;

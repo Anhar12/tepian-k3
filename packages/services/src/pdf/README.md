@@ -33,6 +33,7 @@ pdf/
 ## Installation
 
 The required dependencies are already installed:
+
 - `@react-pdf/renderer` - PDF generation
 - `qrcode` - QR code generation
 - `@types/qrcode` - TypeScript types
@@ -57,17 +58,16 @@ const pdfBuffer = await generateInvoicePdf({
 ```typescript
 import {
   generateInvoicePdf,
-  generateDocumentVerificationQRCode
+  generateDocumentVerificationQRCode,
 } from "@tepian-k3/services/pdf";
 
 // Generate QR code
-const { qrCodeDataURL, verificationURL } =
-  await runEffect(
-    generateDocumentVerificationQRCode(
-      verificationToken,
-      "https://yourdomain.com"
-    )
-  );
+const { qrCodeDataURL, verificationURL } = await runEffect(
+  generateDocumentVerificationQRCode(
+    verificationToken,
+    "https://yourdomain.com",
+  ),
+);
 
 // Generate PDF with QR code
 const pdfBuffer = await generateInvoicePdf({
@@ -109,7 +109,7 @@ import { generateQRCodeDataURL } from "@tepian-k3/services/pdf";
 import { runEffect } from "@tepian-k3/api/utils/run-effect";
 
 const dataURL = await runEffect(
-  generateQRCodeDataURL("https://example.com/verify/token123")
+  generateQRCodeDataURL("https://example.com/verify/token123"),
 );
 ```
 
@@ -121,7 +121,7 @@ For saving to file:
 import { generateQRCodeBuffer } from "@tepian-k3/services/pdf";
 
 const buffer = await runEffect(
-  generateQRCodeBuffer("https://example.com/verify/token123")
+  generateQRCodeBuffer("https://example.com/verify/token123"),
 );
 ```
 
@@ -132,7 +132,7 @@ import { generateVerificationURL } from "@tepian-k3/services/pdf";
 
 const url = generateVerificationURL(
   "verification-token-here",
-  "https://yourdomain.com"
+  "https://yourdomain.com",
 );
 // Returns: "https://yourdomain.com/verify/verification-token-here"
 ```
@@ -150,8 +150,8 @@ const { qrCodeDataURL, verificationURL } = await runEffect(
       width: 150,
       margin: 2,
       errorCorrectionLevel: "H",
-    }
-  )
+    },
+  ),
 );
 ```
 
@@ -188,14 +188,14 @@ import { Letterhead } from "../components/letterhead";
 ```typescript
 const { qrCodeDataURL } = await runEffect(
   generateQRCodeDataURL("data", {
-    width: 200,              // Size in pixels
-    margin: 1,               // Margin in modules
+    width: 200, // Size in pixels
+    margin: 1, // Margin in modules
     errorCorrectionLevel: "H", // L, M, Q, or H
     color: {
-      dark: "#000000",       // QR code color
-      light: "#FFFFFF",      // Background color
+      dark: "#000000", // QR code color
+      light: "#FFFFFF", // Background color
     },
-  })
+  }),
 );
 ```
 
@@ -246,6 +246,7 @@ try {
 ## Examples
 
 For complete integration examples, see:
+
 - [INTEGRATION_EXAMPLE.md](./INTEGRATION_EXAMPLE.md) - Full integration guide
 - `packages/api/src/routers/order.ts` - Real-world usage in API
 

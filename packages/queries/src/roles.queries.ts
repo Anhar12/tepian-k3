@@ -53,7 +53,7 @@ const rolesQueries = {
         logError(
           "rolesQueries.getRoleById",
           `Error fetching role with ID ${roleId}:`,
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -69,9 +69,9 @@ const rolesQueries = {
               new TRPCError({
                 code: "NOT_FOUND",
                 message: `Peran dengan ID ${roleId} tidak ditemukan.`,
-              })
-            )
-      )
+              }),
+            ),
+      ),
     );
   },
 
@@ -90,7 +90,7 @@ const rolesQueries = {
             .from(rolePermissions)
             .innerJoin(
               permission,
-              eq(rolePermissions.permissionId, permission.id)
+              eq(rolePermissions.permissionId, permission.id),
             )
             .where(eq(rolePermissions.roleId, role.id));
 
@@ -100,7 +100,7 @@ const rolesQueries = {
           logError(
             "rolesQueries.getRoleWithPermissionsById",
             "Error fetching role permissions",
-            { error }
+            { error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -132,7 +132,7 @@ const rolesQueries = {
         logError(
           "rolesQueries.getDeletedRoleById",
           `Error fetching deleted role with ID ${roleId}:`,
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -153,7 +153,7 @@ const rolesQueries = {
         logError(
           "rolesQueries.getRoleByName",
           `Error fetching role with name ${roleName}:`,
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -163,8 +163,8 @@ const rolesQueries = {
       },
     }).pipe(
       Effect.flatMap((role) =>
-        role ? Effect.succeed(role) : Effect.succeed(null)
-      )
+        role ? Effect.succeed(role) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -204,7 +204,7 @@ const rolesQueries = {
             "Error fetching users by role",
             {
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -218,7 +218,7 @@ const rolesQueries = {
   },
 
   getOffsetPaginatedRoles(
-    input: z.infer<typeof rolesSchema.getAllRolesSchema>
+    input: z.infer<typeof rolesSchema.getAllRolesSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -241,7 +241,7 @@ const rolesQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -251,20 +251,20 @@ const rolesQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(roles.deletedAt)
-              : isNull(roles.deletedAt)
+              : isNull(roles.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(roles[item.id]) : asc(roles[item.id])
+              item.desc ? desc(roles[item.id]) : asc(roles[item.id]),
             )
           : [desc(roles.createdAt)];
 
@@ -297,7 +297,7 @@ const rolesQueries = {
             {
               error,
               input,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -325,7 +325,7 @@ const rolesQueries = {
           new TRPCError({
             code: "CONFLICT",
             message: `Peran dengan nama ${data.name} sudah ada.`,
-          })
+          }),
         );
       }
 
@@ -346,7 +346,7 @@ const rolesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat peran.",
-          })
+          }),
         );
       }
 
@@ -363,7 +363,7 @@ const rolesQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: `Peran dengan ID ${data.id} tidak ditemukan.`,
-          })
+          }),
         );
       }
 
@@ -392,7 +392,7 @@ const rolesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui peran.",
-          })
+          }),
         );
       }
 
@@ -409,7 +409,7 @@ const rolesQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: `Peran dengan ID ${roleId} tidak ditemukan.`,
-          })
+          }),
         );
       }
 
@@ -435,7 +435,7 @@ const rolesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus peran.",
-          })
+          }),
         );
       }
 
@@ -452,7 +452,7 @@ const rolesQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: `Peran dengan ID ${roleId} tidak ditemukan.`,
-          })
+          }),
         );
       }
 
@@ -480,7 +480,7 @@ const rolesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan peran.",
-          })
+          }),
         );
       }
 

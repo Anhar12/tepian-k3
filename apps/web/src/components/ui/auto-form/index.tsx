@@ -48,11 +48,16 @@ export function AutoForm<T extends z.ZodObject<z.ZodRawShape>>({
 
     return keys
       .filter((key) => key in shape)
-      .filter((key) => fieldOverrides?.[key as keyof typeof fieldOverrides] !== false)
+      .filter(
+        (key) => fieldOverrides?.[key as keyof typeof fieldOverrides] !== false,
+      )
       .map<FieldConfig>((key) => {
         const zodType = shape[key]!;
-        const rawOverride = fieldOverrides?.[key as keyof typeof fieldOverrides];
-        const override = (rawOverride || undefined) as FieldOverride | undefined;
+        const rawOverride =
+          fieldOverrides?.[key as keyof typeof fieldOverrides];
+        const override = (rawOverride || undefined) as
+          | FieldOverride
+          | undefined;
         return {
           name: key,
           type: inferFieldType(zodType),

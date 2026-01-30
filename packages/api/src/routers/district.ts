@@ -8,27 +8,27 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const districtRouter = createTRPCRouter({
   getAllDistricts: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(districtQueries.getAllDistricts())
+    async () => await runEffect(districtQueries.getAllDistricts()),
   ),
 
   getAllDistrictsByRegencyId: withRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         regencyId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
         await runEffect(
-          districtQueries.getAllDistrictsByRegencyId(input.regencyId)
-        )
+          districtQueries.getAllDistrictsByRegencyId(input.regencyId),
+        ),
     ),
 
   getPaginatedDistricts: withPermission("district.view")
     .input(districtSchema.getAllDistrictsSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        districtQueries.getOffsetPaginatedDistricts(input)
+        districtQueries.getOffsetPaginatedDistricts(input),
       );
 
       return { data, pageCount };
@@ -38,11 +38,11 @@ export const districtRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const district = await runEffect(
-        districtQueries.getDistrictById(input.id)
+        districtQueries.getDistrictById(input.id),
       );
 
       if (!district) {
@@ -59,35 +59,35 @@ export const districtRouter = createTRPCRouter({
     .input(districtSchema.createDistrictSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.createDistrict(input))
+        await runEffect(districtQueries.createDistrict(input)),
     ),
 
   updateDistrict: withPermission("district.update")
     .input(districtSchema.updateDistrictSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.updateDistrict(input))
+        await runEffect(districtQueries.updateDistrict(input)),
     ),
 
   deleteDistrict: withPermission("district.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.deleteDistrict(input.id))
+        await runEffect(districtQueries.deleteDistrict(input.id)),
     ),
 
   restoreDistrict: withPermission("district.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(districtQueries.restoreDistrict(input.id))
+        await runEffect(districtQueries.restoreDistrict(input.id)),
     ),
 });

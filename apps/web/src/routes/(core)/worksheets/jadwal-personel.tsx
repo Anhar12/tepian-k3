@@ -514,7 +514,10 @@ function JadwalPersonilPage() {
       return allSchedules.filter((schedule) => {
         if (!schedule.startDate) return false;
         const endDate = schedule.endDate ?? schedule.startDate;
-        return isWithinInterval(day, { start: schedule.startDate, end: endDate });
+        return isWithinInterval(day, {
+          start: schedule.startDate,
+          end: endDate,
+        });
       });
     };
 

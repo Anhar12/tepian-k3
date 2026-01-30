@@ -20,7 +20,7 @@ const getAllUsersSchema = z.object({
       z.object({
         id: z.enum(SORTABLE_USER_FIELDS),
         desc: z.boolean(),
-      })
+      }),
     )
     .default([{ id: "createdAt", desc: false }]),
   name: z.string().default(""),
@@ -123,7 +123,7 @@ const updateUserProfileSchema = zfd.formData({
     {
       message:
         "File harus berupa gambar (JPEG, PNG) dan berukuran maksimal 2MB",
-    }
+    },
   ),
 });
 

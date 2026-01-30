@@ -31,7 +31,7 @@ export class RateLimiter {
     // If neither storage is available, throw error
     if (!this.primaryStorage && !this.fallbackStorage) {
       throw new Error(
-        "Rate limiter requires either Redis connection or in-memory fallback enabled"
+        "Rate limiter requires either Redis connection or in-memory fallback enabled",
       );
     }
   }
@@ -59,7 +59,7 @@ export class RateLimiter {
       // If Redis fails and we have fallback, use it
       if (this.fallbackStorage && this.primaryStorage) {
         console.warn(
-          `Rate limiter Redis error, falling back to memory: ${error}`
+          `Rate limiter Redis error, falling back to memory: ${error}`,
         );
         return await this.fallbackStorage.consume(key, points);
       }
@@ -87,7 +87,7 @@ export class RateLimiter {
     } catch (error) {
       if (this.fallbackStorage && this.primaryStorage) {
         console.warn(
-          `Rate limiter Redis error, falling back to memory: ${error}`
+          `Rate limiter Redis error, falling back to memory: ${error}`,
         );
         return await this.fallbackStorage.get(key);
       }

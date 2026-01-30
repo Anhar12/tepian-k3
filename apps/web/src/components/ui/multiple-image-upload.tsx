@@ -10,13 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import {
-  CircleX,
-  CloudUpload,
-  Image,
-  AlertTriangle,
-  X,
-} from "lucide-react";
+import { CircleX, CloudUpload, Image, AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface UploadFile {
@@ -261,7 +255,8 @@ const MultipleImageUpload = forwardRef<
           if (type === "image") extensions.push("Images");
           else if (type === "video") extensions.push("Videos");
           else if (type === "audio") extensions.push("Audio");
-          else if (type) extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
+          else if (type)
+            extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
         } else {
           const ext = mime.extension(format);
           if (ext) extensions.push(ext.toUpperCase());

@@ -16,7 +16,7 @@ export const logCreate = (
   newValues: Record<string, unknown>,
   userId?: string,
   userEmail?: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ) =>
   auditQueries.createAuditLog({
     entityType,
@@ -39,7 +39,7 @@ export const logUpdate = (
   newValues: Record<string, unknown>,
   userId?: string,
   userEmail?: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ) =>
   auditQueries.createAuditLog({
     entityType,
@@ -61,7 +61,7 @@ export const logDelete = (
   oldValues: Record<string, unknown>,
   userId?: string,
   userEmail?: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ) =>
   auditQueries.createAuditLog({
     entityType,
@@ -84,7 +84,7 @@ export const logStatusChange = (
   newStatus: string,
   userId?: string,
   userEmail?: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ) =>
   auditQueries.createAuditLog({
     entityType,
@@ -103,7 +103,7 @@ export const logStatusChange = (
  * Audit failures shouldn't break the main operation
  */
 export const runAuditSafe = <T>(
-  effect: Effect.Effect<T, Error, never>
+  effect: Effect.Effect<T, Error, never>,
 ): Promise<T | null> =>
   Effect.runPromise(effect).catch((error) => {
     console.error("Audit logging failed:", error);
@@ -116,7 +116,7 @@ export const runAuditSafe = <T>(
  */
 export const withAudit = <T, E, R>(
   effect: Effect.Effect<T, E, R>,
-  auditEffect: Effect.Effect<unknown, Error, never>
+  auditEffect: Effect.Effect<unknown, Error, never>,
 ): Effect.Effect<T, E, R> =>
   Effect.gen(function* () {
     // Run the main effect

@@ -40,7 +40,7 @@ export const generateChemicalMaterials = async (): Promise<{
     (material) => ({
       code: material.code,
       parameterNames: material.parameters,
-    })
+    }),
   );
 
   return { chemicalMaterialsData, parameterChemicalMaterialsData };
@@ -60,7 +60,7 @@ async function seedChemicalMaterials() {
     .values(chemicalMaterialsData)
     .returning();
   console.log(
-    `✅ ${insertedMaterials.length} Chemical Materials have been seeded`
+    `✅ ${insertedMaterials.length} Chemical Materials have been seeded`,
   );
 
   // Create a map of code to chemicalMaterialId
@@ -69,7 +69,7 @@ async function seedChemicalMaterials() {
   // Get all unique parameter names from the material mappings
   const allParameterNames = [
     ...new Set(
-      parameterChemicalMaterialsData.flatMap((pm) => pm.parameterNames)
+      parameterChemicalMaterialsData.flatMap((pm) => pm.parameterNames),
     ),
   ];
 
@@ -80,7 +80,7 @@ async function seedChemicalMaterials() {
 
   // Create a map of parameter name to parameterId
   const parameterNameToId = new Map(
-    parameterRecords.map((p) => [p.name, p.id])
+    parameterRecords.map((p) => [p.name, p.id]),
   );
 
   // Build parameter_chemical_materials data
@@ -91,7 +91,7 @@ async function seedChemicalMaterials() {
     const chemicalMaterialId = codeToId.get(code);
     if (!chemicalMaterialId) {
       console.warn(
-        `⚠️ Chemical material with code ${code} not found, skipping...`
+        `⚠️ Chemical material with code ${code} not found, skipping...`,
       );
       continue;
     }
@@ -100,7 +100,7 @@ async function seedChemicalMaterials() {
       const parameterId = parameterNameToId.get(parameterName);
       if (!parameterId) {
         console.warn(
-          `⚠️ Parameter "${parameterName}" not found for chemical material ${code}, skipping...`
+          `⚠️ Parameter "${parameterName}" not found for chemical material ${code}, skipping...`,
         );
         continue;
       }
@@ -119,7 +119,7 @@ async function seedChemicalMaterials() {
       .values(parameterChemicalMaterialsInsertData)
       .execute();
     console.log(
-      `✅ ${parameterChemicalMaterialsInsertData.length} Parameter-Chemical Material relationships have been seeded`
+      `✅ ${parameterChemicalMaterialsInsertData.length} Parameter-Chemical Material relationships have been seeded`,
     );
   }
 }

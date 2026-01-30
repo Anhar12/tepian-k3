@@ -52,7 +52,7 @@ const insertInBatches = async (data: InsertVillage[]) => {
     await db.insert(villages).values(batch).execute();
 
     console.log(
-      `📦 Inserted batch ${i + 1}/${totalBatches} (${batch.length} villages)`
+      `📦 Inserted batch ${i + 1}/${totalBatches} (${batch.length} villages)`,
     );
   }
 };

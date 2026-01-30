@@ -1,20 +1,21 @@
-/**
- * Type-Safe Roles System Examples
- *
- * This file demonstrates how to use the type-safe roles system
- * throughout the application.
- */
+/\*\*
+
+- Type-Safe Roles System Examples
+-
+- This file demonstrates how to use the type-safe roles system
+- throughout the application.
+  \*/
 
 import type { Role, Permission } from "../index";
 import {
-  ROLES,
-  ROLE_DESCRIPTIONS,
-  ROLE_PERMISSIONS,
-  isValidRole,
-  getRoleMetadata,
-  getAllRolesMetadata,
-  hasRolePermission,
-  getCombinedRolePermissions,
+ROLES,
+ROLE_DESCRIPTIONS,
+ROLE_PERMISSIONS,
+isValidRole,
+getRoleMetadata,
+getAllRolesMetadata,
+hasRolePermission,
+getCombinedRolePermissions,
 } from "../roles";
 
 // ============================================================
@@ -34,18 +35,18 @@ const labTechRole: Role = "lab_technician";
 // ============================================================
 
 function validateRole(role: string): Role | null {
-  if (isValidRole(role)) {
-    return role; // Now typed as Role
-  }
-  console.error(`Invalid role: ${role}`);
-  return null;
+if (isValidRole(role)) {
+return role; // Now typed as Role
+}
+console.error(`Invalid role: ${role}`);
+return null;
 }
 
 // Usage with user input
 const userInputRole = "admin";
 const validated = validateRole(userInputRole);
 if (validated) {
-  console.log(`Valid role: ${validated}`);
+console.log(`Valid role: ${validated}`);
 }
 
 // ============================================================
@@ -61,8 +62,8 @@ console.log(adminMetadata.permissions.length); // Number of permissions
 // Get all roles with metadata
 const allRoles = getAllRolesMetadata();
 allRoles.forEach((role) => {
-  console.log(`${role.name}: ${role.description}`);
-  console.log(`  Permissions: ${role.permissions.length}`);
+console.log(`${role.name}: ${role.description}`);
+console.log(`  Permissions: ${role.permissions.length}`);
 });
 
 // ============================================================
@@ -88,7 +89,7 @@ console.log(`Total permissions: ${allPermissions.length}`);
 
 // Check if user has permission from any of their roles
 const hasPermission = (permission: Permission): boolean => {
-  return allPermissions.includes(permission);
+return allPermissions.includes(permission);
 };
 
 console.log(hasPermission("testing.update")); // true (from lab_technician)
@@ -99,27 +100,27 @@ console.log(hasPermission("cart.create")); // true (from user)
 // ============================================================
 
 // React component example (pseudo-code)
-/*
+/\*
 function AdminPanel() {
-  const { user } = useAuth();
-  const userRoles = user.roles as Role[];
+const { user } = useAuth();
+const userRoles = user.roles as Role[];
 
-  // Check if user has admin role
-  const isAdmin = userRoles.includes("admin") || userRoles.includes("super_admin");
+// Check if user has admin role
+const isAdmin = userRoles.includes("admin") || userRoles.includes("super_admin");
 
-  if (!isAdmin) {
-    return <UnauthorizedPage />;
-  }
-
-  return (
-    <div>
-      <h1>Admin Panel</h1>
-      {userRoles.includes("super_admin") && <SuperAdminSection />}
-      {hasRolePermission(userRoles, "users.create") && <CreateUserButton />}
-    </div>
-  );
+if (!isAdmin) {
+return <UnauthorizedPage />;
 }
-*/
+
+return (
+<div>
+<h1>Admin Panel</h1>
+{userRoles.includes("super_admin") && <SuperAdminSection />}
+{hasRolePermission(userRoles, "users.create") && <CreateUserButton />}
+</div>
+);
+}
+\*/
 
 // ============================================================
 // 7. BACKEND ROLE CHECKING
@@ -127,18 +128,18 @@ function AdminPanel() {
 
 // Middleware for role-based access control
 function requireRole(allowedRoles: Role[]) {
-  return (userRoles: Role[]): boolean => {
-    return allowedRoles.some((role) => userRoles.includes(role));
-  };
+return (userRoles: Role[]): boolean => {
+return allowedRoles.some((role) => userRoles.includes(role));
+};
 }
 
 // Usage in API routes
 const userRolesExample: Role[] = ["lab_manager"];
 
 const canAccessLabManagement = requireRole([
-  "lab_manager",
-  "admin",
-  "super_admin",
+"lab_manager",
+"admin",
+"super_admin",
 ])(userRolesExample);
 console.log(canAccessLabManagement); // true
 
@@ -151,18 +152,18 @@ console.log(canAccessSuperAdmin); // false
 
 // Define role hierarchy (higher number = more privileged)
 const ROLE_HIERARCHY: Record<Role, number> = {
-  viewer: 1,
-  employee: 2,
-  user: 3,
-  lab_technician: 4,
-  lab_manager: 5,
-  admin: 6,
-  super_admin: 7,
+viewer: 1,
+employee: 2,
+user: 3,
+lab_technician: 4,
+lab_manager: 5,
+admin: 6,
+super_admin: 7,
 };
 
 function hasHigherRole(userRoles: Role[], requiredRole: Role): boolean {
-  const requiredLevel = ROLE_HIERARCHY[requiredRole];
-  return userRoles.some((role) => ROLE_HIERARCHY[role] >= requiredLevel);
+const requiredLevel = ROLE_HIERARCHY[requiredRole];
+return userRoles.some((role) => ROLE_HIERARCHY[role] >= requiredLevel);
 }
 
 // Usage
@@ -175,15 +176,15 @@ console.log(hasHigherRole(exampleRoles, "admin")); // false (lab_manager < admin
 // ============================================================
 
 function RoleSelector() {
-  return (
-    <>
-      {ROLES.map((role) => (
-        <option key={role} value={role}>
-          {ROLE_DESCRIPTIONS[role]}
-        </option>
-      ))}
-    </>
-  );
+return (
+<>
+{ROLES.map((role) => (
+<option key={role} value={role}>
+{ROLE_DESCRIPTIONS[role]}
+</option>
+))}
+</>
+);
 }
 
 // ============================================================
@@ -191,24 +192,24 @@ function RoleSelector() {
 // ============================================================
 
 function displayRolePermissions(role: Role) {
-  const permissions = ROLE_PERMISSIONS[role];
-  const grouped: Record<string, string[]> = {};
+const permissions = ROLE_PERMISSIONS[role];
+const grouped: Record<string, string[]> = {};
 
-  // Group by resource
-  permissions.forEach((perm) => {
-    const [resource, action] = perm.split(".");
-    if (!grouped[resource]) {
-      grouped[resource] = [];
-    }
-    grouped[resource].push(action);
-  });
+// Group by resource
+permissions.forEach((perm) => {
+const [resource, action] = perm.split(".");
+if (!grouped[resource]) {
+grouped[resource] = [];
+}
+grouped[resource].push(action);
+});
 
-  console.log(`\n${role} (${permissions.length} permissions):`);
-  console.log(`Description: ${ROLE_DESCRIPTIONS[role]}\n`);
+console.log(`\n${role} (${permissions.length} permissions):`);
+console.log(`Description: ${ROLE_DESCRIPTIONS[role]}\n`);
 
-  Object.entries(grouped).forEach(([resource, actions]) => {
-    console.log(`  ${resource}: ${actions.join(", ")}`);
-  });
+Object.entries(grouped).forEach(([resource, actions]) => {
+console.log(`  ${resource}: ${actions.join(", ")}`);
+});
 }
 
 // Display all roles
@@ -219,24 +220,24 @@ ROLES.forEach((role) => displayRolePermissions(role));
 // ============================================================
 
 interface UserRoleAssignment {
-  userId: string;
-  roles: Role[];
+userId: string;
+roles: Role[];
 }
 
 function assignRolesToUser(userId: string, roles: Role[]): UserRoleAssignment {
-  // Validate all roles
-  const validRoles = roles.filter((role) => {
-    if (!isValidRole(role)) {
-      console.warn(`Invalid role '${role}' skipped for user ${userId}`);
-      return false;
-    }
-    return true;
-  });
+// Validate all roles
+const validRoles = roles.filter((role) => {
+if (!isValidRole(role)) {
+console.warn(`Invalid role '${role}' skipped for user ${userId}`);
+return false;
+}
+return true;
+});
 
-  return {
-    userId,
-    roles: validRoles,
-  };
+return {
+userId,
+roles: validRoles,
+};
 }
 
 // Usage
@@ -248,17 +249,17 @@ console.log(assignment);
 // ============================================================
 
 const FEATURE_FLAGS: Record<string, Role[]> = {
-  testing_module: ["lab_technician", "lab_manager", "admin", "super_admin"],
-  employee_management: ["lab_manager", "admin", "super_admin"],
-  system_settings: ["admin", "super_admin"],
-  audit_logs: ["super_admin"],
+testing_module: ["lab_technician", "lab_manager", "admin", "super_admin"],
+employee_management: ["lab_manager", "admin", "super_admin"],
+system_settings: ["admin", "super_admin"],
+audit_logs: ["super_admin"],
 };
 
 function hasFeatureAccess(userRoles: Role[], feature: string): boolean {
-  const allowedRoles = FEATURE_FLAGS[feature];
-  if (!allowedRoles) return false;
+const allowedRoles = FEATURE_FLAGS[feature];
+if (!allowedRoles) return false;
 
-  return userRoles.some((role) => allowedRoles.includes(role));
+return userRoles.some((role) => allowedRoles.includes(role));
 }
 
 // Usage
@@ -272,26 +273,26 @@ console.log(hasFeatureAccess(technicianRoles, "system_settings")); // false
 
 // Helper to migrate old role names to new ones
 const ROLE_MIGRATION_MAP: Record<string, Role> = {
-  technician: "lab_technician",
-  manager: "lab_manager",
-  regular_user: "user",
+technician: "lab_technician",
+manager: "lab_manager",
+regular_user: "user",
 };
 
 function migrateRole(oldRole: string): Role | null {
-  // Check if it's already a valid role
-  if (isValidRole(oldRole)) {
-    return oldRole;
-  }
+// Check if it's already a valid role
+if (isValidRole(oldRole)) {
+return oldRole;
+}
 
-  // Check migration map
-  const newRole = ROLE_MIGRATION_MAP[oldRole];
-  if (newRole) {
-    console.log(`Migrated role: ${oldRole} -> ${newRole}`);
-    return newRole;
-  }
+// Check migration map
+const newRole = ROLE_MIGRATION_MAP[oldRole];
+if (newRole) {
+console.log(`Migrated role: ${oldRole} -> ${newRole}`);
+return newRole;
+}
 
-  console.error(`Cannot migrate unknown role: ${oldRole}`);
-  return null;
+console.error(`Cannot migrate unknown role: ${oldRole}`);
+return null;
 }
 
 // ============================================================
@@ -299,17 +300,17 @@ function migrateRole(oldRole: string): Role | null {
 // ============================================================
 
 function compareRoles(role1: Role, role2: Role): number {
-  const level1 = ROLE_HIERARCHY[role1];
-  const level2 = ROLE_HIERARCHY[role2];
-  return level1 - level2;
+const level1 = ROLE_HIERARCHY[role1];
+const level2 = ROLE_HIERARCHY[role2];
+return level1 - level2;
 }
 
 function getHighestRole(roles: Role[]): Role | null {
-  if (roles.length === 0) return null;
+if (roles.length === 0) return null;
 
-  return roles.reduce((highest, current) => {
-    return compareRoles(current, highest) > 0 ? current : highest;
-  });
+return roles.reduce((highest, current) => {
+return compareRoles(current, highest) > 0 ? current : highest;
+});
 }
 
 // Usage
@@ -322,12 +323,12 @@ console.log(highestRole); // "lab_technician"
 // ============================================================
 
 export {
-  requireRole,
-  hasHigherRole,
-  hasFeatureAccess,
-  migrateRole,
-  compareRoles,
-  getHighestRole,
-  ROLE_HIERARCHY,
-  FEATURE_FLAGS,
+requireRole,
+hasHigherRole,
+hasFeatureAccess,
+migrateRole,
+compareRoles,
+getHighestRole,
+ROLE_HIERARCHY,
+FEATURE_FLAGS,
 };

@@ -104,12 +104,15 @@ export function DataTableFilterMenu<TData>({
     [inputValue, selectedColumn],
   );
 
-  const filters = (table.options.meta?.filters ?? []) as ExtendedColumnFilter<TData>[];
+  const filters = (table.options.meta?.filters ??
+    []) as ExtendedColumnFilter<TData>[];
   const metaSetFilters = table.options.meta?.setFilters as
     | ((
         value:
           | ExtendedColumnFilter<TData>[]
-          | ((prev: ExtendedColumnFilter<TData>[]) => ExtendedColumnFilter<TData>[])
+          | ((
+              prev: ExtendedColumnFilter<TData>[],
+            ) => ExtendedColumnFilter<TData>[])
           | null,
       ) => void)
     | undefined;
@@ -118,7 +121,9 @@ export function DataTableFilterMenu<TData>({
     (
       value:
         | ExtendedColumnFilter<TData>[]
-        | ((prev: ExtendedColumnFilter<TData>[]) => ExtendedColumnFilter<TData>[])
+        | ((
+            prev: ExtendedColumnFilter<TData>[],
+          ) => ExtendedColumnFilter<TData>[])
         | null,
     ) => {
       metaSetFilters?.(value);

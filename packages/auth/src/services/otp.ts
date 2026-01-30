@@ -34,14 +34,14 @@ export class OTPService {
 
         const code = OTPService.generateOTP();
         const expiresAt = new Date(
-          Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000
+          Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000,
         ).toISOString();
 
         yield* Effect.tryPromise({
           try: () =>
             db.transaction(async (tx) => {
               await Effect.runPromise(
-                otpQueries.invalidateOTPsByEmail(email, tx)
+                otpQueries.invalidateOTPsByEmail(email, tx),
               );
 
               await Effect.runPromise(
@@ -54,8 +54,8 @@ export class OTPService {
                     attempts: 0,
                     verified: false,
                   },
-                  tx
-                )
+                  tx,
+                ),
               );
             }),
           catch: (error) => {
@@ -65,7 +65,7 @@ export class OTPService {
               {
                 email,
                 error,
-              }
+              },
             );
             return new OTPError({
               status: false,
@@ -99,7 +99,7 @@ export class OTPService {
           success: true,
           message: "OTP berhasil dibuat dan dikirim ke email.",
         };
-      })
+      }),
     );
   }
 
@@ -110,7 +110,7 @@ export class OTPService {
       ipAddress?: string;
       os?: string;
       version?: string;
-    }
+    },
   ) {
     return Effect.runPromise(
       Effect.gen(function* () {
@@ -123,7 +123,7 @@ export class OTPService {
             new OTPError({
               status: false,
               message: "OTP tidak ditemukan atau sudah kedaluwarsa.",
-            })
+            }),
           );
         }
 
@@ -134,7 +134,7 @@ export class OTPService {
             new OTPError({
               status: false,
               message: "Jumlah percobaan OTP telah melebihi batas.",
-            })
+            }),
           );
         }
 
@@ -144,7 +144,7 @@ export class OTPService {
             new OTPError({
               status: false,
               message: "Kode OTP salah.",
-            })
+            }),
           );
         }
 
@@ -154,7 +154,7 @@ export class OTPService {
               await Effect.runPromise(otpQueries.markOTPAsVerified(otp.id, tx));
 
               await Effect.runPromise(
-                usersQueries.markUserEmailAsVerified(otp.userId, tx)
+                usersQueries.markUserEmailAsVerified(otp.userId, tx),
               );
             }),
           catch: (error) => {
@@ -165,7 +165,7 @@ export class OTPService {
                 otpId: otp.id,
                 userId: otp.userId,
                 error,
-              }
+              },
             );
             return new OTPError({
               status: false,
@@ -175,7 +175,7 @@ export class OTPService {
         });
 
         const user = yield* permissionQueries.getUserWithPermissions(
-          otp.userId
+          otp.userId,
         );
 
         if (!user) {
@@ -183,7 +183,7 @@ export class OTPService {
             new OTPError({
               status: false,
               message: "Pengguna tidak ditemukan.",
-            })
+            }),
           );
         }
 
@@ -220,14 +220,10 @@ export class OTPService {
               type: "refresh",
             }),
           catch: (error) => {
-            logError(
-              "OTPService.verifyOTP",
-              "Failed to create refresh token",
-              {
-                userId: user.id,
-                error,
-              }
-            );
+            logError("OTPService.verifyOTP", "Failed to create refresh token", {
+              userId: user.id,
+              error,
+            });
             return new OTPError({
               status: false,
               message: "Gagal membuat refresh token.",
@@ -252,7 +248,7 @@ export class OTPService {
 
         logInfo(
           "OTPService.verifyOTP",
-          `OTP verified and tokens generated for ${email}`
+          `OTP verified and tokens generated for ${email}`,
         );
 
         return {
@@ -262,7 +258,7 @@ export class OTPService {
           accessToken,
           refreshToken: refreshTokenJWT,
         };
-      })
+      }),
     );
   }
 
@@ -285,20 +281,20 @@ export class OTPService {
 
           if (timeSinceLastOTP < MIN_RESEND_INTERVAL) {
             const waitTime = Math.ceil(
-              (MIN_RESEND_INTERVAL - timeSinceLastOTP) / 1000
+              (MIN_RESEND_INTERVAL - timeSinceLastOTP) / 1000,
             );
             return yield* Effect.fail(
               new OTPError({
                 status: false,
                 message: `Silakan tunggu ${waitTime} detik sebelum mengirim ulang OTP.`,
-              })
+              }),
             );
           }
         }
 
         const code = OTPService.generateOTP();
         const expiresAt = new Date(
-          Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000
+          Date.now() + OTPService.OTP_EXPIRY_MINUTES * 60 * 1000,
         ).toISOString();
 
         yield* Effect.tryPromise({
@@ -316,8 +312,8 @@ export class OTPService {
                     attempts: 0,
                     verified: false,
                   },
-                  tx
-                )
+                  tx,
+                ),
               );
             }),
           catch: (error) => {
@@ -327,7 +323,7 @@ export class OTPService {
               {
                 email,
                 error,
-              }
+              },
             );
             return new OTPError({
               status: false,
@@ -359,7 +355,7 @@ export class OTPService {
           success: true,
           message: "Kode OTP baru berhasil dikirim.",
         };
-      })
+      }),
     );
   }
 

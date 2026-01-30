@@ -30,13 +30,20 @@ interface SearchParams {
   page: number;
   perPage: number;
   sort: { id: string; desc: boolean }[];
-  filters?: { id: string; value: string | string[]; variant: string; operator: string; filterId: string }[];
+  filters?: {
+    id: string;
+    value: string | string[];
+    variant: string;
+    operator: string;
+    filterId: string;
+  }[];
   joinOperator?: string;
   [key: string]: unknown;
 }
 
 interface UseDataTableRouterProps<TData, TSearch extends SearchParams>
-  extends Omit<
+  extends
+    Omit<
       TableOptions<TData>,
       | "state"
       | "pageCount"
@@ -210,7 +217,9 @@ export function useDataTableRouter<TData, TSearch extends SearchParams>(
     (
       value:
         | ExtendedColumnFilter<TData>[]
-        | ((prev: ExtendedColumnFilter<TData>[]) => ExtendedColumnFilter<TData>[])
+        | ((
+            prev: ExtendedColumnFilter<TData>[],
+          ) => ExtendedColumnFilter<TData>[])
         | null,
     ) => {
       if (typeof value === "function") {

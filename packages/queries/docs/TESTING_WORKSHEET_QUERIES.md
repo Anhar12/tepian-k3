@@ -23,14 +23,16 @@ This document describes the implementation of testing and worksheet query functi
 Get a testing record by ID with all relations.
 
 **Returns:**
+
 - Testing with order, company, user, items, parameters, and locations
 
 **Example:**
+
 ```typescript
 import testingQueries from "@tepian-k3/queries/testing.queries";
 
 const testing = await Effect.runPromise(
-  testingQueries.getTestingById(testingId)
+  testingQueries.getTestingById(testingId),
 );
 ```
 
@@ -41,11 +43,13 @@ const testing = await Effect.runPromise(
 Get all testings with pagination and optional search.
 
 **Parameters:**
+
 - `page` - Page number (default: 1)
 - `limit` - Items per page (default: 10)
 - `search` - Optional search by testing number
 
 **Returns:**
+
 ```typescript
 {
   data: Testing[];
@@ -59,9 +63,10 @@ Get all testings with pagination and optional search.
 ```
 
 **Example:**
+
 ```typescript
 const result = await Effect.runPromise(
-  testingQueries.getAllTestings(1, 10, "TEST-2024")
+  testingQueries.getAllTestings(1, 10, "TEST-2024"),
 );
 ```
 
@@ -72,6 +77,7 @@ const result = await Effect.runPromise(
 **Main function** - Create testing record from an order with full transaction handling.
 
 **Transaction Steps:**
+
 1. Fetch order with items and validate:
    - Order must exist
    - Order must be approved (`approvalStatus = 'approved'`)
@@ -87,27 +93,31 @@ const result = await Effect.runPromise(
 8. Log audit (deferred, non-blocking)
 
 **Validations:**
+
 - Order exists and is in valid state
 - Order has items
 - Testing doesn't already exist for the order
 
 **Error Handling:**
+
 - Returns `TRPCError` with appropriate code and message
 - All operations are wrapped in a database transaction
 - Transaction rolls back if any step fails
 
 **Example:**
+
 ```typescript
 import testingQueries from "@tepian-k3/queries/testing.queries";
 
 const testing = await Effect.runPromise(
-  testingQueries.createTestingFromOrder(orderId)
+  testingQueries.createTestingFromOrder(orderId),
 );
 
 // Returns the created testing record
 ```
 
 **Transaction Flow:**
+
 ```typescript
 db.transaction(async (tx) => {
   // 1. Validate order
@@ -141,20 +151,22 @@ db.transaction(async (tx) => {
 Update testing status with optional note.
 
 **Parameters:**
+
 - `testingId` - Testing ID
 - `status` - New status (one of: `start_testing`, `sample_submission`, `sample_analysis`, `result_entry`, `completed`)
 - `userId` - User making the update
 - `note` - Optional note
 
 **Example:**
+
 ```typescript
 const updated = await Effect.runPromise(
   testingQueries.updateTestingStatus(
     testingId,
     "sample_analysis",
     userId,
-    "Samples received"
-  )
+    "Samples received",
+  ),
 );
 ```
 
@@ -165,12 +177,14 @@ const updated = await Effect.runPromise(
 Update testing item result value (used within transactions).
 
 **Parameters:**
+
 - `tx` - Transaction object
 - `itemId` - Testing item ID
 - `result` - Result value as string
 - `note` - Optional note
 
 **Example:**
+
 ```typescript
 await db.transaction(async (tx) => {
   await Effect.runPromise(
@@ -178,8 +192,8 @@ await db.transaction(async (tx) => {
       tx,
       itemId,
       "95.5",
-      "Within acceptable range"
-    )
+      "Within acceptable range",
+    ),
   );
 });
 ```
@@ -199,14 +213,16 @@ await db.transaction(async (tx) => {
 Get worksheet by ID with all relations.
 
 **Returns:**
+
 - Worksheet with testing, order, items, tools, assignments, notes, supervisors
 
 **Example:**
+
 ```typescript
 import worksheetQueries from "@tepian-k3/queries/worksheet.queries";
 
 const worksheet = await Effect.runPromise(
-  worksheetQueries.getWorksheetById(worksheetId)
+  worksheetQueries.getWorksheetById(worksheetId),
 );
 ```
 
@@ -217,11 +233,13 @@ const worksheet = await Effect.runPromise(
 Get all worksheets with pagination and optional status filter.
 
 **Parameters:**
+
 - `page` - Page number (default: 1)
 - `limit` - Items per page (default: 10)
 - `status` - Optional status filter (one of: `draft`, `in_progress`, `completed`, `approved`, `rejected`)
 
 **Returns:**
+
 ```typescript
 {
   data: Worksheet[];
@@ -241,12 +259,14 @@ Get all worksheets with pagination and optional status filter.
 Get all worksheets for a specific testing.
 
 **Returns:**
+
 - Array of worksheets with items and supervisors
 
 **Example:**
+
 ```typescript
 const worksheets = await Effect.runPromise(
-  worksheetQueries.getWorksheetsByTestingId(testingId)
+  worksheetQueries.getWorksheetsByTestingId(testingId),
 );
 ```
 
@@ -257,12 +277,14 @@ const worksheets = await Effect.runPromise(
 **Main function** - Create worksheet from testing with transaction handling.
 
 **Transaction Steps:**
+
 1. Fetch testing with items and validate
 2. Create worksheet record
 3. Create worksheet items from testing items
 4. Log audit (deferred, non-blocking)
 
 **Parameters:**
+
 - `testingId` - Testing ID to create worksheet from
 - `userId` - User creating the worksheet
 - `startDate` - Start date (ISO string)
@@ -270,10 +292,12 @@ const worksheets = await Effect.runPromise(
 - `accompanyingSupervisorId` - Optional accompanying supervisor employee ID
 
 **Validations:**
+
 - Testing must exist
 - Testing must have items
 
 **Example:**
+
 ```typescript
 const worksheet = await Effect.runPromise(
   worksheetQueries.createWorksheetFromTesting(
@@ -281,12 +305,13 @@ const worksheet = await Effect.runPromise(
     userId,
     new Date().toISOString(),
     mainSupervisorId,
-    accompanyingSupervisorId
-  )
+    accompanyingSupervisorId,
+  ),
 );
 ```
 
 **Transaction Flow:**
+
 ```typescript
 db.transaction(async (tx) => {
   // 1. Validate testing
@@ -309,6 +334,7 @@ db.transaction(async (tx) => {
 Update worksheet status with optional end date and result.
 
 **Parameters:**
+
 - `worksheetId` - Worksheet ID
 - `status` - New status
 - `userId` - User making the update
@@ -318,6 +344,7 @@ Update worksheet status with optional end date and result.
 **Logs audit automatically.**
 
 **Example:**
+
 ```typescript
 const updated = await Effect.runPromise(
   worksheetQueries.updateWorksheetStatus(
@@ -325,8 +352,8 @@ const updated = await Effect.runPromise(
     "completed",
     userId,
     new Date().toISOString(),
-    "All tests completed successfully"
-  )
+    "All tests completed successfully",
+  ),
 );
 ```
 
@@ -337,6 +364,7 @@ const updated = await Effect.runPromise(
 Update worksheet item value (used within transactions).
 
 **Parameters:**
+
 - `tx` - Transaction object
 - `itemId` - Worksheet item ID
 - `value` - Value as number
@@ -344,6 +372,7 @@ Update worksheet item value (used within transactions).
 - `isReady` - Optional ready status (boolean)
 
 **Example:**
+
 ```typescript
 await db.transaction(async (tx) => {
   await Effect.runPromise(
@@ -352,8 +381,8 @@ await db.transaction(async (tx) => {
       itemId,
       95.5,
       "Test completed",
-      true
-    )
+      true,
+    ),
   );
 });
 ```
@@ -365,19 +394,21 @@ await db.transaction(async (tx) => {
 Assign tools to worksheet (replaces existing tools).
 
 **Parameters:**
+
 - `tx` - Transaction object
 - `worksheetId` - Worksheet ID
 - `toolIds` - Array of tool IDs
 
 **Example:**
+
 ```typescript
 await db.transaction(async (tx) => {
   await Effect.runPromise(
-    worksheetQueries.assignToolsToWorksheet(
-      tx,
-      worksheetId,
-      [toolId1, toolId2, toolId3]
-    )
+    worksheetQueries.assignToolsToWorksheet(tx, worksheetId, [
+      toolId1,
+      toolId2,
+      toolId3,
+    ]),
   );
 });
 ```
@@ -389,12 +420,14 @@ await db.transaction(async (tx) => {
 Assign employees to worksheet (replaces existing assignments).
 
 **Parameters:**
+
 - `tx` - Transaction object
 - `worksheetId` - Worksheet ID
 - `employeeIds` - Array of employee IDs
 - `assignedBy` - User ID who is assigning
 
 **Example:**
+
 ```typescript
 await db.transaction(async (tx) => {
   await Effect.runPromise(
@@ -402,8 +435,8 @@ await db.transaction(async (tx) => {
       tx,
       worksheetId,
       [employeeId1, employeeId2],
-      userId
-    )
+      userId,
+    ),
   );
 });
 ```
@@ -415,6 +448,7 @@ await db.transaction(async (tx) => {
 Add a note to worksheet (used within transactions).
 
 **Parameters:**
+
 - `tx` - Transaction object
 - `worksheetId` - Worksheet ID
 - `note` - Note text
@@ -422,6 +456,7 @@ Add a note to worksheet (used within transactions).
 - `severity` - Severity level (`info`, `warning`, `error`)
 
 **Example:**
+
 ```typescript
 await db.transaction(async (tx) => {
   await Effect.runPromise(
@@ -430,8 +465,8 @@ await db.transaction(async (tx) => {
       worksheetId,
       "Equipment calibration needed",
       userId,
-      "warning"
-    )
+      "warning",
+    ),
   );
 });
 ```
@@ -443,6 +478,7 @@ await db.transaction(async (tx) => {
 Update worksheet supervisors.
 
 **Parameters:**
+
 - `worksheetId` - Worksheet ID
 - `mainSupervisorId` - Optional main supervisor employee ID
 - `accompanyingSupervisorId` - Optional accompanying supervisor employee ID
@@ -451,14 +487,15 @@ Update worksheet supervisors.
 **Logs audit if userId is provided.**
 
 **Example:**
+
 ```typescript
 const updated = await Effect.runPromise(
   worksheetQueries.updateWorksheetSupervisors(
     worksheetId,
     newMainSupervisorId,
     newAccompanyingSupervisorId,
-    userId
-  )
+    userId,
+  ),
 );
 ```
 
@@ -562,18 +599,18 @@ await db.transaction(async (tx) => {
   // Update worksheet items
   for (const item of items) {
     await Effect.runPromise(
-      worksheetQueries.updateWorksheetItemValue(tx, item.id, item.value)
+      worksheetQueries.updateWorksheetItemValue(tx, item.id, item.value),
     );
   }
 
   // Assign tools
   await Effect.runPromise(
-    worksheetQueries.assignToolsToWorksheet(tx, worksheetId, toolIds)
+    worksheetQueries.assignToolsToWorksheet(tx, worksheetId, toolIds),
   );
 
   // Add notes
   await Effect.runPromise(
-    worksheetQueries.addWorksheetNote(tx, worksheetId, note, userId, "info")
+    worksheetQueries.addWorksheetNote(tx, worksheetId, note, userId, "info"),
   );
 });
 ```
@@ -590,6 +627,7 @@ All queries follow these error handling patterns:
 4. **Transaction Rollback**: Automatic rollback on any error in transaction
 
 **Example:**
+
 ```typescript
 try: async () => {
   // Operations
@@ -703,16 +741,12 @@ draft → in_progress → completed → approved
 ```typescript
 // 1. Create testing from order
 const testing = await Effect.runPromise(
-  testingQueries.createTestingFromOrder(orderId)
+  testingQueries.createTestingFromOrder(orderId),
 );
 
 // 2. Update testing status as it progresses
 await Effect.runPromise(
-  testingQueries.updateTestingStatus(
-    testing.id,
-    "sample_submission",
-    userId
-  )
+  testingQueries.updateTestingStatus(testing.id, "sample_submission", userId),
 );
 
 // 3. Create worksheet from testing
@@ -721,8 +755,8 @@ const worksheet = await Effect.runPromise(
     testing.id,
     userId,
     new Date().toISOString(),
-    mainSupervisorId
-  )
+    mainSupervisorId,
+  ),
 );
 
 // 4. Assign employees and tools to worksheet
@@ -732,16 +766,15 @@ await db.transaction(async (tx) => {
       tx,
       worksheet.id,
       [employeeId1, employeeId2],
-      userId
-    )
+      userId,
+    ),
   );
 
   await Effect.runPromise(
-    worksheetQueries.assignToolsToWorksheet(
-      tx,
-      worksheet.id,
-      [toolId1, toolId2]
-    )
+    worksheetQueries.assignToolsToWorksheet(tx, worksheet.id, [
+      toolId1,
+      toolId2,
+    ]),
   );
 });
 
@@ -754,8 +787,8 @@ await db.transaction(async (tx) => {
         item.id,
         item.value,
         item.note,
-        true
-      )
+        true,
+      ),
     );
   }
 });
@@ -767,8 +800,8 @@ await Effect.runPromise(
     "completed",
     userId,
     new Date().toISOString(),
-    "All tests completed successfully"
-  )
+    "All tests completed successfully",
+  ),
 );
 ```
 

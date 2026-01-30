@@ -86,24 +86,21 @@ export function createCrudActionCell<
 
     const queryOptions = getQueryOptions(params);
 
-    const deleteMut = useOptimisticMutation(
-      deleteMutation.mutationOptions(),
-      {
-        queryOptions,
-        operation: {
-          type: "soft-delete",
-          getId: (input) => input.id,
-        },
-        onSuccess: () => {
-          globalSuccessToast(`Berhasil menghapus ${resourceName}`);
-        },
-        onError: (error) => {
-          globalErrorToast(
-            `Gagal menghapus ${resourceName}. ${error.message ?? "Silahkan coba lagi."}`,
-          );
-        },
+    const deleteMut = useOptimisticMutation(deleteMutation.mutationOptions(), {
+      queryOptions,
+      operation: {
+        type: "soft-delete",
+        getId: (input) => input.id,
       },
-    );
+      onSuccess: () => {
+        globalSuccessToast(`Berhasil menghapus ${resourceName}`);
+      },
+      onError: (error) => {
+        globalErrorToast(
+          `Gagal menghapus ${resourceName}. ${error.message ?? "Silahkan coba lagi."}`,
+        );
+      },
+    });
 
     const restoreMut = useOptimisticMutation(
       restoreMutation.mutationOptions(),

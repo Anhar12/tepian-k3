@@ -47,15 +47,11 @@ export const SignatureBlock: React.FC<SignatureBlockProps> = ({
         </Text>
       ))}
 
-      <Text
-        style={tw(`${fontSize} text-center`, showUnderline && "underline")}
-      >
+      <Text style={tw(`${fontSize} text-center`, showUnderline && "underline")}>
         {name}
       </Text>
 
-      {nip && (
-        <Text style={tw(`${fontSize} text-center`)}>NIP. {nip}</Text>
-      )}
+      {nip && <Text style={tw(`${fontSize} text-center`)}>NIP. {nip}</Text>}
     </View>
   );
 };

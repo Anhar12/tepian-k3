@@ -56,8 +56,8 @@ const kbliQueries = {
       },
     }).pipe(
       Effect.flatMap((kbli) =>
-        kbli ? Effect.succeed(kbli) : Effect.succeed(null)
-      )
+        kbli ? Effect.succeed(kbli) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -74,7 +74,7 @@ const kbliQueries = {
           {
             id,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -83,8 +83,8 @@ const kbliQueries = {
       },
     }).pipe(
       Effect.flatMap((kbli) =>
-        kbli ? Effect.succeed(kbli) : Effect.succeed(null)
-      )
+        kbli ? Effect.succeed(kbli) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -106,13 +106,13 @@ const kbliQueries = {
       },
     }).pipe(
       Effect.flatMap((kbli) =>
-        kbli ? Effect.succeed(kbli) : Effect.succeed(null)
-      )
+        kbli ? Effect.succeed(kbli) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginatedKblis(
-    input: z.infer<typeof districSchema.getAllKBLISchema>
+    input: z.infer<typeof districSchema.getAllKBLISchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -135,7 +135,7 @@ const kbliQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -145,20 +145,20 @@ const kbliQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(kblis.deletedAt)
-              : isNull(kblis.deletedAt)
+              : isNull(kblis.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(kblis[item.id]) : asc(kblis[item.id])
+              item.desc ? desc(kblis[item.id]) : asc(kblis[item.id]),
             )
           : [desc(kblis.createdAt)];
 
@@ -188,7 +188,7 @@ const kbliQueries = {
           logError(
             "kbliQueries.getOffsetPaginatedKblis",
             "Error fetching paginated kblis",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

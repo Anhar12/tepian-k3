@@ -60,7 +60,9 @@ const useDialogs = <T extends Record<string, z.ZodType | null>>(schemas: T) => {
       if ("shape" in schema && schema.shape) {
         const defaults: Record<string, unknown> = {};
         Object.keys(schema.shape).forEach((key) => {
-          const fieldSchema = (schema.shape as Record<string, z.ZodTypeAny>)[key];
+          const fieldSchema = (schema.shape as Record<string, z.ZodTypeAny>)[
+            key
+          ];
           if (!fieldSchema) {
             defaults[key] = undefined;
             return;

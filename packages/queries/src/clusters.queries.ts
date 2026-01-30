@@ -32,7 +32,7 @@ const clustersQueries = {
           "Error fetching all clusters",
           {
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -55,7 +55,7 @@ const clustersQueries = {
           {
             id,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -64,8 +64,8 @@ const clustersQueries = {
       },
     }).pipe(
       Effect.flatMap((cluster) =>
-        cluster ? Effect.succeed(cluster) : Effect.succeed(null)
-      )
+        cluster ? Effect.succeed(cluster) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -82,7 +82,7 @@ const clustersQueries = {
           {
             id,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -91,8 +91,8 @@ const clustersQueries = {
       },
     }).pipe(
       Effect.flatMap((cluster) =>
-        cluster ? Effect.succeed(cluster) : Effect.succeed(null)
-      )
+        cluster ? Effect.succeed(cluster) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -109,7 +109,7 @@ const clustersQueries = {
           {
             name,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -118,13 +118,13 @@ const clustersQueries = {
       },
     }).pipe(
       Effect.flatMap((cluster) =>
-        cluster ? Effect.succeed(cluster) : Effect.succeed(null)
-      )
+        cluster ? Effect.succeed(cluster) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginatedClusters(
-    input: z.infer<typeof clusterSchema.getAllClustersSchema>
+    input: z.infer<typeof clusterSchema.getAllClustersSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -147,7 +147,7 @@ const clustersQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -157,20 +157,20 @@ const clustersQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(clusters.deletedAt)
-              : isNull(clusters.deletedAt)
+              : isNull(clusters.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(clusters[item.id]) : asc(clusters[item.id])
+              item.desc ? desc(clusters[item.id]) : asc(clusters[item.id]),
             )
           : [desc(clusters.createdAt)];
 
@@ -203,7 +203,7 @@ const clustersQueries = {
             {
               input,
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -231,7 +231,7 @@ const clustersQueries = {
           new TRPCError({
             code: "CONFLICT",
             message: "Cluster dengan nama tersebut sudah ada",
-          })
+          }),
         );
       }
 
@@ -241,7 +241,7 @@ const clustersQueries = {
           logError(
             "clustersQueries.createCluster",
             "Error creating new cluster",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -255,7 +255,7 @@ const clustersQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat cluster baru",
-          })
+          }),
         );
       }
 
@@ -272,7 +272,7 @@ const clustersQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Cluster tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -283,7 +283,7 @@ const clustersQueries = {
             new TRPCError({
               code: "CONFLICT",
               message: "Cluster dengan nama tersebut sudah ada",
-            })
+            }),
           );
         }
       }
@@ -316,7 +316,7 @@ const clustersQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui cluster",
-          })
+          }),
         );
       }
 
@@ -333,7 +333,7 @@ const clustersQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Cluster tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -362,7 +362,7 @@ const clustersQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus cluster",
-          })
+          }),
         );
       }
 
@@ -379,7 +379,7 @@ const clustersQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Cluster yang dihapus tidak ditemukan",
-          })
+          }),
         );
       }
 
@@ -397,7 +397,7 @@ const clustersQueries = {
             {
               error,
               id,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -412,7 +412,7 @@ const clustersQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan cluster",
-          })
+          }),
         );
       }
 

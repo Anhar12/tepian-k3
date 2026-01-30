@@ -45,7 +45,14 @@ export const DocumentHeader: React.FC<DocumentHeaderProps> = ({
   };
 
   return (
-    <View style={tw("flex-col justify-between", getAlignClass(align), spacing, className)}>
+    <View
+      style={tw(
+        "flex-col justify-between",
+        getAlignClass(align),
+        spacing,
+        className,
+      )}
+    >
       {fields.map((field, index) => (
         <View
           key={index}

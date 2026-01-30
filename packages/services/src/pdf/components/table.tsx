@@ -56,7 +56,10 @@ export const Table = <T extends Record<string, unknown>>({
   };
 
   // Helper function to get nested value from object using dot notation
-  const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+  const getNestedValue = (
+    obj: Record<string, unknown>,
+    path: string,
+  ): unknown => {
     return path.split(".").reduce<unknown>((current, key) => {
       if (current != null && typeof current === "object" && key in current) {
         return (current as Record<string, unknown>)[key];

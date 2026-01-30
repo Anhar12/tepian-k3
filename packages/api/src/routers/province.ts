@@ -8,14 +8,14 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const provinceRouter = createTRPCRouter({
   getAllProvinces: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(provinceQueries.getAllProvinces())
+    async () => await runEffect(provinceQueries.getAllProvinces()),
   ),
 
   getPaginatedProvinces: withPermission("provinces.view")
     .input(provinceSchema.getAllProvincesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        provinceQueries.getOffsetPaginatedProvince(input)
+        provinceQueries.getOffsetPaginatedProvince(input),
       );
 
       return { data, pageCount };
@@ -25,11 +25,11 @@ export const provinceRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const province = await runEffect(
-        provinceQueries.getProvinceById(input.id)
+        provinceQueries.getProvinceById(input.id),
       );
 
       if (!province) {
@@ -46,35 +46,35 @@ export const provinceRouter = createTRPCRouter({
     .input(provinceSchema.createProvinceSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.createProvince(input))
+        await runEffect(provinceQueries.createProvince(input)),
     ),
 
   updateProvince: withPermission("provinces.update")
     .input(provinceSchema.updateProvinceSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.updateProvince(input))
+        await runEffect(provinceQueries.updateProvince(input)),
     ),
 
   deleteProvince: withPermission("provinces.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.deleteProvince(input.id))
+        await runEffect(provinceQueries.deleteProvince(input.id)),
     ),
 
   restoreProvince: withPermission("provinces.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(provinceQueries.restoreProvince(input.id))
+        await runEffect(provinceQueries.restoreProvince(input.id)),
     ),
 });

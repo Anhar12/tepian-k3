@@ -23,7 +23,7 @@ const otpQueries = {
         logError(
           "otpQueries.invalidateOTPsByEmail",
           "Failed to invalidate OTPs",
-          { email, error }
+          { email, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -57,7 +57,7 @@ const otpQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat kode OTP.",
-          })
+          }),
         );
       }
 
@@ -72,7 +72,7 @@ const otpQueries = {
           where: and(
             eq(otpCodes.email, email),
             eq(otpCodes.verified, false),
-            gte(otpCodes.expiresAt, new Date().toISOString())
+            gte(otpCodes.expiresAt, new Date().toISOString()),
           ),
         }),
       catch: (error) => {
@@ -103,7 +103,7 @@ const otpQueries = {
           {
             email,
             error,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -131,7 +131,7 @@ const otpQueries = {
               id,
               currentAttempt,
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -145,13 +145,13 @@ const otpQueries = {
         logError(
           "otpQueries.incrementOTPAttempts",
           "No result returned when incrementing OTP attempts",
-          { id, currentAttempt }
+          { id, currentAttempt },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menambah percobaan kode OTP.",
-          })
+          }),
         );
       }
 
@@ -173,7 +173,7 @@ const otpQueries = {
         logError(
           "otpQueries.markOTPAsVerified",
           "Failed to mark OTP as verified",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -198,7 +198,7 @@ const otpQueries = {
         logError(
           "otpQueries.deleteExpiredOTPs",
           "Failed to delete expired OTPs",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

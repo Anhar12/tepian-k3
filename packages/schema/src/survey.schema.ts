@@ -21,7 +21,7 @@ const getAllSurveyQuestionsSchema = z.object({
       z.object({
         id: z.enum(SORTABLE_SURVEY_QUESTION_FIELDS),
         desc: z.boolean(),
-      })
+      }),
     )
     .default([{ id: "order", desc: false }]),
   search: z.string().default(""),
@@ -56,7 +56,7 @@ const updateSurveyQuestionSchema = createUpdateSchema(surveyQuestions, {
     z
       .string()
       .min(5, "Pertanyaan minimal 5 karakter")
-      .max(500, "Pertanyaan maksimal 500 karakter")
+      .max(500, "Pertanyaan maksimal 500 karakter"),
   ),
   order: z.optional(z.number().int().min(0)),
   isActive: z.optional(z.boolean()),
@@ -67,7 +67,7 @@ const reorderSurveyQuestionsSchema = z.object({
     z.object({
       id: z.uuidv7(),
       order: z.number().int().min(0),
-    })
+    }),
   ),
 });
 

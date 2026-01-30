@@ -14,7 +14,9 @@ const limiter = rateLimiters.auth();
 const result = await limiter.consume(`login:${userId}`);
 
 if (!result.allowed) {
-  throw new Error(`Rate limit exceeded. Try again in ${Math.ceil(result.resetMs / 1000)}s`);
+  throw new Error(
+    `Rate limit exceeded. Try again in ${Math.ceil(result.resetMs / 1000)}s`,
+  );
 }
 ```
 
@@ -28,14 +30,14 @@ if (!result.allowed) {
 ## Available Presets
 
 ```typescript
-rateLimiters.auth()           // 5 attempts per 15 minutes
-rateLimiters.api()            // 1000 requests per hour
-rateLimiters.email()          // 10 emails per hour
-rateLimiters.otp()            // 3 attempts per 5 minutes
-rateLimiters.passwordReset()  // 3 attempts per hour
-rateLimiters.strict()         // 10 requests per minute
-rateLimiters.moderate()       // 30 requests per minute
-rateLimiters.lenient()        // 100 requests per minute
+rateLimiters.auth(); // 5 attempts per 15 minutes
+rateLimiters.api(); // 1000 requests per hour
+rateLimiters.email(); // 10 emails per hour
+rateLimiters.otp(); // 3 attempts per 5 minutes
+rateLimiters.passwordReset(); // 3 attempts per hour
+rateLimiters.strict(); // 10 requests per minute
+rateLimiters.moderate(); // 30 requests per minute
+rateLimiters.lenient(); // 100 requests per minute
 ```
 
 ## Custom Configuration

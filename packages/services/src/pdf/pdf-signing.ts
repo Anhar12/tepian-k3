@@ -52,7 +52,7 @@ export const generateQRCodeBuffer = (data: string, size = 200) =>
  */
 export const embedQRCodesInPDF = (
   pdfBuffer: Buffer,
-  qrCodes: Array<{ signature: SignatureData; position: QRCodePosition }>
+  qrCodes: Array<{ signature: SignatureData; position: QRCodePosition }>,
 ) =>
   Effect.gen(function* () {
     // Load the PDF document
@@ -83,7 +83,7 @@ export const embedQRCodesInPDF = (
       // Generate QR code as PNG buffer
       const qrCodeBuffer = yield* generateQRCodeBuffer(
         signature.verificationUrl,
-        Math.max(position.width, position.height)
+        Math.max(position.width, position.height),
       );
 
       // Embed QR code image in PDF
@@ -162,7 +162,7 @@ export const embedQRCodesInPDF = (
 export const embedSingleQRCodeInPDF = (
   pdfBuffer: Buffer,
   signature: SignatureData,
-  position: QRCodePosition
+  position: QRCodePosition,
 ) => embedQRCodesInPDF(pdfBuffer, [{ signature, position }]);
 
 /**
@@ -176,7 +176,7 @@ export const convertClientCoordinatesToPDFPoints = (
   clientWidth: number,
   clientHeight: number,
   pageNumber: number,
-  pdfBuffer: Buffer
+  pdfBuffer: Buffer,
 ) =>
   Effect.gen(function* () {
     const pdfDoc = yield* Effect.tryPromise({

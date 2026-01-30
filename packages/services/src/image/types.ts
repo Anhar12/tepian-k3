@@ -81,7 +81,10 @@ export interface ConversionResult {
 
 export class ImageConversionError extends Error {
   _tag = "ImageConversionError";
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown,
+  ) {
     super(message);
     this.name = "ImageConversionError";
   }

@@ -22,12 +22,12 @@ interface SurveyFormProps {
 export function SurveyForm({ order, onComplete }: SurveyFormProps) {
   // Fetch active questions
   const { data: questions, isLoading: questionsLoading } = useQuery(
-    trpc.survey.getActiveQuestions.queryOptions()
+    trpc.survey.getActiveQuestions.queryOptions(),
   );
 
   // Check if survey already submitted
   const { data: surveyStatus, isLoading: statusLoading } = useQuery(
-    trpc.survey.checkSurveyStatus.queryOptions({ orderId: order.id })
+    trpc.survey.checkSurveyStatus.queryOptions({ orderId: order.id }),
   );
 
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -38,14 +38,14 @@ export function SurveyForm({ order, onComplete }: SurveyFormProps) {
       onSuccess: async () => {
         globalSuccessToast("Terima kasih! Survey berhasil dikirim.");
         await queryClient.invalidateQueries(
-          trpc.survey.checkSurveyStatus.queryOptions({ orderId: order.id })
+          trpc.survey.checkSurveyStatus.queryOptions({ orderId: order.id }),
         );
         onComplete?.();
       },
       onError: (error) => {
         globalErrorToast("Gagal mengirim survey: " + error.message);
       },
-    })
+    }),
   );
 
   const handleRatingChange = (questionId: string, value: string) => {

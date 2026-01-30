@@ -9,14 +9,14 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 export const parameterCategoriesRouter = createTRPCRouter({
   getAllParameterCategories: withRateLimit(rateLimiters.moderate()).query(
     async () =>
-      await runEffect(parameterCategoriesQueries.getAllParameterCategories())
+      await runEffect(parameterCategoriesQueries.getAllParameterCategories()),
   ),
 
   getPaginatedParameterCategories: withPermission("parameter-categories.view")
     .input(parameterCategoriesSchema.getAllParameterCategoriesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        parameterCategoriesQueries.getOffsetPaginatedParameterCategories(input)
+        parameterCategoriesQueries.getOffsetPaginatedParameterCategories(input),
       );
 
       return { data, pageCount };
@@ -26,11 +26,11 @@ export const parameterCategoriesRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const parameterCategory = await runEffect(
-        parameterCategoriesQueries.getParameterCategoryById(input.id)
+        parameterCategoriesQueries.getParameterCategoryById(input.id),
       );
 
       if (!parameterCategory) {
@@ -48,8 +48,8 @@ export const parameterCategoriesRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await runEffect(
-          parameterCategoriesQueries.createParameterCategory(input)
-        )
+          parameterCategoriesQueries.createParameterCategory(input),
+        ),
     ),
 
   updateParameterCategory: withPermission("parameter-categories.update")
@@ -57,33 +57,33 @@ export const parameterCategoriesRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await runEffect(
-          parameterCategoriesQueries.updateParameterCategory(input)
-        )
+          parameterCategoriesQueries.updateParameterCategory(input),
+        ),
     ),
 
   deleteParameterCategory: withPermission("parameter-categories.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
         await runEffect(
-          parameterCategoriesQueries.deleteParameterCategory(input.id)
-        )
+          parameterCategoriesQueries.deleteParameterCategory(input.id),
+        ),
     ),
 
   restoreParameterCategory: withPermission("parameter-categories.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
         await runEffect(
-          parameterCategoriesQueries.restoreParameterCategory(input.id)
-        )
+          parameterCategoriesQueries.restoreParameterCategory(input.id),
+        ),
     ),
 });

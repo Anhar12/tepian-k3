@@ -17,7 +17,7 @@ const userRolesQueries = {
           logError(
             "userRolesQueries.assignDefaultRoleToUser",
             "Error fetching default role",
-            { error }
+            { error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -32,14 +32,14 @@ const userRolesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Peran default tidak ditemukan.",
-          })
+          }),
         );
       }
 
       return yield* userRolesQueries.assignRoleToUser(
         userId,
         defaultRole.id,
-        tx
+        tx,
       );
     });
   },
@@ -51,7 +51,7 @@ const userRolesQueries = {
         logError(
           "userRolesQueries.assignRoleToUser",
           `Error assigning role ${roleId} to user ${userId}:`,
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -78,7 +78,7 @@ const userRolesQueries = {
         logError(
           "userRolesQueries.assignRole",
           "Error assigning role to user",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -100,7 +100,7 @@ const userRolesQueries = {
             roleIds.map((roleId) => ({
               userId,
               roleId,
-            }))
+            })),
           )
           .onConflictDoNothing()
           .returning(),
@@ -108,7 +108,7 @@ const userRolesQueries = {
         logError(
           "userRolesQueries.assignRoles",
           "Error assigning roles to user",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -125,14 +125,14 @@ const userRolesQueries = {
         tx
           .delete(userRoles)
           .where(
-            and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId))
+            and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId)),
           )
           .returning(),
       catch: (error) => {
         logError(
           "userRolesQueries.removeRole",
           "Error removing role from user",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -151,7 +151,7 @@ const userRolesQueries = {
         logError(
           "userRolesQueries.removeAllRoles",
           "Error removing all roles from user",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -175,7 +175,7 @@ const userRolesQueries = {
               roleIds.map((roleId) => ({
                 userId,
                 roleId,
-              }))
+              })),
             );
           }
         }),
@@ -183,7 +183,7 @@ const userRolesQueries = {
         logError(
           "userRolesQueries.replaceRoles",
           "Error replacing roles for user",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

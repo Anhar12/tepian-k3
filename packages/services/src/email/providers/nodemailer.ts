@@ -88,7 +88,7 @@ const createTransporter = () => {
   // }
 
   throw new Error(
-    "Email provider not configured. Set EMAIL_PROVIDER in environment variables."
+    "Email provider not configured. Set EMAIL_PROVIDER in environment variables.",
   );
 };
 
@@ -121,7 +121,7 @@ export const nodemailerProvider = {
       logError(
         "nodemailerProvider.send",
         `Failed to send email to ${options.to}`,
-        { error }
+        { error },
       );
       throw new SendEmailFailedError("Failed to send email", error);
     }
@@ -133,14 +133,14 @@ export const nodemailerProvider = {
       await transporter.verify();
       logInfo(
         "nodemailerProvider.verify",
-        "Email server verified successfully"
+        "Email server verified successfully",
       );
       return true;
     } catch (error) {
       logError(
         "nodemailerProvider.verify",
         "Email server verification failed",
-        { error }
+        { error },
       );
       return false;
     }

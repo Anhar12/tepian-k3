@@ -17,22 +17,22 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userCompanyRouter = createTRPCRouter({
   getAllUserCompaniesByUserId: withProtectedRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   ).query(
     async ({ ctx: { user } }) =>
-      await runEffect(userCompanyQueries.getAllUserCompaniesByUserId(user.id))
+      await runEffect(userCompanyQueries.getAllUserCompaniesByUserId(user.id)),
   ),
 
   getPaginatedUserCompaniesByUserId: withProtectedRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   )
     .input(userCompanySchema.getAllUserCompaniesSchema)
     .query(async ({ input, ctx: { user } }) => {
       const { data, pageCount } = await runEffect(
         userCompanyQueries.getOffsetPaginatedUserCompaniesByUserId(
           user.id,
-          input
-        )
+          input,
+        ),
       );
 
       return { data, pageCount };
@@ -42,7 +42,7 @@ export const userCompanyRouter = createTRPCRouter({
     .input(userCompanySchema.getAllUserCompaniesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        userCompanyQueries.getOffsetPaginatedUserCompanies(input)
+        userCompanyQueries.getOffsetPaginatedUserCompanies(input),
       );
 
       return { data, pageCount };
@@ -52,11 +52,11 @@ export const userCompanyRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const userCompany = await runEffect(
-        userCompanyQueries.getUserCompanyById(input.id)
+        userCompanyQueries.getUserCompanyById(input.id),
       );
 
       if (!userCompany) {
@@ -73,11 +73,14 @@ export const userCompanyRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input, ctx: { user } }) => {
       const userCompany = await runEffect(
-        userCompanyQueries.getUserCompanyDetailsByUserIdAndId(user.id, input.id)
+        userCompanyQueries.getUserCompanyDetailsByUserIdAndId(
+          user.id,
+          input.id,
+        ),
       );
 
       if (!userCompany) {
@@ -103,7 +106,7 @@ export const userCompanyRouter = createTRPCRouter({
         Effect.gen(function* () {
           // convert file to buffer
           const arrayBuffer = yield* Effect.tryPromise(() =>
-            ctx.input.data.picture.arrayBuffer()
+            ctx.input.data.picture.arrayBuffer(),
           );
 
           const buffer = Buffer.from(arrayBuffer);
@@ -119,18 +122,18 @@ export const userCompanyRouter = createTRPCRouter({
             {
               filename: convertedImage.filename!,
               folder: "company-pictures",
-            }
+            },
           );
 
           const result = yield* userCompanyQueries.userCreateUserCompany(
             ctx.user.id,
             ctx.input.data,
-            uploadedFile.key
+            uploadedFile.key,
           );
 
           return result;
-        })
-      )
+        }),
+      ),
     ),
 
   userUpdateUserCompany: withProtectedRateLimit(rateLimiters.moderate())
@@ -144,7 +147,7 @@ export const userCompanyRouter = createTRPCRouter({
           if (input.data.picture && input.data.picture !== undefined) {
             // convert file to buffer
             const arrayBuffer = yield* Effect.tryPromise(() =>
-              input.data.picture!.arrayBuffer()
+              input.data.picture!.arrayBuffer(),
             );
 
             const buffer = Buffer.from(arrayBuffer);
@@ -164,37 +167,37 @@ export const userCompanyRouter = createTRPCRouter({
           const result = yield* userCompanyQueries.userUpdateUserCompany(
             user.id,
             input.data,
-            uploadedFile?.key
+            uploadedFile?.key,
           );
 
           return result;
-        })
-      )
+        }),
+      ),
     ),
 
   userDeleteUserCompany: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
         await runEffect(
-          userCompanyQueries.userDeleteUserCompany(user.id, input.id)
-        )
+          userCompanyQueries.userDeleteUserCompany(user.id, input.id),
+        ),
     ),
 
   userRestoreUserCompany: withProtectedRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
         await runEffect(
-          userCompanyQueries.userRestoreUserCompany(user.id, input.id)
-        )
+          userCompanyQueries.userRestoreUserCompany(user.id, input.id),
+        ),
     ),
 });

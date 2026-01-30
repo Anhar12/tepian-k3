@@ -15,12 +15,12 @@ Role-based rate limiting automatically applies different rate limits based on a 
 
 The system defines 4 tiers, each with different limits:
 
-| Tier | Roles | API Calls | Mutations | Queries | Uploads | Emails |
-|------|-------|-----------|-----------|---------|---------|--------|
-| **Unlimited** | super_admin, admin | 100k/hr | 10k/hr | 50k/hr | 1000/hr | 500/hr |
-| **Premium** | lab_manager, lab_technician | 5k/hr | 500/hr | 2k/hr | 100/hr | 50/hr |
-| **Standard** | user, employee | 1k/hr | 100/hr | 500/hr | 20/hr | 10/hr |
-| **Basic** | viewer | 100/hr | 10/hr | 100/hr | 5/hr | 3/hr |
+| Tier          | Roles                       | API Calls | Mutations | Queries | Uploads | Emails |
+| ------------- | --------------------------- | --------- | --------- | ------- | ------- | ------ |
+| **Unlimited** | super_admin, admin          | 100k/hr   | 10k/hr    | 50k/hr  | 1000/hr | 500/hr |
+| **Premium**   | lab_manager, lab_technician | 5k/hr     | 500/hr    | 2k/hr   | 100/hr  | 50/hr  |
+| **Standard**  | user, employee              | 1k/hr     | 100/hr    | 500/hr  | 20/hr   | 10/hr  |
+| **Basic**     | viewer                      | 100/hr    | 10/hr     | 100/hr  | 5/hr    | 3/hr   |
 
 ### Tier Assignment
 
@@ -58,10 +58,9 @@ import { createTRPCRouter, withRoleBasedRateLimit } from "..";
 
 export const userRouter = createTRPCRouter({
   // Automatically applies different limits based on user role
-  getProfile: withRoleBasedRateLimit("api")
-    .query(async ({ ctx }) => {
-      return await getUserProfile(ctx.user.id);
-    }),
+  getProfile: withRoleBasedRateLimit("api").query(async ({ ctx }) => {
+    return await getUserProfile(ctx.user.id);
+  }),
 
   updateProfile: withRoleBasedRateLimit("mutations")
     .input(updateProfileSchema)
@@ -294,7 +293,7 @@ export const orderRouter = createTRPCRouter({
   // Rate limit by user + order ID combination
   updateOrder: withRoleBasedRateLimit(
     "mutations",
-    (ctx, input) => `order:${input.orderId}:${ctx.user.id}`
+    (ctx, input) => `order:${input.orderId}:${ctx.user.id}`,
   )
     .input(updateOrderSchema)
     .mutation(async ({ input }) => {
@@ -304,7 +303,7 @@ export const orderRouter = createTRPCRouter({
   // Rate limit by company ID
   createOrder: withRoleBasedRateLimit(
     "mutations",
-    (ctx) => `order:create:${ctx.user.companyId}`
+    (ctx) => `order:create:${ctx.user.companyId}`,
   )
     .input(createOrderSchema)
     .mutation(async ({ input }) => {
@@ -355,7 +354,7 @@ export const adminRouter = createTRPCRouter({
     .use(async ({ ctx, next }) => {
       // Apply role-based rate limiting manually
       const limiter = createRateLimiter(
-        getRateLimitConfig(ctx.user.roles as Role[], "mutations")
+        getRateLimitConfig(ctx.user.roles as Role[], "mutations"),
       );
 
       const result = await limiter.consume(`delete:${ctx.user.id}`);
@@ -382,18 +381,17 @@ Rate limit information is added to the context:
 
 ```typescript
 export const userRouter = createTRPCRouter({
-  getProfile: withRoleBasedRateLimit("api")
-    .query(async ({ ctx }) => {
-      // Access rate limit info
-      console.log(`Remaining: ${ctx.rateLimit.remaining}`);
-      console.log(`Reset in: ${ctx.rateLimit.resetMs}ms`);
-      console.log(`Tier: ${ctx.rateLimit.tier}`);
+  getProfile: withRoleBasedRateLimit("api").query(async ({ ctx }) => {
+    // Access rate limit info
+    console.log(`Remaining: ${ctx.rateLimit.remaining}`);
+    console.log(`Reset in: ${ctx.rateLimit.resetMs}ms`);
+    console.log(`Tier: ${ctx.rateLimit.tier}`);
 
-      return {
-        profile: await getUserProfile(ctx.user.id),
-        rateLimit: ctx.rateLimit, // Include in response if needed
-      };
-    }),
+    return {
+      profile: await getUserProfile(ctx.user.id),
+      rateLimit: ctx.rateLimit, // Include in response if needed
+    };
+  }),
 });
 ```
 
@@ -454,14 +452,14 @@ describe("Role-Based Rate Limiting", () => {
 
 ```typescript
 // ✅ Good: Use specific operation types
-getUsers: withRoleBasedRateLimit("queries")  // Read-heavy
-createUser: withRoleBasedRateLimit("mutations")  // Write operation
-uploadDoc: withRoleBasedRateLimit("uploads")  // File upload
-sendEmail: withRoleBasedRateLimit("email")  // Email sending
+getUsers: withRoleBasedRateLimit("queries"); // Read-heavy
+createUser: withRoleBasedRateLimit("mutations"); // Write operation
+uploadDoc: withRoleBasedRateLimit("uploads"); // File upload
+sendEmail: withRoleBasedRateLimit("email"); // Email sending
 
 // ❌ Less ideal: Use generic "api" for everything
-getUsers: withRoleBasedRateLimit("api")
-createUser: withRoleBasedRateLimit("api")
+getUsers: withRoleBasedRateLimit("api");
+createUser: withRoleBasedRateLimit("api");
 ```
 
 ### 2. Use Role-Based for Most Endpoints
@@ -496,17 +494,16 @@ export const authRouter = createTRPCRouter({
 
 ```typescript
 export const monitoredRouter = createTRPCRouter({
-  getData: withRoleBasedRateLimit("queries")
-    .query(async ({ ctx }) => {
-      // Log rate limit usage
-      if (ctx.rateLimit.remaining < 10) {
-        console.warn(
-          `User ${ctx.user.id} approaching rate limit: ${ctx.rateLimit.remaining} remaining`
-        );
-      }
+  getData: withRoleBasedRateLimit("queries").query(async ({ ctx }) => {
+    // Log rate limit usage
+    if (ctx.rateLimit.remaining < 10) {
+      console.warn(
+        `User ${ctx.user.id} approaching rate limit: ${ctx.rateLimit.remaining} remaining`,
+      );
+    }
 
-      return await fetchData();
-    }),
+    return await fetchData();
+  }),
 });
 ```
 
@@ -520,6 +517,7 @@ export const monitoredRouter = createTRPCRouter({
 6. **Access rate limit info** via `ctx.rateLimit`
 
 For more details, see:
+
 - [Rate Limiting Middleware Guide](./RATE_LIMITING_MIDDLEWARE.md)
 - [Rate Limiter Service Documentation](../../services/src/rate-limiter/docs/README.md)
 - [Rate Limit Constants](../../constants/src/rate-limits.ts)

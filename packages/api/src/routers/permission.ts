@@ -5,7 +5,7 @@ import { runEffect } from "../utils/run-effect";
 
 export const permissionRouters = createTRPCRouter({
   getAllPermissions: withPermission("permissions.view").query(
-    async () => await runEffect(permissionsQueries.getAllPermissions())
+    async () => await runEffect(permissionsQueries.getAllPermissions()),
   ),
 
   updateRolePermissions: withPermission("roles.update")
@@ -14,7 +14,7 @@ export const permissionRouters = createTRPCRouter({
         roleId: z.uuidv7(),
         addedPermissions: z.array(z.string()),
         removedPermissions: z.array(z.string()),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
@@ -22,8 +22,8 @@ export const permissionRouters = createTRPCRouter({
           permissionsQueries.updateRolePermissions(
             input.roleId,
             input.addedPermissions,
-            input.removedPermissions
-          )
-        )
+            input.removedPermissions,
+          ),
+        ),
     ),
 });

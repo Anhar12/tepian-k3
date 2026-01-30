@@ -35,7 +35,7 @@ class StorageService {
 
   upload(
     file: Buffer,
-    options: UploadOptions = {}
+    options: UploadOptions = {},
   ): Effect.Effect<UploadResult, UploadFailedError> {
     return this.provider.upload(file, options);
   }
@@ -45,14 +45,14 @@ class StorageService {
   }
 
   download(
-    key: string
+    key: string,
   ): Effect.Effect<Buffer, FileNotFoundError | UploadFailedError> {
     return this.provider.download(key);
   }
 
   getSignedUrl(
     key: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Effect.Effect<string, UploadFailedError | never> {
     return this.provider.getSignedUrl(key, expiresIn);
   }

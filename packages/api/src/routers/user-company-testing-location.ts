@@ -13,22 +13,22 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userCompanyTestingLocationRouter = createTRPCRouter({
   getAllUserCompanyTestingLocations: withRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   ).query(
     async () =>
       await runEffect(
-        userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations()
-      )
+        userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations(),
+      ),
   ),
 
   getAllUserCompanyTestingLocationsByCompanyIdAndUserId: withProtectedRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   )
     .input(
       z.object({
         companyId: z.uuidv7(),
         showDeleted: z.boolean().optional(),
-      })
+      }),
     )
     .query(
       async ({ input, ctx: { user } }) =>
@@ -36,59 +36,59 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
           userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
             input.companyId,
             user.id,
-            input.showDeleted ?? false
-          )
-        )
+            input.showDeleted ?? false,
+          ),
+        ),
     ),
 
   getPaginatedUserCompanyTestingLocations: withPermission(
-    "user-company-testing-location.view"
+    "user-company-testing-location.view",
   )
     .input(
-      userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema
+      userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema,
     )
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
         userCompanyTestingLocationQueries.getOffsetPaginationUserCompanyTestingLocations(
-          input
-        )
+          input,
+        ),
       );
 
       return { data, pageCount };
     }),
 
   getUserCompanyTestingLocationByUserIdAndCompanyId: withPermission(
-    "user-company-testing-location.view"
+    "user-company-testing-location.view",
   )
     .input(
       z.object({
         companyId: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input, ctx: { user } }) => {
       const userCompanyTestingLocation = await runEffect(
         userCompanyTestingLocationQueries.getUserCompanyTestingLocationByUserIdAndCompanyId(
           user.id,
-          input.companyId
-        )
+          input.companyId,
+        ),
       );
 
       return userCompanyTestingLocation;
     }),
 
   getUserCompanyTestingLocationById: withPermission(
-    "user-company-testing-location.view"
+    "user-company-testing-location.view",
   )
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const userCompanyTestingLocation = await runEffect(
         userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
-          input.id
-        )
+          input.id,
+        ),
       );
 
       if (!userCompanyTestingLocation) {
@@ -102,70 +102,70 @@ export const userCompanyTestingLocationRouter = createTRPCRouter({
     }),
 
   userCreateUserCompanyTestingLocation: withProtectedRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   )
     .input(
-      userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
+      userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema,
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
         await runEffect(
           userCompanyTestingLocationQueries.userCreateUserCompanyTestingLocation(
             user.id,
-            input
-          )
-        )
+            input,
+          ),
+        ),
     ),
 
   userUpdateUserCompanyTestingLocation: withProtectedRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   )
     .input(
-      userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
+      userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema,
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
         await runEffect(
           userCompanyTestingLocationQueries.userUpdateUserCompanyTestingLocation(
             user.id,
-            input
-          )
-        )
+            input,
+          ),
+        ),
     ),
 
   userDeleteUserCompanyTestingLocation: withProtectedRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   )
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
         await runEffect(
           userCompanyTestingLocationQueries.userDeleteUserCompanyTestingLocation(
             user.id,
-            input.id
-          )
-        )
+            input.id,
+          ),
+        ),
     ),
 
   userRestoreUserCompanyTestingLocation: withProtectedRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   )
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input, ctx: { user } }) =>
         await runEffect(
           userCompanyTestingLocationQueries.userRestoreUserCompanyTestingLocation(
             user.id,
-            input.id
-          )
-        )
+            input.id,
+          ),
+        ),
     ),
 });

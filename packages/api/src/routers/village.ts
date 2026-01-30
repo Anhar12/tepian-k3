@@ -8,27 +8,27 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const villageRouter = createTRPCRouter({
   getAllVillages: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(villageQueries.getAllVillages())
+    async () => await runEffect(villageQueries.getAllVillages()),
   ),
 
   getAllVillagesByDistrictId: withRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         districtId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
         await runEffect(
-          villageQueries.getAllVillagesByDistrictId(input.districtId)
-        )
+          villageQueries.getAllVillagesByDistrictId(input.districtId),
+        ),
     ),
 
   getPaginatedVillages: withPermission("village.read")
     .input(villageSchema.getAllVillagesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        villageQueries.getOffsetPaginationVillages(input)
+        villageQueries.getOffsetPaginationVillages(input),
       );
 
       return { data, pageCount };
@@ -38,7 +38,7 @@ export const villageRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const village = await runEffect(villageQueries.getVillageById(input.id));
@@ -56,34 +56,34 @@ export const villageRouter = createTRPCRouter({
   createVillage: withPermission("village.create")
     .input(villageSchema.createVillageSchema)
     .mutation(
-      async ({ input }) => await runEffect(villageQueries.createVillage(input))
+      async ({ input }) => await runEffect(villageQueries.createVillage(input)),
     ),
 
   updateVillage: withPermission("village.update")
     .input(villageSchema.updateVillageSchema)
     .mutation(
-      async ({ input }) => await runEffect(villageQueries.updateVillage(input))
+      async ({ input }) => await runEffect(villageQueries.updateVillage(input)),
     ),
 
   deleteVillage: withPermission("village.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(villageQueries.deleteVillage(input.id))
+        await runEffect(villageQueries.deleteVillage(input.id)),
     ),
 
   restoreVillage: withPermission("village.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(villageQueries.restoreVillage(input.id))
+        await runEffect(villageQueries.restoreVillage(input.id)),
     ),
 });

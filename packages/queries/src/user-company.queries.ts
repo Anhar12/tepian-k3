@@ -35,14 +35,14 @@ const userCompanyQueries = {
         db.query.userCompanies.findMany({
           where: and(
             eq(userCompanies.userId, userId),
-            isNull(userCompanies.deletedAt)
+            isNull(userCompanies.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "userCompanyQueries.getAllUserCompaniesByUserId",
           "Failed to fetch userCompanies",
-          { userId, error }
+          { userId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -60,10 +60,10 @@ const userCompanyQueries = {
                     ? storageService.getPublicUrl(uc.companyPictureUrl)
                     : null,
                 };
-              })
+              }),
             )
-          : Effect.succeed([])
-      )
+          : Effect.succeed([]),
+      ),
     );
   },
 
@@ -77,7 +77,7 @@ const userCompanyQueries = {
         logError(
           "userCompanyQueries.getUserCompanyById",
           "Error fetching userCompany by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -86,8 +86,8 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null)
-      )
+        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -98,7 +98,7 @@ const userCompanyQueries = {
           where: and(
             eq(userCompanies.id, id),
             eq(userCompanies.userId, userId),
-            isNull(userCompanies.deletedAt)
+            isNull(userCompanies.deletedAt),
           ),
           with: {
             district: {
@@ -137,7 +137,7 @@ const userCompanyQueries = {
         logError(
           "userCompanyQueries.getUserCompanyDetailsByUserIdAndId",
           "Error fetching userCompany details by userId and ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -146,8 +146,8 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null)
-      )
+        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -156,14 +156,14 @@ const userCompanyQueries = {
       try: () =>
         db.query.userCompanies.findFirst({
           where: and(
-            (eq(userCompanies.id, id), isNotNull(userCompanies.deletedAt))
+            (eq(userCompanies.id, id), isNotNull(userCompanies.deletedAt)),
           ),
         }),
       catch: (error) => {
         logError(
           "userCompanyQueries.getDeletedUserCompanyById",
           "Error fetching deleted userCompany by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -173,8 +173,8 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null)
-      )
+        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -188,7 +188,7 @@ const userCompanyQueries = {
         logError(
           "userCompanyQueries.getUserCompanyByName",
           "Error fetching userCompany by name",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -197,8 +197,8 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null)
-      )
+        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -208,7 +208,7 @@ const userCompanyQueries = {
         db.query.userCompanies.findFirst({
           where: and(
             eq(userCompanies.userId, userId),
-            eq(userCompanies.name, name)
+            eq(userCompanies.name, name),
           ),
           columns: { name: true, id: true },
         }),
@@ -216,7 +216,7 @@ const userCompanyQueries = {
         logError(
           "userCompanyQueries.getUserCompanyNameByUserId",
           "Error fetching userCompany names by userId",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -228,7 +228,7 @@ const userCompanyQueries = {
 
   getOffsetPaginatedUserCompaniesByUserId(
     userId: string,
-    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema>
+    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -264,7 +264,7 @@ const userCompanyQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -274,15 +274,15 @@ const userCompanyQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(userCompanies.deletedAt)
               : isNull(userCompanies.deletedAt),
-            eq(userCompanies.userId, userId)
+            eq(userCompanies.userId, userId),
           );
 
       const orderBy =
@@ -290,7 +290,7 @@ const userCompanyQueries = {
           ? input.sort.map((item) =>
               item.desc
                 ? desc(userCompanies[item.id])
-                : asc(userCompanies[item.id])
+                : asc(userCompanies[item.id]),
             )
           : [desc(userCompanies.createdAt)];
 
@@ -347,7 +347,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.getOffsetPaginatedUserCompanies",
             "Error fetching paginated userCompanies",
-            { error, input }
+            { error, input },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -367,7 +367,7 @@ const userCompanyQueries = {
   },
 
   getOffsetPaginatedUserCompanies(
-    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema>
+    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -394,7 +394,7 @@ const userCompanyQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -404,14 +404,14 @@ const userCompanyQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(userCompanies.deletedAt)
-              : isNull(userCompanies.deletedAt)
+              : isNull(userCompanies.deletedAt),
           );
 
       const orderBy =
@@ -419,7 +419,7 @@ const userCompanyQueries = {
           ? input.sort.map((item) =>
               item.desc
                 ? desc(userCompanies[item.id])
-                : asc(userCompanies[item.id])
+                : asc(userCompanies[item.id]),
             )
           : [desc(userCompanies.createdAt)];
 
@@ -449,7 +449,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.getOffsetPaginatedUserCompanies",
             "Error fetching paginated userCompanies",
-            { error, input }
+            { error, input },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -471,12 +471,12 @@ const userCompanyQueries = {
   userCreateUserCompany(
     userId: string,
     data: z.infer<typeof userCompanySchema.createUserCompanySchema>,
-    url: string
+    url: string,
   ) {
     return Effect.gen(this, function* () {
       const isExisting = yield* userCompanyQueries.getUserCompanyNameByUserId(
         userId,
-        data.name
+        data.name,
       );
 
       if (isExisting) {
@@ -517,7 +517,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.userCreateUserCompany",
             "Error creating userCompany",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -540,11 +540,11 @@ const userCompanyQueries = {
   userUpdateUserCompany(
     userId: string,
     data: z.infer<typeof userCompanySchema.updateUserCompanySchema>,
-    url?: string
+    url?: string,
   ) {
     return Effect.gen(this, function* () {
       const existingUserCompany = yield* userCompanyQueries.getUserCompanyById(
-        data.id
+        data.id,
       );
 
       if (!existingUserCompany) {
@@ -552,14 +552,14 @@ const userCompanyQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Perusahaan tidak ditemukan.",
-          })
+          }),
         );
       }
 
       if (data.name && data.name !== existingUserCompany.name) {
         const isExisting = yield* userCompanyQueries.getUserCompanyNameByUserId(
           userId,
-          data.name
+          data.name,
         );
 
         if (isExisting) {
@@ -568,7 +568,7 @@ const userCompanyQueries = {
               code: "CONFLICT",
               message:
                 "Perusahaan dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
-            })
+            }),
           );
         }
       }
@@ -579,26 +579,26 @@ const userCompanyQueries = {
             code: "FORBIDDEN",
             message:
               "Anda tidak memiliki izin untuk memperbarui perusahaan ini.",
-          })
+          }),
         );
       }
 
       if (existingUserCompany.companyPictureUrl) {
         const key = storageService.getKeyFromUrl(
-          existingUserCompany.companyPictureUrl
+          existingUserCompany.companyPictureUrl,
         );
 
         if (!key) {
           logError(
             "userCompanyQueries.userUpdateUserCompany",
             "Failed to extract key from existing company picture URL",
-            { url: existingUserCompany.companyPictureUrl }
+            { url: existingUserCompany.companyPictureUrl },
           );
           return yield* Effect.fail(
             new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: "Gagal memperbarui data perusahaan",
-            })
+            }),
           );
         }
 
@@ -650,7 +650,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.userUpdateUserCompany",
             "Error updating userCompany",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -672,9 +672,8 @@ const userCompanyQueries = {
 
   userDeleteUserCompany(userId: string, id: string) {
     return Effect.gen(this, function* () {
-      const existingUserCompany = yield* userCompanyQueries.getUserCompanyById(
-        id
-      );
+      const existingUserCompany =
+        yield* userCompanyQueries.getUserCompanyById(id);
 
       if (!existingUserCompany) {
         throw new TRPCError({
@@ -702,7 +701,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.userDeleteUserCompany",
             "Error deleting userCompany",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -724,9 +723,8 @@ const userCompanyQueries = {
 
   deleteUserCompany(id: string) {
     return Effect.gen(this, function* () {
-      const existingUserCompany = yield* userCompanyQueries.getUserCompanyById(
-        id
-      );
+      const existingUserCompany =
+        yield* userCompanyQueries.getUserCompanyById(id);
 
       if (!existingUserCompany) {
         throw new TRPCError({
@@ -747,7 +745,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.userDeleteUserCompany",
             "Error deleting userCompany",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -799,7 +797,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.userRestoreUserCompany",
             "Error restoring userCompany",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -843,7 +841,7 @@ const userCompanyQueries = {
           logError(
             "userCompanyQueries.userRestoreUserCompany",
             "Error restoring userCompany",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

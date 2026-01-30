@@ -30,7 +30,7 @@ export const auditRouter = createTRPCRouter({
           auditQueries.getAuditLogs({
             ...filters,
             limit,
-          })
+          }),
         );
 
         // For pagination, you'd want to also get total count
@@ -58,7 +58,7 @@ export const auditRouter = createTRPCRouter({
     .query(async ({ input }) => {
       try {
         const logs = await Effect.runPromise(
-          auditQueries.getAuditLogsByEntity(input.entityType, input.entityId)
+          auditQueries.getAuditLogsByEntity(input.entityType, input.entityId),
         );
 
         return logs;
@@ -83,7 +83,7 @@ export const auditRouter = createTRPCRouter({
         const targetUserId = isAdmin ? input.userId : ctx.user.id;
 
         const logs = await Effect.runPromise(
-          auditQueries.getAuditLogsByUser(targetUserId, input.limit)
+          auditQueries.getAuditLogsByUser(targetUserId, input.limit),
         );
 
         return logs;
@@ -114,7 +114,7 @@ export const auditRouter = createTRPCRouter({
         }
 
         const stats = await Effect.runPromise(
-          auditQueries.getAuditStatistics(input.entityType)
+          auditQueries.getAuditStatistics(input.entityType),
         );
 
         return stats;

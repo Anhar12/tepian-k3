@@ -3,7 +3,10 @@ import type { Role } from "./roles";
 /**
  * Rate limiter strategy types
  */
-export type RateLimiterStrategy = "sliding-window" | "token-bucket" | "fixed-window";
+export type RateLimiterStrategy =
+  | "sliding-window"
+  | "token-bucket"
+  | "fixed-window";
 
 /**
  * Rate limiter configuration
@@ -149,7 +152,7 @@ export function getHighestRateLimitTier(roles: Role[]): RateLimitTier {
  */
 export function getRateLimitConfig(
   roles: Role[],
-  operation: keyof (typeof RATE_LIMIT_TIER_CONFIGS)["basic"]
+  operation: keyof (typeof RATE_LIMIT_TIER_CONFIGS)["basic"],
 ): RateLimiterConfig {
   const tier = getHighestRateLimitTier(roles);
   return RATE_LIMIT_TIER_CONFIGS[tier][operation];

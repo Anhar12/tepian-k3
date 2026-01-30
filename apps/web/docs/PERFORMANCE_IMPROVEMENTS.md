@@ -43,9 +43,11 @@ All icon-only buttons now include descriptive `aria-label` attributes for screen
 Consolidated duplicated cart mutation logic into a reusable custom hook.
 
 #### File Created:
+
 - `apps/web/src/hooks/use-cart-mutations.ts` (104 lines)
 
 #### Features:
+
 - ✅ Centralized mutation handlers for increment, decrement, and delete operations
 - ✅ Shared loading state management (`loadingItems`, `deleteLoadingItems`)
 - ✅ Consistent error handling with `globalErrorToast`
@@ -53,6 +55,7 @@ Consolidated duplicated cart mutation logic into a reusable custom hook.
 - ✅ Memoized callbacks to prevent unnecessary re-renders
 
 #### Benefits:
+
 - **Reduced code duplication:** Removed ~90 lines of duplicated mutation logic from cart-sheet.tsx
 - **Improved maintainability:** Single source of truth for cart mutations
 - **Better testability:** Isolated mutation logic can be tested independently
@@ -86,9 +89,11 @@ function MyComponent() {
 Implemented React.lazy and Suspense for the heavy PDF QR Code Editor component (698 lines).
 
 #### File Modified:
+
 - `apps/web/src/routes/(core)/pdf-editor.tsx`
 
 #### Changes:
+
 ```tsx
 // Before
 import PDFQRCodeEditor from "@/components/pdf/pdf-qrcode-editor";
@@ -104,12 +109,14 @@ const PDFQRCodeEditor = lazy(() => import("@/components/pdf/pdf-qrcode-editor"))
 ```
 
 #### Benefits:
+
 - **Reduced initial bundle size:** PDF editor code is only loaded when the route is accessed
 - **Faster initial page load:** Main bundle is smaller and loads faster
 - **Better user experience:** Loading indicator shown while component is being fetched
 - **Progressive loading:** Users can interact with the rest of the app while heavy components load
 
 #### Impact:
+
 - Estimated bundle size reduction: ~50-80 KB (pdf-lib + drag-and-drop dependencies)
 - Initial load time improvement: ~200-400ms on slow connections
 
@@ -167,11 +174,13 @@ const PDFQRCodeEditor = lazy(() => import("@/components/pdf/pdf-qrcode-editor"))
 ## Performance Metrics
 
 ### Before Improvements
+
 - Bundle size: Not measured
 - Accessibility violations: 10
 - Code duplication: ~90 lines in cart mutations
 
 ### After Improvements
+
 - Bundle size: ~50-80 KB reduction (estimated)
 - Accessibility violations: 0
 - Code duplication: Reduced by consolidating cart mutations

@@ -88,7 +88,7 @@ const result = await OTPService.verifyOTP(
     ipAddress: ctx.ip,
     os: ctx.osName,
     version: ctx.osVersion,
-  }
+  },
 );
 
 // Returns:
@@ -111,6 +111,7 @@ The OTP service now accepts optional device information to track sessions:
 - `version`: OS version
 
 This information is stored in the `refreshTokens` table and helps users:
+
 - Identify active sessions
 - Revoke sessions from specific devices
 - Monitor security with session tracking
@@ -144,7 +145,7 @@ The refresh token is stored in the `refreshTokens` table:
 
 ```typescript
 const result = await trpcClient.auth.sendOTP.mutate({
-  email: "user@example.com"
+  email: "user@example.com",
 });
 ```
 
@@ -153,7 +154,7 @@ const result = await trpcClient.auth.sendOTP.mutate({
 ```typescript
 const result = await trpcClient.auth.verifyOTP.mutate({
   email: "user@example.com",
-  code: "123456"
+  code: "123456",
 });
 
 // Response:
@@ -175,7 +176,7 @@ localStorage.setItem("refreshToken", result.refreshToken);
 
 // Use access token for API requests
 const headers = {
-  Authorization: `Bearer ${accessToken}`
+  Authorization: `Bearer ${accessToken}`,
 };
 ```
 
@@ -185,7 +186,7 @@ When the access token expires:
 
 ```typescript
 const result = await trpcClient.auth.refresh.mutate({
-  refreshToken: localStorage.getItem("refreshToken")
+  refreshToken: localStorage.getItem("refreshToken"),
 });
 
 // Response:
@@ -203,7 +204,7 @@ localStorage.setItem("refreshToken", result.refreshToken);
 
 ```typescript
 await trpcClient.auth.logout.mutate({
-  refreshToken: localStorage.getItem("refreshToken")
+  refreshToken: localStorage.getItem("refreshToken"),
 });
 
 // Clear stored tokens
@@ -214,21 +215,27 @@ localStorage.removeItem("refreshToken");
 ## Security Features
 
 ### 1. Token Rotation
+
 When refreshing, the old refresh token is revoked and a new one is issued. This prevents token reuse and enhances security.
 
 ### 2. Session Tracking
+
 All refresh tokens are tracked in the database with device information, allowing users to:
+
 - View active sessions
 - Revoke specific sessions
 - Revoke all sessions (except current)
 
 ### 3. Rate Limiting
+
 OTP operations are rate-limited:
+
 - `sendOTP`: Limited to prevent abuse
 - `verifyOTP`: Limited to prevent brute force attacks
 - `refresh`: Limited to prevent token refresh abuse
 
 ### 4. Soft Delete Support
+
 Refresh tokens support soft deletion, maintaining audit trail while preventing token reuse.
 
 ## Frontend Integration Example
@@ -245,7 +252,7 @@ export const useAuth = () => {
     try {
       const result = await trpcClient.auth.verifyOTP.mutate({
         email,
-        code
+        code,
       });
 
       if (result.success) {
@@ -270,7 +277,7 @@ export const useAuth = () => {
       }
 
       const result = await trpcClient.auth.refresh.mutate({
-        refreshToken: storedRefreshToken
+        refreshToken: storedRefreshToken,
       });
 
       setAccessToken(result.accessToken);
@@ -291,7 +298,7 @@ export const useAuth = () => {
     if (storedRefreshToken) {
       try {
         await trpcClient.auth.logout.mutate({
-          refreshToken: storedRefreshToken
+          refreshToken: storedRefreshToken,
         });
       } catch (error) {
         console.error("Logout failed:", error);
@@ -309,7 +316,7 @@ export const useAuth = () => {
     refreshToken,
     verifyOTP,
     refreshAccessToken,
-    logout
+    logout,
   };
 };
 ```
@@ -335,7 +342,7 @@ const trpcClient = createTRPCClient({
             const result = await fetch("/trpc/auth.refresh", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ refreshToken })
+              body: JSON.stringify({ refreshToken }),
             });
 
             const data = await result.json();
@@ -349,11 +356,11 @@ const trpcClient = createTRPCClient({
         }
 
         return {
-          Authorization: accessToken ? `Bearer ${accessToken}` : ""
+          Authorization: accessToken ? `Bearer ${accessToken}` : "",
         };
-      }
-    })
-  ]
+      },
+    }),
+  ],
 });
 ```
 
@@ -372,6 +379,7 @@ const trpcClient = createTRPCClient({
 ```
 
 **Issues:**
+
 - Long-lived tokens are security risks
 - No way to revoke tokens without database check
 - No session tracking
@@ -391,6 +399,7 @@ const trpcClient = createTRPCClient({
 ```
 
 **Benefits:**
+
 - Short-lived access tokens reduce exposure window
 - Refresh tokens can be revoked immediately
 - Session tracking across devices
@@ -452,8 +461,8 @@ describe("OTPService.verifyOTP", () => {
         userAgent: "Mozilla/5.0...",
         ipAddress: "127.0.0.1",
         os: "Windows",
-        version: "10"
-      }
+        version: "10",
+      },
     );
 
     expect(result.success).toBe(true);
@@ -483,21 +492,25 @@ If you're migrating from the old single-token system:
 ## Troubleshooting
 
 ### Access token expires too quickly
+
 - Check `JWT_ACCESS_TOKEN_EXPIRY` environment variable
 - Default is 15 minutes, adjust if needed
 - Don't exceed 1 hour for security
 
 ### Refresh token not stored in database
+
 - Verify `refreshTokensQueries.createRefreshToken` is called
 - Check database connection
 - Ensure `refreshTokens` table exists
 
 ### Device information not captured
+
 - Verify context contains `userAgent`, `ip`, `osName`, `osVersion`
 - Check Hono middleware for context population
 - Ensure headers are passed correctly
 
 ### Token rotation fails
+
 - Verify old token is revoked before creating new one
 - Check `refreshTokensQueries.revokeToken` implementation
 - Ensure transaction completes successfully

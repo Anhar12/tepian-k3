@@ -39,10 +39,7 @@ type Style = ReturnType<typeof baseTw>;
  * tw(["flex-row", condition && "items-center"])
  */
 const tw = (...classes: ClassValue[]): Style => {
-  const result = clsx(classes)
-    .split(/\s+/)
-    .filter(Boolean)
-    .join(" ");
+  const result = clsx(classes).split(/\s+/).filter(Boolean).join(" ");
 
   // Return empty style object if no valid classes
   if (!result) return {} as Style;

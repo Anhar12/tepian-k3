@@ -44,11 +44,12 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userRouter = createTRPCRouter({
   // Rate limit by user ID (1000 requests per hour)
-  getProfile: withProtectedRateLimit(rateLimiters.api())
-    .query(async ({ ctx }) => {
+  getProfile: withProtectedRateLimit(rateLimiters.api()).query(
+    async ({ ctx }) => {
       // User is guaranteed to exist (from protectedProcedure)
       return await getUserProfile(ctx.user.id);
-    }),
+    },
+  ),
 
   // Rate limit updates by user ID
   updateProfile: withProtectedRateLimit(rateLimiters.api())
@@ -70,7 +71,7 @@ export const authRouter = createTRPCRouter({
   // Rate limit by email instead of IP
   login: withRateLimit(
     rateLimiters.auth(),
-    (ctx, input) => `login:${input.email}`
+    (ctx, input) => `login:${input.email}`,
   )
     .input(loginSchema)
     .mutation(async ({ input }) => {
@@ -80,7 +81,7 @@ export const authRouter = createTRPCRouter({
   // Rate limit password reset by email (3 attempts per hour)
   forgotPassword: withRateLimit(
     rateLimiters.passwordReset(),
-    (ctx, input) => `reset:${input.email}`
+    (ctx, input) => `reset:${input.email}`,
   )
     .input(forgotPasswordSchema)
     .mutation(async ({ input }) => {
@@ -96,7 +97,7 @@ export const emailRouter = createTRPCRouter({
   // Rate limit sending emails by user email (10 per hour)
   sendEmail: withProtectedRateLimit(
     rateLimiters.email(),
-    (ctx) => `email:${ctx.user.email}`
+    (ctx) => `email:${ctx.user.email}`,
   )
     .input(emailSchema)
     .mutation(async ({ input, ctx }) => {
@@ -112,7 +113,7 @@ export const otpRouter = createTRPCRouter({
   // Rate limit OTP by email + IP combination
   sendOtp: withRateLimit(
     rateLimiters.otp(),
-    (ctx, input) => `otp:${input.email}:${ctx.ip}`
+    (ctx, input) => `otp:${input.email}:${ctx.ip}`,
   )
     .input(otpSchema)
     .mutation(async ({ input }) => {
@@ -126,14 +127,14 @@ export const otpRouter = createTRPCRouter({
 The `rateLimiters` service provides 8 preset configurations:
 
 ```typescript
-rateLimiters.auth()           // 5 attempts per 15 minutes
-rateLimiters.api()            // 1000 requests per hour
-rateLimiters.email()          // 10 emails per hour
-rateLimiters.otp()            // 3 attempts per 5 minutes
-rateLimiters.passwordReset()  // 3 attempts per hour
-rateLimiters.strict()         // 10 requests per minute
-rateLimiters.moderate()       // 30 requests per minute
-rateLimiters.lenient()        // 100 requests per minute
+rateLimiters.auth(); // 5 attempts per 15 minutes
+rateLimiters.api(); // 1000 requests per hour
+rateLimiters.email(); // 10 emails per hour
+rateLimiters.otp(); // 3 attempts per 5 minutes
+rateLimiters.passwordReset(); // 3 attempts per hour
+rateLimiters.strict(); // 10 requests per minute
+rateLimiters.moderate(); // 30 requests per minute
+rateLimiters.lenient(); // 100 requests per minute
 ```
 
 ## Combining with Other Middleware
@@ -150,7 +151,7 @@ export const adminRouter = createTRPCRouter({
       // Check permission
       const hasPermission = await permissionQueries.userHasPermission(
         ctx.user.id,
-        "users.delete"
+        "users.delete",
       );
       if (!hasPermission) {
         throw new TRPCError({
@@ -203,17 +204,16 @@ The rate limit information is added to the context and available in your procedu
 
 ```typescript
 export const apiRouter = createTRPCRouter({
-  getData: withProtectedRateLimit(rateLimiters.api())
-    .query(async ({ ctx }) => {
-      // Access rate limit info
-      console.log(`Remaining requests: ${ctx.rateLimit.remaining}`);
-      console.log(`Reset in: ${ctx.rateLimit.resetMs}ms`);
+  getData: withProtectedRateLimit(rateLimiters.api()).query(async ({ ctx }) => {
+    // Access rate limit info
+    console.log(`Remaining requests: ${ctx.rateLimit.remaining}`);
+    console.log(`Reset in: ${ctx.rateLimit.resetMs}ms`);
 
-      return {
-        data: await fetchData(),
-        rateLimit: ctx.rateLimit, // Return to client if needed
-      };
-    }),
+    return {
+      data: await fetchData(),
+      rateLimit: ctx.rateLimit, // Return to client if needed
+    };
+  }),
 });
 ```
 
@@ -233,10 +233,10 @@ More specific keys provide better isolation:
 
 ```typescript
 // ✅ Good: Specific key per action
-withRateLimit(rateLimiters.auth(), (ctx, input) => `login:${input.email}`)
+withRateLimit(rateLimiters.auth(), (ctx, input) => `login:${input.email}`);
 
 // ❌ Less ideal: Generic key
-withRateLimit(rateLimiters.auth(), (ctx) => ctx.ip)
+withRateLimit(rateLimiters.auth(), (ctx) => ctx.ip);
 ```
 
 ### 3. Apply Rate Limiting Early
@@ -264,12 +264,16 @@ export const authRouter = createTRPCRouter({
   // Strict limit for login
   login: withRateLimit(rateLimiters.auth())
     .input(loginSchema)
-    .mutation(async ({ input }) => { /* ... */ }),
+    .mutation(async ({ input }) => {
+      /* ... */
+    }),
 
   // More lenient for checking email availability
   checkEmail: withRateLimit(rateLimiters.moderate())
     .input(z.object({ email: z.string().email() }))
-    .query(async ({ input }) => { /* ... */ }),
+    .query(async ({ input }) => {
+      /* ... */
+    }),
 });
 ```
 
@@ -300,7 +304,7 @@ export const authRouter = createTRPCRouter({
   // Rate limit login by email (5 attempts per 15 min)
   login: withRateLimit(
     rateLimiters.auth(),
-    (ctx, input) => `login:${input.email}`
+    (ctx, input) => `login:${input.email}`,
   )
     .input(loginSchema)
     .mutation(async ({ input }) => {
@@ -317,7 +321,7 @@ export const authRouter = createTRPCRouter({
   // Rate limit OTP sending (3 per 5 min per email)
   sendOtp: withRateLimit(
     rateLimiters.otp(),
-    (ctx, input) => `otp:${input.email}`
+    (ctx, input) => `otp:${input.email}`,
   )
     .input(otpSchema)
     .mutation(async ({ input }) => {
@@ -327,7 +331,7 @@ export const authRouter = createTRPCRouter({
   // Rate limit OTP verification (3 per 5 min per email)
   verifyOtp: withRateLimit(
     rateLimiters.otp(),
-    (ctx, input) => `verify:${input.email}`
+    (ctx, input) => `verify:${input.email}`,
   )
     .input(z.object({ email: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {
@@ -337,7 +341,7 @@ export const authRouter = createTRPCRouter({
   // Rate limit password reset requests (3 per hour per email)
   forgotPassword: withRateLimit(
     rateLimiters.passwordReset(),
-    (ctx, input) => `reset:${input.email}`
+    (ctx, input) => `reset:${input.email}`,
   )
     .input(z.object({ email: z.string().email() }))
     .mutation(async ({ input }) => {
@@ -354,10 +358,11 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userRouter = createTRPCRouter({
   // Standard API rate limit (1000 per hour per user)
-  getProfile: withProtectedRateLimit(rateLimiters.api())
-    .query(async ({ ctx }) => {
+  getProfile: withProtectedRateLimit(rateLimiters.api()).query(
+    async ({ ctx }) => {
       return await getUserProfile(ctx.user.id);
-    }),
+    },
+  ),
 
   // Standard API rate limit for updates
   updateProfile: withProtectedRateLimit(rateLimiters.api())
@@ -367,15 +372,16 @@ export const userRouter = createTRPCRouter({
     }),
 
   // Strict rate limit for sensitive operations
-  deleteAccount: withProtectedRateLimit(rateLimiters.strict())
-    .mutation(async ({ ctx }) => {
+  deleteAccount: withProtectedRateLimit(rateLimiters.strict()).mutation(
+    async ({ ctx }) => {
       return await deleteUserAccount(ctx.user.id);
-    }),
+    },
+  ),
 
   // Email-specific rate limit for email changes
   changeEmail: withProtectedRateLimit(
     rateLimiters.email(),
-    (ctx) => `change-email:${ctx.user.email}`
+    (ctx) => `change-email:${ctx.user.email}`,
   )
     .input(z.object({ newEmail: z.string().email() }))
     .mutation(async ({ input, ctx }) => {
@@ -409,16 +415,17 @@ import { createRateLimiter } from "@tepian-k3/services/rate-limiter";
 
 // Create custom rate limiter
 const customLimiter = createRateLimiter({
-  points: 50,           // 50 requests
-  duration: 300,        // per 5 minutes
+  points: 50, // 50 requests
+  duration: 300, // per 5 minutes
   strategy: "sliding-window",
-  blockDuration: 600,   // Block for 10 minutes if exceeded
+  blockDuration: 600, // Block for 10 minutes if exceeded
 });
 
 // Use in router
 export const apiRouter = createTRPCRouter({
-  customEndpoint: withRateLimit(customLimiter)
-    .query(async () => { /* ... */ }),
+  customEndpoint: withRateLimit(customLimiter).query(async () => {
+    /* ... */
+  }),
 });
 ```
 
@@ -428,14 +435,17 @@ For testing, you can bypass rate limiting or use lenient limits:
 
 ```typescript
 // In test environment
-const testLimiter = process.env.NODE_ENV === "test"
-  ? createRateLimiter({ points: 1000000, duration: 1 }) // Essentially no limit
-  : rateLimiters.auth();
+const testLimiter =
+  process.env.NODE_ENV === "test"
+    ? createRateLimiter({ points: 1000000, duration: 1 }) // Essentially no limit
+    : rateLimiters.auth();
 
 export const authRouter = createTRPCRouter({
   login: withRateLimit(testLimiter)
     .input(loginSchema)
-    .mutation(async ({ input }) => { /* ... */ }),
+    .mutation(async ({ input }) => {
+      /* ... */
+    }),
 });
 ```
 
@@ -446,7 +456,7 @@ To monitor rate limiting effectiveness, log when limits are hit:
 ```typescript
 export const withRateLimit = <TInput = unknown>(
   limiter: RateLimiter,
-  getKey?: (ctx: any, input?: TInput) => string
+  getKey?: (ctx: any, input?: TInput) => string,
 ) =>
   publicProcedure.use(async ({ ctx, next, getRawInput }) => {
     const rawInput = await getRawInput();

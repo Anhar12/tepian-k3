@@ -25,7 +25,7 @@ const userPermissionsQueries = {
         logError(
           "userPermissionsQueries.grantPermission",
           "Error granting permission to user",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -55,7 +55,7 @@ const userPermissionsQueries = {
         logError(
           "userPermissionsQueries.revokePermission",
           "Error revoking permission from user",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

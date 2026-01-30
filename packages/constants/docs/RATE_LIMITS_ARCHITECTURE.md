@@ -23,7 +23,10 @@ The constants package defines the **base types** for rate limiting:
 ```typescript
 // packages/constants/src/rate-limits.ts
 
-export type RateLimiterStrategy = "sliding-window" | "token-bucket" | "fixed-window";
+export type RateLimiterStrategy =
+  | "sliding-window"
+  | "token-bucket"
+  | "fixed-window";
 
 export interface RateLimiterConfig {
   points: number;
@@ -36,6 +39,7 @@ export interface RateLimiterConfig {
 ```
 
 **Why here?**
+
 - Constants package is the foundation layer
 - No dependencies on other packages
 - Provides shared types for rate limit tier configurations
@@ -69,6 +73,7 @@ export interface RateLimiterResult {
 ```
 
 **Why here?**
+
 - Implementation-specific types
 - Result types that consumers need
 - Can depend on constants for base types
@@ -121,7 +126,7 @@ export const RATE_LIMIT_TIER_CONFIGS = {
     api: {
       points: 1000,
       duration: 3600,
-      strategy: "sliding-window"
+      strategy: "sliding-window",
     } satisfies RateLimiterConfig,
     // ...
   },

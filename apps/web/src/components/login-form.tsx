@@ -136,7 +136,11 @@ export function LoginForm({
                             prev === "password" ? "text" : "password",
                           );
                         }}
-                        aria-label={type === "password" ? "Tampilkan password" : "Sembunyikan password"}
+                        aria-label={
+                          type === "password"
+                            ? "Tampilkan password"
+                            : "Sembunyikan password"
+                        }
                       >
                         {type === "password" ? (
                           <EyeOff className="h-4 w-4" />
