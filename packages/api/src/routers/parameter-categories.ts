@@ -5,11 +5,23 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { cacheService } from "@tepian-k3/services/cache";
+import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
+
+const getAllCategoriesFromDb = () =>
+  runEffect(parameterCategoriesQueries.getAllParameterCategories());
 
 export const parameterCategoriesRouter = createTRPCRouter({
   getAllParameterCategories: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await runEffect(parameterCategoriesQueries.getAllParameterCategories()),
+    async () => {
+      type Categories = Awaited<ReturnType<typeof getAllCategoriesFromDb>>;
+      const cached = await cacheService.get<Categories>(CACHE_KEYS.PARAMETER_CATEGORIES_ALL);
+      if (cached) return cached;
+
+      const result = await getAllCategoriesFromDb();
+      await cacheService.set(CACHE_KEYS.PARAMETER_CATEGORIES_ALL, result, CACHE_TTL.LONG);
+      return result;
+    },
   ),
 
   getPaginatedParameterCategories: withPermission("parameter-categories.view")
@@ -45,21 +57,23 @@ export const parameterCategoriesRouter = createTRPCRouter({
 
   createParameterCategory: withPermission("parameter-categories.create")
     .input(parameterCategoriesSchema.createParameterCategorySchema)
-    .mutation(
-      async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.createParameterCategory(input),
-        ),
-    ),
+    .mutation(async ({ input }) => {
+      const result = await runEffect(
+        parameterCategoriesQueries.createParameterCategory(input),
+      );
+      await cacheService.deleteByPrefix(CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX);
+      return result;
+    }),
 
   updateParameterCategory: withPermission("parameter-categories.update")
     .input(parameterCategoriesSchema.updateParameterCategorySchema)
-    .mutation(
-      async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.updateParameterCategory(input),
-        ),
-    ),
+    .mutation(async ({ input }) => {
+      const result = await runEffect(
+        parameterCategoriesQueries.updateParameterCategory(input),
+      );
+      await cacheService.deleteByPrefix(CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX);
+      return result;
+    }),
 
   deleteParameterCategory: withPermission("parameter-categories.delete")
     .input(
@@ -67,12 +81,13 @@ export const parameterCategoriesRouter = createTRPCRouter({
         id: z.uuidv7(),
       }),
     )
-    .mutation(
-      async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.deleteParameterCategory(input.id),
-        ),
-    ),
+    .mutation(async ({ input }) => {
+      const result = await runEffect(
+        parameterCategoriesQueries.deleteParameterCategory(input.id),
+      );
+      await cacheService.deleteByPrefix(CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX);
+      return result;
+    }),
 
   restoreParameterCategory: withPermission("parameter-categories.delete")
     .input(
@@ -80,10 +95,11 @@ export const parameterCategoriesRouter = createTRPCRouter({
         id: z.uuidv7(),
       }),
     )
-    .mutation(
-      async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.restoreParameterCategory(input.id),
-        ),
-    ),
+    .mutation(async ({ input }) => {
+      const result = await runEffect(
+        parameterCategoriesQueries.restoreParameterCategory(input.id),
+      );
+      await cacheService.deleteByPrefix(CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX);
+      return result;
+    }),
 });

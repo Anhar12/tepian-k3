@@ -92,7 +92,7 @@
 - [ ] Configure Vite manual chunks for code splitting (vendor, router, pdf libs)
 - [ ] Lazy-load TanStack Router routes for `/back-office/*` and `/pengujian/*`
 - [ ] Lazy-load PDF generation imports (pdf-lib, @react-pdf/renderer)
-- [ ] Add Redis caching for frequently accessed read-only data (parameters, clusters)
+- [x] Add Redis caching for frequently accessed read-only data (parameters, clusters)
 
 ### Database
 
