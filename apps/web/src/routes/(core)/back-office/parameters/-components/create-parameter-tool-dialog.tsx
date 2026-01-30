@@ -94,7 +94,7 @@ export default function CreateParameterToolDialog({
   return (
     <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
       <form>
-        <DialogContent className="sm:max-w-106.25">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Tambah Alat Terkait Parameter</DialogTitle>
             <DialogDescription>

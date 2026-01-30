@@ -2,6 +2,8 @@
   "name": "@tepian-k3/services",
   "type": "module",
   "scripts": {
+    "build": "tsc",
+    "check-types": "tsc -b",
     "email:dev": "email dev --dir ./src/email/dev --port 3001",
     "email:verify": "pnpm with-env tsx src/scripts/verify-email.ts",
     "with-env": "dotenv -e ../../.env --"
@@ -22,9 +24,6 @@
     "./pdf": {
       "default": "./src/pdf/index.ts"
     },
-    "./pdf/client": {
-      "default": "./src/pdf/client.ts"
-    },
     "./document-signing": {
       "default": "./src/document-signing/index.ts"
     },
@@ -41,6 +40,8 @@
     "@react-pdf/renderer": "^4.3.2",
     "@tepian-k3/constants": "workspace:*",
     "@trpc/server": "catalog:",
+    "clsx": "^2.1.1",
+    "date-fns": "catalog:",
     "file-saver": "^2.0.5",
     "ioredis": "^5.9.1",
     "jose": "catalog:",
@@ -50,6 +51,7 @@
     "pdf-lib": "catalog:",
     "qrcode": "catalog:",
     "react": "catalog:react19",
+    "react-pdf-tailwind": "^3.0.0",
     "resend": "^6.6.0",
     "sharp": "^0.34.5",
     "uuid": "catalog:",

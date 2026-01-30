@@ -1,4 +1,4 @@
-import { desc, eq } from "@tepian-k3/db";
+import { asc, eq } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
 import { worksheetNotes } from "@tepian-k3/db/schema";
 import { TRPCError } from "@trpc/server";
@@ -14,7 +14,7 @@ const worksheetNoteQueries = {
       try: async () =>
         db.query.worksheetNotes.findMany({
           where: eq(worksheetNotes.worksheetId, worksheetId),
-          orderBy: [desc(worksheetNotes.createdAt)],
+          orderBy: [asc(worksheetNotes.createdAt)],
           with: {
             createdBy: true,
           },

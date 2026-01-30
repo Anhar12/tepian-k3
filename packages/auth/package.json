@@ -9,7 +9,10 @@
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc -b"
+  },
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",
     "typescript": "catalog:"

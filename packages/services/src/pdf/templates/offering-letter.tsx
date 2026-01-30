@@ -1,108 +1,19 @@
 import React from "react";
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
-import { Letterhead } from "../components/letterhead";
-import { QRCodeImage } from "../components/qrcode";
-import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontSize: 11,
-    fontFamily: "Helvetica",
-  },
-  section: {
-    marginBottom: 10,
-  },
-  row: {
-    flexDirection: "row",
-    marginBottom: 5,
-  },
-  label: {
-    width: 80,
-  },
-  colon: {
-    width: 20,
-  },
-  value: {
-    flex: 1,
-  },
-  recipient: {
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  bodyText: {
-    textAlign: "justify",
-    lineHeight: 1.5,
-    marginBottom: 10,
-  },
-  numberedList: {
-    marginLeft: 20,
-    marginBottom: 10,
-  },
-  listItem: {
-    flexDirection: "row",
-    marginBottom: 8,
-    textAlign: "justify",
-  },
-  listNumber: {
-    width: 25,
-  },
-  listContent: {
-    flex: 1,
-    lineHeight: 1.5,
-  },
-  closing: {
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  signatureTable: {
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#000",
-  },
-  signatureRow: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#000",
-  },
-  signatureCell: {
-    flex: 1,
-    padding: 8,
-    borderRightWidth: 1,
-    borderRightColor: "#000",
-    textAlign: "center",
-    fontSize: 10,
-  },
-  signatureCellLast: {
-    borderRightWidth: 0,
-  },
-  signatureSpace: {
-    height: 60,
-  },
-});
+import { Document, Page, View, Text } from "@react-pdf/renderer";
+import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
+import { tw } from "../utils/tw";
+import { PricingTable } from "../components/pricing-table";
 
 interface OfferingLetterProps {
-  order: OrderWithCompanyAndItems;
+  worksheet: WorksheetTransactionDetail;
+  companyName: string;
   letterNumber: string;
-  referenceNumber: string;
-  referenceDate: string;
-  adminEmail: string;
-  adminContact: string;
-  logoUrl?: string;
-  qrCodeDataURL?: string;
-  verificationURL?: string;
 }
 
 export const OfferingLetter: React.FC<OfferingLetterProps> = ({
-  order,
+  worksheet,
+  companyName,
   letterNumber,
-  referenceNumber,
-  referenceDate,
-  adminEmail,
-  adminContact,
-  logoUrl,
-  qrCodeDataURL,
-  verificationURL,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
     day: "numeric",
@@ -112,156 +23,142 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <Letterhead logoUrl={logoUrl} />
+      <Page size="A4" style={tw("p-4 text-[11px] font-sans")}>
+        {/*  Header with letterhead */}
+        <View style={tw("mb-4 flex-col justify-between items-center")}>
+          <View style={tw("flex-row justify-between items-center gap-2")}>
+            <Text style={tw("text-[12px]")}>Lampiran</Text>
+            <Text style={tw("text-[12px]")}>:</Text>
+            <Text style={tw("text-[12px]")}>
+              Surat Kepala Balai K3 Nomor {letterNumber}
+            </Text>
+          </View>
 
-        {/* Letter Details */}
-        <View style={styles.section}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Nomor</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{letterNumber}</Text>
-            <Text>{today}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Sifat</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>Biasa</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Lampiran</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>2 (dua) lembar</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Hal</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>Penawaran Pelaksanaan</Text>
+          <View style={tw("flex-row justify-between items-center gap-2")}>
+            <Text style={tw("text-[12px]")}>Tanggal</Text>
+            <Text style={tw("text-[12px]")}>:</Text>
+            <Text style={tw("text-[12px]")}>{today}</Text>
           </View>
         </View>
 
-        {/* Recipient */}
-        <View style={styles.recipient}>
-          <Text>Yth. Pimpinan Perusahaan</Text>
-          <Text>{order.company.name}</Text>
-          <Text>{order.company.regency.name}</Text>
+        {/* Header */}
+        <View style={tw("items-center mb-4")}>
+          <Text style={tw("text-[12px] font-bold")}>
+            Penawaran harga biaya jasa dan operasional pelaksanaan pengujian K3
+            pada
+          </Text>
+          <Text style={tw("text-[12px] font-bold")}>{companyName}</Text>
         </View>
 
-        {/* Body */}
-        <Text style={styles.bodyText}>
-          Sesuai dengan surat saudara nomor {referenceNumber} tanggal{" "}
-          {referenceDate} perihal Permohonan Pengajuan K3 Lingkungan Kerja, pada
-          prinsipnya Balai Keselamatan dan Kesehatan Kerja Samarinda bersedia
-          untuk melakukan pengujian keselamatan dan kesehatan kerja dengan
-          hal-hal sebagai berikut:
-        </Text>
+        {/* Pricing Tables */}
+        <PricingTable
+          items={worksheet.items}
+          operationalCosts={worksheet.operationalCosts}
+        />
 
-        {/* Numbered List */}
-        <View style={styles.numberedList}>
-          <View style={styles.listItem}>
-            <Text style={styles.listNumber}>1.</Text>
-            <Text style={styles.listContent}>
-              Pihak perusahaan menyetujui penawaran biaya pelaksanaan pengujian
-              dan ditandatangani kemudian dibuatkan Surat Perjanjian Kerjasama
-              (SPK) dan ditandatangani kedua belah pihak dikirimkan melalui
-              email: {adminEmail}
-              (format SPK terlampir).
+        {/* Signature  */}
+        <View style={tw("flex-row justify-between items-start mt-8")}>
+          {/* Company Signature */}
+          <View style={tw("items-center w-4/12")}>
+            <Text style={tw("text-[10px] font-bold text-center")}>
+              Menyetujui,
+            </Text>
+            <Text style={tw("text-[10px] font-bold text-center mb-12")}>
+              {companyName}
+            </Text>
+
+            <Text style={tw("text-[10px] text-center")}>
+              (_________________________)
             </Text>
           </View>
 
-          <View style={styles.listItem}>
-            <Text style={styles.listNumber}>2.</Text>
-            <Text style={styles.listContent}>
-              Balai Keselamatan dan Kesehatan Kerja Samarinda akan menerbitkan
-              tagihan dan kode billing pembayaran pengujian yang disetujui oleh
-              perusahaan, serta SPK untuk ditandatangani kedua belah pihak
-              sebelum pelaksanaan pengujian. (Peraturan Menteri Keuangan Nomor
-              6/PMK.02/2023, Tentang Jenis dan Tarif Penerimaan Negara Bukan
-              Pajak yang Bersifat Volatil yang Berlaku pada Kementerian
-              Ketenagakerjaan).
-            </Text>
+          {/* Signature Table */}
+          <View style={tw("w-5/12 border border-black")}>
+            <View style={tw("flex-row border-b border-black")}>
+              <Text
+                style={tw(
+                  "text-[7px] p-2 border-r border-black w-2/3 text-center",
+                )}
+              >
+                Penanggungjawab
+              </Text>
+              <Text
+                style={tw(
+                  "text-[7px] p-2 border-r border-black w-1/3 text-center",
+                )}
+              >
+                Paraf
+              </Text>
+              <Text style={tw("text-[7px] p-2 w-1/3 text-center")}>
+                Tanggal
+              </Text>
+            </View>
+            <View style={tw("flex-row border-b border-black")}>
+              <View style={tw("w-2/3 border-r border-black p-2")}>
+                <Text style={tw("text-[7px] text-center")}>Pengendali</Text>
+                <Text style={tw("text-[7px] text-center")}>Administrasi</Text>
+                <Text style={tw("text-[7px] text-center")}>
+                  (Kasubbag Umum Balai K3 Samarinda)
+                </Text>
+              </View>
+              <View style={tw("w-1/3 border-r border-black h-16")} />
+              <View style={tw("w-1/3 h-16")} />
+            </View>
+            <View style={tw("flex-row")}>
+              <View style={tw("w-2/3 border-r border-black p-2")}>
+                <Text style={tw("text-[7px] text-center")}>Pengendali</Text>
+                <Text style={tw("text-[7px] text-center")}>Teknis</Text>
+                <Text style={tw("text-[7px] text-center")}>
+                  (Sub Koordinator Pengujian Balai K3 Samarinda)
+                </Text>
+              </View>
+              <View style={tw("w-1/3 border-r border-black h-16")} />
+              <View style={tw("w-1/3 h-16")} />
+            </View>
           </View>
 
-          <View style={styles.listItem}>
-            <Text style={styles.listNumber}>3.</Text>
-            <Text style={styles.listContent}>
-              Penjadwalan dan penunjukan petugas pengujian akan dilakukan oleh
-              Petugas Penjadwalan setelah dilakukan pembayaran penuh oleh
-              perusahaan. (Surat Ditjen Binwasnaker dan K3
-              No.329/BINWASK3/X/2016, Tgl. 14 Oktober 2016, Tentang Pelaksanaan
-              Kegiatan PNBP).
+          {/* Head Signature */}
+          <View style={tw("items-center w-4/12")}>
+            <Text style={tw("text-[10px] font-bold text-center")}>
+              Kepala Balai
             </Text>
-          </View>
+            <Text style={tw("text-[10px] font-bold text-center")}>
+              Keselamatan dan Kesehatan Kerja
+            </Text>
+            <Text style={tw("text-[10px] font-bold text-center mb-12")}>
+              Samarinda
+            </Text>
 
-          <View style={styles.listItem}>
-            <Text style={styles.listNumber}>4.</Text>
-            <Text style={styles.listContent}>
-              Untuk konfirmasi pembayaran atau informasi lebih lanjut
-              disampaikan melalui email {adminEmail} atau Nomor Whatsapp Admin
-              Pengujian {adminContact}.
+            <Text style={tw("text-[10px] text-center underline")}>
+              dr. Erwin Anjasmara lchsan, M.K.M.
             </Text>
-          </View>
-
-          <View style={styles.listItem}>
-            <Text style={styles.listNumber}>5.</Text>
-            <Text style={styles.listContent}>
-              Biaya operasional akan ditransfer kembali apabila terdapat sisa
-              dana setelah pengujian dilaksanakan. Mohon perusahaan dapat
-              menyampaikan nomor rekening pengembalian pada lembar lampiran
-              biaya dan akan dibuatkan Berita Acara Pengembalian Biaya.
+            <Text style={tw("text-[10px] text-center")}>
+              NIP. 19760718 200312 1 001
             </Text>
-          </View>
-
-          <View style={styles.listItem}>
-            <Text style={styles.listNumber}>6.</Text>
-            <Text style={styles.listContent}>
-              Balai Keselamatan dan Kesehatan Kerja Samarinda akan melakukan
-              pengujian sesuai dengan standar, prosedur dan ketentuan yang
-              berlaku dan berkomitmen mewujudkan wilayah bebas dari korupsi
-              dengan menjaga integritas semua petugas dalam memberikan pelayanan
-              yang optimal dan profesional.
-            </Text>
-          </View>
-        </View>
-
-        {/* Closing */}
-        <Text style={styles.closing}>
-          Atas perhatian dan kerja sama yang baik, diucapkan terima kasih.
-        </Text>
-
-        {/* Signature Table */}
-        <View style={styles.signatureTable}>
-          <View style={styles.signatureRow}>
-            <Text style={styles.signatureCell}>Penanggungjawab</Text>
-            <Text style={styles.signatureCell}>Paraf</Text>
-            <Text style={[styles.signatureCell, styles.signatureCellLast]}>
-              Tanggal
-            </Text>
-          </View>
-          <View style={styles.signatureRow}>
-            <Text style={styles.signatureCell}>
-              Pengendali Administrasi{"\n"}
-              (Kasubbag Umum Balai K3 Samarinda)
-            </Text>
-            <View style={[styles.signatureCell, styles.signatureSpace]} />
-            <View
-              style={[
-                styles.signatureCell,
-                styles.signatureCellLast,
-                styles.signatureSpace,
-              ]}
-            />
           </View>
         </View>
 
-        {/* QR Code for verification */}
-        {qrCodeDataURL && (
-          <QRCodeImage
-            qrCodeDataURL={qrCodeDataURL}
-            label="Scan untuk verifikasi keaslian dokumen"
-            verificationText={verificationURL}
-          />
-        )}
+        {/* Refund Bank Info */}
+        <View style={tw("mt-8")}>
+          <Text style={tw("text-[10px] mb-2")}>
+            * Nomor rekening pengembalian sisa dana operasional
+          </Text>
+          <View style={tw("flex-row items-center mb-1")}>
+            <Text style={tw("text-[10px] w-32")}>Nama Bank</Text>
+            <Text style={tw("text-[10px] mx-2")}>:</Text>
+            <Text style={tw("text-[10px]")}>________________________</Text>
+          </View>
+          <View style={tw("flex-row items-center mb-1")}>
+            <Text style={tw("text-[10px] w-32")}>Nomor Rekening</Text>
+            <Text style={tw("text-[10px] mx-2")}>:</Text>
+            <Text style={tw("text-[10px]")}>________________________</Text>
+          </View>
+          <View style={tw("flex-row items-center mb-1")}>
+            <Text style={tw("text-[10px] w-32")}>Atas Nama</Text>
+            <Text style={tw("text-[10px] mx-2")}>:</Text>
+            <Text style={tw("text-[10px]")}>________________________</Text>
+          </View>
+        </View>
       </Page>
     </Document>
   );

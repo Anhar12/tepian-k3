@@ -13,6 +13,7 @@ import {
   type OrderStatus,
 } from "@tepian-k3/constants";
 import { type OrderStatusHistory } from "@tepian-k3/types/order-status-history.types";
+import { format } from "date-fns";
 
 interface OrderTimelineProps {
   history: OrderStatusHistory[];
@@ -23,13 +24,8 @@ interface OrderTimelineProps {
 
 function formatDate(dateString: string): { date: string; time: string } {
   const d = new Date(dateString);
-  const date = d.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-  });
-  const time = d
-    .toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
-    .replace(":", ".");
+  const date = format(d, "dd MMM yyyy");
+  const time = format(d, "HH:mm");
   return { date, time };
 }
 
@@ -58,13 +54,14 @@ export function OrderTimeline({
   const isRevisionStatus = currentStatus === "revision";
 
   // Determine which statuses are completed (appear before current in the flow)
-  let currentIndex = statusFlow.indexOf(currentStatus);
+  let currentIndex = currentStatus ? statusFlow.indexOf(currentStatus) : -1;
 
   // If current status is "revision" (not in flow), find the last completed status in the flow
   if (currentIndex < 0 && isRevisionStatus) {
     // Find the highest index in statusFlow that has history
     for (let i = statusFlow.length - 1; i >= 0; i--) {
-      if (historyMap.has(statusFlow[i])) {
+      const status = statusFlow[i];
+      if (status && historyMap.has(status)) {
         currentIndex = i;
         break;
       }
@@ -144,7 +141,9 @@ export function OrderTimeline({
 
         // Check if revision should be inserted after this item
         const shouldInsertRevision =
-          isRevisionStatus && revisionRecord && index + 1 === revisionInsertIndex;
+          isRevisionStatus &&
+          revisionRecord &&
+          index + 1 === revisionInsertIndex;
 
         // Determine if this is the last item (considering revision insertion)
         const isLast = index === statusFlow.length - 1 && !shouldInsertRevision;
@@ -161,9 +160,20 @@ export function OrderTimeline({
 
         return (
           <Fragment key={status}>
-            {renderTimelineItem(status, variant, isLast, historyRecord, connectorColor)}
+            {renderTimelineItem(
+              status,
+              variant,
+              isLast,
+              historyRecord,
+              connectorColor,
+            )}
             {shouldInsertRevision &&
-              renderTimelineItem("revision", "revision", isRevisionLast, revisionRecord)}
+              renderTimelineItem(
+                "revision",
+                "revision",
+                isRevisionLast,
+                revisionRecord,
+              )}
           </Fragment>
         );
       })}

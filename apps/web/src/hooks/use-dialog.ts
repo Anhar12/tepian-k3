@@ -58,20 +58,23 @@ const useDialogs = <T extends Record<string, z.ZodType | null>>(schemas: T) => {
 
       // If that fails, create a basic default based on schema shape
       if ("shape" in schema && schema.shape) {
-        const defaults: any = {};
+        const defaults: Record<string, unknown> = {};
         Object.keys(schema.shape).forEach((key) => {
-          const fieldSchema = (schema.shape as any)[key];
+          const fieldSchema = (schema.shape as Record<string, z.ZodTypeAny>)[key];
+          if (!fieldSchema) {
+            defaults[key] = undefined;
+            return;
+          }
 
-          // Handle different zod types
-          if (fieldSchema._def?.typeName === "ZodString") {
+          if (fieldSchema instanceof z.ZodString) {
             defaults[key] = "";
-          } else if (fieldSchema._def?.typeName === "ZodNumber") {
+          } else if (fieldSchema instanceof z.ZodNumber) {
             defaults[key] = 0;
-          } else if (fieldSchema._def?.typeName === "ZodBoolean") {
+          } else if (fieldSchema instanceof z.ZodBoolean) {
             defaults[key] = false;
-          } else if (fieldSchema._def?.typeName === "ZodArray") {
+          } else if (fieldSchema instanceof z.ZodArray) {
             defaults[key] = [];
-          } else if (fieldSchema._def?.typeName === "ZodObject") {
+          } else if (fieldSchema instanceof z.ZodObject) {
             defaults[key] = {};
           } else {
             defaults[key] = undefined;

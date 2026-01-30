@@ -3,28 +3,28 @@ import { db } from "@tepian-k3/db/client";
 import {
   and,
   asc,
-  count,
-  desc,
   eq,
   getTableColumns,
-  gte,
   ilike,
   inArray,
   isNotNull,
   isNull,
+  ne,
   sql,
+  sum,
 } from "@tepian-k3/db";
 import {
   chemicalMaterials,
   parameterChemicalMaterials,
   parameters,
+  worksheetChemicalMaterials,
+  worksheets,
 } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
 import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
-import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
-import { filterColumns } from "@tepian-k3/utils/filter-column";
+import { getOffsetPaginated } from "./utils/get-offset-paginated";
 
 const chemicalMaterialQueries = {
   /**
@@ -176,108 +176,25 @@ const chemicalMaterialQueries = {
   getOffsetPaginatedChemicalMaterials(
     input: z.infer<typeof chemicalMaterialSchema.getAllChemicalMaterialsSchema>,
   ) {
-    return Effect.gen(function* () {
-      const offset = (input.page - 1) * input.perPage;
-      const advancedTable = input.filters && input.filters.length > 0;
-
-      const where = advancedTable
-        ? filterColumns({
-            table: chemicalMaterials,
-            filters: input.filters as ExtendedColumnFilter<
-              typeof chemicalMaterials
-            >[],
-            joinOperator: "and",
-          })
-        : and(
-            input.name
-              ? ilike(chemicalMaterials.name, `%${input.name}%`)
-              : undefined,
-            input.code
-              ? ilike(chemicalMaterials.code, `%${input.code}%`)
-              : undefined,
-            input.status
-              ? eq(chemicalMaterials.status, input.status)
-              : undefined,
-            input.createdAt.length > 0
-              ? and(
-                  input.createdAt[0]
-                    ? gte(
-                        chemicalMaterials.createdAt,
-                        (() => {
-                          const date = new Date(input.createdAt[0]);
-                          date.setHours(0, 0, 0, 0);
-                          return date.toISOString();
-                        })(),
-                      )
-                    : undefined,
-                  input.createdAt[1]
-                    ? gte(
-                        chemicalMaterials.createdAt,
-                        (() => {
-                          const date = new Date(input.createdAt[1]);
-                          date.setHours(23, 59, 59, 999);
-                          return date.toISOString();
-                        })(),
-                      )
-                    : undefined,
-                )
-              : undefined,
-            input.showDeleted
-              ? isNotNull(chemicalMaterials.deletedAt)
-              : isNull(chemicalMaterials.deletedAt),
-          );
-
-      const orderBy =
-        input.sort.length > 0
-          ? input.sort.map((item) =>
-              item.desc
-                ? desc(chemicalMaterials[item.id])
-                : asc(chemicalMaterials[item.id]),
-            )
-          : [desc(chemicalMaterials.createdAt)];
-
-      const { data, total } = yield* Effect.tryPromise({
-        try: () =>
-          db.transaction(async (tx) => {
-            const data = await tx
-              .select()
-              .from(chemicalMaterials)
-              .limit(input.perPage)
-              .offset(offset)
-              .where(where)
-              .orderBy(...orderBy);
-
-            const total = await tx
-              .select({
-                count: count(),
-              })
-              .from(chemicalMaterials)
-              .where(where)
-              .execute()
-              .then((res) => res[0]?.count ?? 0);
-
-            return { data, total };
-          }),
-        catch: (error) => {
-          logError(
-            "chemicalMaterialQueries.getOffsetPaginatedChemicalMaterials",
-            "Error fetching paginated chemical materials",
-            { error, input },
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal mengambil data bahan kimia",
-            cause: error,
-          });
-        },
-      });
-
-      const pageCount = Math.ceil(total / input.perPage);
-
-      return {
-        data,
-        pageCount,
-      };
+    return getOffsetPaginated({
+      table: chemicalMaterials,
+      input,
+      searchConditions: [
+        input.name
+          ? ilike(chemicalMaterials.name, `%${input.name}%`)
+          : undefined,
+        input.code
+          ? ilike(chemicalMaterials.code, `%${input.code}%`)
+          : undefined,
+        input.status
+          ? eq(chemicalMaterials.status, input.status)
+          : undefined,
+      ],
+      errorContext: {
+        queryName:
+          "chemicalMaterialQueries.getOffsetPaginatedChemicalMaterials",
+        errorMessage: "Gagal mengambil data bahan kimia",
+      },
     });
   },
 
@@ -331,6 +248,7 @@ const chemicalMaterialQueries = {
   /**
    * Get chemical materials for worksheet
    * Returns chemical materials related to parameters in the worksheet
+   * Also calculates pending stock from other worksheets with pending statuses
    */
   getChemicalMaterialsForWorksheet(worksheetId: string) {
     return Effect.tryPromise({
@@ -347,11 +265,21 @@ const chemicalMaterialQueries = {
 
         if (parameterIds.length === 0) return [];
 
-        // Get chemical materials linked to these parameters with parameter name
+        // Statuses that count as "pending" (materials are reserved but not yet consumed)
+        const pendingStatuses = [
+          "draft",
+          "pending_verification",
+          "revision",
+          "in_progress",
+        ] as const;
+
+        // Get chemical materials linked to these parameters with aggregated parameter names
+        // and calculate pending stock from other worksheets
         const results = await db
           .select({
             ...getTableColumns(chemicalMaterials),
-            parameterName: parameters.name,
+            // Aggregate parameter names into a comma-separated string
+            parameterName: sql<string>`string_agg(DISTINCT ${parameters.name}, ', ' ORDER BY ${parameters.name})`,
           })
           .from(chemicalMaterials)
           .innerJoin(
@@ -371,9 +299,46 @@ const chemicalMaterialQueries = {
               isNull(chemicalMaterials.deletedAt),
             ),
           )
-          .orderBy(asc(chemicalMaterials.name), asc(parameters.name));
+          .groupBy(chemicalMaterials.id)
+          .orderBy(asc(chemicalMaterials.name));
 
-        return results;
+        // Get pending stock for each chemical material from other worksheets
+        const pendingStockResults = await db
+          .select({
+            chemicalMaterialId: worksheetChemicalMaterials.chemicalMaterialId,
+            pendingStock: sum(worksheetChemicalMaterials.required),
+          })
+          .from(worksheetChemicalMaterials)
+          .innerJoin(
+            worksheets,
+            eq(worksheetChemicalMaterials.worksheetId, worksheets.id),
+          )
+          .where(
+            and(
+              inArray(
+                worksheetChemicalMaterials.chemicalMaterialId,
+                results.map((r) => r.id),
+              ),
+              ne(worksheets.id, worksheetId), // Exclude current worksheet
+              inArray(worksheets.status, pendingStatuses),
+              isNull(worksheets.deletedAt),
+            ),
+          )
+          .groupBy(worksheetChemicalMaterials.chemicalMaterialId);
+
+        // Create a map of pending stock by chemical material ID
+        const pendingStockMap = new Map(
+          pendingStockResults.map((r) => [
+            r.chemicalMaterialId,
+            Number(r.pendingStock) || 0,
+          ]),
+        );
+
+        // Merge pending stock into results
+        return results.map((material) => ({
+          ...material,
+          pendingStock: pendingStockMap.get(material.id) ?? 0,
+        }));
       },
       catch: (error) => {
         logError(

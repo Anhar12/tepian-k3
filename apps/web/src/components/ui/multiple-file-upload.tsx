@@ -44,8 +44,8 @@ const MultipleFileUpload = forwardRef<HTMLDivElement, MultipleFileUploadProps>(
       className,
       value,
       onChange,
-      onBlur,
-      name,
+      onBlur: _onBlur,
+      name: _name,
       disabled = false,
       error,
     },
@@ -225,7 +225,8 @@ const MultipleFileUpload = forwardRef<HTMLDivElement, MultipleFileUploadProps>(
 
     const getFileExtension = (filename: string): string => {
       const parts = filename.split(".");
-      return parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "FILE";
+      const ext = parts[parts.length - 1];
+      return parts.length > 1 && ext ? ext.toUpperCase() : "FILE";
     };
 
     const getAcceptedFormats = (): string => {
@@ -242,7 +243,7 @@ const MultipleFileUpload = forwardRef<HTMLDivElement, MultipleFileUploadProps>(
           if (type === "image") extensions.push("Images");
           else if (type === "video") extensions.push("Videos");
           else if (type === "audio") extensions.push("Audio");
-          else extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
+          else if (type) extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
         } else {
           const ext = mime.extension(format);
           if (ext) extensions.push(ext.toUpperCase());

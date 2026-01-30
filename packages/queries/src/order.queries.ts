@@ -132,6 +132,8 @@ const orderQueries = {
           with: {
             items: true,
             statusHistory: true,
+            surveyResponses: true,
+            surveyFeedback: true,
           },
         }),
       catch: (error) => {
@@ -475,9 +477,6 @@ const orderQueries = {
                 message: "Gagal membuat pesanan",
               });
             }
-
-            console.log("New Order Created:", newOrder);
-            console.log("Order Items to be Created:", orderItems);
 
             // Create order items using the existing query
             const items = await Effect.runPromiseExit(

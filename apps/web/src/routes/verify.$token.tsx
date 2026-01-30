@@ -164,7 +164,11 @@ function RouteComponent() {
   // Status configuration
   const statusConfig: Record<
     DocumentStatus,
-    { color: string; icon: React.ComponentType<any>; label: string }
+    {
+      color: string;
+      icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+      label: string;
+    }
   > = {
     draft: {
       color: "bg-gray-500",

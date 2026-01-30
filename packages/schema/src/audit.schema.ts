@@ -1,27 +1,11 @@
-// packages/schema/src/audit.schema.ts
-
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "@tepian-k3/constants";
 import { z } from "zod";
 
 // Audit action enum
-export const auditActionSchema = z.enum([
-  "create",
-  "update",
-  "delete",
-  "status_change",
-]);
+export const auditActionSchema = z.enum(AUDIT_ACTIONS);
 
 // Entity type enum
-export const auditEntityTypeSchema = z.enum([
-  "order",
-  "order_item",
-  "order_status_history",
-  "testing",
-  "testing_item",
-  "user",
-  "user_company",
-  "parameter",
-  "tool",
-]);
+export const auditEntityTypeSchema = z.enum(AUDIT_ENTITY_TYPES);
 
 // Get audit logs filters
 export const getAuditLogsSchema = z.object({

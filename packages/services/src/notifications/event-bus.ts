@@ -27,12 +27,12 @@ type SubscribeOptions = {
   customFilter?: <T extends EventTypes>(
     type: T,
     payload: EventMap[T],
-    context: FilterContext
+    context: FilterContext,
   ) => boolean;
 };
 
 export type EventCallback<T extends EventName = EventName> = (
-  data: EventMap[T]
+  data: EventMap[T],
 ) => void;
 
 export class EventBus {
@@ -56,14 +56,14 @@ export class EventBus {
         if (times > this.maxReconnectAttempts) {
           logError(
             "EventBus.createRedisClient",
-            `Max reconnect attempts reached for ${name}`
+            `Max reconnect attempts reached for ${name}`,
           );
           return null; // Stop retrying
         }
         const delay = Math.min(times * this.reconnectDelay, 10000);
         logWarn(
           "EventBus.createRedisClient",
-          `Reconnecting ${name} in ${delay}ms (attempt ${times})`
+          `Reconnecting ${name} in ${delay}ms (attempt ${times})`,
         );
         return delay;
       },
@@ -96,7 +96,7 @@ export class EventBus {
   }
 
   private async *createMessageIterator(
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ): AsyncIterableIterator<string> {
     // Create abort controller for cleanup
     const abortHandler = () => {
@@ -139,7 +139,7 @@ export class EventBus {
               this.subscriber.once("message", messageHandler);
               this.subscriber.once("error", errorHandler);
               signal?.addEventListener("abort", abortListener, { once: true });
-            }
+            },
           );
 
           // Check for abort or null result
@@ -154,7 +154,7 @@ export class EventBus {
           logError(
             "EventBus.createMessageIterator",
             "Redis subscription error:",
-            { error }
+            { error },
           );
           // Small delay before retrying on error
           await new Promise((r) => setTimeout(r, 100));
@@ -167,7 +167,7 @@ export class EventBus {
 
   private parseAndValidateEvent<T extends EventTypes>(
     message: string,
-    allowedTypes: T[]
+    allowedTypes: T[],
   ): { type: T; payload: EventMap[T] } | null {
     try {
       const data = JSON.parse(message) as unknown;
@@ -182,7 +182,7 @@ export class EventBus {
       if (!allowedTypes.includes(parsed.type as T)) {
         logInfo(
           "EventBus.parseAndValidateEvent",
-          `Skipping event of type ${parsed.type} as it's not in allowed types.`
+          `Skipping event of type ${parsed.type} as it's not in allowed types.`,
         );
         return null;
       }
@@ -194,7 +194,7 @@ export class EventBus {
         logError(
           "EventBus.parseAndValidateEvent",
           `Invalid payload for ${parsed.type}:`,
-          result.error
+          result.error,
         );
         return null;
       }
@@ -215,7 +215,7 @@ export class EventBus {
     types: T[],
     context: FilterContext,
     signal?: AbortSignal,
-    options: SubscribeOptions = {}
+    options: SubscribeOptions = {},
   ): AsyncIterableIterator<{ type: T; payload: EventMap[T] }> {
     const { includeOwnEvents = false, customFilter } = options;
 
@@ -247,7 +247,7 @@ export class EventBus {
         if (!includeOwnEvents && this.isOwnEvent(payload, context)) {
           logInfo(
             "EventBus.subscribe",
-            `Skipping own event ${type} for user ${context.user.id}`
+            `Skipping own event ${type} for user ${context.user.id}`,
           );
           continue;
         }
@@ -261,7 +261,7 @@ export class EventBus {
         if (customFilter && !customFilter(type, payload, context)) {
           logInfo(
             "EventBus.subscribe",
-            `Event ${type} filtered out by custom filter`
+            `Event ${type} filtered out by custom filter`,
           );
           continue;
         }
@@ -279,14 +279,14 @@ export class EventBus {
 
   async publish<T extends EventTypes>(
     type: T,
-    payload: Omit<EventMap[T], "id" | "timestamp">
+    payload: Omit<EventMap[T], "id" | "timestamp">,
   ): Promise<void> {
     const event = {
       type,
       payload: {
         ...payload,
         id: uuidv7(),
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       },
     };
 
@@ -295,7 +295,7 @@ export class EventBus {
 
     if (!result.success) {
       const error = `Invalid payload for ${type}: ${z.prettifyError(
-        result.error
+        result.error,
       )}`;
       logError("EventBus.publish", "Failed to publish event:", { error });
       throw new Error(error);
@@ -308,7 +308,7 @@ export class EventBus {
 
   private isOwnEvent<T extends EventTypes>(
     payload: EventMap[T],
-    context: FilterContext
+    context: FilterContext,
   ): boolean {
     // Check if this event was triggered by the current user
     if ("triggeredBy" in payload && payload.triggeredBy === context.user.id) {
@@ -319,7 +319,7 @@ export class EventBus {
 
   private isEventForUser<T extends EventTypes>(
     payload: EventMap[T],
-    context: FilterContext
+    context: FilterContext,
   ): boolean {
     // Check if event has a target userId and matches current user
     if ("userId" in payload) {
@@ -341,7 +341,7 @@ export function initializeEventBus(config: RedisOptions): void {
   if (eventBus) {
     logWarn(
       "initializeEventBus",
-      "EventBus already initialized, skipping re-initialization"
+      "EventBus already initialized, skipping re-initialization",
     );
     return;
   }
@@ -353,7 +353,7 @@ export function getEventBus(): EventBus {
   if (!eventBus) {
     logWarn(
       "getEventBus",
-      "EventBus not initialized, creating with default config"
+      "EventBus not initialized, creating with default config",
     );
     const redisConfig = {
       host: env.MEMURAI_HOST,

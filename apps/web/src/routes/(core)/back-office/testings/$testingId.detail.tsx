@@ -39,6 +39,7 @@ import {
   type TestingDocumentType,
   type TestingStatus,
 } from "@tepian-k3/constants";
+import { format } from "date-fns";
 import {
   Building2,
   CheckCircle2,
@@ -175,7 +176,7 @@ function RouteComponent() {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-4">
         <FlaskConical className="h-12 w-12 text-muted-foreground/50" />
-        <p className="text-muted-foreground">Testing tidak ditemukan</p>
+        <p className="text-muted-foreground">Pengujian tidak ditemukan</p>
         <Button variant="outline" onClick={() => router.history.back()}>
           Kembali ke Daftar
         </Button>
@@ -188,7 +189,7 @@ function RouteComponent() {
   return (
     <div className="flex flex-col gap-4">
       <WorksheetHeaderCard
-        title={`Testing ${testing.testingNumber}`}
+        title={`Pengujian ${testing.testingNumber}`}
         subtitle={`${testing.order?.company?.name || "Perusahaan"} - ${TESTING_STATUS_LABELS[testing.status as TestingStatus]}`}
         actionButton={[]}
       />
@@ -244,17 +245,17 @@ function RouteComponent() {
           {/* Info Tab */}
           <TabsContent value="info" className="p-3 pt-4 sm:p-4 sm:pt-6">
             <div className="grid gap-6 md:grid-cols-2">
-              {/* Testing Info */}
+              {/* Pengujian Info */}
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <h3 className="mb-4 flex items-center gap-2 font-semibold">
                     <FlaskConical className="h-5 w-5 text-primary" />
-                    Informasi Testing
+                    Informasi Pengujian
                   </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">
-                        No. Testing
+                        No. Pengujian
                       </span>
                       <span className="font-mono text-sm font-medium">
                         {testing.testingNumber}
@@ -275,14 +276,7 @@ function RouteComponent() {
                         Tanggal Dibuat
                       </span>
                       <span className="text-sm">
-                        {new Date(testing.createdAt).toLocaleDateString(
-                          "id-ID",
-                          {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                          },
-                        )}
+                        {format(testing.createdAt, "dd MMM yyyy HH:mm")}
                       </span>
                     </div>
                     {testing.note && (
@@ -380,7 +374,7 @@ function RouteComponent() {
                   Tidak ada parameter testing
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Testing ini belum memiliki item parameter.
+                  Pengujian ini belum memiliki item parameter.
                 </p>
               </div>
             ) : (
@@ -461,7 +455,7 @@ function RouteComponent() {
               <CardContent className="p-4">
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
                   <Upload className="h-5 w-5 text-primary" />
-                  Unggah Dokumen Testing
+                  Unggah Dokumen Pengujian
                 </h3>
                 <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
                   <div>
@@ -594,14 +588,7 @@ function RouteComponent() {
                             </Badge>
                           </TableCell>
                           <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                            {new Date(doc.createdAt).toLocaleDateString(
-                              "id-ID",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              },
-                            )}
+                            {format(doc.createdAt, "dd MMM yyyy")}
                           </TableCell>
                           <TableCell>
                             <Badge

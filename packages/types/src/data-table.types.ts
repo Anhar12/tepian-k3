@@ -2,6 +2,7 @@ import type { ColumnSort, Row, RowData } from "@tanstack/react-table";
 import type {
   FilterItemSchema,
   FilterVariant,
+  JoinOperator,
 } from "@tepian-k3/shared/data-table.config";
 
 export {
@@ -17,6 +18,15 @@ declare module "@tanstack/react-table" {
   // biome-ignore lint/correctness/noUnusedVariables: TData is used in the TableMeta interface
   interface TableMeta<TData extends RowData> {
     queryKeys?: QueryKeys;
+    filters?: ExtendedColumnFilter<TData>[];
+    setFilters?: (
+      filters:
+        | ExtendedColumnFilter<TData>[]
+        | ((prev: ExtendedColumnFilter<TData>[]) => ExtendedColumnFilter<TData>[])
+        | null,
+    ) => void;
+    joinOperator?: JoinOperator;
+    setJoinOperator?: (value: JoinOperator) => void;
   }
 
   // biome-ignore lint/correctness/noUnusedVariables: TData and TValue are used in the ColumnMeta interface

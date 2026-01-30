@@ -32,7 +32,7 @@ import z from "zod";
 
 export const Route = createFileRoute("/(core)/back-office/roles/$roleId/edit")({
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "roles.create" }),
+    await requirePermission(context, { permission: "roles.update" }),
   params: z.object({
     roleId: z.uuidv7(),
   }),

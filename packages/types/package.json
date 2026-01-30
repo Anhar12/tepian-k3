@@ -9,7 +9,10 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc -b"
+  },
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",
     "type-fest": "^5.3.1",

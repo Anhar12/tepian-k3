@@ -17,7 +17,7 @@ const getAllKBLISchema = z.object({
       z.object({
         id: z.enum(SORTABLE_KBLI_FIELDS),
         desc: z.boolean(),
-      })
+      }),
     )
     .default([{ id: "createdAt", desc: false }]),
   name: z.string().default(""),

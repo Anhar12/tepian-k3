@@ -14,7 +14,7 @@ import {
   testingItem,
   order,
 } from "@tepian-k3/db/schema";
-import type { BahanUnit } from "@tepian-k3/constants";
+import type { BahanUnit, WorksheetStatus } from "@tepian-k3/constants";
 import { logCreate, logUpdate } from "./helpers/audit.helpers";
 import type { WorksheetNoteStatus } from "@tepian-k3/constants";
 
@@ -120,7 +120,11 @@ const worksheetQueries = {
   /**
    * Get all worksheets with pagination
    */
-  getAllWorksheets(page: number = 1, limit: number = 10, status?: string) {
+  getAllWorksheets(
+    page: number = 1,
+    limit: number = 10,
+    status?: WorksheetStatus,
+  ) {
     return Effect.gen(function* () {
       const offset = (page - 1) * limit;
 
@@ -128,7 +132,7 @@ const worksheetQueries = {
         try: () =>
           Promise.all([
             db.query.worksheets.findMany({
-              where: status ? eq(worksheets.status, status as any) : undefined,
+              where: status ? eq(worksheets.status, status) : undefined,
               limit,
               offset,
               orderBy: (worksheets, { desc }) => [desc(worksheets.createdAt)],
@@ -191,6 +195,78 @@ const worksheetQueries = {
           totalItems: totalCount,
         },
       };
+    });
+  },
+
+  /**
+   * Get all worksheets for schedule calendar display
+   * Returns worksheets with schedule dates, company, location, and assignments
+   */
+  getWorksheetsForSchedule() {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.worksheets.findMany({
+          columns: {
+            id: true,
+            status: true,
+            startDate: true,
+            endDate: true,
+          },
+          orderBy: (worksheets, { desc }) => [desc(worksheets.startDate)],
+          with: {
+            order: {
+              with: {
+                company: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            testing: {
+              with: {
+                items: {
+                  columns: {
+                    id: true,
+                  },
+                  with: {
+                    location: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      },
+                    },
+                  },
+                  limit: 1,
+                },
+              },
+            },
+            assignments: {
+              columns: {
+                id: true,
+              },
+              with: {
+                employee: {
+                  columns: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+      catch: (error) => {
+        logError(
+          "worksheetQueries.getWorksheetsForSchedule",
+          "Failed to fetch worksheets for schedule",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil jadwal worksheet",
+        });
+      },
     });
   },
 
@@ -413,7 +489,7 @@ const worksheetQueries = {
    */
   updateWorksheetStatus(
     worksheetId: string,
-    status: string,
+    status: WorksheetStatus,
     userId: string,
     endDate?: string,
     result?: string,
@@ -424,7 +500,7 @@ const worksheetQueries = {
           const [updatedWorksheet] = await db
             .update(worksheets)
             .set({
-              status: status as any,
+              status: status,
               endDate: endDate || sql`${worksheets.endDate}`,
               result: result || sql`${worksheets.result}`,
               updatedAt: sql`CURRENT_TIMESTAMP`,
@@ -1052,45 +1128,46 @@ const worksheetQueries = {
   submitForVerification(worksheetId: string, userId: string) {
     return Effect.gen(function* () {
       const updated = yield* Effect.tryPromise({
-        try: async () => {
-          // First check current status
-          const worksheet = await db.query.worksheets.findFirst({
-            where: eq(worksheets.id, worksheetId),
-          });
-
-          if (!worksheet) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Worksheet tidak ditemukan",
+        try: () =>
+          db.transaction(async (tx) => {
+            // First check current status
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
             });
-          }
 
-          if (worksheet.status !== "draft") {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message:
-                "Worksheet harus dalam status 'draft' untuk diajukan verifikasi",
-            });
-          }
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
 
-          const [updatedWorksheet] = await db
-            .update(worksheets)
-            .set({
-              status: "pending_verification",
-              updatedAt: sql`CURRENT_TIMESTAMP`,
-            })
-            .where(eq(worksheets.id, worksheetId))
-            .returning();
+            if (worksheet.status !== "draft") {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Worksheet harus dalam status 'draft' untuk diajukan verifikasi",
+              });
+            }
 
-          if (!updatedWorksheet) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal mengajukan worksheet untuk verifikasi",
-            });
-          }
+            const [updatedWorksheet] = await tx
+              .update(worksheets)
+              .set({
+                status: "pending_verification",
+                updatedAt: sql`CURRENT_TIMESTAMP`,
+              })
+              .where(eq(worksheets.id, worksheetId))
+              .returning();
 
-          return updatedWorksheet;
-        },
+            if (!updatedWorksheet) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal mengajukan worksheet untuk verifikasi",
+              });
+            }
+
+            return updatedWorksheet;
+          }),
         catch: (error) => {
           logError(
             "worksheetQueries.submitForVerification",
@@ -1140,54 +1217,55 @@ const worksheetQueries = {
   ) {
     return Effect.gen(function* () {
       const updated = yield* Effect.tryPromise({
-        try: async () => {
-          // First check current status
-          const worksheet = await db.query.worksheets.findFirst({
-            where: eq(worksheets.id, worksheetId),
-          });
-
-          if (!worksheet) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Worksheet tidak ditemukan",
+        try: () =>
+          db.transaction(async (tx) => {
+            // First check current status
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
             });
-          }
 
-          if (
-            worksheet.status !== "draft" &&
-            worksheet.status !== "pending_verification"
-          ) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message:
-                "Worksheet harus dalam status 'draft' atau 'pending_verification' untuk diverifikasi",
-            });
-          }
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
 
-          const [updatedWorksheet] = await db
-            .update(worksheets)
-            .set({
-              status: "verified",
-              mainSupervisorId:
-                mainSupervisorId ?? worksheet.mainSupervisorId ?? null,
-              accompanyingSupervisorId:
-                accompanyingSupervisorId ??
-                worksheet.accompanyingSupervisorId ??
-                null,
-              updatedAt: sql`CURRENT_TIMESTAMP`,
-            })
-            .where(eq(worksheets.id, worksheetId))
-            .returning();
+            if (
+              worksheet.status !== "draft" &&
+              worksheet.status !== "pending_verification"
+            ) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Worksheet harus dalam status 'draft' atau 'pending_verification' untuk diverifikasi",
+              });
+            }
 
-          if (!updatedWorksheet) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal memverifikasi worksheet",
-            });
-          }
+            const [updatedWorksheet] = await tx
+              .update(worksheets)
+              .set({
+                status: "verified",
+                mainSupervisorId:
+                  mainSupervisorId ?? worksheet.mainSupervisorId ?? null,
+                accompanyingSupervisorId:
+                  accompanyingSupervisorId ??
+                  worksheet.accompanyingSupervisorId ??
+                  null,
+                updatedAt: sql`CURRENT_TIMESTAMP`,
+              })
+              .where(eq(worksheets.id, worksheetId))
+              .returning();
 
-          return updatedWorksheet;
-        },
+            if (!updatedWorksheet) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal memverifikasi worksheet",
+              });
+            }
+
+            return updatedWorksheet;
+          }),
         catch: (error) => {
           logError(
             "worksheetQueries.verifyWorksheet",
@@ -1237,7 +1315,20 @@ const worksheetQueries = {
           with: {
             order: {
               with: {
-                company: true,
+                company: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                  with: {
+                    regency: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      },
+                    },
+                  },
+                },
                 items: {
                   with: {
                     parameter: {

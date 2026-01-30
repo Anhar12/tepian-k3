@@ -17,6 +17,7 @@
     "@tepian-k3/db": "workspace:*",
     "@tepian-k3/services": "workspace:*",
     "@trpc/server": "catalog:",
+    "date-fns": "catalog:",
     "dotenv": "catalog:",
     "hono": "catalog:",
     "mime-types": "catalog:",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",
+    "@tepian-k3/types": "workspace:*",
     "@types/mime-types": "catalog:",
     "@types/node": "^22.13.11",
     "dotenv-cli": "^11.0.0",

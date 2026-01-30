@@ -20,7 +20,7 @@ import {
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import employeeSchema from "@tepian-k3/schema/employee.schema";
 import { LoaderCircle } from "lucide-react";
@@ -67,6 +67,8 @@ function LoaderComponent() {
           <div className="grid gap-4">
             <SkeletonInput className="w-full" />
             <SkeletonInput className="w-full" />
+            <SkeletonInput className="w-full" />
+            <SkeletonInput className="w-full" />
             <SkeletonCombobox className="w-full" />
             <SkeletonCombobox className="w-full" />
             <SkeletonButton className="w-full" />
@@ -86,7 +88,7 @@ function RouteComponent() {
   const { employeeId } = Route.useParams();
   const redirectBack = useRedirectBackWithTimeout();
 
-  const { data: employee } = useQuery(
+  const { data: employee } = useSuspenseQuery(
     trpc.employee.getEmployeeDetails.queryOptions({
       id: employeeId,
     }),
@@ -96,10 +98,7 @@ function RouteComponent() {
     resolver: zodResolver(employeeSchema.updateEmployeeSchema),
     defaultValues: {
       id: employeeId,
-      name: employee?.name ?? "",
-      email: employee?.email ?? "",
-      userId: employee?.userId ?? "",
-      positionId: employee?.positionId ?? "",
+      ...employee,
     },
   });
 
@@ -153,11 +152,11 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nama Posisi
+                      Nama Karyawan
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nama posisi"
+                      placeholder="Masukkan nama karyawan"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -183,6 +182,56 @@ function RouteComponent() {
                     <Input
                       type="email"
                       placeholder="Masukkan email"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="nip"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      NIP
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan NIP"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="type"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Golongan Karyawan
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan golongan karyawan"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}

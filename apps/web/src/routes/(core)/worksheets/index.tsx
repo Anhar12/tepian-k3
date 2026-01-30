@@ -39,10 +39,12 @@ import {
   TOOLS_CONDITIONS,
   TOOLS_CONDITIONS_LABELS,
   WORKSHEET_NOTE_STATUS,
+  WORKSHEET_STATUS_LABELS,
   type BahanUnit,
   type ToolsAvailability,
   type ToolsCondition,
   type WorksheetNoteStatus,
+  type WorksheetStatus,
 } from "@tepian-k3/constants";
 import {
   AlertCircle,
@@ -50,6 +52,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Download,
+  Lock,
   Loader2,
   MessageSquare,
   Package,
@@ -58,7 +61,7 @@ import {
   Send,
   Wrench,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -102,6 +105,7 @@ interface WorksheetItemWithMeta {
   note: string | null;
   isReady: boolean;
   locationName: string;
+  reference: string | null;
 }
 
 function RouteComponent() {
@@ -121,6 +125,14 @@ function RouteComponent() {
   const { data: notes } = useQuery(
     trpc.worksheet.getNotes.queryOptions({ worksheetId }),
   );
+
+  // Ref for auto-scrolling notes to bottom
+  const notesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when notes change
+  useEffect(() => {
+    notesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [notes]);
 
   // TODO create worksheet items api to fetch items separately
   // Fetch worksheet items
@@ -142,6 +154,10 @@ function RouteComponent() {
   const { data: worksheetChemicalMaterialsData } = useQuery(
     trpc.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
   );
+
+  // Worksheet is only editable in draft or revision status
+  const isEditable =
+    worksheet?.status === "draft" || worksheet?.status === "revision";
 
   // Mutations
   const batchUpdateMutation = useMutation(
@@ -176,10 +192,10 @@ function RouteComponent() {
   const addNoteMutation = useMutation(
     trpc.worksheet.addNote.mutationOptions({
       onSuccess: async () => {
-        (await queryClient.invalidateQueries(
+        await queryClient.invalidateQueries(
           trpc.worksheet.getNotes.queryOptions({ worksheetId }),
-        ),
-          globalSuccessToast("Catatan berhasil ditambahkan"));
+        );
+        globalSuccessToast("Catatan berhasil ditambahkan");
         setNewNote("");
         setNoteSeverity("info");
       },
@@ -254,6 +270,7 @@ function RouteComponent() {
       note: item.note,
       isReady: item.isReady,
       locationName: item.location?.name ?? "Unknown",
+      reference: item.parameter?.reference ?? null,
     }));
   }, [worksheet?.items]);
 
@@ -329,15 +346,24 @@ function RouteComponent() {
       const totalStock =
         (material.usedStock ?? 0) + (material.sealedStock ?? 0);
 
+      // Get pending stock from other worksheets (reserved but not yet consumed)
+      const pendingStock = material.pendingStock ?? 0;
+
+      // Calculate available stock (total - pending from other worksheets)
+      const availableStock = Math.max(0, totalStock - pendingStock);
+
       return {
         ...material,
         required,
         requiredUnit: worksheetData?.requiredUnit ?? material.usedStockUnit,
         totalStock,
+        pendingStock,
+        availableStock,
+        // Stock status is now based on available stock (after pending reservations)
         stockStatus:
           required === 0
             ? ("none" as const)
-            : required <= totalStock
+            : required <= availableStock
               ? ("sufficient" as const)
               : ("insufficient" as const),
       };
@@ -591,6 +617,21 @@ function RouteComponent() {
         ]}
       />
 
+      {/* Show readonly alert when worksheet is not editable */}
+      {!isEditable && worksheet && (
+        <Alert className="border-blue-200 bg-blue-50">
+          <Lock className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-sm text-blue-800">
+            Worksheet ini dalam status{" "}
+            <strong>
+              {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
+            </strong>{" "}
+            dan tidak dapat diedit. Worksheet hanya dapat diedit saat status{" "}
+            <strong>Draft</strong> atau <strong>Revision</strong>.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <Tabs
           value={activeSubTab}
@@ -685,7 +726,7 @@ function RouteComponent() {
                 </SelectContent>
               </Select>
 
-              {hasLocalChanges && (
+              {hasLocalChanges && isEditable && (
                 <PermissionGate permission="worksheet-items.update">
                   <Button
                     onClick={handleSaveItems}
@@ -725,7 +766,7 @@ function RouteComponent() {
                         Parameter
                       </TableHead>
                       <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
-                        Lokasi
+                        Acuan
                       </TableHead>
                       <TableHead className="text-center text-xs font-semibold sm:text-sm">
                         Jumlah
@@ -763,7 +804,7 @@ function RouteComponent() {
                             {item.parameterName}
                           </TableCell>
                           <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                            {item.locationName}
+                            {item.reference ?? "-"}
                           </TableCell>
                           <TableCell className="text-center text-xs sm:text-sm">
                             {item.quantity}
@@ -777,21 +818,27 @@ function RouteComponent() {
                                 </span>
                               }
                             >
-                              <Input
-                                type="number"
-                                value={itemState.value ?? ""}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    item.id,
-                                    "value",
-                                    e.target.value
-                                      ? parseFloat(e.target.value)
-                                      : null,
-                                  )
-                                }
-                                className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
-                                step="any"
-                              />
+                              {isEditable ? (
+                                <Input
+                                  type="number"
+                                  value={itemState.value ?? ""}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      item.id,
+                                      "value",
+                                      e.target.value
+                                        ? parseFloat(e.target.value)
+                                        : null,
+                                    )
+                                  }
+                                  className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
+                                  step="any"
+                                />
+                              ) : (
+                                <span className="text-xs text-muted-foreground sm:text-sm">
+                                  {itemState.value ?? "-"}
+                                </span>
+                              )}
                             </PermissionGate>
                           </TableCell>
                           <TableCell className="text-center">
@@ -805,17 +852,23 @@ function RouteComponent() {
                                 )
                               }
                             >
-                              <Checkbox
-                                checked={itemState.isReady}
-                                onCheckedChange={(checked) =>
-                                  handleItemChange(
-                                    item.id,
-                                    "isReady",
-                                    checked as boolean,
-                                  )
-                                }
-                                className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
-                              />
+                              {isEditable ? (
+                                <Checkbox
+                                  checked={itemState.isReady}
+                                  onCheckedChange={(checked) =>
+                                    handleItemChange(
+                                      item.id,
+                                      "isReady",
+                                      checked as boolean,
+                                    )
+                                  }
+                                  className="data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
+                                />
+                              ) : itemState.isReady ? (
+                                <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-500" />
+                              ) : (
+                                <AlertTriangle className="mx-auto h-5 w-5 text-muted-foreground" />
+                              )}
                             </PermissionGate>
                           </TableCell>
 
@@ -828,18 +881,24 @@ function RouteComponent() {
                                 </span>
                               }
                             >
-                              <Input
-                                value={itemState.note ?? ""}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    item.id,
-                                    "note",
-                                    e.target.value || null,
-                                  )
-                                }
-                                className="h-8 text-xs"
-                                placeholder="Catatan..."
-                              />
+                              {isEditable ? (
+                                <Input
+                                  value={itemState.note ?? ""}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      item.id,
+                                      "note",
+                                      e.target.value || null,
+                                    )
+                                  }
+                                  className="h-8 text-xs"
+                                  placeholder="Catatan..."
+                                />
+                              ) : (
+                                <span className="text-xs text-muted-foreground sm:text-sm">
+                                  {itemState.note ?? "-"}
+                                </span>
+                              )}
                             </PermissionGate>
                           </TableCell>
                         </TableRow>
@@ -967,20 +1026,22 @@ function RouteComponent() {
               ))}
             </div>
 
-            <PermissionGate permission="worksheet-tools.update">
-              <div className="mb-4 flex justify-end">
-                <Button
-                  onClick={handleSaveTools}
-                  disabled={assignToolsMutation.isPending}
-                  className="gap-2"
-                >
-                  {assignToolsMutation.isPending && (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  )}
-                  Simpan Alat ({selectedToolsCount})
-                </Button>
-              </div>
-            </PermissionGate>
+            {isEditable && (
+              <PermissionGate permission="worksheet-tools.update">
+                <div className="mb-4 flex justify-end">
+                  <Button
+                    onClick={handleSaveTools}
+                    disabled={assignToolsMutation.isPending}
+                    className="gap-2"
+                  >
+                    {assignToolsMutation.isPending && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                    Simpan Alat ({selectedToolsCount})
+                  </Button>
+                </div>
+              </PermissionGate>
+            )}
 
             <div className="overflow-hidden rounded-xl border">
               <div className="overflow-x-auto">
@@ -988,18 +1049,20 @@ function RouteComponent() {
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="w-12">
-                        <PermissionGate permission="worksheet-tools.update">
-                          <Checkbox
-                            checked={allToolsSelected}
-                            onCheckedChange={handleSelectAllTools}
-                            aria-label="Select all"
-                            className={
-                              someToolsSelected && !allToolsSelected
-                                ? "data-[state=checked]:bg-primary/50"
-                                : ""
-                            }
-                          />
-                        </PermissionGate>
+                        {isEditable && (
+                          <PermissionGate permission="worksheet-tools.update">
+                            <Checkbox
+                              checked={allToolsSelected}
+                              onCheckedChange={handleSelectAllTools}
+                              aria-label="Select all"
+                              className={
+                                someToolsSelected && !allToolsSelected
+                                  ? "data-[state=checked]:bg-primary/50"
+                                  : ""
+                              }
+                            />
+                          </PermissionGate>
+                        )}
                       </TableHead>
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Kode
@@ -1019,13 +1082,14 @@ function RouteComponent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {toolPagination.paginatedData.map((tool) => (
+                    {toolPagination.paginatedData.map((tool, idx) => (
                       <TableRow
-                        key={tool.id}
-                        className={`cursor-pointer hover:bg-muted/30 ${
+                        key={idx}
+                        className={`hover:bg-muted/30 ${isEditable ? "cursor-pointer" : ""} ${
                           selectedToolIds.has(tool.id) ? "bg-primary/5" : ""
                         }`}
                         onClick={() =>
+                          isEditable &&
                           handleToolSelect(
                             tool.id,
                             !selectedToolIds.has(tool.id),
@@ -1043,12 +1107,18 @@ function RouteComponent() {
                               )
                             }
                           >
-                            <Checkbox
-                              checked={selectedToolIds.has(tool.id)}
-                              onCheckedChange={(checked) =>
-                                handleToolSelect(tool.id, checked as boolean)
-                              }
-                            />
+                            {isEditable ? (
+                              <Checkbox
+                                checked={selectedToolIds.has(tool.id)}
+                                onCheckedChange={(checked) =>
+                                  handleToolSelect(tool.id, checked as boolean)
+                                }
+                              />
+                            ) : selectedToolIds.has(tool.id) ? (
+                              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                            ) : (
+                              <div className="h-5 w-5" />
+                            )}
                           </PermissionGate>
                         </TableCell>
                         <TableCell className="font-mono text-xs">
@@ -1200,7 +1270,7 @@ function RouteComponent() {
                   </Card>
                 </div>
 
-                {hasLocalBahanChanges && (
+                {hasLocalBahanChanges && isEditable && (
                   <PermissionGate permission="worksheets.update">
                     <div className="mb-4 flex justify-end">
                       <Button
@@ -1240,6 +1310,12 @@ function RouteComponent() {
                           <TableHead className="text-center text-xs font-semibold sm:text-sm">
                             Stok
                           </TableHead>
+                          <TableHead className="hidden text-center text-xs font-semibold sm:text-sm lg:table-cell">
+                            Pending
+                          </TableHead>
+                          <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                            Tersedia
+                          </TableHead>
                           <TableHead className="text-center text-xs font-semibold sm:text-sm">
                             Status
                           </TableHead>
@@ -1254,8 +1330,10 @@ function RouteComponent() {
                             <TableCell className="text-xs font-medium sm:text-sm">
                               {item.name}
                             </TableCell>
-                            <TableCell className="text-xs font-medium sm:text-sm">
-                              {item.parameterName}
+                            <TableCell className="max-w-50 truncate text-xs font-medium sm:text-sm">
+                              <span title={item.parameterName}>
+                                {item.parameterName}
+                              </span>
                             </TableCell>
                             <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                               {item.chemicalFormula ?? "-"}
@@ -1276,18 +1354,24 @@ function RouteComponent() {
                                   </span>
                                 }
                               >
-                                <Input
-                                  type="number"
-                                  value={item.required}
-                                  onChange={(e) =>
-                                    handleRequiredChange(
-                                      item.id,
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
-                                  min={0}
-                                />
+                                {isEditable ? (
+                                  <Input
+                                    type="number"
+                                    value={item.required}
+                                    onChange={(e) =>
+                                      handleRequiredChange(
+                                        item.id,
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
+                                    min={0}
+                                  />
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">
+                                    {item.required}
+                                  </span>
+                                )}
                               </PermissionGate>
                             </TableCell>
                             <TableCell className="text-center">
@@ -1296,6 +1380,29 @@ function RouteComponent() {
                                 className="bg-background text-xs"
                               >
                                 {item.totalStock}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="hidden text-center lg:table-cell">
+                              {item.pendingStock > 0 ? (
+                                <Badge className="bg-yellow-100 text-xs text-yellow-700">
+                                  {item.pendingStock}
+                                </Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">
+                                  0
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${
+                                  item.availableStock < item.required
+                                    ? "border-amber-300 bg-amber-50 text-amber-700"
+                                    : "bg-background"
+                                }`}
+                              >
+                                {item.availableStock}
                               </Badge>
                             </TableCell>
                             <TableCell className="text-center">
@@ -1544,7 +1651,7 @@ function RouteComponent() {
           {/* Catatan Tab */}
           <TabsContent value="catatan" className="p-3 pt-4 sm:p-4 sm:pt-6">
             <div className="flex h-125 flex-col">
-              <ScrollArea className="mb-4 flex-1 pr-4">
+              <ScrollArea className="mb-4 min-h-0 flex-1 pr-4">
                 <div className="flex flex-col space-y-4">
                   {notes?.length === 0 ? (
                     <div className="py-12 text-center">
@@ -1555,7 +1662,7 @@ function RouteComponent() {
                     </div>
                   ) : (
                     notes?.map((note) => {
-                      const isCurrentUser = note.createdBy.id === profile.id; // You'll need to pass currentUserId as a prop
+                      const isCurrentUser = note.createdBy.id === profile.id;
 
                       return (
                         <div
@@ -1573,7 +1680,7 @@ function RouteComponent() {
                             </AvatarFallback>
                           </Avatar>
                           <div
-                            className={`max-w-[80%] flex-1 ${isCurrentUser ? "flex flex-col items-end" : ""}`}
+                            className={`max-w-[80%] ${isCurrentUser ? "flex flex-col items-end" : ""}`}
                           >
                             <div
                               className={`inline-block rounded-2xl px-4 py-2 ${
@@ -1619,6 +1726,7 @@ function RouteComponent() {
                       );
                     })
                   )}
+                  <div ref={notesEndRef} />
                 </div>
               </ScrollArea>
 

@@ -33,7 +33,6 @@ import type z from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
 import { Spinner } from "@/components/ui/spinner";
 import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
@@ -47,6 +46,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import { useOptimisticMutation } from "@/lib/optimistic-update";
 
 export const Route = createFileRoute(
   "/(core)/back-office/chemical-materials/create",
@@ -78,8 +78,19 @@ function RouteComponent() {
     },
   });
 
-  const createChemicalMaterialMutation = useMutation(
-    trpc.chemicalMaterial.create.mutationOptions({
+  const createChemicalMaterialMutation = useOptimisticMutation(
+    trpc.chemicalMaterial.create.mutationOptions(),
+    {
+      queryOptions: trpc.chemicalMaterial.getPaginated.queryOptions({}),
+      operation: {
+        type: "create",
+        getOptimisticItem: (input) => ({
+          id: `optimistic-${Math.random().toString(16).slice(2)}`,
+          ...input,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }),
+      },
       onSuccess: async () => {
         globalSuccessToast("Bahan kimia berhasil dibuat");
         await redirectBack();
@@ -87,7 +98,7 @@ function RouteComponent() {
       onError: (error) => {
         globalErrorToast(`Gagal membuat bahan kimia: ${error.message}`);
       },
-    }),
+    },
   );
 
   function handleSubmit(

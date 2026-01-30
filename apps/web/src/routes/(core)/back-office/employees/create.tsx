@@ -49,6 +49,8 @@ function RouteComponent() {
       name: "",
       positionId: "",
       userId: "",
+      nip: "",
+      type: "",
     },
   });
 
@@ -103,11 +105,11 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nama Posisi
+                      Nama Karyawan
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nama posisi"
+                      placeholder="Masukkan nama karyawan"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -133,6 +135,56 @@ function RouteComponent() {
                     <Input
                       type="email"
                       placeholder="Masukkan email"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="nip"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      NIP
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan NIP"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="type"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Golongan Karyawan
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan golongan karyawan"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}

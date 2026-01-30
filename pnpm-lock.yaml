@@ -133,6 +133,9 @@ importers:
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.8.0(typescript@5.9.3)
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
@@ -149,6 +152,9 @@ importers:
       '@tepian-k3/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@tepian-k3/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@types/mime-types':
         specifier: 'catalog:'
         version: 3.0.1
@@ -721,6 +727,12 @@ importers:
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.8.0(typescript@5.9.3)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -748,6 +760,9 @@ importers:
       react:
         specifier: catalog:react19
         version: 19.2.3
+      react-pdf-tailwind:
+        specifier: ^3.0.0
+        version: 3.0.0(react@19.2.3)
       resend:
         specifier: ^6.6.0
         version: 6.6.0(@react-email/render@2.0.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
@@ -6445,6 +6460,9 @@ packages:
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
+
+  react-pdf-tailwind@3.0.0:
+    resolution: {integrity: sha512-Up9T5lkWcWDmepMaYkHzoo8iptwvc0AkYpud0eDRlF/rto5wAijDv2fAZ4AYsaO1O5CQV/2VjELToFGzSjzs4g==}
 
   react-redux@9.2.0:
     resolution: {integrity: sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==}
@@ -13203,6 +13221,14 @@ snapshots:
   react-is@16.13.1: {}
 
   react-is@18.3.1: {}
+
+  react-pdf-tailwind@3.0.0(react@19.2.3):
+    dependencies:
+      '@react-pdf/renderer': 4.3.2(react@19.2.3)
+      '@react-pdf/types': 2.9.2
+      tailwindcss: 4.1.18
+    transitivePeerDependencies:
+      - react
 
   react-redux@9.2.0(@types/react@19.2.7)(react@19.2.3)(redux@5.0.1):
     dependencies:

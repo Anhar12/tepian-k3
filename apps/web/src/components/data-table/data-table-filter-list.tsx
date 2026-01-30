@@ -1,5 +1,3 @@
-"use client";
-
 import type { Column, ColumnMeta, Table } from "@tanstack/react-table";
 import {
   CalendarIcon,
@@ -9,7 +7,6 @@ import {
   ListFilter,
   Trash2,
 } from "lucide-react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
 import { DataTableRangeFilter } from "@/components/data-table/data-table-range-filter";
@@ -63,7 +60,6 @@ import {
 } from "@tepian-k3/utils/data-table";
 import { formatDate } from "@/lib/format";
 import { generateId } from "@/lib/id";
-import { getFiltersStateParser } from "@tepian-k3/utils/parsers";
 import { cn } from "@/lib/utils";
 import type {
   ExtendedColumnFilter,
@@ -72,7 +68,6 @@ import type {
 } from "@tepian-k3/types/data-table.types";
 
 const DEBOUNCE_MS = 300;
-const THROTTLE_MS = 50;
 const FILTER_SHORTCUT_KEY = "f";
 const REMOVE_FILTER_SHORTCUTS = ["backspace", "delete"];
 
@@ -81,16 +76,12 @@ interface DataTableFilterListProps<TData> extends React.ComponentProps<
 > {
   table: Table<TData>;
   debounceMs?: number;
-  throttleMs?: number;
-  shallow?: boolean;
   disabled?: boolean;
 }
 
 export function DataTableFilterList<TData>({
   table,
   debounceMs = DEBOUNCE_MS,
-  throttleMs = THROTTLE_MS,
-  shallow = true,
   disabled,
   ...props
 }: DataTableFilterListProps<TData>) {
@@ -106,24 +97,41 @@ export function DataTableFilterList<TData>({
       .filter((column) => column.columnDef.enableColumnFilter);
   }, [table]);
 
-  const [filters, setFilters] = useQueryState(
-    table.options.meta?.queryKeys?.filters ?? "filters",
-    getFiltersStateParser<TData>(columns.map((field) => field.id))
-      .withDefault([])
-      .withOptions({
-        clearOnDefault: true,
-        shallow,
-        throttleMs,
-      }),
+  const filters = (table.options.meta?.filters ??
+    []) as ExtendedColumnFilter<TData>[];
+  const metaSetFilters = table.options.meta?.setFilters as
+    | ((
+        value:
+          | ExtendedColumnFilter<TData>[]
+          | ((
+              prev: ExtendedColumnFilter<TData>[],
+            ) => ExtendedColumnFilter<TData>[])
+          | null,
+      ) => void)
+    | undefined;
+
+  const setFilters = React.useCallback(
+    (
+      value:
+        | ExtendedColumnFilter<TData>[]
+        | ((
+            prev: ExtendedColumnFilter<TData>[],
+          ) => ExtendedColumnFilter<TData>[])
+        | null,
+    ) => {
+      metaSetFilters?.(value);
+    },
+    [metaSetFilters],
   );
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
-  const [joinOperator, setJoinOperator] = useQueryState(
-    table.options.meta?.queryKeys?.joinOperator ?? "",
-    parseAsStringEnum(["and", "or"]).withDefault("and").withOptions({
-      clearOnDefault: true,
-      shallow,
-    }),
+  const joinOperator = (table.options.meta?.joinOperator ??
+    "and") as JoinOperator;
+  const setJoinOperator = React.useCallback(
+    (value: JoinOperator) => {
+      table.options.meta?.setJoinOperator?.(value);
+    },
+    [table.options.meta],
   );
 
   const onFilterAdd = React.useCallback(() => {
@@ -249,7 +257,7 @@ export function DataTableFilterList<TData>({
         <PopoverContent
           aria-describedby={descriptionId}
           aria-labelledby={labelId}
-          className="flex w-full max-w-(--radix-popover-content-available-width) flex-col gap-3.5 p-4 sm:min-w-[380px]"
+          className="flex w-full max-w-(--radix-popover-content-available-width) flex-col gap-3.5 p-4 sm:min-w-95"
           {...props}
         >
           <div className="flex flex-col gap-1">
@@ -272,7 +280,7 @@ export function DataTableFilterList<TData>({
             <SortableContent asChild>
               <div
                 role="list"
-                className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
+                className="flex max-h-75 flex-col gap-2 overflow-y-auto p-1"
               >
                 {filters.map((filter, index) => (
                   <DataTableFilterItem<TData>
@@ -314,7 +322,7 @@ export function DataTableFilterList<TData>({
       </Popover>
       <SortableOverlay>
         <div className="flex items-center gap-2">
-          <div className="h-8 min-w-[72px] rounded-sm bg-primary/10" />
+          <div className="h-8 min-w-18 rounded-sm bg-primary/10" />
           <div className="h-8 w-32 rounded-sm bg-primary/10" />
           <div className="h-8 w-32 rounded-sm bg-primary/10" />
           <div className="h-8 min-w-36 flex-1 rounded-sm bg-primary/10" />
@@ -402,7 +410,7 @@ function DataTableFilterItem<TData>({
         className="flex items-center gap-2"
         onKeyDown={onItemKeyDown}
       >
-        <div className="min-w-[72px] text-center">
+        <div className="min-w-18 text-center">
           {index === 0 ? (
             <span className="text-sm text-muted-foreground">Where</span>
           ) : index === 1 ? (
@@ -711,7 +719,7 @@ function onFilterInputRender<TData>({
               />
             </Button>
           </FacetedTrigger>
-          <FacetedContent id={inputListboxId} className="w-[200px]">
+          <FacetedContent id={inputListboxId} className="w-50">
             <FacetedInput
               aria-label={`Search ${columnMeta?.label} options`}
               placeholder={columnMeta?.placeholder ?? "Search options..."}

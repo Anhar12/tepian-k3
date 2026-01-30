@@ -8,7 +8,7 @@ import { Text } from "lucide-react";
 
 type NestedKeyOf<T> = {
   [K in keyof T & string]: T[K] extends object
-    ? T[K] extends any[]
+    ? T[K] extends unknown[]
       ? K
       : K | `${K}.${NestedKeyOf<T[K]>}`
     : K;
@@ -59,14 +59,14 @@ export function createTextColumn<T extends RowData>(
     icon = Text,
   } = options;
 
-  const meta: ColumnMeta<T, unknown> | undefined = enableFilter
+  const meta: ColumnMeta<T, unknown> = enableFilter
     ? {
         label,
         placeholder,
         variant,
         icon,
       }
-    : undefined;
+    : { label };
 
   return {
     id,
@@ -97,14 +97,14 @@ export function createPriceColumn<T extends RowData>(
     icon = Text,
   } = options;
 
-  const meta: ColumnMeta<T, unknown> | undefined = enableFilter
+  const meta: ColumnMeta<T, unknown> = enableFilter
     ? {
         label,
         placeholder,
         variant,
         icon,
       }
-    : undefined;
+    : { label };
 
   return {
     id,
@@ -159,6 +159,7 @@ export function createDateColumn<T extends RowData>(
       if (!value && nullable) return <span>-</span>;
       return <span>{format(new Date(value as string), dateFormat)}</span>;
     },
+    meta: { label },
   };
 }
 

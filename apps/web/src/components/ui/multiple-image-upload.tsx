@@ -16,8 +16,6 @@ import {
   Image,
   AlertTriangle,
   X,
-  File,
-  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,8 +53,8 @@ const MultipleImageUpload = forwardRef<
       className,
       value,
       onChange,
-      onBlur,
-      name,
+      onBlur: _onBlur,
+      name: _name,
       disabled = false,
       error,
     },
@@ -263,7 +261,7 @@ const MultipleImageUpload = forwardRef<
           if (type === "image") extensions.push("Images");
           else if (type === "video") extensions.push("Videos");
           else if (type === "audio") extensions.push("Audio");
-          else extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
+          else if (type) extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
         } else {
           const ext = mime.extension(format);
           if (ext) extensions.push(ext.toUpperCase());

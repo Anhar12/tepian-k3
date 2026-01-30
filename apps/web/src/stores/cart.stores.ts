@@ -36,12 +36,15 @@ export const useCartStore = create<CartStore>((set) => ({
   cartItems: [],
   setCartItems: (items) =>
     set((state) => {
+      const firstItem = items[0];
+      if (!firstItem) return state;
+
       const index = state.cartItems.findIndex(
-        (item) => item.id === items[0].id,
+        (item) => item.id === firstItem.id,
       );
       if (index !== -1) {
         const updatedCartItems = [...state.cartItems];
-        updatedCartItems[index] = items[0];
+        updatedCartItems[index] = firstItem;
         return { cartItems: updatedCartItems };
       } else {
         return { cartItems: [...state.cartItems, ...items] };

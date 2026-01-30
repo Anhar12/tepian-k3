@@ -65,6 +65,11 @@ export const RESOURCES = [
   "worksheet-assignments",
   "worksheet-chemical-materials",
 
+  // ==================== SURVEY ====================
+  "survey-questions",
+  "survey-responses",
+  "survey-feedback",
+
   // ==================== NOTIFICATIONS ====================
   "notifications",
 ] as const;

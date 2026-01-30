@@ -8,16 +8,17 @@ import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import type { Audit } from "@tepian-k3/types/audit.types";
 import { useQuery } from "@tanstack/react-query";
+import type { AuditEntityType } from "@tepian-k3/constants";
 
 interface AuditLogViewerProps {
-  entityType: string;
+  entityType: AuditEntityType;
   entityId: string;
 }
 
 export function AuditLogViewer({ entityType, entityId }: AuditLogViewerProps) {
   const { data: logs, isLoading } = useQuery(
     trpc.audit.getEntityHistory.queryOptions({
-      entityType: entityType as any,
+      entityType,
       entityId,
     }),
   );
@@ -123,12 +124,12 @@ function AuditLogItem({ log }: { log: Audit }) {
 }
 
 interface ChangeDetailsProps {
-  oldValues: any;
-  newValues: any;
+  oldValues: unknown;
+  newValues: unknown;
 }
 
 function ChangeDetails({ oldValues, newValues }: ChangeDetailsProps) {
-  const changes: Array<{ field: string; old: any; new: any }> = [];
+  const changes: Array<{ field: string; old: unknown; new: unknown }> = [];
 
   // Compare and find changes
   if (oldValues && newValues) {
@@ -140,8 +141,8 @@ function ChangeDetails({ oldValues, newValues }: ChangeDetailsProps) {
     for (const key of allKeys) {
       if (key === "updatedAt" || key === "updated_at") continue;
 
-      const oldVal = oldValues?.[key];
-      const newVal = newValues?.[key];
+      const oldVal = (oldValues as Record<string, unknown>)?.[key];
+      const newVal = (newValues as Record<string, unknown>)?.[key];
 
       if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
         changes.push({ field: key, old: oldVal, new: newVal });
@@ -177,7 +178,7 @@ function ChangeDetails({ oldValues, newValues }: ChangeDetailsProps) {
   );
 }
 
-function formatValue(value: any): string {
+function formatValue(value: unknown): string {
   if (value === null || value === undefined) return "null";
   if (typeof value === "string") return `"${value}"`;
   if (typeof value === "boolean" || typeof value === "number")

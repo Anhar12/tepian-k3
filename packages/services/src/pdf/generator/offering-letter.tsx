@@ -1,22 +1,20 @@
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
 import { OfferingLetter } from "../templates/offering-letter";
-import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
+import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
 
 interface GenerateOfferingLetterOptions {
-  order: OrderWithCompanyAndItems;
+  worksheet: WorksheetTransactionDetail;
+  companyName: string;
   letterNumber: string;
-  referenceNumber: string;
-  referenceDate: string;
-  adminEmail: string;
-  adminContact: string;
-  logoUrl?: string;
-  qrCodeDataURL?: string;
-  verificationURL?: string;
 }
-
+/**
+ * Generates an Offering Letter PDF buffer
+ * @param options - Options for generating the Offering Letter
+ * @returns Promise that resolves to the Offering Letter PDF buffer
+ */
 export const generateOfferingLetterPdf = async (
-  options: GenerateOfferingLetterOptions
+  options: GenerateOfferingLetterOptions,
 ): Promise<Buffer> => {
   const stream = await renderToStream(<OfferingLetter {...options} />);
 

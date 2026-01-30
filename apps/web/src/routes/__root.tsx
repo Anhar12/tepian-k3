@@ -110,8 +110,8 @@ function ErrorComponent({ error }: { error: Error }) {
       // Combine error message with its path (pattern: "✖ message" followed by "→ at path")
       const errors: string[] = [];
       for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line.startsWith("✖")) {
+        const line = lines[i]?.trim();
+        if (line?.startsWith("✖")) {
           const message = line.replace("✖ ", "");
           const nextLine = lines[i + 1]?.trim();
           if (nextLine?.startsWith("→ at")) {

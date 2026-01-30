@@ -23,6 +23,9 @@ function getPageTitle(pathname: string): string {
 
   // Get the last meaningful segment
   const lastSegment = segments[segments.length - 1];
+  if (!lastSegment) {
+    return "Home";
+  }
 
   // Action words for routes
   const actionWords = [
@@ -39,11 +42,15 @@ function getPageTitle(pathname: string): string {
   if (segments.length > 2 && actionWords.includes(lastSegment.toLowerCase())) {
     // Find the parent segment (skip the ID)
     const secondLast = segments[segments.length - 2];
+    if (!secondLast) return formatSegment(lastSegment);
+
     const isSecondLastId = /^[0-9a-f-]{36}$|^\d+$/.test(secondLast);
 
     if (isSecondLastId) {
       // Pattern: /users/$userId/edit -> "User Edit"
       const parentSegment = segments[segments.length - 3];
+      if (!parentSegment) return formatSegment(lastSegment);
+
       const singular = parentSegment.endsWith("s")
         ? parentSegment.slice(0, -1)
         : parentSegment;
@@ -60,6 +67,8 @@ function getPageTitle(pathname: string): string {
   if (isId && segments.length > 1) {
     // Use the previous segment with "Detail" suffix
     const parentSegment = segments[segments.length - 2];
+    if (!parentSegment) return "Detail";
+
     // Singularize if ends with 's' (simple approach)
     const singular = parentSegment.endsWith("s")
       ? parentSegment.slice(0, -1)

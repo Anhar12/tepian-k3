@@ -29,6 +29,7 @@ import {
   TESTING_STATUS_LABELS,
   type TestingStatus,
 } from "@tepian-k3/constants";
+import { format } from "date-fns";
 import { Building2, Eye, FileText, FlaskConical, Search } from "lucide-react";
 import { useState } from "react";
 import z from "zod";
@@ -107,7 +108,7 @@ function RouteComponent() {
   return (
     <div className="flex flex-col gap-4">
       <WorksheetHeaderCard
-        title="Manajemen Testing"
+        title="Manajemen Pengujian"
         subtitle="Kelola pengujian laboratorium dan dokumen hasil pengujian"
         actionButton={[]}
       />
@@ -208,7 +209,7 @@ function RouteComponent() {
                     <TableHead className="text-xs font-semibold sm:text-sm">
                       <div className="flex items-center gap-2">
                         <FlaskConical className="h-4 w-4" />
-                        No. Testing
+                        No. Pengujian
                       </div>
                     </TableHead>
                     <TableHead className="text-xs font-semibold sm:text-sm">
@@ -252,7 +253,7 @@ function RouteComponent() {
                         className="py-12 text-center text-muted-foreground"
                       >
                         <FlaskConical className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                        Tidak ada data testing ditemukan
+                        Tidak ada data pengujian ditemukan
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -284,14 +285,7 @@ function RouteComponent() {
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                          {new Date(testing.createdAt).toLocaleDateString(
-                            "id-ID",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          )}
+                          {format(testing.createdAt, "dd MMM yyyy HH:mm")}
                         </TableCell>
                         <TableCell className="text-center">
                           <PermissionGate

@@ -9,7 +9,7 @@ const STRING_PREFIX = "__str__";
  * Coerces a string value to its appropriate type
  * Handles booleans, numbers, and keeps strings as-is
  */
-function coerceValue(value: string | File): any {
+function coerceValue(value: string | File): string | number | boolean | File {
   // Keep File/Blob as-is
   if (value instanceof File) {
     return value;
@@ -45,8 +45,13 @@ function coerceValue(value: string | File): any {
  * Parses FormData into a structured object
  * Handles arrays (field[]), nested objects (field.nested), and files
  */
-export function parseFormData(formData: FormData): Record<string, any> {
-  const result: Record<string, any> = {};
+interface FormRecord {
+  [key: string]: FormValue;
+}
+type FormValue = string | number | boolean | File | FormValue[] | FormRecord;
+
+export function parseFormData(formData: FormData): Record<string, FormValue> {
+  const result: Record<string, FormValue> = {};
 
   formData.forEach((value, key) => {
     const coercedValue = coerceValue(value);
@@ -57,7 +62,7 @@ export function parseFormData(formData: FormData): Record<string, any> {
       if (!result[cleanKey]) {
         result[cleanKey] = [];
       }
-      result[cleanKey].push(coercedValue);
+      (result[cleanKey] as FormValue[]).push(coercedValue);
       return;
     }
 
@@ -83,12 +88,12 @@ export function parseFormData(formData: FormData): Record<string, any> {
 }
 
 function setNestedValue(
-  obj: Record<string, any>,
+  obj: Record<string, FormValue>,
   path: string,
-  value: any
+  value: FormValue
 ): void {
   const keys = path.match(/[^.\[\]]+/g) || [];
-  let current = obj;
+  let current: FormRecord = obj;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
@@ -98,17 +103,18 @@ function setNestedValue(
       current[key] = /^\d+$/.test(nextKey) ? [] : {};
     }
     if (key !== undefined) {
-      current = current[key];
+      current = current[key] as FormRecord;
     }
   }
 
   const lastKey = keys[keys.length - 1];
   if (lastKey !== undefined) {
-    if (current[lastKey]) {
-      if (Array.isArray(current[lastKey])) {
-        current[lastKey].push(value);
+    const existing = current[lastKey];
+    if (existing) {
+      if (Array.isArray(existing)) {
+        existing.push(value);
       } else {
-        current[lastKey] = [current[lastKey], value];
+        current[lastKey] = [existing, value];
       }
     } else {
       current[lastKey] = value;

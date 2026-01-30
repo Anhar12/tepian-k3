@@ -41,8 +41,8 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
       className,
       value,
       onChange,
-      onBlur,
-      name,
+      onBlur: _onBlur,
+      name: _name,
       disabled = false,
       error,
     },
@@ -131,7 +131,7 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
       [image, maxSize],
     );
 
-    const simulateUpload = (imageFile: ImageFile, file: File) => {
+    const simulateUpload = (_imageFile: ImageFile, file: File) => {
       let progress = 0;
       const interval = setInterval(() => {
         progress += Math.random() * 20;
@@ -204,8 +204,9 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
         setIsDragging(false);
 
         const files = e.dataTransfer.files;
-        if (files.length > 0) {
-          addImage(files[0]);
+        const file = files[0];
+        if (file) {
+          addImage(file);
         }
       },
       [addImage, disabled],
@@ -218,8 +219,9 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
       input.accept = accept;
       input.onchange = (e) => {
         const target = e.target as HTMLInputElement;
-        if (target.files && target.files.length > 0) {
-          addImage(target.files[0]);
+        const file = target.files?.[0];
+        if (file) {
+          addImage(file);
         }
       };
       input.click();

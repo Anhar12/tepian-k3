@@ -16,23 +16,9 @@ const REFRESH_SECRET = new TextEncoder().encode(refreshSecretKey);
 const resetSecretKey = env.JWT_RESET_PASSWORD_SECRET;
 const RESET_SECRET = new TextEncoder().encode(resetSecretKey);
 
-// Legacy function for backward compatibility
-export async function encrypt(payload: JWTPayload): Promise<string> {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(env.JWT_ACCESS_TOKEN_EXPIRY)
-    .sign(key);
-}
-
-export async function decrypt(token: string): Promise<JWTPayload> {
-  const { payload } = await jwtVerify(token, key);
-  return payload as JWTPayload;
-}
-
 // New access token functions
 export async function createAccessToken(
-  payload: AccessTokenPayload
+  payload: AccessTokenPayload,
 ): Promise<string> {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -41,8 +27,13 @@ export async function createAccessToken(
     .sign(key);
 }
 
+export async function decryptAccessToken(token: string): Promise<JWTPayload> {
+  const { payload } = await jwtVerify(token, key);
+  return payload as JWTPayload;
+}
+
 export async function verifyAccessToken(
-  token: string
+  token: string,
 ): Promise<AccessTokenPayload | null> {
   try {
     const { payload } = await jwtVerify(token, key);
@@ -54,7 +45,7 @@ export async function verifyAccessToken(
 
 // Refresh token functions
 export async function createRefreshToken(
-  payload: RefreshTokenPayload
+  payload: RefreshTokenPayload,
 ): Promise<string> {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -64,7 +55,7 @@ export async function createRefreshToken(
 }
 
 export async function verifyRefreshToken(
-  token: string
+  token: string,
 ): Promise<RefreshTokenPayload | null> {
   try {
     const { payload } = await jwtVerify(token, REFRESH_SECRET);
@@ -82,7 +73,7 @@ export async function verifyRefreshToken(
 
 export async function encryptResetToken(
   userId: string,
-  email: string
+  email: string,
 ): Promise<string> {
   return await new SignJWT({ userId, email, type: "password-reset" })
     .setProtectedHeader({ alg: "HS256" })
@@ -92,7 +83,7 @@ export async function encryptResetToken(
 }
 
 export async function decryptResetToken(
-  token: string
+  token: string,
 ): Promise<ResetTokenPayload | null> {
   try {
     const { payload } = await jwtVerify(token, RESET_SECRET);
