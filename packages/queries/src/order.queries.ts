@@ -478,9 +478,6 @@ const orderQueries = {
               });
             }
 
-            console.log("New Order Created:", newOrder);
-            console.log("Order Items to be Created:", orderItems);
-
             // Create order items using the existing query
             const items = await Effect.runPromiseExit(
               orderItemQueries.createOrderItems(tx, newOrder.id, orderItems),

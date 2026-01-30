@@ -1,4 +1,4 @@
-import { decrypt } from ".";
+import { decryptAccessToken } from ".";
 import type { JWTPayload, SessionUser } from "./types/auth.types";
 
 export async function validateToken(token: string): Promise<{
@@ -6,7 +6,7 @@ export async function validateToken(token: string): Promise<{
   user: JWTPayload | null;
 }> {
   try {
-    const payload = await decrypt(token);
+    const payload = await decryptAccessToken(token);
 
     // Validate expiration
     const now = Date.now() / 1000;
