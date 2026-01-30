@@ -30,7 +30,7 @@ footer = """
 trim = true
 # postprocessors
 postprocessors = [
-  { pattern = '\${{ github.repository }}', replace = "${{ github.repository }}" },
+  { pattern = '\$\{\{ github\.repository \}\}', replace = "${{ github.repository }}" },
 ]
 
 [git]
