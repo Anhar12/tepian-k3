@@ -19,6 +19,7 @@ export const withPermissionAndRateLimit = <TInput = unknown>(
 ```
 
 **Features:**
+
 - ✅ Extends `protectedProcedure` (requires authentication)
 - ✅ Checks user permission first
 - ✅ Applies role-based rate limits automatically
@@ -30,6 +31,7 @@ export const withPermissionAndRateLimit = <TInput = unknown>(
 Modified `packages/api/src/routers/audit.ts` to demonstrate usage:
 
 **Before:**
+
 ```typescript
 getAuditLogs: withPermission("audits.view")
   .input(auditSchema.getAuditLogsSchema)
@@ -37,6 +39,7 @@ getAuditLogs: withPermission("audits.view")
 ```
 
 **After:**
+
 ```typescript
 getAuditLogs: withPermissionAndRateLimit("audits.view", "queries")
   .input(auditSchema.getAuditLogsSchema)
@@ -61,12 +64,12 @@ The middleware performs checks in this order:
 
 ## Rate Limit Tiers
 
-| Tier | Roles | Example Limits |
-|------|-------|----------------|
-| **Basic** | viewer | 100 queries/hr, 10 mutations/hr |
-| **Standard** | user, employee | 500 queries/hr, 100 mutations/hr |
-| **Premium** | lab_technician, lab_manager | 2,000 queries/hr, 500 mutations/hr |
-| **Unlimited** | admin, super_admin | 50,000 queries/hr, 10,000 mutations/hr |
+| Tier          | Roles                       | Example Limits                         |
+| ------------- | --------------------------- | -------------------------------------- |
+| **Basic**     | viewer                      | 100 queries/hr, 10 mutations/hr        |
+| **Standard**  | user, employee              | 500 queries/hr, 100 mutations/hr       |
+| **Premium**   | lab_technician, lab_manager | 2,000 queries/hr, 500 mutations/hr     |
+| **Unlimited** | admin, super_admin          | 50,000 queries/hr, 10,000 mutations/hr |
 
 ## Usage Examples
 
@@ -78,21 +81,21 @@ getAll: withPermissionAndRateLimit("resources.read", "queries")
   .input(paginationSchema)
   .query(async ({ input }) => {
     return await resourceQueries.getAll(input);
-  })
+  });
 
 // Mutation endpoint
 create: withPermissionAndRateLimit("resources.create", "mutations")
   .input(createSchema)
   .mutation(async ({ input }) => {
     return await resourceQueries.create(input);
-  })
+  });
 
 // Upload endpoint
 upload: withPermissionAndRateLimit("documents.create", "uploads")
   .input(uploadSchema)
   .mutation(async ({ input }) => {
     return await documentQueries.upload(input);
-  })
+  });
 ```
 
 ### Custom Rate Limit Keys
@@ -176,11 +179,12 @@ The middleware adds rate limit information to the context:
 Access it in your procedure:
 
 ```typescript
-getProfile: withPermissionAndRateLimit("users.read", "queries")
-  .query(async ({ ctx }) => {
+getProfile: withPermissionAndRateLimit("users.read", "queries").query(
+  async ({ ctx }) => {
     console.log(`Rate limit: ${ctx.rateLimit.remaining} remaining`);
     return await userQueries.getById(ctx.user.id);
-  })
+  },
+);
 ```
 
 ## Migration Guide
@@ -213,12 +217,12 @@ getAll: withPermissionAndRateLimit("resources.read", "queries")
 
 ### When to Use Which Middleware
 
-| Middleware | Use When |
-|------------|----------|
-| `publicProcedure` | No auth required, no rate limiting needed |
-| `protectedProcedure` | Auth required, no permission/rate limit checks |
-| `withPermission()` | Permission check only, no rate limiting |
-| `withRoleBasedRateLimit()` | Rate limiting only, no permission check |
+| Middleware                     | Use When                                        |
+| ------------------------------ | ----------------------------------------------- |
+| `publicProcedure`              | No auth required, no rate limiting needed       |
+| `protectedProcedure`           | Auth required, no permission/rate limit checks  |
+| `withPermission()`             | Permission check only, no rate limiting         |
+| `withRoleBasedRateLimit()`     | Rate limiting only, no permission check         |
 | `withPermissionAndRateLimit()` | **Both permission and rate limiting needed** ⭐ |
 
 ## Testing
@@ -230,8 +234,9 @@ describe("Audit Router with Combined Middleware", () => {
   it("should deny access without permission", async () => {
     const caller = createCaller({ user: viewerUser });
 
-    await expect(caller.audit.getStatistics({ entityType: "order" }))
-      .rejects.toThrow("tidak memiliki izin");
+    await expect(
+      caller.audit.getStatistics({ entityType: "order" }),
+    ).rejects.toThrow("tidak memiliki izin");
   });
 
   it("should enforce rate limits for viewers", async () => {
@@ -241,15 +246,17 @@ describe("Audit Router with Combined Middleware", () => {
     for (let i = 0; i < 100; i++) {
       await caller.audit.getEntityHistory({
         entityType: "order",
-        entityId: `${i}`
+        entityId: `${i}`,
       });
     }
 
     // 101st request should fail
-    await expect(caller.audit.getEntityHistory({
-      entityType: "order",
-      entityId: "101"
-    })).rejects.toThrow("Terlalu banyak permintaan");
+    await expect(
+      caller.audit.getEntityHistory({
+        entityType: "order",
+        entityId: "101",
+      }),
+    ).rejects.toThrow("Terlalu banyak permintaan");
   });
 
   it("should allow more requests for admins", async () => {
@@ -259,15 +266,17 @@ describe("Audit Router with Combined Middleware", () => {
     for (let i = 0; i < 100; i++) {
       await caller.audit.getEntityHistory({
         entityType: "order",
-        entityId: `${i}`
+        entityId: `${i}`,
       });
     }
 
     // Should still work
-    await expect(caller.audit.getEntityHistory({
-      entityType: "order",
-      entityId: "101"
-    })).resolves.toBeDefined();
+    await expect(
+      caller.audit.getEntityHistory({
+        entityType: "order",
+        entityId: "101",
+      }),
+    ).resolves.toBeDefined();
   });
 });
 ```

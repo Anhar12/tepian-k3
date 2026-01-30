@@ -103,6 +103,12 @@ importers:
       lint-staged:
         specifier: ^16.1.2
         version: 16.2.7
+      prettier:
+        specifier: 3.7.4
+        version: 3.7.4
+      prettier-plugin-tailwindcss:
+        specifier: ^0.7.2
+        version: 0.7.2(prettier@3.7.4)
       turbo:
         specifier: ^2.6.3
         version: 2.6.3
@@ -118,6 +124,9 @@ importers:
       '@hono/trpc-server':
         specifier: ^0.4.0
         version: 0.4.1(@trpc/server@11.8.0(typescript@5.9.3))(hono@4.11.1)
+      '@node-rs/argon2':
+        specifier: 'catalog:'
+        version: 2.0.2
       '@t3-oss/env-core':
         specifier: ^0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.2.1)

@@ -30,7 +30,7 @@ const regencyQueries = {
         logError(
           "regencyQueries.getAllRegencies",
           "Failed to get all regencies",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -46,14 +46,14 @@ const regencyQueries = {
         db.query.regencies.findMany({
           where: and(
             eq(regencies.provinceId, provinceId),
-            isNull(regencies.deletedAt)
+            isNull(regencies.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "regencyQueries.getAllRegenciesByProvinceId",
           "Failed to get all regencies by province ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -74,7 +74,7 @@ const regencyQueries = {
         logError(
           "regencyQueries.getRegencyById",
           "Failed to get regency by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -83,8 +83,8 @@ const regencyQueries = {
       },
     }).pipe(
       Effect.flatMap((regency) =>
-        regency ? Effect.succeed(regency) : Effect.succeed(null)
-      )
+        regency ? Effect.succeed(regency) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -98,7 +98,7 @@ const regencyQueries = {
         logError(
           "regencyQueries.getDeletedRegencyById",
           "Failed to get deleted regency by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -108,8 +108,8 @@ const regencyQueries = {
       },
     }).pipe(
       Effect.flatMap((regency) =>
-        regency ? Effect.succeed(regency) : Effect.succeed(null)
-      )
+        regency ? Effect.succeed(regency) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -123,7 +123,7 @@ const regencyQueries = {
         logError(
           "regencyQueries.getRegencyByName",
           "Failed to get regency by name",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -132,13 +132,13 @@ const regencyQueries = {
       },
     }).pipe(
       Effect.flatMap((regency) =>
-        regency ? Effect.succeed(regency) : Effect.succeed(null)
-      )
+        regency ? Effect.succeed(regency) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginationRegencies(
-    input: z.infer<typeof regencySchema.getAllRegenciesSchema>
+    input: z.infer<typeof regencySchema.getAllRegenciesSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -161,7 +161,7 @@ const regencyQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -171,20 +171,20 @@ const regencyQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(regencies.deletedAt)
-              : isNull(regencies.deletedAt)
+              : isNull(regencies.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(regencies[item.id]) : asc(regencies[item.id])
+              item.desc ? desc(regencies[item.id]) : asc(regencies[item.id]),
             )
           : [desc(regencies.createdAt)];
 
@@ -217,7 +217,7 @@ const regencyQueries = {
             {
               error,
               input,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -246,7 +246,7 @@ const regencyQueries = {
             code: "CONFLICT",
             message:
               "Kabupaten/Kota dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
-          })
+          }),
         );
       }
 
@@ -276,7 +276,7 @@ const regencyQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data Kabupaten/Kota.",
-          })
+          }),
         );
       }
 
@@ -293,7 +293,7 @@ const regencyQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kabupaten/Kota tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -324,7 +324,7 @@ const regencyQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data Kabupaten/Kota.",
-          })
+          }),
         );
       }
 
@@ -341,7 +341,7 @@ const regencyQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kabupaten/Kota tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -371,7 +371,7 @@ const regencyQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data Kabupaten/Kota.",
-          })
+          }),
         );
       }
 
@@ -388,7 +388,7 @@ const regencyQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kabupaten/Kota yang dihapus tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -419,7 +419,7 @@ const regencyQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data Kabupaten/Kota yang dihapus.",
-          })
+          }),
         );
       }
 

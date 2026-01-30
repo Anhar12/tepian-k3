@@ -7,6 +7,7 @@ This document describes the implementation of the back-office orders list UI.
 ### 1. Backend - Query Layer
 
 #### `packages/queries/src/order.queries.ts`
+
 Added `getAllOrdersPaginated()` function for admin access to all orders with pagination:
 
 ```typescript
@@ -19,6 +20,7 @@ getAllOrdersPaginated(
 ```
 
 **Features:**
+
 - Paginated results with configurable page size
 - Optional status filtering
 - Returns orders with:
@@ -31,6 +33,7 @@ getAllOrdersPaginated(
 ### 2. Backend - Schema Layer
 
 #### `packages/schema/src/order.schema.ts`
+
 Added `getAllOrdersSchema` for validating query parameters:
 
 ```typescript
@@ -52,6 +55,7 @@ const getAllOrdersSchema = z.object({
 ### 3. Backend - API Layer
 
 #### `packages/api/src/routers/order.ts`
+
 Added `getAllOrdersPaginated` endpoint:
 
 ```typescript
@@ -74,9 +78,11 @@ getAllOrdersPaginated: withPermission("orders.read")
 ### 4. Frontend - Columns Definition
 
 #### `apps/web/src/components/columns/orders-columns.tsx`
+
 Created column definitions for the orders data table:
 
 **Columns:**
+
 1. **Number** - Row number with pagination
 2. **Order Number** - Searchable order number
 3. **Company Name** - Truncated company name
@@ -90,6 +96,7 @@ Created column definitions for the orders data table:
 11. **Actions** - View detail button
 
 **Color Schemes:**
+
 - Status colors: yellow (pending), green (approved/completed), red (rejected), blue (in_progress), purple (completed), gray (cancelled)
 - Payment colors: yellow (unpaid), green (paid), blue (refunded), red (failed)
 - Approval colors: yellow (pending), green (approved), red (rejected)
@@ -97,9 +104,11 @@ Created column definitions for the orders data table:
 ### 5. Frontend - Orders List Page
 
 #### `apps/web/src/routes/(core)/back-office/orders/index.tsx`
+
 Created the main orders list page component:
 
 **Features:**
+
 - Data table with server-side pagination
 - Status filter dropdown (all statuses, pending, approved, etc.)
 - Total order count display
@@ -110,12 +119,14 @@ Created the main orders list page component:
 - Responsive layout
 
 **Route Protection:**
+
 - Requires `orders.read` permission
 - Uses `validateSearch` for type-safe query parameters
 
 ### 6. Frontend - Navigation Menu
 
 #### `apps/web/src/lib/back-office-menu.ts`
+
 Added "Orders" to the back-office navigation menu:
 
 ```typescript
@@ -175,6 +186,7 @@ The UI displays three types of statuses for each order:
 ## Future Enhancements
 
 Potential improvements:
+
 - Search by company name or customer email
 - Date range filter
 - Export to CSV/Excel

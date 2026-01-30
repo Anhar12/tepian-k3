@@ -52,7 +52,7 @@ const insertInBatches = async (data: InsertRegency[]) => {
     await db.insert(regencies).values(batch).execute();
 
     console.log(
-      `📦 Inserted batch ${i + 1}/${totalBatches} (${batch.length} regencies)`
+      `📦 Inserted batch ${i + 1}/${totalBatches} (${batch.length} regencies)`,
     );
   }
 };

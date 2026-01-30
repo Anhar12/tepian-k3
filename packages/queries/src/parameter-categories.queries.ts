@@ -31,7 +31,7 @@ const parameterCategoriesQueries = {
         logError(
           "parameterCategoriesQueries.getAllParameterCategories",
           "Failed to fetch all parameter categories",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -47,14 +47,14 @@ const parameterCategoriesQueries = {
         db.query.parameterCategories.findFirst({
           where: and(
             eq(parameterCategories.id, id),
-            isNull(parameterCategories.deletedAt)
+            isNull(parameterCategories.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "parameterCategoriesQueries.getParameterCategoryById",
           "Failed to fetch parameter category by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -65,8 +65,8 @@ const parameterCategoriesQueries = {
       Effect.flatMap((parameterCategory) =>
         parameterCategory
           ? Effect.succeed(parameterCategory)
-          : Effect.succeed(null)
-      )
+          : Effect.succeed(null),
+      ),
     );
   },
 
@@ -76,14 +76,14 @@ const parameterCategoriesQueries = {
         db.query.parameterCategories.findFirst({
           where: and(
             eq(parameterCategories.id, id),
-            isNotNull(parameterCategories.deletedAt)
+            isNotNull(parameterCategories.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "parameterCategoriesQueries.getDeletedParameterCategoryById",
           "Failed to fetch deleted parameter category by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -95,8 +95,8 @@ const parameterCategoriesQueries = {
       Effect.flatMap((parameterCategory) =>
         parameterCategory
           ? Effect.succeed(parameterCategory)
-          : Effect.succeed(null)
-      )
+          : Effect.succeed(null),
+      ),
     );
   },
 
@@ -110,7 +110,7 @@ const parameterCategoriesQueries = {
         logError(
           "parameterCategoriesQueries.getParameterCategoryByName",
           "Failed to fetch parameter category by name",
-          { name, error }
+          { name, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -121,15 +121,15 @@ const parameterCategoriesQueries = {
       Effect.flatMap((parameterCategory) =>
         parameterCategory
           ? Effect.succeed(parameterCategory)
-          : Effect.succeed(null)
-      )
+          : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginatedParameterCategories(
     input: z.infer<
       typeof parameterCategoriesSchema.getAllParameterCategoriesSchema
-    >
+    >,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -156,7 +156,7 @@ const parameterCategoriesQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -166,14 +166,14 @@ const parameterCategoriesQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(parameterCategories.deletedAt)
-              : isNull(parameterCategories.deletedAt)
+              : isNull(parameterCategories.deletedAt),
           );
 
       const orderBy =
@@ -181,7 +181,7 @@ const parameterCategoriesQueries = {
           ? input.sort.map((item) =>
               item.desc
                 ? desc(parameterCategories[item.id])
-                : asc(parameterCategories[item.id])
+                : asc(parameterCategories[item.id]),
             )
           : [desc(parameterCategories.createdAt)];
 
@@ -202,7 +202,7 @@ const parameterCategoriesQueries = {
               .where(where)
               .leftJoin(
                 clusters,
-                eq(parameterCategories.clusterId, clusters.id)
+                eq(parameterCategories.clusterId, clusters.id),
               )
               .orderBy(...orderBy);
 
@@ -221,7 +221,7 @@ const parameterCategoriesQueries = {
           logError(
             "parameterCategoriesQueries.getOffsetPaginatedParameterCategories",
             "Failed to fetch paginated parameter categories",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -243,7 +243,7 @@ const parameterCategoriesQueries = {
   createParameterCategory(
     data: z.infer<
       typeof parameterCategoriesSchema.createParameterCategorySchema
-    >
+    >,
   ) {
     return Effect.gen(this, function* () {
       const isExisting = yield* this.getParameterCategoryByName(data.name);
@@ -253,7 +253,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "CONFLICT",
             message: "Kategori parameter dengan nama tersebut sudah ada.",
-          })
+          }),
         );
       }
 
@@ -263,7 +263,7 @@ const parameterCategoriesQueries = {
           logError(
             "parameterCategoriesQueries.createParameterCategory",
             "Failed to create new parameter category",
-            { data, error }
+            { data, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -277,7 +277,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat kategori parameter baru",
-          })
+          }),
         );
       }
 
@@ -288,7 +288,7 @@ const parameterCategoriesQueries = {
   updateParameterCategory(
     data: z.infer<
       typeof parameterCategoriesSchema.updateParameterCategorySchema
-    >
+    >,
   ) {
     return Effect.gen(this, function* () {
       const parameterCategory = yield* this.getParameterCategoryById(data.id);
@@ -298,7 +298,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kategori parameter tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -310,7 +310,7 @@ const parameterCategoriesQueries = {
             new TRPCError({
               code: "CONFLICT",
               message: "Kategori parameter dengan nama tersebut sudah ada.",
-            })
+            }),
           );
         }
       }
@@ -329,7 +329,7 @@ const parameterCategoriesQueries = {
           logError(
             "parameterCategoriesQueries.updateParameterCategory",
             "Failed to update parameter category",
-            { data, error }
+            { data, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -343,7 +343,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui kategori parameter",
-          })
+          }),
         );
       }
 
@@ -360,7 +360,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kategori parameter tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -375,7 +375,7 @@ const parameterCategoriesQueries = {
           logError(
             "parameterCategoriesQueries.deleteParameterCategory",
             "Failed to delete parameter category",
-            { id, error }
+            { id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -389,7 +389,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus kategori parameter",
-          })
+          }),
         );
       }
 
@@ -406,7 +406,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kategori parameter terhapus tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -421,7 +421,7 @@ const parameterCategoriesQueries = {
           logError(
             "parameterCategoriesQueries.restoreParameterCategory",
             "Failed to restore parameter category",
-            { id, error }
+            { id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -435,7 +435,7 @@ const parameterCategoriesQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan kategori parameter",
-          })
+          }),
         );
       }
 

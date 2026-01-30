@@ -78,7 +78,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
    */
   private async consumeSlidingWindow(
     key: string,
-    points: number
+    points: number,
   ): Promise<RateLimiterResult> {
     const fullKey = this.getKey(key);
     const now = Date.now();
@@ -101,7 +101,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
     // Calculate current points in window
     const currentPoints = record.requests!.reduce(
       (sum, r) => sum + r.points,
-      0
+      0,
     );
 
     // Check if blocked
@@ -142,10 +142,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
     // Calculate reset time based on oldest request
     const oldestRequest = record.requests![0];
     const resetMs = oldestRequest
-      ? Math.max(
-          0,
-          oldestRequest.timestamp + this.config.duration * 1000 - now
-        )
+      ? Math.max(0, oldestRequest.timestamp + this.config.duration * 1000 - now)
       : this.config.duration * 1000;
 
     record.resetAt = now + resetMs;
@@ -166,7 +163,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
    */
   private async consumeTokenBucket(
     key: string,
-    points: number
+    points: number,
   ): Promise<RateLimiterResult> {
     const fullKey = this.getKey(key);
     const now = Date.now();
@@ -196,7 +193,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
       record.resetAt = now + Math.ceil((points / refillRate) * 1000);
 
       const resetMs = Math.ceil(
-        ((this.config.points - record.tokens) / refillRate) * 1000
+        ((this.config.points - record.tokens) / refillRate) * 1000,
       );
 
       return {
@@ -229,7 +226,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
    */
   private async consumeFixedWindow(
     key: string,
-    points: number
+    points: number,
   ): Promise<RateLimiterResult> {
     const fullKey = this.getKey(key);
     const now = Date.now();
@@ -306,7 +303,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
 
       const windowStart = now - this.config.duration * 1000;
       const validRequests = record.requests.filter(
-        (r) => r.timestamp > windowStart
+        (r) => r.timestamp > windowStart,
       );
       const consumed = validRequests.reduce((sum, r) => sum + r.points, 0);
       const remaining = Math.max(0, this.config.points - consumed);
@@ -314,7 +311,7 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
       const resetMs = oldestRequest
         ? Math.max(
             0,
-            oldestRequest.timestamp + this.config.duration * 1000 - now
+            oldestRequest.timestamp + this.config.duration * 1000 - now,
           )
         : this.config.duration * 1000;
 
@@ -344,13 +341,10 @@ export class MemoryRateLimiterStorage implements IRateLimiterStorage {
       const refillRate = this.config.points / this.config.duration;
       const elapsed = (now - record.lastRefill!) / 1000;
       const tokensToAdd = elapsed * refillRate;
-      const tokens = Math.min(
-        this.config.points,
-        record.tokens + tokensToAdd
-      );
+      const tokens = Math.min(this.config.points, record.tokens + tokensToAdd);
       const remaining = Math.floor(tokens);
       const resetMs = Math.ceil(
-        ((this.config.points - tokens) / refillRate) * 1000
+        ((this.config.points - tokens) / refillRate) * 1000,
       );
 
       return {

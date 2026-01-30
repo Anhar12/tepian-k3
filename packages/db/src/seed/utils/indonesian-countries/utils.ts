@@ -5,14 +5,14 @@ import { z } from "zod";
 async function readJsonFile<T>(
   filePath: string,
   schema?: z.ZodSchema<T>,
-  setDirectory?: string
+  setDirectory?: string,
 ): Promise<T> {
   try {
     const currentDir = process.cwd();
     const fullPath = path.join(
       currentDir,
       setDirectory ?? "src/seed/utils/indonesian-countries/",
-      filePath
+      filePath,
     );
 
     const text = await readFile(fullPath, "utf-8");

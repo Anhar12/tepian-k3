@@ -1,6 +1,9 @@
 export class EmailError extends Error {
   _tag = "EmailError";
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown,
+  ) {
     super(message);
     this.name = "EmailError";
   }

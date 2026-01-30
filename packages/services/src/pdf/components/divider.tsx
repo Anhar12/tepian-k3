@@ -34,7 +34,12 @@ export const Divider: React.FC<DividerProps> = ({
   const defaultLength = length || (isHorizontal ? "w-full" : "h-full");
 
   const borderDirection = isHorizontal ? "border-b" : "border-r";
-  const borderStyle = style === "dashed" ? "border-dashed" : style === "dotted" ? "border-dotted" : "";
+  const borderStyle =
+    style === "dashed"
+      ? "border-dashed"
+      : style === "dotted"
+        ? "border-dotted"
+        : "";
 
   return (
     <View

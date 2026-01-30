@@ -58,7 +58,7 @@ async function seedTools() {
 
   // Create a map of parameter name to parameterId
   const parameterNameToId = new Map(
-    parameterRecords.map((p) => [p.name, p.id])
+    parameterRecords.map((p) => [p.name, p.id]),
   );
 
   // Build parameter_tools data
@@ -75,7 +75,7 @@ async function seedTools() {
       const parameterId = parameterNameToId.get(parameterName);
       if (!parameterId) {
         console.warn(
-          `⚠️ Parameter "${parameterName}" not found for tool ${toolCode}, skipping...`
+          `⚠️ Parameter "${parameterName}" not found for tool ${toolCode}, skipping...`,
         );
         continue;
       }
@@ -91,7 +91,7 @@ async function seedTools() {
   if (parameterToolsInsertData.length > 0) {
     await db.insert(parameterTools).values(parameterToolsInsertData).execute();
     console.log(
-      `✅ ${parameterToolsInsertData.length} Parameter-Tool relationships have been seeded`
+      `✅ ${parameterToolsInsertData.length} Parameter-Tool relationships have been seeded`,
     );
   }
 }

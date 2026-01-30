@@ -34,11 +34,10 @@ export const notificationsQueries = {
         if (error instanceof TRPCError) {
           return error;
         }
-        logError(
-          "notificationsQueries.create",
-          "Error creating notification",
-          { input, error }
-        );
+        logError("notificationsQueries.create", "Error creating notification", {
+          input,
+          error,
+        });
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create notification",
@@ -100,7 +99,7 @@ export const notificationsQueries = {
         logError(
           "notificationsQueries.getPaginated",
           "Error fetching notifications",
-          { userId, input, error }
+          { userId, input, error },
         );
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -126,8 +125,8 @@ export const notificationsQueries = {
             and(
               eq(notifications.id, id),
               eq(notifications.userId, userId),
-              isNull(notifications.deletedAt)
-            )
+              isNull(notifications.deletedAt),
+            ),
           )
           .returning();
 
@@ -147,7 +146,7 @@ export const notificationsQueries = {
         logError(
           "notificationsQueries.markAsRead",
           "Error marking notification as read",
-          { id, userId, error }
+          { id, userId, error },
         );
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -173,8 +172,8 @@ export const notificationsQueries = {
             and(
               eq(notifications.userId, userId),
               eq(notifications.isRead, false),
-              isNull(notifications.deletedAt)
-            )
+              isNull(notifications.deletedAt),
+            ),
           )
           .returning();
 
@@ -187,7 +186,7 @@ export const notificationsQueries = {
         logError(
           "notificationsQueries.markAllAsRead",
           "Error marking all notifications as read",
-          { userId, error }
+          { userId, error },
         );
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -210,8 +209,8 @@ export const notificationsQueries = {
             and(
               eq(notifications.userId, userId),
               eq(notifications.isRead, false),
-              isNull(notifications.deletedAt)
-            )
+              isNull(notifications.deletedAt),
+            ),
           );
 
         return result[0]?.count ?? 0;
@@ -220,7 +219,7 @@ export const notificationsQueries = {
         logError(
           "notificationsQueries.getUnreadCount",
           "Error getting unread count",
-          { userId, error }
+          { userId, error },
         );
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -243,8 +242,8 @@ export const notificationsQueries = {
             and(
               eq(notifications.id, id),
               eq(notifications.userId, userId),
-              isNull(notifications.deletedAt)
-            )
+              isNull(notifications.deletedAt),
+            ),
           )
           .returning();
 
@@ -261,11 +260,11 @@ export const notificationsQueries = {
         if (error instanceof TRPCError) {
           return error;
         }
-        logError(
-          "notificationsQueries.delete",
-          "Error deleting notification",
-          { id, userId, error }
-        );
+        logError("notificationsQueries.delete", "Error deleting notification", {
+          id,
+          userId,
+          error,
+        });
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to delete notification",
@@ -286,8 +285,8 @@ export const notificationsQueries = {
           .where(
             and(
               eq(notifications.userId, userId),
-              isNull(notifications.deletedAt)
-            )
+              isNull(notifications.deletedAt),
+            ),
           )
           .returning();
 
@@ -300,7 +299,7 @@ export const notificationsQueries = {
         logError(
           "notificationsQueries.deleteAll",
           "Error deleting all notifications",
-          { userId, error }
+          { userId, error },
         );
         return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

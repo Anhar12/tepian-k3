@@ -11,7 +11,6 @@ import { imageService } from "@tepian-k3/services/image";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const userRouter = createTRPCRouter({
-  // TODO this should support combobox search or something
   getAllUsers: withPermission("users.view").query(
     async () => await runEffect(usersQueries.getAllUsers()),
   ),

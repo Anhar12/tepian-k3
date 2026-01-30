@@ -13,6 +13,7 @@ Updated the OTP verification service to implement the modern authentication patt
 ### 1. Updated `packages/auth/src/services/otp.ts`
 
 #### Imports Added
+
 ```typescript
 import { createAccessToken, createRefreshToken } from "..";
 import refreshTokensQueries from "@tepian-k3/queries/refresh-tokens.queries";
@@ -20,18 +21,21 @@ import { v7 as uuidv7 } from "uuid";
 ```
 
 Removed:
+
 ```typescript
-import { encrypt } from "..";  // Legacy single token function
+import { encrypt } from ".."; // Legacy single token function
 ```
 
 #### `verifyOTP` Method Signature Changed
 
 **Before:**
+
 ```typescript
 static async verifyOTP(input: z.infer<typeof otpSchema.verifyOtpSchema>)
 ```
 
 **After:**
+
 ```typescript
 static async verifyOTP(
   input: z.infer<typeof otpSchema.verifyOtpSchema>,
@@ -47,124 +51,131 @@ static async verifyOTP(
 #### Token Generation Updated
 
 **Before:**
+
 ```typescript
-const token = yield* Effect.tryPromise({
-  try: () =>
-    encrypt({
-      id: user.id,
-      email: user.email,
-      permissions: user.permissions,
-      roles: user.roles.map((role) => role.name),
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,  // 30 days!
-      iat: Math.floor(Date.now() / 1000),
-      jti: user.id,
-    }),
-  catch: (error) => {
-    logError("OTPService.verifyOTP", "Failed to generate auth token", {
-      userId: user.id,
-      error,
-    });
-    return new OTPError({
-      status: false,
-      message: "Gagal membuat token.",
-    });
-  },
-});
+const token =
+  yield *
+  Effect.tryPromise({
+    try: () =>
+      encrypt({
+        id: user.id,
+        email: user.email,
+        permissions: user.permissions,
+        roles: user.roles.map((role) => role.name),
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days!
+        iat: Math.floor(Date.now() / 1000),
+        jti: user.id,
+      }),
+    catch: (error) => {
+      logError("OTPService.verifyOTP", "Failed to generate auth token", {
+        userId: user.id,
+        error,
+      });
+      return new OTPError({
+        status: false,
+        message: "Gagal membuat token.",
+      });
+    },
+  });
 ```
 
 **After:**
+
 ```typescript
 // Create access token with short expiry
-const accessToken = yield* Effect.tryPromise({
-  try: () =>
-    createAccessToken({
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.name),
-      permissions: user.permissions,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }),
-  catch: (error) => {
-    logError("OTPService.verifyOTP", "Failed to create access token", {
-      userId: user.id,
-      error,
-    });
-    return new OTPError({
-      status: false,
-      message: "Gagal membuat access token.",
-    });
-  },
-});
+const accessToken =
+  yield *
+  Effect.tryPromise({
+    try: () =>
+      createAccessToken({
+        id: user.id,
+        email: user.email,
+        roles: user.roles.map((role) => role.name),
+        permissions: user.permissions,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }),
+    catch: (error) => {
+      logError("OTPService.verifyOTP", "Failed to create access token", {
+        userId: user.id,
+        error,
+      });
+      return new OTPError({
+        status: false,
+        message: "Gagal membuat access token.",
+      });
+    },
+  });
 
 // Create refresh token with long expiry
 const sessionId = uuidv7();
-const refreshTokenJWT = yield* Effect.tryPromise({
-  try: () =>
-    createRefreshToken({
-      id: user.id,
-      sessionId,
-      type: "refresh",
-    }),
-  catch: (error) => {
-    logError(
-      "OTPService.verifyOTP",
-      "Failed to create refresh token",
-      {
+const refreshTokenJWT =
+  yield *
+  Effect.tryPromise({
+    try: () =>
+      createRefreshToken({
+        id: user.id,
+        sessionId,
+        type: "refresh",
+      }),
+    catch: (error) => {
+      logError("OTPService.verifyOTP", "Failed to create refresh token", {
         userId: user.id,
         error,
-      }
-    );
-    return new OTPError({
-      status: false,
-      message: "Gagal membuat refresh token.",
-    });
-  },
-});
+      });
+      return new OTPError({
+        status: false,
+        message: "Gagal membuat refresh token.",
+      });
+    },
+  });
 
 // Store refresh token in database
 const refreshTokenExpiry = new Date();
 refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30); // 30 days
 
-yield* refreshTokensQueries.createRefreshToken({
-  userId: user.id,
-  token: refreshTokenJWT,
-  expiresAt: refreshTokenExpiry.toISOString(),
-  deviceInfo: deviceInfo?.userAgent,
-  ipAddress: deviceInfo?.ipAddress,
-  userAgent: deviceInfo?.userAgent,
-  os: deviceInfo?.os,
-  version: deviceInfo?.version,
-});
+yield *
+  refreshTokensQueries.createRefreshToken({
+    userId: user.id,
+    token: refreshTokenJWT,
+    expiresAt: refreshTokenExpiry.toISOString(),
+    deviceInfo: deviceInfo?.userAgent,
+    ipAddress: deviceInfo?.ipAddress,
+    userAgent: deviceInfo?.userAgent,
+    os: deviceInfo?.os,
+    version: deviceInfo?.version,
+  });
 
 logInfo(
   "OTPService.verifyOTP",
-  `OTP verified and tokens generated for ${email}`
+  `OTP verified and tokens generated for ${email}`,
 );
 ```
 
 #### Return Value Updated
 
 **Before:**
+
 ```typescript
 return {
   success: true,
   message: "OTP berhasil diverifikasi.",
   userId: otp.userId,
-  token,  // Single long-lived token
+  token, // Single long-lived token
 };
 ```
 
 **After:**
+
 ```typescript
 return {
   success: true,
   message: "OTP berhasil diverifikasi.",
   userId: otp.userId,
-  accessToken,   // Short-lived (15 min)
-  refreshToken: refreshTokenJWT,  // Long-lived (30 days)
+  accessToken, // Short-lived (15 min)
+  refreshToken: refreshTokenJWT, // Long-lived (30 days)
 };
 ```
 
@@ -173,6 +184,7 @@ return {
 #### `verifyOTP` Procedure Updated
 
 **Before:**
+
 ```typescript
 verifyOTP: withRateLimit(rateLimiters.otp())
   .input(otpSchema.verifyOtpSchema)
@@ -191,6 +203,7 @@ verifyOTP: withRateLimit(rateLimiters.otp())
 ```
 
 **After:**
+
 ```typescript
 verifyOTP: withRateLimit(rateLimiters.otp())
   .input(otpSchema.verifyOtpSchema)
@@ -218,6 +231,7 @@ Now passes device information from context to track sessions.
 ### 3. Documentation Added
 
 Created comprehensive documentation:
+
 - `packages/auth/docs/OTP_WITH_REFRESH_TOKEN.md` - Complete guide
 - `packages/auth/docs/CHANGELOG_OTP_REFRESH_TOKEN.md` - This changelog
 
@@ -228,22 +242,24 @@ Created comprehensive documentation:
 The `verifyOTP` mutation now returns a different structure:
 
 **Old Response:**
+
 ```typescript
 {
   success: boolean;
   message: string;
   userId: string;
-  token: string;  // Single long-lived token
+  token: string; // Single long-lived token
 }
 ```
 
 **New Response:**
+
 ```typescript
 {
   success: boolean;
   message: string;
   userId: string;
-  accessToken: string;  // Short-lived (15 min)
+  accessToken: string; // Short-lived (15 min)
   refreshToken: string; // Long-lived (30 days)
 }
 ```
@@ -253,6 +269,7 @@ The `verifyOTP` mutation now returns a different structure:
 Frontend code must be updated to:
 
 1. **Store both tokens instead of one:**
+
    ```typescript
    // Old
    localStorage.setItem("token", result.token);
@@ -263,23 +280,25 @@ Frontend code must be updated to:
    ```
 
 2. **Use access token for API calls:**
+
    ```typescript
    // Old
    headers: {
-     Authorization: `Bearer ${localStorage.getItem("token")}`
+     Authorization: `Bearer ${localStorage.getItem("token")}`;
    }
 
    // New
    headers: {
-     Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+     Authorization: `Bearer ${localStorage.getItem("accessToken")}`;
    }
    ```
 
 3. **Implement token refresh logic:**
+
    ```typescript
    // When access token expires
    const result = await trpcClient.auth.refresh.mutate({
-     refreshToken: localStorage.getItem("refreshToken")
+     refreshToken: localStorage.getItem("refreshToken"),
    });
 
    localStorage.setItem("accessToken", result.accessToken);
@@ -287,13 +306,14 @@ Frontend code must be updated to:
    ```
 
 4. **Update logout to use refresh token:**
+
    ```typescript
    // Old
    localStorage.removeItem("token");
 
    // New
    await trpcClient.auth.logout.mutate({
-     refreshToken: localStorage.getItem("refreshToken")
+     refreshToken: localStorage.getItem("refreshToken"),
    });
    localStorage.removeItem("accessToken");
    localStorage.removeItem("refreshToken");
@@ -337,6 +357,7 @@ Frontend code must be updated to:
 ### New Records Created
 
 Each OTP verification now creates:
+
 1. One record in `refreshTokens` table
 2. Includes device information for session tracking
 
@@ -357,6 +378,7 @@ Each OTP verification now creates:
 ### Test Cases to Add/Update
 
 1. **OTP Verification Returns Both Tokens**
+
    ```typescript
    it("should return access and refresh tokens", async () => {
      const result = await OTPService.verifyOTP(input, deviceInfo);
@@ -366,10 +388,13 @@ Each OTP verification now creates:
    ```
 
 2. **Refresh Token Stored in Database**
+
    ```typescript
    it("should store refresh token in database", async () => {
      const result = await OTPService.verifyOTP(input, deviceInfo);
-     const storedToken = await refreshTokensQueries.findByToken(result.refreshToken);
+     const storedToken = await refreshTokensQueries.findByToken(
+       result.refreshToken,
+     );
      expect(storedToken).toBeDefined();
    });
    ```
@@ -381,10 +406,12 @@ Each OTP verification now creates:
        userAgent: "Mozilla/5.0...",
        ipAddress: "127.0.0.1",
        os: "Windows",
-       version: "10"
+       version: "10",
      };
      const result = await OTPService.verifyOTP(input, deviceInfo);
-     const storedToken = await refreshTokensQueries.findByToken(result.refreshToken);
+     const storedToken = await refreshTokensQueries.findByToken(
+       result.refreshToken,
+     );
      expect(storedToken.ipAddress).toBe("127.0.0.1");
    });
    ```
@@ -406,6 +433,7 @@ If needed, rollback by:
 ## Environment Variables
 
 No new environment variables required. Uses existing:
+
 - `JWT_SECRET` - For access tokens
 - `JWT_REFRESH_SECRET` - For refresh tokens
 - `JWT_ACCESS_TOKEN_EXPIRY` - Default: 15m
@@ -414,6 +442,7 @@ No new environment variables required. Uses existing:
 ## Related Changes
 
 This change aligns the OTP flow with the existing login flow:
+
 - `auth.login` already uses access + refresh tokens
 - `auth.refresh` endpoint handles token rotation
 - `auth.logout` revokes refresh tokens
@@ -438,6 +467,7 @@ This change aligns the OTP flow with the existing login flow:
 ## Support
 
 For questions or issues, refer to:
+
 - [OTP with Refresh Token Guide](./OTP_WITH_REFRESH_TOKEN.md)
 - [Refresh Token Example](./refresh-token-example.md)
 - CLAUDE.md for project overview

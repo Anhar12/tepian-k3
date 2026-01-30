@@ -1,17 +1,18 @@
 {
   "name": "@tepian-k3/web",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm with-env vite dev",
-    "build": "pnpm with-env vite build",
-    "serve": "pnpm with-env vite preview",
-    "start": "pnpm with-env vite",
+    "dev": "pnpm with-env:local vite dev",
+    "build": "pnpm with-env:prod vite build",
+    "serve": "pnpm with-env:prod vite preview",
+    "start": "pnpm with-env:prod vite",
     "prettier": "prettier --write .",
     "check-types": "tsc --noEmit",
     "generate-pwa-assets": "pwa-assets-generator",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env:local": "dotenv -e ../../.env.local -e ../../.env --",
+    "with-env:prod": "dotenv -e ../../.env.production -e ../../.env --"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -11,18 +11,21 @@ The order detail page displays different UI based on 6 workflow states:
 ### 1. Pending Approval (`approvalStatus === 'pending'`)
 
 **What admin sees:**
+
 - Complete order items table with parameters, clusters, quantities, and prices
 - Customer information card
 - Testing location card
 - Action buttons: "Tolak Order" (Reject) and "Setujui Order" (Approve)
 
 **Actions available:**
+
 - Approve order → moves to state 2
 - Reject order with reason → sends notification to customer
 
 ### 2. Approved - Upload Documents (`approvalStatus === 'approved' && !hasBothDocuments`)
 
 **What admin sees:**
+
 - Two document upload sections:
   - Surat Penawaran (Offering Letter)
   - Invoice
@@ -34,6 +37,7 @@ The order detail page displays different UI based on 6 workflow states:
 - "Kirim Dokumen ke Pelanggan" button (enabled when both documents uploaded)
 
 **Actions available:**
+
 - Upload offering letter PDF
 - Upload invoice PDF
 - Send documents to customer via email → moves to state 3
@@ -41,23 +45,27 @@ The order detail page displays different UI based on 6 workflow states:
 ### 3. Awaiting Payment (`approvalStatus === 'approved' && hasBothDocuments && paymentStatus === 'unpaid'`)
 
 **What admin sees:**
+
 - Two document cards showing uploaded documents with download buttons
 - Message: "Dokumen penagihan sudah dikirim. Menunggu pelanggan mengunggah bukti pembayaran."
 - "Kirim Ulang Dokumen" button
 
 **Actions available:**
+
 - Download uploaded documents
 - Resend documents to customer
 
 ### 4. Payment Verification (`paymentStatus === 'pending_verification'`)
 
 **What admin sees:**
+
 - Payment proof uploaded by customer (image or PDF)
 - Upload timestamp
 - Amount to be paid (formatted in IDR)
 - Action buttons: "Tolak Pembayaran" (Reject) and "Verifikasi Pembayaran" (Verify)
 
 **Actions available:**
+
 - View payment proof (opens in new tab if PDF, or shows image)
 - Verify payment → moves to state 5
 - Reject payment with reason → sends notification to customer
@@ -65,6 +73,7 @@ The order detail page displays different UI based on 6 workflow states:
 ### 5. Payment Verified - Create Testing (`paymentStatus === 'paid' && !testing`)
 
 **What admin sees:**
+
 - Payment confirmation card (green background) showing:
   - Amount paid
   - Payment date
@@ -72,11 +81,13 @@ The order detail page displays different UI based on 6 workflow states:
 - "Buat Testing Record" button
 
 **Actions available:**
+
 - Create testing record from order → moves to state 6
 
 ### 6. Testing Created (`testing exists`)
 
 **What admin sees:**
+
 - Testing information card showing:
   - Testing number
   - Status badge
@@ -84,12 +95,14 @@ The order detail page displays different UI based on 6 workflow states:
 - Action buttons: "Lihat Detail Testing" and "Buat Worksheet" (if not created)
 
 **Actions available:**
+
 - Navigate to testing detail page
 - Navigate to testing detail with worksheet creation prompt
 
 ## UI Components Used
 
 ### Cards
+
 ```tsx
 <Card>
   <CardHeader>
@@ -103,6 +116,7 @@ The order detail page displays different UI based on 6 workflow states:
 ```
 
 ### Status Badges
+
 ```tsx
 // Order status
 <Badge className={getOrderStatusBadge(order.status)}>
@@ -121,6 +135,7 @@ The order detail page displays different UI based on 6 workflow states:
 ```
 
 ### Document Upload UI
+
 ```tsx
 <div className="flex items-center gap-3">
   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
@@ -158,36 +173,42 @@ The order detail page displays different UI based on 6 workflow states:
 ### New Admin Procedures Added to `orderRouter`
 
 #### 1. `approveOrder`
+
 - **Permission:** `orders.approve`
 - **Input:** `{ orderId: string, note?: string }`
 - **Action:** Sets `approvalStatus` to 'approved', sends email notification
 - **Query to implement:** `orderQueries.approveOrder(orderId)`
 
 #### 2. `rejectOrderApproval`
+
 - **Permission:** `orders.approve`
 - **Input:** `{ orderId: string, reason: string }` (min 10 chars)
 - **Action:** Sets `approvalStatus` to 'rejected', stores reason, sends email
 - **Query to implement:** `orderQueries.rejectOrderApproval(orderId, reason)`
 
 #### 3. `verifyPayment`
+
 - **Permission:** `orders.verify-payment`
 - **Input:** `{ orderId: string, note?: string }`
 - **Action:** Sets `paymentStatus` to 'paid', sets `paidAt` timestamp, sends email
 - **Query to implement:** `orderQueries.verifyPayment(orderId)`
 
 #### 4. `rejectPayment`
+
 - **Permission:** `orders.verify-payment`
 - **Input:** `{ orderId: string, reason: string }` (min 10 chars)
 - **Action:** Sets `paymentStatus` to 'rejected', stores reason, sends email
 - **Query to implement:** `orderQueries.rejectPayment(orderId, reason)`
 
 #### 5. `notifyCustomer`
+
 - **Permission:** `orders.notify`
 - **Input:** `{ orderId: string }`
 - **Action:** Sends email with document download links
 - **Requires:** Both offering letter and invoice documents uploaded
 
 #### 6. `createTesting`
+
 - **Permission:** `orders.create-testing`
 - **Input:** `{ orderId: string }`
 - **Action:** Creates testing record with testing items from order items

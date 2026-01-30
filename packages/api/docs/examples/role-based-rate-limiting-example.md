@@ -5,6 +5,7 @@ This example demonstrates the difference between fixed rate limiting and role-ba
 ## Scenario
 
 You have a user management API with different types of users:
+
 - **Admins** - Need high limits to manage the system
 - **Lab Managers** - Need moderate limits for daily operations
 - **Regular Users** - Need standard limits
@@ -223,6 +224,7 @@ uploadDocument: withRoleBasedRateLimit("uploads")
 ```
 
 **Result:**
+
 - **50+ lines reduced to 4 lines**
 - **Same functionality**
 - **More maintainable**
@@ -309,7 +311,7 @@ export const orderRouter = createTRPCRouter({
       return await orderQueries.uploadPaymentProof(
         input.orderId,
         input.file,
-        ctx.user.id
+        ctx.user.id,
       );
     }),
 
@@ -320,7 +322,10 @@ export const orderRouter = createTRPCRouter({
   sendConfirmation: withRoleBasedRateLimit("email")
     .input(z.object({ orderId: z.uuidv7() }))
     .mutation(async ({ input, ctx }) => {
-      return await orderQueries.sendConfirmationEmail(input.orderId, ctx.user.id);
+      return await orderQueries.sendConfirmationEmail(
+        input.orderId,
+        ctx.user.id,
+      );
     }),
 });
 ```
@@ -356,7 +361,7 @@ describe("Role-Based Rate Limiting", () => {
 
     // 501st request fails
     await expect(
-      userCaller.order.getAll({ page: 1, limit: 10 })
+      userCaller.order.getAll({ page: 1, limit: 10 }),
     ).rejects.toMatchObject({
       code: "TOO_MANY_REQUESTS",
     });
@@ -375,7 +380,7 @@ describe("Role-Based Rate Limiting", () => {
 
     // 101st request fails
     await expect(
-      viewerCaller.order.getAll({ page: 1, limit: 10 })
+      viewerCaller.order.getAll({ page: 1, limit: 10 }),
     ).rejects.toMatchObject({
       code: "TOO_MANY_REQUESTS",
     });
@@ -425,17 +430,20 @@ curl -H "Authorization: Bearer <viewer-token>" http://localhost:3000/trpc/user.g
 ## Summary
 
 **Use Role-Based Rate Limiting When:**
+
 - ✅ You have different user roles with different privilege levels
 - ✅ You want automatic tier selection based on roles
 - ✅ You want clean, maintainable code
 - ✅ You want centralized rate limit configuration
 
 **Use Fixed Rate Limiting When:**
+
 - ✅ You need the same limit for all users (e.g., login attempts)
 - ✅ You need very specific custom limits
 - ✅ The endpoint is public (no authentication)
 
 **Best Practice:**
+
 - Use `withRoleBasedRateLimit` for **most authenticated endpoints**
 - Use `withRateLimit` for **public endpoints** and **specific use cases**
 - Combine both when needed for **defense in depth**

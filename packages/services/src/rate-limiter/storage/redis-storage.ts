@@ -14,7 +14,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
 
   constructor(
     redis: Redis,
-    config: Omit<RateLimiterConfig, "useInMemoryFallback">
+    config: Omit<RateLimiterConfig, "useInMemoryFallback">,
   ) {
     this.redis = redis;
     this.config = {
@@ -56,7 +56,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
    */
   private async consumeSlidingWindow(
     key: string,
-    points: number
+    points: number,
   ): Promise<RateLimiterResult> {
     const redisKey = this.getKey(key);
     const now = Date.now();
@@ -118,7 +118,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
       points.toString(),
       this.config.points.toString(),
       this.config.duration.toString(),
-      this.config.blockDuration.toString()
+      this.config.blockDuration.toString(),
     )) as [number, number, number, number, number];
 
     const [allowed, remaining, limit, resetMs, consumed] = result;
@@ -138,7 +138,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
    */
   private async consumeTokenBucket(
     key: string,
-    points: number
+    points: number,
   ): Promise<RateLimiterResult> {
     const redisKey = this.getKey(key);
     const now = Date.now();
@@ -183,7 +183,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
       now.toString(),
       points.toString(),
       this.config.points.toString(),
-      this.config.duration.toString()
+      this.config.duration.toString(),
     )) as [number, number, number, number, number];
 
     const [allowed, remaining, limit, resetMs, consumed] = result;
@@ -203,7 +203,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
    */
   private async consumeFixedWindow(
     key: string,
-    points: number
+    points: number,
   ): Promise<RateLimiterResult> {
     const redisKey = this.getKey(key);
     const now = Date.now();
@@ -243,7 +243,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
       this.config.points.toString(),
       this.config.duration.toString(),
       windowEnd.toString(),
-      now.toString()
+      now.toString(),
     )) as [number, number, number, number, number];
 
     const [allowed, remaining, limit, resetMs, consumed] = result;
@@ -276,10 +276,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
       let resetMs = this.config.duration * 1000;
       if (oldest.length > 1 && oldest[1]) {
         const oldestScore = parseInt(oldest[1]);
-        resetMs = Math.max(
-          0,
-          oldestScore + this.config.duration * 1000 - now
-        );
+        resetMs = Math.max(0, oldestScore + this.config.duration * 1000 - now);
       }
 
       return {
@@ -296,7 +293,7 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
       const remaining = Math.floor(tokens);
       const refillRate = this.config.points / this.config.duration;
       const resetMs = Math.ceil(
-        ((this.config.points - tokens) / refillRate) * 1000
+        ((this.config.points - tokens) / refillRate) * 1000,
       );
 
       return {

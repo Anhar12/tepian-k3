@@ -257,10 +257,10 @@ export function generateRolesList() {
  */
 export function hasRolePermission(
   userRoles: Role[],
-  requiredPermission: Permission
+  requiredPermission: Permission,
 ): boolean {
   return userRoles.some((role) =>
-    ROLE_PERMISSIONS[role].includes(requiredPermission)
+    ROLE_PERMISSIONS[role].includes(requiredPermission),
   );
 }
 

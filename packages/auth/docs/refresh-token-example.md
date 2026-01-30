@@ -5,17 +5,17 @@ Quick examples for using the refresh token authentication system.
 ## Login with Dual Tokens
 
 ```typescript
-import { trpc } from '@/utils/trpc';
+import { trpc } from "@/utils/trpc";
 
 // Login returns both tokens
 const { accessToken, refreshToken, user } = await trpc.auth.login.mutate({
-  email: 'user@example.com',
-  password: 'password123',
+  email: "user@example.com",
+  password: "password123",
 });
 
 // Store tokens
-localStorage.setItem('accessToken', accessToken);
-localStorage.setItem('refreshToken', refreshToken);
+localStorage.setItem("accessToken", accessToken);
+localStorage.setItem("refreshToken", refreshToken);
 ```
 
 ## Refresh Access Token
@@ -23,12 +23,12 @@ localStorage.setItem('refreshToken', refreshToken);
 ```typescript
 // When access token expires (after 15 minutes)
 const { accessToken, refreshToken } = await trpc.auth.refresh.mutate({
-  refreshToken: localStorage.getItem('refreshToken'),
+  refreshToken: localStorage.getItem("refreshToken"),
 });
 
 // Update stored tokens
-localStorage.setItem('accessToken', accessToken);
-localStorage.setItem('refreshToken', refreshToken); // Old one is revoked
+localStorage.setItem("accessToken", accessToken);
+localStorage.setItem("refreshToken", refreshToken); // Old one is revoked
 ```
 
 ## Session Management
@@ -39,7 +39,7 @@ const sessions = await trpc.auth.getSessions.query();
 
 // Revoke specific session
 await trpc.auth.revokeSession.mutate({
-  sessionId: 'uuid-of-session-to-revoke',
+  sessionId: "uuid-of-session-to-revoke",
 });
 
 // Logout from all devices
@@ -61,6 +61,7 @@ JWT_REFRESH_TOKEN_EXPIRY=30d
 ```
 
 Generate secrets:
+
 ```bash
 openssl rand -base64 32
 ```

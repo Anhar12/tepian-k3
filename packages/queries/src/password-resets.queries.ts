@@ -14,7 +14,7 @@ const passwordResetsQueries = {
         logError(
           "passwordResetsQueries.hashResetToken",
           "Failed to hash password reset token",
-          { token, error }
+          { token, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -42,7 +42,7 @@ const passwordResetsQueries = {
           logError(
             "passwordResetsQueries.createResetRecord",
             "Failed to create password reset record",
-            { userId, token, expiresAt, error }
+            { userId, token, expiresAt, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -56,13 +56,13 @@ const passwordResetsQueries = {
         logError(
           "passwordResetsQueries.createResetRecord",
           "No result returned after creating password reset record",
-          { userId }
+          { userId },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat catatan pengaturan ulang kata sandi.",
-          })
+          }),
         );
       }
 
@@ -81,15 +81,15 @@ const passwordResetsQueries = {
               and(
                 eq(passwordResets.token, token),
                 eq(passwordResets.used, false),
-                gt(passwordResets.expiresAt, new Date().toISOString())
-              )
+                gt(passwordResets.expiresAt, new Date().toISOString()),
+              ),
             )
             .limit(1),
         catch: (error) => {
           logError(
             "passwordResetsQueries.validateResetToken",
             "Failed to validate password reset token",
-            { token, error }
+            { token, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -116,7 +116,7 @@ const passwordResetsQueries = {
           logError(
             "passwordResetsQueries.markTokenAsUsed",
             "Failed to mark password reset token as used",
-            { token, error }
+            { token, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -131,14 +131,14 @@ const passwordResetsQueries = {
         logError(
           "passwordResetsQueries.markTokenAsUsed",
           "No result returned after marking reset token as used",
-          { token }
+          { token },
         );
         return yield* Effect.fail(
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message:
               "Gagal menandai token pengaturan ulang kata sandi sebagai terpakai.",
-          })
+          }),
         );
       }
 
@@ -157,7 +157,7 @@ const passwordResetsQueries = {
         logError(
           "passwordResetsQueries.deleteExpiredTokens",
           "Failed to delete expired password reset tokens",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -181,7 +181,7 @@ const passwordResetsQueries = {
         logError(
           "passwordResetsQueries.invalidateUserResets",
           "Failed to invalidate user's password reset tokens",
-          { userId, error }
+          { userId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

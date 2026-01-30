@@ -7,7 +7,7 @@ export const testRouter = createTRPCRouter({
     .input(
       z.object({
         message: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const event = {

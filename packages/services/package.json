@@ -32,6 +32,9 @@
     },
     "./rate-limiter": {
       "default": "./src/rate-limiter/index.ts"
+    },
+    "./cache": {
+      "default": "./src/cache/index.ts"
     }
   },
   "dependencies": {

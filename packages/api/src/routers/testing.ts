@@ -35,7 +35,11 @@ export const testingRouter = createTRPCRouter({
     .query(
       async ({ input }) =>
         await runEffect(
-          testingQueries.getAllTestings(input.page, input.perPage, input.search),
+          testingQueries.getAllTestings(
+            input.page,
+            input.perPage,
+            input.search,
+          ),
         ),
     ),
 

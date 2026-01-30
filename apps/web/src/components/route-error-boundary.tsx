@@ -15,7 +15,7 @@ interface RouteErrorBoundaryProps {
 export function RouteErrorBoundary({ error }: RouteErrorBoundaryProps) {
   return (
     <div className="flex items-center justify-center p-8">
-      <Card className="max-w-lg w-full">
+      <Card className="w-full max-w-lg">
         <CardHeader className="flex flex-row items-center gap-3">
           <div className="rounded-full bg-destructive/10 p-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />

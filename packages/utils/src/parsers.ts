@@ -13,7 +13,7 @@ const sortingItemSchema = z.object({
 });
 
 export const getSortingStateParser = <TData>(
-  columnIds?: string[] | Set<string>
+  columnIds?: string[] | Set<string>,
 ) => {
   const validKeys = columnIds
     ? columnIds instanceof Set
@@ -43,7 +43,7 @@ export const getSortingStateParser = <TData>(
       a.length === b.length &&
       a.every(
         (item, index) =>
-          item.id === b[index]?.id && item.desc === b[index]?.desc
+          item.id === b[index]?.id && item.desc === b[index]?.desc,
       ),
   });
 };
@@ -60,7 +60,7 @@ const filterItemSchema = z.object({
 export type { FilterItemSchema } from "@tepian-k3/shared/data-table.config";
 
 export const getFiltersStateParser = <TData>(
-  columnIds?: string[] | Set<string>
+  columnIds?: string[] | Set<string>,
 ) => {
   const validKeys = columnIds
     ? columnIds instanceof Set
@@ -93,7 +93,7 @@ export const getFiltersStateParser = <TData>(
           filter.id === b[index]?.id &&
           filter.value === b[index]?.value &&
           filter.variant === b[index]?.variant &&
-          filter.operator === b[index]?.operator
+          filter.operator === b[index]?.operator,
       ),
   });
 };

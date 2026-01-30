@@ -8,7 +8,7 @@ export class TypedEventEmitter<TEventMap extends Record<string, unknown>> {
   constructor(schemas: Partial<Record<keyof TEventMap, z.ZodType>> = {}) {
     this.emitter = new EventEmitter();
     this.schemas = new Map(
-      Object.entries(schemas) as [keyof TEventMap, z.ZodType][]
+      Object.entries(schemas) as [keyof TEventMap, z.ZodType][],
     );
   }
 
@@ -18,7 +18,7 @@ export class TypedEventEmitter<TEventMap extends Record<string, unknown>> {
    */
   emit<K extends keyof TEventMap & string>(
     event: K,
-    data: TEventMap[K]
+    data: TEventMap[K],
   ): boolean {
     const schema = this.schemas.get(event);
 
@@ -35,7 +35,7 @@ export class TypedEventEmitter<TEventMap extends Record<string, unknown>> {
             data,
           });
           throw new Error(
-            `Invalid event data for "${event}": ${error.message}`
+            `Invalid event data for "${event}": ${error.message}`,
           );
         }
         throw error;
@@ -52,7 +52,7 @@ export class TypedEventEmitter<TEventMap extends Record<string, unknown>> {
   on<K extends keyof TEventMap & string>(
     event: K,
     listener: (data: TEventMap[K]) => void,
-    context?: unknown
+    context?: unknown,
   ): this {
     this.emitter.on(event, listener as (...args: unknown[]) => void, context);
     return this;
@@ -64,7 +64,7 @@ export class TypedEventEmitter<TEventMap extends Record<string, unknown>> {
   once<K extends keyof TEventMap & string>(
     event: K,
     listener: (data: TEventMap[K]) => void,
-    context?: unknown
+    context?: unknown,
   ): this {
     this.emitter.once(event, listener as (...args: unknown[]) => void, context);
     return this;
@@ -77,14 +77,14 @@ export class TypedEventEmitter<TEventMap extends Record<string, unknown>> {
     event: K,
     listener?: (data: TEventMap[K]) => void,
     context?: unknown,
-    once?: boolean
+    once?: boolean,
   ): this {
     if (listener) {
       this.emitter.off(
         event,
         listener as (...args: unknown[]) => void,
         context,
-        once
+        once,
       );
     } else {
       this.emitter.removeAllListeners(event);
@@ -122,7 +122,7 @@ export class TypedEventEmitter<TEventMap extends Record<string, unknown>> {
    * Get all listeners for an event
    */
   listeners<K extends keyof TEventMap & string>(
-    event: K
+    event: K,
   ): Array<(data: TEventMap[K]) => void> {
     return this.emitter.listeners(event) as Array<(data: TEventMap[K]) => void>;
   }

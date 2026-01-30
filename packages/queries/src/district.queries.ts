@@ -30,7 +30,7 @@ const districtQueries = {
         logError(
           "districtQueries.getAllDistricts",
           "Error fetching all districts",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -46,14 +46,14 @@ const districtQueries = {
         db.query.districts.findMany({
           where: and(
             eq(districts.regencyId, regencyId),
-            isNull(districts.deletedAt)
+            isNull(districts.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "districtQueries.getAllDistrictsByRegencyId",
           "Error fetching districts by regency ID",
-          { regencyId, error }
+          { regencyId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -73,7 +73,7 @@ const districtQueries = {
         logError(
           "districtQueries.getDistrictById",
           "Error fetching district by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -82,8 +82,8 @@ const districtQueries = {
       },
     }).pipe(
       Effect.flatMap((district) =>
-        district ? Effect.succeed(district) : Effect.succeed(null)
-      )
+        district ? Effect.succeed(district) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -97,7 +97,7 @@ const districtQueries = {
         logError(
           "districtQueries.getDeletedDistrictById",
           "Error fetching deleted district by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -106,8 +106,8 @@ const districtQueries = {
       },
     }).pipe(
       Effect.flatMap((district) =>
-        district ? Effect.succeed(district) : Effect.succeed(null)
-      )
+        district ? Effect.succeed(district) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -121,7 +121,7 @@ const districtQueries = {
         logError(
           "districtQueries.getDistrictByName",
           "Error fetching district by name",
-          { name, error }
+          { name, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -130,13 +130,13 @@ const districtQueries = {
       },
     }).pipe(
       Effect.flatMap((district) =>
-        district ? Effect.succeed(district) : Effect.succeed(null)
-      )
+        district ? Effect.succeed(district) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginatedDistricts(
-    input: z.infer<typeof districSchema.getAllDistrictsSchema>
+    input: z.infer<typeof districSchema.getAllDistrictsSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -159,7 +159,7 @@ const districtQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -169,20 +169,20 @@ const districtQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(districts.deletedAt)
-              : isNull(districts.deletedAt)
+              : isNull(districts.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(districts[item.id]) : asc(districts[item.id])
+              item.desc ? desc(districts[item.id]) : asc(districts[item.id]),
             )
           : [desc(districts.createdAt)];
 
@@ -212,7 +212,7 @@ const districtQueries = {
           logError(
             "districtQueries.getOffsetPaginatedDistricts",
             "Error fetching paginated districts",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -261,7 +261,7 @@ const districtQueries = {
             {
               data,
               error,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -311,7 +311,7 @@ const districtQueries = {
           logError(
             "districtQueries.updateDistrict",
             "Error updating district",
-            { data, error }
+            { data, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -357,7 +357,7 @@ const districtQueries = {
             {
               error,
               id,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -400,7 +400,7 @@ const districtQueries = {
           logError(
             "districtQueries.restoreDistrict",
             "Error restoring district",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

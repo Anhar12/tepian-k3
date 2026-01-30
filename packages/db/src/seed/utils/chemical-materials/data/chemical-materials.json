@@ -33,7 +33,12 @@
     "incomingMaterialNote": "Pembelian rutin bulanan",
     "expiredDate": "2027-06-30",
     "status": "tersedia",
-    "parameters": ["Ambien - NO2", "Emisi Genset - NOx", "Emisi Boiler - NOx", "NO"]
+    "parameters": [
+      "Ambien - NO2",
+      "Emisi Genset - NOx",
+      "Emisi Boiler - NOx",
+      "NO"
+    ]
   },
   {
     "code": "CM-003",
@@ -51,7 +56,13 @@
     "incomingMaterialNote": "Pembelian rutin bulanan",
     "expiredDate": "2028-03-31",
     "status": "tersedia",
-    "parameters": ["Ambien - CO", "Emisi Kendaraan - CO", "Emisi Genset - CO", "Emisi Boiler - CO", "CO"]
+    "parameters": [
+      "Ambien - CO",
+      "Emisi Kendaraan - CO",
+      "Emisi Genset - CO",
+      "Emisi Boiler - CO",
+      "CO"
+    ]
   },
   {
     "code": "CM-004",
@@ -123,7 +134,14 @@
     "incomingMaterialNote": "Pembelian rutin bulanan",
     "expiredDate": "2028-06-30",
     "status": "tersedia",
-    "parameters": ["Debu - TSP", "Debu - Inhalabel", "Debu Respirabel", "Debu - PM 10", "Debu - PM 2.5", "PM 10"]
+    "parameters": [
+      "Debu - TSP",
+      "Debu - Inhalabel",
+      "Debu Respirabel",
+      "Debu - PM 10",
+      "Debu - PM 2.5",
+      "PM 10"
+    ]
   },
   {
     "code": "CM-008",
@@ -213,7 +231,12 @@
     "incomingMaterialNote": "Pembelian rutin bulanan",
     "expiredDate": "2027-09-30",
     "status": "tersedia",
-    "parameters": ["Hidrokarbon - Benzene", "Hidrokarbon - Toluene", "Hidrokarbon - Xylene", "Hidrokarbon - HC Total"]
+    "parameters": [
+      "Hidrokarbon - Benzene",
+      "Hidrokarbon - Toluene",
+      "Hidrokarbon - Xylene",
+      "Hidrokarbon - HC Total"
+    ]
   },
   {
     "code": "CM-013",
@@ -357,7 +380,13 @@
     "incomingMaterialNote": "Pembelian tahunan",
     "expiredDate": "2028-12-31",
     "status": "tersedia",
-    "parameters": ["Ambien - CO", "Emisi Kendaraan - CO", "Emisi Genset - CO", "Emisi Boiler - CO", "CO"]
+    "parameters": [
+      "Ambien - CO",
+      "Emisi Kendaraan - CO",
+      "Emisi Genset - CO",
+      "Emisi Boiler - CO",
+      "CO"
+    ]
   },
   {
     "code": "CM-021",
@@ -375,7 +404,12 @@
     "incomingMaterialNote": "Pembelian tahunan",
     "expiredDate": "2028-12-31",
     "status": "tersedia",
-    "parameters": ["Ambien - NO2", "Emisi Genset - NOx", "Emisi Boiler - NOx", "NO"]
+    "parameters": [
+      "Ambien - NO2",
+      "Emisi Genset - NOx",
+      "Emisi Boiler - NOx",
+      "NO"
+    ]
   },
   {
     "code": "CM-022",
@@ -429,7 +463,11 @@
     "incomingMaterialNote": "Pembelian rutin bulanan",
     "expiredDate": "2028-06-30",
     "status": "tersedia",
-    "parameters": ["Hidrokarbon - Benzene", "Hidrokarbon - Toluene", "Hidrokarbon - Xylene"]
+    "parameters": [
+      "Hidrokarbon - Benzene",
+      "Hidrokarbon - Toluene",
+      "Hidrokarbon - Xylene"
+    ]
   },
   {
     "code": "CM-025",

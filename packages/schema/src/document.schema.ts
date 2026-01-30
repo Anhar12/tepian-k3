@@ -11,10 +11,10 @@ import {
 export const insertDocumentSchema = createInsertSchema(documents);
 export const selectDocumentSchema = createSelectSchema(documents);
 export const insertDocumentVerificationSchema = createInsertSchema(
-  documentVerifications
+  documentVerifications,
 );
 export const selectDocumentVerificationSchema = createSelectSchema(
-  documentVerifications
+  documentVerifications,
 );
 
 // Document entity types

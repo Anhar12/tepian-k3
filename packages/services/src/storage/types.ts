@@ -16,7 +16,10 @@ export interface UploadResult {
 // Storage errors
 export class StorageError extends Error {
   _tag = "StorageError";
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown,
+  ) {
     super(message);
     this.name = "StorageError";
   }

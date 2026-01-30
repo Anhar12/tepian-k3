@@ -17,7 +17,7 @@ const orderStatusHistoryQueries = {
         logError(
           "orderStatusHistoryQueries.getOrderStatusHistoriesByOrderId",
           "Failed to fetch order status histories",
-          { error, orderId }
+          { error, orderId },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -32,7 +32,7 @@ const orderStatusHistoryQueries = {
     orderId: string,
     status: OrderStatus,
     changedBy: string,
-    note?: string
+    note?: string,
   ) {
     return Effect.tryPromise({
       try: () =>
@@ -49,7 +49,7 @@ const orderStatusHistoryQueries = {
         logError(
           "orderStatusHistoryQueries.createOrderStatusHistory",
           "Failed to create order status history",
-          { error, orderId, status, changedBy, note }
+          { error, orderId, status, changedBy, note },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -64,9 +64,9 @@ const orderStatusHistoryQueries = {
               new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal membuat riwayat status pesanan",
-              })
-            )
-      )
+              }),
+            ),
+      ),
     );
   },
 };

@@ -8,14 +8,14 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 export const parameterRouter = createTRPCRouter({
   getOffsetPaginatedParametersByClusterIdAndCategoryId: withRateLimit(
-    rateLimiters.moderate()
+    rateLimiters.moderate(),
   )
     .input(parameterSchema.getByClusterAndParameterCategorySchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
         parameterQueries.getOffsetPaginatedParametersByClusterIdAndCategoryId(
-          input
-        )
+          input,
+        ),
       );
 
       return { data, pageCount };
@@ -25,7 +25,7 @@ export const parameterRouter = createTRPCRouter({
     .input(parameterSchema.getAllParametersSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        parameterQueries.getOffsetPaginatedParameters(input)
+        parameterQueries.getOffsetPaginatedParameters(input),
       );
 
       return { data, pageCount };
@@ -35,11 +35,11 @@ export const parameterRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const parameter = await runEffect(
-        parameterQueries.getParameterById(input.id)
+        parameterQueries.getParameterById(input.id),
       );
 
       if (!parameter) {
@@ -56,35 +56,35 @@ export const parameterRouter = createTRPCRouter({
     .input(parameterSchema.createParameterSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(parameterQueries.createParameter(input))
+        await runEffect(parameterQueries.createParameter(input)),
     ),
 
   updateParameter: withPermission("parameters.update")
     .input(parameterSchema.updateParameterSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(parameterQueries.updateParameter(input))
+        await runEffect(parameterQueries.updateParameter(input)),
     ),
 
   deleteParameter: withPermission("parameters.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(parameterQueries.deleteParameter(input.id))
+        await runEffect(parameterQueries.deleteParameter(input.id)),
     ),
 
   restoreParameter: withPermission("parameters.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(parameterQueries.restoreParameter(input.id))
+        await runEffect(parameterQueries.restoreParameter(input.id)),
     ),
 });

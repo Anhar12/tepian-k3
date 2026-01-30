@@ -18,7 +18,7 @@ const getAllUserCompaniesSchema = z.object({
       z.object({
         id: z.enum(SORTABLE_USER_COMPANY_FIELDS),
         desc: z.boolean(),
-      })
+      }),
     )
     .default([{ id: "createdAt", desc: false }]),
   name: z.string().default(""),

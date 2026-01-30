@@ -90,7 +90,7 @@ export function parseFormData(formData: FormData): Record<string, FormValue> {
 function setNestedValue(
   obj: Record<string, FormValue>,
   path: string,
-  value: FormValue
+  value: FormValue,
 ): void {
   const keys = path.match(/[^.\[\]]+/g) || [];
   let current: FormRecord = obj;
@@ -124,7 +124,7 @@ function setNestedValue(
 
 export function parseAndValidate<T extends z.ZodTypeAny>(
   formData: FormData,
-  schema: T
+  schema: T,
 ): z.infer<T> {
   const parsed = parseFormData(formData);
   return schema.parse(parsed);
@@ -132,7 +132,7 @@ export function parseAndValidate<T extends z.ZodTypeAny>(
 
 export function parseAndValidateSafe<T extends z.ZodTypeAny>(
   formData: FormData,
-  schema: T
+  schema: T,
 ): { success: true; data: z.infer<T> } | { success: false; error: z.ZodError } {
   const parsed = parseFormData(formData);
   const result = schema.safeParse(parsed);

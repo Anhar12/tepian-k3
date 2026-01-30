@@ -135,9 +135,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
               <Text>Jumlah</Text>
               <Text>Hari</Text>
             </View>
-            <Text style={tw("w-2/12 border-black p-2 text-center")}>
-              Total
-            </Text>
+            <Text style={tw("w-2/12 border-black p-2 text-center")}>Total</Text>
           </View>
           {/* Section Header */}
           <View style={tw("flex-row border-b border-black bg-gray-100")}>
@@ -155,27 +153,19 @@ export const PricingTable: React.FC<PricingTableProps> = ({
                 }`.trim(),
               )}
             >
-              <Text
-                style={tw("w-1/12 border-r border-black p-2 text-center")}
-              >
+              <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
                 {index + 1}
               </Text>
               <Text style={tw("w-3/12 border-r border-black p-2")}>
                 {cost.item}
               </Text>
-              <Text
-                style={tw("w-2/12 border-r border-black p-2 text-center")}
-              >
+              <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
                 {cost.unitCost != null ? formatCurrency(cost.unitCost) : "-"}
               </Text>
-              <Text
-                style={tw("w-2/12 border-r border-black p-2 text-center")}
-              >
+              <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
                 {cost.unitCount}
               </Text>
-              <Text
-                style={tw("w-2/12 border-r border-black p-2 text-center")}
-              >
+              <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
                 {cost.days}
               </Text>
               <Text style={tw("w-2/12 p-2 text-center")}>

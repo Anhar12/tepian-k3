@@ -18,7 +18,7 @@ const getAllUserCompanyTestingLocationSchema = z.object({
       z.object({
         id: z.enum(SORTABLE_USER_COMPANY_TESTING_LOCATION_FIELDS),
         desc: z.boolean(),
-      })
+      }),
     )
     .default([{ id: "createdAt", desc: false }]),
   name: z.string().default(""),
@@ -35,7 +35,7 @@ const createUserCompanyTestingLocationSchema = createInsertSchema(
     name: z.string().min(1).max(256),
     districtId: z.uuidv7(),
     regencyId: z.uuidv7(),
-  }
+  },
 ).omit({
   userId: true,
 });
@@ -48,7 +48,7 @@ const updateUserCompanyTestingLocationSchema = createUpdateSchema(
     name: z.optional(z.string().min(1).max(256)),
     districtId: z.optional(z.uuidv7()),
     regencyId: z.optional(z.uuidv7()),
-  }
+  },
 ).omit({
   userId: true,
 });

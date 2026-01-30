@@ -41,6 +41,12 @@
     "db:reset": {
       "cache": false
     },
+    "db:snapshot": {
+      "cache": false
+    },
+    "db:restore": {
+      "cache": false
+    },
     "email:dev": {
       "cache": false,
       "persistent": true

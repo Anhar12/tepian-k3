@@ -19,14 +19,14 @@ export const devFormat: Format = combine(
     }
 
     return msg;
-  })
+  }),
 );
 
 // Production format - JSON for log aggregation
 export const prodFormat: Format = combine(
   timestamp(),
   errors({ stack: true }),
-  json()
+  json(),
 );
 
 // Get format based on environment

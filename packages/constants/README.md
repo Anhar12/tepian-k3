@@ -23,11 +23,11 @@ This package provides a fully type-safe permission system that prevents typos an
 
 ```typescript
 type PermissionAction =
-  | "view"    // List/dashboard access (no details)
-  | "create"  // Create new records
-  | "read"    // Read full record details
-  | "update"  // Modify records
-  | "delete"  // Delete records
+  | "view" // List/dashboard access (no details)
+  | "create" // Create new records
+  | "read" // Read full record details
+  | "update" // Modify records
+  | "delete"; // Delete records
 ```
 
 ### Action Hierarchy
@@ -49,30 +49,39 @@ view < create/read < update < delete
 The system supports permissions for these resources:
 
 **Authentication & Authorization:**
+
 - `users`, `roles`, `permissions`, `role-permissions`, `user-permissions`
 
 **Testing Configuration:**
+
 - `tools`, `clusters`, `parameter-categories`, `parameters`, `parameter-tool`
 
 **Geography:**
+
 - `provinces`, `regencies`, `districts`, `villages`, `kbli`
 
 **Companies:**
+
 - `user-company`, `user-company-testing-location`
 
 **Shopping & Orders:**
+
 - `cart`, `orders`, `order-items`, `order-status-history`
 
 **Testing:**
+
 - `testing`, `testing-item`
 
 **Documents:**
+
 - `documents`, `document-signatures`, `document-verifications`
 
 **Employees & Worksheets:**
+
 - `employees`, `worksheets`, `worksheet-items`, `worksheet-tools`, `worksheet-notes`, `worksheet-assignments`
 
 **Audit:**
+
 - `audits`
 
 ### Total Permissions
@@ -99,7 +108,11 @@ const invalid2: Permission = "users.invalid";
 ### 2. Creating Permissions Dynamically
 
 ```typescript
-import { createPermission, type Resource, type PermissionAction } from "@tepian-k3/constants";
+import {
+  createPermission,
+  type Resource,
+  type PermissionAction,
+} from "@tepian-k3/constants";
 
 const resource: Resource = "documents";
 const action: PermissionAction = "update";
@@ -170,10 +183,9 @@ import type { Permission } from "@tepian-k3/constants";
 
 export const userRouter = createTRPCRouter({
   // Only users with "users.view" can access
-  getAll: withPermission("users.view" as Permission)
-    .query(async () => {
-      return await db.query.users.findMany();
-    }),
+  getAll: withPermission("users.view" as Permission).query(async () => {
+    return await db.query.users.findMany();
+  }),
 
   // Only users with "users.create" can access
   create: withPermission("users.create" as Permission)
@@ -194,7 +206,7 @@ export const Route = createFileRoute("/(core)/back-office/users/")({
   beforeLoad: async ({ context }) => {
     // Type-safe permission check
     await requirePermission(context, {
-      permission: "users.read" as Permission
+      permission: "users.read" as Permission,
     });
   },
 });
@@ -207,23 +219,23 @@ import type { Permission } from "@tepian-k3/constants";
 
 function hasPermission(
   userPermissions: Permission[],
-  required: Permission
+  required: Permission,
 ): boolean {
   return userPermissions.includes(required);
 }
 
 function hasAnyPermission(
   userPermissions: Permission[],
-  required: Permission[]
+  required: Permission[],
 ): boolean {
-  return required.some(perm => userPermissions.includes(perm));
+  return required.some((perm) => userPermissions.includes(perm));
 }
 
 function hasAllPermissions(
   userPermissions: Permission[],
-  required: Permission[]
+  required: Permission[],
 ): boolean {
-  return required.every(perm => userPermissions.includes(perm));
+  return required.every((perm) => userPermissions.includes(perm));
 }
 ```
 
@@ -237,13 +249,13 @@ This package also provides a type-safe roles system that integrates with the per
 
 ```typescript
 type Role =
-  | "super_admin"      // All system permissions
-  | "admin"            // Full access to most features
-  | "user"             // Regular user (company management, orders)
-  | "employee"         // Basic employee access
-  | "lab_technician"   // Laboratory technician (testing operations)
-  | "lab_manager"      // Laboratory manager (full testing management)
-  | "viewer"           // Read-only access
+  | "super_admin" // All system permissions
+  | "admin" // Full access to most features
+  | "user" // Regular user (company management, orders)
+  | "employee" // Basic employee access
+  | "lab_technician" // Laboratory technician (testing operations)
+  | "lab_manager" // Laboratory manager (full testing management)
+  | "viewer"; // Read-only access
 ```
 
 ### Role Descriptions
@@ -341,6 +353,7 @@ for (const [roleName, permissions] of Object.entries(ROLE_PERMISSIONS)) {
 To add a new resource with permissions:
 
 1. **Add to RESOURCES array** in `packages/constants/src/resources.ts`:
+
    ```typescript
    export const RESOURCES = [
      // ... existing resources
@@ -349,6 +362,7 @@ To add a new resource with permissions:
    ```
 
 2. **Run seeder** to add permissions to database:
+
    ```bash
    pnpm db:seed
    ```
@@ -363,6 +377,7 @@ To add a new resource with permissions:
 To add a new role:
 
 1. **Add to ROLES array** in `packages/constants/src/roles.ts`:
+
    ```typescript
    export const ROLES = [
      // ... existing roles
@@ -371,6 +386,7 @@ To add a new role:
    ```
 
 2. **Add description** in `ROLE_DESCRIPTIONS`:
+
    ```typescript
    export const ROLE_DESCRIPTIONS: Record<Role, string> = {
      // ... existing descriptions
@@ -379,6 +395,7 @@ To add a new role:
    ```
 
 3. **Define permissions** in `ROLE_PERMISSIONS`:
+
    ```typescript
    export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
      // ... existing role permissions
@@ -391,6 +408,7 @@ To add a new role:
    ```
 
 4. **Run seeder** to add role to database:
+
    ```bash
    pnpm db:seed
    ```

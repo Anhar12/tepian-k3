@@ -243,7 +243,8 @@ const MultipleFileUpload = forwardRef<HTMLDivElement, MultipleFileUploadProps>(
           if (type === "image") extensions.push("Images");
           else if (type === "video") extensions.push("Videos");
           else if (type === "audio") extensions.push("Audio");
-          else if (type) extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
+          else if (type)
+            extensions.push(type.charAt(0).toUpperCase() + type.slice(1));
         } else {
           const ext = mime.extension(format);
           if (ext) extensions.push(ext.toUpperCase());

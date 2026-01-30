@@ -209,8 +209,8 @@ export default function PDFQRCodeEditor() {
       setSelectedQRId(id);
 
       // Get client coordinates from mouse or touch event
-      const clientX = "touches" in e ? e.touches[0]?.clientX ?? 0 : e.clientX;
-      const clientY = "touches" in e ? e.touches[0]?.clientY ?? 0 : e.clientY;
+      const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
+      const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
 
       // Calculate offset in the original coordinate system (800x1100)
       const canvasRect = canvasRef.current.getBoundingClientRect();
@@ -230,8 +230,10 @@ export default function PDFQRCodeEditor() {
         if (!draggingQR || !canvasRef.current) return;
 
         // Get client coordinates from mouse or touch event
-        const clientX = "touches" in e ? e.touches[0]?.clientX ?? 0 : e.clientX;
-        const clientY = "touches" in e ? e.touches[0]?.clientY ?? 0 : e.clientY;
+        const clientX =
+          "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
+        const clientY =
+          "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
 
         const canvasRect = canvasRef.current.getBoundingClientRect();
         const scaleRatio = canvasSize.width / 800;

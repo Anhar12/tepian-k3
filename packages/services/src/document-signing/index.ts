@@ -47,7 +47,7 @@ export const generateVerificationToken = () =>
  */
 export const signDocument = (
   payload: DocumentSignPayload,
-  expiresIn: string = "10y" // Long expiration for archival documents
+  expiresIn: string = "10y", // Long expiration for archival documents
 ) =>
   Effect.gen(function* () {
     const secret = new TextEncoder().encode(env.JWT_DOCUMENT_SECRET);
@@ -111,7 +111,7 @@ export const verifyDocumentSignature = (jwt: string) =>
  */
 export const verifyFileIntegrity = (
   currentFileContent: Buffer,
-  originalHash: string
+  originalHash: string,
 ) =>
   Effect.gen(function* () {
     const currentHash = yield* generateFileHash(currentFileContent);
@@ -131,7 +131,7 @@ export const createDocumentSignature = (
   fileUrl: string,
   fileContent: Buffer,
   signedByUserId: string,
-  existingVerificationToken?: string // Optional: reuse existing token
+  existingVerificationToken?: string, // Optional: reuse existing token
 ) =>
   Effect.gen(function* () {
     // Generate file hash
@@ -172,7 +172,7 @@ export const createDocumentSignature = (
  */
 export const verifyDocumentAuthenticity = (
   signatureJWT: string,
-  currentFileContent?: Buffer
+  currentFileContent?: Buffer,
 ) =>
   Effect.gen(function* () {
     // Verify JWT signature
@@ -190,7 +190,7 @@ export const verifyDocumentAuthenticity = (
     if (currentFileContent && signatureResult.payload) {
       const fileIntact = yield* verifyFileIntegrity(
         currentFileContent,
-        signatureResult.payload.fileHash
+        signatureResult.payload.fileHash,
       );
 
       if (!fileIntact) {

@@ -21,6 +21,7 @@
     "changelog:today": "git-cliff --since today --output CHANGELOG.md",
     "changelog:tag": "git-cliff --tag",
     "changelog:latest": "git-cliff --latest --output CHANGELOG.md",
+    "dev:all": "turbo run dev db:studio",
     "dev:native": "turbo run dev -F native",
     "dev:web": "turbo run dev -F @tepian-k3/web",
     "dev:server": "turbo run dev -F @tepian-k3/server",
@@ -30,9 +31,14 @@
     "db:migrate": "turbo run db:migrate -F @tepian-k3/db",
     "db:seed": "turbo run db:seed -F @tepian-k3/db",
     "db:reset": "turbo run db:reset -F @tepian-k3/db",
+    "db:snapshot": "turbo run db:snapshot -F @tepian-k3/db",
+    "db:restore": "turbo run db:restore -F @tepian-k3/db --",
     "email:dev": "turbo run email:dev -F @tepian-k3/services",
     "email:verify": "turbo run email:verify -F @tepian-k3/services",
-    "web:prettier": "turbo run prettier -F @tepian-k3/web"
+    "web:prettier": "turbo run prettier -F @tepian-k3/web",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,css,md}\" \"packages/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "regenerate:jwt": "node ./scripts/regenerate-jwt-secrets.js",
+    "regenerate:jwt:unix": "sh ./scripts/regenerate-jwt-secrets.sh"
   },
   "dependencies": {
     "dotenv": "catalog:",
@@ -43,6 +49,8 @@
     "git-cliff": "^2.12.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
+    "prettier": "3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.6.3",
     "typescript": "catalog:"
   },

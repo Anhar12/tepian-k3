@@ -15,7 +15,7 @@ export const notificationsRouter = createTRPCRouter({
   getAll: withProtectedRateLimit(rateLimiters.moderate())
     .input(notificationSchema.getNotificationsSchema)
     .query(async ({ input, ctx }) =>
-      runEffect(notificationsQueries.getPaginated(ctx.user.id, input))
+      runEffect(notificationsQueries.getPaginated(ctx.user.id, input)),
     ),
 
   /**
@@ -23,7 +23,7 @@ export const notificationsRouter = createTRPCRouter({
    */
   getUnreadCount: withProtectedRateLimit(rateLimiters.moderate()).query(
     async ({ ctx }) =>
-      runEffect(notificationsQueries.getUnreadCount(ctx.user.id))
+      runEffect(notificationsQueries.getUnreadCount(ctx.user.id)),
   ),
 
   /**
@@ -32,7 +32,7 @@ export const notificationsRouter = createTRPCRouter({
   markAsRead: withProtectedRateLimit(rateLimiters.moderate())
     .input(notificationSchema.markAsReadSchema)
     .mutation(async ({ input, ctx }) =>
-      runEffect(notificationsQueries.markAsRead(input.id, ctx.user.id))
+      runEffect(notificationsQueries.markAsRead(input.id, ctx.user.id)),
     ),
 
   /**
@@ -40,7 +40,7 @@ export const notificationsRouter = createTRPCRouter({
    */
   markAllAsRead: withProtectedRateLimit(rateLimiters.moderate()).mutation(
     async ({ ctx }) =>
-      runEffect(notificationsQueries.markAllAsRead(ctx.user.id))
+      runEffect(notificationsQueries.markAllAsRead(ctx.user.id)),
   ),
 
   /**
@@ -49,14 +49,14 @@ export const notificationsRouter = createTRPCRouter({
   delete: withProtectedRateLimit(rateLimiters.moderate())
     .input(notificationSchema.deleteNotificationSchema)
     .mutation(async ({ input, ctx }) =>
-      runEffect(notificationsQueries.delete(input.id, ctx.user.id))
+      runEffect(notificationsQueries.delete(input.id, ctx.user.id)),
     ),
 
   /**
    * Delete all notifications for the current user (soft delete)
    */
   deleteAll: withProtectedRateLimit(rateLimiters.moderate()).mutation(
-    async ({ ctx }) => runEffect(notificationsQueries.deleteAll(ctx.user.id))
+    async ({ ctx }) => runEffect(notificationsQueries.deleteAll(ctx.user.id)),
   ),
 
   /**
@@ -66,6 +66,6 @@ export const notificationsRouter = createTRPCRouter({
   create: withPermissionAndRateLimit("notifications.create", "mutations")
     .input(notificationSchema.createNotificationSchema)
     .mutation(async ({ input }) =>
-      runEffect(notificationsQueries.create(input))
+      runEffect(notificationsQueries.create(input)),
     ),
 });

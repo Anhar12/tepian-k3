@@ -79,7 +79,7 @@ const documentTransactionQueries = {
           logError(
             "documentTransactionQueries.createSignedDocument",
             "Error in transaction",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

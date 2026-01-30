@@ -7,7 +7,7 @@ const ProvincesSchema = z.array(
     alt_name: z.string(),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
-  })
+  }),
 );
 
 export type Provinces = z.infer<typeof ProvincesSchema>;
@@ -20,7 +20,7 @@ const RegenciesSchema = z.array(
     alt_name: z.string(),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
-  })
+  }),
 );
 
 export type Regencies = z.infer<typeof RegenciesSchema>;
@@ -33,7 +33,7 @@ const DistrictsSchema = z.array(
     alt_name: z.string(),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
-  })
+  }),
 );
 
 export type Districts = z.infer<typeof DistrictsSchema>;
@@ -45,7 +45,7 @@ const VillagesSchema = z.array(
     name: z.string(),
     latitude: z.number().nullable(),
     longitude: z.number().nullable(),
-  })
+  }),
 );
 
 export type Villages = z.infer<typeof VillagesSchema>;

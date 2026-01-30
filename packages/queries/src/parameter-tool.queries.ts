@@ -35,7 +35,7 @@ const parameterToolQueries = {
         logError(
           "parameterToolQueries.getAllToolsByParameterId",
           "Failed to fetch tools by parameter ID",
-          { parameterId, error }
+          { parameterId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -69,7 +69,7 @@ const parameterToolQueries = {
         logError(
           "parameterToolQueries.getParameterToolById",
           "Failed to fetch parameter tool by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -80,11 +80,11 @@ const parameterToolQueries = {
   },
 
   assignToolToParameter(
-    data: z.infer<typeof parameterToolSchema.createParameterToolSchema>
+    data: z.infer<typeof parameterToolSchema.createParameterToolSchema>,
   ) {
     return Effect.gen(function* () {
       const isParameterExist = yield* parameterQueries.getParameterById(
-        data.parameterId
+        data.parameterId,
       );
 
       if (!isParameterExist) {
@@ -101,7 +101,7 @@ const parameterToolQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Tool tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -109,8 +109,8 @@ const parameterToolQueries = {
         .getAllToolsByParameterId(data.parameterId)
         .pipe(
           Effect.map((assignments) =>
-            assignments.find((assignment) => assignment.toolId === data.toolId)
-          )
+            assignments.find((assignment) => assignment.toolId === data.toolId),
+          ),
         );
 
       if (isAlreadyAssigned) {
@@ -118,7 +118,7 @@ const parameterToolQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Tool sudah ditugaskan ke parameter tersebut.",
-          })
+          }),
         );
       }
 
@@ -128,7 +128,7 @@ const parameterToolQueries = {
           logError(
             "parameterToolQueries.assignToolToParameter",
             "Failed to assign tool to parameter",
-            { data, error }
+            { data, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -142,7 +142,7 @@ const parameterToolQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menugaskan tool ke parameter.",
-          })
+          }),
         );
       }
 
@@ -151,11 +151,11 @@ const parameterToolQueries = {
   },
 
   updateParameterTool(
-    data: z.infer<typeof parameterToolSchema.updateParameterToolSchema>
+    data: z.infer<typeof parameterToolSchema.updateParameterToolSchema>,
   ) {
     return Effect.gen(function* () {
       const existingRecord = yield* parameterToolQueries.getParameterToolById(
-        data.id
+        data.id,
       );
 
       if (!existingRecord) {
@@ -166,7 +166,7 @@ const parameterToolQueries = {
       }
 
       const isParameterExist = yield* parameterQueries.getParameterById(
-        data.parameterId
+        data.parameterId,
       );
 
       if (!isParameterExist) {
@@ -183,7 +183,7 @@ const parameterToolQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Tool tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -201,7 +201,7 @@ const parameterToolQueries = {
           logError(
             "parameterToolQueries.updateParameterTool",
             "Failed to update parameter tool",
-            { data, error }
+            { data, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -215,7 +215,7 @@ const parameterToolQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui parameter tool.",
-          })
+          }),
         );
       }
 
@@ -225,16 +225,15 @@ const parameterToolQueries = {
 
   removeToolFromParameter(id: string) {
     return Effect.gen(function* () {
-      const existingRecord = yield* parameterToolQueries.getParameterToolById(
-        id
-      );
+      const existingRecord =
+        yield* parameterToolQueries.getParameterToolById(id);
 
       if (!existingRecord) {
         return Effect.fail(
           new TRPCError({
             code: "NOT_FOUND",
             message: "Data parameter tool tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -248,7 +247,7 @@ const parameterToolQueries = {
           logError(
             "parameterToolQueries.removeToolFromParameter",
             "Failed to remove tool from parameter",
-            { id, error }
+            { id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -262,7 +261,7 @@ const parameterToolQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus tool dari parameter.",
-          })
+          }),
         );
       }
 

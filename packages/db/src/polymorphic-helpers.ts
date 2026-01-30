@@ -13,11 +13,11 @@ import type { DocumentEntityType } from "@tepian-k3/constants";
  */
 export const whereEntityIs = (
   entityType: DocumentEntityType,
-  entityId: string
+  entityId: string,
 ): SQL => {
   return and(
     eq(documents.entityType, entityType),
-    eq(documents.entityId, entityId)
+    eq(documents.entityId, entityId),
   ) as SQL;
 };
 
@@ -34,7 +34,7 @@ export const whereEntityIs = (
  * });
  */
 export const getEntityRelationName = (
-  entityType: DocumentEntityType
+  entityType: DocumentEntityType,
 ): "order" | "testing" | "userCompany" | "user" => {
   switch (entityType) {
     case "order":
@@ -55,7 +55,7 @@ export const getEntityRelationName = (
  */
 export const isDocumentOfType = <T extends DocumentEntityType>(
   document: { entityType: DocumentEntityType },
-  type: T
+  type: T,
 ): document is typeof document & { entityType: T } => {
   return document.entityType === type;
 };

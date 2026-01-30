@@ -27,6 +27,8 @@
     "db:migrate": "pnpm with-env drizzle-kit migrate",
     "db:seed": "pnpm with-env tsx ./src/seed/index.ts",
     "db:reset": "pnpm with-env tsx ./src/reset/index.ts",
+    "db:snapshot": "bash ./scripts/db-snapshot.sh",
+    "db:restore": "bash ./scripts/db-restore.sh",
     "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {

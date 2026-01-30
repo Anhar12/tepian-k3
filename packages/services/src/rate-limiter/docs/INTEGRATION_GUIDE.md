@@ -24,7 +24,10 @@ export const authRouter = createTRPCRouter({
       const limiter = rateLimiters.auth();
 
       // Get IP from request headers
-      const ip = ctx.req.header("x-forwarded-for") || ctx.req.header("x-real-ip") || "unknown";
+      const ip =
+        ctx.req.header("x-forwarded-for") ||
+        ctx.req.header("x-real-ip") ||
+        "unknown";
 
       // Check rate limit
       const result = await limiter.consume(`login:${input.email}`);
@@ -63,48 +66,46 @@ export const authRouter = createTRPCRouter({
 
 ```typescript
 export const authRouter = createTRPCRouter({
-  login: publicProcedure
-    .input(loginSchema)
-    .mutation(async ({ input, ctx }) => {
-      const limiter = rateLimiters.auth();
-      const ip = getClientIp(ctx.req);
+  login: publicProcedure.input(loginSchema).mutation(async ({ input, ctx }) => {
+    const limiter = rateLimiters.auth();
+    const ip = getClientIp(ctx.req);
 
-      // Rate limit by email and IP
-      const [emailResult, ipResult] = await Promise.all([
-        limiter.consume(`login:email:${input.email}`),
-        limiter.consume(`login:ip:${ip}`),
-      ]);
+    // Rate limit by email and IP
+    const [emailResult, ipResult] = await Promise.all([
+      limiter.consume(`login:email:${input.email}`),
+      limiter.consume(`login:ip:${ip}`),
+    ]);
 
-      if (!emailResult.allowed) {
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: `Too many login attempts. Try again in ${Math.ceil(emailResult.resetMs / 60000)} minutes`,
-        });
-      }
+    if (!emailResult.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Too many login attempts. Try again in ${Math.ceil(emailResult.resetMs / 60000)} minutes`,
+      });
+    }
 
-      if (!ipResult.allowed) {
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: `Too many login attempts from your IP. Try again in ${Math.ceil(ipResult.resetMs / 60000)} minutes`,
-        });
-      }
+    if (!ipResult.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Too many login attempts from your IP. Try again in ${Math.ceil(ipResult.resetMs / 60000)} minutes`,
+      });
+    }
 
-      // Authenticate user...
-      const result = await authenticateUser(input.email, input.password);
+    // Authenticate user...
+    const result = await authenticateUser(input.email, input.password);
 
-      if (!result.success) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: `Invalid credentials. ${emailResult.remaining} attempts remaining`,
-        });
-      }
+    if (!result.success) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: `Invalid credentials. ${emailResult.remaining} attempts remaining`,
+      });
+    }
 
-      // Success - reset limits
-      await limiter.reset(`login:email:${input.email}`);
-      await limiter.reset(`login:ip:${ip}`);
+    // Success - reset limits
+    await limiter.reset(`login:email:${input.email}`);
+    await limiter.reset(`login:ip:${ip}`);
 
-      return result;
-    }),
+    return result;
+  }),
 });
 ```
 
@@ -239,13 +240,16 @@ import { createMiddleware } from "hono/factory";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 import { TRPCError } from "@trpc/server";
 
-export const rateLimitMiddleware = (limiterType: keyof typeof rateLimiters = "api") => {
+export const rateLimitMiddleware = (
+  limiterType: keyof typeof rateLimiters = "api",
+) => {
   return createMiddleware(async (c, next) => {
     const limiter = rateLimiters[limiterType]();
 
     // Get user ID from context or use IP
     const userId = c.get("userId");
-    const ip = c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
+    const ip =
+      c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown";
     const key = userId ? `api:user:${userId}` : `api:ip:${ip}`;
 
     // Check rate limit
@@ -443,7 +447,7 @@ import { logger } from "@tepian-k3/services/logger";
 export async function consumeWithLogging(
   limiter: RateLimiter,
   key: string,
-  points = 1
+  points = 1,
 ) {
   const result = await limiter.consume(key, points);
 
@@ -485,6 +489,7 @@ export async function consumeWithLogging(
 **Issue**: Users getting blocked frequently
 
 **Solution**:
+
 - Increase `points` or `duration`
 - Use `token-bucket` strategy for bursty traffic
 - Reset limits on successful operations

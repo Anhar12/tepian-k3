@@ -29,7 +29,7 @@ export class PasswordResetService {
             {
               email,
               error,
-            }
+            },
           );
           return new PasswordResetError({
             status: false,
@@ -40,14 +40,14 @@ export class PasswordResetService {
 
       // Calculate expiry date
       const expiresAt = new Date(
-        Date.now() + PasswordResetService.RESET_EXPIRY_MINUTES * 60 * 1000
+        Date.now() + PasswordResetService.RESET_EXPIRY_MINUTES * 60 * 1000,
       );
 
       // Save reset record
       yield* passwordResetsQueries.createResetRecord(
         user.id,
         token,
-        expiresAt.toISOString()
+        expiresAt.toISOString(),
       );
 
       const baseUrl = env.APP_URL;
@@ -58,7 +58,7 @@ export class PasswordResetService {
           emailService.sendPasswordReset(
             user.email,
             resetLink,
-            PasswordResetService.RESET_EXPIRY_MINUTES
+            PasswordResetService.RESET_EXPIRY_MINUTES,
           ),
         catch: (error) => {
           logError(
@@ -67,7 +67,7 @@ export class PasswordResetService {
             {
               email,
               error,
-            }
+            },
           );
           return new PasswordResetError({
             status: false,
@@ -88,7 +88,7 @@ export class PasswordResetService {
           logError(
             "PasswordResetService.verifyResetToken",
             "Failed to decrypt reset token",
-            { token, error }
+            { token, error },
           );
           return new PasswordResetError({
             status: false,
@@ -102,20 +102,19 @@ export class PasswordResetService {
           new PasswordResetError({
             status: false,
             message: "Token reset password tidak valid atau telah kedaluwarsa.",
-          })
+          }),
         );
       }
 
-      const resetRecord = yield* passwordResetsQueries.validateResetToken(
-        token
-      );
+      const resetRecord =
+        yield* passwordResetsQueries.validateResetToken(token);
 
       if (!resetRecord) {
         return yield* Effect.fail(
           new PasswordResetError({
             status: false,
             message: "Token reset password tidak valid atau telah kedaluwarsa.",
-          })
+          }),
         );
       }
 
@@ -137,7 +136,7 @@ export class PasswordResetService {
           new PasswordResetError({
             status: false,
             message: verification.message,
-          })
+          }),
         );
       }
 
@@ -147,7 +146,7 @@ export class PasswordResetService {
           new PasswordResetError({
             status: false,
             message: "Password harus terdiri dari minimal 8 karakter.",
-          })
+          }),
         );
       }
 
@@ -160,20 +159,20 @@ export class PasswordResetService {
               usersQueries.updateUserPassword(
                 verification.userId,
                 newPassword,
-                tx
-              )
+                tx,
+              ),
             );
 
             await Effect.runPromise(
-              passwordResetsQueries.markTokenAsUsed(token, tx)
+              passwordResetsQueries.markTokenAsUsed(token, tx),
             );
 
             // Invalidate all other reset tokens for this user
             await Effect.runPromise(
               passwordResetsQueries.invalidateUserResets(
                 verification.userId,
-                tx
-              )
+                tx,
+              ),
             );
           }),
         catch: (error) => {
@@ -184,7 +183,7 @@ export class PasswordResetService {
               token,
               userId: verification.userId,
               error,
-            }
+            },
           );
           return new PasswordResetError({
             status: false,

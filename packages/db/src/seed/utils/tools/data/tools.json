@@ -9,7 +9,13 @@
     "type": "SL-4012",
     "condition": "baik",
     "availability": "ready",
-    "parameters": ["Kebisingan - Sesaat/Ambien", "Kebisingan - 24 Jam", "Kebisingan - Lingker", "Kebisingan - Personal", "Kebisingan - Noise Contour"]
+    "parameters": [
+      "Kebisingan - Sesaat/Ambien",
+      "Kebisingan - 24 Jam",
+      "Kebisingan - Lingker",
+      "Kebisingan - Personal",
+      "Kebisingan - Noise Contour"
+    ]
   },
   {
     "toolCode": "LUX-001",
@@ -165,7 +171,13 @@
     "type": "48i",
     "condition": "baik",
     "availability": "ready",
-    "parameters": ["Ambien - CO", "Emisi Kendaraan - CO", "Emisi Genset - CO", "Emisi Boiler - CO", "CO"]
+    "parameters": [
+      "Ambien - CO",
+      "Emisi Kendaraan - CO",
+      "Emisi Genset - CO",
+      "Emisi Boiler - CO",
+      "CO"
+    ]
   },
   {
     "toolCode": "GAS-002",
@@ -177,7 +189,12 @@
     "type": "42i",
     "condition": "baik",
     "availability": "ready",
-    "parameters": ["Ambien - NO2", "Emisi Genset - NOx", "Emisi Boiler - NOx", "NO"]
+    "parameters": [
+      "Ambien - NO2",
+      "Emisi Genset - NOx",
+      "Emisi Boiler - NOx",
+      "NO"
+    ]
   },
   {
     "toolCode": "GAS-003",
@@ -237,7 +254,11 @@
     "type": "DiSmoke 4000",
     "condition": "baik",
     "availability": "ready",
-    "parameters": ["Emisi Kendaraan - Opasitas", "Emisi Genset - Opasitas", "Emisi Boiler - Opasitas"]
+    "parameters": [
+      "Emisi Kendaraan - Opasitas",
+      "Emisi Genset - Opasitas",
+      "Emisi Boiler - Opasitas"
+    ]
   },
   {
     "toolCode": "EMIS-002",
@@ -285,7 +306,11 @@
     "type": "Passive Sampler",
     "condition": "baik",
     "availability": "ready",
-    "parameters": ["Hidrokarbon - Benzene", "Hidrokarbon - Toluene", "Hidrokarbon - Xylene"]
+    "parameters": [
+      "Hidrokarbon - Benzene",
+      "Hidrokarbon - Toluene",
+      "Hidrokarbon - Xylene"
+    ]
   },
   {
     "toolCode": "MIC-001",
@@ -465,6 +490,8 @@
     "type": "FoodScan",
     "condition": "baik",
     "availability": "ready",
-    "parameters": ["Pemerikaan Pola Konsumsi Makanan & Rekomendasi Asupan Sesuai Beban Kerja"]
+    "parameters": [
+      "Pemerikaan Pola Konsumsi Makanan & Rekomendasi Asupan Sesuai Beban Kerja"
+    ]
   }
 ]

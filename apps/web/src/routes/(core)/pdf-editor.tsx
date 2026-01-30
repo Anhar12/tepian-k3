@@ -9,7 +9,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-const PDFQRCodeEditor = lazy(() => import("@/components/pdf/pdf-qrcode-editor"));
+const PDFQRCodeEditor = lazy(
+  () => import("@/components/pdf/pdf-qrcode-editor"),
+);
 
 export const Route = createFileRoute("/(core)/pdf-editor")({
   component: PDFEditorPage,

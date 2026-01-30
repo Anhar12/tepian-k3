@@ -5,17 +5,22 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
+import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 
 export const kbliRouter = createTRPCRouter({
   getAllKblis: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(kbliQueries.getAllKblis())
+    async () =>
+      await withCache(CACHE_KEYS.KBLIS_ALL, CACHE_TTL.LONG, () =>
+        runEffect(kbliQueries.getAllKblis()),
+      ),
   ),
 
   getPaginatedKblis: withPermission("kbli.view")
     .input(kbliSchema.getAllKBLISchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        kbliQueries.getOffsetPaginatedKblis(input)
+        kbliQueries.getOffsetPaginatedKblis(input),
       );
 
       return { data, pageCount };
@@ -25,7 +30,7 @@ export const kbliRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const kbli = await runEffect(kbliQueries.getKbliById(input.id));
@@ -43,32 +48,44 @@ export const kbliRouter = createTRPCRouter({
   createKbli: withPermission("kbli.create")
     .input(kbliSchema.createKBLISchema)
     .mutation(
-      async ({ input }) => await runEffect(kbliQueries.createKbli(input))
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.KBLIS_PREFIX, () =>
+          runEffect(kbliQueries.createKbli(input)),
+        ),
     ),
 
   updateKbli: withPermission("kbli.update")
     .input(kbliSchema.updateKBLISchema)
     .mutation(
-      async ({ input }) => await runEffect(kbliQueries.updateKbli(input))
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.KBLIS_PREFIX, () =>
+          runEffect(kbliQueries.updateKbli(input)),
+        ),
     ),
 
   deleteKbli: withPermission("kbli.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
-      async ({ input }) => await runEffect(kbliQueries.deleteKbli(input.id))
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.KBLIS_PREFIX, () =>
+          runEffect(kbliQueries.deleteKbli(input.id)),
+        ),
     ),
 
   restoreKbli: withPermission("kbli.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
-      async ({ input }) => await runEffect(kbliQueries.restoreKbli(input.id))
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.KBLIS_PREFIX, () =>
+          runEffect(kbliQueries.restoreKbli(input.id)),
+        ),
     ),
 });

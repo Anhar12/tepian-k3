@@ -5,30 +5,40 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
+import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 
 export const regencyRouter = createTRPCRouter({
   getAllRegencies: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(regencyQueries.getAllRegencies())
+    async () =>
+      await withCache(CACHE_KEYS.REGENCIES_ALL, CACHE_TTL.LONG, () =>
+        runEffect(regencyQueries.getAllRegencies()),
+      ),
   ),
 
   getAllRegenciesByProvinceId: withRateLimit(rateLimiters.moderate())
     .input(
       z.object({
         provinceId: z.uuidv7(),
-      })
+      }),
     )
     .query(
       async ({ input }) =>
-        await runEffect(
-          regencyQueries.getAllRegenciesByProvinceId(input.provinceId)
-        )
+        await withCache(
+          `${CACHE_KEYS.REGENCIES_BY_PROVINCE}${input.provinceId}`,
+          CACHE_TTL.LONG,
+          () =>
+            runEffect(
+              regencyQueries.getAllRegenciesByProvinceId(input.provinceId),
+            ),
+        ),
     ),
 
   getPaginatedRegencies: withPermission("regency.view")
     .input(regencySchema.getAllRegenciesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        regencyQueries.getOffsetPaginationRegencies(input)
+        regencyQueries.getOffsetPaginationRegencies(input),
       );
 
       return { data, pageCount };
@@ -38,7 +48,7 @@ export const regencyRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const regency = await runEffect(regencyQueries.getRegencyById(input.id));
@@ -56,34 +66,44 @@ export const regencyRouter = createTRPCRouter({
   createRegency: withPermission("regency.create")
     .input(regencySchema.createRegencySchema)
     .mutation(
-      async ({ input }) => await runEffect(regencyQueries.createRegency(input))
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.REGENCIES_PREFIX, () =>
+          runEffect(regencyQueries.createRegency(input)),
+        ),
     ),
 
   updateRegency: withPermission("regency.update")
     .input(regencySchema.updateRegencySchema)
     .mutation(
-      async ({ input }) => await runEffect(regencyQueries.updateRegency(input))
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.REGENCIES_PREFIX, () =>
+          runEffect(regencyQueries.updateRegency(input)),
+        ),
     ),
 
   deleteRegency: withPermission("regency.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(regencyQueries.deleteRegency(input.id))
+        await withCacheInvalidation(CACHE_KEYS.REGENCIES_PREFIX, () =>
+          runEffect(regencyQueries.deleteRegency(input.id)),
+        ),
     ),
 
   restoreRegency: withPermission("regency.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(regencyQueries.restoreRegency(input.id))
+        await withCacheInvalidation(CACHE_KEYS.REGENCIES_PREFIX, () =>
+          runEffect(regencyQueries.restoreRegency(input.id)),
+        ),
     ),
 });

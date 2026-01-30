@@ -15,14 +15,14 @@ export const surveyRouter = createTRPCRouter({
   // ==================== QUESTION MANAGEMENT (ADMIN) ====================
 
   getAllQuestions: withPermission("survey-questions.view").query(
-    async () => await runEffect(surveyQueries.getAllSurveyQuestions())
+    async () => await runEffect(surveyQueries.getAllSurveyQuestions()),
   ),
 
   getPaginatedQuestions: withPermission("survey-questions.view")
     .input(surveySchema.getAllSurveyQuestionsSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        surveyQueries.getPaginatedSurveyQuestions(input)
+        surveyQueries.getPaginatedSurveyQuestions(input),
       );
       return { data, pageCount };
     }),
@@ -31,7 +31,7 @@ export const surveyRouter = createTRPCRouter({
     .input(z.object({ id: z.uuidv7() }))
     .query(async ({ input }) => {
       const question = await runEffect(
-        surveyQueries.getSurveyQuestionById(input.id)
+        surveyQueries.getSurveyQuestionById(input.id),
       );
 
       if (!question) {
@@ -48,42 +48,42 @@ export const surveyRouter = createTRPCRouter({
     .input(surveySchema.createSurveyQuestionSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(surveyQueries.createSurveyQuestion(input))
+        await runEffect(surveyQueries.createSurveyQuestion(input)),
     ),
 
   updateQuestion: withPermission("survey-questions.update")
     .input(surveySchema.updateSurveyQuestionSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(surveyQueries.updateSurveyQuestion(input))
+        await runEffect(surveyQueries.updateSurveyQuestion(input)),
     ),
 
   reorderQuestions: withPermission("survey-questions.update")
     .input(surveySchema.reorderSurveyQuestionsSchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(surveyQueries.reorderSurveyQuestions(input))
+        await runEffect(surveyQueries.reorderSurveyQuestions(input)),
     ),
 
   deleteQuestion: withPermission("survey-questions.delete")
     .input(z.object({ id: z.uuidv7() }))
     .mutation(
       async ({ input }) =>
-        await runEffect(surveyQueries.deleteSurveyQuestion(input.id))
+        await runEffect(surveyQueries.deleteSurveyQuestion(input.id)),
     ),
 
   restoreQuestion: withPermission("survey-questions.delete")
     .input(z.object({ id: z.uuidv7() }))
     .mutation(
       async ({ input }) =>
-        await runEffect(surveyQueries.restoreSurveyQuestion(input.id))
+        await runEffect(surveyQueries.restoreSurveyQuestion(input.id)),
     ),
 
   // ==================== SURVEY SUBMISSION (USER) ====================
 
   // Get active questions for survey form (for authenticated users)
   getActiveQuestions: withRateLimit(rateLimiters.moderate()).query(
-    async () => await runEffect(surveyQueries.getActiveSurveyQuestions())
+    async () => await runEffect(surveyQueries.getActiveSurveyQuestions()),
   ),
 
   // Check if survey already submitted for an order
@@ -91,7 +91,7 @@ export const surveyRouter = createTRPCRouter({
     .input(surveySchema.checkSurveyExistsSchema)
     .query(async ({ input }) => {
       const existing = await runEffect(
-        surveyQueries.checkSurveyExists(input.orderId)
+        surveyQueries.checkSurveyExists(input.orderId),
       );
       return { hasSubmitted: !!existing };
     }),
@@ -102,8 +102,8 @@ export const surveyRouter = createTRPCRouter({
     .query(
       async ({ input }) =>
         await runEffect(
-          surveyQueries.getSurveyWithFeedbackForOrder(input.orderId)
-        )
+          surveyQueries.getSurveyWithFeedbackForOrder(input.orderId),
+        ),
     ),
 
   // Submit survey
@@ -116,14 +116,14 @@ export const surveyRouter = createTRPCRouter({
             input.orderId,
             ctx.user.id,
             input.responses,
-            input.feedback
-          )
-        )
+            input.feedback,
+          ),
+        ),
     ),
 
   // ==================== STATISTICS (ADMIN) ====================
 
   getStatistics: withPermission("survey-responses.view").query(
-    async () => await runEffect(surveyQueries.getSurveyStatistics())
+    async () => await runEffect(surveyQueries.getSurveyStatistics()),
   ),
 });

@@ -30,7 +30,7 @@ const userCompanyTestingLocationQueries = {
         logError(
           "userCompanyTestingLocationQueries.getAllUserCompanyTestingLocations",
           "Error fetching all user company testing locations",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -46,14 +46,14 @@ const userCompanyTestingLocationQueries = {
         db.query.userCompanyTestingLocation.findMany({
           where: and(
             eq(userCompanyTestingLocation.userId, userId),
-            isNull(userCompanyTestingLocation.deletedAt)
+            isNull(userCompanyTestingLocation.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByUserId",
           "Error fetching all user company testing locations by user ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -67,7 +67,7 @@ const userCompanyTestingLocationQueries = {
   getAllUserCompanyTestingLocationsByCompanyIdAndUserId(
     companyId: string,
     userId: string,
-    showDeleted: boolean = false
+    showDeleted: boolean = false,
   ) {
     return Effect.tryPromise({
       try: () =>
@@ -77,7 +77,7 @@ const userCompanyTestingLocationQueries = {
             eq(userCompanyTestingLocation.userId, userId),
             showDeleted
               ? isNotNull(userCompanyTestingLocation.deletedAt)
-              : isNull(userCompanyTestingLocation.deletedAt)
+              : isNull(userCompanyTestingLocation.deletedAt),
           ),
           with: {
             regency: {
@@ -104,7 +104,7 @@ const userCompanyTestingLocationQueries = {
         logError(
           "userCompanyTestingLocationQueries.getAllUserCompanyTestingLocationsByCompanyIdAndUserId",
           "Error fetching all user company testing locations by company ID and user ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -117,7 +117,7 @@ const userCompanyTestingLocationQueries = {
 
   getUserCompanyTestingLocationByUserIdAndCompanyId(
     userId: string,
-    companyId: string
+    companyId: string,
   ) {
     return Effect.tryPromise({
       try: () =>
@@ -125,14 +125,14 @@ const userCompanyTestingLocationQueries = {
           where: and(
             eq(userCompanyTestingLocation.userId, userId),
             eq(userCompanyTestingLocation.userCompanyId, companyId),
-            isNull(userCompanyTestingLocation.deletedAt)
+            isNull(userCompanyTestingLocation.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationById",
           "Error fetching user company testing location by user ID and company ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -149,14 +149,14 @@ const userCompanyTestingLocationQueries = {
         db.query.userCompanyTestingLocation.findFirst({
           where: and(
             eq(userCompanyTestingLocation.id, id),
-            isNull(userCompanyTestingLocation.deletedAt)
+            isNull(userCompanyTestingLocation.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationById",
           "Error fetching user company testing location by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -168,8 +168,8 @@ const userCompanyTestingLocationQueries = {
       Effect.flatMap((userCompanyTestingLocation) =>
         userCompanyTestingLocation
           ? Effect.succeed(userCompanyTestingLocation)
-          : Effect.succeed(null)
-      )
+          : Effect.succeed(null),
+      ),
     );
   },
 
@@ -179,14 +179,14 @@ const userCompanyTestingLocationQueries = {
         db.query.userCompanyTestingLocation.findFirst({
           where: and(
             (eq(userCompanyTestingLocation.id, id),
-            isNotNull(userCompanyTestingLocation.deletedAt))
+            isNotNull(userCompanyTestingLocation.deletedAt)),
           ),
         }),
       catch: (error) => {
         logError(
           "userCompanyTestingLocationQueries.getDeletedUserCompanyTestingLocationById",
           "Error fetching deleted user company testing location by ID",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -198,8 +198,8 @@ const userCompanyTestingLocationQueries = {
       Effect.flatMap((userCompanyTestingLocation) =>
         userCompanyTestingLocation
           ? Effect.succeed(userCompanyTestingLocation)
-          : Effect.succeed(null)
-      )
+          : Effect.succeed(null),
+      ),
     );
   },
 
@@ -213,7 +213,7 @@ const userCompanyTestingLocationQueries = {
         logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationByName",
           "Error fetching user company testing location by name",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -225,8 +225,8 @@ const userCompanyTestingLocationQueries = {
       Effect.flatMap((userCompanyTestingLocation) =>
         userCompanyTestingLocation
           ? Effect.succeed(userCompanyTestingLocation)
-          : Effect.succeed(null)
-      )
+          : Effect.succeed(null),
+      ),
     );
   },
 
@@ -236,14 +236,14 @@ const userCompanyTestingLocationQueries = {
         db.query.userCompanyTestingLocation.findFirst({
           where: and(
             eq(userCompanyTestingLocation.userId, userId),
-            eq(userCompanyTestingLocation.name, name)
+            eq(userCompanyTestingLocation.name, name),
           ),
         }),
       catch: (error) => {
         logError(
           "userCompanyTestingLocationQueries.getUserCompanyTestingLocationsNameByUserId",
           "Error fetching user company testing location by user ID and name",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -255,8 +255,8 @@ const userCompanyTestingLocationQueries = {
       Effect.flatMap((userCompanyTestingLocation) =>
         userCompanyTestingLocation
           ? Effect.succeed(userCompanyTestingLocation)
-          : Effect.succeed(null)
-      )
+          : Effect.succeed(null),
+      ),
     );
   },
 
@@ -265,7 +265,7 @@ const userCompanyTestingLocationQueries = {
     companyId: string,
     input: z.infer<
       typeof userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema
-    >
+    >,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -311,7 +311,7 @@ const userCompanyTestingLocationQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -321,16 +321,16 @@ const userCompanyTestingLocationQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(userCompanyTestingLocation.deletedAt)
               : isNull(userCompanyTestingLocation.deletedAt),
             eq(userCompanyTestingLocation.userId, userId),
-            eq(userCompanyTestingLocation.userCompanyId, companyId)
+            eq(userCompanyTestingLocation.userCompanyId, companyId),
           );
 
       const orderBy =
@@ -338,7 +338,7 @@ const userCompanyTestingLocationQueries = {
           ? input.sort.map((item) =>
               item.desc
                 ? desc(userCompanyTestingLocation[item.id])
-                : asc(userCompanyTestingLocation[item.id])
+                : asc(userCompanyTestingLocation[item.id]),
             )
           : [desc(userCompanyTestingLocation.createdAt)];
 
@@ -371,7 +371,7 @@ const userCompanyTestingLocationQueries = {
             {
               error,
               input,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -393,7 +393,7 @@ const userCompanyTestingLocationQueries = {
   getOffsetPaginationUserCompanyTestingLocations(
     input: z.infer<
       typeof userCompanyTestingLocationSchema.getAllUserCompanyTestingLocationSchema
-    >
+    >,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -420,7 +420,7 @@ const userCompanyTestingLocationQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -430,14 +430,14 @@ const userCompanyTestingLocationQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(userCompanyTestingLocation.deletedAt)
-              : isNull(userCompanyTestingLocation.deletedAt)
+              : isNull(userCompanyTestingLocation.deletedAt),
           );
 
       const orderBy =
@@ -445,7 +445,7 @@ const userCompanyTestingLocationQueries = {
           ? input.sort.map((item) =>
               item.desc
                 ? desc(userCompanyTestingLocation[item.id])
-                : asc(userCompanyTestingLocation[item.id])
+                : asc(userCompanyTestingLocation[item.id]),
             )
           : [desc(userCompanyTestingLocation.createdAt)];
 
@@ -475,7 +475,7 @@ const userCompanyTestingLocationQueries = {
           logError(
             "userCompanyTestingLocationQueries.getOffsetPaginationUserCompanyTestingLocations",
             "Error fetching paginated user company testing locations",
-            { error, input }
+            { error, input },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -498,13 +498,13 @@ const userCompanyTestingLocationQueries = {
     userId: string,
     data: z.infer<
       typeof userCompanyTestingLocationSchema.createUserCompanyTestingLocationSchema
-    >
+    >,
   ) {
     return Effect.gen(this, function* () {
       const isExisting =
         yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationsNameByUserId(
           userId,
-          data.name
+          data.name,
         );
 
       if (isExisting) {
@@ -513,7 +513,7 @@ const userCompanyTestingLocationQueries = {
             code: "CONFLICT",
             message:
               "Kabupaten/Kota dengan nama tersebut sudah ada atau sudah dihapus sebelumnya.",
-          })
+          }),
         );
       }
 
@@ -530,7 +530,7 @@ const userCompanyTestingLocationQueries = {
           logError(
             "userCompanyTestingLocationQueries.createUserCompanyTestingLocation",
             "Error creating user company testing location",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -544,7 +544,7 @@ const userCompanyTestingLocationQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat data Kabupaten/Kota.",
-          })
+          }),
         );
       }
 
@@ -556,12 +556,12 @@ const userCompanyTestingLocationQueries = {
     userId: string,
     data: z.infer<
       typeof userCompanyTestingLocationSchema.updateUserCompanyTestingLocationSchema
-    >
+    >,
   ) {
     return Effect.gen(this, function* () {
       const existingUserCompanyTestingLocation =
         yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
-          data.id
+          data.id,
         );
 
       if (!existingUserCompanyTestingLocation) {
@@ -569,7 +569,7 @@ const userCompanyTestingLocationQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kabupaten/Kota tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -579,7 +579,7 @@ const userCompanyTestingLocationQueries = {
             code: "FORBIDDEN",
             message:
               "Anda tidak memiliki izin untuk memperbarui Kabupaten/Kota ini.",
-          })
+          }),
         );
       }
 
@@ -597,7 +597,7 @@ const userCompanyTestingLocationQueries = {
           logError(
             "userCompanyTestingLocationQueries.updateUserCompanyTestingLocation",
             "Error updating user company testing location",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -611,7 +611,7 @@ const userCompanyTestingLocationQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data Kabupaten/Kota.",
-          })
+          }),
         );
       }
 
@@ -623,7 +623,7 @@ const userCompanyTestingLocationQueries = {
     return Effect.gen(this, function* () {
       const existingUserCompanyTestingLocation =
         yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationById(
-          id
+          id,
         );
 
       if (!existingUserCompanyTestingLocation) {
@@ -631,7 +631,7 @@ const userCompanyTestingLocationQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kabupaten/Kota tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -641,7 +641,7 @@ const userCompanyTestingLocationQueries = {
             code: "FORBIDDEN",
             message:
               "Anda tidak memiliki izin untuk menghapus Kabupaten/Kota ini.",
-          })
+          }),
         );
       }
 
@@ -658,7 +658,7 @@ const userCompanyTestingLocationQueries = {
           logError(
             "userCompanyTestingLocationQueries.deleteUserCompanyTestingLocation",
             "Error deleting user company testing location",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -672,7 +672,7 @@ const userCompanyTestingLocationQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menghapus data Kabupaten/Kota.",
-          })
+          }),
         );
       }
 
@@ -684,7 +684,7 @@ const userCompanyTestingLocationQueries = {
     return Effect.gen(this, function* () {
       const deletedUserCompanyTestingLocation =
         yield* userCompanyTestingLocationQueries.getDeletedUserCompanyTestingLocationById(
-          id
+          id,
         );
 
       if (!deletedUserCompanyTestingLocation) {
@@ -692,7 +692,7 @@ const userCompanyTestingLocationQueries = {
           new TRPCError({
             code: "NOT_FOUND",
             message: "Kabupaten/Kota yang dihapus tidak ditemukan.",
-          })
+          }),
         );
       }
 
@@ -702,7 +702,7 @@ const userCompanyTestingLocationQueries = {
             code: "FORBIDDEN",
             message:
               "Anda tidak memiliki izin untuk mengembalikan Kabupaten/Kota ini.",
-          })
+          }),
         );
       }
 
@@ -720,7 +720,7 @@ const userCompanyTestingLocationQueries = {
           logError(
             "userCompanyTestingLocationQueries.restoreUserCompanyTestingLocation",
             "Error restoring user company testing location",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -734,7 +734,7 @@ const userCompanyTestingLocationQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengembalikan data Kabupaten/Kota yang dihapus.",
-          })
+          }),
         );
       }
 

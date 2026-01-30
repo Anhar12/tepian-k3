@@ -72,7 +72,7 @@ const createAuditLog = (options: AuditLogOptions) =>
         new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create audit log",
-        })
+        }),
       );
     }
 
@@ -100,8 +100,8 @@ const getAuditLogsByEntity = (entityType: string, entityId: string) =>
           .where(
             and(
               eq(audits.entityType, entityType),
-              eq(audits.entityId, entityId)
-            )
+              eq(audits.entityId, entityId),
+            ),
           )
           .orderBy(desc(audits.createdAt)),
       catch: (error) => {
@@ -112,7 +112,7 @@ const getAuditLogsByEntity = (entityType: string, entityId: string) =>
             error,
             entityType,
             entityId,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -144,7 +144,7 @@ const getAuditLogsByUser = (userId: string, limit: number = 100) =>
           {
             error,
             userId,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -247,7 +247,7 @@ const getAuditStatistics = (entityType?: string) =>
         logError(
           "auditQueries.getAuditStatistics",
           "Failed to get audit statistics",
-          { error, entityType }
+          { error, entityType },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -280,7 +280,7 @@ const deleteOldAuditLogs = (olderThanDays: number) =>
           {
             error,
             olderThanDays,
-          }
+          },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

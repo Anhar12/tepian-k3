@@ -41,7 +41,7 @@ const result = await authLimiter.consume(`login:${userId}`);
 
 if (!result.allowed) {
   throw new Error(
-    `Too many login attempts. Try again in ${Math.ceil(result.resetMs / 1000)} seconds`
+    `Too many login attempts. Try again in ${Math.ceil(result.resetMs / 1000)} seconds`,
   );
 }
 
@@ -69,11 +69,13 @@ const result = await limiter.consume(`api:${userId}`);
 Most accurate algorithm. Counts requests in a rolling time window.
 
 **Pros:**
+
 - Most accurate rate limiting
 - No edge case issues at window boundaries
 - Fair distribution of requests
 
 **Cons:**
+
 - Slightly more complex
 - Uses more memory
 
@@ -92,11 +94,13 @@ const limiter = createRateLimiter({
 Good for handling burst traffic. Tokens refill continuously at a steady rate.
 
 **Pros:**
+
 - Allows controlled bursts
 - Tokens regenerate smoothly over time
 - Good for APIs with bursty traffic patterns
 
 **Cons:**
+
 - Can allow bursts that exceed average rate
 - More complex to understand
 
@@ -115,11 +119,13 @@ const limiter = createRateLimiter({
 Simplest algorithm. Resets counter at fixed intervals.
 
 **Pros:**
+
 - Very simple
 - Low memory usage
 - Fast performance
 
 **Cons:**
+
 - Edge case issues at window boundaries
 - Can allow 2x requests at boundaries
 
@@ -136,6 +142,7 @@ const limiter = createRateLimiter({
 ## Available Presets
 
 ### Authentication (`AUTH`)
+
 ```typescript
 const limiter = rateLimiters.auth();
 // 5 attempts per 15 minutes
@@ -143,12 +150,14 @@ const limiter = rateLimiters.auth();
 ```
 
 ### API Calls (`API`)
+
 ```typescript
 const limiter = rateLimiters.api();
 // 1000 requests per hour
 ```
 
 ### Email Sending (`EMAIL`)
+
 ```typescript
 const limiter = rateLimiters.email();
 // 10 emails per hour
@@ -156,6 +165,7 @@ const limiter = rateLimiters.email();
 ```
 
 ### OTP Verification (`OTP`)
+
 ```typescript
 const limiter = rateLimiters.otp();
 // 3 attempts per 5 minutes
@@ -163,6 +173,7 @@ const limiter = rateLimiters.otp();
 ```
 
 ### Password Reset (`PASSWORD_RESET`)
+
 ```typescript
 const limiter = rateLimiters.passwordReset();
 // 3 attempts per hour
@@ -199,6 +210,7 @@ if (result.allowed) {
 ```
 
 **Response:**
+
 ```typescript
 {
   allowed: boolean;        // Whether request is allowed
@@ -332,7 +344,7 @@ async function handleApiRequest(req: Request, userId: string) {
           "X-RateLimit-Reset": result.resetAt.toISOString(),
           "Retry-After": Math.ceil(result.resetMs / 1000).toString(),
         },
-      }
+      },
     );
   }
 
@@ -494,6 +506,7 @@ afterEach(async () => {
 **Issue**: Redis connection is failing
 
 **Solution**:
+
 - Check Redis/Memurai is running
 - Verify environment variables are set correctly
 - Check network connectivity
@@ -503,6 +516,7 @@ afterEach(async () => {
 **Issue**: Using in-memory storage
 
 **Solution**:
+
 - Ensure Redis is properly configured and connected
 - Check `useInMemoryFallback` is not forced to true
 
@@ -511,6 +525,7 @@ afterEach(async () => {
 **Issue**: Using fixed-window strategy
 
 **Solution**:
+
 - Switch to sliding-window strategy for more accurate limiting
 - Or increase the duration to smooth out resets
 

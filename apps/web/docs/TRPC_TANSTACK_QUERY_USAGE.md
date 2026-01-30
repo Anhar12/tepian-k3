@@ -106,7 +106,7 @@ function UserProfile() {
 }
 ```
 
-**Example from codebase** - [apps/web/src/routes/(core)/route.tsx](../src/routes/(core)/route.tsx):
+**Example from codebase** - [apps/web/src/routes/(core)/route.tsx](<../src/routes/(core)/route.tsx>):
 
 ```typescript
 export const Route = createFileRoute("/(core)")({
@@ -214,32 +214,35 @@ export async function logout() {
 
 ## Comparison Table
 
-| Feature | Classic Pattern | Modern Pattern | Direct Client |
-|---------|----------------|----------------|---------------|
-| **Usage Location** | React components | React components | Utility functions, lib files |
-| **Import** | `trpc` from utils | `trpc` + `useQuery`/`useMutation` | `trpcClient` from utils |
-| **Query Syntax** | `trpc.user.getById.useQuery()` | `useQuery(trpc.user.getById.queryOptions())` | `trpcClient.user.getById.query()` |
-| **Mutation Syntax** | `trpc.user.update.useMutation()` | `useMutation(trpc.user.update.mutationOptions())` | `trpcClient.user.update.mutate()` |
-| **TanStack Query Integration** | Indirect | Direct | N/A (no hooks) |
-| **Advanced Query Features** | Limited | Full access | N/A |
-| **Type Safety** | ✅ Full | ✅ Full | ✅ Full |
-| **SSR/Prefetching** | Requires workarounds | Native support | Native support |
+| Feature                        | Classic Pattern                  | Modern Pattern                                    | Direct Client                     |
+| ------------------------------ | -------------------------------- | ------------------------------------------------- | --------------------------------- |
+| **Usage Location**             | React components                 | React components                                  | Utility functions, lib files      |
+| **Import**                     | `trpc` from utils                | `trpc` + `useQuery`/`useMutation`                 | `trpcClient` from utils           |
+| **Query Syntax**               | `trpc.user.getById.useQuery()`   | `useQuery(trpc.user.getById.queryOptions())`      | `trpcClient.user.getById.query()` |
+| **Mutation Syntax**            | `trpc.user.update.useMutation()` | `useMutation(trpc.user.update.mutationOptions())` | `trpcClient.user.update.mutate()` |
+| **TanStack Query Integration** | Indirect                         | Direct                                            | N/A (no hooks)                    |
+| **Advanced Query Features**    | Limited                          | Full access                                       | N/A                               |
+| **Type Safety**                | ✅ Full                          | ✅ Full                                           | ✅ Full                           |
+| **SSR/Prefetching**            | Requires workarounds             | Native support                                    | Native support                    |
 
 ## When to Use Each Pattern
 
 ### Use Classic Pattern When:
+
 - Building simple components with straightforward data fetching
 - You don't need advanced TanStack Query features
 - Team prefers concise syntax
 - Working with subscriptions (only supported in classic pattern)
 
 ### Use Modern Pattern When:
+
 - Need advanced TanStack Query features (placeholderData, select, refetchInterval, etc.)
 - Working with TanStack Router loaders/prefetching
 - Need fine-grained control over query/mutation behavior
 - Composing multiple queries with suspense
 
 ### Use Direct Client When:
+
 - Making API calls outside React components
 - In utility functions (logout, file uploads, etc.)
 - In middleware or request handlers
@@ -359,6 +362,7 @@ function UserOrders({ userId }: { userId: string }) {
 ## Best Practices
 
 ### 1. Consistent Pattern Per Component
+
 Choose one pattern per component and stick with it. Don't mix patterns unnecessarily.
 
 ```typescript

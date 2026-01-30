@@ -5,18 +5,22 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
+import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 
 export const parameterCategoriesRouter = createTRPCRouter({
   getAllParameterCategories: withRateLimit(rateLimiters.moderate()).query(
     async () =>
-      await runEffect(parameterCategoriesQueries.getAllParameterCategories())
+      await withCache(CACHE_KEYS.PARAMETER_CATEGORIES_ALL, CACHE_TTL.LONG, () =>
+        runEffect(parameterCategoriesQueries.getAllParameterCategories()),
+      ),
   ),
 
   getPaginatedParameterCategories: withPermission("parameter-categories.view")
     .input(parameterCategoriesSchema.getAllParameterCategoriesSchema)
     .query(async ({ input }) => {
       const { data, pageCount } = await runEffect(
-        parameterCategoriesQueries.getOffsetPaginatedParameterCategories(input)
+        parameterCategoriesQueries.getOffsetPaginatedParameterCategories(input),
       );
 
       return { data, pageCount };
@@ -26,11 +30,11 @@ export const parameterCategoriesRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const parameterCategory = await runEffect(
-        parameterCategoriesQueries.getParameterCategoryById(input.id)
+        parameterCategoriesQueries.getParameterCategoryById(input.id),
       );
 
       if (!parameterCategory) {
@@ -47,43 +51,59 @@ export const parameterCategoriesRouter = createTRPCRouter({
     .input(parameterCategoriesSchema.createParameterCategorySchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.createParameterCategory(input)
-        )
+        await withCacheInvalidation(
+          CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX,
+          () =>
+            runEffect(
+              parameterCategoriesQueries.createParameterCategory(input),
+            ),
+        ),
     ),
 
   updateParameterCategory: withPermission("parameter-categories.update")
     .input(parameterCategoriesSchema.updateParameterCategorySchema)
     .mutation(
       async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.updateParameterCategory(input)
-        )
+        await withCacheInvalidation(
+          CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX,
+          () =>
+            runEffect(
+              parameterCategoriesQueries.updateParameterCategory(input),
+            ),
+        ),
     ),
 
   deleteParameterCategory: withPermission("parameter-categories.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.deleteParameterCategory(input.id)
-        )
+        await withCacheInvalidation(
+          CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX,
+          () =>
+            runEffect(
+              parameterCategoriesQueries.deleteParameterCategory(input.id),
+            ),
+        ),
     ),
 
   restoreParameterCategory: withPermission("parameter-categories.delete")
     .input(
       z.object({
         id: z.uuidv7(),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
-        await runEffect(
-          parameterCategoriesQueries.restoreParameterCategory(input.id)
-        )
+        await withCacheInvalidation(
+          CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX,
+          () =>
+            runEffect(
+              parameterCategoriesQueries.restoreParameterCategory(input.id),
+            ),
+        ),
     ),
 });

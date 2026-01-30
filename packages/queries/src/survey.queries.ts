@@ -34,14 +34,14 @@ const surveyQueries = {
         db.query.surveyQuestions.findFirst({
           where: and(
             eq(surveyQuestions.id, id),
-            isNull(surveyQuestions.deletedAt)
+            isNull(surveyQuestions.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "surveyQueries.getSurveyQuestionById",
           "Error fetching survey question by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -50,8 +50,8 @@ const surveyQueries = {
       },
     }).pipe(
       Effect.flatMap((question) =>
-        question ? Effect.succeed(question) : Effect.succeed(null)
-      )
+        question ? Effect.succeed(question) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -61,14 +61,14 @@ const surveyQueries = {
         db.query.surveyQuestions.findFirst({
           where: and(
             eq(surveyQuestions.id, id),
-            isNotNull(surveyQuestions.deletedAt)
+            isNotNull(surveyQuestions.deletedAt),
           ),
         }),
       catch: (error) => {
         logError(
           "surveyQueries.getDeletedSurveyQuestionById",
           "Error fetching deleted survey question by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -77,8 +77,8 @@ const surveyQueries = {
       },
     }).pipe(
       Effect.flatMap((question) =>
-        question ? Effect.succeed(question) : Effect.succeed(null)
-      )
+        question ? Effect.succeed(question) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -88,7 +88,7 @@ const surveyQueries = {
         db.query.surveyQuestions.findMany({
           where: and(
             eq(surveyQuestions.isActive, true),
-            isNull(surveyQuestions.deletedAt)
+            isNull(surveyQuestions.deletedAt),
           ),
           orderBy: [asc(surveyQuestions.order)],
         }),
@@ -96,7 +96,7 @@ const surveyQueries = {
         logError(
           "surveyQueries.getActiveSurveyQuestions",
           "Error fetching active survey questions",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -117,7 +117,7 @@ const surveyQueries = {
         logError(
           "surveyQueries.getAllSurveyQuestions",
           "Error fetching all survey questions",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -128,7 +128,7 @@ const surveyQueries = {
   },
 
   getPaginatedSurveyQuestions(
-    input: z.infer<typeof surveySchema.getAllSurveyQuestionsSchema>
+    input: z.infer<typeof surveySchema.getAllSurveyQuestionsSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -146,12 +146,10 @@ const surveyQueries = {
             input.search
               ? ilike(surveyQuestions.questionText, `%${input.search}%`)
               : undefined,
-            input.showInactive
-              ? undefined
-              : eq(surveyQuestions.isActive, true),
+            input.showInactive ? undefined : eq(surveyQuestions.isActive, true),
             input.showDeleted
               ? isNotNull(surveyQuestions.deletedAt)
-              : isNull(surveyQuestions.deletedAt)
+              : isNull(surveyQuestions.deletedAt),
           );
 
       const orderBy =
@@ -159,7 +157,7 @@ const surveyQueries = {
           ? input.sort.map((item) =>
               item.desc
                 ? desc(surveyQuestions[item.id])
-                : asc(surveyQuestions[item.id])
+                : asc(surveyQuestions[item.id]),
             )
           : [asc(surveyQuestions.order)];
 
@@ -187,7 +185,7 @@ const surveyQueries = {
           logError(
             "surveyQueries.getPaginatedSurveyQuestions",
             "Error fetching paginated survey questions",
-            { input, error }
+            { input, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -204,7 +202,7 @@ const surveyQueries = {
   },
 
   createSurveyQuestion(
-    data: z.infer<typeof surveySchema.createSurveyQuestionSchema>
+    data: z.infer<typeof surveySchema.createSurveyQuestionSchema>,
   ) {
     return Effect.gen(function* () {
       // Get max order to auto-set order if not provided
@@ -231,7 +229,7 @@ const surveyQueries = {
           logError(
             "surveyQueries.createSurveyQuestion",
             "Error creating survey question",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -252,7 +250,7 @@ const surveyQueries = {
   },
 
   updateSurveyQuestion(
-    data: z.infer<typeof surveySchema.updateSurveyQuestionSchema>
+    data: z.infer<typeof surveySchema.updateSurveyQuestionSchema>,
   ) {
     return Effect.gen(function* () {
       const existing = yield* surveyQueries.getSurveyQuestionById(data.id);
@@ -279,7 +277,7 @@ const surveyQueries = {
           logError(
             "surveyQueries.updateSurveyQuestion",
             "Error updating survey question",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -301,7 +299,7 @@ const surveyQueries = {
   },
 
   reorderSurveyQuestions(
-    data: z.infer<typeof surveySchema.reorderSurveyQuestionsSchema>
+    data: z.infer<typeof surveySchema.reorderSurveyQuestionsSchema>,
   ) {
     return Effect.tryPromise({
       try: async () => {
@@ -319,7 +317,7 @@ const surveyQueries = {
         logError(
           "surveyQueries.reorderSurveyQuestions",
           "Error reordering survey questions",
-          { error, data }
+          { error, data },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -351,7 +349,7 @@ const surveyQueries = {
           logError(
             "surveyQueries.deleteSurveyQuestion",
             "Error deleting survey question",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -394,7 +392,7 @@ const surveyQueries = {
           logError(
             "surveyQueries.restoreSurveyQuestion",
             "Error restoring survey question",
-            { error, id }
+            { error, id },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -427,7 +425,7 @@ const surveyQueries = {
         logError(
           "surveyQueries.checkSurveyExists",
           "Error checking survey existence",
-          { orderId, error }
+          { orderId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -450,7 +448,7 @@ const surveyQueries = {
         logError(
           "surveyQueries.getSurveyResponsesForOrder",
           "Error fetching survey responses for order",
-          { orderId, error }
+          { orderId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -473,7 +471,7 @@ const surveyQueries = {
         logError(
           "surveyQueries.getSurveyFeedbackForOrder",
           "Error fetching survey feedback for order",
-          { orderId, error }
+          { orderId, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -502,7 +500,7 @@ const surveyQueries = {
     orderId: string,
     userId: string,
     responses: { questionId: string; rating: number }[],
-    feedback?: string
+    feedback?: string,
   ) {
     return Effect.gen(function* () {
       // Check if survey already submitted
@@ -547,7 +545,7 @@ const surveyQueries = {
       // Validate all required questions are answered
       const questionIds = new Set(responses.map((r) => r.questionId));
       const missingQuestions = activeQuestions.filter(
-        (q) => !questionIds.has(q.id)
+        (q) => !questionIds.has(q.id),
       );
 
       if (missingQuestions.length > 0) {
@@ -649,7 +647,7 @@ const surveyQueries = {
         logError(
           "surveyQueries.getSurveyStatistics",
           "Error fetching survey statistics",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

@@ -9,7 +9,7 @@ import { env } from "../../../env";
  */
 export const generateQRCodeDataURL = (
   data: string,
-  options?: QRCode.QRCodeToDataURLOptions
+  options?: QRCode.QRCodeToDataURLOptions,
 ) =>
   Effect.tryPromise({
     try: () =>
@@ -34,7 +34,7 @@ export const generateQRCodeDataURL = (
  */
 export const generateQRCodeBuffer = (
   data: string,
-  options?: QRCode.QRCodeToBufferOptions
+  options?: QRCode.QRCodeToBufferOptions,
 ) =>
   Effect.tryPromise({
     try: () =>
@@ -59,7 +59,7 @@ export const generateQRCodeBuffer = (
  */
 export const generateVerificationURL = (
   verificationToken: string,
-  baseUrl?: string
+  baseUrl?: string,
 ): string => {
   const base = baseUrl || env.DOCUMENT_VERIFICATION_BASE_URL || "";
   return `${base}${verificationToken}`;
@@ -72,13 +72,13 @@ export const generateVerificationURL = (
 export const generateDocumentVerificationQRCode = (
   verificationToken: string,
   baseUrl?: string,
-  options?: QRCode.QRCodeToDataURLOptions
+  options?: QRCode.QRCodeToDataURLOptions,
 ) =>
   Effect.gen(function* () {
     const verificationURL = generateVerificationURL(verificationToken, baseUrl);
     const qrCodeDataURL = yield* generateQRCodeDataURL(
       verificationURL,
-      options
+      options,
     );
     return {
       qrCodeDataURL,

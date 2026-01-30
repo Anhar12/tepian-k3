@@ -526,3 +526,4 @@ export * from "./resources";
 export * from "./permissions";
 export * from "./roles";
 export * from "./rate-limits";
+export * from "./cache";

@@ -28,7 +28,7 @@ const permissionQueries = {
         logError(
           "permissionQueries.getAllPermissions",
           "Failed to get all permissions",
-          { error }
+          { error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -52,7 +52,7 @@ const permissionQueries = {
           logError(
             "permissionQueries.getUserWithPermissions",
             "Failed to get user data",
-            { userId, error }
+            { userId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -77,7 +77,7 @@ const permissionQueries = {
           logError(
             "permissionQueries.getUserWithPermissions",
             "Failed to get user roles",
-            { userId, error }
+            { userId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -101,7 +101,7 @@ const permissionQueries = {
               .from(rolePermissions)
               .innerJoin(
                 permission,
-                eq(rolePermissions.permissionId, permission.id)
+                eq(rolePermissions.permissionId, permission.id),
               )
               .where(inArray(rolePermissions.roleId, roleIds));
 
@@ -111,7 +111,7 @@ const permissionQueries = {
             logError(
               "permissionQueries.getUserWithPermissions",
               "Failed to get role permissions",
-              { roleIds, error }
+              { roleIds, error },
             );
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
@@ -132,7 +132,7 @@ const permissionQueries = {
             .from(userPermissions)
             .innerJoin(
               permission,
-              eq(userPermissions.permissionId, permission.id)
+              eq(userPermissions.permissionId, permission.id),
             )
             .where(eq(userPermissions.userId, user.id)),
 
@@ -140,7 +140,7 @@ const permissionQueries = {
           logError(
             "permissionQueries.getUserWithPermissions",
             "Failed to get user permissions",
-            { userId, error }
+            { userId, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -178,9 +178,8 @@ const permissionQueries = {
   // Check if user has specific permission
   userHasPermission(userId: string, permissionName: string) {
     return Effect.gen(function* () {
-      const userWithPerms = yield* permissionQueries.getUserWithPermissions(
-        userId
-      );
+      const userWithPerms =
+        yield* permissionQueries.getUserWithPermissions(userId);
       if (!userWithPerms) return false;
       return userWithPerms.permissions.includes(permissionName) || false;
     });
@@ -189,9 +188,8 @@ const permissionQueries = {
   // Check if user has specific role
   userHasRole(userId: string, roleName: string) {
     return Effect.gen(function* () {
-      const userWithPerms = yield* permissionQueries.getUserWithPermissions(
-        userId
-      );
+      const userWithPerms =
+        yield* permissionQueries.getUserWithPermissions(userId);
       if (!userWithPerms) return false;
       return userWithPerms.roles.some((r) => r.name === roleName) || false;
     });
@@ -200,9 +198,8 @@ const permissionQueries = {
   // Check if user has Any of the specified roles
   userHasAnyRole(userId: string, roleNames: string[]) {
     return Effect.gen(function* () {
-      const userWithPerms = yield* permissionQueries.getUserWithPermissions(
-        userId
-      );
+      const userWithPerms =
+        yield* permissionQueries.getUserWithPermissions(userId);
       if (!userWithPerms) return false;
       return (
         userWithPerms.roles.some((r) => roleNames.includes(r.name)) || false
@@ -213,9 +210,8 @@ const permissionQueries = {
   // Check if user has ALL of the specified roles
   userHasAllRoles(userId: string, roleNames: string[]) {
     return Effect.gen(function* () {
-      const userWithPerms = yield* permissionQueries.getUserWithPermissions(
-        userId
-      );
+      const userWithPerms =
+        yield* permissionQueries.getUserWithPermissions(userId);
       const userRoleNames = userWithPerms?.roles.map((r) => r.name) || [];
       return roleNames.every((roleName) => userRoleNames.includes(roleName));
     });
@@ -224,7 +220,7 @@ const permissionQueries = {
   updateRolePermissions(
     roleId: string,
     addedPermissions: string[],
-    removedPermissions: string[]
+    removedPermissions: string[],
   ) {
     return Effect.gen(function* () {
       // Verify role exists
@@ -243,7 +239,7 @@ const permissionQueries = {
             logError(
               "permissionQueries.updateRolePermissions",
               "Error fetching permissions to remove",
-              { error }
+              { error },
             );
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
@@ -262,14 +258,17 @@ const permissionQueries = {
                 .where(
                   and(
                     eq(rolePermissions.roleId, roleId),
-                    inArray(rolePermissions.permissionId, permissionIdsToRemove)
-                  )
+                    inArray(
+                      rolePermissions.permissionId,
+                      permissionIdsToRemove,
+                    ),
+                  ),
                 ),
             catch: (error) => {
               logError(
                 "permissionQueries.updateRolePermissions",
                 "Error removing role permissions",
-                { error }
+                { error },
               );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
@@ -293,7 +292,7 @@ const permissionQueries = {
             logError(
               "permissionQueries.updateRolePermissions",
               "Error fetching permissions to add",
-              { error }
+              { error },
             );
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
@@ -318,7 +317,7 @@ const permissionQueries = {
               logError(
                 "permissionQueries.updateRolePermissions",
                 "Error adding role permissions",
-                { error }
+                { error },
               );
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",

@@ -40,7 +40,7 @@ export class EmailService {
   async sendPasswordReset(
     email: string,
     resetLink: string,
-    expiresInMinutes?: number
+    expiresInMinutes?: number,
   ) {
     return await this.send({
       to: email,

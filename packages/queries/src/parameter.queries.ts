@@ -44,7 +44,7 @@ const parameterQueries = {
         logError(
           "parameterQueries.getParameterById",
           "Failed to fetch parameter by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -53,8 +53,8 @@ const parameterQueries = {
       },
     }).pipe(
       Effect.flatMap((parameter) =>
-        parameter ? Effect.succeed(parameter) : Effect.succeed(null)
-      )
+        parameter ? Effect.succeed(parameter) : Effect.succeed(null),
+      ),
     );
   },
 
@@ -68,7 +68,7 @@ const parameterQueries = {
         logError(
           "parameterQueries.getDeletedParameterById",
           "Failed to fetch deleted parameter by ID",
-          { id, error }
+          { id, error },
         );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -77,15 +77,15 @@ const parameterQueries = {
       },
     }).pipe(
       Effect.flatMap((parameter) =>
-        parameter ? Effect.succeed(parameter) : Effect.succeed(null)
-      )
+        parameter ? Effect.succeed(parameter) : Effect.succeed(null),
+      ),
     );
   },
 
   getOffsetPaginatedParametersByClusterIdAndCategoryId(
     input: z.infer<
       typeof parameterSchema.getByClusterAndParameterCategorySchema
-    >
+    >,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -98,7 +98,7 @@ const parameterQueries = {
           ? eq(parameters.parameterCategoryId, input.parameterCategoryId)
           : undefined,
         input.name ? ilike(parameters.name, `%${input.name}%`) : undefined,
-        isNull(parameters.deletedAt)
+        isNull(parameters.deletedAt),
       );
 
       const { data, total } = yield* Effect.tryPromise({
@@ -123,11 +123,11 @@ const parameterQueries = {
               .where(where)
               .innerJoin(
                 parameterCategories,
-                eq(parameters.parameterCategoryId, parameterCategories.id)
+                eq(parameters.parameterCategoryId, parameterCategories.id),
               )
               .innerJoin(
                 clusters,
-                eq(parameterCategories.clusterId, clusters.id)
+                eq(parameterCategories.clusterId, clusters.id),
               )
               .orderBy(desc(parameters.createdAt));
 
@@ -138,7 +138,7 @@ const parameterQueries = {
               .from(parameters)
               .innerJoin(
                 parameterCategories,
-                eq(parameters.parameterCategoryId, parameterCategories.id)
+                eq(parameters.parameterCategoryId, parameterCategories.id),
               )
               .where(where)
               .execute()
@@ -153,7 +153,7 @@ const parameterQueries = {
             {
               error,
               input,
-            }
+            },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -173,7 +173,7 @@ const parameterQueries = {
   },
 
   getOffsetPaginatedParameters(
-    input: z.infer<typeof parameterSchema.getAllParametersSchema>
+    input: z.infer<typeof parameterSchema.getAllParametersSchema>,
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -196,7 +196,7 @@ const parameterQueries = {
                           const date = new Date(input.createdAt[0]);
                           date.setHours(0, 0, 0, 0);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
                     : undefined,
                   input.createdAt[1]
@@ -206,20 +206,20 @@ const parameterQueries = {
                           const date = new Date(input.createdAt[1]);
                           date.setHours(23, 59, 59, 999);
                           return date.toISOString();
-                        })()
+                        })(),
                       )
-                    : undefined
+                    : undefined,
                 )
               : undefined,
             input.showDeleted
               ? isNotNull(parameters.deletedAt)
-              : isNull(parameters.deletedAt)
+              : isNull(parameters.deletedAt),
           );
 
       const orderBy =
         input.sort.length > 0
           ? input.sort.map((item) =>
-              item.desc ? desc(parameters[item.id]) : asc(parameters[item.id])
+              item.desc ? desc(parameters[item.id]) : asc(parameters[item.id]),
             )
           : [desc(parameters.createdAt)];
 
@@ -240,7 +240,7 @@ const parameterQueries = {
               .where(where)
               .innerJoin(
                 parameterCategories,
-                eq(parameters.parameterCategoryId, parameterCategories.id)
+                eq(parameters.parameterCategoryId, parameterCategories.id),
               )
               .orderBy(...orderBy);
 
@@ -259,7 +259,7 @@ const parameterQueries = {
           logError(
             "parameterQueries.getOffsetPaginatedParameters",
             "Failed to fetch paginated parameters",
-            { error, input }
+            { error, input },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -282,7 +282,7 @@ const parameterQueries = {
     return Effect.gen(function* () {
       const isCategoryExist =
         yield* parameterCategoriesQueries.getParameterCategoryById(
-          data.parameterCategoryId
+          data.parameterCategoryId,
         );
 
       if (!isCategoryExist) {
@@ -298,7 +298,7 @@ const parameterQueries = {
           logError(
             "parameterQueries.createParameter",
             "Failed to create parameter",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -321,7 +321,7 @@ const parameterQueries = {
   updateParameter(data: z.infer<typeof parameterSchema.updateParameterSchema>) {
     return Effect.gen(function* () {
       const existingParameter = yield* parameterQueries.getParameterById(
-        data.id
+        data.id,
       );
 
       if (!existingParameter) {
@@ -333,7 +333,7 @@ const parameterQueries = {
 
       const isCategoryExist =
         yield* parameterCategoriesQueries.getParameterCategoryById(
-          data.parameterCategoryId
+          data.parameterCategoryId,
         );
 
       if (!isCategoryExist) {
@@ -361,7 +361,7 @@ const parameterQueries = {
           logError(
             "parameterQueries.updateParameter",
             "Failed to update parameter",
-            { error, data }
+            { error, data },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -403,7 +403,7 @@ const parameterQueries = {
           logError(
             "parameterQueries.deleteParameter",
             "Failed to delete parameter",
-            { id, error }
+            { id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -425,9 +425,8 @@ const parameterQueries = {
 
   restoreParameter(id: string) {
     return Effect.gen(function* () {
-      const deletedParameter = yield* parameterQueries.getDeletedParameterById(
-        id
-      );
+      const deletedParameter =
+        yield* parameterQueries.getDeletedParameterById(id);
 
       if (!deletedParameter) {
         throw new TRPCError({
@@ -447,7 +446,7 @@ const parameterQueries = {
           logError(
             "parameterQueries.restoreParameter",
             "Failed to restore parameter",
-            { id, error }
+            { id, error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
