@@ -2,6 +2,7 @@ import { surveyQuestions } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
 import { filterSchema } from "./filter.schema";
+import { createPaginationSchema } from "./pagination.schema";
 
 // ==================== SURVEY QUESTION SCHEMAS (ADMIN) ====================
 
@@ -13,22 +14,11 @@ export const SORTABLE_SURVEY_QUESTION_FIELDS = [
   "updatedAt",
 ] as const satisfies readonly (keyof typeof surveyQuestions.$inferSelect)[];
 
-const getAllSurveyQuestionsSchema = z.object({
-  page: z.number().default(1),
-  perPage: z.number().default(10),
-  sort: z
-    .array(
-      z.object({
-        id: z.enum(SORTABLE_SURVEY_QUESTION_FIELDS),
-        desc: z.boolean(),
-      }),
-    )
-    .default([{ id: "order", desc: false }]),
+const getAllSurveyQuestionsSchema = createPaginationSchema(
+  SORTABLE_SURVEY_QUESTION_FIELDS,
+).extend({
   search: z.string().default(""),
-  showDeleted: z.boolean().default(false),
   showInactive: z.boolean().default(false),
-  filters: z.array(filterSchema).default([]),
-  joinOperator: z.enum(["and", "or"]).default("and"),
 });
 
 const createSurveyQuestionSchema = createInsertSchema(surveyQuestions, {

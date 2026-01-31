@@ -2,6 +2,7 @@ import { parameters } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
 import { filterSchema } from "./filter.schema";
+import { createPaginationSchema } from "./pagination.schema";
 
 export const SORTABLE_PARAMETER_FIELDS = [
   "name",
@@ -10,24 +11,12 @@ export const SORTABLE_PARAMETER_FIELDS = [
   "deletedAt",
 ] as const satisfies readonly (keyof typeof parameters.$inferSelect)[];
 
-const getAllParametersSchema = z.object({
-  page: z.number().default(1),
-  perPage: z.number().default(10),
-  sort: z
-    .array(
-      z.object({
-        id: z.enum(SORTABLE_PARAMETER_FIELDS),
-        desc: z.boolean(),
-      }),
-    )
-    .default([{ id: "createdAt", desc: false }]),
+const getAllParametersSchema = createPaginationSchema(
+  SORTABLE_PARAMETER_FIELDS,
+).extend({
   name: z.string().default(""),
-  createdAt: z.array(z.coerce.number()).default([]),
-  filters: z.array(filterSchema).default([]),
-  joinOperator: z.enum(["and", "or"]).default("and"),
   companyId: z.optional(z.uuidv7()),
   locationId: z.optional(z.uuidv7()),
-  showDeleted: z.boolean().default(false),
 });
 
 const getByClusterAndParameterCategorySchema = z.object({
