@@ -224,11 +224,7 @@ const bannerQueries = {
         existingBanner.bannerUrl &&
         bannerUrl !== existingBanner.bannerUrl
       ) {
-        console.log("existingBanner.bannerUrl:", existingBanner.bannerUrl);
-        console.log("typeof:", typeof existingBanner.bannerUrl);
-
         const key = storageService.getKeyFromUrl(existingBanner.bannerUrl);
-        console.log("extracted key:", key);
 
         if (!key) {
           logError("banner.queries", "updateBanner", {
