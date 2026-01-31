@@ -89,7 +89,7 @@ function RouteComponent() {
       villageId: company.villageId,
       kbliId: company.kbliId,
       wlkpStatus: company.wlkpStatus,
-      wlkp: company.wlkp,
+      wlkp: company.wlkp ?? "",
       email: company.email,
       femaleWorkers: String(company.femaleWorkers),
       healthFacilityAvailable: company.healthFacilityAvailable,
