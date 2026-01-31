@@ -14,7 +14,12 @@ import {
   isNull,
   sql,
 } from "@tepian-k3/db";
-import { parameterTools, parameters, tools } from "@tepian-k3/db/schema";
+import {
+  parameterTools,
+  parameters,
+  tools,
+  worksheetTools,
+} from "@tepian-k3/db/schema";
 import { z } from "zod";
 import toolsSchema from "@tepian-k3/schema/tools.schema";
 import { Effect } from "effect";
@@ -261,14 +266,22 @@ const toolsQueries = {
 
         // Get tools linked to these parameter IDs with parameter name
         const result = await db
-          .select({
+          .selectDistinct({
             ...getTableColumns(tools),
             parameterId: parameterTools.parameterId,
             parameterName: parameters.name,
+            toolNeeded: worksheetTools.toolNeeded,
           })
           .from(tools)
           .innerJoin(parameterTools, eq(parameterTools.toolId, tools.id))
           .innerJoin(parameters, eq(parameterTools.parameterId, parameters.id))
+          .innerJoin(
+            worksheetTools,
+            and(
+              eq(worksheetTools.toolId, tools.id),
+              eq(worksheetTools.worksheetId, worksheetId),
+            ),
+          )
           .where(
             and(
               inArray(parameterTools.parameterId, parameterIds),

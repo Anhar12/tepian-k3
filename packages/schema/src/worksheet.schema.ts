@@ -100,6 +100,7 @@ const assignToolsToWorksheetSchema = z.object({
   items: z.array(
     z.object({
       itemId: z.uuidv7(),
+      parameterId: z.array(z.uuidv7()),
       toolNeeded: z.number().int().min(0).default(0),
     }),
   ),

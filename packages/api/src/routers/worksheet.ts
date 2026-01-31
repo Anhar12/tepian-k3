@@ -12,6 +12,7 @@ import { WORKSHEET_STATUS } from "@tepian-k3/constants";
 import { logError } from "@tepian-k3/services/logger";
 import worksheetNoteQueries from "@tepian-k3/queries/worksheet-note.queries";
 import { EventTypes } from "@tepian-k3/schema/event.schema";
+import { handleTRPCError } from "@tepian-k3/utils/handle-trpc-error";
 
 export const worksheetRouter = createTRPCRouter({
   /**
@@ -288,6 +289,7 @@ export const worksheetRouter = createTRPCRouter({
                         tx,
                         input.worksheetId,
                         item.itemId,
+                        item.parameterId,
                         item.toolNeeded,
                       ),
                     ),
@@ -305,10 +307,12 @@ export const worksheetRouter = createTRPCRouter({
                   error,
                 },
               );
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal mengassign alat ke worksheet",
-              });
+
+              return handleTRPCError(
+                error,
+                "Gagal mengassign alat ke worksheet",
+                "INTERNAL_SERVER_ERROR",
+              );
             },
           });
 
@@ -363,10 +367,11 @@ export const worksheetRouter = createTRPCRouter({
                   error,
                 },
               );
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal mengassign personil ke worksheet",
-              });
+              return handleTRPCError(
+                error,
+                "Gagal mengassign karyawan ke worksheet",
+                "INTERNAL_SERVER_ERROR",
+              );
             },
           });
 
@@ -429,10 +434,11 @@ export const worksheetRouter = createTRPCRouter({
                 "Failed to add note to worksheet",
                 { input, error },
               );
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal menambahkan catatan",
-              });
+              return handleTRPCError(
+                error,
+                "Gagal menambahkan catatan",
+                "INTERNAL_SERVER_ERROR",
+              );
             },
           });
 
@@ -619,10 +625,11 @@ export const worksheetRouter = createTRPCRouter({
                 "Failed to get assigned worksheets for user",
                 { input, userId: ctx.user.id, error },
               );
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal mengambil worksheet yang ditugaskan",
-              });
+              return handleTRPCError(
+                error,
+                "Gagal mengambil worksheet yang ditugaskan",
+                "INTERNAL_SERVER_ERROR",
+              );
             },
           });
 
@@ -723,10 +730,11 @@ export const worksheetRouter = createTRPCRouter({
                   error,
                 },
               );
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal menyimpan bahan kimia worksheet",
-              });
+              return handleTRPCError(
+                error,
+                "Gagal menyimpan bahan kimia ke worksheet",
+                "INTERNAL_SERVER_ERROR",
+              );
             },
           });
 
@@ -780,10 +788,11 @@ export const worksheetRouter = createTRPCRouter({
                   error,
                 },
               );
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal memperbarui kebutuhan bahan kimia",
-              });
+              return handleTRPCError(
+                error,
+                "Gagal memperbarui kebutuhan bahan kimia",
+                "INTERNAL_SERVER_ERROR",
+              );
             },
           });
 

@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
-import { eq, sql } from "@tepian-k3/db";
+import { and, eq, inArray, sql } from "@tepian-k3/db";
 import {
   worksheets,
   worksheetItems,
@@ -13,6 +13,7 @@ import {
   worksheetOperationalCosts,
   testingItem,
   order,
+  parameterTools,
 } from "@tepian-k3/db/schema";
 import type { BahanUnit, WorksheetStatus } from "@tepian-k3/constants";
 import { logCreate, logUpdate } from "./helpers/audit.helpers";
@@ -688,50 +689,117 @@ const worksheetQueries = {
     tx: DBorTx,
     worksheetId: string,
     toolId: string,
+    parameterId: string[],
     toolNeeded: number,
   ) {
-    return Effect.tryPromise({
-      try: async () => {
-        // First, remove existing tools
-        await tx
-          .delete(worksheetTools)
-          .where(eq(worksheetTools.worksheetId, worksheetId));
+    return Effect.gen(function* () {
+      // Validation first
+      if (toolNeeded <= 0) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Jumlah alat yang dibutuhkan harus lebih dari 0",
+          }),
+        );
+      }
 
-        const [newTools] = await tx
-          .insert(worksheetTools)
-          .values({
-            worksheetId,
-            toolId,
-            toolNeeded,
-          })
-          .returning();
+      // Remove existing tools
+      yield* Effect.tryPromise({
+        try: () =>
+          tx
+            .delete(worksheetTools)
+            .where(eq(worksheetTools.worksheetId, worksheetId)),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.assignToolsToWorksheet.delete",
+            "Failed to delete existing tools",
+            { error, worksheetId },
+          );
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menghapus alat existing dari worksheet",
+          });
+        },
+      });
 
-        if (!newTools) {
-          throw new TRPCError({
+      // Fetch tool parameters
+      const toolParams = yield* Effect.tryPromise({
+        try: () =>
+          tx.query.parameterTools.findMany({
+            where: and(
+              eq(parameterTools.toolId, toolId),
+              inArray(parameterTools.parameterId, parameterId),
+            ),
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.assignToolsToWorksheet.findMany",
+            "Failed to fetch tool parameters",
+            { error, toolId, parameterId },
+          );
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil data parameter alat",
+          });
+        },
+      });
+
+      // Validate tool parameters
+      if (toolParams.length !== parameterId.length) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Alat tidak tersedia untuk semua parameter yang dipilih",
+          }),
+        );
+      }
+
+      if (toolNeeded > toolParams.length) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Jumlah alat yang dibutuhkan melebihi jumlah parameter yang dipilih",
+          }),
+        );
+      }
+
+      // Prepare data
+      const worksheetToolsData = toolParams.map((tp) => ({
+        worksheetId,
+        toolId: tp.toolId,
+        parameterId: tp.parameterId,
+        toolNeeded: Math.ceil(toolNeeded / parameterId.length),
+      }));
+
+      // Insert new assignments
+      const newWorksheetTools = yield* Effect.tryPromise({
+        try: () =>
+          tx.insert(worksheetTools).values(worksheetToolsData).returning(),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.assignToolsToWorksheet.insert",
+            "Failed to insert worksheet tools",
+            { error, worksheetToolsData },
+          );
+          return new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengassign alat ke worksheet",
           });
-        }
+        },
+      });
 
-        return newTools;
-      },
-      catch: (error) => {
-        logError(
-          "worksheetQueries.assignToolsToWorksheet",
-          "Failed to assign tools to worksheet",
-          {
-            error,
-            worksheetId,
-            toolId,
-            toolNeeded,
-          },
+      // Final validation
+      if (newWorksheetTools.length !== toolParams.length) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengassign alat ke worksheet",
+          }),
         );
+      }
 
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengassign alat ke worksheet",
-        });
-      },
+      return newWorksheetTools;
     });
   },
 

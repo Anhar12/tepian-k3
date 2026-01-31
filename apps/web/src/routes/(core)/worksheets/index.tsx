@@ -272,7 +272,13 @@ function RouteComponent() {
     new Set(),
   );
   const [localToolUpdates, setLocalToolUpdates] = useState<
-    Map<string, { toolNeeded: number }>
+    Map<
+      string,
+      {
+        parameterId: string[];
+        toolNeeded: number;
+      }
+    >
   >(new Map());
   const [localItemUpdates, setLocalItemUpdates] = useState<
     Map<string, { note: string | null; isReady: boolean }>
@@ -348,6 +354,8 @@ function RouteComponent() {
           parameterId: tool.parameterId,
           parameterName: tool.parameterName,
         });
+        // the toolNeeded is combined from worksheetTools join, so it should be the same for all entries
+        existing.toolNeeded = tool.toolNeeded + (existing.toolNeeded ?? 0);
       } else {
         toolMap.set(tool.id, {
           id: tool.id,
@@ -362,7 +370,7 @@ function RouteComponent() {
           condition: tool.condition,
           availability: tool.availability,
           selected: selectedToolIds.has(tool.id),
-          toolNeeded: 0,
+          toolNeeded: tool.toolNeeded ?? 0,
         });
       }
     }
@@ -571,13 +579,18 @@ function RouteComponent() {
     const localUpdate = localToolUpdates.get(toolId);
     if (localUpdate) return localUpdate;
     const tool = tools.find((t) => t.id === toolId);
-    return tool ? { toolNeeded: tool.toolNeeded } : { toolNeeded: 0 };
+    return tool
+      ? {
+          parameterId: tool.parameters.map((p) => p.parameterId),
+          toolNeeded: tool.toolNeeded,
+        }
+      : { parameterId: [], toolNeeded: 0 };
   };
 
   const handleToolChange = (
     toolId: string,
-    field: "toolNeeded",
-    value: number,
+    field: "toolNeeded" | "parameterId",
+    value: number | string[],
   ) => {
     setLocalToolUpdates((prev) => {
       const newMap = new Map(prev);
@@ -591,12 +604,29 @@ function RouteComponent() {
   };
 
   const handleToolSelect = (toolId: string, checked: boolean) => {
+    // Update local tool updates to ensure toolParameters is set
+    const current = getToolState(toolId);
+
     setSelectedToolIds((prev) => {
       const newSet = new Set(prev);
       if (checked) {
         newSet.add(toolId);
+        setLocalToolUpdates((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(toolId, {
+            ...current,
+            parameterId: current.parameterId,
+          });
+          return newMap;
+        });
       } else {
         newSet.delete(toolId);
+        //remove local update when unselected
+        setLocalToolUpdates((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(toolId);
+          return newMap;
+        });
       }
       return newSet;
     });
@@ -604,12 +634,33 @@ function RouteComponent() {
 
   const handleSelectAllTools = (checked: boolean) => {
     const filteredIds = filteredTools.map((t) => t.id);
+
     setSelectedToolIds((prev) => {
       const newSet = new Set(prev);
       if (checked) {
         filteredIds.forEach((id) => newSet.add(id));
+        // Update local tool updates for all filtered tools
+        filteredIds.forEach((toolId) => {
+          const current = getToolState(toolId);
+          setLocalToolUpdates((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(toolId, {
+              ...current,
+              parameterId: current.parameterId,
+            });
+            return newMap;
+          });
+        });
       } else {
         filteredIds.forEach((id) => newSet.delete(id));
+        // Remove local tool updates for all filtered tools
+        filteredIds.forEach((toolId) => {
+          setLocalToolUpdates((prev) => {
+            const newMap = new Map(prev);
+            newMap.delete(toolId);
+            return newMap;
+          });
+        });
       }
       return newSet;
     });
@@ -621,6 +672,7 @@ function RouteComponent() {
     const items = Array.from(localToolUpdates.entries()).map(
       ([itemId, data]) => ({
         itemId,
+        parameterId: data.parameterId,
         toolNeeded: data.toolNeeded,
       }),
     );

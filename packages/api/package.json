@@ -25,6 +25,7 @@
     "@tepian-k3/queries": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
     "@tepian-k3/services": "workspace:*",
+    "@tepian-k3/utils": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
     "dotenv": "catalog:",
