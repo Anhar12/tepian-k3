@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { requirePermission } from "@/utils/require-permission";
 import type z from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
@@ -132,8 +132,8 @@ function RouteComponent() {
                   >
                     <FieldLabel>Kode Bahan Kimia</FieldLabel>
                     <Input placeholder="Masukkan kode bahan kimia" {...field} />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -153,8 +153,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -174,8 +174,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -195,8 +195,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -218,8 +218,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -278,8 +278,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -338,8 +338,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -398,8 +398,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -456,8 +456,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}

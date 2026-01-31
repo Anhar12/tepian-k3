@@ -33,6 +33,12 @@ export const RESOURCES = [
   "user-company",
   "user-company-testing-location",
 
+  // ==================== BANNERS ====================
+  "banners",
+
+  // ==================== NEWS ====================
+  "news",
+
   // ==================== CART ====================
   "cart",
 

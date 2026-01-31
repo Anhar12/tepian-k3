@@ -22,8 +22,9 @@ import MultiComboBox from "@/components/ui/multi-combobox";
 import { useCartStore } from "@/stores/cart.stores";
 import { EmptyState } from "@/components/ui/empty-state";
 
+const routeApi = getRouteApi("/(core)/pengujian/");
+
 export function LocationSection() {
-  const routeApi = getRouteApi("/(core)/pengujian/");
   const { companyId, locationId } = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
 

@@ -1590,3 +1590,23 @@ export const surveyFeedback = createTable(
     index("survey_feedback_order_id_idx").using("btree", table.orderId),
   ],
 );
+
+export const banners = createTable(
+  "banners",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    ...createRequiredFileUrlColumn("banner"),
+    title: varchar("title", { length: 255 }).notNull(),
+    order: integer("order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    index("banner_id_idx").using("btree", table.id),
+    index("banner_order_idx").using("btree", table.order),
+    index("banner_is_active_idx").using("btree", table.isActive),
+  ],
+);

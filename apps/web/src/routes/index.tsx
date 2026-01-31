@@ -29,6 +29,9 @@ import {
 } from "@tanstack/react-router";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getPublicUrl } from "@/utils/url";
+import Autoplay from "embla-carousel-autoplay";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
@@ -65,6 +68,10 @@ const pusatLayananItems: {
 
 function HomeComponent() {
   const navigate = useNavigate();
+
+  const { data: banners, isLoading } = useQuery(
+    trpc.banner.getAllBanners.queryOptions(),
+  );
 
   useSubscription({
     ...trpc.event.onBroadcastTest.subscriptionOptions(),
@@ -210,24 +217,36 @@ function HomeComponent() {
         <div className="flex flex-col gap-4">
           {/* Infographic Card */}
           <div className="relative z-10 flex w-full items-center justify-center">
-            <Carousel className="w-full">
+            <Carousel
+              className="w-[calc(100%-9rem)]"
+              opts={{
+                loop: true,
+              }}
+              plugins={[
+                Autoplay({
+                  delay: 4000,
+                }),
+              ]}
+            >
               <CarouselContent>
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <CarouselItem key={index}>
+                {banners?.map((banner) => (
+                  <CarouselItem key={banner.id}>
                     <div className="p-1">
                       <Card className="h-96 w-full rounded-2xl">
                         <CardContent className="flex h-full flex-col items-center justify-center">
-                          <span className="text-4xl font-semibold">
-                            {index + 1}
-                          </span>
+                          <img
+                            src={getPublicUrl(banner.bannerUrl ?? "")}
+                            alt={banner.title}
+                            className="h-full w-full object-contain"
+                          />
                         </CardContent>
                       </Card>
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="absolute top-1/2 left-0 ml-2 -translate-y-1/2 rounded-none border-0 bg-transparent p-2 shadow-none" />
-              <CarouselNext className="absolute top-1/2 right-0 mr-2 -translate-y-1/2 rounded-none border-0 bg-transparent p-2 shadow-none" />
+              <CarouselPrevious className="absolute top-1/2 left-0 ml-2 -translate-y-1/2 rounded-2xl border-0 bg-transparent p-2 shadow-none" />
+              <CarouselNext className="absolute top-1/2 right-0 mr-2 -translate-y-1/2 rounded-2xl border-0 bg-transparent p-2 shadow-none" />
             </Carousel>
           </div>
           {/* Small News Card */}

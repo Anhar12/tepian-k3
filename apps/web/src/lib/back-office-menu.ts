@@ -1,22 +1,20 @@
 import {
-  IconAdjustments,
   IconBook,
   IconBriefcase,
-  IconBuilding,
   IconCategory,
   IconCategoryPlus,
   IconDashboard,
   IconFileInvoice,
   IconFlask,
-  IconFolderCog,
   IconLayersSubtract,
   IconMessage2Question,
-  IconShieldCheckFilled,
   IconShoppingCart,
   IconTools,
   IconUserPlus,
   IconUsers,
   IconUserShield,
+  IconAd,
+  IconNews,
 } from "@tabler/icons-react";
 import type { NavMainProps } from "@/components/nav-main";
 
@@ -110,10 +108,22 @@ export const backOfficeMenu: {
       permission: "kbli.view",
     },
     {
-      title: "Survey",
+      title: "Surveys",
       url: `${urlStarter}/survey-questions`,
       icon: IconMessage2Question,
       permission: "survey-questions.view",
+    },
+    {
+      title: "Banners",
+      url: `${urlStarter}/banners`,
+      icon: IconAd,
+      permission: "banners.view",
+    },
+    {
+      title: "News",
+      url: `${urlStarter}/news`,
+      icon: IconNews,
+      permission: "news.view",
     },
   ],
 };

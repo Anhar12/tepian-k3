@@ -3,6 +3,8 @@
  */
 
 export const CACHE_KEYS = {
+  BANNERS_ALL: "cache:banners:all",
+  BANNERS_PREFIX: "cache:banners:",
   CLUSTERS_ALL: "cache:clusters:all",
   CLUSTERS_PREFIX: "cache:clusters:",
   PARAMETER_CATEGORIES_ALL: "cache:parameter-categories:all",
