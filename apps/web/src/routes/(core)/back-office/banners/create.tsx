@@ -27,6 +27,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toFormData } from "@/utils/form-data-mapper";
 import SingleImageUpload from "@/components/ui/single-image-upload";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/(core)/back-office/banners/create")({
   beforeLoad: async ({ context }) =>
@@ -41,29 +42,16 @@ function RouteComponent() {
     resolver: zodResolver(bannerSchema.createBannerSchema),
   });
 
-  const createBannerMutation = useOptimisticMutation(
-    trpc.banner.createBanner.mutationOptions(),
-    {
-      queryOptions: trpc.banner.getPaginatedBanners.queryOptions({}),
-      operation: {
-        type: "create",
-        getOptimisticItem: (input) => ({
-          id: `optimistic-${Math.random().toString(36).substring(2, 9)}`,
-          ...input,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: null,
-        }),
-      },
-      onSuccess: async () => {
-        globalSuccessToast("Banner berhasil dibuat");
-        await redirectBack();
-      },
-      onError: (error) => {
-        globalErrorToast(`Gagal membuat banner: ${error.message}`);
-      },
+  const createBannerMutation = useMutation({
+    ...trpc.banner.createBanner.mutationOptions(),
+    onSuccess: async () => {
+      globalSuccessToast("Banner berhasil dibuat");
+      await redirectBack();
     },
-  );
+    onError: (error) => {
+      globalErrorToast(`Gagal membuat banner: ${error.message}`);
+    },
+  });
 
   const handleSubmit = (
     data: z.infer<typeof bannerSchema.createBannerSchema>,

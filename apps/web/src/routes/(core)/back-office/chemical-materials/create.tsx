@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useOptimisticMutation } from "@/lib/optimistic-update";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute(
   "/(core)/back-office/chemical-materials/create",
@@ -78,28 +79,16 @@ function RouteComponent() {
     },
   });
 
-  const createChemicalMaterialMutation = useOptimisticMutation(
-    trpc.chemicalMaterial.create.mutationOptions(),
-    {
-      queryOptions: trpc.chemicalMaterial.getPaginated.queryOptions({}),
-      operation: {
-        type: "create",
-        getOptimisticItem: (input) => ({
-          id: `optimistic-${Math.random().toString(16).slice(2)}`,
-          ...input,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }),
-      },
-      onSuccess: async () => {
-        globalSuccessToast("Bahan kimia berhasil dibuat");
-        await redirectBack();
-      },
-      onError: (error) => {
-        globalErrorToast(`Gagal membuat bahan kimia: ${error.message}`);
-      },
+  const createChemicalMaterialMutation = useMutation({
+    ...trpc.chemicalMaterial.create.mutationOptions(),
+    onSuccess: async () => {
+      globalSuccessToast("Bahan kimia berhasil dibuat");
+      await redirectBack();
     },
-  );
+    onError: (error) => {
+      globalErrorToast(`Gagal membuat bahan kimia: ${error.message}`);
+    },
+  });
 
   function handleSubmit(
     data: z.infer<typeof chemicalMaterialSchema.createChemicalMaterialSchema>,
