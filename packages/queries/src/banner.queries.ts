@@ -178,18 +178,29 @@ const bannerQueries = {
         );
       }
 
-      if (data.order && data.order !== existingBanner.order) {
-        const isOrderExisting = yield* bannerQueries.getBannerByOrder(
+      // Handle order changes
+      if (data.order !== undefined && data.order !== existingBanner.order) {
+        const bannerWithTargetOrder = yield* bannerQueries.getBannerByOrder(
           data.order,
         );
 
-        if (isOrderExisting) {
-          return yield* Effect.fail(
-            new TRPCError({
-              code: "CONFLICT",
-              message: `Banner dengan order ${data.order} sudah ada.`,
-            }),
-          );
+        if (bannerWithTargetOrder) {
+          // Swap orders
+          // Swap the order of the existing banner with the target order
+          yield* Effect.tryPromise({
+            try: () =>
+              db
+                .update(banners)
+                .set({ order: existingBanner.order })
+                .where(eq(banners.id, bannerWithTargetOrder.id)),
+            catch: (error) => {
+              logError("banner.queries", "updateBanner:swapOrder", { error });
+              return new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal memperbarui urutan banner.",
+              });
+            },
+          });
         }
       }
 
