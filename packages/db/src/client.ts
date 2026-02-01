@@ -1,8 +1,11 @@
 import { drizzle } from "drizzle-orm/postgres-js";
+import { sql } from "drizzle-orm";
 
 import { env } from "../env";
 import * as schema from "./schema";
 import * as relations from "./relations";
+
+export { sql };
 
 export const db = drizzle(env.POSTGRES_URL, {
   schema: {

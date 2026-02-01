@@ -14,10 +14,13 @@ import path from "path";
 import {
   initializeEventBus,
   shutdownEventBus,
+  isEventBusReady,
 } from "@tepian-k3/services/notifications";
 import { logInfo } from "@tepian-k3/services/logger";
+import { db, sql } from "@tepian-k3/db/client";
 import { devRouter } from "./routes/dev";
 import { secureHeaders } from "./middleware/secure-headers";
+import { timeout } from "./middleware/timeout";
 import { setDefaultOptions } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -56,6 +59,7 @@ if (env.NODE_ENV === "production") {
 
 app.use(logger());
 app.use(secureHeaders());
+app.use(timeout(30000)); // 30 second request timeout
 
 // Parse CORS origins (supports comma-separated values)
 const corsOrigins: string[] = env.CORS_ORIGIN
@@ -63,6 +67,13 @@ const corsOrigins: string[] = env.CORS_ORIGIN
       .map((o) => o.trim())
       .filter(Boolean)
   : [];
+
+// Validate CORS_ORIGIN is set in production
+if (env.NODE_ENV === "production" && corsOrigins.length === 0) {
+  throw new Error(
+    "CORS_ORIGIN must be set in production. Using '*' is not allowed.",
+  );
+}
 
 const corsOrigin: string | string[] =
   corsOrigins.length === 1
@@ -81,7 +92,10 @@ app.use(
   }),
 );
 
-app.route("/dev", devRouter);
+// Only mount dev router in development
+if (env.NODE_ENV === "development") {
+  app.route("/dev", devRouter);
+}
 
 // Only for local testing
 app.use("*", async (c, next) => {
@@ -105,10 +119,60 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
+app.get("/health", async (c) => {
+  const startTime = Date.now();
+
+  // Check database connectivity
+  let dbStatus: "healthy" | "unhealthy" = "unhealthy";
+  let dbLatency = 0;
+  try {
+    const dbStart = Date.now();
+    await db.execute(sql`SELECT 1`);
+    dbLatency = Date.now() - dbStart;
+    dbStatus = "healthy";
+  } catch {
+    dbStatus = "unhealthy";
+  }
+
+  // Check Redis connectivity
+  const redisStatus: "healthy" | "unhealthy" = isEventBusReady()
+    ? "healthy"
+    : "unhealthy";
+
+  const overallStatus =
+    dbStatus === "healthy" && redisStatus === "healthy"
+      ? "healthy"
+      : "unhealthy";
+
+  const response = {
+    status: overallStatus,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    services: {
+      database: {
+        status: dbStatus,
+        latency: dbLatency,
+      },
+      redis: {
+        status: redisStatus,
+      },
+    },
+    responseTime: Date.now() - startTime,
+  };
+
+  return c.json(response, overallStatus === "healthy" ? 200 : 503);
+});
+
 app.get("/api/public/*", async (c) => {
   // Get the full path after /api/public/
   const fullPath = c.req.path.replace("/api/public/", "");
-  const filePath = path.join("public", fullPath);
+  const publicDir = path.resolve(process.cwd(), "public");
+  const filePath = path.resolve(publicDir, fullPath);
+
+  // Security check: prevent directory traversal
+  if (!filePath.startsWith(publicDir + path.sep)) {
+    return c.text("Invalid path", 400);
+  }
 
   try {
     await fs.access(filePath);
@@ -128,13 +192,13 @@ app.get("/api/public/*", async (c) => {
 app.get("/api/uploads/*", async (c) => {
   // Get the full path after /api/uploads/
   const fullPath = c.req.path.replace("/api/uploads/", "");
+  const resolvedUploadsDir = path.resolve(uploadsDir);
+  const filePath = path.resolve(resolvedUploadsDir, fullPath);
 
   // Security check: prevent directory traversal
-  if (fullPath.includes("..")) {
+  if (!filePath.startsWith(resolvedUploadsDir + path.sep)) {
     return c.text("Invalid path", 400);
   }
-
-  const filePath = path.join(uploadsDir, fullPath);
 
   try {
     await fs.access(filePath);

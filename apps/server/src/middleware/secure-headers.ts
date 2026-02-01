@@ -11,6 +11,22 @@ export const secureHeaders = (): MiddlewareHandler => {
     c.header("Referrer-Policy", "strict-origin-when-cross-origin");
     c.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
+    // Content Security Policy
+    c.header(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https:",
+        "font-src 'self' data:",
+        "connect-src 'self' https: wss:",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+      ].join("; "),
+    );
+
     if (env.NODE_ENV === "production") {
       c.header(
         "Strict-Transport-Security",

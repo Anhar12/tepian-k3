@@ -23,7 +23,7 @@ const stream = {
 const logWithContext = (
   level: string,
   message: string,
-  context?: Record<string, any>,
+  context?: Record<string, unknown>,
 ) => {
   // Winston expects metadata to be passed as the third argument
   // Use the splat format or pass metadata directly
@@ -37,7 +37,7 @@ const logWithContext = (
 const logInfo = (
   service: string,
   message: string,
-  context?: Record<string, any>,
+  context?: Record<string, unknown>,
 ) => {
   logWithContext("info", `[${service}] ${message}`, context);
 };
@@ -45,7 +45,7 @@ const logInfo = (
 const logError = (
   service: string,
   message: string,
-  context?: Record<string, any>,
+  context?: Record<string, unknown>,
 ) => {
   logWithContext("error", `[${service}] ${message}`, context);
 };
@@ -53,7 +53,7 @@ const logError = (
 const logDebug = (
   service: string,
   message: string,
-  context?: Record<string, any>,
+  context?: Record<string, unknown>,
 ) => {
   logWithContext("debug", `[${service}] ${message}`, context);
 };
@@ -61,7 +61,7 @@ const logDebug = (
 const logWarn = (
   service: string,
   message: string,
-  context?: Record<string, any>,
+  context?: Record<string, unknown>,
 ) => {
   logWithContext("warn", `[${service}] ${message}`, context);
 };

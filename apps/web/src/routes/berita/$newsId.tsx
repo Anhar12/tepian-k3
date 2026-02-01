@@ -10,6 +10,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPublicUrl } from "@/utils/url";
 import { trpc } from "@/utils/trpc";
+import DOMPurify from "dompurify";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -210,7 +211,9 @@ function NewsDetailPage() {
         <div className="mx-auto max-w-4xl">
           <div
             className="prose prose-lg dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: news.content }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(news.content),
+            }}
           />
         </div>
       </article>
