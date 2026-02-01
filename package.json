@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "prepare": "husky",
+    "postinstall": "turbo run check-types --only",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "check-types": "turbo run check-types",
@@ -38,13 +39,20 @@
     "web:prettier": "turbo run prettier -F @tepian-k3/web",
     "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,css,md}\" \"packages/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "regenerate:jwt": "node ./scripts/regenerate-jwt-secrets.js",
-    "regenerate:jwt:unix": "sh ./scripts/regenerate-jwt-secrets.sh"
+    "regenerate:jwt:unix": "sh ./scripts/regenerate-jwt-secrets.sh",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "clean:turbo": "rm -rf .turbo",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish",
+    "changeset:status": "changeset status"
   },
   "dependencies": {
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.12",
     "@types/node": "^22.13.11",
     "git-cliff": "^2.12.0",
     "husky": "^9.1.7",
@@ -55,7 +63,15 @@
     "typescript": "catalog:"
   },
   "lint-staged": {
-    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": ""
+    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,md,css}": "prettier --write"
   },
-  "packageManager": "pnpm@10.5.2"
+  "packageManager": "pnpm@10.5.2",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  }
 }

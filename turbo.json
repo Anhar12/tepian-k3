@@ -12,6 +12,7 @@
     },
     "lint": {
       "dependsOn": ["transit"],
+      "inputs": ["**/*.ts", "**/*.tsx", "eslint.config.js"],
       "outputs": []
     },
     "check-types": {
