@@ -241,6 +241,7 @@ const bannerQueries = {
           logError("banner.queries", "updateBanner", {
             error: "Gagal mendapatkan key dari URL banner.",
             bannerUrl: existingBanner.bannerUrl,
+            key,
           });
           return yield* Effect.fail(
             new TRPCError({
