@@ -37,6 +37,9 @@ import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
 
+// TODO: When order is cancelled, make sure all related documents/worksheets are handled properly (maybe soft delete or archive)
+// TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
+
 export const Route = createFileRoute("/(core)/pengujian/status")({
   beforeLoad: async ({ search }) => {
     // check if orderId exists
@@ -192,7 +195,6 @@ function RouteComponent() {
 
   const {
     offeringDoc,
-    approvalLetterDoc,
     approvalLetterUserDoc,
     cooperationAgreementDoc,
     cooperationAgreementUserDoc,
@@ -223,7 +225,6 @@ function RouteComponent() {
 
     return {
       offeringDoc,
-      approvalLetterDoc,
       approvalLetterUserDoc,
       cooperationAgreementDoc,
       cooperationAgreementUserDoc,
@@ -239,7 +240,7 @@ function RouteComponent() {
   // Status flags
   const isRevisionStatus = orderDetail.status === "revision";
   const isApproved = !!orderDetail.approvedAt;
-  const hasApprovalLetter = !!approvalLetterDoc && !!approvalLetterUserDoc;
+  const hasApprovalLetter = !!approvalLetterUserDoc;
   const hasInvoice = !!invoiceDoc;
   const hasCooperationAgreement = !!cooperationAgreementDoc;
   const hasCooperationAgreementUser = !!cooperationAgreementUserDoc;
@@ -351,7 +352,6 @@ function RouteComponent() {
               ) : isApproved && !hasApprovalLetter ? (
                 // State 2: Customer approved, needs to upload approval letter
                 <StatusState2
-                  approvalLetter={approvalLetterDoc}
                   approvalLetterFile={approvalLetterFile.file}
                   setApprovalLetterFile={approvalLetterFile.setFile}
                   uploadingApprovalLetter={approvalLetterFile.uploading}
@@ -388,7 +388,7 @@ function RouteComponent() {
               !isApproved &&
               !freshlySubmitted &&
               !isWorksheetInReview &&
-              !isWorksheetVerified &&
+              isWorksheetVerified &&
               offeringDoc && (
                 <div className="mt-8 flex justify-end gap-3 pt-6">
                   {/* Batal Dialog */}

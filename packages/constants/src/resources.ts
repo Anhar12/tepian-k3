@@ -33,6 +33,12 @@ export const RESOURCES = [
   "user-company",
   "user-company-testing-location",
 
+  // ==================== BANNERS ====================
+  "banners",
+
+  // ==================== NEWS ====================
+  "news",
+
   // ==================== CART ====================
   "cart",
 
@@ -59,6 +65,9 @@ export const RESOURCES = [
 
   // ==================== WORKSHEETS ====================
   "worksheets",
+  "worksheets-parameters",
+  "worksheets-personnel-assignments",
+  "worksheets-transaction-details",
   "worksheet-items",
   "worksheet-tools",
   "worksheet-notes",

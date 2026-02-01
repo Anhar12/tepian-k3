@@ -11,6 +11,7 @@ import {
   order,
   userCompanies,
   userCompanyTestingLocation,
+  worksheets,
 } from "@tepian-k3/db/schema";
 import orderItemSchema from "@tepian-k3/schema/order-item.schema";
 import { generateOrderNumberWithSequence } from "@tepian-k3/db/utils";
@@ -740,18 +741,66 @@ const orderQueries = {
         );
       }
 
-      // update order status to revision_offered
-      const [updatedOrder] = yield* Effect.tryPromise({
+      const hasWorksheet = yield* Effect.tryPromise({
         try: () =>
-          db
-            .update(order)
-            .set({
-              status: "revision",
-              revisionNotes: revisionNote,
-              revisionCount: sql`revision_count + 1`,
-            })
-            .where(eq(order.id, orderId))
-            .returning(),
+          db.query.worksheets.findFirst({
+            where: eq(worksheets.orderId, orderId),
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.offerRevision",
+            "Failed to fetch order worksheet",
+            {
+              error,
+              orderId,
+              userId,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil worksheet pesanan",
+          });
+        },
+      });
+
+      if (!hasWorksheet) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Worksheet tidak ditemukan untuk pesanan ini",
+          }),
+        );
+      }
+
+      // update order status to revision_offered
+      const updatedOrder = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const [updatedOrders] = await tx
+              .update(order)
+              .set({
+                status: "revision",
+                revisionNotes: revisionNote,
+                revisionCount: sql`revision_count + 1`,
+              })
+              .where(eq(order.id, orderId))
+              .returning();
+
+            if (!updatedOrders) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal memperbarui pesanan",
+              });
+            }
+
+            // update worksheet status to revision_requested
+            await tx
+              .update(worksheets)
+              .set({ status: "revision", updatedAt: new Date().toISOString() })
+              .where(eq(worksheets.orderId, orderId));
+
+            return updatedOrders;
+          }),
         catch: (error) => {
           logError("orderQueries.offerRevision", "Failed to update order", {
             error,
@@ -764,15 +813,6 @@ const orderQueries = {
           });
         },
       });
-
-      if (!updatedOrder) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menawarkan revisi untuk pesanan",
-          }),
-        );
-      }
 
       // create order status history - revision_offered
       yield* orderStatusHistoryQueries.createOrderStatusHistory(

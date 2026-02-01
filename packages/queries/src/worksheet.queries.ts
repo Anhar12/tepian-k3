@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
-import { eq, sql } from "@tepian-k3/db";
+import { and, eq, inArray, sql } from "@tepian-k3/db";
 import {
   worksheets,
   worksheetItems,
@@ -13,6 +13,7 @@ import {
   worksheetOperationalCosts,
   testingItem,
   order,
+  parameterTools,
 } from "@tepian-k3/db/schema";
 import type { BahanUnit, WorksheetStatus } from "@tepian-k3/constants";
 import { logCreate, logUpdate } from "./helpers/audit.helpers";
@@ -485,6 +486,78 @@ const worksheetQueries = {
   },
 
   /**
+   * Create worksheet estimated members and days
+   * This is a separate function to allow updating estimates later
+   */
+  createWorksheetEstimates(
+    worksheetId: string,
+    estimatedAmountOfMembers: number,
+    estimatedAmountOfDays: number,
+  ) {
+    return Effect.gen(this, function* () {
+      const isExisting = yield* this.getWorksheetById(worksheetId);
+
+      if (!isExisting) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Worksheet tidak ditemukan",
+          }),
+        );
+      }
+
+      if (["draft", "revision"].includes(isExisting.status) === false) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Estimasi hanya dapat ditambahkan pada worksheet dengan status 'draft' atau 'revision'",
+          }),
+        );
+      }
+
+      const [updated] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(worksheets)
+            .set({
+              estimatedAmountOfDays,
+              estimatedAmountOfMembers,
+            })
+            .where(eq(worksheets.id, worksheetId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.createWorksheetEstimates",
+            "Failed to create worksheet estimates",
+            {
+              error,
+              worksheetId,
+              estimatedAmountOfMembers,
+              estimatedAmountOfDays,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menambahkan estimasi worksheet",
+          });
+        },
+      });
+
+      if (!updated) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menambahkan estimasi worksheet",
+          }),
+        );
+      }
+
+      return updated;
+    });
+  },
+
+  /**
    * Update worksheet status
    */
   updateWorksheetStatus(
@@ -570,7 +643,6 @@ const worksheetQueries = {
         const [updatedItem] = await tx
           .update(worksheetItems)
           .set({
-            value,
             note: note || sql`${worksheetItems.note}`,
             isReady: isReady ?? sql`${worksheetItems.isReady}`,
             updatedAt: sql`CURRENT_TIMESTAMP`,
@@ -613,47 +685,121 @@ const worksheetQueries = {
   /**
    * Assign tools to worksheet with transaction
    */
-  assignToolsToWorksheet(tx: DBorTx, worksheetId: string, toolIds: string[]) {
-    return Effect.tryPromise({
-      try: async () => {
-        // First, remove existing tools
-        await tx
-          .delete(worksheetTools)
-          .where(eq(worksheetTools.worksheetId, worksheetId));
-
-        // Then, add new tools
-        if (toolIds.length > 0) {
-          const toolsData = toolIds.map((toolId) => ({
-            worksheetId,
-            toolId,
-          }));
-
-          const newTools = await tx
-            .insert(worksheetTools)
-            .values(toolsData)
-            .returning();
-
-          return newTools;
-        }
-
-        return [];
-      },
-      catch: (error) => {
-        logError(
-          "worksheetQueries.assignToolsToWorksheet",
-          "Failed to assign tools to worksheet",
-          {
-            error,
-            worksheetId,
-            toolIds,
-          },
+  assignToolsToWorksheet(
+    tx: DBorTx,
+    worksheetId: string,
+    toolId: string,
+    parameterId: string[],
+    toolNeeded: number,
+  ) {
+    return Effect.gen(function* () {
+      // Validation first
+      if (toolNeeded <= 0) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Jumlah alat yang dibutuhkan harus lebih dari 0",
+          }),
         );
+      }
 
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal mengassign alat ke worksheet",
-        });
-      },
+      // Remove existing tools
+      yield* Effect.tryPromise({
+        try: () =>
+          tx
+            .delete(worksheetTools)
+            .where(eq(worksheetTools.worksheetId, worksheetId)),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.assignToolsToWorksheet.delete",
+            "Failed to delete existing tools",
+            { error, worksheetId },
+          );
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menghapus alat existing dari worksheet",
+          });
+        },
+      });
+
+      // Fetch tool parameters
+      const toolParams = yield* Effect.tryPromise({
+        try: () =>
+          tx.query.parameterTools.findMany({
+            where: and(
+              eq(parameterTools.toolId, toolId),
+              inArray(parameterTools.parameterId, parameterId),
+            ),
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.assignToolsToWorksheet.findMany",
+            "Failed to fetch tool parameters",
+            { error, toolId, parameterId },
+          );
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil data parameter alat",
+          });
+        },
+      });
+
+      // Validate tool parameters
+      if (toolParams.length !== parameterId.length) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Alat tidak tersedia untuk semua parameter yang dipilih",
+          }),
+        );
+      }
+
+      if (toolNeeded > toolParams.length) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Jumlah alat yang dibutuhkan melebihi jumlah parameter yang dipilih",
+          }),
+        );
+      }
+
+      // Prepare data
+      const worksheetToolsData = toolParams.map((tp) => ({
+        worksheetId,
+        toolId: tp.toolId,
+        parameterId: tp.parameterId,
+        toolNeeded: Math.ceil(toolNeeded / parameterId.length),
+      }));
+
+      // Insert new assignments
+      const newWorksheetTools = yield* Effect.tryPromise({
+        try: () =>
+          tx.insert(worksheetTools).values(worksheetToolsData).returning(),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.assignToolsToWorksheet.insert",
+            "Failed to insert worksheet tools",
+            { error, worksheetToolsData },
+          );
+          return new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengassign alat ke worksheet",
+          });
+        },
+      });
+
+      // Final validation
+      if (newWorksheetTools.length !== toolParams.length) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengassign alat ke worksheet",
+          }),
+        );
+      }
+
+      return newWorksheetTools;
     });
   },
 
@@ -1060,12 +1206,11 @@ const worksheetQueries = {
                   ti.locationId === worksheetItem.locationId,
               );
 
-              if (matchingTestingItem && worksheetItem.value !== null) {
+              if (matchingTestingItem) {
                 // Update testing item with worksheet value
                 const [updated] = await tx
                   .update(testingItem)
                   .set({
-                    result: String(worksheetItem.value),
                     note: worksheetItem.note,
                     updatedAt: sql`CURRENT_TIMESTAMP`,
                   })

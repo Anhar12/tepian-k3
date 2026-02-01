@@ -156,8 +156,8 @@ function RouteComponent() {
                   >
                     <FieldLabel>Kode Bahan Kimia</FieldLabel>
                     <Input placeholder="Masukkan kode bahan kimia" {...field} />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -177,8 +177,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -198,8 +198,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -219,8 +219,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -242,8 +242,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -302,8 +302,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -362,8 +362,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -422,8 +422,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -480,8 +480,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}

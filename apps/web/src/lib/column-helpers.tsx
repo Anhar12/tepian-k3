@@ -5,6 +5,8 @@ import type { FilterVariant } from "@tepian-k3/types/data-table.types";
 import { format } from "date-fns";
 import type { LucideIcon } from "lucide-react";
 import { Text } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "./utils";
 
 type NestedKeyOf<T> = {
   [K in keyof T & string]: T[K] extends object
@@ -84,6 +86,82 @@ export function createTextColumn<T extends RowData>(
   };
 }
 
+interface BadgeColumnOptions {
+  /** Width class (e.g., 'w-48', 'max-w-64') */
+  width?: string;
+  /** Enable column filtering */
+  enableFilter?: boolean;
+  /** Custom placeholder for filter */
+  placeholder?: string;
+  /** Filter variant */
+  variant?: FilterVariant;
+  /** Icon for the filter */
+  icon?: LucideIcon;
+  /** Whether the badge value is boolean */
+  valueIsBoolean?: boolean;
+}
+
+/**
+ * Creates a badge column with consistent styling
+ */
+export function createBadgeColumn<T extends RowData>(
+  id: Extract<NestedKeyOf<T>, string>,
+  label: string,
+  options: BadgeColumnOptions = {},
+): ColumnDef<T> {
+  const {
+    width = "w-48",
+    enableFilter = false,
+    placeholder = `Cari ${label.toLowerCase()}...`,
+    variant = "text",
+    icon = Text,
+    valueIsBoolean = false,
+  } = options;
+
+  const meta: ColumnMeta<T, string> = enableFilter
+    ? {
+        label,
+        placeholder,
+        variant,
+        icon,
+      }
+    : { label };
+
+  return {
+    id,
+    accessorKey: id,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={label} label={label} />
+    ),
+    cell: ({ row }) => {
+      let value: unknown;
+      if (valueIsBoolean) {
+        value = Boolean(row.getValue(id));
+      } else {
+        value = row.getValue(id);
+      }
+
+      return (
+        <div className={width}>
+          <Badge
+            variant="secondary"
+            className={cn(
+              value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800",
+            )}
+          >
+            {String(value)}
+          </Badge>
+        </div>
+      );
+    },
+    meta,
+    enableColumnFilter: enableFilter,
+  };
+}
+
+/**
+ * Creates a price column with consistent formatting
+ */
 export function createPriceColumn<T extends RowData>(
   id: Extract<NestedKeyOf<T>, string>,
   label: string,

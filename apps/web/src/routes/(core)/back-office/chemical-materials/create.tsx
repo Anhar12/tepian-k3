@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { requirePermission } from "@/utils/require-permission";
 import type z from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useOptimisticMutation } from "@/lib/optimistic-update";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute(
   "/(core)/back-office/chemical-materials/create",
@@ -78,28 +79,16 @@ function RouteComponent() {
     },
   });
 
-  const createChemicalMaterialMutation = useOptimisticMutation(
-    trpc.chemicalMaterial.create.mutationOptions(),
-    {
-      queryOptions: trpc.chemicalMaterial.getPaginated.queryOptions({}),
-      operation: {
-        type: "create",
-        getOptimisticItem: (input) => ({
-          id: `optimistic-${Math.random().toString(16).slice(2)}`,
-          ...input,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }),
-      },
-      onSuccess: async () => {
-        globalSuccessToast("Bahan kimia berhasil dibuat");
-        await redirectBack();
-      },
-      onError: (error) => {
-        globalErrorToast(`Gagal membuat bahan kimia: ${error.message}`);
-      },
+  const createChemicalMaterialMutation = useMutation({
+    ...trpc.chemicalMaterial.create.mutationOptions(),
+    onSuccess: async () => {
+      globalSuccessToast("Bahan kimia berhasil dibuat");
+      await redirectBack();
     },
-  );
+    onError: (error) => {
+      globalErrorToast(`Gagal membuat bahan kimia: ${error.message}`);
+    },
+  });
 
   function handleSubmit(
     data: z.infer<typeof chemicalMaterialSchema.createChemicalMaterialSchema>,
@@ -132,8 +121,8 @@ function RouteComponent() {
                   >
                     <FieldLabel>Kode Bahan Kimia</FieldLabel>
                     <Input placeholder="Masukkan kode bahan kimia" {...field} />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -153,8 +142,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -174,8 +163,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -195,8 +184,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -218,8 +207,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -278,8 +267,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -338,8 +327,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -398,8 +387,8 @@ function RouteComponent() {
                       value={field.value || ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}
@@ -456,8 +445,8 @@ function RouteComponent() {
                       {...field}
                       value={field.value || ""}
                     />
-                    {fieldState.error && (
-                      <FieldError>{fieldState.error.message}</FieldError>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
                     )}
                   </Field>
                 )}

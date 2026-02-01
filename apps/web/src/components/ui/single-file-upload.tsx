@@ -214,6 +214,15 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
       return parts.length > 1 && ext ? ext.toUpperCase() : "FILE";
     };
 
+    const renderMimeTypes = (types: string): string => {
+      return types
+        .split(",")
+        .map((type) => type.trim())
+        .map((type) => mime.extension(type))
+        .filter((ext): ext is string => !!ext)
+        .join(", ");
+    };
+
     const displayError = error || uploadError;
 
     return (
@@ -280,8 +289,7 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
                 Choose a file or drag & drop here.
               </h3>
               <span className="mb-3 block text-xs font-normal text-secondary-foreground">
-                {mime.extension(accept).toString().toUpperCase()} up to{" "}
-                {formatBytes(maxSize)}.
+                {renderMimeTypes(accept)} up to {formatBytes(maxSize)}.
               </span>
               <Button
                 size="sm"

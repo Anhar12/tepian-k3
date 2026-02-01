@@ -30,6 +30,8 @@ import { userCompanyRouter } from "./routers/user-company";
 import { userCompanyTestingLocationRouter } from "./routers/user-company-testing-location";
 import { villageRouter } from "./routers/village";
 import { worksheetRouter } from "./routers/worksheet";
+import { bannerRouter } from "./routers/banner";
+import { newsRouter } from "./routers/news";
 
 /**
  * This is the primary router for your server.
@@ -68,6 +70,8 @@ export const appRouter = createTRPCRouter({
   worksheet: worksheetRouter,
   generateDocument: generateDocumentRouter,
   survey: surveyRouter,
+  banner: bannerRouter,
+  news: newsRouter,
 });
 
 // export type definition of API

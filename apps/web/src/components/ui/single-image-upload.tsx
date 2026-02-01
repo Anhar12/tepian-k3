@@ -1,4 +1,4 @@
-import { useCallback, useState, forwardRef, useEffect } from "react";
+import { useCallback, useState, forwardRef, useEffect, useMemo } from "react";
 import mime from "mime-types";
 import {
   Alert,
@@ -37,7 +37,7 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
   (
     {
       maxSize = 2 * 1024 * 1024, // 2MB
-      accept = "image/*",
+      accept = "image/jpeg, image/png",
       className,
       value,
       onChange,
@@ -235,6 +235,15 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
     };
 
+    const renderMimeTypes = (types: string): string => {
+      return types
+        .split(",")
+        .map((type) => type.trim())
+        .map((type) => mime.extension(type))
+        .filter((ext): ext is string => !!ext)
+        .join(", ");
+    };
+
     const displayError = error || uploadError;
 
     return (
@@ -291,8 +300,7 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
                 Choose a file or drag & drop here.
               </h3>
               <span className="mb-3 block text-xs font-normal text-secondary-foreground">
-                {mime.extension(accept).toString().toUpperCase()} up to{" "}
-                {formatBytes(maxSize)}.
+                {renderMimeTypes(accept)} up to {formatBytes(maxSize)}.
               </span>
               <Button
                 size="sm"

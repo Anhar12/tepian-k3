@@ -3,8 +3,14 @@
  */
 
 export const CACHE_KEYS = {
+  BANNERS_ALL: "cache:banners:all",
+  BANNERS_PREFIX: "cache:banners:",
   CLUSTERS_ALL: "cache:clusters:all",
   CLUSTERS_PREFIX: "cache:clusters:",
+  NEWS_ALL: "cache:news:all",
+  NEWS_FIRST_5: "cache:news:first-5",
+  NEWS_CURSOR_PREFIX: "cache:news:cursor:",
+  NEWS_PREFIX: "cache:news:",
   PARAMETER_CATEGORIES_ALL: "cache:parameter-categories:all",
   PARAMETER_CATEGORIES_PREFIX: "cache:parameter-categories:",
   PROVINCES_ALL: "cache:provinces:all",

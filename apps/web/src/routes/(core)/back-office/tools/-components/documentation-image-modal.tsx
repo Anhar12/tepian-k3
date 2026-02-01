@@ -15,11 +15,11 @@ import { getPublicUrl } from "@/utils/url";
 
 interface DocumentationImageModalProps {}
 
-export default function DocumentationImageModal({}: DocumentationImageModalProps) {
-  const calibrationDetailApi = getRouteApi(
-    "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
-  );
+const calibrationDetailApi = getRouteApi(
+  "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
+);
 
+export default function DocumentationImageModal({}: DocumentationImageModalProps) {
   const navigate = calibrationDetailApi.useNavigate();
   const { modalId } = calibrationDetailApi.useSearch();
 

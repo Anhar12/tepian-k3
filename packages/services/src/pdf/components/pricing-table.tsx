@@ -26,7 +26,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
 }) => {
   const totalServicesCost = items.reduce((total, item) => {
     return (
-      total + (item.parameter ? item.parameter.price * (item.value ?? 0) : 0)
+      total + (item.parameter ? item.parameter.price * (item.quantity ?? 0) : 0)
     );
   }, 0);
 
@@ -87,14 +87,14 @@ export const PricingTable: React.FC<PricingTableProps> = ({
               {item.parameter ? formatCurrency(item.parameter.price) : "-"}
             </Text>
             <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
-              {item.value}
+              {item.quantity}
             </Text>
             <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
               {item.location ? item.location.name : "-"}
             </Text>
             <Text style={tw("w-2/12 border-black p-2 text-center")}>
-              {item.value
-                ? formatCurrency(item.value * item.parameter.price)
+              {item.quantity
+                ? formatCurrency(item.quantity * item.parameter.price)
                 : "-"}
             </Text>
           </View>

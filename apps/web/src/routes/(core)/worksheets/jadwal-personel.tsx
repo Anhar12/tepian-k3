@@ -13,12 +13,14 @@ import {
   Save,
   Download,
   Lock,
+  CalendarDays,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
@@ -65,10 +67,17 @@ import {
   addDays,
   subDays,
   isWithinInterval,
+  addBusinessDays,
+  differenceInBusinessDays,
+  isWeekend,
+  nextMonday,
 } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
+import { getPublicUrl } from "@/utils/url";
+
+// TODO: Make this page can be edited when status is verified approved and order is payed
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
@@ -85,6 +94,7 @@ interface Personnel {
   initials: string;
   status: EmployeeStatus;
   color: string;
+  avatarUrl?: string;
 }
 
 interface WorksheetSchedule {
@@ -203,6 +213,7 @@ function JadwalPersonilPage() {
       initials: getInitials(emp.name),
       status: emp.status,
       color: getColorForIndex(index),
+      avatarUrl: emp.user.profilePictureUrl ?? undefined,
     }));
   }, [employeesData]);
 
@@ -235,10 +246,10 @@ function JadwalPersonilPage() {
     );
   }, [worksheet]);
 
-  // Check if worksheet is editable (only draft or revision status)
+  // Check if worksheet is editable (status is 'verified')
   const isEditable = useMemo(() => {
     if (!worksheet?.status) return false;
-    return ["draft", "revision"].includes(worksheet.status);
+    return ["verified"].includes(worksheet.status);
   }, [worksheet?.status]);
 
   // Initialize selected personnel and dates when opening dialog
@@ -671,6 +682,17 @@ function JadwalPersonilPage() {
     );
   }
 
+  const startDate = worksheet.startDate
+    ? new Date(worksheet.startDate)
+    : new Date();
+  const businessStartDate = isWeekend(startDate)
+    ? nextMonday(startDate)
+    : startDate;
+  const businessEndDate = addBusinessDays(
+    businessStartDate,
+    worksheet.estimatedAmountOfDays,
+  );
+
   return (
     <div className="space-y-4">
       <WorksheetHeaderCard
@@ -704,7 +726,7 @@ function JadwalPersonilPage() {
               {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
             </strong>{" "}
             dan jadwal tidak dapat diubah. Jadwal hanya dapat diubah saat status{" "}
-            <strong>Draft</strong> atau <strong>Revision</strong>.
+            <strong>Verified</strong>
           </AlertDescription>
         </Alert>
       )}
@@ -806,12 +828,47 @@ function JadwalPersonilPage() {
         </div>
 
         <div className="w-full shrink-0 space-y-4 lg:w-80">
+          {/* Estimated Card */}
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="size-4 text-primary sm:size-5" />
+                <h3 className="text-sm font-semibold sm:text-base">Estimasi</h3>
+              </div>
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center gap-2">
+                  <CalendarClock className="size-4 text-muted-foreground sm:size-5" />
+                  <span className="text-sm text-foreground sm:text-base">
+                    {format(businessStartDate, "dd/MM/yyyy")} -{" "}
+                    {format(businessEndDate, "dd/MM/yyyy")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="size-4 text-muted-foreground sm:size-5" />
+                  <span className="text-sm text-foreground sm:text-base">
+                    {differenceInBusinessDays(
+                      businessEndDate,
+                      businessStartDate,
+                    )}{" "}
+                    Hari Kerja
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="size-4 text-muted-foreground sm:size-5" />
+                  <span className="text-sm text-foreground sm:text-base">
+                    {worksheet.estimatedAmountOfMembers} Personil
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Assigned Personnel Card */}
           <Card>
             <CardContent className="p-3 sm:p-4">
               <div className="mb-3 flex items-center justify-between sm:mb-4">
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+                  <Check className="size-4 text-primary sm:size-5" />
                   <h3 className="text-sm font-semibold sm:text-base">
                     Personel Ditugaskan
                   </h3>
@@ -829,9 +886,11 @@ function JadwalPersonilPage() {
                         key={person.id}
                         className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-2 sm:gap-3"
                       >
-                        <Avatar
-                          className={`h-8 w-8 sm:h-10 sm:w-10 ${person.color}`}
-                        >
+                        <Avatar className={`size-8 sm:size-10 ${person.color}`}>
+                          <AvatarImage
+                            src={getPublicUrl(person.avatarUrl ?? "")}
+                            alt={person.name}
+                          />
                           <AvatarFallback className="text-xs text-white sm:text-sm">
                             {person.initials}
                           </AvatarFallback>

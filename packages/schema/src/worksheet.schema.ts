@@ -27,7 +27,7 @@ const baseWorksheetChemicalMaterialSchema = createInsertSchema(
 // Create worksheet from testing
 const createWorksheetFromTestingSchema = z.object({
   testingId: z.uuidv7(),
-  startDate: z.string().datetime(),
+  startDate: z.iso.datetime(),
   mainSupervisorId: z.uuidv7().optional(),
   accompanyingSupervisorId: z.uuidv7().optional(),
 });
@@ -35,9 +35,16 @@ const createWorksheetFromTestingSchema = z.object({
 // Create worksheet from order (kaji ulang phase - before offering)
 const createWorksheetFromOrderSchema = z.object({
   orderId: z.uuidv7(),
-  startDate: z.string().datetime().optional(),
+  startDate: z.iso.datetime().optional(),
   mainSupervisorId: z.uuidv7().optional(),
   accompanyingSupervisorId: z.uuidv7().optional(),
+});
+
+// Create worksheet estimated members and days
+const createWorksheetEstimatedSchema = z.object({
+  worksheetId: z.uuidv7(),
+  estimatedAmountOfMembers: z.number().int().min(0),
+  estimatedAmountOfDays: z.number().int().min(0),
 });
 
 // Submit worksheet for verification
@@ -56,7 +63,7 @@ const verifyWorksheetSchema = z.object({
 const updateWorksheetStatusSchema = z.object({
   worksheetId: z.uuidv7(),
   status: z.enum(WORKSHEET_STATUS),
-  endDate: z.string().datetime().optional(),
+  endDate: z.iso.datetime().optional(),
   result: z.string().optional(),
 });
 
@@ -81,7 +88,6 @@ const batchUpdateWorksheetItemsSchema = z.object({
   items: z.array(
     z.object({
       itemId: z.uuidv7(),
-      value: z.number().nullable(),
       note: z.string().optional().nullable(),
       isReady: z.boolean().optional(),
     }),
@@ -91,7 +97,13 @@ const batchUpdateWorksheetItemsSchema = z.object({
 // Assign tools to worksheet
 const assignToolsToWorksheetSchema = z.object({
   worksheetId: z.uuidv7(),
-  toolIds: z.array(z.uuidv7()),
+  items: z.array(
+    z.object({
+      itemId: z.uuidv7(),
+      parameterId: z.array(z.uuidv7()),
+      toolNeeded: z.number().int().min(0).default(0),
+    }),
+  ),
 });
 
 // Assign employees to worksheet (with optional schedule dates)
@@ -106,7 +118,7 @@ const assignEmployeesToWorksheetSchema = z.object({
 const addWorksheetNoteSchema = z.object({
   worksheetId: z.uuidv7(),
   note: z.string().min(1).max(1000),
-  severity: z.enum(WORKSHEET_NOTE_STATUS).default("info"),
+  severity: z.enum(WORKSHEET_NOTE_STATUS),
 });
 
 // Get worksheets with pagination
@@ -179,6 +191,7 @@ const worksheetSchema = {
   baseWorksheetChemicalMaterialSchema,
   createWorksheetFromTestingSchema,
   createWorksheetFromOrderSchema,
+  createWorksheetEstimatedSchema,
   submitForVerificationSchema,
   verifyWorksheetSchema,
   updateWorksheetStatusSchema,

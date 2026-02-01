@@ -28,6 +28,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.2.0",
     "@tepian-k3/config": "workspace:*",
     "@tepian-k3/types": "workspace:*",
     "@types/mime-types": "catalog:",

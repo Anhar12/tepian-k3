@@ -335,7 +335,7 @@ const cartQueries = {
         try: () =>
           db.transaction(async (tx) => {
             if (existingCartItem) {
-              const [updated] = await Effect.runPromise(
+              const updated = await Effect.runPromise(
                 this.updateCartItemQuantity(
                   existingCartItem.id,
                   existingCartItem.quantity + data.quantity,
@@ -343,27 +343,13 @@ const cartQueries = {
                 ),
               );
 
-              if (!updated) {
-                throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: "Gagal memperbarui item keranjang",
-                });
-              }
-
               return updated;
             }
 
             // Only create new item if none exists
-            const [newCartItem] = await Effect.runPromise(
+            const newCartItem = await Effect.runPromise(
               this.insertNewCartItem(userId, data, tx),
             );
-
-            if (!newCartItem) {
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Gagal membuat item keranjang baru",
-              });
-            }
 
             return newCartItem;
           }),
@@ -390,8 +376,8 @@ const cartQueries = {
     tx: DBorTx = db,
   ) {
     return Effect.tryPromise({
-      try: () =>
-        tx
+      try: async () => {
+        const [inserted] = await tx
           .insert(cart)
           .values({
             userId,
@@ -401,7 +387,31 @@ const cartQueries = {
             quantity: data.quantity,
             price: data.price,
           })
-          .returning(),
+          .returning();
+
+        if (!inserted) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memasukkan item keranjang baru",
+          });
+        }
+
+        const result = await tx.query.cart.findFirst({
+          where: eq(cart.id, inserted.id),
+          with: {
+            parameter: true,
+          },
+        });
+
+        if (!result) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memasukkan item keranjang baru",
+          });
+        }
+
+        return result;
+      },
       catch: (error) => {
         logError(
           "cartQueries.insertNewCartItem",
@@ -426,12 +436,36 @@ const cartQueries = {
     tx: DBorTx = db,
   ) {
     return Effect.tryPromise({
-      try: () =>
-        tx
+      try: async () => {
+        const [updated] = await tx
           .update(cart)
           .set({ quantity })
           .where(eq(cart.id, cartItemId))
-          .returning(),
+          .returning();
+
+        if (!updated) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui jumlah item keranjang",
+          });
+        }
+
+        const result = await tx.query.cart.findFirst({
+          where: eq(cart.id, cartItemId),
+          with: {
+            parameter: true,
+          },
+        });
+
+        if (!result) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui jumlah item keranjang",
+          });
+        }
+
+        return result;
+      },
       catch: (error) => {
         logError(
           "cartQueries.updateCartItemQuantity",

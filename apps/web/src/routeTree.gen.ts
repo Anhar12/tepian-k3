@@ -15,7 +15,9 @@ import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BeritaIndexRouteImport } from './routes/berita/index'
 import { Route as VerifyTokenRouteImport } from './routes/verify.$token'
+import { Route as BeritaNewsIdRouteImport } from './routes/berita/$newsId'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as corePdfEditorRouteImport } from './routes/(core)/pdf-editor'
@@ -53,10 +55,12 @@ import { Route as coreBackOfficePositionsIndexRouteImport } from './routes/(core
 import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
 import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './routes/(core)/back-office/parameter-categories/index'
 import { Route as coreBackOfficeOrdersIndexRouteImport } from './routes/(core)/back-office/orders/index'
+import { Route as coreBackOfficeNewsIndexRouteImport } from './routes/(core)/back-office/news/index'
 import { Route as coreBackOfficeKblisIndexRouteImport } from './routes/(core)/back-office/kblis/index'
 import { Route as coreBackOfficeEmployeesIndexRouteImport } from './routes/(core)/back-office/employees/index'
 import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)/back-office/clusters/index'
 import { Route as coreBackOfficeChemicalMaterialsIndexRouteImport } from './routes/(core)/back-office/chemical-materials/index'
+import { Route as coreBackOfficeBannersIndexRouteImport } from './routes/(core)/back-office/banners/index'
 import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
 import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
 import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
@@ -65,10 +69,12 @@ import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/b
 import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
 import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(core)/back-office/parameters/create'
 import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from './routes/(core)/back-office/parameter-categories/create'
+import { Route as coreBackOfficeNewsCreateRouteImport } from './routes/(core)/back-office/news/create'
 import { Route as coreBackOfficeKblisCreateRouteImport } from './routes/(core)/back-office/kblis/create'
 import { Route as coreBackOfficeEmployeesCreateRouteImport } from './routes/(core)/back-office/employees/create'
 import { Route as coreBackOfficeClustersCreateRouteImport } from './routes/(core)/back-office/clusters/create'
 import { Route as coreBackOfficeChemicalMaterialsCreateRouteImport } from './routes/(core)/back-office/chemical-materials/create'
+import { Route as coreBackOfficeBannersCreateRouteImport } from './routes/(core)/back-office/banners/create'
 import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
 import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
 import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
@@ -83,10 +89,12 @@ import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './r
 import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from './routes/(core)/back-office/parameters/$parameterId.detail'
 import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
 import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from './routes/(core)/back-office/orders/$orderId.detail'
+import { Route as coreBackOfficeNewsNewsIdEditRouteImport } from './routes/(core)/back-office/news/$newsId.edit'
 import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
 import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './routes/(core)/back-office/employees/$employeeId.edit'
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
 import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport } from './routes/(core)/back-office/chemical-materials/$chemicalMaterialId.edit'
+import { Route as coreBackOfficeBannersBannerIdEditRouteImport } from './routes/(core)/back-office/banners/$bannerId.edit'
 import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.index'
 import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.create'
 import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit'
@@ -120,9 +128,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BeritaIndexRoute = BeritaIndexRouteImport.update({
+  id: '/berita/',
+  path: '/berita/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyTokenRoute = VerifyTokenRouteImport.update({
   id: '/verify/$token',
   path: '/verify/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeritaNewsIdRoute = BeritaNewsIdRouteImport.update({
+  id: '/berita/$newsId',
+  path: '/berita/$newsId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
@@ -324,6 +342,11 @@ const coreBackOfficeOrdersIndexRoute =
     path: '/orders/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeNewsIndexRoute = coreBackOfficeNewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => coreBackOfficeRouteRoute,
+} as any)
 const coreBackOfficeKblisIndexRoute =
   coreBackOfficeKblisIndexRouteImport.update({
     id: '/kblis/',
@@ -346,6 +369,12 @@ const coreBackOfficeChemicalMaterialsIndexRoute =
   coreBackOfficeChemicalMaterialsIndexRouteImport.update({
     id: '/chemical-materials/',
     path: '/chemical-materials/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeBannersIndexRoute =
+  coreBackOfficeBannersIndexRouteImport.update({
+    id: '/banners/',
+    path: '/banners/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreDashboardCompanyCreateRoute =
@@ -396,6 +425,12 @@ const coreBackOfficeParameterCategoriesCreateRoute =
     path: '/parameter-categories/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeNewsCreateRoute =
+  coreBackOfficeNewsCreateRouteImport.update({
+    id: '/news/create',
+    path: '/news/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeKblisCreateRoute =
   coreBackOfficeKblisCreateRouteImport.update({
     id: '/kblis/create',
@@ -418,6 +453,12 @@ const coreBackOfficeChemicalMaterialsCreateRoute =
   coreBackOfficeChemicalMaterialsCreateRouteImport.update({
     id: '/chemical-materials/create',
     path: '/chemical-materials/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeBannersCreateRoute =
+  coreBackOfficeBannersCreateRouteImport.update({
+    id: '/banners/create',
+    path: '/banners/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreDashboardCompanyCompanyIdEditRoute =
@@ -504,6 +545,12 @@ const coreBackOfficeOrdersOrderIdDetailRoute =
     path: '/orders/$orderId/detail',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeNewsNewsIdEditRoute =
+  coreBackOfficeNewsNewsIdEditRouteImport.update({
+    id: '/news/$newsId/edit',
+    path: '/news/$newsId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeKblisKbliIdEditRoute =
   coreBackOfficeKblisKbliIdEditRouteImport.update({
     id: '/kblis/$kbliId/edit',
@@ -526,6 +573,12 @@ const coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute =
   coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport.update({
     id: '/chemical-materials/$chemicalMaterialId/edit',
     path: '/chemical-materials/$chemicalMaterialId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeBannersBannerIdEditRoute =
+  coreBackOfficeBannersBannerIdEditRouteImport.update({
+    id: '/banners/$bannerId/edit',
+    path: '/banners/$bannerId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeToolsToolIdCalibrationIndexRoute =
@@ -574,7 +627,9 @@ export interface FileRoutesByFullPath {
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/berita/$newsId': typeof BeritaNewsIdRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/berita': typeof BeritaIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -585,10 +640,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof coreDashboardIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
   '/worksheets/': typeof coreWorksheetsIndexRoute
+  '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
@@ -597,10 +654,12 @@ export interface FileRoutesByFullPath {
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/news': typeof coreBackOfficeNewsIndexRoute
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
@@ -612,10 +671,12 @@ export interface FileRoutesByFullPath {
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
+  '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
   '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -652,7 +713,9 @@ export interface FileRoutesByTo {
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/berita/$newsId': typeof BeritaNewsIdRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/berita': typeof BeritaIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -663,10 +726,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof coreDashboardIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
   '/worksheets': typeof coreWorksheetsIndexRoute
+  '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
@@ -675,10 +740,12 @@ export interface FileRoutesByTo {
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/news': typeof coreBackOfficeNewsIndexRoute
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
@@ -690,10 +757,12 @@ export interface FileRoutesByTo {
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
+  '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
   '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -737,7 +806,9 @@ export interface FileRoutesById {
   '/(core)/pdf-editor': typeof corePdfEditorRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/berita/$newsId': typeof BeritaNewsIdRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/berita/': typeof BeritaIndexRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
   '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -748,10 +819,12 @@ export interface FileRoutesById {
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
   '/(core)/worksheets/': typeof coreWorksheetsIndexRoute
+  '/(core)/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/(core)/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/(core)/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/(core)/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/(core)/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
@@ -760,10 +833,12 @@ export interface FileRoutesById {
   '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/(core)/back-office/banners/': typeof coreBackOfficeBannersIndexRoute
   '/(core)/back-office/chemical-materials/': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/(core)/back-office/clusters/': typeof coreBackOfficeClustersIndexRoute
   '/(core)/back-office/employees/': typeof coreBackOfficeEmployeesIndexRoute
   '/(core)/back-office/kblis/': typeof coreBackOfficeKblisIndexRoute
+  '/(core)/back-office/news/': typeof coreBackOfficeNewsIndexRoute
   '/(core)/back-office/orders/': typeof coreBackOfficeOrdersIndexRoute
   '/(core)/back-office/parameter-categories/': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
@@ -775,10 +850,12 @@ export interface FileRoutesById {
   '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
   '/(core)/back-office/worksheets/': typeof coreBackOfficeWorksheetsIndexRoute
   '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
+  '/(core)/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
   '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/(core)/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/(core)/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/(core)/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -821,7 +898,9 @@ export interface FileRouteTypes {
     | '/pdf-editor'
     | '/profile'
     | '/settings'
+    | '/berita/$newsId'
     | '/verify/$token'
+    | '/berita'
     | '/pengujian/checkout'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
@@ -832,10 +911,12 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/pengujian/'
     | '/worksheets/'
+    | '/back-office/banners/create'
     | '/back-office/chemical-materials/create'
     | '/back-office/clusters/create'
     | '/back-office/employees/create'
     | '/back-office/kblis/create'
+    | '/back-office/news/create'
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
@@ -844,10 +925,12 @@ export interface FileRouteTypes {
     | '/back-office/tools/create'
     | '/back-office/users/create'
     | '/dashboard/company/create'
+    | '/back-office/banners'
     | '/back-office/chemical-materials'
     | '/back-office/clusters'
     | '/back-office/employees'
     | '/back-office/kblis'
+    | '/back-office/news'
     | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
@@ -859,10 +942,12 @@ export interface FileRouteTypes {
     | '/back-office/users'
     | '/back-office/worksheets'
     | '/dashboard/company'
+    | '/back-office/banners/$bannerId/edit'
     | '/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
@@ -899,7 +984,9 @@ export interface FileRouteTypes {
     | '/pdf-editor'
     | '/profile'
     | '/settings'
+    | '/berita/$newsId'
     | '/verify/$token'
+    | '/berita'
     | '/pengujian/checkout'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
@@ -910,10 +997,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/pengujian'
     | '/worksheets'
+    | '/back-office/banners/create'
     | '/back-office/chemical-materials/create'
     | '/back-office/clusters/create'
     | '/back-office/employees/create'
     | '/back-office/kblis/create'
+    | '/back-office/news/create'
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
@@ -922,10 +1011,12 @@ export interface FileRouteTypes {
     | '/back-office/tools/create'
     | '/back-office/users/create'
     | '/dashboard/company/create'
+    | '/back-office/banners'
     | '/back-office/chemical-materials'
     | '/back-office/clusters'
     | '/back-office/employees'
     | '/back-office/kblis'
+    | '/back-office/news'
     | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
@@ -937,10 +1028,12 @@ export interface FileRouteTypes {
     | '/back-office/users'
     | '/back-office/worksheets'
     | '/dashboard/company'
+    | '/back-office/banners/$bannerId/edit'
     | '/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
@@ -983,7 +1076,9 @@ export interface FileRouteTypes {
     | '/(core)/pdf-editor'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/berita/$newsId'
     | '/verify/$token'
+    | '/berita/'
     | '/(core)/pengujian/checkout'
     | '/(core)/pengujian/status'
     | '/(core)/pengujian/survey-kepuasan'
@@ -994,10 +1089,12 @@ export interface FileRouteTypes {
     | '/(core)/dashboard/'
     | '/(core)/pengujian/'
     | '/(core)/worksheets/'
+    | '/(core)/back-office/banners/create'
     | '/(core)/back-office/chemical-materials/create'
     | '/(core)/back-office/clusters/create'
     | '/(core)/back-office/employees/create'
     | '/(core)/back-office/kblis/create'
+    | '/(core)/back-office/news/create'
     | '/(core)/back-office/parameter-categories/create'
     | '/(core)/back-office/parameters/create'
     | '/(core)/back-office/positions/create'
@@ -1006,10 +1103,12 @@ export interface FileRouteTypes {
     | '/(core)/back-office/tools/create'
     | '/(core)/back-office/users/create'
     | '/(core)/dashboard/company/create'
+    | '/(core)/back-office/banners/'
     | '/(core)/back-office/chemical-materials/'
     | '/(core)/back-office/clusters/'
     | '/(core)/back-office/employees/'
     | '/(core)/back-office/kblis/'
+    | '/(core)/back-office/news/'
     | '/(core)/back-office/orders/'
     | '/(core)/back-office/parameter-categories/'
     | '/(core)/back-office/parameters/'
@@ -1021,10 +1120,12 @@ export interface FileRouteTypes {
     | '/(core)/back-office/users/'
     | '/(core)/back-office/worksheets/'
     | '/(core)/dashboard/company/'
+    | '/(core)/back-office/banners/$bannerId/edit'
     | '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/employees/$employeeId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
+    | '/(core)/back-office/news/$newsId/edit'
     | '/(core)/back-office/orders/$orderId/detail'
     | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/(core)/back-office/parameters/$parameterId/detail'
@@ -1052,7 +1153,9 @@ export interface RootRouteChildren {
   KatalogRoute: typeof KatalogRoute
   TestRoute: typeof TestRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
+  BeritaNewsIdRoute: typeof BeritaNewsIdRoute
   VerifyTokenRoute: typeof VerifyTokenRoute
+  BeritaIndexRoute: typeof BeritaIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1099,11 +1202,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/berita/': {
+      id: '/berita/'
+      path: '/berita'
+      fullPath: '/berita'
+      preLoaderRoute: typeof BeritaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify/$token': {
       id: '/verify/$token'
       path: '/verify/$token'
       fullPath: '/verify/$token'
       preLoaderRoute: typeof VerifyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/berita/$newsId': {
+      id: '/berita/$newsId'
+      path: '/berita/$newsId'
+      fullPath: '/berita/$newsId'
+      preLoaderRoute: typeof BeritaNewsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)/settings': {
@@ -1365,6 +1482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeOrdersIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/news/': {
+      id: '/(core)/back-office/news/'
+      path: '/news'
+      fullPath: '/back-office/news'
+      preLoaderRoute: typeof coreBackOfficeNewsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/': {
       id: '/(core)/back-office/kblis/'
       path: '/kblis'
@@ -1391,6 +1515,13 @@ declare module '@tanstack/react-router' {
       path: '/chemical-materials'
       fullPath: '/back-office/chemical-materials'
       preLoaderRoute: typeof coreBackOfficeChemicalMaterialsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/banners/': {
+      id: '/(core)/back-office/banners/'
+      path: '/banners'
+      fullPath: '/back-office/banners'
+      preLoaderRoute: typeof coreBackOfficeBannersIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/dashboard/company/create': {
@@ -1449,6 +1580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeParameterCategoriesCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/news/create': {
+      id: '/(core)/back-office/news/create'
+      path: '/news/create'
+      fullPath: '/back-office/news/create'
+      preLoaderRoute: typeof coreBackOfficeNewsCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/create': {
       id: '/(core)/back-office/kblis/create'
       path: '/kblis/create'
@@ -1475,6 +1613,13 @@ declare module '@tanstack/react-router' {
       path: '/chemical-materials/create'
       fullPath: '/back-office/chemical-materials/create'
       preLoaderRoute: typeof coreBackOfficeChemicalMaterialsCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/banners/create': {
+      id: '/(core)/back-office/banners/create'
+      path: '/banners/create'
+      fullPath: '/back-office/banners/create'
+      preLoaderRoute: typeof coreBackOfficeBannersCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/dashboard/company/$companyId/edit': {
@@ -1575,6 +1720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeOrdersOrderIdDetailRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/news/$newsId/edit': {
+      id: '/(core)/back-office/news/$newsId/edit'
+      path: '/news/$newsId/edit'
+      fullPath: '/back-office/news/$newsId/edit'
+      preLoaderRoute: typeof coreBackOfficeNewsNewsIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/$kbliId/edit': {
       id: '/(core)/back-office/kblis/$kbliId/edit'
       path: '/kblis/$kbliId/edit'
@@ -1601,6 +1753,13 @@ declare module '@tanstack/react-router' {
       path: '/chemical-materials/$chemicalMaterialId/edit'
       fullPath: '/back-office/chemical-materials/$chemicalMaterialId/edit'
       preLoaderRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/banners/$bannerId/edit': {
+      id: '/(core)/back-office/banners/$bannerId/edit'
+      path: '/banners/$bannerId/edit'
+      fullPath: '/back-office/banners/$bannerId/edit'
+      preLoaderRoute: typeof coreBackOfficeBannersBannerIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/tools/$toolId/calibration/': {
@@ -1656,10 +1815,12 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeIndexRoute: typeof coreBackOfficeIndexRoute
+  coreBackOfficeBannersCreateRoute: typeof coreBackOfficeBannersCreateRoute
   coreBackOfficeChemicalMaterialsCreateRoute: typeof coreBackOfficeChemicalMaterialsCreateRoute
   coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute
   coreBackOfficeEmployeesCreateRoute: typeof coreBackOfficeEmployeesCreateRoute
   coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute
+  coreBackOfficeNewsCreateRoute: typeof coreBackOfficeNewsCreateRoute
   coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
   coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute
   coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
@@ -1667,10 +1828,12 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeSurveyQuestionsCreateRoute: typeof coreBackOfficeSurveyQuestionsCreateRoute
   coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
   coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
+  coreBackOfficeBannersIndexRoute: typeof coreBackOfficeBannersIndexRoute
   coreBackOfficeChemicalMaterialsIndexRoute: typeof coreBackOfficeChemicalMaterialsIndexRoute
   coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute
   coreBackOfficeEmployeesIndexRoute: typeof coreBackOfficeEmployeesIndexRoute
   coreBackOfficeKblisIndexRoute: typeof coreBackOfficeKblisIndexRoute
+  coreBackOfficeNewsIndexRoute: typeof coreBackOfficeNewsIndexRoute
   coreBackOfficeOrdersIndexRoute: typeof coreBackOfficeOrdersIndexRoute
   coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute
   coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
@@ -1681,10 +1844,12 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
   coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
   coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
+  coreBackOfficeBannersBannerIdEditRoute: typeof coreBackOfficeBannersBannerIdEditRoute
   coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeEmployeesEmployeeIdEditRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
+  coreBackOfficeNewsNewsIdEditRoute: typeof coreBackOfficeNewsNewsIdEditRoute
   coreBackOfficeOrdersOrderIdDetailRoute: typeof coreBackOfficeOrdersOrderIdDetailRoute
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -1705,11 +1870,13 @@ interface coreBackOfficeRouteRouteChildren {
 
 const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeIndexRoute: coreBackOfficeIndexRoute,
+  coreBackOfficeBannersCreateRoute: coreBackOfficeBannersCreateRoute,
   coreBackOfficeChemicalMaterialsCreateRoute:
     coreBackOfficeChemicalMaterialsCreateRoute,
   coreBackOfficeClustersCreateRoute: coreBackOfficeClustersCreateRoute,
   coreBackOfficeEmployeesCreateRoute: coreBackOfficeEmployeesCreateRoute,
   coreBackOfficeKblisCreateRoute: coreBackOfficeKblisCreateRoute,
+  coreBackOfficeNewsCreateRoute: coreBackOfficeNewsCreateRoute,
   coreBackOfficeParameterCategoriesCreateRoute:
     coreBackOfficeParameterCategoriesCreateRoute,
   coreBackOfficeParametersCreateRoute: coreBackOfficeParametersCreateRoute,
@@ -1719,11 +1886,13 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeSurveyQuestionsCreateRoute,
   coreBackOfficeToolsCreateRoute: coreBackOfficeToolsCreateRoute,
   coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
+  coreBackOfficeBannersIndexRoute: coreBackOfficeBannersIndexRoute,
   coreBackOfficeChemicalMaterialsIndexRoute:
     coreBackOfficeChemicalMaterialsIndexRoute,
   coreBackOfficeClustersIndexRoute: coreBackOfficeClustersIndexRoute,
   coreBackOfficeEmployeesIndexRoute: coreBackOfficeEmployeesIndexRoute,
   coreBackOfficeKblisIndexRoute: coreBackOfficeKblisIndexRoute,
+  coreBackOfficeNewsIndexRoute: coreBackOfficeNewsIndexRoute,
   coreBackOfficeOrdersIndexRoute: coreBackOfficeOrdersIndexRoute,
   coreBackOfficeParameterCategoriesIndexRoute:
     coreBackOfficeParameterCategoriesIndexRoute,
@@ -1736,6 +1905,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
   coreBackOfficeUsersIndexRoute: coreBackOfficeUsersIndexRoute,
   coreBackOfficeWorksheetsIndexRoute: coreBackOfficeWorksheetsIndexRoute,
+  coreBackOfficeBannersBannerIdEditRoute:
+    coreBackOfficeBannersBannerIdEditRoute,
   coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute:
     coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute,
   coreBackOfficeClustersClusterIdEditRoute:
@@ -1743,6 +1914,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeEmployeesEmployeeIdEditRoute:
     coreBackOfficeEmployeesEmployeeIdEditRoute,
   coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
+  coreBackOfficeNewsNewsIdEditRoute: coreBackOfficeNewsNewsIdEditRoute,
   coreBackOfficeOrdersOrderIdDetailRoute:
     coreBackOfficeOrdersOrderIdDetailRoute,
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute:
@@ -1869,7 +2041,9 @@ const rootRouteChildren: RootRouteChildren = {
   KatalogRoute: KatalogRoute,
   TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
+  BeritaNewsIdRoute: BeritaNewsIdRoute,
   VerifyTokenRoute: VerifyTokenRoute,
+  BeritaIndexRoute: BeritaIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

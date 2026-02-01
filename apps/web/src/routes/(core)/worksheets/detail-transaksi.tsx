@@ -12,6 +12,7 @@ import {
   Trash2,
   Loader2,
   ChevronDown,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +40,6 @@ import { getPublicUrl } from "@/utils/url";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
-import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import useDialogs from "@/hooks/use-dialog";
 import GenerateOfferingDialog from "./-components/generate-offering-dialog";
 
@@ -100,6 +100,8 @@ function RouteComponent() {
 
   const [paramPage, setParamPage] = useState(1);
   const [paramPageSize, setParamPageSize] = useState(10);
+  const [notReadyParamPage, setNotReadyParamPage] = useState(1);
+  const [notReadyParamPageSize, setNotReadyParamPageSize] = useState(10);
   const [operationalCosts, setOperationalCosts] = useState<
     OperationalCostItem[]
   >([]);
@@ -204,6 +206,11 @@ function RouteComponent() {
     return worksheet.items.filter((item) => item.isReady);
   }, [worksheet?.items]);
 
+  const notReadyItems = useMemo(() => {
+    if (!worksheet?.items) return [];
+    return worksheet.items.filter((item) => !item.isReady);
+  }, [worksheet?.items]);
+
   // Check if worksheet is editable (only draft or revision status)
   const isEditable = useMemo(() => {
     if (!worksheet?.status) return false;
@@ -293,6 +300,32 @@ function RouteComponent() {
       0,
     );
   }, [parameterData]);
+
+  const notReadyParameterData = useMemo(() => {
+    return notReadyItems.map((item) => ({
+      id: item.id,
+      cluster: item.parameter?.category?.cluster?.name || "-",
+      jenisPengujian: item.parameter?.category?.name || "-",
+      parameter: item.parameter?.name || "-",
+      acuan: item.parameter?.reference || "-",
+      jumlah: item.quantity,
+      status: "tidak siap" as const,
+      biaya: item.parameter?.price || 0,
+    }));
+  }, [notReadyItems]);
+
+  const notReadyParamPagination = usePagination(
+    notReadyParameterData,
+    notReadyParamPageSize,
+    notReadyParamPage,
+  );
+
+  const notReadyParameterTotal = useMemo(() => {
+    return notReadyParameterData.reduce(
+      (sum, item) => sum + item.jumlah * item.biaya,
+      0,
+    );
+  }, [notReadyParameterData]);
 
   const operationalTotal = useMemo(() => {
     return operationalCosts.reduce((sum, item) => {
@@ -741,6 +774,125 @@ function RouteComponent() {
               onPageSizeChange={(size) => {
                 setParamPageSize(size);
                 setParamPage(1);
+              }}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="px-3 pb-3 sm:px-6 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <AlertCircle className="h-4 w-4 text-destructive sm:h-5 sm:w-5" />
+            Rincian Parameter (Tidak Siap)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="text-xs font-semibold sm:text-sm">
+                    Cluster
+                  </TableHead>
+                  <TableHead className="hidden text-xs font-semibold sm:text-sm md:table-cell">
+                    Jenis Pengujian
+                  </TableHead>
+                  <TableHead className="text-xs font-semibold sm:text-sm">
+                    Parameter
+                  </TableHead>
+                  <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
+                    Acuan
+                  </TableHead>
+                  <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                    Jumlah
+                  </TableHead>
+                  <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                    Status
+                  </TableHead>
+                  <TableHead className="hidden text-right text-xs font-semibold sm:table-cell sm:text-sm">
+                    Biaya
+                  </TableHead>
+                  <TableHead className="text-right text-xs font-semibold sm:text-sm">
+                    Total
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {notReadyParamPagination.paginatedData.length > 0 ? (
+                  notReadyParamPagination.paginatedData.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-muted/30">
+                      <TableCell className="text-xs font-medium sm:text-sm">
+                        {item.cluster}
+                      </TableCell>
+                      <TableCell className="hidden text-xs sm:text-sm md:table-cell">
+                        {item.jenisPengujian}
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        {item.parameter}
+                      </TableCell>
+                      <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
+                        {item.acuan}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          variant="outline"
+                          className="bg-background text-xs"
+                        >
+                          {item.jumlah}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-red-100 text-xs text-red-700 hover:bg-red-100">
+                          Tidak Siap
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
+                        {formatCurrency(item.biaya)}
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-medium sm:text-sm">
+                        {formatCurrency(item.jumlah * item.biaya)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      className="py-8 text-center text-muted-foreground"
+                    >
+                      Semua parameter sudah siap
+                    </TableCell>
+                  </TableRow>
+                )}
+                <TableRow className="bg-muted/50 font-semibold">
+                  <TableCell
+                    colSpan={7}
+                    className="text-right text-xs sm:text-sm"
+                  >
+                    TOTAL
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Input
+                      value={formatCurrency(notReadyParameterTotal)}
+                      readOnly
+                      className="ml-auto w-24 text-right text-xs font-bold sm:w-32 sm:text-sm"
+                    />
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          {notReadyParameterData.length > 0 && (
+            <WorksheetDataTable
+              currentPage={notReadyParamPagination.currentPage}
+              totalPages={notReadyParamPagination.totalPages}
+              pageSize={notReadyParamPageSize}
+              totalItems={notReadyParamPagination.totalItems}
+              onPageChange={setNotReadyParamPage}
+              onPageSizeChange={(size) => {
+                setNotReadyParamPageSize(size);
+                setNotReadyParamPage(1);
               }}
             />
           )}

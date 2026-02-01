@@ -169,13 +169,23 @@ export class FileSystemProvider {
   }
 
   /**
-   * Extracts the key (full path including filename) from a public URL
-   * @param url - The public URL
+   * Extracts the key (full path including filename) from a public URL or returns the key if already provided
+   * @param urlOrKey - The public URL or key
    * @returns The key (e.g., avatars/2026/01/09/file.jpg)
    */
-  getKeyFromUrl(url: string): string | null {
+  getKeyFromUrl(urlOrKey: string): string | null {
+    // If it's already a key (doesn't look like a URL), return it as-is
+    if (!urlOrKey.startsWith("http://") && !urlOrKey.startsWith("https://")) {
+      // Validate it looks like a valid key (has a path structure)
+      if (urlOrKey.includes("/") && urlOrKey.length > 0) {
+        return urlOrKey;
+      }
+      return null;
+    }
+
+    // It's a URL, extract the key
     try {
-      const urlObj = new URL(url);
+      const urlObj = new URL(urlOrKey);
       const pathname = urlObj.pathname;
 
       const uploadsPrefix = "/api/uploads/";

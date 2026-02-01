@@ -57,7 +57,10 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
         />
 
         {/* Signature  */}
-        <View style={tw("flex-row justify-between items-start mt-8")}>
+        <View
+          style={tw("flex-row justify-between items-start mt-8")}
+          wrap={false}
+        >
           {/* Company Signature */}
           <View style={tw("items-center w-4/12")}>
             <Text style={tw("text-[10px] font-bold text-center")}>

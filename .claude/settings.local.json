@@ -52,7 +52,13 @@
       "Bash(gh issue create --title \"Set up Vitest with monorepo configuration\" --body \"$\\(cat <<''EOF''\n## Description\nSet up Vitest with monorepo configuration including `vitest.config.ts` and `vitest.workspace.ts`.\n\n## Tasks\n- [ ] Configure `vitest.config.ts` at root\n- [ ] Configure `vitest.workspace.ts` for monorepo packages\n- [ ] Add test scripts to root `package.json`\n\n**Source:** `TODO.md` - Critical Priority > Testing\nEOF\n\\)\" --label \"priority: critical,testing,enhancement\")",
       "Bash(gh issue create:*)",
       "Bash(pnpm git-cliff:*)",
-      "Bash(git -C /home/rizrmdhn/Project/Monorepo/tepian-k3 remote get-url origin)"
+      "Bash(git -C /home/rizrmdhn/Project/Monorepo/tepian-k3 remote get-url origin)",
+      "Bash(git tag:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(if exist \"f:\\\\Monorepo\\\\tepian-k3\\\\apps\\\\web\\\\src\\\\lib\\\\form-field.ts\" del \"f:\\\\Monorepo\\\\tepian-k3\\\\apps\\\\web\\\\src\\\\lib\\\\form-field.ts\")",
+      "Bash(node -e \"const m = require\\(''./node_modules/@tanstack/react-query/build/modern/useMutation.d.ts''\\); console.log\\(''check file''\\)\")"
     ]
   }
 }

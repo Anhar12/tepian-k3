@@ -282,7 +282,7 @@ export const userCompanies = createTable(
     }).notNull(),
     email: varchar("email", { length: 250 }).notNull(),
     wlkpStatus: boolean("wlkp_status").notNull().default(false),
-    wlkp: text("wlkp").notNull(),
+    wlkp: text("wlkp"),
     ...createRequiredFileUrlColumn("companyPicture"),
     ...timestamps,
   },
@@ -899,8 +899,13 @@ export const worksheets = createTable(
     orderId: uuid("order_id")
       .notNull()
       .references(() => order.id, { onDelete: "cascade" }),
-
     status: worksheetStatusEnum("status").notNull().default("draft"),
+    estimatedAmountOfMembers: integer("estimated_amount_of_members")
+      .notNull()
+      .default(0),
+    estimatedAmountOfDays: integer("estimated_amount_of_days")
+      .notNull()
+      .default(0),
     startDate: timestamp("start_date", {
       withTimezone: true,
       mode: "string",
@@ -965,7 +970,6 @@ export const worksheetItems = createTable(
       .notNull()
       .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
-    value: real("value"),
     note: text("note"),
     isReady: boolean("is_ready").notNull().default(false),
     ...timestamps,
@@ -991,6 +995,7 @@ export const worksheetTools = createTable(
     toolId: uuid("tool_id")
       .notNull()
       .references(() => tools.id, { onDelete: "cascade" }),
+    toolNeeded: integer("tool_needed").notNull().default(0),
     ...timestamps,
   },
   (table) => [
@@ -1583,5 +1588,49 @@ export const surveyFeedback = createTable(
   (table) => [
     index("survey_feedback_id_idx").using("btree", table.id),
     index("survey_feedback_order_id_idx").using("btree", table.orderId),
+  ],
+);
+
+export const banners = createTable(
+  "banners",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    ...createRequiredFileUrlColumn("banner"),
+    title: varchar("title", { length: 255 }).notNull(),
+    order: integer("order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    index("banner_id_idx").using("btree", table.id),
+    index("banner_order_idx").using("btree", table.order),
+    index("banner_is_active_idx").using("btree", table.isActive),
+  ],
+);
+
+export const news = createTable(
+  "news",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    ...createRequiredFileUrlColumn("image"),
+    title: varchar("title", { length: 255 }).notNull(),
+    content: text("content").notNull(),
+    isPublished: boolean("is_published").notNull().default(false),
+    publishedAt: timestamp("published_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index("news_id_idx").using("btree", table.id),
+    index("news_is_published_idx").using("btree", table.isPublished),
+    index("news_published_at_idx").using("btree", table.publishedAt),
   ],
 );

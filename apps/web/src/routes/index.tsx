@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import GridBackground from "@/components/grid-background";
 import LandingNavbar from "@/components/navbar";
 import {
@@ -28,7 +29,18 @@ import {
   type LinkProps,
 } from "@tanstack/react-router";
 import { useSubscription } from "@trpc/tanstack-react-query";
-import { AlarmClock, ArrowRight, Mail, PhoneCall } from "lucide-react";
+import {
+  AlarmClock,
+  ArrowRight,
+  Calendar,
+  Mail,
+  PhoneCall,
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getPublicUrl } from "@/utils/url";
+import Autoplay from "embla-carousel-autoplay";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
@@ -65,6 +77,14 @@ const pusatLayananItems: {
 
 function HomeComponent() {
   const navigate = useNavigate();
+
+  const { data: banners, isLoading: isBannersLoading } = useQuery(
+    trpc.banner.getAllBanners.queryOptions(),
+  );
+
+  const { data: news, isLoading: isNewsLoading } = useQuery(
+    trpc.news.getFirst5News.queryOptions(),
+  );
 
   useSubscription({
     ...trpc.event.onBroadcastTest.subscriptionOptions(),
@@ -210,51 +230,150 @@ function HomeComponent() {
         <div className="flex flex-col gap-4">
           {/* Infographic Card */}
           <div className="relative z-10 flex w-full items-center justify-center">
-            <Carousel className="w-full">
-              <CarouselContent>
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <CarouselItem key={index}>
-                    <div className="p-1">
-                      <Card className="h-96 w-full rounded-2xl">
-                        <CardContent className="flex h-full flex-col items-center justify-center">
-                          <span className="text-4xl font-semibold">
-                            {index + 1}
-                          </span>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="absolute top-1/2 left-0 ml-2 -translate-y-1/2 rounded-none border-0 bg-transparent p-2 shadow-none" />
-              <CarouselNext className="absolute top-1/2 right-0 mr-2 -translate-y-1/2 rounded-none border-0 bg-transparent p-2 shadow-none" />
-            </Carousel>
+            {isBannersLoading ? (
+              <div className="w-[calc(100%-9rem)]">
+                <Card className="h-96 w-full rounded-2xl">
+                  <CardContent className="flex h-full flex-col items-center justify-center p-6">
+                    <Skeleton className="h-full w-full rounded-lg" />
+                  </CardContent>
+                </Card>
+              </div>
+            ) : banners && banners.length > 0 ? (
+              <Carousel
+                className="w-[calc(100%-9rem)]"
+                opts={{
+                  loop: true,
+                }}
+                plugins={[
+                  Autoplay({
+                    delay: 4000,
+                  }),
+                ]}
+              >
+                <CarouselContent>
+                  {banners.map((banner) => (
+                    <CarouselItem key={banner.id}>
+                      <div className="p-1">
+                        <Card className="h-96 w-full rounded-2xl">
+                          <CardContent className="flex h-full flex-col items-center justify-center">
+                            <img
+                              src={getPublicUrl(banner.bannerUrl ?? "")}
+                              alt={banner.title}
+                              className="h-full w-full object-contain"
+                            />
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute top-1/2 left-0 ml-2 -translate-y-1/2 rounded-2xl border-0 bg-transparent p-2 shadow-none" />
+                <CarouselNext className="absolute top-1/2 right-0 mr-2 -translate-y-1/2 rounded-2xl border-0 bg-transparent p-2 shadow-none" />
+              </Carousel>
+            ) : (
+              <div className="w-[calc(100%-9rem)]">
+                <Card className="h-96 w-full rounded-2xl">
+                  <CardContent className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                    <p>No banners available</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
           {/* Small News Card */}
           <div className="relative z-10 flex flex-row flex-wrap items-center justify-center gap-6">
-            {[1, 2, 3].map((item) => (
-              <Card
-                key={item}
-                className="flex size-96 flex-col overflow-hidden rounded-4xl"
-              >
-                <CardHeader>
-                  <img
-                    src="/assets/info-k3.jpg"
-                    alt="Informasi K3"
-                    className="h-32 w-full object-contain"
-                  />
-                </CardHeader>
-                <CardFooter className="flex flex-row items-center">
-                  <a
-                    href="#"
-                    className="w-full text-center text-lg font-semibold text-primary"
-                  >
-                    Informasi K3 #{item}
-                  </a>
-                </CardFooter>
-              </Card>
-            ))}
+            {isNewsLoading ? (
+              // News Skeleton
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card
+                  key={i}
+                  className="flex h-96 w-80 flex-col overflow-hidden rounded-4xl"
+                >
+                  <CardHeader className="p-0">
+                    <Skeleton className="h-40 w-full rounded-none" />
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col gap-2 p-4">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="mt-2 h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0">
+                    <Skeleton className="h-4 w-32" />
+                  </CardFooter>
+                </Card>
+              ))
+            ) : news && news.length > 0 ? (
+              news.slice(0, 3).map((newsItem) => (
+                <Card
+                  key={newsItem.id}
+                  className="group flex h-96 w-80 cursor-pointer flex-col overflow-hidden rounded-4xl transition-shadow hover:shadow-lg"
+                  onClick={() =>
+                    navigate({
+                      to: "/berita/$newsId",
+                      params: { newsId: newsItem.id },
+                    })
+                  }
+                >
+                  <CardHeader className="p-0">
+                    <div className="h-40 w-full overflow-hidden">
+                      <img
+                        src={getPublicUrl(newsItem.imageUrl ?? "")}
+                        alt={newsItem.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col gap-2 p-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="size-4" />
+                      <span>
+                        {newsItem.publishedAt
+                          ? format(
+                              new Date(newsItem.publishedAt),
+                              "dd MMM yyyy",
+                              {
+                                locale: idLocale,
+                              },
+                            )
+                          : "-"}
+                      </span>
+                    </div>
+                    <h3 className="line-clamp-2 text-lg font-semibold text-primary group-hover:underline">
+                      {newsItem.title}
+                    </h3>
+                    <p className="line-clamp-2 flex-1 text-sm text-muted-foreground">
+                      {newsItem.content.replace(/<[^>]*>/g, "").slice(0, 100)}
+                      ...
+                    </p>
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0">
+                    <span className="text-sm font-medium text-primary">
+                      Baca selengkapnya →
+                    </span>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <div className="flex h-48 items-center justify-center">
+                <p className="text-muted-foreground">Belum ada berita</p>
+              </div>
+            )}
           </div>
+          {/* View All News Button */}
+          {news && news.length > 0 && (
+            <div className="relative z-10 mt-8 flex justify-center">
+              <Button
+                variant="outline"
+                className="rounded-3xl border-primary px-8 text-primary hover:bg-primary/10"
+                onClick={() => navigate({ to: "/berita" })}
+              >
+                Lihat Semua Berita
+                <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
