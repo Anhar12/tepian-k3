@@ -1610,3 +1610,27 @@ export const banners = createTable(
     index("banner_is_active_idx").using("btree", table.isActive),
   ],
 );
+
+export const news = createTable(
+  "news",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    ...createRequiredFileUrlColumn("image"),
+    title: varchar("title", { length: 255 }).notNull(),
+    content: text("content").notNull(),
+    isPublished: boolean("is_published").notNull().default(false),
+    publishedAt: timestamp("published_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index("news_id_idx").using("btree", table.id),
+    index("news_is_published_idx").using("btree", table.isPublished),
+    index("news_published_at_idx").using("btree", table.publishedAt),
+  ],
+);

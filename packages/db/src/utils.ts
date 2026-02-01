@@ -16,7 +16,7 @@ export const timestamps = {
     withTimezone: true,
     mode: "string",
   })
-    .$default(() => sql`CURRENT_TIMESTAMP`)
+    .defaultNow()
     .notNull(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,

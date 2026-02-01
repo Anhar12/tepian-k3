@@ -15,7 +15,9 @@ import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BeritaIndexRouteImport } from './routes/berita/index'
 import { Route as VerifyTokenRouteImport } from './routes/verify.$token'
+import { Route as BeritaNewsIdRouteImport } from './routes/berita/$newsId'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as corePdfEditorRouteImport } from './routes/(core)/pdf-editor'
@@ -53,6 +55,7 @@ import { Route as coreBackOfficePositionsIndexRouteImport } from './routes/(core
 import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
 import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './routes/(core)/back-office/parameter-categories/index'
 import { Route as coreBackOfficeOrdersIndexRouteImport } from './routes/(core)/back-office/orders/index'
+import { Route as coreBackOfficeNewsIndexRouteImport } from './routes/(core)/back-office/news/index'
 import { Route as coreBackOfficeKblisIndexRouteImport } from './routes/(core)/back-office/kblis/index'
 import { Route as coreBackOfficeEmployeesIndexRouteImport } from './routes/(core)/back-office/employees/index'
 import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)/back-office/clusters/index'
@@ -66,6 +69,7 @@ import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/b
 import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
 import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(core)/back-office/parameters/create'
 import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from './routes/(core)/back-office/parameter-categories/create'
+import { Route as coreBackOfficeNewsCreateRouteImport } from './routes/(core)/back-office/news/create'
 import { Route as coreBackOfficeKblisCreateRouteImport } from './routes/(core)/back-office/kblis/create'
 import { Route as coreBackOfficeEmployeesCreateRouteImport } from './routes/(core)/back-office/employees/create'
 import { Route as coreBackOfficeClustersCreateRouteImport } from './routes/(core)/back-office/clusters/create'
@@ -85,6 +89,7 @@ import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './r
 import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from './routes/(core)/back-office/parameters/$parameterId.detail'
 import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
 import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from './routes/(core)/back-office/orders/$orderId.detail'
+import { Route as coreBackOfficeNewsNewsIdEditRouteImport } from './routes/(core)/back-office/news/$newsId.edit'
 import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
 import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './routes/(core)/back-office/employees/$employeeId.edit'
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
@@ -123,9 +128,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BeritaIndexRoute = BeritaIndexRouteImport.update({
+  id: '/berita/',
+  path: '/berita/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyTokenRoute = VerifyTokenRouteImport.update({
   id: '/verify/$token',
   path: '/verify/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeritaNewsIdRoute = BeritaNewsIdRouteImport.update({
+  id: '/berita/$newsId',
+  path: '/berita/$newsId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const coreSettingsRoute = coreSettingsRouteImport.update({
@@ -327,6 +342,11 @@ const coreBackOfficeOrdersIndexRoute =
     path: '/orders/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeNewsIndexRoute = coreBackOfficeNewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => coreBackOfficeRouteRoute,
+} as any)
 const coreBackOfficeKblisIndexRoute =
   coreBackOfficeKblisIndexRouteImport.update({
     id: '/kblis/',
@@ -403,6 +423,12 @@ const coreBackOfficeParameterCategoriesCreateRoute =
   coreBackOfficeParameterCategoriesCreateRouteImport.update({
     id: '/parameter-categories/create',
     path: '/parameter-categories/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeNewsCreateRoute =
+  coreBackOfficeNewsCreateRouteImport.update({
+    id: '/news/create',
+    path: '/news/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeKblisCreateRoute =
@@ -519,6 +545,12 @@ const coreBackOfficeOrdersOrderIdDetailRoute =
     path: '/orders/$orderId/detail',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeNewsNewsIdEditRoute =
+  coreBackOfficeNewsNewsIdEditRouteImport.update({
+    id: '/news/$newsId/edit',
+    path: '/news/$newsId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeKblisKbliIdEditRoute =
   coreBackOfficeKblisKbliIdEditRouteImport.update({
     id: '/kblis/$kbliId/edit',
@@ -595,7 +627,9 @@ export interface FileRoutesByFullPath {
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/berita/$newsId': typeof BeritaNewsIdRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/berita': typeof BeritaIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -611,6 +645,7 @@ export interface FileRoutesByFullPath {
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
@@ -624,6 +659,7 @@ export interface FileRoutesByFullPath {
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/news': typeof coreBackOfficeNewsIndexRoute
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
@@ -640,6 +676,7 @@ export interface FileRoutesByFullPath {
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -676,7 +713,9 @@ export interface FileRoutesByTo {
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
+  '/berita/$newsId': typeof BeritaNewsIdRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/berita': typeof BeritaIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -692,6 +731,7 @@ export interface FileRoutesByTo {
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
@@ -705,6 +745,7 @@ export interface FileRoutesByTo {
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
+  '/back-office/news': typeof coreBackOfficeNewsIndexRoute
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
   '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
@@ -721,6 +762,7 @@ export interface FileRoutesByTo {
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -764,7 +806,9 @@ export interface FileRoutesById {
   '/(core)/pdf-editor': typeof corePdfEditorRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
+  '/berita/$newsId': typeof BeritaNewsIdRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/berita/': typeof BeritaIndexRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
   '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
@@ -780,6 +824,7 @@ export interface FileRoutesById {
   '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/(core)/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/(core)/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/(core)/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
@@ -793,6 +838,7 @@ export interface FileRoutesById {
   '/(core)/back-office/clusters/': typeof coreBackOfficeClustersIndexRoute
   '/(core)/back-office/employees/': typeof coreBackOfficeEmployeesIndexRoute
   '/(core)/back-office/kblis/': typeof coreBackOfficeKblisIndexRoute
+  '/(core)/back-office/news/': typeof coreBackOfficeNewsIndexRoute
   '/(core)/back-office/orders/': typeof coreBackOfficeOrdersIndexRoute
   '/(core)/back-office/parameter-categories/': typeof coreBackOfficeParameterCategoriesIndexRoute
   '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
@@ -809,6 +855,7 @@ export interface FileRoutesById {
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/(core)/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/(core)/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/(core)/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -851,7 +898,9 @@ export interface FileRouteTypes {
     | '/pdf-editor'
     | '/profile'
     | '/settings'
+    | '/berita/$newsId'
     | '/verify/$token'
+    | '/berita'
     | '/pengujian/checkout'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
@@ -867,6 +916,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/create'
     | '/back-office/employees/create'
     | '/back-office/kblis/create'
+    | '/back-office/news/create'
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
@@ -880,6 +930,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters'
     | '/back-office/employees'
     | '/back-office/kblis'
+    | '/back-office/news'
     | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
@@ -896,6 +947,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
@@ -932,7 +984,9 @@ export interface FileRouteTypes {
     | '/pdf-editor'
     | '/profile'
     | '/settings'
+    | '/berita/$newsId'
     | '/verify/$token'
+    | '/berita'
     | '/pengujian/checkout'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
@@ -948,6 +1002,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/create'
     | '/back-office/employees/create'
     | '/back-office/kblis/create'
+    | '/back-office/news/create'
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
@@ -961,6 +1016,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters'
     | '/back-office/employees'
     | '/back-office/kblis'
+    | '/back-office/news'
     | '/back-office/orders'
     | '/back-office/parameter-categories'
     | '/back-office/parameters'
@@ -977,6 +1033,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
@@ -1019,7 +1076,9 @@ export interface FileRouteTypes {
     | '/(core)/pdf-editor'
     | '/(core)/profile'
     | '/(core)/settings'
+    | '/berita/$newsId'
     | '/verify/$token'
+    | '/berita/'
     | '/(core)/pengujian/checkout'
     | '/(core)/pengujian/status'
     | '/(core)/pengujian/survey-kepuasan'
@@ -1035,6 +1094,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/clusters/create'
     | '/(core)/back-office/employees/create'
     | '/(core)/back-office/kblis/create'
+    | '/(core)/back-office/news/create'
     | '/(core)/back-office/parameter-categories/create'
     | '/(core)/back-office/parameters/create'
     | '/(core)/back-office/positions/create'
@@ -1048,6 +1108,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/clusters/'
     | '/(core)/back-office/employees/'
     | '/(core)/back-office/kblis/'
+    | '/(core)/back-office/news/'
     | '/(core)/back-office/orders/'
     | '/(core)/back-office/parameter-categories/'
     | '/(core)/back-office/parameters/'
@@ -1064,6 +1125,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/employees/$employeeId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
+    | '/(core)/back-office/news/$newsId/edit'
     | '/(core)/back-office/orders/$orderId/detail'
     | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/(core)/back-office/parameters/$parameterId/detail'
@@ -1091,7 +1153,9 @@ export interface RootRouteChildren {
   KatalogRoute: typeof KatalogRoute
   TestRoute: typeof TestRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
+  BeritaNewsIdRoute: typeof BeritaNewsIdRoute
   VerifyTokenRoute: typeof VerifyTokenRoute
+  BeritaIndexRoute: typeof BeritaIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1138,11 +1202,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/berita/': {
+      id: '/berita/'
+      path: '/berita'
+      fullPath: '/berita'
+      preLoaderRoute: typeof BeritaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify/$token': {
       id: '/verify/$token'
       path: '/verify/$token'
       fullPath: '/verify/$token'
       preLoaderRoute: typeof VerifyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/berita/$newsId': {
+      id: '/berita/$newsId'
+      path: '/berita/$newsId'
+      fullPath: '/berita/$newsId'
+      preLoaderRoute: typeof BeritaNewsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)/settings': {
@@ -1404,6 +1482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeOrdersIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/news/': {
+      id: '/(core)/back-office/news/'
+      path: '/news'
+      fullPath: '/back-office/news'
+      preLoaderRoute: typeof coreBackOfficeNewsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/': {
       id: '/(core)/back-office/kblis/'
       path: '/kblis'
@@ -1493,6 +1578,13 @@ declare module '@tanstack/react-router' {
       path: '/parameter-categories/create'
       fullPath: '/back-office/parameter-categories/create'
       preLoaderRoute: typeof coreBackOfficeParameterCategoriesCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/news/create': {
+      id: '/(core)/back-office/news/create'
+      path: '/news/create'
+      fullPath: '/back-office/news/create'
+      preLoaderRoute: typeof coreBackOfficeNewsCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/kblis/create': {
@@ -1628,6 +1720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeOrdersOrderIdDetailRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/news/$newsId/edit': {
+      id: '/(core)/back-office/news/$newsId/edit'
+      path: '/news/$newsId/edit'
+      fullPath: '/back-office/news/$newsId/edit'
+      preLoaderRoute: typeof coreBackOfficeNewsNewsIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/$kbliId/edit': {
       id: '/(core)/back-office/kblis/$kbliId/edit'
       path: '/kblis/$kbliId/edit'
@@ -1721,6 +1820,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute
   coreBackOfficeEmployeesCreateRoute: typeof coreBackOfficeEmployeesCreateRoute
   coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute
+  coreBackOfficeNewsCreateRoute: typeof coreBackOfficeNewsCreateRoute
   coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
   coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute
   coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
@@ -1733,6 +1833,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute
   coreBackOfficeEmployeesIndexRoute: typeof coreBackOfficeEmployeesIndexRoute
   coreBackOfficeKblisIndexRoute: typeof coreBackOfficeKblisIndexRoute
+  coreBackOfficeNewsIndexRoute: typeof coreBackOfficeNewsIndexRoute
   coreBackOfficeOrdersIndexRoute: typeof coreBackOfficeOrdersIndexRoute
   coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute
   coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
@@ -1748,6 +1849,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeEmployeesEmployeeIdEditRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
+  coreBackOfficeNewsNewsIdEditRoute: typeof coreBackOfficeNewsNewsIdEditRoute
   coreBackOfficeOrdersOrderIdDetailRoute: typeof coreBackOfficeOrdersOrderIdDetailRoute
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute
@@ -1774,6 +1876,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeClustersCreateRoute: coreBackOfficeClustersCreateRoute,
   coreBackOfficeEmployeesCreateRoute: coreBackOfficeEmployeesCreateRoute,
   coreBackOfficeKblisCreateRoute: coreBackOfficeKblisCreateRoute,
+  coreBackOfficeNewsCreateRoute: coreBackOfficeNewsCreateRoute,
   coreBackOfficeParameterCategoriesCreateRoute:
     coreBackOfficeParameterCategoriesCreateRoute,
   coreBackOfficeParametersCreateRoute: coreBackOfficeParametersCreateRoute,
@@ -1789,6 +1892,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeClustersIndexRoute: coreBackOfficeClustersIndexRoute,
   coreBackOfficeEmployeesIndexRoute: coreBackOfficeEmployeesIndexRoute,
   coreBackOfficeKblisIndexRoute: coreBackOfficeKblisIndexRoute,
+  coreBackOfficeNewsIndexRoute: coreBackOfficeNewsIndexRoute,
   coreBackOfficeOrdersIndexRoute: coreBackOfficeOrdersIndexRoute,
   coreBackOfficeParameterCategoriesIndexRoute:
     coreBackOfficeParameterCategoriesIndexRoute,
@@ -1810,6 +1914,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeEmployeesEmployeeIdEditRoute:
     coreBackOfficeEmployeesEmployeeIdEditRoute,
   coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
+  coreBackOfficeNewsNewsIdEditRoute: coreBackOfficeNewsNewsIdEditRoute,
   coreBackOfficeOrdersOrderIdDetailRoute:
     coreBackOfficeOrdersOrderIdDetailRoute,
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute:
@@ -1936,7 +2041,9 @@ const rootRouteChildren: RootRouteChildren = {
   KatalogRoute: KatalogRoute,
   TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
+  BeritaNewsIdRoute: BeritaNewsIdRoute,
   VerifyTokenRoute: VerifyTokenRoute,
+  BeritaIndexRoute: BeritaIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
