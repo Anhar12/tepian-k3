@@ -36,6 +36,7 @@ import { LoaderCircle, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 export const Route = createFileRoute(
   "/(core)/dashboard/company/$companyId/edit",
@@ -170,7 +171,7 @@ function RouteComponent() {
               <div className="flex justify-start">
                 {company.companyPictureUrl ? (
                   // If company has a logo, display it
-                  <img
+                  <ImageWithFallback
                     src={company.companyPictureUrl}
                     alt="Logo Perusahaan"
                     className="h-32 w-32 rounded-lg object-cover"

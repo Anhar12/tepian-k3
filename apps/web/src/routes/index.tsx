@@ -107,7 +107,7 @@ function HomeComponent() {
       >
         {/* Background Image/SVG */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <img
+          <ImageWithFallback
             src="/assets/hero-banner.jpg"
             className="h-full w-full object-fill"
           />
@@ -167,7 +167,7 @@ function HomeComponent() {
               onClick={() => navigate({ to: item.to })}
             >
               <CardHeader>
-                <img
+                <ImageWithFallback
                   src={item.imageSrc}
                   alt={item.title}
                   className="h-40 w-full object-contain"
@@ -189,7 +189,7 @@ function HomeComponent() {
         id="profile"
       >
         {/* Logo */}
-        <img
+        <ImageWithFallback
           src="/assets/logo-balai-k3.png"
           alt="Balai Tepian K3 Logo"
           className="mx-auto w-64 object-contain"
@@ -450,7 +450,7 @@ function HomeComponent() {
         id="stakeholder"
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">
-          <img
+          <ImageWithFallback
             src="/assets/stakeholder-tepian-k3.png"
             alt="Tepian K3 Stakeholder Logos"
             className="h-32 w-96 self-end object-contain"

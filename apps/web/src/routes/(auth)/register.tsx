@@ -1,5 +1,6 @@
 import { RegisterForm } from "@/components/register-form";
 import { createFileRoute } from "@tanstack/react-router";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 const BannerImage = "/assets/banner-auth.png";
 
@@ -11,7 +12,7 @@ function RouteComponent() {
   return (
     <div className="grid min-h-svh bg-[#F4F4F4] font-['Inter'] lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-[#F4F4F4] lg:block">
-        <img
+        <ImageWithFallback
           src={BannerImage}
           alt="Register Banner"
           className="absolute inset-0 h-full w-full object-cover object-center"

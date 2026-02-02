@@ -13,6 +13,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { toFormData } from "@/utils/form-data-mapper";
 import { Loader2 } from "lucide-react";
+import ImageWithFallback from "../image-with-fallback";
 
 interface QRCodeElement {
   id: string;
@@ -534,7 +535,7 @@ export default function PDFQRCodeEditor() {
                                   <div className="cursor-move text-gray-400">
                                     ⋮⋮
                                   </div>
-                                  <img
+                                  <ImageWithFallback
                                     src={qr.dataUrl}
                                     alt="QR Code"
                                     className="h-8 w-8"
@@ -665,7 +666,7 @@ export default function PDFQRCodeEditor() {
                         setSelectedQRId(qr.id);
                       }}
                     >
-                      <img
+                      <ImageWithFallback
                         src={qr.dataUrl}
                         alt="QR Code"
                         className="pointer-events-none h-full w-full select-none"

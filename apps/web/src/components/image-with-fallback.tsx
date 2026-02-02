@@ -1,6 +1,7 @@
 import { useState, type ImgHTMLAttributes } from "react";
 import { type LucideIcon, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ImageWithFallbackProps extends Omit<
   ImgHTMLAttributes<HTMLImageElement>,
@@ -28,14 +29,7 @@ export default function ImageWithFallback({
   return (
     <div className={cn("relative inline-block", className)}>
       {loading && !error && (
-        <div
-          className={cn(
-            "absolute inset-0 flex items-center justify-center rounded bg-gray-100",
-            loaderClassName,
-          )}
-        >
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-500" />
-        </div>
+        <Skeleton className={cn("absolute inset-0 rounded", loaderClassName)} />
       )}
 
       {error ? (

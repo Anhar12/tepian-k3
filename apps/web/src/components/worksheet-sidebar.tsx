@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import {
-  Building2,
   Calendar,
   ClipboardList,
   Home,
@@ -27,10 +26,10 @@ import { useQuery } from "@tanstack/react-query";
 import {
   WORKSHEET_STATUS_COLORS,
   WORKSHEET_STATUS_LABELS,
-  type WorksheetStatus,
 } from "@tepian-k3/constants";
 import { getPublicUrl } from "@/utils/url";
 import { format } from "date-fns";
+import ImageWithFallback from "./image-with-fallback";
 
 const routeApi = getRouteApi("/(core)/worksheets");
 
@@ -59,7 +58,7 @@ export function WorksheetSidebar({
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="#" className="flex flex-row items-center justify-start">
-                <img
+                <ImageWithFallback
                   src="/assets/tepian-k3.png"
                   alt="Tepian K3 Logo"
                   className="size-6"
@@ -80,7 +79,7 @@ export function WorksheetSidebar({
             {/* Company Picture */}
             <div className="flex justify-center">
               <div className="flex size-32 items-center justify-center rounded-lg bg-muted">
-                <img
+                <ImageWithFallback
                   src={getPublicUrl(company?.companyPictureUrl || "")}
                   alt="Company"
                   className="size-32 rounded-lg object-cover"

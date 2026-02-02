@@ -1,23 +1,11 @@
 import { trpc } from "@/utils/trpc";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useNavigate, type LinkProps } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import { Button } from "./ui/button";
 import { Bell, ShoppingCart } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { IconHome, IconLogout, IconUserCircle } from "@tabler/icons-react";
-import { ModeToggle } from "./mode-toggle";
 import { useCartSheetStore } from "@/stores/cart-sheet.stores";
-import { logout } from "@/lib/logout";
 import NavbarDropdown from "./navbar-dropdown";
+import ImageWithFallback from "./image-with-fallback";
 
 const navItems: {
   label: string;
@@ -29,8 +17,6 @@ const navItems: {
 ];
 
 export default function PengujianNavbar() {
-  const navigate = useNavigate();
-
   const setIsOpenCartSheet = useCartSheetStore((state) => state.setIsOpen);
 
   const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
@@ -42,15 +28,11 @@ export default function PengujianNavbar() {
 
   const isCartMoreThan99 = cartCount !== undefined && cartCount > 99;
 
-  function onLogout() {
-    logout();
-  }
-
   return (
     <nav className="sticky top-0 z-50 mx-auto flex h-16 max-h-16 min-h-16 w-full items-center justify-between bg-white/80 px-5 backdrop-blur-sm dark:bg-neutral-950/80">
       <a href="/" className="text-xl font-bold text-primary">
         {/* image */}
-        <img
+        <ImageWithFallback
           src="/assets/logo-tepiank3.png"
           alt="Tepian K3 Logo"
           className="w-44 object-contain"

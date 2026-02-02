@@ -3,7 +3,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,12 +16,12 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, CheckCircle2, Loader2, Mail } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import z from "zod";
-import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { auth } from "@/utils/auth";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 const validateEmailSchema = z.object({
   email: z.email().optional(),
@@ -162,7 +161,7 @@ function VerifyEmailComponent() {
   return (
     <div className="grid min-h-svh bg-[#F4F4F4] font-['Inter'] lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-[#F4F4F4] lg:block">
-        <img
+        <ImageWithFallback
           src={BannerImage}
           alt="Banner"
           className="absolute inset-0 h-full w-full object-cover object-center"

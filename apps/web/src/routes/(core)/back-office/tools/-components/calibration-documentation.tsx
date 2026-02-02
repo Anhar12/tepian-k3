@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "@tanstack/react-router";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 interface CalibrationDocumentationProps {
   calibrationId: string;
@@ -129,7 +130,7 @@ export function CalibrationDocumentation({
                   <CarouselContent>
                     {calibration.map((item, index) => (
                       <CarouselItem key={index} className="basis-1/3">
-                        <img
+                        <ImageWithFallback
                           data-testid={`calibration-documentation-image-${item.id}`}
                           src={getPublicUrl(item?.documentationFileUrl || "")}
                           alt={`Dokumentasi Kalibrasi ${index + 1}`}

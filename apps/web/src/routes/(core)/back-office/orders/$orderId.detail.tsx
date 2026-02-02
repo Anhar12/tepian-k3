@@ -54,6 +54,7 @@ import { getPublicUrl } from "@/utils/url";
 import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation";
 import useDialogs from "@/hooks/use-dialog";
 import z from "zod";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 // TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
 
@@ -1435,7 +1436,7 @@ function RouteComponent() {
                             </div>
                           </div>
                         ) : (
-                          <img
+                          <ImageWithFallback
                             src={getPublicUrl(
                               order.documents.find(
                                 (doc) => doc.type === "proof_of_payment",

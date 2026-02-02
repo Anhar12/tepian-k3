@@ -246,7 +246,7 @@ function NewsDetailPage() {
                 >
                   <CardHeader className="p-0">
                     <div className="h-40 w-full overflow-hidden">
-                      <img
+                      <ImageWithFallback
                         src={getPublicUrl(relatedItem.imageUrl ?? "")}
                         alt={relatedItem.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
