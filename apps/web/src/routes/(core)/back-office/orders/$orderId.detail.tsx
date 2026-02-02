@@ -490,12 +490,18 @@ function RouteComponent() {
   const hasCooperationAgreement = order.documents.some(
     (doc) => doc.type === "cooperation_agreement",
   );
+  const hasCooperationAgreementDocument = order.documents.some(
+    (doc) => doc.type === "cooperation_agreement",
+  );
   const hasCooperationAgreementUserDocument = order.documents.some(
     (doc) => doc.type === "cooperation_agreement_user",
   );
   const hasInvoice = order.documents.some((doc) => doc.type === "invoice");
   const hasBothDocuments =
-    hasOfferingLetter && hasInvoice && hasApprovalLetterUserDocument;
+    hasOfferingLetter &&
+    hasInvoice &&
+    hasApprovalLetterUserDocument &&
+    hasCooperationAgreementDocument;
 
   // Determine current workflow state
   const isPendingApproval = order.approvalStatus === "pending";
@@ -506,7 +512,7 @@ function RouteComponent() {
     !isRevisionRequested;
   const isAcceptingDocuments =
     order.approvalStatus === "approved" &&
-    order.status === "surat_persetujuan_diproses" &&
+    order.status === "persetujuan_disetujui" &&
     !isRevisionRequested;
   const isAwaitingPayment =
     order.approvalStatus === "approved" &&
@@ -514,7 +520,10 @@ function RouteComponent() {
     order.paymentStatus === "unpaid" &&
     !isRevisionRequested;
   const isPendingPaymentVerification =
+    hasInvoice &&
+    hasApprovalLetterUserDocument &&
     order.paymentStatus === "pending_verification";
+  const isPaymentVerified = order.paymentStatus === "paid";
   const isPaymentVerifiedNeedsTesting =
     order.paymentStatus === "paid" && !order.testing;
   const hasTestingCreated = !!order.testing;
@@ -1547,6 +1556,56 @@ function RouteComponent() {
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
                         Verifikasi Pembayaran
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {isPaymentVerified && hasWorksheet && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Buat Penjadwalan dan SPT</CardTitle>
+                  <CardDescription>
+                    Worksheet telah dibuat. Lihat detail worksheet dan buat
+                    penjadwalan serta SPT untuk memulai proses pengujian.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-muted-foreground">
+                        Nomor Worksheet
+                      </Label>
+                      <p className="font-medium">
+                        {worksheet.id.slice(0, 8).toUpperCase()}
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label className="text-muted-foreground">
+                        Status Worksheet
+                      </Label>
+                      <div>
+                        <Badge className="bg-purple-100 text-purple-800">
+                          {worksheet.status ?? "pending"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          navigate({
+                            to: "/worksheets/jadwal-personel",
+                            search: { worksheetId: worksheet!.id },
+                          })
+                        }
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Lihat Worksheet
                       </Button>
                     </div>
                   </div>

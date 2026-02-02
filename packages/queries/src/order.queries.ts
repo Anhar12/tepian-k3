@@ -464,7 +464,7 @@ const orderQueries = {
                 companyId: orderData.companyId,
                 orderNumber,
                 totalAmount: calculatedTotal,
-                status: "pending",
+                status: "kaji_ulang",
                 approvalStatus: "pending",
                 paymentStatus: "unpaid",
                 coverTransportationIncluded,
@@ -511,6 +511,17 @@ const orderQueries = {
                 "pending",
                 userId,
                 "Order created and is pending approval",
+              ),
+            );
+
+            // create order status history - kaji ulang
+            await Effect.runPromise(
+              orderStatusHistoryQueries.createOrderStatusHistory(
+                tx,
+                newOrder.id,
+                "kaji_ulang",
+                userId,
+                "Order is under review",
               ),
             );
 
@@ -563,7 +574,7 @@ const orderQueries = {
             where: and(
               eq(order.id, orderId),
               eq(order.userId, userId),
-              eq(order.status, "pending"),
+              eq(order.status, "penawaran_diterbitkan"),
             ),
           }),
         catch: (error) => {
@@ -680,7 +691,7 @@ const orderQueries = {
             where: and(
               eq(order.id, orderId),
               eq(order.userId, userId),
-              eq(order.status, "pending"),
+              eq(order.status, "penawaran_diterbitkan"),
             ),
           }),
         catch: (error) => {
@@ -798,6 +809,17 @@ const orderQueries = {
               .update(worksheets)
               .set({ status: "revision", updatedAt: new Date().toISOString() })
               .where(eq(worksheets.orderId, orderId));
+
+            // add status history
+            await Effect.runPromise(
+              orderStatusHistoryQueries.createOrderStatusHistory(
+                tx,
+                orderId,
+                "revision",
+                userId,
+                `Revision offered to customer. Note: ${revisionNote}`,
+              ),
+            );
 
             return updatedOrders;
           }),

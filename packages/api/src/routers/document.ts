@@ -16,12 +16,7 @@ import {
   pdfSigningService,
   type QRCodePosition,
 } from "@tepian-k3/services/pdf";
-import { db } from "@tepian-k3/db/client";
 import orderQueries from "@tepian-k3/queries/order.queries";
-import { eq } from "@tepian-k3/db";
-import { order } from "@tepian-k3/db/schema";
-import { TRPCError } from "@trpc/server";
-import { logError } from "@tepian-k3/services/logger";
 
 export const documentRouter = createTRPCRouter({
   /**
@@ -65,38 +60,43 @@ export const documentRouter = createTRPCRouter({
               uploadedByUserId: ctx.user.id,
             });
 
-            // Special handling: If uploading offering_document for an order in revision status,
-            // update order status back to pending
-            if (
-              ctx.input.data.entityType === "order" &&
-              ctx.input.data.type === "offering_document"
-            ) {
-              const currentOrder = yield* Effect.tryPromise({
-                try: () =>
-                  db.query.order.findFirst({
-                    where: eq(order.id, ctx.input.data.entityId),
-                  }),
-                catch: (error) => {
-                  logError(
-                    "documentRouter.uploadDocument",
-                    "Failed to fetch order data",
-                    {
-                      orderId: ctx.input.data.entityId,
-                      error,
-                    },
-                  );
-                  throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Gagal mengambil data pesanan",
-                  });
-                },
-              });
+            // Update order status based on uploaded document type
+            if (ctx.input.data.entityType === "order") {
+              const docType = ctx.input.data.type;
+              const orderId = ctx.input.data.entityId;
 
-              if (currentOrder?.status === "revision") {
+              if (docType === "offering_document") {
+                // Offering document uploaded → penawaran_diterbitkan
                 yield* orderQueries.updateOrderStatus(
-                  ctx.input.data.entityId,
-                  "pending",
+                  orderId,
+                  "penawaran_diterbitkan",
                 );
+              } else if (docType === "approval_letter") {
+                // Admin approval letter uploaded → persetujuan_disetujui
+                yield* orderQueries.updateOrderStatus(
+                  orderId,
+                  "persetujuan_disetujui",
+                );
+              } else if (
+                docType === "invoice" ||
+                docType === "cooperation_agreement"
+              ) {
+                // Check if both invoice and cooperation agreement now exist
+                const orderDocs = yield* documentQueries.getDocumentsByEntity(
+                  "order",
+                  orderId,
+                );
+                const hasInvoice = orderDocs.some((d) => d.type === "invoice");
+                const hasCooperationAgreement = orderDocs.some(
+                  (d) => d.type === "cooperation_agreement",
+                );
+
+                if (hasInvoice && hasCooperationAgreement) {
+                  yield* orderQueries.updateOrderStatus(
+                    orderId,
+                    "tagihan_diterbitkan",
+                  );
+                }
               }
             }
 

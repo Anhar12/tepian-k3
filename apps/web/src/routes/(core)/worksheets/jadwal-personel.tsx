@@ -54,7 +54,6 @@ import {
   type EmployeeStatus,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
-import { toast } from "sonner";
 import {
   format,
   startOfMonth,
@@ -80,8 +79,7 @@ import { id as localeId } from "date-fns/locale";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import { getPublicUrl } from "@/utils/url";
-
-// TODO: Make this page can be edited when status is verified approved and order is payed
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
@@ -194,15 +192,18 @@ function JadwalPersonilPage() {
   // Mutation to assign employees to worksheet
   const assignEmployeesMutation = useMutation(
     trpc.worksheet.assignEmployees.mutationOptions({
-      onSuccess: () => {
-        toast.success("Personil dan jadwal berhasil disimpan");
-        queryClient.invalidateQueries({
-          queryKey: trpc.worksheet.getWorksheetById.queryKey({ worksheetId }),
-        });
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+        );
+        await queryClient.invalidateQueries(
+          trpc.worksheet.getWorksheetsForSchedule.queryOptions(),
+        );
+        globalSuccessToast("Personil berhasil ditugaskan");
         resetDialogState();
       },
       onError: (error) => {
-        toast.error(error.message || "Gagal menugaskan personil");
+        globalErrorToast("Gagal menugaskan personil: " + error.message);
       },
     }),
   );
@@ -337,7 +338,7 @@ function JadwalPersonilPage() {
 
   const handleSaveAssignments = () => {
     if (selectedPersonnel.length === 0) {
-      toast.error("Pilih minimal 1 personil");
+      globalErrorToast("Pilih setidaknya satu personil untuk ditugaskan");
       return;
     }
 

@@ -13,6 +13,7 @@ import { logError } from "@tepian-k3/services/logger";
 import worksheetNoteQueries from "@tepian-k3/queries/worksheet-note.queries";
 import { EventTypes } from "@tepian-k3/schema/event.schema";
 import { handleTRPCError } from "@tepian-k3/utils/handle-trpc-error";
+import orderQueries from "@tepian-k3/queries/order.queries";
 
 export const worksheetRouter = createTRPCRouter({
   /**
@@ -343,11 +344,33 @@ export const worksheetRouter = createTRPCRouter({
             );
           }
 
+          // check worksheet status
+          if (worksheet.status !== "verified") {
+            return yield* Effect.fail(
+              new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Karyawan hanya dapat diassign ke worksheet dengan status 'verified'",
+              }),
+            );
+          }
+
+          // check order payment status
+          if (worksheet.order?.paymentStatus !== "paid") {
+            return yield* Effect.fail(
+              new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Karyawan hanya dapat diassign ke worksheet dengan status 'verified' dan order dengan status 'paid'",
+              }),
+            );
+          }
+
           // Assign employees in transaction
           const results = yield* Effect.tryPromise({
             try: () =>
               db.transaction(async (tx) => {
-                return await runEffect(
+                const assigned = await runEffect(
                   worksheetQueries.assignEmployeesToWorksheet(
                     tx,
                     input.worksheetId,
@@ -357,6 +380,21 @@ export const worksheetRouter = createTRPCRouter({
                     input.endDate,
                   ),
                 );
+
+                await Effect.runPromise(
+                  orderQueries.updateOrderStatus(
+                    worksheet.orderId,
+                    "menunggu_penerbitan_spt_jadwal",
+                  ),
+                );
+                await Effect.runPromise(
+                  orderQueries.updateOrderStatus(
+                    worksheet.orderId,
+                    "proses_pengambilan_sampel",
+                  ),
+                );
+
+                return assigned;
               }),
             catch: (error) => {
               logError(

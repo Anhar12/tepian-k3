@@ -274,6 +274,12 @@ export const orderRouter = createTRPCRouter({
               },
             });
 
+            // Update order status to 'persetujuan_disetujui'
+            yield* orderQueries.updateOrderStatus(
+              order.id,
+              "persetujuan_disetujui",
+            );
+
             return {
               documentId: document.id,
               url: storageService.getPublicUrl(uploadedFile.key),
@@ -392,6 +398,13 @@ export const orderRouter = createTRPCRouter({
                         ),
                       );
 
+                    // Update order status to 'proses_validasi_pembayaran'
+                    await Effect.runPromise(
+                      orderQueries.updateOrderStatus(
+                        order.id,
+                        "proses_validasi_pembayaran",
+                      ),
+                    );
                     // update order payment status to 'pending_verification'
                     await Effect.runPromise(
                       orderQueries.updatePaymentStatus(
@@ -584,10 +597,13 @@ export const orderRouter = createTRPCRouter({
               }),
             );
 
+            // update payment status to 'paid'
+            yield* orderQueries.updatePaymentStatus(order.id, "paid");
+
             // update order status to pembayaran_diterima
             yield* orderQueries.updateOrderStatus(
               order.id,
-              "pembayaran_diterima",
+              "menunggu_penerbitan_spt_jadwal",
             );
 
             return order;
