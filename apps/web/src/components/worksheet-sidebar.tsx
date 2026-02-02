@@ -13,7 +13,6 @@ import {
   Calendar,
   ClipboardList,
   Home,
-  Loader2,
   Mail,
   MapPin,
   PhoneCall,
@@ -30,6 +29,7 @@ import {
 import { getPublicUrl } from "@/utils/url";
 import { format } from "date-fns";
 import ImageWithFallback from "./image-with-fallback";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const routeApi = getRouteApi("/(core)/worksheets");
 
@@ -71,8 +71,25 @@ export function WorksheetSidebar({
       </SidebarHeader>
       <SidebarContent className="p-4">
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="mx-auto flex flex-col gap-6">
+            <div className="flex justify-center">
+              <Skeleton className="size-32 rounded-lg" />
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+            <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
           </div>
         ) : worksheet ? (
           <div className="mx-auto flex flex-col gap-6">

@@ -1,6 +1,7 @@
 import { Activity } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,28 @@ export function WorksheetHeaderCard({
                 </span>
               </Button>
             ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function WorksheetHeaderCardSkeleton() {
+  return (
+    <Card className="w-full overflow-hidden border-0 bg-linear-to-r from-primary/5 via-primary/10 to-primary/5">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-12 w-12 rounded-2xl sm:h-14 sm:w-14" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-40 sm:h-6" />
+              <Skeleton className="h-3 w-56 sm:h-4" />
+            </div>
+          </div>
+          <div className="flex gap-2 sm:gap-3">
+            <Skeleton className="h-9 w-20" />
+            <Skeleton className="h-9 w-20" />
           </div>
         </div>
       </CardContent>

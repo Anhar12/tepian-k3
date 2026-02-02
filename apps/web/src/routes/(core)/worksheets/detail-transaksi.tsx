@@ -1,4 +1,7 @@
-import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
+import {
+  WorksheetHeaderCard,
+  WorksheetHeaderCardSkeleton,
+} from "@/components/worksheet-header-card";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
@@ -434,26 +437,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <WorksheetHeaderCard
-          title="Detail Transaksi"
-          subtitle="Rincian biaya parameter dan operasional pengujian"
-          actionButton={[
-            {
-              label: "Simpan",
-              icon: <Save />,
-              variant: "default",
-              size: "default",
-              onClick: () => {},
-            },
-            {
-              label: "Cetak",
-              icon: <Printer />,
-              variant: "outline",
-              size: "default",
-              onClick: () => {},
-            },
-          ]}
-        />
+        <WorksheetHeaderCardSkeleton />
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-48" />

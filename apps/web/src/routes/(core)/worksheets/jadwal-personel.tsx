@@ -38,8 +38,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
+import {
+  WorksheetHeaderCard,
+  WorksheetHeaderCardSkeleton,
+} from "@/components/worksheet-header-card";
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { trpc } from "@/utils/trpc";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -664,8 +668,51 @@ function JadwalPersonilPage() {
 
   if (worksheetLoading || employeesLoading || allWorksheetsLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <WorksheetHeaderCardSkeleton />
+        </div>
+        <div className="flex flex-col gap-4 lg:flex-row">
+          <div className="flex-1">
+            <Card>
+              <CardContent className="p-4">
+                <div className="mb-4 flex items-center justify-between">
+                  <Skeleton className="h-6 w-32" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-24" />
+                    <Skeleton className="h-9 w-48" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <Skeleton key={`h-${i}`} className="h-8 w-full" />
+                  ))}
+                  {Array.from({ length: 35 }).map((_, i) => (
+                    <Skeleton key={i} className="h-24 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="w-full shrink-0 space-y-4 lg:w-80">
+            <Card>
+              <CardContent className="space-y-3 p-4">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="space-y-3 p-4">
+                <Skeleton className="h-5 w-40" />
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 w-full rounded-lg" />
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
