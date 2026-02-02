@@ -1,5 +1,6 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
+import tepian from "./packages/config/eslint-plugin-tepian/index.js";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -25,6 +26,15 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-empty-object-type": "off",
+    },
+  },
+  {
+    files: ["apps/web/**/*.{ts,tsx}"],
+    plugins: {
+      tepian,
+    },
+    rules: {
+      "tepian/no-img-element": "error",
     },
   },
 );

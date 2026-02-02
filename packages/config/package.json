@@ -1,5 +1,6 @@
 {
   "name": "@tepian-k3/config",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "type": "module"
 }
