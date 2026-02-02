@@ -41,6 +41,7 @@ import { getPublicUrl } from "@/utils/url";
 import Autoplay from "embla-carousel-autoplay";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
@@ -256,10 +257,11 @@ function HomeComponent() {
                       <div className="p-1">
                         <Card className="h-96 w-full rounded-2xl">
                           <CardContent className="flex h-full flex-col items-center justify-center">
-                            <img
+                            <ImageWithFallback
                               src={getPublicUrl(banner.bannerUrl ?? "")}
                               alt={banner.title}
                               className="h-full w-full object-contain"
+                              fallbackClassName="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400"
                             />
                           </CardContent>
                         </Card>
@@ -318,7 +320,7 @@ function HomeComponent() {
                 >
                   <CardHeader className="p-0">
                     <div className="h-40 w-full overflow-hidden">
-                      <img
+                      <ImageWithFallback
                         src={getPublicUrl(newsItem.imageUrl ?? "")}
                         alt={newsItem.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"

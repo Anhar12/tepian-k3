@@ -17,6 +17,7 @@ import { id as idLocale } from "date-fns/locale";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { News } from "@tepian-k3/types/news.types";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 export const Route = createFileRoute("/berita/")({
   component: NewsListPage,
@@ -37,10 +38,11 @@ function NewsCard({ news }: { news: News }) {
     >
       <CardHeader className="p-0">
         <div className="h-48 w-full overflow-hidden">
-          <img
+          <ImageWithFallback
             src={getPublicUrl(news.imageUrl ?? "")}
             alt={news.title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fallbackClassName="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400"
           />
         </div>
       </CardHeader>
@@ -113,16 +115,18 @@ function NewsListPage() {
   );
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="relative flex h-64 flex-col items-center justify-center bg-primary px-10 text-center">
+      <section className="relative flex h-64 flex-col items-center justify-center bg-primary px-4 text-center sm:px-6 md:px-10">
         <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-20">
           <GridBackground />
         </div>
         <div className="relative z-10">
-          <h1 className="text-5xl font-bold text-primary-foreground">Berita</h1>
+          <h1 className="text-3xl font-bold text-primary-foreground md:text-5xl">
+            Berita
+          </h1>
           <p className="mt-4 text-lg text-primary-foreground/80">
             Informasi terbaru seputar Keselamatan & Kesehatan Kerja
           </p>
@@ -130,7 +134,7 @@ function NewsListPage() {
       </section>
 
       {/* Back Button */}
-      <div className="container mx-auto px-10 pt-8">
+      <div className="container mx-auto px-4 pt-8 sm:px-6 md:px-10">
         <Button
           variant="ghost"
           className="gap-2 text-muted-foreground hover:text-foreground"
@@ -142,7 +146,7 @@ function NewsListPage() {
       </div>
 
       {/* News Grid Section */}
-      <section className="container mx-auto px-10 py-8">
+      <section className="container mx-auto px-4 py-8 sm:px-6 md:px-10">
         <InfiniteScrollGrid<News>
           queryResult={newsQuery}
           estimateRowHeight={420}
@@ -162,7 +166,7 @@ function NewsListPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative flex h-11 items-center justify-center bg-muted/50 px-10 py-4">
+      <footer className="relative mt-auto flex h-11 items-center justify-center bg-muted/50 px-4 py-4 sm:px-6 md:px-10">
         <p className="text-center text-sm font-normal text-foreground">
           &copy; 2025 Balai K3 Samarinda
         </p>
