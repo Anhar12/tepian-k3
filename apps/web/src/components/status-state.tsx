@@ -309,7 +309,7 @@ export function StatusState2({
 
 interface StatusState3Props {}
 
-export function StatusState3({}: StatusState3Props) {
+export function StatusState3() {
   return (
     <StateLayout>
       <div className="flex h-full flex-col items-center justify-center py-8">
@@ -619,7 +619,7 @@ export function StatusState5({
 
 interface StatusState6Props {}
 
-export function StatusState6({}: StatusState6Props) {
+export function StatusState6() {
   return (
     <StateLayout>
       <div className="flex flex-col items-center justify-center py-8">

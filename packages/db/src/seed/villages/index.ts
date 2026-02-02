@@ -58,22 +58,17 @@ const insertInBatches = async (data: InsertVillage[]) => {
 };
 
 async function seedVillages() {
-  try {
-    console.log("🌱 Starting village seeding...");
+  console.log("🌱 Starting village seeding...");
 
-    const villagesData = await generateVillages();
-    console.log(`📊 Total villages to seed: ${villagesData.length}`);
+  const villagesData = await generateVillages();
+  console.log(`📊 Total villages to seed: ${villagesData.length}`);
 
-    await db.delete(villages).execute();
-    console.log("🗑️  Cleared existing villages");
+  await db.delete(villages).execute();
+  console.log("🗑️  Cleared existing villages");
 
-    await insertInBatches(villagesData);
+  await insertInBatches(villagesData);
 
-    console.log("✅ Villages have been seeded successfully");
-  } catch (error) {
-    // console.error("❌ Error seeding villages:", error);
-    throw error;
-  }
+  console.log("✅ Villages have been seeded successfully");
 }
 
 export default seedVillages;

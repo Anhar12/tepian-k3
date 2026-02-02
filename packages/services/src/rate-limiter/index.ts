@@ -38,7 +38,7 @@ export class RateLimiterService {
     try {
       const redisConfig = {
         host: config?.host ?? env.MEMURAI_HOST ?? "localhost",
-        port: config?.port ?? Number(env.MEMURAI_PORT) ?? 6379,
+        port: config?.port ?? (Number(env.MEMURAI_PORT) || 6379),
         password: config?.password ?? env.MEMURAI_PASSWORD,
         db: config?.db ?? 0,
         retryStrategy: (times: number) => {

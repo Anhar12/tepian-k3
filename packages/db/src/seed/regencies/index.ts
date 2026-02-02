@@ -58,22 +58,17 @@ const insertInBatches = async (data: InsertRegency[]) => {
 };
 
 async function seedRegencies() {
-  try {
-    console.log("🌱 Starting regency seeding...");
+  console.log("🌱 Starting regency seeding...");
 
-    const regenciesData = await generateRegencies();
-    console.log(`📊 Total regencies to seed: ${regenciesData.length}`);
+  const regenciesData = await generateRegencies();
+  console.log(`📊 Total regencies to seed: ${regenciesData.length}`);
 
-    await db.delete(regencies).execute();
-    console.log("🗑️  Cleared existing regencies");
+  await db.delete(regencies).execute();
+  console.log("🗑️  Cleared existing regencies");
 
-    await insertInBatches(regenciesData);
+  await insertInBatches(regenciesData);
 
-    console.log("✅ Regencies have been seeded successfully");
-  } catch (error) {
-    // console.error("❌ Error seeding regencies:", error);
-    throw error;
-  }
+  console.log("✅ Regencies have been seeded successfully");
 }
 
 export default seedRegencies;

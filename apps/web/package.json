@@ -10,6 +10,7 @@
     "start": "pnpm with-env:prod vite",
     "prettier": "prettier --write .",
     "check-types": "tsc --noEmit",
+    "lint": "eslint .",
     "generate-pwa-assets": "pwa-assets-generator",
     "with-env:local": "dotenv -e ../../.env.local -e ../../.env --",
     "with-env:prod": "dotenv -e ../../.env.production -e ../../.env --"
@@ -50,6 +51,7 @@
     "@t3-oss/env-core": "^0.13.10",
     "@tabler/icons-react": "^3.36.0",
     "@tailwindcss/vite": "^4.0.15",
+    "@tanstack/eslint-plugin-router": "^1.155.0",
     "@tanstack/react-form": "^1.12.3",
     "@tanstack/react-pacer": "^0.19.1",
     "@tanstack/react-query": "^5.90.12",

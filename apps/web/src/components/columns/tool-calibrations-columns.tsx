@@ -15,7 +15,7 @@ interface ToolCalibrationColumnsProps {
   perPage: number;
 }
 
-function createActionCell(row: Row<ToolCalibration>) {
+function ActionCell(row: Row<ToolCalibration>) {
   const { toolId } = Route.useParams();
 
   const ActionCell = createCrudActionCell<
@@ -57,6 +57,6 @@ export default function getToolCalibrationColumns({
     createDateColumn<ToolCalibration>("updatedAt", "Diubah", {
       nullable: true,
     }),
-    createActionColumn<ToolCalibration>(({ row }) => createActionCell(row)),
+    createActionColumn<ToolCalibration>(({ row }) => ActionCell(row)),
   ];
 }
