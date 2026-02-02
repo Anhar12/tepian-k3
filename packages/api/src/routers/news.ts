@@ -31,20 +31,27 @@ export const newsRouter = createTRPCRouter({
         id: z.uuidv7(),
       }),
     )
-    .query(async ({ input }) => {
-      const newsItem = await runEffect(
-        newsQueries.getPublishedNewsById(input.id),
-      );
+    .query(
+      async ({ input }) =>
+        await withCache(
+          `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
+          CACHE_TTL.MEDIUM,
+          async () => {
+            const newsItem = await runEffect(
+              newsQueries.getPublishedNewsById(input.id),
+            );
 
-      if (!newsItem) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Berita tidak ditemukan",
-        });
-      }
+            if (!newsItem) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Berita tidak ditemukan",
+              });
+            }
 
-      return newsItem;
-    }),
+            return newsItem;
+          },
+        ),
+    ),
 
   getCursorPaginatedNews: withRateLimit(rateLimiters.moderate())
     .input(newsSchema.getCursorPaginatedNewsSchema)
@@ -136,7 +143,11 @@ export const newsRouter = createTRPCRouter({
     .mutation(
       async ({ ctx }) =>
         await withCacheInvalidation(
-          [CACHE_KEYS.NEWS_ALL, CACHE_KEYS.NEWS_FIRST_5],
+          [
+            CACHE_KEYS.NEWS_ALL,
+            CACHE_KEYS.NEWS_FIRST_5,
+            `${CACHE_KEYS.NEWS_PREFIX}${ctx.input.data.id}`,
+          ],
           () =>
             runEffect(
               Effect.gen(function* () {
@@ -189,7 +200,11 @@ export const newsRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await withCacheInvalidation(
-          [CACHE_KEYS.NEWS_ALL, CACHE_KEYS.NEWS_FIRST_5],
+          [
+            CACHE_KEYS.NEWS_ALL,
+            CACHE_KEYS.NEWS_FIRST_5,
+            `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
+          ],
           () => runEffect(newsQueries.deleteNews(input.id)),
         ),
     ),
@@ -203,7 +218,11 @@ export const newsRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await withCacheInvalidation(
-          [CACHE_KEYS.NEWS_ALL, CACHE_KEYS.NEWS_FIRST_5],
+          [
+            CACHE_KEYS.NEWS_ALL,
+            CACHE_KEYS.NEWS_FIRST_5,
+            `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
+          ],
           () => runEffect(newsQueries.restoreDeletedNews(input.id)),
         ),
     ),
