@@ -18,6 +18,7 @@ import {
 import type { BahanUnit, WorksheetStatus } from "@tepian-k3/constants";
 import { logCreate, logUpdate } from "./helpers/audit.helpers";
 import type { WorksheetNoteStatus } from "@tepian-k3/constants";
+import orderQueries from "./order.queries";
 
 const worksheetQueries = {
   /**
@@ -435,6 +436,11 @@ const worksheetQueries = {
               .insert(worksheetItems)
               .values(worksheetItemsData)
               .returning();
+
+            // Update order status to 'kaji_ulang' since worksheet is created
+            await Effect.runPromise(
+              orderQueries.updateOrderStatus(orderId, "kaji_ulang", tx),
+            );
 
             return {
               worksheet: newWorksheet,

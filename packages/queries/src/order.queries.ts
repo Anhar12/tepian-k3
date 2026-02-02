@@ -464,7 +464,7 @@ const orderQueries = {
                 companyId: orderData.companyId,
                 orderNumber,
                 totalAmount: calculatedTotal,
-                status: "kaji_ulang",
+                status: "pending",
                 approvalStatus: "pending",
                 paymentStatus: "unpaid",
                 coverTransportationIncluded,
@@ -511,17 +511,6 @@ const orderQueries = {
                 "pending",
                 userId,
                 "Order created and is pending approval",
-              ),
-            );
-
-            // create order status history - kaji ulang
-            await Effect.runPromise(
-              orderStatusHistoryQueries.createOrderStatusHistory(
-                tx,
-                newOrder.id,
-                "kaji_ulang",
-                userId,
-                "Order is under review",
               ),
             );
 
@@ -1249,11 +1238,11 @@ const orderQueries = {
    * Update order status
    * Used when admin completes revision and sends documents back to customer
    */
-  updateOrderStatus(orderId: string, status: OrderStatus) {
+  updateOrderStatus(orderId: string, status: OrderStatus, tx: DBorTx = db) {
     return Effect.gen(function* () {
       const [updatedOrder] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .update(order)
             .set({ status })
             .where(eq(order.id, orderId))
