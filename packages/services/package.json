@@ -35,6 +35,9 @@
     },
     "./cache": {
       "default": "./src/cache/index.ts"
+    },
+    "./queue": {
+      "default": "./src/queue/index.ts"
     }
   },
   "dependencies": {
@@ -43,6 +46,7 @@
     "@react-pdf/renderer": "^4.3.2",
     "@tepian-k3/constants": "workspace:*",
     "@trpc/server": "catalog:",
+    "bullmq": "^5.67.2",
     "clsx": "^2.1.1",
     "date-fns": "catalog:",
     "file-saver": "^2.0.5",
