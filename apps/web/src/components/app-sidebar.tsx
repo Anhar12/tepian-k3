@@ -48,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#" className="flex flex-row items-center justify-start">
                 <ImageWithFallback
-                  src="/assets/tepian-k3-icon.png"
+                  src="/assets/tepian-k3.png"
                   alt="Tepian K3 Icon"
                   className="size-6"
                 />
