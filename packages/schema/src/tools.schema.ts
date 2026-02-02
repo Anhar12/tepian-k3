@@ -1,7 +1,6 @@
 import { tools } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
-import { filterSchema } from "./filter.schema";
 import { TOOLS_CONDITIONS } from "@tepian-k3/constants";
 import { TOOLS_AVAILABILITY } from "@tepian-k3/constants";
 import { createPaginationSchema } from "./pagination.schema";

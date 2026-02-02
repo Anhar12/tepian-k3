@@ -62,7 +62,9 @@
       "Bash(npx eslint:*)",
       "Bash(pnpm lint:*)",
       "Bash(npx prettier:*)",
-      "Bash(pnpm remove:*)"
+      "Bash(pnpm remove:*)",
+      "Bash(for f in packages/utils/package.json packages/queries/package.json packages/schema/package.json packages/services/package.json packages/shared/package.json packages/types/package.json packages/db/package.json packages/constants/package.json packages/auth/package.json packages/api/package.json apps/web/package.json apps/server/package.json)",
+      "Bash(do sed -i 's/\"\"lint\"\": \"\"eslint \\\\.\"\"/\"\"lint\"\": \"\"eslint .\"\",\\\\n    \"\"lint:fix\"\": \"\"eslint . --fix\"\"/' \"$f\")"
     ]
   }
 }

@@ -12,7 +12,6 @@ import {
   type TRPCLink,
 } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
-import { toast } from "sonner";
 import { env } from "@/env";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import SuperJSON from "superjson";

@@ -2,7 +2,6 @@ import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  Check,
   Users,
   MapPin,
   Calendar,
@@ -11,7 +10,6 @@ import {
   Plus,
   Trash2,
   Loader2,
-  ChevronDown,
   AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

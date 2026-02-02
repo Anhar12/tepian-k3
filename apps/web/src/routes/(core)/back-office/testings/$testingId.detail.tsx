@@ -27,7 +27,6 @@ import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
-  Link,
   useNavigate,
   useRouter,
 } from "@tanstack/react-router";

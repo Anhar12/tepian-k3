@@ -8,11 +8,11 @@ import { TabsContent } from "@radix-ui/react-tabs";
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/detail",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "tools.read" }),
   params: z.object({
     toolId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "tools.read" }),
   component: RouteComponent,
 });
 

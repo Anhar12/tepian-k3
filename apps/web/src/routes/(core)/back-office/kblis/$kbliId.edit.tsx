@@ -26,11 +26,11 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/back-office/kblis/$kbliId/edit")({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "kbli.update" }),
   params: z.object({
     kbliId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "kbli.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.kbli.getKbliById.queryOptions({

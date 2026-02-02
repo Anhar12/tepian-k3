@@ -15,6 +15,12 @@
       "inputs": ["**/*.ts", "**/*.tsx", "eslint.config.js"],
       "outputs": []
     },
+    "lint:fix": {
+      "dependsOn": ["transit"],
+      "inputs": ["**/*.ts", "**/*.tsx", "eslint.config.js"],
+      "outputs": [],
+      "cache": false
+    },
     "check-types": {
       "dependsOn": ["transit"],
       "outputs": []

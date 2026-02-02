@@ -49,13 +49,13 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/parameter-categories/$parameterCategoriesId/edit",
 )({
+  params: z.object({
+    parameterCategoriesId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "parameter-categories.update",
     }),
-  params: z.object({
-    parameterCategoriesId: z.uuidv7(),
-  }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.parameterCategories.getParameterCategoryById.queryOptions({

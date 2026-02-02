@@ -34,13 +34,13 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/positions/$positionId/edit",
 )({
+  params: z.object({
+    positionId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "positions.update",
     }),
-  params: z.object({
-    positionId: z.uuidv7(),
-  }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.position.getPositionDetails.queryOptions({

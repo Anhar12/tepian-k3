@@ -5,7 +5,6 @@ import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
 import bannerSchema from "@tepian-k3/schema/banner.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useOptimisticMutation } from "@/lib/optimistic-update";
 import { trpc } from "@/utils/trpc";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import {

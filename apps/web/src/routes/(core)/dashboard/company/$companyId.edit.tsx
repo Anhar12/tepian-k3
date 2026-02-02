@@ -25,7 +25,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { toFormData } from "@/utils/form-data-mapper";
-import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";

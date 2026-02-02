@@ -9,6 +9,7 @@
     "compile": "bun with-env build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "pnpm with-env:local tsx watch src/index.ts",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "start": "pnpm with-env:prod node dist/index.mjs",
     "with-env:local": "dotenv -e ../../.env.local -e ../../.env --",
     "with-env:prod": "dotenv -e ../../.env.production -e ../../.env --"

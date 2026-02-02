@@ -30,11 +30,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 export const Route = createFileRoute(
   "/(core)/back-office/survey-questions/$questionId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "survey-questions.update" }),
   params: z.object({
     questionId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "survey-questions.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.survey.getQuestionById.queryOptions({

@@ -1,4 +1,4 @@
-import type { ColumnDef, Row } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import type { Tools } from "@tepian-k3/types/tools.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/tools";

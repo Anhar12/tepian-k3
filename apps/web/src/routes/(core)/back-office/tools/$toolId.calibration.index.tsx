@@ -9,14 +9,14 @@ import { TabsContent } from "@/components/ui/tabs";
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "tool-calibrations.view",
-    }),
   validateSearch: toolCalibrationSchema.getAllToolCalibrationsSchema,
   params: z.object({
     toolId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: "tool-calibrations.view",
+    }),
   component: RouteComponent,
 });
 

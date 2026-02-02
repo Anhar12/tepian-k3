@@ -6,6 +6,9 @@ import { Loader2 } from "lucide-react";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
+  validateSearch: z.object({
+    orderId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context, search }) => {
     // check if orderId exists
     if (!search.orderId) {
@@ -44,9 +47,6 @@ export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
 
     return;
   },
-  validateSearch: z.object({
-    orderId: z.uuidv7(),
-  }),
   component: RouteComponent,
 });
 

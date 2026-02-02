@@ -1,12 +1,4 @@
-import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconHome,
-  IconLogout,
-  IconNotification,
-  IconSettings,
-  IconUserCircle,
-} from "@tabler/icons-react";
+import { IconHome, IconLogout, IconSettings } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

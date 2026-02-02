@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { format } from "date-fns";
 import {

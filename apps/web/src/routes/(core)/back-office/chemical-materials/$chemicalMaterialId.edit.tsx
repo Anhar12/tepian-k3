@@ -56,13 +56,13 @@ import {
 export const Route = createFileRoute(
   "/(core)/back-office/chemical-materials/$chemicalMaterialId/edit",
 )({
+  params: z.object({
+    chemicalMaterialId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "chemical-materials.update",
     }),
-  params: z.object({
-    chemicalMaterialId: z.uuidv7(),
-  }),
   component: RouteComponent,
 });
 

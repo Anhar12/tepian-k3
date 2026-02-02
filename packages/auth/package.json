@@ -12,7 +12,8 @@
   "scripts": {
     "build": "tsc",
     "check-types": "tsc -b",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",

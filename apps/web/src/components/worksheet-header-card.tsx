@@ -1,4 +1,4 @@
-import { Activity, Download, Save } from "lucide-react";
+import { Activity } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { VariantProps } from "class-variance-authority";

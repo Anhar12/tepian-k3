@@ -13,7 +13,6 @@ import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconAlertCircle } from "@tabler/icons-react";
-import CreateParameterChemicalDialog from "./create-parameter-chemical-dialog";
 
 interface ParameterDetailProps {
   parameterId: string;

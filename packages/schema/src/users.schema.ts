@@ -3,7 +3,6 @@ import type { UsersWithoutFoto } from "@tepian-k3/types/users.types";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
 import { zfd } from "zod-form-data";
-import { filterSchema } from "./filter.schema";
 import { createPaginationSchema } from "./pagination.schema";
 
 const SORTABLE_USER_FIELDS = [

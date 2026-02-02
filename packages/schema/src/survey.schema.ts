@@ -1,7 +1,6 @@
 import { surveyQuestions } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
-import { filterSchema } from "./filter.schema";
 import { createPaginationSchema } from "./pagination.schema";
 
 // ==================== SURVEY QUESTION SCHEMAS (ADMIN) ====================

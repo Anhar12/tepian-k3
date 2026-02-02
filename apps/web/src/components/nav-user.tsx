@@ -1,9 +1,7 @@
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconHome,
   IconLogout,
-  IconNotification,
   IconSettings,
   IconUserCircle,
 } from "@tabler/icons-react";

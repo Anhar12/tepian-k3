@@ -41,7 +41,6 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useState } from "react";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient } from "@/utils/trpc";
 import { format } from "date-fns";

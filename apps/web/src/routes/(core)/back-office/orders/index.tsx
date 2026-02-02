@@ -2,7 +2,6 @@ import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import getOrdersColumns from "@/components/columns/orders-columns";
 import { useDataTable } from "@/hooks/use-data-table";

@@ -35,13 +35,13 @@ import useDialogs from "@/hooks/use-dialog";
 export const Route = createFileRoute(
   "/(core)/back-office/employees/$employeeId/edit",
 )({
+  params: z.object({
+    employeeId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "employees.update",
     }),
-  params: z.object({
-    employeeId: z.uuidv7(),
-  }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.employee.getEmployeeDetails.queryOptions({

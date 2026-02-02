@@ -2,14 +2,7 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import {
-  Building2,
-  ShieldCheck,
-  Headphones,
-  TestTube2,
-  Globe2,
-  AlertCircle,
-} from "lucide-react";
+import { Globe2, AlertCircle } from "lucide-react";
 import { createElement } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getClusterColor, getClusterIcon } from "@/lib/cluster-colors";

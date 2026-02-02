@@ -10,10 +10,6 @@ import { requirePermission } from "@/utils/require-permission";
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "tool-calibrations.view",
-    }),
   validateSearch: z.object({
     tabs: z.enum(["detail", "certificate", "documentation"]).default("detail"),
     modalId: z.uuidv7().optional(),
@@ -22,6 +18,10 @@ export const Route = createFileRoute(
     toolId: z.uuidv7(),
     calibrationId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: "tool-calibrations.view",
+    }),
   component: RouteComponent,
 });
 

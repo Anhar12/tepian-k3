@@ -6,7 +6,7 @@ import type { z } from "zod";
 import newsSchema from "@tepian-k3/schema/news.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/utils/trpc";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import {
   Card,

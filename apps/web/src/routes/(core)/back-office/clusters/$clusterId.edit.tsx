@@ -29,11 +29,11 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/clusters/$clusterId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "clusters.update" }),
   params: z.object({
     clusterId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "clusters.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.cluster.getClusterById.queryOptions({

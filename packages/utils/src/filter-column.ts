@@ -249,7 +249,6 @@ export function filterColumns<T extends Table>({
         return not(isEmpty(column));
 
       default:
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         throw new Error(`Unsupported operator: ${filter.operator}`);
     }
   });

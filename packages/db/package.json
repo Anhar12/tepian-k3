@@ -30,6 +30,7 @@
     "db:snapshot": "bash ./scripts/db-snapshot.sh",
     "db:restore": "bash ./scripts/db-restore.sh",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {

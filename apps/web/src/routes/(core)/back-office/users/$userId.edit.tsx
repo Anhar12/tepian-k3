@@ -53,13 +53,13 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/back-office/users/$userId/edit")({
+  params: z.object({
+    userId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: ["users.update", "roles.read"],
     }),
-  params: z.object({
-    userId: z.uuidv7(),
-  }),
   loader: async ({ params, context }) => {
     context.queryClient.ensureQueryData(
       context.trpc.user.getUserDetailWithRolesAndPermissions.queryOptions({

@@ -42,14 +42,14 @@ import { Spinner } from "@/components/ui/spinner";
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "tool-calibrations.update",
-    }),
   params: z.object({
     toolId: z.uuidv7(),
     calibrationId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: "tool-calibrations.update",
+    }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.tool.getToolCalibrationDetails.queryOptions({

@@ -26,11 +26,11 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/roles/$roleId/detail",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "roles.read" }),
   params: z.object({
     roleId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "roles.read" }),
   loader: async ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.role.getRoleWithPermissionsById.queryOptions({

@@ -41,6 +41,9 @@ import z from "zod";
 // TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
 
 export const Route = createFileRoute("/(core)/pengujian/status")({
+  validateSearch: z.object({
+    orderId: z.uuidv7(),
+  }),
   beforeLoad: async ({ search }) => {
     // check if orderId exists
     if (!search.orderId) {
@@ -49,9 +52,6 @@ export const Route = createFileRoute("/(core)/pengujian/status")({
       });
     }
   },
-  validateSearch: z.object({
-    orderId: z.uuidv7(),
-  }),
   component: RouteComponent,
 });
 

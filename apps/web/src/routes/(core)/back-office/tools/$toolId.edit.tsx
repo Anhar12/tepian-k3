@@ -40,11 +40,11 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/back-office/tools/$toolId/edit")({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "tools.update" }),
   params: z.object({
     toolId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "tools.update" }),
   loader: ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.tool.getToolDetails.queryOptions({

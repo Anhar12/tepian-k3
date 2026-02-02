@@ -2,7 +2,6 @@ import { positions } from "@tepian-k3/db/schema";
 import type { Positions } from "@tepian-k3/types/position.types";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
-import { filterSchema } from "./filter.schema";
 import { createPaginationSchema } from "./pagination.schema";
 
 const SORTABLE_POSITION_FIELDS = [
