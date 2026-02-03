@@ -8,1797 +8,1817 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
-import { Route as TestRouteImport } from './routes/test'
-import { Route as KatalogRouteImport } from './routes/katalog'
-import { Route as coreRouteRouteImport } from './routes/(core)/route'
-import { Route as authRouteRouteImport } from './routes/(auth)/route'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as BeritaIndexRouteImport } from './routes/berita/index'
-import { Route as VerifyTokenRouteImport } from './routes/verify.$token'
-import { Route as BeritaNewsIdRouteImport } from './routes/berita/$newsId'
-import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
-import { Route as coreProfileRouteImport } from './routes/(core)/profile'
-import { Route as corePdfEditorRouteImport } from './routes/(core)/pdf-editor'
-import { Route as coreDocumentRouteImport } from './routes/(core)/document'
-import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
-import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
-import { Route as authRegisterRouteImport } from './routes/(auth)/register'
-import { Route as authLoginRouteImport } from './routes/(auth)/login'
-import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as coreWorksheetsRouteRouteImport } from './routes/(core)/worksheets/route'
-import { Route as coreUjiKompetensiRouteRouteImport } from './routes/(core)/uji-kompetensi/route'
-import { Route as corePengujianRouteRouteImport } from './routes/(core)/pengujian/route'
-import { Route as corePelatihanRouteRouteImport } from './routes/(core)/pelatihan/route'
-import { Route as coreKonsultasiRouteRouteImport } from './routes/(core)/konsultasi/route'
-import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
-import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
-import { Route as coreWorksheetsIndexRouteImport } from './routes/(core)/worksheets/index'
-import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
-import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
-import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
-import { Route as coreWorksheetsJadwalPersonelRouteImport } from './routes/(core)/worksheets/jadwal-personel'
-import { Route as coreWorksheetsDetailTransaksiRouteImport } from './routes/(core)/worksheets/detail-transaksi'
-import { Route as corePengujianTransaksiRouteImport } from './routes/(core)/pengujian/transaksi'
-import { Route as corePengujianSurveyKepuasanRouteImport } from './routes/(core)/pengujian/survey-kepuasan'
-import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
-import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
-import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
-import { Route as coreBackOfficeWorksheetsIndexRouteImport } from './routes/(core)/back-office/worksheets/index'
-import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
-import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
-import { Route as coreBackOfficeTestingsIndexRouteImport } from './routes/(core)/back-office/testings/index'
-import { Route as coreBackOfficeSurveyQuestionsIndexRouteImport } from './routes/(core)/back-office/survey-questions/index'
-import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
-import { Route as coreBackOfficePositionsIndexRouteImport } from './routes/(core)/back-office/positions/index'
-import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
-import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './routes/(core)/back-office/parameter-categories/index'
-import { Route as coreBackOfficeOrdersIndexRouteImport } from './routes/(core)/back-office/orders/index'
-import { Route as coreBackOfficeNewsIndexRouteImport } from './routes/(core)/back-office/news/index'
-import { Route as coreBackOfficeKblisIndexRouteImport } from './routes/(core)/back-office/kblis/index'
-import { Route as coreBackOfficeEmployeesIndexRouteImport } from './routes/(core)/back-office/employees/index'
-import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)/back-office/clusters/index'
-import { Route as coreBackOfficeChemicalMaterialsIndexRouteImport } from './routes/(core)/back-office/chemical-materials/index'
-import { Route as coreBackOfficeBannersIndexRouteImport } from './routes/(core)/back-office/banners/index'
-import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
-import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
-import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
-import { Route as coreBackOfficeSurveyQuestionsCreateRouteImport } from './routes/(core)/back-office/survey-questions/create'
-import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/back-office/roles/create'
-import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
-import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(core)/back-office/parameters/create'
-import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from './routes/(core)/back-office/parameter-categories/create'
-import { Route as coreBackOfficeNewsCreateRouteImport } from './routes/(core)/back-office/news/create'
-import { Route as coreBackOfficeKblisCreateRouteImport } from './routes/(core)/back-office/kblis/create'
-import { Route as coreBackOfficeEmployeesCreateRouteImport } from './routes/(core)/back-office/employees/create'
-import { Route as coreBackOfficeClustersCreateRouteImport } from './routes/(core)/back-office/clusters/create'
-import { Route as coreBackOfficeChemicalMaterialsCreateRouteImport } from './routes/(core)/back-office/chemical-materials/create'
-import { Route as coreBackOfficeBannersCreateRouteImport } from './routes/(core)/back-office/banners/create'
-import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
-import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
-import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
-import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.edit'
-import { Route as coreBackOfficeToolsToolIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.detail'
-import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
-import { Route as coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport } from './routes/(core)/back-office/survey-questions/$questionId.edit'
-import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
-import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(core)/back-office/roles/$roleId.detail'
-import { Route as coreBackOfficePositionsPositionIdEditRouteImport } from './routes/(core)/back-office/positions/$positionId.edit'
-import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './routes/(core)/back-office/parameters/$parameterId.edit'
-import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from './routes/(core)/back-office/parameters/$parameterId.detail'
-import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
-import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from './routes/(core)/back-office/orders/$orderId.detail'
-import { Route as coreBackOfficeNewsNewsIdEditRouteImport } from './routes/(core)/back-office/news/$newsId.edit'
-import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
-import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './routes/(core)/back-office/employees/$employeeId.edit'
-import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
-import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport } from './routes/(core)/back-office/chemical-materials/$chemicalMaterialId.edit'
-import { Route as coreBackOfficeBannersBannerIdEditRouteImport } from './routes/(core)/back-office/banners/$bannerId.edit'
-import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.index'
-import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.create'
-import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit'
-import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.detail'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as UnauthorizedRouteImport } from "./routes/unauthorized";
+import { Route as TestRouteImport } from "./routes/test";
+import { Route as ProfilRouteImport } from "./routes/profil";
+import { Route as KatalogRouteImport } from "./routes/katalog";
+import { Route as coreRouteRouteImport } from "./routes/(core)/route";
+import { Route as authRouteRouteImport } from "./routes/(auth)/route";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as BeritaIndexRouteImport } from "./routes/berita/index";
+import { Route as VerifyTokenRouteImport } from "./routes/verify.$token";
+import { Route as BeritaNewsIdRouteImport } from "./routes/berita/$newsId";
+import { Route as coreSettingsRouteImport } from "./routes/(core)/settings";
+import { Route as coreProfileRouteImport } from "./routes/(core)/profile";
+import { Route as corePdfEditorRouteImport } from "./routes/(core)/pdf-editor";
+import { Route as coreDocumentRouteImport } from "./routes/(core)/document";
+import { Route as authVerifyEmailRouteImport } from "./routes/(auth)/verify-email";
+import { Route as authResetPasswordRouteImport } from "./routes/(auth)/reset-password";
+import { Route as authRegisterRouteImport } from "./routes/(auth)/register";
+import { Route as authLoginRouteImport } from "./routes/(auth)/login";
+import { Route as authForgotPasswordRouteImport } from "./routes/(auth)/forgot-password";
+import { Route as coreWorksheetsRouteRouteImport } from "./routes/(core)/worksheets/route";
+import { Route as coreUjiKompetensiRouteRouteImport } from "./routes/(core)/uji-kompetensi/route";
+import { Route as corePengujianRouteRouteImport } from "./routes/(core)/pengujian/route";
+import { Route as corePelatihanRouteRouteImport } from "./routes/(core)/pelatihan/route";
+import { Route as coreKonsultasiRouteRouteImport } from "./routes/(core)/konsultasi/route";
+import { Route as coreDashboardRouteRouteImport } from "./routes/(core)/dashboard/route";
+import { Route as coreBackOfficeRouteRouteImport } from "./routes/(core)/back-office/route";
+import { Route as coreWorksheetsIndexRouteImport } from "./routes/(core)/worksheets/index";
+import { Route as corePengujianIndexRouteImport } from "./routes/(core)/pengujian/index";
+import { Route as coreDashboardIndexRouteImport } from "./routes/(core)/dashboard/index";
+import { Route as coreBackOfficeIndexRouteImport } from "./routes/(core)/back-office/index";
+import { Route as coreWorksheetsJadwalPersonelRouteImport } from "./routes/(core)/worksheets/jadwal-personel";
+import { Route as coreWorksheetsDetailTransaksiRouteImport } from "./routes/(core)/worksheets/detail-transaksi";
+import { Route as corePengujianTransaksiRouteImport } from "./routes/(core)/pengujian/transaksi";
+import { Route as corePengujianSurveyKepuasanRouteImport } from "./routes/(core)/pengujian/survey-kepuasan";
+import { Route as corePengujianStatusRouteImport } from "./routes/(core)/pengujian/status";
+import { Route as corePengujianCheckoutRouteImport } from "./routes/(core)/pengujian/checkout";
+import { Route as coreDashboardCompanyIndexRouteImport } from "./routes/(core)/dashboard/company/index";
+import { Route as coreBackOfficeWorksheetsIndexRouteImport } from "./routes/(core)/back-office/worksheets/index";
+import { Route as coreBackOfficeUsersIndexRouteImport } from "./routes/(core)/back-office/users/index";
+import { Route as coreBackOfficeToolsIndexRouteImport } from "./routes/(core)/back-office/tools/index";
+import { Route as coreBackOfficeTestingsIndexRouteImport } from "./routes/(core)/back-office/testings/index";
+import { Route as coreBackOfficeSurveyQuestionsIndexRouteImport } from "./routes/(core)/back-office/survey-questions/index";
+import { Route as coreBackOfficeRolesIndexRouteImport } from "./routes/(core)/back-office/roles/index";
+import { Route as coreBackOfficePositionsIndexRouteImport } from "./routes/(core)/back-office/positions/index";
+import { Route as coreBackOfficeParametersIndexRouteImport } from "./routes/(core)/back-office/parameters/index";
+import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from "./routes/(core)/back-office/parameter-categories/index";
+import { Route as coreBackOfficeOrdersIndexRouteImport } from "./routes/(core)/back-office/orders/index";
+import { Route as coreBackOfficeNewsIndexRouteImport } from "./routes/(core)/back-office/news/index";
+import { Route as coreBackOfficeKblisIndexRouteImport } from "./routes/(core)/back-office/kblis/index";
+import { Route as coreBackOfficeEmployeesIndexRouteImport } from "./routes/(core)/back-office/employees/index";
+import { Route as coreBackOfficeClustersIndexRouteImport } from "./routes/(core)/back-office/clusters/index";
+import { Route as coreBackOfficeChemicalMaterialsIndexRouteImport } from "./routes/(core)/back-office/chemical-materials/index";
+import { Route as coreBackOfficeBannersIndexRouteImport } from "./routes/(core)/back-office/banners/index";
+import { Route as coreDashboardCompanyCreateRouteImport } from "./routes/(core)/dashboard/company/create";
+import { Route as coreBackOfficeUsersCreateRouteImport } from "./routes/(core)/back-office/users/create";
+import { Route as coreBackOfficeToolsCreateRouteImport } from "./routes/(core)/back-office/tools/create";
+import { Route as coreBackOfficeSurveyQuestionsCreateRouteImport } from "./routes/(core)/back-office/survey-questions/create";
+import { Route as coreBackOfficeRolesCreateRouteImport } from "./routes/(core)/back-office/roles/create";
+import { Route as coreBackOfficePositionsCreateRouteImport } from "./routes/(core)/back-office/positions/create";
+import { Route as coreBackOfficeParametersCreateRouteImport } from "./routes/(core)/back-office/parameters/create";
+import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from "./routes/(core)/back-office/parameter-categories/create";
+import { Route as coreBackOfficeNewsCreateRouteImport } from "./routes/(core)/back-office/news/create";
+import { Route as coreBackOfficeKblisCreateRouteImport } from "./routes/(core)/back-office/kblis/create";
+import { Route as coreBackOfficeEmployeesCreateRouteImport } from "./routes/(core)/back-office/employees/create";
+import { Route as coreBackOfficeClustersCreateRouteImport } from "./routes/(core)/back-office/clusters/create";
+import { Route as coreBackOfficeChemicalMaterialsCreateRouteImport } from "./routes/(core)/back-office/chemical-materials/create";
+import { Route as coreBackOfficeBannersCreateRouteImport } from "./routes/(core)/back-office/banners/create";
+import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from "./routes/(core)/dashboard/company/$companyId.edit";
+import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from "./routes/(core)/dashboard/company/$companyId.detail";
+import { Route as coreBackOfficeUsersUserIdEditRouteImport } from "./routes/(core)/back-office/users/$userId.edit";
+import { Route as coreBackOfficeToolsToolIdEditRouteImport } from "./routes/(core)/back-office/tools/$toolId.edit";
+import { Route as coreBackOfficeToolsToolIdDetailRouteImport } from "./routes/(core)/back-office/tools/$toolId.detail";
+import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from "./routes/(core)/back-office/testings/$testingId.detail";
+import { Route as coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport } from "./routes/(core)/back-office/survey-questions/$questionId.edit";
+import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from "./routes/(core)/back-office/roles/$roleId.edit";
+import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from "./routes/(core)/back-office/roles/$roleId.detail";
+import { Route as coreBackOfficePositionsPositionIdEditRouteImport } from "./routes/(core)/back-office/positions/$positionId.edit";
+import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from "./routes/(core)/back-office/parameters/$parameterId.edit";
+import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from "./routes/(core)/back-office/parameters/$parameterId.detail";
+import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from "./routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit";
+import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from "./routes/(core)/back-office/orders/$orderId.detail";
+import { Route as coreBackOfficeNewsNewsIdEditRouteImport } from "./routes/(core)/back-office/news/$newsId.edit";
+import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from "./routes/(core)/back-office/kblis/$kbliId.edit";
+import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from "./routes/(core)/back-office/employees/$employeeId.edit";
+import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from "./routes/(core)/back-office/clusters/$clusterId.edit";
+import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport } from "./routes/(core)/back-office/chemical-materials/$chemicalMaterialId.edit";
+import { Route as coreBackOfficeBannersBannerIdEditRouteImport } from "./routes/(core)/back-office/banners/$bannerId.edit";
+import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from "./routes/(core)/back-office/tools/$toolId.calibration.index";
+import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from "./routes/(core)/back-office/tools/$toolId.calibration.create";
+import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from "./routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit";
+import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport } from "./routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.detail";
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
-  id: '/unauthorized',
-  path: '/unauthorized',
+  id: "/unauthorized",
+  path: "/unauthorized",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const TestRoute = TestRouteImport.update({
-  id: '/test',
-  path: '/test',
+  id: "/test",
+  path: "/test",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
+const ProfilRoute = ProfilRouteImport.update({
+  id: "/profil",
+  path: "/profil",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const KatalogRoute = KatalogRouteImport.update({
-  id: '/katalog',
-  path: '/katalog',
+  id: "/katalog",
+  path: "/katalog",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const coreRouteRoute = coreRouteRouteImport.update({
-  id: '/(core)',
+  id: "/(core)",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const authRouteRoute = authRouteRouteImport.update({
-  id: '/(auth)',
+  id: "/(auth)",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const BeritaIndexRoute = BeritaIndexRouteImport.update({
-  id: '/berita/',
-  path: '/berita/',
+  id: "/berita/",
+  path: "/berita/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const VerifyTokenRoute = VerifyTokenRouteImport.update({
-  id: '/verify/$token',
-  path: '/verify/$token',
+  id: "/verify/$token",
+  path: "/verify/$token",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const BeritaNewsIdRoute = BeritaNewsIdRouteImport.update({
-  id: '/berita/$newsId',
-  path: '/berita/$newsId',
+  id: "/berita/$newsId",
+  path: "/berita/$newsId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const coreSettingsRoute = coreSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+  id: "/settings",
+  path: "/settings",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const coreProfileRoute = coreProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+  id: "/profile",
+  path: "/profile",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const corePdfEditorRoute = corePdfEditorRouteImport.update({
-  id: '/pdf-editor',
-  path: '/pdf-editor',
+  id: "/pdf-editor",
+  path: "/pdf-editor",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const coreDocumentRoute = coreDocumentRouteImport.update({
-  id: '/document',
-  path: '/document',
+  id: "/document",
+  path: "/document",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
-  id: '/verify-email',
-  path: '/verify-email',
+  id: "/verify-email",
+  path: "/verify-email",
   getParentRoute: () => authRouteRoute,
-} as any)
+} as any);
 const authResetPasswordRoute = authResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+  id: "/reset-password",
+  path: "/reset-password",
   getParentRoute: () => authRouteRoute,
-} as any)
+} as any);
 const authRegisterRoute = authRegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
+  id: "/register",
+  path: "/register",
   getParentRoute: () => authRouteRoute,
-} as any)
+} as any);
 const authLoginRoute = authLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+  id: "/login",
+  path: "/login",
   getParentRoute: () => authRouteRoute,
-} as any)
+} as any);
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
+  id: "/forgot-password",
+  path: "/forgot-password",
   getParentRoute: () => authRouteRoute,
-} as any)
+} as any);
 const coreWorksheetsRouteRoute = coreWorksheetsRouteRouteImport.update({
-  id: '/worksheets',
-  path: '/worksheets',
+  id: "/worksheets",
+  path: "/worksheets",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const coreUjiKompetensiRouteRoute = coreUjiKompetensiRouteRouteImport.update({
-  id: '/uji-kompetensi',
-  path: '/uji-kompetensi',
+  id: "/uji-kompetensi",
+  path: "/uji-kompetensi",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const corePengujianRouteRoute = corePengujianRouteRouteImport.update({
-  id: '/pengujian',
-  path: '/pengujian',
+  id: "/pengujian",
+  path: "/pengujian",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const corePelatihanRouteRoute = corePelatihanRouteRouteImport.update({
-  id: '/pelatihan',
-  path: '/pelatihan',
+  id: "/pelatihan",
+  path: "/pelatihan",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const coreKonsultasiRouteRoute = coreKonsultasiRouteRouteImport.update({
-  id: '/konsultasi',
-  path: '/konsultasi',
+  id: "/konsultasi",
+  path: "/konsultasi",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const coreDashboardRouteRoute = coreDashboardRouteRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: "/dashboard",
+  path: "/dashboard",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const coreBackOfficeRouteRoute = coreBackOfficeRouteRouteImport.update({
-  id: '/back-office',
-  path: '/back-office',
+  id: "/back-office",
+  path: "/back-office",
   getParentRoute: () => coreRouteRoute,
-} as any)
+} as any);
 const coreWorksheetsIndexRoute = coreWorksheetsIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => coreWorksheetsRouteRoute,
-} as any)
+} as any);
 const corePengujianIndexRoute = corePengujianIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => corePengujianRouteRoute,
-} as any)
+} as any);
 const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => coreDashboardRouteRoute,
-} as any)
+} as any);
 const coreBackOfficeIndexRoute = coreBackOfficeIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => coreBackOfficeRouteRoute,
-} as any)
+} as any);
 const coreWorksheetsJadwalPersonelRoute =
   coreWorksheetsJadwalPersonelRouteImport.update({
-    id: '/jadwal-personel',
-    path: '/jadwal-personel',
+    id: "/jadwal-personel",
+    path: "/jadwal-personel",
     getParentRoute: () => coreWorksheetsRouteRoute,
-  } as any)
+  } as any);
 const coreWorksheetsDetailTransaksiRoute =
   coreWorksheetsDetailTransaksiRouteImport.update({
-    id: '/detail-transaksi',
-    path: '/detail-transaksi',
+    id: "/detail-transaksi",
+    path: "/detail-transaksi",
     getParentRoute: () => coreWorksheetsRouteRoute,
-  } as any)
+  } as any);
 const corePengujianTransaksiRoute = corePengujianTransaksiRouteImport.update({
-  id: '/transaksi',
-  path: '/transaksi',
+  id: "/transaksi",
+  path: "/transaksi",
   getParentRoute: () => corePengujianRouteRoute,
-} as any)
+} as any);
 const corePengujianSurveyKepuasanRoute =
   corePengujianSurveyKepuasanRouteImport.update({
-    id: '/survey-kepuasan',
-    path: '/survey-kepuasan',
+    id: "/survey-kepuasan",
+    path: "/survey-kepuasan",
     getParentRoute: () => corePengujianRouteRoute,
-  } as any)
+  } as any);
 const corePengujianStatusRoute = corePengujianStatusRouteImport.update({
-  id: '/status',
-  path: '/status',
+  id: "/status",
+  path: "/status",
   getParentRoute: () => corePengujianRouteRoute,
-} as any)
+} as any);
 const corePengujianCheckoutRoute = corePengujianCheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
+  id: "/checkout",
+  path: "/checkout",
   getParentRoute: () => corePengujianRouteRoute,
-} as any)
+} as any);
 const coreDashboardCompanyIndexRoute =
   coreDashboardCompanyIndexRouteImport.update({
-    id: '/company/',
-    path: '/company/',
+    id: "/company/",
+    path: "/company/",
     getParentRoute: () => coreDashboardRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeWorksheetsIndexRoute =
   coreBackOfficeWorksheetsIndexRouteImport.update({
-    id: '/worksheets/',
-    path: '/worksheets/',
+    id: "/worksheets/",
+    path: "/worksheets/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeUsersIndexRoute =
   coreBackOfficeUsersIndexRouteImport.update({
-    id: '/users/',
-    path: '/users/',
+    id: "/users/",
+    path: "/users/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsIndexRoute =
   coreBackOfficeToolsIndexRouteImport.update({
-    id: '/tools/',
-    path: '/tools/',
+    id: "/tools/",
+    path: "/tools/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeTestingsIndexRoute =
   coreBackOfficeTestingsIndexRouteImport.update({
-    id: '/testings/',
-    path: '/testings/',
+    id: "/testings/",
+    path: "/testings/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeSurveyQuestionsIndexRoute =
   coreBackOfficeSurveyQuestionsIndexRouteImport.update({
-    id: '/survey-questions/',
-    path: '/survey-questions/',
+    id: "/survey-questions/",
+    path: "/survey-questions/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeRolesIndexRoute =
   coreBackOfficeRolesIndexRouteImport.update({
-    id: '/roles/',
-    path: '/roles/',
+    id: "/roles/",
+    path: "/roles/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficePositionsIndexRoute =
   coreBackOfficePositionsIndexRouteImport.update({
-    id: '/positions/',
-    path: '/positions/',
+    id: "/positions/",
+    path: "/positions/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeParametersIndexRoute =
   coreBackOfficeParametersIndexRouteImport.update({
-    id: '/parameters/',
-    path: '/parameters/',
+    id: "/parameters/",
+    path: "/parameters/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeParameterCategoriesIndexRoute =
   coreBackOfficeParameterCategoriesIndexRouteImport.update({
-    id: '/parameter-categories/',
-    path: '/parameter-categories/',
+    id: "/parameter-categories/",
+    path: "/parameter-categories/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeOrdersIndexRoute =
   coreBackOfficeOrdersIndexRouteImport.update({
-    id: '/orders/',
-    path: '/orders/',
+    id: "/orders/",
+    path: "/orders/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeNewsIndexRoute = coreBackOfficeNewsIndexRouteImport.update({
-  id: '/news/',
-  path: '/news/',
+  id: "/news/",
+  path: "/news/",
   getParentRoute: () => coreBackOfficeRouteRoute,
-} as any)
+} as any);
 const coreBackOfficeKblisIndexRoute =
   coreBackOfficeKblisIndexRouteImport.update({
-    id: '/kblis/',
-    path: '/kblis/',
+    id: "/kblis/",
+    path: "/kblis/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeEmployeesIndexRoute =
   coreBackOfficeEmployeesIndexRouteImport.update({
-    id: '/employees/',
-    path: '/employees/',
+    id: "/employees/",
+    path: "/employees/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeClustersIndexRoute =
   coreBackOfficeClustersIndexRouteImport.update({
-    id: '/clusters/',
-    path: '/clusters/',
+    id: "/clusters/",
+    path: "/clusters/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeChemicalMaterialsIndexRoute =
   coreBackOfficeChemicalMaterialsIndexRouteImport.update({
-    id: '/chemical-materials/',
-    path: '/chemical-materials/',
+    id: "/chemical-materials/",
+    path: "/chemical-materials/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeBannersIndexRoute =
   coreBackOfficeBannersIndexRouteImport.update({
-    id: '/banners/',
-    path: '/banners/',
+    id: "/banners/",
+    path: "/banners/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreDashboardCompanyCreateRoute =
   coreDashboardCompanyCreateRouteImport.update({
-    id: '/company/create',
-    path: '/company/create',
+    id: "/company/create",
+    path: "/company/create",
     getParentRoute: () => coreDashboardRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeUsersCreateRoute =
   coreBackOfficeUsersCreateRouteImport.update({
-    id: '/users/create',
-    path: '/users/create',
+    id: "/users/create",
+    path: "/users/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsCreateRoute =
   coreBackOfficeToolsCreateRouteImport.update({
-    id: '/tools/create',
-    path: '/tools/create',
+    id: "/tools/create",
+    path: "/tools/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeSurveyQuestionsCreateRoute =
   coreBackOfficeSurveyQuestionsCreateRouteImport.update({
-    id: '/survey-questions/create',
-    path: '/survey-questions/create',
+    id: "/survey-questions/create",
+    path: "/survey-questions/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeRolesCreateRoute =
   coreBackOfficeRolesCreateRouteImport.update({
-    id: '/roles/create',
-    path: '/roles/create',
+    id: "/roles/create",
+    path: "/roles/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficePositionsCreateRoute =
   coreBackOfficePositionsCreateRouteImport.update({
-    id: '/positions/create',
-    path: '/positions/create',
+    id: "/positions/create",
+    path: "/positions/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeParametersCreateRoute =
   coreBackOfficeParametersCreateRouteImport.update({
-    id: '/parameters/create',
-    path: '/parameters/create',
+    id: "/parameters/create",
+    path: "/parameters/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeParameterCategoriesCreateRoute =
   coreBackOfficeParameterCategoriesCreateRouteImport.update({
-    id: '/parameter-categories/create',
-    path: '/parameter-categories/create',
+    id: "/parameter-categories/create",
+    path: "/parameter-categories/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeNewsCreateRoute =
   coreBackOfficeNewsCreateRouteImport.update({
-    id: '/news/create',
-    path: '/news/create',
+    id: "/news/create",
+    path: "/news/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeKblisCreateRoute =
   coreBackOfficeKblisCreateRouteImport.update({
-    id: '/kblis/create',
-    path: '/kblis/create',
+    id: "/kblis/create",
+    path: "/kblis/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeEmployeesCreateRoute =
   coreBackOfficeEmployeesCreateRouteImport.update({
-    id: '/employees/create',
-    path: '/employees/create',
+    id: "/employees/create",
+    path: "/employees/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeClustersCreateRoute =
   coreBackOfficeClustersCreateRouteImport.update({
-    id: '/clusters/create',
-    path: '/clusters/create',
+    id: "/clusters/create",
+    path: "/clusters/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeChemicalMaterialsCreateRoute =
   coreBackOfficeChemicalMaterialsCreateRouteImport.update({
-    id: '/chemical-materials/create',
-    path: '/chemical-materials/create',
+    id: "/chemical-materials/create",
+    path: "/chemical-materials/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeBannersCreateRoute =
   coreBackOfficeBannersCreateRouteImport.update({
-    id: '/banners/create',
-    path: '/banners/create',
+    id: "/banners/create",
+    path: "/banners/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreDashboardCompanyCompanyIdEditRoute =
   coreDashboardCompanyCompanyIdEditRouteImport.update({
-    id: '/company/$companyId/edit',
-    path: '/company/$companyId/edit',
+    id: "/company/$companyId/edit",
+    path: "/company/$companyId/edit",
     getParentRoute: () => coreDashboardRouteRoute,
-  } as any)
+  } as any);
 const coreDashboardCompanyCompanyIdDetailRoute =
   coreDashboardCompanyCompanyIdDetailRouteImport.update({
-    id: '/company/$companyId/detail',
-    path: '/company/$companyId/detail',
+    id: "/company/$companyId/detail",
+    path: "/company/$companyId/detail",
     getParentRoute: () => coreDashboardRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeUsersUserIdEditRoute =
   coreBackOfficeUsersUserIdEditRouteImport.update({
-    id: '/users/$userId/edit',
-    path: '/users/$userId/edit',
+    id: "/users/$userId/edit",
+    path: "/users/$userId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsToolIdEditRoute =
   coreBackOfficeToolsToolIdEditRouteImport.update({
-    id: '/tools/$toolId/edit',
-    path: '/tools/$toolId/edit',
+    id: "/tools/$toolId/edit",
+    path: "/tools/$toolId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsToolIdDetailRoute =
   coreBackOfficeToolsToolIdDetailRouteImport.update({
-    id: '/tools/$toolId/detail',
-    path: '/tools/$toolId/detail',
+    id: "/tools/$toolId/detail",
+    path: "/tools/$toolId/detail",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeTestingsTestingIdDetailRoute =
   coreBackOfficeTestingsTestingIdDetailRouteImport.update({
-    id: '/testings/$testingId/detail',
-    path: '/testings/$testingId/detail',
+    id: "/testings/$testingId/detail",
+    path: "/testings/$testingId/detail",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeSurveyQuestionsQuestionIdEditRoute =
   coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport.update({
-    id: '/survey-questions/$questionId/edit',
-    path: '/survey-questions/$questionId/edit',
+    id: "/survey-questions/$questionId/edit",
+    path: "/survey-questions/$questionId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeRolesRoleIdEditRoute =
   coreBackOfficeRolesRoleIdEditRouteImport.update({
-    id: '/roles/$roleId/edit',
-    path: '/roles/$roleId/edit',
+    id: "/roles/$roleId/edit",
+    path: "/roles/$roleId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeRolesRoleIdDetailRoute =
   coreBackOfficeRolesRoleIdDetailRouteImport.update({
-    id: '/roles/$roleId/detail',
-    path: '/roles/$roleId/detail',
+    id: "/roles/$roleId/detail",
+    path: "/roles/$roleId/detail",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficePositionsPositionIdEditRoute =
   coreBackOfficePositionsPositionIdEditRouteImport.update({
-    id: '/positions/$positionId/edit',
-    path: '/positions/$positionId/edit',
+    id: "/positions/$positionId/edit",
+    path: "/positions/$positionId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeParametersParameterIdEditRoute =
   coreBackOfficeParametersParameterIdEditRouteImport.update({
-    id: '/parameters/$parameterId/edit',
-    path: '/parameters/$parameterId/edit',
+    id: "/parameters/$parameterId/edit",
+    path: "/parameters/$parameterId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeParametersParameterIdDetailRoute =
   coreBackOfficeParametersParameterIdDetailRouteImport.update({
-    id: '/parameters/$parameterId/detail',
-    path: '/parameters/$parameterId/detail',
+    id: "/parameters/$parameterId/detail",
+    path: "/parameters/$parameterId/detail",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute =
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport.update({
-    id: '/parameter-categories/$parameterCategoriesId/edit',
-    path: '/parameter-categories/$parameterCategoriesId/edit',
+    id: "/parameter-categories/$parameterCategoriesId/edit",
+    path: "/parameter-categories/$parameterCategoriesId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeOrdersOrderIdDetailRoute =
   coreBackOfficeOrdersOrderIdDetailRouteImport.update({
-    id: '/orders/$orderId/detail',
-    path: '/orders/$orderId/detail',
+    id: "/orders/$orderId/detail",
+    path: "/orders/$orderId/detail",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeNewsNewsIdEditRoute =
   coreBackOfficeNewsNewsIdEditRouteImport.update({
-    id: '/news/$newsId/edit',
-    path: '/news/$newsId/edit',
+    id: "/news/$newsId/edit",
+    path: "/news/$newsId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeKblisKbliIdEditRoute =
   coreBackOfficeKblisKbliIdEditRouteImport.update({
-    id: '/kblis/$kbliId/edit',
-    path: '/kblis/$kbliId/edit',
+    id: "/kblis/$kbliId/edit",
+    path: "/kblis/$kbliId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeEmployeesEmployeeIdEditRoute =
   coreBackOfficeEmployeesEmployeeIdEditRouteImport.update({
-    id: '/employees/$employeeId/edit',
-    path: '/employees/$employeeId/edit',
+    id: "/employees/$employeeId/edit",
+    path: "/employees/$employeeId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeClustersClusterIdEditRoute =
   coreBackOfficeClustersClusterIdEditRouteImport.update({
-    id: '/clusters/$clusterId/edit',
-    path: '/clusters/$clusterId/edit',
+    id: "/clusters/$clusterId/edit",
+    path: "/clusters/$clusterId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute =
   coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport.update({
-    id: '/chemical-materials/$chemicalMaterialId/edit',
-    path: '/chemical-materials/$chemicalMaterialId/edit',
+    id: "/chemical-materials/$chemicalMaterialId/edit",
+    path: "/chemical-materials/$chemicalMaterialId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeBannersBannerIdEditRoute =
   coreBackOfficeBannersBannerIdEditRouteImport.update({
-    id: '/banners/$bannerId/edit',
-    path: '/banners/$bannerId/edit',
+    id: "/banners/$bannerId/edit",
+    path: "/banners/$bannerId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsToolIdCalibrationIndexRoute =
   coreBackOfficeToolsToolIdCalibrationIndexRouteImport.update({
-    id: '/tools/$toolId/calibration/',
-    path: '/tools/$toolId/calibration/',
+    id: "/tools/$toolId/calibration/",
+    path: "/tools/$toolId/calibration/",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsToolIdCalibrationCreateRoute =
   coreBackOfficeToolsToolIdCalibrationCreateRouteImport.update({
-    id: '/tools/$toolId/calibration/create',
-    path: '/tools/$toolId/calibration/create',
+    id: "/tools/$toolId/calibration/create",
+    path: "/tools/$toolId/calibration/create",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute =
   coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport.update({
-    id: '/tools/$toolId/calibration/$calibrationId/edit',
-    path: '/tools/$toolId/calibration/$calibrationId/edit',
+    id: "/tools/$toolId/calibration/$calibrationId/edit",
+    path: "/tools/$toolId/calibration/$calibrationId/edit",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute =
   coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport.update({
-    id: '/tools/$toolId/calibration/$calibrationId/detail',
-    path: '/tools/$toolId/calibration/$calibrationId/detail',
+    id: "/tools/$toolId/calibration/$calibrationId/detail",
+    path: "/tools/$toolId/calibration/$calibrationId/detail",
     getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
+  } as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/katalog': typeof KatalogRoute
-  '/test': typeof TestRoute
-  '/unauthorized': typeof UnauthorizedRoute
-  '/back-office': typeof coreBackOfficeRouteRouteWithChildren
-  '/dashboard': typeof coreDashboardRouteRouteWithChildren
-  '/konsultasi': typeof coreKonsultasiRouteRoute
-  '/pelatihan': typeof corePelatihanRouteRoute
-  '/pengujian': typeof corePengujianRouteRouteWithChildren
-  '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
-  '/worksheets': typeof coreWorksheetsRouteRouteWithChildren
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/login': typeof authLoginRoute
-  '/register': typeof authRegisterRoute
-  '/reset-password': typeof authResetPasswordRoute
-  '/verify-email': typeof authVerifyEmailRoute
-  '/document': typeof coreDocumentRoute
-  '/pdf-editor': typeof corePdfEditorRoute
-  '/profile': typeof coreProfileRoute
-  '/settings': typeof coreSettingsRoute
-  '/berita/$newsId': typeof BeritaNewsIdRoute
-  '/verify/$token': typeof VerifyTokenRoute
-  '/berita': typeof BeritaIndexRoute
-  '/pengujian/checkout': typeof corePengujianCheckoutRoute
-  '/pengujian/status': typeof corePengujianStatusRoute
-  '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
-  '/pengujian/transaksi': typeof corePengujianTransaksiRoute
-  '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
-  '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
-  '/back-office/': typeof coreBackOfficeIndexRoute
-  '/dashboard/': typeof coreDashboardIndexRoute
-  '/pengujian/': typeof corePengujianIndexRoute
-  '/worksheets/': typeof coreWorksheetsIndexRoute
-  '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
-  '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
-  '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
-  '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
-  '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
-  '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
-  '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
-  '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
-  '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
-  '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
-  '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
-  '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
-  '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
-  '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
-  '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
-  '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
-  '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
-  '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
-  '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
-  '/back-office/news': typeof coreBackOfficeNewsIndexRoute
-  '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
-  '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
-  '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
-  '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
-  '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
-  '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
-  '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
-  '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
-  '/back-office/users': typeof coreBackOfficeUsersIndexRoute
-  '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
-  '/dashboard/company': typeof coreDashboardCompanyIndexRoute
-  '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
-  '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
-  '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
-  '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
-  '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
-  '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
-  '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
-  '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
-  '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
-  '/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
-  '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
-  '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
-  '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
-  '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
-  '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
-  '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
-  '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
-  '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
-  '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
-  '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  "/": typeof IndexRoute;
+  "/katalog": typeof KatalogRoute;
+  "/profil": typeof ProfilRoute;
+  "/test": typeof TestRoute;
+  "/unauthorized": typeof UnauthorizedRoute;
+  "/back-office": typeof coreBackOfficeRouteRouteWithChildren;
+  "/dashboard": typeof coreDashboardRouteRouteWithChildren;
+  "/konsultasi": typeof coreKonsultasiRouteRoute;
+  "/pelatihan": typeof corePelatihanRouteRoute;
+  "/pengujian": typeof corePengujianRouteRouteWithChildren;
+  "/uji-kompetensi": typeof coreUjiKompetensiRouteRoute;
+  "/worksheets": typeof coreWorksheetsRouteRouteWithChildren;
+  "/forgot-password": typeof authForgotPasswordRoute;
+  "/login": typeof authLoginRoute;
+  "/register": typeof authRegisterRoute;
+  "/reset-password": typeof authResetPasswordRoute;
+  "/verify-email": typeof authVerifyEmailRoute;
+  "/document": typeof coreDocumentRoute;
+  "/pdf-editor": typeof corePdfEditorRoute;
+  "/profile": typeof coreProfileRoute;
+  "/settings": typeof coreSettingsRoute;
+  "/berita/$newsId": typeof BeritaNewsIdRoute;
+  "/verify/$token": typeof VerifyTokenRoute;
+  "/berita": typeof BeritaIndexRoute;
+  "/pengujian/checkout": typeof corePengujianCheckoutRoute;
+  "/pengujian/status": typeof corePengujianStatusRoute;
+  "/pengujian/survey-kepuasan": typeof corePengujianSurveyKepuasanRoute;
+  "/pengujian/transaksi": typeof corePengujianTransaksiRoute;
+  "/worksheets/detail-transaksi": typeof coreWorksheetsDetailTransaksiRoute;
+  "/worksheets/jadwal-personel": typeof coreWorksheetsJadwalPersonelRoute;
+  "/back-office/": typeof coreBackOfficeIndexRoute;
+  "/dashboard/": typeof coreDashboardIndexRoute;
+  "/pengujian/": typeof corePengujianIndexRoute;
+  "/worksheets/": typeof coreWorksheetsIndexRoute;
+  "/back-office/banners/create": typeof coreBackOfficeBannersCreateRoute;
+  "/back-office/chemical-materials/create": typeof coreBackOfficeChemicalMaterialsCreateRoute;
+  "/back-office/clusters/create": typeof coreBackOfficeClustersCreateRoute;
+  "/back-office/employees/create": typeof coreBackOfficeEmployeesCreateRoute;
+  "/back-office/kblis/create": typeof coreBackOfficeKblisCreateRoute;
+  "/back-office/news/create": typeof coreBackOfficeNewsCreateRoute;
+  "/back-office/parameter-categories/create": typeof coreBackOfficeParameterCategoriesCreateRoute;
+  "/back-office/parameters/create": typeof coreBackOfficeParametersCreateRoute;
+  "/back-office/positions/create": typeof coreBackOfficePositionsCreateRoute;
+  "/back-office/roles/create": typeof coreBackOfficeRolesCreateRoute;
+  "/back-office/survey-questions/create": typeof coreBackOfficeSurveyQuestionsCreateRoute;
+  "/back-office/tools/create": typeof coreBackOfficeToolsCreateRoute;
+  "/back-office/users/create": typeof coreBackOfficeUsersCreateRoute;
+  "/dashboard/company/create": typeof coreDashboardCompanyCreateRoute;
+  "/back-office/banners": typeof coreBackOfficeBannersIndexRoute;
+  "/back-office/chemical-materials": typeof coreBackOfficeChemicalMaterialsIndexRoute;
+  "/back-office/clusters": typeof coreBackOfficeClustersIndexRoute;
+  "/back-office/employees": typeof coreBackOfficeEmployeesIndexRoute;
+  "/back-office/kblis": typeof coreBackOfficeKblisIndexRoute;
+  "/back-office/news": typeof coreBackOfficeNewsIndexRoute;
+  "/back-office/orders": typeof coreBackOfficeOrdersIndexRoute;
+  "/back-office/parameter-categories": typeof coreBackOfficeParameterCategoriesIndexRoute;
+  "/back-office/parameters": typeof coreBackOfficeParametersIndexRoute;
+  "/back-office/positions": typeof coreBackOfficePositionsIndexRoute;
+  "/back-office/roles": typeof coreBackOfficeRolesIndexRoute;
+  "/back-office/survey-questions": typeof coreBackOfficeSurveyQuestionsIndexRoute;
+  "/back-office/testings": typeof coreBackOfficeTestingsIndexRoute;
+  "/back-office/tools": typeof coreBackOfficeToolsIndexRoute;
+  "/back-office/users": typeof coreBackOfficeUsersIndexRoute;
+  "/back-office/worksheets": typeof coreBackOfficeWorksheetsIndexRoute;
+  "/dashboard/company": typeof coreDashboardCompanyIndexRoute;
+  "/back-office/banners/$bannerId/edit": typeof coreBackOfficeBannersBannerIdEditRoute;
+  "/back-office/chemical-materials/$chemicalMaterialId/edit": typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute;
+  "/back-office/clusters/$clusterId/edit": typeof coreBackOfficeClustersClusterIdEditRoute;
+  "/back-office/employees/$employeeId/edit": typeof coreBackOfficeEmployeesEmployeeIdEditRoute;
+  "/back-office/kblis/$kbliId/edit": typeof coreBackOfficeKblisKbliIdEditRoute;
+  "/back-office/news/$newsId/edit": typeof coreBackOfficeNewsNewsIdEditRoute;
+  "/back-office/orders/$orderId/detail": typeof coreBackOfficeOrdersOrderIdDetailRoute;
+  "/back-office/parameter-categories/$parameterCategoriesId/edit": typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute;
+  "/back-office/parameters/$parameterId/detail": typeof coreBackOfficeParametersParameterIdDetailRoute;
+  "/back-office/parameters/$parameterId/edit": typeof coreBackOfficeParametersParameterIdEditRoute;
+  "/back-office/positions/$positionId/edit": typeof coreBackOfficePositionsPositionIdEditRoute;
+  "/back-office/roles/$roleId/detail": typeof coreBackOfficeRolesRoleIdDetailRoute;
+  "/back-office/roles/$roleId/edit": typeof coreBackOfficeRolesRoleIdEditRoute;
+  "/back-office/survey-questions/$questionId/edit": typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute;
+  "/back-office/testings/$testingId/detail": typeof coreBackOfficeTestingsTestingIdDetailRoute;
+  "/back-office/tools/$toolId/detail": typeof coreBackOfficeToolsToolIdDetailRoute;
+  "/back-office/tools/$toolId/edit": typeof coreBackOfficeToolsToolIdEditRoute;
+  "/back-office/users/$userId/edit": typeof coreBackOfficeUsersUserIdEditRoute;
+  "/dashboard/company/$companyId/detail": typeof coreDashboardCompanyCompanyIdDetailRoute;
+  "/dashboard/company/$companyId/edit": typeof coreDashboardCompanyCompanyIdEditRoute;
+  "/back-office/tools/$toolId/calibration/create": typeof coreBackOfficeToolsToolIdCalibrationCreateRoute;
+  "/back-office/tools/$toolId/calibration": typeof coreBackOfficeToolsToolIdCalibrationIndexRoute;
+  "/back-office/tools/$toolId/calibration/$calibrationId/detail": typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute;
+  "/back-office/tools/$toolId/calibration/$calibrationId/edit": typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/katalog': typeof KatalogRoute
-  '/test': typeof TestRoute
-  '/unauthorized': typeof UnauthorizedRoute
-  '/konsultasi': typeof coreKonsultasiRouteRoute
-  '/pelatihan': typeof corePelatihanRouteRoute
-  '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
-  '/forgot-password': typeof authForgotPasswordRoute
-  '/login': typeof authLoginRoute
-  '/register': typeof authRegisterRoute
-  '/reset-password': typeof authResetPasswordRoute
-  '/verify-email': typeof authVerifyEmailRoute
-  '/document': typeof coreDocumentRoute
-  '/pdf-editor': typeof corePdfEditorRoute
-  '/profile': typeof coreProfileRoute
-  '/settings': typeof coreSettingsRoute
-  '/berita/$newsId': typeof BeritaNewsIdRoute
-  '/verify/$token': typeof VerifyTokenRoute
-  '/berita': typeof BeritaIndexRoute
-  '/pengujian/checkout': typeof corePengujianCheckoutRoute
-  '/pengujian/status': typeof corePengujianStatusRoute
-  '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
-  '/pengujian/transaksi': typeof corePengujianTransaksiRoute
-  '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
-  '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
-  '/back-office': typeof coreBackOfficeIndexRoute
-  '/dashboard': typeof coreDashboardIndexRoute
-  '/pengujian': typeof corePengujianIndexRoute
-  '/worksheets': typeof coreWorksheetsIndexRoute
-  '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
-  '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
-  '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
-  '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
-  '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
-  '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
-  '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
-  '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
-  '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
-  '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
-  '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
-  '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
-  '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
-  '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
-  '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
-  '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
-  '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
-  '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
-  '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
-  '/back-office/news': typeof coreBackOfficeNewsIndexRoute
-  '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
-  '/back-office/parameter-categories': typeof coreBackOfficeParameterCategoriesIndexRoute
-  '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
-  '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
-  '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
-  '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
-  '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
-  '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
-  '/back-office/users': typeof coreBackOfficeUsersIndexRoute
-  '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
-  '/dashboard/company': typeof coreDashboardCompanyIndexRoute
-  '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
-  '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
-  '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
-  '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
-  '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
-  '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
-  '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
-  '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
-  '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
-  '/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
-  '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
-  '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
-  '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
-  '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
-  '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
-  '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
-  '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
-  '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
-  '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
-  '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  "/": typeof IndexRoute;
+  "/katalog": typeof KatalogRoute;
+  "/profil": typeof ProfilRoute;
+  "/test": typeof TestRoute;
+  "/unauthorized": typeof UnauthorizedRoute;
+  "/konsultasi": typeof coreKonsultasiRouteRoute;
+  "/pelatihan": typeof corePelatihanRouteRoute;
+  "/uji-kompetensi": typeof coreUjiKompetensiRouteRoute;
+  "/forgot-password": typeof authForgotPasswordRoute;
+  "/login": typeof authLoginRoute;
+  "/register": typeof authRegisterRoute;
+  "/reset-password": typeof authResetPasswordRoute;
+  "/verify-email": typeof authVerifyEmailRoute;
+  "/document": typeof coreDocumentRoute;
+  "/pdf-editor": typeof corePdfEditorRoute;
+  "/profile": typeof coreProfileRoute;
+  "/settings": typeof coreSettingsRoute;
+  "/berita/$newsId": typeof BeritaNewsIdRoute;
+  "/verify/$token": typeof VerifyTokenRoute;
+  "/berita": typeof BeritaIndexRoute;
+  "/pengujian/checkout": typeof corePengujianCheckoutRoute;
+  "/pengujian/status": typeof corePengujianStatusRoute;
+  "/pengujian/survey-kepuasan": typeof corePengujianSurveyKepuasanRoute;
+  "/pengujian/transaksi": typeof corePengujianTransaksiRoute;
+  "/worksheets/detail-transaksi": typeof coreWorksheetsDetailTransaksiRoute;
+  "/worksheets/jadwal-personel": typeof coreWorksheetsJadwalPersonelRoute;
+  "/back-office": typeof coreBackOfficeIndexRoute;
+  "/dashboard": typeof coreDashboardIndexRoute;
+  "/pengujian": typeof corePengujianIndexRoute;
+  "/worksheets": typeof coreWorksheetsIndexRoute;
+  "/back-office/banners/create": typeof coreBackOfficeBannersCreateRoute;
+  "/back-office/chemical-materials/create": typeof coreBackOfficeChemicalMaterialsCreateRoute;
+  "/back-office/clusters/create": typeof coreBackOfficeClustersCreateRoute;
+  "/back-office/employees/create": typeof coreBackOfficeEmployeesCreateRoute;
+  "/back-office/kblis/create": typeof coreBackOfficeKblisCreateRoute;
+  "/back-office/news/create": typeof coreBackOfficeNewsCreateRoute;
+  "/back-office/parameter-categories/create": typeof coreBackOfficeParameterCategoriesCreateRoute;
+  "/back-office/parameters/create": typeof coreBackOfficeParametersCreateRoute;
+  "/back-office/positions/create": typeof coreBackOfficePositionsCreateRoute;
+  "/back-office/roles/create": typeof coreBackOfficeRolesCreateRoute;
+  "/back-office/survey-questions/create": typeof coreBackOfficeSurveyQuestionsCreateRoute;
+  "/back-office/tools/create": typeof coreBackOfficeToolsCreateRoute;
+  "/back-office/users/create": typeof coreBackOfficeUsersCreateRoute;
+  "/dashboard/company/create": typeof coreDashboardCompanyCreateRoute;
+  "/back-office/banners": typeof coreBackOfficeBannersIndexRoute;
+  "/back-office/chemical-materials": typeof coreBackOfficeChemicalMaterialsIndexRoute;
+  "/back-office/clusters": typeof coreBackOfficeClustersIndexRoute;
+  "/back-office/employees": typeof coreBackOfficeEmployeesIndexRoute;
+  "/back-office/kblis": typeof coreBackOfficeKblisIndexRoute;
+  "/back-office/news": typeof coreBackOfficeNewsIndexRoute;
+  "/back-office/orders": typeof coreBackOfficeOrdersIndexRoute;
+  "/back-office/parameter-categories": typeof coreBackOfficeParameterCategoriesIndexRoute;
+  "/back-office/parameters": typeof coreBackOfficeParametersIndexRoute;
+  "/back-office/positions": typeof coreBackOfficePositionsIndexRoute;
+  "/back-office/roles": typeof coreBackOfficeRolesIndexRoute;
+  "/back-office/survey-questions": typeof coreBackOfficeSurveyQuestionsIndexRoute;
+  "/back-office/testings": typeof coreBackOfficeTestingsIndexRoute;
+  "/back-office/tools": typeof coreBackOfficeToolsIndexRoute;
+  "/back-office/users": typeof coreBackOfficeUsersIndexRoute;
+  "/back-office/worksheets": typeof coreBackOfficeWorksheetsIndexRoute;
+  "/dashboard/company": typeof coreDashboardCompanyIndexRoute;
+  "/back-office/banners/$bannerId/edit": typeof coreBackOfficeBannersBannerIdEditRoute;
+  "/back-office/chemical-materials/$chemicalMaterialId/edit": typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute;
+  "/back-office/clusters/$clusterId/edit": typeof coreBackOfficeClustersClusterIdEditRoute;
+  "/back-office/employees/$employeeId/edit": typeof coreBackOfficeEmployeesEmployeeIdEditRoute;
+  "/back-office/kblis/$kbliId/edit": typeof coreBackOfficeKblisKbliIdEditRoute;
+  "/back-office/news/$newsId/edit": typeof coreBackOfficeNewsNewsIdEditRoute;
+  "/back-office/orders/$orderId/detail": typeof coreBackOfficeOrdersOrderIdDetailRoute;
+  "/back-office/parameter-categories/$parameterCategoriesId/edit": typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute;
+  "/back-office/parameters/$parameterId/detail": typeof coreBackOfficeParametersParameterIdDetailRoute;
+  "/back-office/parameters/$parameterId/edit": typeof coreBackOfficeParametersParameterIdEditRoute;
+  "/back-office/positions/$positionId/edit": typeof coreBackOfficePositionsPositionIdEditRoute;
+  "/back-office/roles/$roleId/detail": typeof coreBackOfficeRolesRoleIdDetailRoute;
+  "/back-office/roles/$roleId/edit": typeof coreBackOfficeRolesRoleIdEditRoute;
+  "/back-office/survey-questions/$questionId/edit": typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute;
+  "/back-office/testings/$testingId/detail": typeof coreBackOfficeTestingsTestingIdDetailRoute;
+  "/back-office/tools/$toolId/detail": typeof coreBackOfficeToolsToolIdDetailRoute;
+  "/back-office/tools/$toolId/edit": typeof coreBackOfficeToolsToolIdEditRoute;
+  "/back-office/users/$userId/edit": typeof coreBackOfficeUsersUserIdEditRoute;
+  "/dashboard/company/$companyId/detail": typeof coreDashboardCompanyCompanyIdDetailRoute;
+  "/dashboard/company/$companyId/edit": typeof coreDashboardCompanyCompanyIdEditRoute;
+  "/back-office/tools/$toolId/calibration/create": typeof coreBackOfficeToolsToolIdCalibrationCreateRoute;
+  "/back-office/tools/$toolId/calibration": typeof coreBackOfficeToolsToolIdCalibrationIndexRoute;
+  "/back-office/tools/$toolId/calibration/$calibrationId/detail": typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute;
+  "/back-office/tools/$toolId/calibration/$calibrationId/edit": typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/(auth)': typeof authRouteRouteWithChildren
-  '/(core)': typeof coreRouteRouteWithChildren
-  '/katalog': typeof KatalogRoute
-  '/test': typeof TestRoute
-  '/unauthorized': typeof UnauthorizedRoute
-  '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
-  '/(core)/dashboard': typeof coreDashboardRouteRouteWithChildren
-  '/(core)/konsultasi': typeof coreKonsultasiRouteRoute
-  '/(core)/pelatihan': typeof corePelatihanRouteRoute
-  '/(core)/pengujian': typeof corePengujianRouteRouteWithChildren
-  '/(core)/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
-  '/(core)/worksheets': typeof coreWorksheetsRouteRouteWithChildren
-  '/(auth)/forgot-password': typeof authForgotPasswordRoute
-  '/(auth)/login': typeof authLoginRoute
-  '/(auth)/register': typeof authRegisterRoute
-  '/(auth)/reset-password': typeof authResetPasswordRoute
-  '/(auth)/verify-email': typeof authVerifyEmailRoute
-  '/(core)/document': typeof coreDocumentRoute
-  '/(core)/pdf-editor': typeof corePdfEditorRoute
-  '/(core)/profile': typeof coreProfileRoute
-  '/(core)/settings': typeof coreSettingsRoute
-  '/berita/$newsId': typeof BeritaNewsIdRoute
-  '/verify/$token': typeof VerifyTokenRoute
-  '/berita/': typeof BeritaIndexRoute
-  '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
-  '/(core)/pengujian/status': typeof corePengujianStatusRoute
-  '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
-  '/(core)/pengujian/transaksi': typeof corePengujianTransaksiRoute
-  '/(core)/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
-  '/(core)/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
-  '/(core)/back-office/': typeof coreBackOfficeIndexRoute
-  '/(core)/dashboard/': typeof coreDashboardIndexRoute
-  '/(core)/pengujian/': typeof corePengujianIndexRoute
-  '/(core)/worksheets/': typeof coreWorksheetsIndexRoute
-  '/(core)/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
-  '/(core)/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
-  '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
-  '/(core)/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
-  '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
-  '/(core)/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
-  '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
-  '/(core)/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
-  '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
-  '/(core)/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
-  '/(core)/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
-  '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
-  '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
-  '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
-  '/(core)/back-office/banners/': typeof coreBackOfficeBannersIndexRoute
-  '/(core)/back-office/chemical-materials/': typeof coreBackOfficeChemicalMaterialsIndexRoute
-  '/(core)/back-office/clusters/': typeof coreBackOfficeClustersIndexRoute
-  '/(core)/back-office/employees/': typeof coreBackOfficeEmployeesIndexRoute
-  '/(core)/back-office/kblis/': typeof coreBackOfficeKblisIndexRoute
-  '/(core)/back-office/news/': typeof coreBackOfficeNewsIndexRoute
-  '/(core)/back-office/orders/': typeof coreBackOfficeOrdersIndexRoute
-  '/(core)/back-office/parameter-categories/': typeof coreBackOfficeParameterCategoriesIndexRoute
-  '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
-  '/(core)/back-office/positions/': typeof coreBackOfficePositionsIndexRoute
-  '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
-  '/(core)/back-office/survey-questions/': typeof coreBackOfficeSurveyQuestionsIndexRoute
-  '/(core)/back-office/testings/': typeof coreBackOfficeTestingsIndexRoute
-  '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
-  '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
-  '/(core)/back-office/worksheets/': typeof coreBackOfficeWorksheetsIndexRoute
-  '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
-  '/(core)/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
-  '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
-  '/(core)/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
-  '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
-  '/(core)/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
-  '/(core)/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
-  '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
-  '/(core)/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
-  '/(core)/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
-  '/(core)/back-office/positions/$positionId/edit': typeof coreBackOfficePositionsPositionIdEditRoute
-  '/(core)/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
-  '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
-  '/(core)/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
-  '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
-  '/(core)/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
-  '/(core)/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
-  '/(core)/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
-  '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
-  '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
-  '/(core)/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
-  '/(core)/back-office/tools/$toolId/calibration/': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/(auth)": typeof authRouteRouteWithChildren;
+  "/(core)": typeof coreRouteRouteWithChildren;
+  "/katalog": typeof KatalogRoute;
+  "/profil": typeof ProfilRoute;
+  "/test": typeof TestRoute;
+  "/unauthorized": typeof UnauthorizedRoute;
+  "/(core)/back-office": typeof coreBackOfficeRouteRouteWithChildren;
+  "/(core)/dashboard": typeof coreDashboardRouteRouteWithChildren;
+  "/(core)/konsultasi": typeof coreKonsultasiRouteRoute;
+  "/(core)/pelatihan": typeof corePelatihanRouteRoute;
+  "/(core)/pengujian": typeof corePengujianRouteRouteWithChildren;
+  "/(core)/uji-kompetensi": typeof coreUjiKompetensiRouteRoute;
+  "/(core)/worksheets": typeof coreWorksheetsRouteRouteWithChildren;
+  "/(auth)/forgot-password": typeof authForgotPasswordRoute;
+  "/(auth)/login": typeof authLoginRoute;
+  "/(auth)/register": typeof authRegisterRoute;
+  "/(auth)/reset-password": typeof authResetPasswordRoute;
+  "/(auth)/verify-email": typeof authVerifyEmailRoute;
+  "/(core)/document": typeof coreDocumentRoute;
+  "/(core)/pdf-editor": typeof corePdfEditorRoute;
+  "/(core)/profile": typeof coreProfileRoute;
+  "/(core)/settings": typeof coreSettingsRoute;
+  "/berita/$newsId": typeof BeritaNewsIdRoute;
+  "/verify/$token": typeof VerifyTokenRoute;
+  "/berita/": typeof BeritaIndexRoute;
+  "/(core)/pengujian/checkout": typeof corePengujianCheckoutRoute;
+  "/(core)/pengujian/status": typeof corePengujianStatusRoute;
+  "/(core)/pengujian/survey-kepuasan": typeof corePengujianSurveyKepuasanRoute;
+  "/(core)/pengujian/transaksi": typeof corePengujianTransaksiRoute;
+  "/(core)/worksheets/detail-transaksi": typeof coreWorksheetsDetailTransaksiRoute;
+  "/(core)/worksheets/jadwal-personel": typeof coreWorksheetsJadwalPersonelRoute;
+  "/(core)/back-office/": typeof coreBackOfficeIndexRoute;
+  "/(core)/dashboard/": typeof coreDashboardIndexRoute;
+  "/(core)/pengujian/": typeof corePengujianIndexRoute;
+  "/(core)/worksheets/": typeof coreWorksheetsIndexRoute;
+  "/(core)/back-office/banners/create": typeof coreBackOfficeBannersCreateRoute;
+  "/(core)/back-office/chemical-materials/create": typeof coreBackOfficeChemicalMaterialsCreateRoute;
+  "/(core)/back-office/clusters/create": typeof coreBackOfficeClustersCreateRoute;
+  "/(core)/back-office/employees/create": typeof coreBackOfficeEmployeesCreateRoute;
+  "/(core)/back-office/kblis/create": typeof coreBackOfficeKblisCreateRoute;
+  "/(core)/back-office/news/create": typeof coreBackOfficeNewsCreateRoute;
+  "/(core)/back-office/parameter-categories/create": typeof coreBackOfficeParameterCategoriesCreateRoute;
+  "/(core)/back-office/parameters/create": typeof coreBackOfficeParametersCreateRoute;
+  "/(core)/back-office/positions/create": typeof coreBackOfficePositionsCreateRoute;
+  "/(core)/back-office/roles/create": typeof coreBackOfficeRolesCreateRoute;
+  "/(core)/back-office/survey-questions/create": typeof coreBackOfficeSurveyQuestionsCreateRoute;
+  "/(core)/back-office/tools/create": typeof coreBackOfficeToolsCreateRoute;
+  "/(core)/back-office/users/create": typeof coreBackOfficeUsersCreateRoute;
+  "/(core)/dashboard/company/create": typeof coreDashboardCompanyCreateRoute;
+  "/(core)/back-office/banners/": typeof coreBackOfficeBannersIndexRoute;
+  "/(core)/back-office/chemical-materials/": typeof coreBackOfficeChemicalMaterialsIndexRoute;
+  "/(core)/back-office/clusters/": typeof coreBackOfficeClustersIndexRoute;
+  "/(core)/back-office/employees/": typeof coreBackOfficeEmployeesIndexRoute;
+  "/(core)/back-office/kblis/": typeof coreBackOfficeKblisIndexRoute;
+  "/(core)/back-office/news/": typeof coreBackOfficeNewsIndexRoute;
+  "/(core)/back-office/orders/": typeof coreBackOfficeOrdersIndexRoute;
+  "/(core)/back-office/parameter-categories/": typeof coreBackOfficeParameterCategoriesIndexRoute;
+  "/(core)/back-office/parameters/": typeof coreBackOfficeParametersIndexRoute;
+  "/(core)/back-office/positions/": typeof coreBackOfficePositionsIndexRoute;
+  "/(core)/back-office/roles/": typeof coreBackOfficeRolesIndexRoute;
+  "/(core)/back-office/survey-questions/": typeof coreBackOfficeSurveyQuestionsIndexRoute;
+  "/(core)/back-office/testings/": typeof coreBackOfficeTestingsIndexRoute;
+  "/(core)/back-office/tools/": typeof coreBackOfficeToolsIndexRoute;
+  "/(core)/back-office/users/": typeof coreBackOfficeUsersIndexRoute;
+  "/(core)/back-office/worksheets/": typeof coreBackOfficeWorksheetsIndexRoute;
+  "/(core)/dashboard/company/": typeof coreDashboardCompanyIndexRoute;
+  "/(core)/back-office/banners/$bannerId/edit": typeof coreBackOfficeBannersBannerIdEditRoute;
+  "/(core)/back-office/chemical-materials/$chemicalMaterialId/edit": typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute;
+  "/(core)/back-office/clusters/$clusterId/edit": typeof coreBackOfficeClustersClusterIdEditRoute;
+  "/(core)/back-office/employees/$employeeId/edit": typeof coreBackOfficeEmployeesEmployeeIdEditRoute;
+  "/(core)/back-office/kblis/$kbliId/edit": typeof coreBackOfficeKblisKbliIdEditRoute;
+  "/(core)/back-office/news/$newsId/edit": typeof coreBackOfficeNewsNewsIdEditRoute;
+  "/(core)/back-office/orders/$orderId/detail": typeof coreBackOfficeOrdersOrderIdDetailRoute;
+  "/(core)/back-office/parameter-categories/$parameterCategoriesId/edit": typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute;
+  "/(core)/back-office/parameters/$parameterId/detail": typeof coreBackOfficeParametersParameterIdDetailRoute;
+  "/(core)/back-office/parameters/$parameterId/edit": typeof coreBackOfficeParametersParameterIdEditRoute;
+  "/(core)/back-office/positions/$positionId/edit": typeof coreBackOfficePositionsPositionIdEditRoute;
+  "/(core)/back-office/roles/$roleId/detail": typeof coreBackOfficeRolesRoleIdDetailRoute;
+  "/(core)/back-office/roles/$roleId/edit": typeof coreBackOfficeRolesRoleIdEditRoute;
+  "/(core)/back-office/survey-questions/$questionId/edit": typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute;
+  "/(core)/back-office/testings/$testingId/detail": typeof coreBackOfficeTestingsTestingIdDetailRoute;
+  "/(core)/back-office/tools/$toolId/detail": typeof coreBackOfficeToolsToolIdDetailRoute;
+  "/(core)/back-office/tools/$toolId/edit": typeof coreBackOfficeToolsToolIdEditRoute;
+  "/(core)/back-office/users/$userId/edit": typeof coreBackOfficeUsersUserIdEditRoute;
+  "/(core)/dashboard/company/$companyId/detail": typeof coreDashboardCompanyCompanyIdDetailRoute;
+  "/(core)/dashboard/company/$companyId/edit": typeof coreDashboardCompanyCompanyIdEditRoute;
+  "/(core)/back-office/tools/$toolId/calibration/create": typeof coreBackOfficeToolsToolIdCalibrationCreateRoute;
+  "/(core)/back-office/tools/$toolId/calibration/": typeof coreBackOfficeToolsToolIdCalibrationIndexRoute;
+  "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail": typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute;
+  "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit": typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/katalog'
-    | '/test'
-    | '/unauthorized'
-    | '/back-office'
-    | '/dashboard'
-    | '/konsultasi'
-    | '/pelatihan'
-    | '/pengujian'
-    | '/uji-kompetensi'
-    | '/worksheets'
-    | '/forgot-password'
-    | '/login'
-    | '/register'
-    | '/reset-password'
-    | '/verify-email'
-    | '/document'
-    | '/pdf-editor'
-    | '/profile'
-    | '/settings'
-    | '/berita/$newsId'
-    | '/verify/$token'
-    | '/berita'
-    | '/pengujian/checkout'
-    | '/pengujian/status'
-    | '/pengujian/survey-kepuasan'
-    | '/pengujian/transaksi'
-    | '/worksheets/detail-transaksi'
-    | '/worksheets/jadwal-personel'
-    | '/back-office/'
-    | '/dashboard/'
-    | '/pengujian/'
-    | '/worksheets/'
-    | '/back-office/banners/create'
-    | '/back-office/chemical-materials/create'
-    | '/back-office/clusters/create'
-    | '/back-office/employees/create'
-    | '/back-office/kblis/create'
-    | '/back-office/news/create'
-    | '/back-office/parameter-categories/create'
-    | '/back-office/parameters/create'
-    | '/back-office/positions/create'
-    | '/back-office/roles/create'
-    | '/back-office/survey-questions/create'
-    | '/back-office/tools/create'
-    | '/back-office/users/create'
-    | '/dashboard/company/create'
-    | '/back-office/banners'
-    | '/back-office/chemical-materials'
-    | '/back-office/clusters'
-    | '/back-office/employees'
-    | '/back-office/kblis'
-    | '/back-office/news'
-    | '/back-office/orders'
-    | '/back-office/parameter-categories'
-    | '/back-office/parameters'
-    | '/back-office/positions'
-    | '/back-office/roles'
-    | '/back-office/survey-questions'
-    | '/back-office/testings'
-    | '/back-office/tools'
-    | '/back-office/users'
-    | '/back-office/worksheets'
-    | '/dashboard/company'
-    | '/back-office/banners/$bannerId/edit'
-    | '/back-office/chemical-materials/$chemicalMaterialId/edit'
-    | '/back-office/clusters/$clusterId/edit'
-    | '/back-office/employees/$employeeId/edit'
-    | '/back-office/kblis/$kbliId/edit'
-    | '/back-office/news/$newsId/edit'
-    | '/back-office/orders/$orderId/detail'
-    | '/back-office/parameter-categories/$parameterCategoriesId/edit'
-    | '/back-office/parameters/$parameterId/detail'
-    | '/back-office/parameters/$parameterId/edit'
-    | '/back-office/positions/$positionId/edit'
-    | '/back-office/roles/$roleId/detail'
-    | '/back-office/roles/$roleId/edit'
-    | '/back-office/survey-questions/$questionId/edit'
-    | '/back-office/testings/$testingId/detail'
-    | '/back-office/tools/$toolId/detail'
-    | '/back-office/tools/$toolId/edit'
-    | '/back-office/users/$userId/edit'
-    | '/dashboard/company/$companyId/detail'
-    | '/dashboard/company/$companyId/edit'
-    | '/back-office/tools/$toolId/calibration/create'
-    | '/back-office/tools/$toolId/calibration'
-    | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
-    | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/katalog"
+    | "/profil"
+    | "/test"
+    | "/unauthorized"
+    | "/back-office"
+    | "/dashboard"
+    | "/konsultasi"
+    | "/pelatihan"
+    | "/pengujian"
+    | "/uji-kompetensi"
+    | "/worksheets"
+    | "/forgot-password"
+    | "/login"
+    | "/register"
+    | "/reset-password"
+    | "/verify-email"
+    | "/document"
+    | "/pdf-editor"
+    | "/profile"
+    | "/settings"
+    | "/berita/$newsId"
+    | "/verify/$token"
+    | "/berita"
+    | "/pengujian/checkout"
+    | "/pengujian/status"
+    | "/pengujian/survey-kepuasan"
+    | "/pengujian/transaksi"
+    | "/worksheets/detail-transaksi"
+    | "/worksheets/jadwal-personel"
+    | "/back-office/"
+    | "/dashboard/"
+    | "/pengujian/"
+    | "/worksheets/"
+    | "/back-office/banners/create"
+    | "/back-office/chemical-materials/create"
+    | "/back-office/clusters/create"
+    | "/back-office/employees/create"
+    | "/back-office/kblis/create"
+    | "/back-office/news/create"
+    | "/back-office/parameter-categories/create"
+    | "/back-office/parameters/create"
+    | "/back-office/positions/create"
+    | "/back-office/roles/create"
+    | "/back-office/survey-questions/create"
+    | "/back-office/tools/create"
+    | "/back-office/users/create"
+    | "/dashboard/company/create"
+    | "/back-office/banners"
+    | "/back-office/chemical-materials"
+    | "/back-office/clusters"
+    | "/back-office/employees"
+    | "/back-office/kblis"
+    | "/back-office/news"
+    | "/back-office/orders"
+    | "/back-office/parameter-categories"
+    | "/back-office/parameters"
+    | "/back-office/positions"
+    | "/back-office/roles"
+    | "/back-office/survey-questions"
+    | "/back-office/testings"
+    | "/back-office/tools"
+    | "/back-office/users"
+    | "/back-office/worksheets"
+    | "/dashboard/company"
+    | "/back-office/banners/$bannerId/edit"
+    | "/back-office/chemical-materials/$chemicalMaterialId/edit"
+    | "/back-office/clusters/$clusterId/edit"
+    | "/back-office/employees/$employeeId/edit"
+    | "/back-office/kblis/$kbliId/edit"
+    | "/back-office/news/$newsId/edit"
+    | "/back-office/orders/$orderId/detail"
+    | "/back-office/parameter-categories/$parameterCategoriesId/edit"
+    | "/back-office/parameters/$parameterId/detail"
+    | "/back-office/parameters/$parameterId/edit"
+    | "/back-office/positions/$positionId/edit"
+    | "/back-office/roles/$roleId/detail"
+    | "/back-office/roles/$roleId/edit"
+    | "/back-office/survey-questions/$questionId/edit"
+    | "/back-office/testings/$testingId/detail"
+    | "/back-office/tools/$toolId/detail"
+    | "/back-office/tools/$toolId/edit"
+    | "/back-office/users/$userId/edit"
+    | "/dashboard/company/$companyId/detail"
+    | "/dashboard/company/$companyId/edit"
+    | "/back-office/tools/$toolId/calibration/create"
+    | "/back-office/tools/$toolId/calibration"
+    | "/back-office/tools/$toolId/calibration/$calibrationId/detail"
+    | "/back-office/tools/$toolId/calibration/$calibrationId/edit";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/katalog'
-    | '/test'
-    | '/unauthorized'
-    | '/konsultasi'
-    | '/pelatihan'
-    | '/uji-kompetensi'
-    | '/forgot-password'
-    | '/login'
-    | '/register'
-    | '/reset-password'
-    | '/verify-email'
-    | '/document'
-    | '/pdf-editor'
-    | '/profile'
-    | '/settings'
-    | '/berita/$newsId'
-    | '/verify/$token'
-    | '/berita'
-    | '/pengujian/checkout'
-    | '/pengujian/status'
-    | '/pengujian/survey-kepuasan'
-    | '/pengujian/transaksi'
-    | '/worksheets/detail-transaksi'
-    | '/worksheets/jadwal-personel'
-    | '/back-office'
-    | '/dashboard'
-    | '/pengujian'
-    | '/worksheets'
-    | '/back-office/banners/create'
-    | '/back-office/chemical-materials/create'
-    | '/back-office/clusters/create'
-    | '/back-office/employees/create'
-    | '/back-office/kblis/create'
-    | '/back-office/news/create'
-    | '/back-office/parameter-categories/create'
-    | '/back-office/parameters/create'
-    | '/back-office/positions/create'
-    | '/back-office/roles/create'
-    | '/back-office/survey-questions/create'
-    | '/back-office/tools/create'
-    | '/back-office/users/create'
-    | '/dashboard/company/create'
-    | '/back-office/banners'
-    | '/back-office/chemical-materials'
-    | '/back-office/clusters'
-    | '/back-office/employees'
-    | '/back-office/kblis'
-    | '/back-office/news'
-    | '/back-office/orders'
-    | '/back-office/parameter-categories'
-    | '/back-office/parameters'
-    | '/back-office/positions'
-    | '/back-office/roles'
-    | '/back-office/survey-questions'
-    | '/back-office/testings'
-    | '/back-office/tools'
-    | '/back-office/users'
-    | '/back-office/worksheets'
-    | '/dashboard/company'
-    | '/back-office/banners/$bannerId/edit'
-    | '/back-office/chemical-materials/$chemicalMaterialId/edit'
-    | '/back-office/clusters/$clusterId/edit'
-    | '/back-office/employees/$employeeId/edit'
-    | '/back-office/kblis/$kbliId/edit'
-    | '/back-office/news/$newsId/edit'
-    | '/back-office/orders/$orderId/detail'
-    | '/back-office/parameter-categories/$parameterCategoriesId/edit'
-    | '/back-office/parameters/$parameterId/detail'
-    | '/back-office/parameters/$parameterId/edit'
-    | '/back-office/positions/$positionId/edit'
-    | '/back-office/roles/$roleId/detail'
-    | '/back-office/roles/$roleId/edit'
-    | '/back-office/survey-questions/$questionId/edit'
-    | '/back-office/testings/$testingId/detail'
-    | '/back-office/tools/$toolId/detail'
-    | '/back-office/tools/$toolId/edit'
-    | '/back-office/users/$userId/edit'
-    | '/dashboard/company/$companyId/detail'
-    | '/dashboard/company/$companyId/edit'
-    | '/back-office/tools/$toolId/calibration/create'
-    | '/back-office/tools/$toolId/calibration'
-    | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
-    | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
+    | "/"
+    | "/katalog"
+    | "/profil"
+    | "/test"
+    | "/unauthorized"
+    | "/konsultasi"
+    | "/pelatihan"
+    | "/uji-kompetensi"
+    | "/forgot-password"
+    | "/login"
+    | "/register"
+    | "/reset-password"
+    | "/verify-email"
+    | "/document"
+    | "/pdf-editor"
+    | "/profile"
+    | "/settings"
+    | "/berita/$newsId"
+    | "/verify/$token"
+    | "/berita"
+    | "/pengujian/checkout"
+    | "/pengujian/status"
+    | "/pengujian/survey-kepuasan"
+    | "/pengujian/transaksi"
+    | "/worksheets/detail-transaksi"
+    | "/worksheets/jadwal-personel"
+    | "/back-office"
+    | "/dashboard"
+    | "/pengujian"
+    | "/worksheets"
+    | "/back-office/banners/create"
+    | "/back-office/chemical-materials/create"
+    | "/back-office/clusters/create"
+    | "/back-office/employees/create"
+    | "/back-office/kblis/create"
+    | "/back-office/news/create"
+    | "/back-office/parameter-categories/create"
+    | "/back-office/parameters/create"
+    | "/back-office/positions/create"
+    | "/back-office/roles/create"
+    | "/back-office/survey-questions/create"
+    | "/back-office/tools/create"
+    | "/back-office/users/create"
+    | "/dashboard/company/create"
+    | "/back-office/banners"
+    | "/back-office/chemical-materials"
+    | "/back-office/clusters"
+    | "/back-office/employees"
+    | "/back-office/kblis"
+    | "/back-office/news"
+    | "/back-office/orders"
+    | "/back-office/parameter-categories"
+    | "/back-office/parameters"
+    | "/back-office/positions"
+    | "/back-office/roles"
+    | "/back-office/survey-questions"
+    | "/back-office/testings"
+    | "/back-office/tools"
+    | "/back-office/users"
+    | "/back-office/worksheets"
+    | "/dashboard/company"
+    | "/back-office/banners/$bannerId/edit"
+    | "/back-office/chemical-materials/$chemicalMaterialId/edit"
+    | "/back-office/clusters/$clusterId/edit"
+    | "/back-office/employees/$employeeId/edit"
+    | "/back-office/kblis/$kbliId/edit"
+    | "/back-office/news/$newsId/edit"
+    | "/back-office/orders/$orderId/detail"
+    | "/back-office/parameter-categories/$parameterCategoriesId/edit"
+    | "/back-office/parameters/$parameterId/detail"
+    | "/back-office/parameters/$parameterId/edit"
+    | "/back-office/positions/$positionId/edit"
+    | "/back-office/roles/$roleId/detail"
+    | "/back-office/roles/$roleId/edit"
+    | "/back-office/survey-questions/$questionId/edit"
+    | "/back-office/testings/$testingId/detail"
+    | "/back-office/tools/$toolId/detail"
+    | "/back-office/tools/$toolId/edit"
+    | "/back-office/users/$userId/edit"
+    | "/dashboard/company/$companyId/detail"
+    | "/dashboard/company/$companyId/edit"
+    | "/back-office/tools/$toolId/calibration/create"
+    | "/back-office/tools/$toolId/calibration"
+    | "/back-office/tools/$toolId/calibration/$calibrationId/detail"
+    | "/back-office/tools/$toolId/calibration/$calibrationId/edit";
   id:
-    | '__root__'
-    | '/'
-    | '/(auth)'
-    | '/(core)'
-    | '/katalog'
-    | '/test'
-    | '/unauthorized'
-    | '/(core)/back-office'
-    | '/(core)/dashboard'
-    | '/(core)/konsultasi'
-    | '/(core)/pelatihan'
-    | '/(core)/pengujian'
-    | '/(core)/uji-kompetensi'
-    | '/(core)/worksheets'
-    | '/(auth)/forgot-password'
-    | '/(auth)/login'
-    | '/(auth)/register'
-    | '/(auth)/reset-password'
-    | '/(auth)/verify-email'
-    | '/(core)/document'
-    | '/(core)/pdf-editor'
-    | '/(core)/profile'
-    | '/(core)/settings'
-    | '/berita/$newsId'
-    | '/verify/$token'
-    | '/berita/'
-    | '/(core)/pengujian/checkout'
-    | '/(core)/pengujian/status'
-    | '/(core)/pengujian/survey-kepuasan'
-    | '/(core)/pengujian/transaksi'
-    | '/(core)/worksheets/detail-transaksi'
-    | '/(core)/worksheets/jadwal-personel'
-    | '/(core)/back-office/'
-    | '/(core)/dashboard/'
-    | '/(core)/pengujian/'
-    | '/(core)/worksheets/'
-    | '/(core)/back-office/banners/create'
-    | '/(core)/back-office/chemical-materials/create'
-    | '/(core)/back-office/clusters/create'
-    | '/(core)/back-office/employees/create'
-    | '/(core)/back-office/kblis/create'
-    | '/(core)/back-office/news/create'
-    | '/(core)/back-office/parameter-categories/create'
-    | '/(core)/back-office/parameters/create'
-    | '/(core)/back-office/positions/create'
-    | '/(core)/back-office/roles/create'
-    | '/(core)/back-office/survey-questions/create'
-    | '/(core)/back-office/tools/create'
-    | '/(core)/back-office/users/create'
-    | '/(core)/dashboard/company/create'
-    | '/(core)/back-office/banners/'
-    | '/(core)/back-office/chemical-materials/'
-    | '/(core)/back-office/clusters/'
-    | '/(core)/back-office/employees/'
-    | '/(core)/back-office/kblis/'
-    | '/(core)/back-office/news/'
-    | '/(core)/back-office/orders/'
-    | '/(core)/back-office/parameter-categories/'
-    | '/(core)/back-office/parameters/'
-    | '/(core)/back-office/positions/'
-    | '/(core)/back-office/roles/'
-    | '/(core)/back-office/survey-questions/'
-    | '/(core)/back-office/testings/'
-    | '/(core)/back-office/tools/'
-    | '/(core)/back-office/users/'
-    | '/(core)/back-office/worksheets/'
-    | '/(core)/dashboard/company/'
-    | '/(core)/back-office/banners/$bannerId/edit'
-    | '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
-    | '/(core)/back-office/clusters/$clusterId/edit'
-    | '/(core)/back-office/employees/$employeeId/edit'
-    | '/(core)/back-office/kblis/$kbliId/edit'
-    | '/(core)/back-office/news/$newsId/edit'
-    | '/(core)/back-office/orders/$orderId/detail'
-    | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
-    | '/(core)/back-office/parameters/$parameterId/detail'
-    | '/(core)/back-office/parameters/$parameterId/edit'
-    | '/(core)/back-office/positions/$positionId/edit'
-    | '/(core)/back-office/roles/$roleId/detail'
-    | '/(core)/back-office/roles/$roleId/edit'
-    | '/(core)/back-office/survey-questions/$questionId/edit'
-    | '/(core)/back-office/testings/$testingId/detail'
-    | '/(core)/back-office/tools/$toolId/detail'
-    | '/(core)/back-office/tools/$toolId/edit'
-    | '/(core)/back-office/users/$userId/edit'
-    | '/(core)/dashboard/company/$companyId/detail'
-    | '/(core)/dashboard/company/$companyId/edit'
-    | '/(core)/back-office/tools/$toolId/calibration/create'
-    | '/(core)/back-office/tools/$toolId/calibration/'
-    | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
-    | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/(auth)"
+    | "/(core)"
+    | "/katalog"
+    | "/profil"
+    | "/test"
+    | "/unauthorized"
+    | "/(core)/back-office"
+    | "/(core)/dashboard"
+    | "/(core)/konsultasi"
+    | "/(core)/pelatihan"
+    | "/(core)/pengujian"
+    | "/(core)/uji-kompetensi"
+    | "/(core)/worksheets"
+    | "/(auth)/forgot-password"
+    | "/(auth)/login"
+    | "/(auth)/register"
+    | "/(auth)/reset-password"
+    | "/(auth)/verify-email"
+    | "/(core)/document"
+    | "/(core)/pdf-editor"
+    | "/(core)/profile"
+    | "/(core)/settings"
+    | "/berita/$newsId"
+    | "/verify/$token"
+    | "/berita/"
+    | "/(core)/pengujian/checkout"
+    | "/(core)/pengujian/status"
+    | "/(core)/pengujian/survey-kepuasan"
+    | "/(core)/pengujian/transaksi"
+    | "/(core)/worksheets/detail-transaksi"
+    | "/(core)/worksheets/jadwal-personel"
+    | "/(core)/back-office/"
+    | "/(core)/dashboard/"
+    | "/(core)/pengujian/"
+    | "/(core)/worksheets/"
+    | "/(core)/back-office/banners/create"
+    | "/(core)/back-office/chemical-materials/create"
+    | "/(core)/back-office/clusters/create"
+    | "/(core)/back-office/employees/create"
+    | "/(core)/back-office/kblis/create"
+    | "/(core)/back-office/news/create"
+    | "/(core)/back-office/parameter-categories/create"
+    | "/(core)/back-office/parameters/create"
+    | "/(core)/back-office/positions/create"
+    | "/(core)/back-office/roles/create"
+    | "/(core)/back-office/survey-questions/create"
+    | "/(core)/back-office/tools/create"
+    | "/(core)/back-office/users/create"
+    | "/(core)/dashboard/company/create"
+    | "/(core)/back-office/banners/"
+    | "/(core)/back-office/chemical-materials/"
+    | "/(core)/back-office/clusters/"
+    | "/(core)/back-office/employees/"
+    | "/(core)/back-office/kblis/"
+    | "/(core)/back-office/news/"
+    | "/(core)/back-office/orders/"
+    | "/(core)/back-office/parameter-categories/"
+    | "/(core)/back-office/parameters/"
+    | "/(core)/back-office/positions/"
+    | "/(core)/back-office/roles/"
+    | "/(core)/back-office/survey-questions/"
+    | "/(core)/back-office/testings/"
+    | "/(core)/back-office/tools/"
+    | "/(core)/back-office/users/"
+    | "/(core)/back-office/worksheets/"
+    | "/(core)/dashboard/company/"
+    | "/(core)/back-office/banners/$bannerId/edit"
+    | "/(core)/back-office/chemical-materials/$chemicalMaterialId/edit"
+    | "/(core)/back-office/clusters/$clusterId/edit"
+    | "/(core)/back-office/employees/$employeeId/edit"
+    | "/(core)/back-office/kblis/$kbliId/edit"
+    | "/(core)/back-office/news/$newsId/edit"
+    | "/(core)/back-office/orders/$orderId/detail"
+    | "/(core)/back-office/parameter-categories/$parameterCategoriesId/edit"
+    | "/(core)/back-office/parameters/$parameterId/detail"
+    | "/(core)/back-office/parameters/$parameterId/edit"
+    | "/(core)/back-office/positions/$positionId/edit"
+    | "/(core)/back-office/roles/$roleId/detail"
+    | "/(core)/back-office/roles/$roleId/edit"
+    | "/(core)/back-office/survey-questions/$questionId/edit"
+    | "/(core)/back-office/testings/$testingId/detail"
+    | "/(core)/back-office/tools/$toolId/detail"
+    | "/(core)/back-office/tools/$toolId/edit"
+    | "/(core)/back-office/users/$userId/edit"
+    | "/(core)/dashboard/company/$companyId/detail"
+    | "/(core)/dashboard/company/$companyId/edit"
+    | "/(core)/back-office/tools/$toolId/calibration/create"
+    | "/(core)/back-office/tools/$toolId/calibration/"
+    | "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail"
+    | "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  authRouteRoute: typeof authRouteRouteWithChildren
-  coreRouteRoute: typeof coreRouteRouteWithChildren
-  KatalogRoute: typeof KatalogRoute
-  TestRoute: typeof TestRoute
-  UnauthorizedRoute: typeof UnauthorizedRoute
-  BeritaNewsIdRoute: typeof BeritaNewsIdRoute
-  VerifyTokenRoute: typeof VerifyTokenRoute
-  BeritaIndexRoute: typeof BeritaIndexRoute
+  IndexRoute: typeof IndexRoute;
+  authRouteRoute: typeof authRouteRouteWithChildren;
+  coreRouteRoute: typeof coreRouteRouteWithChildren;
+  KatalogRoute: typeof KatalogRoute;
+  ProfilRoute: typeof ProfilRoute;
+  TestRoute: typeof TestRoute;
+  UnauthorizedRoute: typeof UnauthorizedRoute;
+  BeritaNewsIdRoute: typeof BeritaNewsIdRoute;
+  VerifyTokenRoute: typeof VerifyTokenRoute;
+  BeritaIndexRoute: typeof BeritaIndexRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/unauthorized': {
-      id: '/unauthorized'
-      path: '/unauthorized'
-      fullPath: '/unauthorized'
-      preLoaderRoute: typeof UnauthorizedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test': {
-      id: '/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof TestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/katalog': {
-      id: '/katalog'
-      path: '/katalog'
-      fullPath: '/katalog'
-      preLoaderRoute: typeof KatalogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(core)': {
-      id: '/(core)'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof coreRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)': {
-      id: '/(auth)'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof authRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/berita/': {
-      id: '/berita/'
-      path: '/berita'
-      fullPath: '/berita'
-      preLoaderRoute: typeof BeritaIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/verify/$token': {
-      id: '/verify/$token'
-      path: '/verify/$token'
-      fullPath: '/verify/$token'
-      preLoaderRoute: typeof VerifyTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/berita/$newsId': {
-      id: '/berita/$newsId'
-      path: '/berita/$newsId'
-      fullPath: '/berita/$newsId'
-      preLoaderRoute: typeof BeritaNewsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(core)/settings': {
-      id: '/(core)/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof coreSettingsRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/profile': {
-      id: '/(core)/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof coreProfileRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/pdf-editor': {
-      id: '/(core)/pdf-editor'
-      path: '/pdf-editor'
-      fullPath: '/pdf-editor'
-      preLoaderRoute: typeof corePdfEditorRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/document': {
-      id: '/(core)/document'
-      path: '/document'
-      fullPath: '/document'
-      preLoaderRoute: typeof coreDocumentRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(auth)/verify-email': {
-      id: '/(auth)/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof authVerifyEmailRouteImport
-      parentRoute: typeof authRouteRoute
-    }
-    '/(auth)/reset-password': {
-      id: '/(auth)/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof authResetPasswordRouteImport
-      parentRoute: typeof authRouteRoute
-    }
-    '/(auth)/register': {
-      id: '/(auth)/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof authRegisterRouteImport
-      parentRoute: typeof authRouteRoute
-    }
-    '/(auth)/login': {
-      id: '/(auth)/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof authLoginRouteImport
-      parentRoute: typeof authRouteRoute
-    }
-    '/(auth)/forgot-password': {
-      id: '/(auth)/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof authForgotPasswordRouteImport
-      parentRoute: typeof authRouteRoute
-    }
-    '/(core)/worksheets': {
-      id: '/(core)/worksheets'
-      path: '/worksheets'
-      fullPath: '/worksheets'
-      preLoaderRoute: typeof coreWorksheetsRouteRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/uji-kompetensi': {
-      id: '/(core)/uji-kompetensi'
-      path: '/uji-kompetensi'
-      fullPath: '/uji-kompetensi'
-      preLoaderRoute: typeof coreUjiKompetensiRouteRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/pengujian': {
-      id: '/(core)/pengujian'
-      path: '/pengujian'
-      fullPath: '/pengujian'
-      preLoaderRoute: typeof corePengujianRouteRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/pelatihan': {
-      id: '/(core)/pelatihan'
-      path: '/pelatihan'
-      fullPath: '/pelatihan'
-      preLoaderRoute: typeof corePelatihanRouteRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/konsultasi': {
-      id: '/(core)/konsultasi'
-      path: '/konsultasi'
-      fullPath: '/konsultasi'
-      preLoaderRoute: typeof coreKonsultasiRouteRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/dashboard': {
-      id: '/(core)/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof coreDashboardRouteRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/back-office': {
-      id: '/(core)/back-office'
-      path: '/back-office'
-      fullPath: '/back-office'
-      preLoaderRoute: typeof coreBackOfficeRouteRouteImport
-      parentRoute: typeof coreRouteRoute
-    }
-    '/(core)/worksheets/': {
-      id: '/(core)/worksheets/'
-      path: '/'
-      fullPath: '/worksheets/'
-      preLoaderRoute: typeof coreWorksheetsIndexRouteImport
-      parentRoute: typeof coreWorksheetsRouteRoute
-    }
-    '/(core)/pengujian/': {
-      id: '/(core)/pengujian/'
-      path: '/'
-      fullPath: '/pengujian/'
-      preLoaderRoute: typeof corePengujianIndexRouteImport
-      parentRoute: typeof corePengujianRouteRoute
-    }
-    '/(core)/dashboard/': {
-      id: '/(core)/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof coreDashboardIndexRouteImport
-      parentRoute: typeof coreDashboardRouteRoute
-    }
-    '/(core)/back-office/': {
-      id: '/(core)/back-office/'
-      path: '/'
-      fullPath: '/back-office/'
-      preLoaderRoute: typeof coreBackOfficeIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/worksheets/jadwal-personel': {
-      id: '/(core)/worksheets/jadwal-personel'
-      path: '/jadwal-personel'
-      fullPath: '/worksheets/jadwal-personel'
-      preLoaderRoute: typeof coreWorksheetsJadwalPersonelRouteImport
-      parentRoute: typeof coreWorksheetsRouteRoute
-    }
-    '/(core)/worksheets/detail-transaksi': {
-      id: '/(core)/worksheets/detail-transaksi'
-      path: '/detail-transaksi'
-      fullPath: '/worksheets/detail-transaksi'
-      preLoaderRoute: typeof coreWorksheetsDetailTransaksiRouteImport
-      parentRoute: typeof coreWorksheetsRouteRoute
-    }
-    '/(core)/pengujian/transaksi': {
-      id: '/(core)/pengujian/transaksi'
-      path: '/transaksi'
-      fullPath: '/pengujian/transaksi'
-      preLoaderRoute: typeof corePengujianTransaksiRouteImport
-      parentRoute: typeof corePengujianRouteRoute
-    }
-    '/(core)/pengujian/survey-kepuasan': {
-      id: '/(core)/pengujian/survey-kepuasan'
-      path: '/survey-kepuasan'
-      fullPath: '/pengujian/survey-kepuasan'
-      preLoaderRoute: typeof corePengujianSurveyKepuasanRouteImport
-      parentRoute: typeof corePengujianRouteRoute
-    }
-    '/(core)/pengujian/status': {
-      id: '/(core)/pengujian/status'
-      path: '/status'
-      fullPath: '/pengujian/status'
-      preLoaderRoute: typeof corePengujianStatusRouteImport
-      parentRoute: typeof corePengujianRouteRoute
-    }
-    '/(core)/pengujian/checkout': {
-      id: '/(core)/pengujian/checkout'
-      path: '/checkout'
-      fullPath: '/pengujian/checkout'
-      preLoaderRoute: typeof corePengujianCheckoutRouteImport
-      parentRoute: typeof corePengujianRouteRoute
-    }
-    '/(core)/dashboard/company/': {
-      id: '/(core)/dashboard/company/'
-      path: '/company'
-      fullPath: '/dashboard/company'
-      preLoaderRoute: typeof coreDashboardCompanyIndexRouteImport
-      parentRoute: typeof coreDashboardRouteRoute
-    }
-    '/(core)/back-office/worksheets/': {
-      id: '/(core)/back-office/worksheets/'
-      path: '/worksheets'
-      fullPath: '/back-office/worksheets'
-      preLoaderRoute: typeof coreBackOfficeWorksheetsIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/users/': {
-      id: '/(core)/back-office/users/'
-      path: '/users'
-      fullPath: '/back-office/users'
-      preLoaderRoute: typeof coreBackOfficeUsersIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/': {
-      id: '/(core)/back-office/tools/'
-      path: '/tools'
-      fullPath: '/back-office/tools'
-      preLoaderRoute: typeof coreBackOfficeToolsIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/testings/': {
-      id: '/(core)/back-office/testings/'
-      path: '/testings'
-      fullPath: '/back-office/testings'
-      preLoaderRoute: typeof coreBackOfficeTestingsIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/survey-questions/': {
-      id: '/(core)/back-office/survey-questions/'
-      path: '/survey-questions'
-      fullPath: '/back-office/survey-questions'
-      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/roles/': {
-      id: '/(core)/back-office/roles/'
-      path: '/roles'
-      fullPath: '/back-office/roles'
-      preLoaderRoute: typeof coreBackOfficeRolesIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/positions/': {
-      id: '/(core)/back-office/positions/'
-      path: '/positions'
-      fullPath: '/back-office/positions'
-      preLoaderRoute: typeof coreBackOfficePositionsIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameters/': {
-      id: '/(core)/back-office/parameters/'
-      path: '/parameters'
-      fullPath: '/back-office/parameters'
-      preLoaderRoute: typeof coreBackOfficeParametersIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameter-categories/': {
-      id: '/(core)/back-office/parameter-categories/'
-      path: '/parameter-categories'
-      fullPath: '/back-office/parameter-categories'
-      preLoaderRoute: typeof coreBackOfficeParameterCategoriesIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/orders/': {
-      id: '/(core)/back-office/orders/'
-      path: '/orders'
-      fullPath: '/back-office/orders'
-      preLoaderRoute: typeof coreBackOfficeOrdersIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/news/': {
-      id: '/(core)/back-office/news/'
-      path: '/news'
-      fullPath: '/back-office/news'
-      preLoaderRoute: typeof coreBackOfficeNewsIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/kblis/': {
-      id: '/(core)/back-office/kblis/'
-      path: '/kblis'
-      fullPath: '/back-office/kblis'
-      preLoaderRoute: typeof coreBackOfficeKblisIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/employees/': {
-      id: '/(core)/back-office/employees/'
-      path: '/employees'
-      fullPath: '/back-office/employees'
-      preLoaderRoute: typeof coreBackOfficeEmployeesIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/clusters/': {
-      id: '/(core)/back-office/clusters/'
-      path: '/clusters'
-      fullPath: '/back-office/clusters'
-      preLoaderRoute: typeof coreBackOfficeClustersIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/chemical-materials/': {
-      id: '/(core)/back-office/chemical-materials/'
-      path: '/chemical-materials'
-      fullPath: '/back-office/chemical-materials'
-      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/banners/': {
-      id: '/(core)/back-office/banners/'
-      path: '/banners'
-      fullPath: '/back-office/banners'
-      preLoaderRoute: typeof coreBackOfficeBannersIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/dashboard/company/create': {
-      id: '/(core)/dashboard/company/create'
-      path: '/company/create'
-      fullPath: '/dashboard/company/create'
-      preLoaderRoute: typeof coreDashboardCompanyCreateRouteImport
-      parentRoute: typeof coreDashboardRouteRoute
-    }
-    '/(core)/back-office/users/create': {
-      id: '/(core)/back-office/users/create'
-      path: '/users/create'
-      fullPath: '/back-office/users/create'
-      preLoaderRoute: typeof coreBackOfficeUsersCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/create': {
-      id: '/(core)/back-office/tools/create'
-      path: '/tools/create'
-      fullPath: '/back-office/tools/create'
-      preLoaderRoute: typeof coreBackOfficeToolsCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/survey-questions/create': {
-      id: '/(core)/back-office/survey-questions/create'
-      path: '/survey-questions/create'
-      fullPath: '/back-office/survey-questions/create'
-      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/roles/create': {
-      id: '/(core)/back-office/roles/create'
-      path: '/roles/create'
-      fullPath: '/back-office/roles/create'
-      preLoaderRoute: typeof coreBackOfficeRolesCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/positions/create': {
-      id: '/(core)/back-office/positions/create'
-      path: '/positions/create'
-      fullPath: '/back-office/positions/create'
-      preLoaderRoute: typeof coreBackOfficePositionsCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameters/create': {
-      id: '/(core)/back-office/parameters/create'
-      path: '/parameters/create'
-      fullPath: '/back-office/parameters/create'
-      preLoaderRoute: typeof coreBackOfficeParametersCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameter-categories/create': {
-      id: '/(core)/back-office/parameter-categories/create'
-      path: '/parameter-categories/create'
-      fullPath: '/back-office/parameter-categories/create'
-      preLoaderRoute: typeof coreBackOfficeParameterCategoriesCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/news/create': {
-      id: '/(core)/back-office/news/create'
-      path: '/news/create'
-      fullPath: '/back-office/news/create'
-      preLoaderRoute: typeof coreBackOfficeNewsCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/kblis/create': {
-      id: '/(core)/back-office/kblis/create'
-      path: '/kblis/create'
-      fullPath: '/back-office/kblis/create'
-      preLoaderRoute: typeof coreBackOfficeKblisCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/employees/create': {
-      id: '/(core)/back-office/employees/create'
-      path: '/employees/create'
-      fullPath: '/back-office/employees/create'
-      preLoaderRoute: typeof coreBackOfficeEmployeesCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/clusters/create': {
-      id: '/(core)/back-office/clusters/create'
-      path: '/clusters/create'
-      fullPath: '/back-office/clusters/create'
-      preLoaderRoute: typeof coreBackOfficeClustersCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/chemical-materials/create': {
-      id: '/(core)/back-office/chemical-materials/create'
-      path: '/chemical-materials/create'
-      fullPath: '/back-office/chemical-materials/create'
-      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/banners/create': {
-      id: '/(core)/back-office/banners/create'
-      path: '/banners/create'
-      fullPath: '/back-office/banners/create'
-      preLoaderRoute: typeof coreBackOfficeBannersCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/dashboard/company/$companyId/edit': {
-      id: '/(core)/dashboard/company/$companyId/edit'
-      path: '/company/$companyId/edit'
-      fullPath: '/dashboard/company/$companyId/edit'
-      preLoaderRoute: typeof coreDashboardCompanyCompanyIdEditRouteImport
-      parentRoute: typeof coreDashboardRouteRoute
-    }
-    '/(core)/dashboard/company/$companyId/detail': {
-      id: '/(core)/dashboard/company/$companyId/detail'
-      path: '/company/$companyId/detail'
-      fullPath: '/dashboard/company/$companyId/detail'
-      preLoaderRoute: typeof coreDashboardCompanyCompanyIdDetailRouteImport
-      parentRoute: typeof coreDashboardRouteRoute
-    }
-    '/(core)/back-office/users/$userId/edit': {
-      id: '/(core)/back-office/users/$userId/edit'
-      path: '/users/$userId/edit'
-      fullPath: '/back-office/users/$userId/edit'
-      preLoaderRoute: typeof coreBackOfficeUsersUserIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/$toolId/edit': {
-      id: '/(core)/back-office/tools/$toolId/edit'
-      path: '/tools/$toolId/edit'
-      fullPath: '/back-office/tools/$toolId/edit'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/$toolId/detail': {
-      id: '/(core)/back-office/tools/$toolId/detail'
-      path: '/tools/$toolId/detail'
-      fullPath: '/back-office/tools/$toolId/detail'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/testings/$testingId/detail': {
-      id: '/(core)/back-office/testings/$testingId/detail'
-      path: '/testings/$testingId/detail'
-      fullPath: '/back-office/testings/$testingId/detail'
-      preLoaderRoute: typeof coreBackOfficeTestingsTestingIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/survey-questions/$questionId/edit': {
-      id: '/(core)/back-office/survey-questions/$questionId/edit'
-      path: '/survey-questions/$questionId/edit'
-      fullPath: '/back-office/survey-questions/$questionId/edit'
-      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/roles/$roleId/edit': {
-      id: '/(core)/back-office/roles/$roleId/edit'
-      path: '/roles/$roleId/edit'
-      fullPath: '/back-office/roles/$roleId/edit'
-      preLoaderRoute: typeof coreBackOfficeRolesRoleIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/roles/$roleId/detail': {
-      id: '/(core)/back-office/roles/$roleId/detail'
-      path: '/roles/$roleId/detail'
-      fullPath: '/back-office/roles/$roleId/detail'
-      preLoaderRoute: typeof coreBackOfficeRolesRoleIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/positions/$positionId/edit': {
-      id: '/(core)/back-office/positions/$positionId/edit'
-      path: '/positions/$positionId/edit'
-      fullPath: '/back-office/positions/$positionId/edit'
-      preLoaderRoute: typeof coreBackOfficePositionsPositionIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameters/$parameterId/edit': {
-      id: '/(core)/back-office/parameters/$parameterId/edit'
-      path: '/parameters/$parameterId/edit'
-      fullPath: '/back-office/parameters/$parameterId/edit'
-      preLoaderRoute: typeof coreBackOfficeParametersParameterIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameters/$parameterId/detail': {
-      id: '/(core)/back-office/parameters/$parameterId/detail'
-      path: '/parameters/$parameterId/detail'
-      fullPath: '/back-office/parameters/$parameterId/detail'
-      preLoaderRoute: typeof coreBackOfficeParametersParameterIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': {
-      id: '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
-      path: '/parameter-categories/$parameterCategoriesId/edit'
-      fullPath: '/back-office/parameter-categories/$parameterCategoriesId/edit'
-      preLoaderRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/orders/$orderId/detail': {
-      id: '/(core)/back-office/orders/$orderId/detail'
-      path: '/orders/$orderId/detail'
-      fullPath: '/back-office/orders/$orderId/detail'
-      preLoaderRoute: typeof coreBackOfficeOrdersOrderIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/news/$newsId/edit': {
-      id: '/(core)/back-office/news/$newsId/edit'
-      path: '/news/$newsId/edit'
-      fullPath: '/back-office/news/$newsId/edit'
-      preLoaderRoute: typeof coreBackOfficeNewsNewsIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/kblis/$kbliId/edit': {
-      id: '/(core)/back-office/kblis/$kbliId/edit'
-      path: '/kblis/$kbliId/edit'
-      fullPath: '/back-office/kblis/$kbliId/edit'
-      preLoaderRoute: typeof coreBackOfficeKblisKbliIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/employees/$employeeId/edit': {
-      id: '/(core)/back-office/employees/$employeeId/edit'
-      path: '/employees/$employeeId/edit'
-      fullPath: '/back-office/employees/$employeeId/edit'
-      preLoaderRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/clusters/$clusterId/edit': {
-      id: '/(core)/back-office/clusters/$clusterId/edit'
-      path: '/clusters/$clusterId/edit'
-      fullPath: '/back-office/clusters/$clusterId/edit'
-      preLoaderRoute: typeof coreBackOfficeClustersClusterIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': {
-      id: '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
-      path: '/chemical-materials/$chemicalMaterialId/edit'
-      fullPath: '/back-office/chemical-materials/$chemicalMaterialId/edit'
-      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/banners/$bannerId/edit': {
-      id: '/(core)/back-office/banners/$bannerId/edit'
-      path: '/banners/$bannerId/edit'
-      fullPath: '/back-office/banners/$bannerId/edit'
-      preLoaderRoute: typeof coreBackOfficeBannersBannerIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/$toolId/calibration/': {
-      id: '/(core)/back-office/tools/$toolId/calibration/'
-      path: '/tools/$toolId/calibration'
-      fullPath: '/back-office/tools/$toolId/calibration'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/$toolId/calibration/create': {
-      id: '/(core)/back-office/tools/$toolId/calibration/create'
-      path: '/tools/$toolId/calibration/create'
-      fullPath: '/back-office/tools/$toolId/calibration/create'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': {
-      id: '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
-      path: '/tools/$toolId/calibration/$calibrationId/edit'
-      fullPath: '/back-office/tools/$toolId/calibration/$calibrationId/edit'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': {
-      id: '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
-      path: '/tools/$toolId/calibration/$calibrationId/detail'
-      fullPath: '/back-office/tools/$toolId/calibration/$calibrationId/detail'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
+    "/unauthorized": {
+      id: "/unauthorized";
+      path: "/unauthorized";
+      fullPath: "/unauthorized";
+      preLoaderRoute: typeof UnauthorizedRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/test": {
+      id: "/test";
+      path: "/test";
+      fullPath: "/test";
+      preLoaderRoute: typeof TestRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/profil": {
+      id: "/profil";
+      path: "/profil";
+      fullPath: "/profil";
+      preLoaderRoute: typeof ProfilRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/katalog": {
+      id: "/katalog";
+      path: "/katalog";
+      fullPath: "/katalog";
+      preLoaderRoute: typeof KatalogRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(core)": {
+      id: "/(core)";
+      path: "";
+      fullPath: "";
+      preLoaderRoute: typeof coreRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(auth)": {
+      id: "/(auth)";
+      path: "";
+      fullPath: "";
+      preLoaderRoute: typeof authRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/berita/": {
+      id: "/berita/";
+      path: "/berita";
+      fullPath: "/berita";
+      preLoaderRoute: typeof BeritaIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/verify/$token": {
+      id: "/verify/$token";
+      path: "/verify/$token";
+      fullPath: "/verify/$token";
+      preLoaderRoute: typeof VerifyTokenRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/berita/$newsId": {
+      id: "/berita/$newsId";
+      path: "/berita/$newsId";
+      fullPath: "/berita/$newsId";
+      preLoaderRoute: typeof BeritaNewsIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/(core)/settings": {
+      id: "/(core)/settings";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof coreSettingsRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/profile": {
+      id: "/(core)/profile";
+      path: "/profile";
+      fullPath: "/profile";
+      preLoaderRoute: typeof coreProfileRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/pdf-editor": {
+      id: "/(core)/pdf-editor";
+      path: "/pdf-editor";
+      fullPath: "/pdf-editor";
+      preLoaderRoute: typeof corePdfEditorRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/document": {
+      id: "/(core)/document";
+      path: "/document";
+      fullPath: "/document";
+      preLoaderRoute: typeof coreDocumentRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(auth)/verify-email": {
+      id: "/(auth)/verify-email";
+      path: "/verify-email";
+      fullPath: "/verify-email";
+      preLoaderRoute: typeof authVerifyEmailRouteImport;
+      parentRoute: typeof authRouteRoute;
+    };
+    "/(auth)/reset-password": {
+      id: "/(auth)/reset-password";
+      path: "/reset-password";
+      fullPath: "/reset-password";
+      preLoaderRoute: typeof authResetPasswordRouteImport;
+      parentRoute: typeof authRouteRoute;
+    };
+    "/(auth)/register": {
+      id: "/(auth)/register";
+      path: "/register";
+      fullPath: "/register";
+      preLoaderRoute: typeof authRegisterRouteImport;
+      parentRoute: typeof authRouteRoute;
+    };
+    "/(auth)/login": {
+      id: "/(auth)/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof authLoginRouteImport;
+      parentRoute: typeof authRouteRoute;
+    };
+    "/(auth)/forgot-password": {
+      id: "/(auth)/forgot-password";
+      path: "/forgot-password";
+      fullPath: "/forgot-password";
+      preLoaderRoute: typeof authForgotPasswordRouteImport;
+      parentRoute: typeof authRouteRoute;
+    };
+    "/(core)/worksheets": {
+      id: "/(core)/worksheets";
+      path: "/worksheets";
+      fullPath: "/worksheets";
+      preLoaderRoute: typeof coreWorksheetsRouteRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/uji-kompetensi": {
+      id: "/(core)/uji-kompetensi";
+      path: "/uji-kompetensi";
+      fullPath: "/uji-kompetensi";
+      preLoaderRoute: typeof coreUjiKompetensiRouteRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/pengujian": {
+      id: "/(core)/pengujian";
+      path: "/pengujian";
+      fullPath: "/pengujian";
+      preLoaderRoute: typeof corePengujianRouteRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/pelatihan": {
+      id: "/(core)/pelatihan";
+      path: "/pelatihan";
+      fullPath: "/pelatihan";
+      preLoaderRoute: typeof corePelatihanRouteRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/konsultasi": {
+      id: "/(core)/konsultasi";
+      path: "/konsultasi";
+      fullPath: "/konsultasi";
+      preLoaderRoute: typeof coreKonsultasiRouteRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/dashboard": {
+      id: "/(core)/dashboard";
+      path: "/dashboard";
+      fullPath: "/dashboard";
+      preLoaderRoute: typeof coreDashboardRouteRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/back-office": {
+      id: "/(core)/back-office";
+      path: "/back-office";
+      fullPath: "/back-office";
+      preLoaderRoute: typeof coreBackOfficeRouteRouteImport;
+      parentRoute: typeof coreRouteRoute;
+    };
+    "/(core)/worksheets/": {
+      id: "/(core)/worksheets/";
+      path: "/";
+      fullPath: "/worksheets/";
+      preLoaderRoute: typeof coreWorksheetsIndexRouteImport;
+      parentRoute: typeof coreWorksheetsRouteRoute;
+    };
+    "/(core)/pengujian/": {
+      id: "/(core)/pengujian/";
+      path: "/";
+      fullPath: "/pengujian/";
+      preLoaderRoute: typeof corePengujianIndexRouteImport;
+      parentRoute: typeof corePengujianRouteRoute;
+    };
+    "/(core)/dashboard/": {
+      id: "/(core)/dashboard/";
+      path: "/";
+      fullPath: "/dashboard/";
+      preLoaderRoute: typeof coreDashboardIndexRouteImport;
+      parentRoute: typeof coreDashboardRouteRoute;
+    };
+    "/(core)/back-office/": {
+      id: "/(core)/back-office/";
+      path: "/";
+      fullPath: "/back-office/";
+      preLoaderRoute: typeof coreBackOfficeIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/worksheets/jadwal-personel": {
+      id: "/(core)/worksheets/jadwal-personel";
+      path: "/jadwal-personel";
+      fullPath: "/worksheets/jadwal-personel";
+      preLoaderRoute: typeof coreWorksheetsJadwalPersonelRouteImport;
+      parentRoute: typeof coreWorksheetsRouteRoute;
+    };
+    "/(core)/worksheets/detail-transaksi": {
+      id: "/(core)/worksheets/detail-transaksi";
+      path: "/detail-transaksi";
+      fullPath: "/worksheets/detail-transaksi";
+      preLoaderRoute: typeof coreWorksheetsDetailTransaksiRouteImport;
+      parentRoute: typeof coreWorksheetsRouteRoute;
+    };
+    "/(core)/pengujian/transaksi": {
+      id: "/(core)/pengujian/transaksi";
+      path: "/transaksi";
+      fullPath: "/pengujian/transaksi";
+      preLoaderRoute: typeof corePengujianTransaksiRouteImport;
+      parentRoute: typeof corePengujianRouteRoute;
+    };
+    "/(core)/pengujian/survey-kepuasan": {
+      id: "/(core)/pengujian/survey-kepuasan";
+      path: "/survey-kepuasan";
+      fullPath: "/pengujian/survey-kepuasan";
+      preLoaderRoute: typeof corePengujianSurveyKepuasanRouteImport;
+      parentRoute: typeof corePengujianRouteRoute;
+    };
+    "/(core)/pengujian/status": {
+      id: "/(core)/pengujian/status";
+      path: "/status";
+      fullPath: "/pengujian/status";
+      preLoaderRoute: typeof corePengujianStatusRouteImport;
+      parentRoute: typeof corePengujianRouteRoute;
+    };
+    "/(core)/pengujian/checkout": {
+      id: "/(core)/pengujian/checkout";
+      path: "/checkout";
+      fullPath: "/pengujian/checkout";
+      preLoaderRoute: typeof corePengujianCheckoutRouteImport;
+      parentRoute: typeof corePengujianRouteRoute;
+    };
+    "/(core)/dashboard/company/": {
+      id: "/(core)/dashboard/company/";
+      path: "/company";
+      fullPath: "/dashboard/company";
+      preLoaderRoute: typeof coreDashboardCompanyIndexRouteImport;
+      parentRoute: typeof coreDashboardRouteRoute;
+    };
+    "/(core)/back-office/worksheets/": {
+      id: "/(core)/back-office/worksheets/";
+      path: "/worksheets";
+      fullPath: "/back-office/worksheets";
+      preLoaderRoute: typeof coreBackOfficeWorksheetsIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/users/": {
+      id: "/(core)/back-office/users/";
+      path: "/users";
+      fullPath: "/back-office/users";
+      preLoaderRoute: typeof coreBackOfficeUsersIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/": {
+      id: "/(core)/back-office/tools/";
+      path: "/tools";
+      fullPath: "/back-office/tools";
+      preLoaderRoute: typeof coreBackOfficeToolsIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/testings/": {
+      id: "/(core)/back-office/testings/";
+      path: "/testings";
+      fullPath: "/back-office/testings";
+      preLoaderRoute: typeof coreBackOfficeTestingsIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/survey-questions/": {
+      id: "/(core)/back-office/survey-questions/";
+      path: "/survey-questions";
+      fullPath: "/back-office/survey-questions";
+      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/roles/": {
+      id: "/(core)/back-office/roles/";
+      path: "/roles";
+      fullPath: "/back-office/roles";
+      preLoaderRoute: typeof coreBackOfficeRolesIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/positions/": {
+      id: "/(core)/back-office/positions/";
+      path: "/positions";
+      fullPath: "/back-office/positions";
+      preLoaderRoute: typeof coreBackOfficePositionsIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/parameters/": {
+      id: "/(core)/back-office/parameters/";
+      path: "/parameters";
+      fullPath: "/back-office/parameters";
+      preLoaderRoute: typeof coreBackOfficeParametersIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/parameter-categories/": {
+      id: "/(core)/back-office/parameter-categories/";
+      path: "/parameter-categories";
+      fullPath: "/back-office/parameter-categories";
+      preLoaderRoute: typeof coreBackOfficeParameterCategoriesIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/orders/": {
+      id: "/(core)/back-office/orders/";
+      path: "/orders";
+      fullPath: "/back-office/orders";
+      preLoaderRoute: typeof coreBackOfficeOrdersIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/news/": {
+      id: "/(core)/back-office/news/";
+      path: "/news";
+      fullPath: "/back-office/news";
+      preLoaderRoute: typeof coreBackOfficeNewsIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/kblis/": {
+      id: "/(core)/back-office/kblis/";
+      path: "/kblis";
+      fullPath: "/back-office/kblis";
+      preLoaderRoute: typeof coreBackOfficeKblisIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/employees/": {
+      id: "/(core)/back-office/employees/";
+      path: "/employees";
+      fullPath: "/back-office/employees";
+      preLoaderRoute: typeof coreBackOfficeEmployeesIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/clusters/": {
+      id: "/(core)/back-office/clusters/";
+      path: "/clusters";
+      fullPath: "/back-office/clusters";
+      preLoaderRoute: typeof coreBackOfficeClustersIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/chemical-materials/": {
+      id: "/(core)/back-office/chemical-materials/";
+      path: "/chemical-materials";
+      fullPath: "/back-office/chemical-materials";
+      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/banners/": {
+      id: "/(core)/back-office/banners/";
+      path: "/banners";
+      fullPath: "/back-office/banners";
+      preLoaderRoute: typeof coreBackOfficeBannersIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/dashboard/company/create": {
+      id: "/(core)/dashboard/company/create";
+      path: "/company/create";
+      fullPath: "/dashboard/company/create";
+      preLoaderRoute: typeof coreDashboardCompanyCreateRouteImport;
+      parentRoute: typeof coreDashboardRouteRoute;
+    };
+    "/(core)/back-office/users/create": {
+      id: "/(core)/back-office/users/create";
+      path: "/users/create";
+      fullPath: "/back-office/users/create";
+      preLoaderRoute: typeof coreBackOfficeUsersCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/create": {
+      id: "/(core)/back-office/tools/create";
+      path: "/tools/create";
+      fullPath: "/back-office/tools/create";
+      preLoaderRoute: typeof coreBackOfficeToolsCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/survey-questions/create": {
+      id: "/(core)/back-office/survey-questions/create";
+      path: "/survey-questions/create";
+      fullPath: "/back-office/survey-questions/create";
+      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/roles/create": {
+      id: "/(core)/back-office/roles/create";
+      path: "/roles/create";
+      fullPath: "/back-office/roles/create";
+      preLoaderRoute: typeof coreBackOfficeRolesCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/positions/create": {
+      id: "/(core)/back-office/positions/create";
+      path: "/positions/create";
+      fullPath: "/back-office/positions/create";
+      preLoaderRoute: typeof coreBackOfficePositionsCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/parameters/create": {
+      id: "/(core)/back-office/parameters/create";
+      path: "/parameters/create";
+      fullPath: "/back-office/parameters/create";
+      preLoaderRoute: typeof coreBackOfficeParametersCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/parameter-categories/create": {
+      id: "/(core)/back-office/parameter-categories/create";
+      path: "/parameter-categories/create";
+      fullPath: "/back-office/parameter-categories/create";
+      preLoaderRoute: typeof coreBackOfficeParameterCategoriesCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/news/create": {
+      id: "/(core)/back-office/news/create";
+      path: "/news/create";
+      fullPath: "/back-office/news/create";
+      preLoaderRoute: typeof coreBackOfficeNewsCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/kblis/create": {
+      id: "/(core)/back-office/kblis/create";
+      path: "/kblis/create";
+      fullPath: "/back-office/kblis/create";
+      preLoaderRoute: typeof coreBackOfficeKblisCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/employees/create": {
+      id: "/(core)/back-office/employees/create";
+      path: "/employees/create";
+      fullPath: "/back-office/employees/create";
+      preLoaderRoute: typeof coreBackOfficeEmployeesCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/clusters/create": {
+      id: "/(core)/back-office/clusters/create";
+      path: "/clusters/create";
+      fullPath: "/back-office/clusters/create";
+      preLoaderRoute: typeof coreBackOfficeClustersCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/chemical-materials/create": {
+      id: "/(core)/back-office/chemical-materials/create";
+      path: "/chemical-materials/create";
+      fullPath: "/back-office/chemical-materials/create";
+      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/banners/create": {
+      id: "/(core)/back-office/banners/create";
+      path: "/banners/create";
+      fullPath: "/back-office/banners/create";
+      preLoaderRoute: typeof coreBackOfficeBannersCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/dashboard/company/$companyId/edit": {
+      id: "/(core)/dashboard/company/$companyId/edit";
+      path: "/company/$companyId/edit";
+      fullPath: "/dashboard/company/$companyId/edit";
+      preLoaderRoute: typeof coreDashboardCompanyCompanyIdEditRouteImport;
+      parentRoute: typeof coreDashboardRouteRoute;
+    };
+    "/(core)/dashboard/company/$companyId/detail": {
+      id: "/(core)/dashboard/company/$companyId/detail";
+      path: "/company/$companyId/detail";
+      fullPath: "/dashboard/company/$companyId/detail";
+      preLoaderRoute: typeof coreDashboardCompanyCompanyIdDetailRouteImport;
+      parentRoute: typeof coreDashboardRouteRoute;
+    };
+    "/(core)/back-office/users/$userId/edit": {
+      id: "/(core)/back-office/users/$userId/edit";
+      path: "/users/$userId/edit";
+      fullPath: "/back-office/users/$userId/edit";
+      preLoaderRoute: typeof coreBackOfficeUsersUserIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/$toolId/edit": {
+      id: "/(core)/back-office/tools/$toolId/edit";
+      path: "/tools/$toolId/edit";
+      fullPath: "/back-office/tools/$toolId/edit";
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/$toolId/detail": {
+      id: "/(core)/back-office/tools/$toolId/detail";
+      path: "/tools/$toolId/detail";
+      fullPath: "/back-office/tools/$toolId/detail";
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdDetailRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/testings/$testingId/detail": {
+      id: "/(core)/back-office/testings/$testingId/detail";
+      path: "/testings/$testingId/detail";
+      fullPath: "/back-office/testings/$testingId/detail";
+      preLoaderRoute: typeof coreBackOfficeTestingsTestingIdDetailRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/survey-questions/$questionId/edit": {
+      id: "/(core)/back-office/survey-questions/$questionId/edit";
+      path: "/survey-questions/$questionId/edit";
+      fullPath: "/back-office/survey-questions/$questionId/edit";
+      preLoaderRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/roles/$roleId/edit": {
+      id: "/(core)/back-office/roles/$roleId/edit";
+      path: "/roles/$roleId/edit";
+      fullPath: "/back-office/roles/$roleId/edit";
+      preLoaderRoute: typeof coreBackOfficeRolesRoleIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/roles/$roleId/detail": {
+      id: "/(core)/back-office/roles/$roleId/detail";
+      path: "/roles/$roleId/detail";
+      fullPath: "/back-office/roles/$roleId/detail";
+      preLoaderRoute: typeof coreBackOfficeRolesRoleIdDetailRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/positions/$positionId/edit": {
+      id: "/(core)/back-office/positions/$positionId/edit";
+      path: "/positions/$positionId/edit";
+      fullPath: "/back-office/positions/$positionId/edit";
+      preLoaderRoute: typeof coreBackOfficePositionsPositionIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/parameters/$parameterId/edit": {
+      id: "/(core)/back-office/parameters/$parameterId/edit";
+      path: "/parameters/$parameterId/edit";
+      fullPath: "/back-office/parameters/$parameterId/edit";
+      preLoaderRoute: typeof coreBackOfficeParametersParameterIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/parameters/$parameterId/detail": {
+      id: "/(core)/back-office/parameters/$parameterId/detail";
+      path: "/parameters/$parameterId/detail";
+      fullPath: "/back-office/parameters/$parameterId/detail";
+      preLoaderRoute: typeof coreBackOfficeParametersParameterIdDetailRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/parameter-categories/$parameterCategoriesId/edit": {
+      id: "/(core)/back-office/parameter-categories/$parameterCategoriesId/edit";
+      path: "/parameter-categories/$parameterCategoriesId/edit";
+      fullPath: "/back-office/parameter-categories/$parameterCategoriesId/edit";
+      preLoaderRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/orders/$orderId/detail": {
+      id: "/(core)/back-office/orders/$orderId/detail";
+      path: "/orders/$orderId/detail";
+      fullPath: "/back-office/orders/$orderId/detail";
+      preLoaderRoute: typeof coreBackOfficeOrdersOrderIdDetailRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/news/$newsId/edit": {
+      id: "/(core)/back-office/news/$newsId/edit";
+      path: "/news/$newsId/edit";
+      fullPath: "/back-office/news/$newsId/edit";
+      preLoaderRoute: typeof coreBackOfficeNewsNewsIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/kblis/$kbliId/edit": {
+      id: "/(core)/back-office/kblis/$kbliId/edit";
+      path: "/kblis/$kbliId/edit";
+      fullPath: "/back-office/kblis/$kbliId/edit";
+      preLoaderRoute: typeof coreBackOfficeKblisKbliIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/employees/$employeeId/edit": {
+      id: "/(core)/back-office/employees/$employeeId/edit";
+      path: "/employees/$employeeId/edit";
+      fullPath: "/back-office/employees/$employeeId/edit";
+      preLoaderRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/clusters/$clusterId/edit": {
+      id: "/(core)/back-office/clusters/$clusterId/edit";
+      path: "/clusters/$clusterId/edit";
+      fullPath: "/back-office/clusters/$clusterId/edit";
+      preLoaderRoute: typeof coreBackOfficeClustersClusterIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/chemical-materials/$chemicalMaterialId/edit": {
+      id: "/(core)/back-office/chemical-materials/$chemicalMaterialId/edit";
+      path: "/chemical-materials/$chemicalMaterialId/edit";
+      fullPath: "/back-office/chemical-materials/$chemicalMaterialId/edit";
+      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/banners/$bannerId/edit": {
+      id: "/(core)/back-office/banners/$bannerId/edit";
+      path: "/banners/$bannerId/edit";
+      fullPath: "/back-office/banners/$bannerId/edit";
+      preLoaderRoute: typeof coreBackOfficeBannersBannerIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/$toolId/calibration/": {
+      id: "/(core)/back-office/tools/$toolId/calibration/";
+      path: "/tools/$toolId/calibration";
+      fullPath: "/back-office/tools/$toolId/calibration";
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/$toolId/calibration/create": {
+      id: "/(core)/back-office/tools/$toolId/calibration/create";
+      path: "/tools/$toolId/calibration/create";
+      fullPath: "/back-office/tools/$toolId/calibration/create";
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit": {
+      id: "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit";
+      path: "/tools/$toolId/calibration/$calibrationId/edit";
+      fullPath: "/back-office/tools/$toolId/calibration/$calibrationId/edit";
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
+    "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail": {
+      id: "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail";
+      path: "/tools/$toolId/calibration/$calibrationId/detail";
+      fullPath: "/back-office/tools/$toolId/calibration/$calibrationId/detail";
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport;
+      parentRoute: typeof coreBackOfficeRouteRoute;
+    };
   }
 }
 
 interface authRouteRouteChildren {
-  authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authLoginRoute: typeof authLoginRoute
-  authRegisterRoute: typeof authRegisterRoute
-  authResetPasswordRoute: typeof authResetPasswordRoute
-  authVerifyEmailRoute: typeof authVerifyEmailRoute
+  authForgotPasswordRoute: typeof authForgotPasswordRoute;
+  authLoginRoute: typeof authLoginRoute;
+  authRegisterRoute: typeof authRegisterRoute;
+  authResetPasswordRoute: typeof authResetPasswordRoute;
+  authVerifyEmailRoute: typeof authVerifyEmailRoute;
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
@@ -1807,65 +1827,65 @@ const authRouteRouteChildren: authRouteRouteChildren = {
   authRegisterRoute: authRegisterRoute,
   authResetPasswordRoute: authResetPasswordRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
-}
+};
 
 const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
-)
+);
 
 interface coreBackOfficeRouteRouteChildren {
-  coreBackOfficeIndexRoute: typeof coreBackOfficeIndexRoute
-  coreBackOfficeBannersCreateRoute: typeof coreBackOfficeBannersCreateRoute
-  coreBackOfficeChemicalMaterialsCreateRoute: typeof coreBackOfficeChemicalMaterialsCreateRoute
-  coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute
-  coreBackOfficeEmployeesCreateRoute: typeof coreBackOfficeEmployeesCreateRoute
-  coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute
-  coreBackOfficeNewsCreateRoute: typeof coreBackOfficeNewsCreateRoute
-  coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
-  coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute
-  coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
-  coreBackOfficeRolesCreateRoute: typeof coreBackOfficeRolesCreateRoute
-  coreBackOfficeSurveyQuestionsCreateRoute: typeof coreBackOfficeSurveyQuestionsCreateRoute
-  coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
-  coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
-  coreBackOfficeBannersIndexRoute: typeof coreBackOfficeBannersIndexRoute
-  coreBackOfficeChemicalMaterialsIndexRoute: typeof coreBackOfficeChemicalMaterialsIndexRoute
-  coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute
-  coreBackOfficeEmployeesIndexRoute: typeof coreBackOfficeEmployeesIndexRoute
-  coreBackOfficeKblisIndexRoute: typeof coreBackOfficeKblisIndexRoute
-  coreBackOfficeNewsIndexRoute: typeof coreBackOfficeNewsIndexRoute
-  coreBackOfficeOrdersIndexRoute: typeof coreBackOfficeOrdersIndexRoute
-  coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute
-  coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
-  coreBackOfficePositionsIndexRoute: typeof coreBackOfficePositionsIndexRoute
-  coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
-  coreBackOfficeSurveyQuestionsIndexRoute: typeof coreBackOfficeSurveyQuestionsIndexRoute
-  coreBackOfficeTestingsIndexRoute: typeof coreBackOfficeTestingsIndexRoute
-  coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
-  coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
-  coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
-  coreBackOfficeBannersBannerIdEditRoute: typeof coreBackOfficeBannersBannerIdEditRoute
-  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
-  coreBackOfficeEmployeesEmployeeIdEditRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRoute
-  coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
-  coreBackOfficeNewsNewsIdEditRoute: typeof coreBackOfficeNewsNewsIdEditRoute
-  coreBackOfficeOrdersOrderIdDetailRoute: typeof coreBackOfficeOrdersOrderIdDetailRoute
-  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
-  coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute
-  coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute
-  coreBackOfficePositionsPositionIdEditRoute: typeof coreBackOfficePositionsPositionIdEditRoute
-  coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
-  coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
-  coreBackOfficeSurveyQuestionsQuestionIdEditRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
-  coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
-  coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute
-  coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
-  coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
-  coreBackOfficeToolsToolIdCalibrationCreateRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
-  coreBackOfficeToolsToolIdCalibrationIndexRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
-  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  coreBackOfficeIndexRoute: typeof coreBackOfficeIndexRoute;
+  coreBackOfficeBannersCreateRoute: typeof coreBackOfficeBannersCreateRoute;
+  coreBackOfficeChemicalMaterialsCreateRoute: typeof coreBackOfficeChemicalMaterialsCreateRoute;
+  coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute;
+  coreBackOfficeEmployeesCreateRoute: typeof coreBackOfficeEmployeesCreateRoute;
+  coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute;
+  coreBackOfficeNewsCreateRoute: typeof coreBackOfficeNewsCreateRoute;
+  coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute;
+  coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute;
+  coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute;
+  coreBackOfficeRolesCreateRoute: typeof coreBackOfficeRolesCreateRoute;
+  coreBackOfficeSurveyQuestionsCreateRoute: typeof coreBackOfficeSurveyQuestionsCreateRoute;
+  coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute;
+  coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute;
+  coreBackOfficeBannersIndexRoute: typeof coreBackOfficeBannersIndexRoute;
+  coreBackOfficeChemicalMaterialsIndexRoute: typeof coreBackOfficeChemicalMaterialsIndexRoute;
+  coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute;
+  coreBackOfficeEmployeesIndexRoute: typeof coreBackOfficeEmployeesIndexRoute;
+  coreBackOfficeKblisIndexRoute: typeof coreBackOfficeKblisIndexRoute;
+  coreBackOfficeNewsIndexRoute: typeof coreBackOfficeNewsIndexRoute;
+  coreBackOfficeOrdersIndexRoute: typeof coreBackOfficeOrdersIndexRoute;
+  coreBackOfficeParameterCategoriesIndexRoute: typeof coreBackOfficeParameterCategoriesIndexRoute;
+  coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute;
+  coreBackOfficePositionsIndexRoute: typeof coreBackOfficePositionsIndexRoute;
+  coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute;
+  coreBackOfficeSurveyQuestionsIndexRoute: typeof coreBackOfficeSurveyQuestionsIndexRoute;
+  coreBackOfficeTestingsIndexRoute: typeof coreBackOfficeTestingsIndexRoute;
+  coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute;
+  coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute;
+  coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute;
+  coreBackOfficeBannersBannerIdEditRoute: typeof coreBackOfficeBannersBannerIdEditRoute;
+  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute;
+  coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute;
+  coreBackOfficeEmployeesEmployeeIdEditRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRoute;
+  coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute;
+  coreBackOfficeNewsNewsIdEditRoute: typeof coreBackOfficeNewsNewsIdEditRoute;
+  coreBackOfficeOrdersOrderIdDetailRoute: typeof coreBackOfficeOrdersOrderIdDetailRoute;
+  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute;
+  coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute;
+  coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute;
+  coreBackOfficePositionsPositionIdEditRoute: typeof coreBackOfficePositionsPositionIdEditRoute;
+  coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute;
+  coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute;
+  coreBackOfficeSurveyQuestionsQuestionIdEditRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute;
+  coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute;
+  coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute;
+  coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute;
+  coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute;
+  coreBackOfficeToolsToolIdCalibrationCreateRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRoute;
+  coreBackOfficeToolsToolIdCalibrationIndexRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRoute;
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute;
+  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute;
 }
 
 const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
@@ -1942,17 +1962,17 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute,
   coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute:
     coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute,
-}
+};
 
 const coreBackOfficeRouteRouteWithChildren =
-  coreBackOfficeRouteRoute._addFileChildren(coreBackOfficeRouteRouteChildren)
+  coreBackOfficeRouteRoute._addFileChildren(coreBackOfficeRouteRouteChildren);
 
 interface coreDashboardRouteRouteChildren {
-  coreDashboardIndexRoute: typeof coreDashboardIndexRoute
-  coreDashboardCompanyCreateRoute: typeof coreDashboardCompanyCreateRoute
-  coreDashboardCompanyIndexRoute: typeof coreDashboardCompanyIndexRoute
-  coreDashboardCompanyCompanyIdDetailRoute: typeof coreDashboardCompanyCompanyIdDetailRoute
-  coreDashboardCompanyCompanyIdEditRoute: typeof coreDashboardCompanyCompanyIdEditRoute
+  coreDashboardIndexRoute: typeof coreDashboardIndexRoute;
+  coreDashboardCompanyCreateRoute: typeof coreDashboardCompanyCreateRoute;
+  coreDashboardCompanyIndexRoute: typeof coreDashboardCompanyIndexRoute;
+  coreDashboardCompanyCompanyIdDetailRoute: typeof coreDashboardCompanyCompanyIdDetailRoute;
+  coreDashboardCompanyCompanyIdEditRoute: typeof coreDashboardCompanyCompanyIdEditRoute;
 }
 
 const coreDashboardRouteRouteChildren: coreDashboardRouteRouteChildren = {
@@ -1963,17 +1983,17 @@ const coreDashboardRouteRouteChildren: coreDashboardRouteRouteChildren = {
     coreDashboardCompanyCompanyIdDetailRoute,
   coreDashboardCompanyCompanyIdEditRoute:
     coreDashboardCompanyCompanyIdEditRoute,
-}
+};
 
 const coreDashboardRouteRouteWithChildren =
-  coreDashboardRouteRoute._addFileChildren(coreDashboardRouteRouteChildren)
+  coreDashboardRouteRoute._addFileChildren(coreDashboardRouteRouteChildren);
 
 interface corePengujianRouteRouteChildren {
-  corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute
-  corePengujianStatusRoute: typeof corePengujianStatusRoute
-  corePengujianSurveyKepuasanRoute: typeof corePengujianSurveyKepuasanRoute
-  corePengujianTransaksiRoute: typeof corePengujianTransaksiRoute
-  corePengujianIndexRoute: typeof corePengujianIndexRoute
+  corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute;
+  corePengujianStatusRoute: typeof corePengujianStatusRoute;
+  corePengujianSurveyKepuasanRoute: typeof corePengujianSurveyKepuasanRoute;
+  corePengujianTransaksiRoute: typeof corePengujianTransaksiRoute;
+  corePengujianIndexRoute: typeof corePengujianIndexRoute;
 }
 
 const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
@@ -1982,38 +2002,38 @@ const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
   corePengujianSurveyKepuasanRoute: corePengujianSurveyKepuasanRoute,
   corePengujianTransaksiRoute: corePengujianTransaksiRoute,
   corePengujianIndexRoute: corePengujianIndexRoute,
-}
+};
 
 const corePengujianRouteRouteWithChildren =
-  corePengujianRouteRoute._addFileChildren(corePengujianRouteRouteChildren)
+  corePengujianRouteRoute._addFileChildren(corePengujianRouteRouteChildren);
 
 interface coreWorksheetsRouteRouteChildren {
-  coreWorksheetsDetailTransaksiRoute: typeof coreWorksheetsDetailTransaksiRoute
-  coreWorksheetsJadwalPersonelRoute: typeof coreWorksheetsJadwalPersonelRoute
-  coreWorksheetsIndexRoute: typeof coreWorksheetsIndexRoute
+  coreWorksheetsDetailTransaksiRoute: typeof coreWorksheetsDetailTransaksiRoute;
+  coreWorksheetsJadwalPersonelRoute: typeof coreWorksheetsJadwalPersonelRoute;
+  coreWorksheetsIndexRoute: typeof coreWorksheetsIndexRoute;
 }
 
 const coreWorksheetsRouteRouteChildren: coreWorksheetsRouteRouteChildren = {
   coreWorksheetsDetailTransaksiRoute: coreWorksheetsDetailTransaksiRoute,
   coreWorksheetsJadwalPersonelRoute: coreWorksheetsJadwalPersonelRoute,
   coreWorksheetsIndexRoute: coreWorksheetsIndexRoute,
-}
+};
 
 const coreWorksheetsRouteRouteWithChildren =
-  coreWorksheetsRouteRoute._addFileChildren(coreWorksheetsRouteRouteChildren)
+  coreWorksheetsRouteRoute._addFileChildren(coreWorksheetsRouteRouteChildren);
 
 interface coreRouteRouteChildren {
-  coreBackOfficeRouteRoute: typeof coreBackOfficeRouteRouteWithChildren
-  coreDashboardRouteRoute: typeof coreDashboardRouteRouteWithChildren
-  coreKonsultasiRouteRoute: typeof coreKonsultasiRouteRoute
-  corePelatihanRouteRoute: typeof corePelatihanRouteRoute
-  corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
-  coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
-  coreWorksheetsRouteRoute: typeof coreWorksheetsRouteRouteWithChildren
-  coreDocumentRoute: typeof coreDocumentRoute
-  corePdfEditorRoute: typeof corePdfEditorRoute
-  coreProfileRoute: typeof coreProfileRoute
-  coreSettingsRoute: typeof coreSettingsRoute
+  coreBackOfficeRouteRoute: typeof coreBackOfficeRouteRouteWithChildren;
+  coreDashboardRouteRoute: typeof coreDashboardRouteRouteWithChildren;
+  coreKonsultasiRouteRoute: typeof coreKonsultasiRouteRoute;
+  corePelatihanRouteRoute: typeof corePelatihanRouteRoute;
+  corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren;
+  coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute;
+  coreWorksheetsRouteRoute: typeof coreWorksheetsRouteRouteWithChildren;
+  coreDocumentRoute: typeof coreDocumentRoute;
+  corePdfEditorRoute: typeof corePdfEditorRoute;
+  coreProfileRoute: typeof coreProfileRoute;
+  coreSettingsRoute: typeof coreSettingsRoute;
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
@@ -2028,23 +2048,24 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   corePdfEditorRoute: corePdfEditorRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
-}
+};
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
   coreRouteRouteChildren,
-)
+);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
   KatalogRoute: KatalogRoute,
+  ProfilRoute: ProfilRoute,
   TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
   BeritaNewsIdRoute: BeritaNewsIdRoute,
   VerifyTokenRoute: VerifyTokenRoute,
   BeritaIndexRoute: BeritaIndexRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

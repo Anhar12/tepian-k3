@@ -210,6 +210,7 @@ function HomeComponent() {
           <Button
             variant="outline"
             className="inline-flex h-10 items-center justify-center rounded-3xl border-primary bg-white px-6 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+            onClick={() => navigate({ to: "/profil" })}
           >
             Baca selengkapnya
             <ArrowRight className="size-4" />
