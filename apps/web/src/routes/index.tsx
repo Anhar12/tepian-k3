@@ -148,7 +148,7 @@ function HomeComponent() {
 
       {/* Pusat layanan kami */}
       <section
-        className="relative flex min-h-screen flex-col bg-muted/50 px-10 py-16"
+        className="relative flex min-h-[calc(100vh-80vh)] flex-col bg-muted/50 px-10 py-16"
         id="layanan"
       >
         <GridBackground />
@@ -158,7 +158,7 @@ function HomeComponent() {
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
-        <div className="relative z-10 mt-12 flex flex-row flex-wrap items-center justify-center gap-6">
+        <div className="relative z-10 my-auto flex flex-row flex-wrap items-center justify-center gap-6">
           {/* Service Cards */}
           {pusatLayananItems.map((item) => (
             <Card
@@ -167,11 +167,13 @@ function HomeComponent() {
               onClick={() => navigate({ to: item.to })}
             >
               <CardHeader>
-                <ImageWithFallback
-                  src={item.imageSrc}
-                  alt={item.title}
-                  className="h-40 w-full object-contain"
-                />
+                <div className="flex flex-row items-center justify-center overflow-hidden">
+                  <ImageWithFallback
+                    src={item.imageSrc}
+                    alt={item.title}
+                    className="size-40 object-contain"
+                  />
+                </div>
               </CardHeader>
               <CardFooter className="flex flex-row items-center">
                 <a className="w-full text-center text-2xl font-semibold text-primary">
@@ -185,14 +187,14 @@ function HomeComponent() {
 
       {/* Profile */}
       <section
-        className="relative flex h-[60vh] flex-row gap-4 px-10 py-16"
+        className="relative flex h-[60vh] flex-row items-center justify-center gap-4 px-10 py-16"
         id="profile"
       >
         {/* Logo */}
         <ImageWithFallback
           src="/assets/logo-balai-k3.png"
           alt="Balai Tepian K3 Logo"
-          className="mx-auto w-64 object-contain"
+          className="mx-auto h-auto w-full max-w-64 object-contain"
         />
         <div className="relative z-10 mx-auto flex h-full w-fit flex-col items-start justify-between gap-4">
           <h2 className="text-start text-4xl font-semibold text-primary">
