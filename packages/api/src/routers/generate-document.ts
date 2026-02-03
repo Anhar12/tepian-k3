@@ -11,7 +11,7 @@ import {
   generateTagihanPdf,
 } from "@tepian-k3/services/pdf";
 import worksheetQueries from "@tepian-k3/queries/worksheet.queries";
-import { storageService } from "@tepian-k3/services/storage";
+// import { storageService } from "@tepian-k3/services/storage";
 
 export const generateDocumentRouter = createTRPCRouter({
   generateOfferingLetter: withPermission("documents.create")
@@ -58,17 +58,19 @@ export const generateDocumentRouter = createTRPCRouter({
               offeringLetter as Buffer,
             );
 
-            const uploadedOfferingLetter = yield* storageService.upload(
-              mergedPdf as Buffer,
-              {
-                filename: `offering-letter-${input.letterNumber}.pdf`,
-                contentType: "application/pdf",
-                folder: "generated-documents/offering-letters",
-              },
-            );
+            // const uploadedOfferingLetter = yield* storageService.upload(
+            //   mergedPdf as Buffer,
+            //   {
+            //     filename: `offering-letter-${input.letterNumber}.pdf`,
+            //     contentType: "application/pdf",
+            //     folder: "generated-documents/offering-letters",
+            //   },
+            // );
 
             return {
-              offeringLetterUrl: uploadedOfferingLetter.key,
+              base64: Buffer.from(mergedPdf as Buffer).toString("base64"),
+              filename: `offering-letter-${input.letterNumber}.pdf`,
+              contentType: "application/pdf",
             };
           }),
         ),
@@ -110,14 +112,16 @@ export const generateDocumentRouter = createTRPCRouter({
               }),
             );
 
-            const uploadedSpk = yield* storageService.upload(spk as Buffer, {
-              filename: `spk-${input.letterNumber}.pdf`,
-              contentType: "application/pdf",
-              folder: "generated-documents/spks",
-            });
+            // const uploadedSpk = yield* storageService.upload(spk as Buffer, {
+            //   filename: `spk-${input.letterNumber}.pdf`,
+            //   contentType: "application/pdf",
+            //   folder: "generated-documents/spks",
+            // });
 
             return {
-              spkUrl: uploadedSpk.key,
+              base64: Buffer.from(spk as Buffer).toString("base64"),
+              filename: `spk-${input.letterNumber}.pdf`,
+              contentType: "application/pdf",
             };
           }),
         ),
@@ -159,17 +163,19 @@ export const generateDocumentRouter = createTRPCRouter({
               }),
             );
 
-            const uploadedTagihan = yield* storageService.upload(
-              tagihan as Buffer,
-              {
-                filename: `tagihan-${input.letterNumber}.pdf`,
-                contentType: "application/pdf",
-                folder: "generated-documents/tagihans",
-              },
-            );
+            // const uploadedTagihan = yield* storageService.upload(
+            //   tagihan as Buffer,
+            //   {
+            //     filename: `tagihan-${input.letterNumber}.pdf`,
+            //     contentType: "application/pdf",
+            //     folder: "generated-documents/tagihans",
+            //   },
+            // );
 
             return {
-              tagihanUrl: uploadedTagihan.key,
+              base64: Buffer.from(tagihan as Buffer).toString("base64"),
+              filename: `tagihan-${input.letterNumber}.pdf`,
+              contentType: "application/pdf",
             };
           }),
         ),
