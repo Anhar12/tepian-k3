@@ -144,7 +144,11 @@ export const authRouter = createTRPCRouter({
   register: withRateLimit(rateLimiters.auth())
     .input(userSchema.createUserSchema)
     .mutation(async ({ input }) => {
-      return runEffect(usersQueries.createUser(input));
+      const user = await runEffect(usersQueries.createUser(input));
+
+      await OTPService.createOTP({ email: input.email });
+
+      return user;
     }),
 
   sendOTP: withRateLimit(rateLimiters.otp())

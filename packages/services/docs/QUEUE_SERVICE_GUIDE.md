@@ -19,7 +19,11 @@ No additional env vars are needed.
 ### Import
 
 ```typescript
-import { queueService, QueueName } from "@tepian-k3/services/queue";
+import {
+  queueService,
+  QueueName,
+  type QueueJobName,
+} from "@tepian-k3/services/queue";
 ```
 
 ## Available Queues
@@ -31,11 +35,43 @@ import { queueService, QueueName } from "@tepian-k3/services/queue";
 | `tepian:audit`        | `QueueName.AUDIT`        | 5       | Exponential (1s) | 10          |
 | `tepian:notification` | `QueueName.NOTIFICATION` | 3       | Exponential (1s) | 5           |
 
+## Typed Job Names
+
+Each queue has a typed set of valid job names defined in `QueueJobNameMap`. This provides autocomplete and compile-time safety when adding jobs or writing workers.
+
+| Queue          | Valid Job Names                                                        |
+| -------------- | ---------------------------------------------------------------------- |
+| `EMAIL`        | `send-otp`, `send-welcome`, `send-password-reset`, `send-verification` |
+| `PDF`          | `generate-invoice`, `generate-offering-letter`, `generate-certificate` |
+| `AUDIT`        | `log`                                                                  |
+| `NOTIFICATION` | `order-status-update`, `testing-progress`                              |
+
+To add a new job name, update the `QueueJobNameMap` interface in `packages/services/src/queue/types.ts`:
+
+```typescript
+export interface QueueJobNameMap {
+  [QueueName.EMAIL]:
+    | "send-otp"
+    | "send-welcome"
+    | "send-password-reset"
+    | "send-verification"
+    | "send-new-job"; // ← add new job names here
+  // ...
+}
+```
+
+Use the `QueueJobName<Q>` utility type to extract valid job names for a specific queue:
+
+```typescript
+type EmailJobs = QueueJobName<typeof QueueName.EMAIL>;
+// → "send-otp" | "send-welcome" | "send-password-reset" | "send-verification"
+```
+
 ## API Reference
 
-### `queueService.addJob(queueName, jobName, data, opts?)`
+### `queueService.addJob<Q>(queueName, jobName, data, opts?)`
 
-Add a job to a queue. Returns the BullMQ `Job` instance or `null` if Redis is unavailable.
+Add a job to a queue. The `jobName` parameter is typed per queue — only valid job names from `QueueJobNameMap` are accepted. Returns the BullMQ `Job` instance or `null` if Redis is unavailable.
 
 ```typescript
 await queueService.addJob(QueueName.EMAIL, "send-otp", {
@@ -59,19 +95,33 @@ await queueService.addJob(
 );
 ```
 
-### `queueService.createWorker(queueName, processor, opts?)`
+### `queueService.createWorker<Q>(queueName, processor, opts?)`
 
 Register a worker that processes jobs from a queue. Returns the BullMQ `Worker` instance or `null` if Redis is unavailable.
 
+Cast `job.name` to `QueueJobName<Q>` to get typed job names in your switch statement with exhaustive checking:
+
 ```typescript
 queueService.createWorker(QueueName.EMAIL, async (job) => {
-  switch (job.name) {
+  const jobName = job.name as QueueJobName<typeof QueueName.EMAIL>;
+
+  switch (jobName) {
     case "send-otp":
       await emailService.sendOTP(job.data);
       break;
     case "send-welcome":
       await emailService.sendWelcome(job.data.email, job.data.name);
       break;
+    case "send-password-reset":
+      await emailService.sendPasswordReset(job.data);
+      break;
+    case "send-verification":
+      await emailService.sendVerification(job.data);
+      break;
+    default: {
+      const _exhaustive: never = jobName;
+      throw new Error(`Unknown email job: ${_exhaustive}`);
+    }
   }
 });
 ```
@@ -150,12 +200,18 @@ export const authRouter = createTRPCRouter({
 
 ```typescript
 // apps/server/src/workers/email.worker.ts
-import { queueService, QueueName } from "@tepian-k3/services/queue";
+import {
+  queueService,
+  QueueName,
+  type QueueJobName,
+} from "@tepian-k3/services/queue";
 import { emailService } from "@tepian-k3/services/email";
 
 export function registerEmailWorker() {
   queueService.createWorker(QueueName.EMAIL, async (job) => {
-    switch (job.name) {
+    const jobName = job.name as QueueJobName<typeof QueueName.EMAIL>;
+
+    switch (jobName) {
       case "send-otp":
         await emailService.sendOTP(job.data);
         break;
@@ -173,6 +229,13 @@ export function registerEmailWorker() {
           job.data.expiresInMinutes,
         );
         break;
+      case "send-verification":
+        await emailService.sendVerification(job.data);
+        break;
+      default: {
+        const _exhaustive: never = jobName;
+        throw new Error(`Unknown email job: ${_exhaustive}`);
+      }
     }
   });
 }
@@ -240,19 +303,25 @@ process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 ```
 
-## Custom Queues
+## Adding a New Queue
 
-You can use any string as a queue name beyond the built-in presets. Custom queues won't have preset retry/concurrency config — pass options explicitly:
+To add a new queue, update three places:
+
+1. Add the queue name to `QueueName` in `types.ts`
+2. Add its job names to `QueueJobNameMap` in `types.ts`
+3. Add a preset config in `presets.ts`
 
 ```typescript
-await queueService.addJob("tepian:custom-task", "process", data, {
-  attempts: 2,
-  backoff: { type: "fixed", delay: 3000 },
-});
+// types.ts
+export const QueueName = {
+  // ...existing
+  CUSTOM: "tepian:custom",
+} as const;
 
-queueService.createWorker("tepian:custom-task", processor, {
-  concurrency: 3,
-});
+export interface QueueJobNameMap {
+  // ...existing
+  [QueueName.CUSTOM]: "process" | "cleanup";
+}
 ```
 
 ## Architecture
@@ -278,6 +347,6 @@ Done (auto-removed based on preset limits)
 ```
 packages/services/src/queue/
 ├── index.ts      # QueueService class + singleton export
-├── types.ts      # QueueName enum, QueuePreset interface
+├── types.ts      # QueueName enum, QueueJobNameMap, QueuePreset interface
 └── presets.ts    # Preset configs per queue
 ```

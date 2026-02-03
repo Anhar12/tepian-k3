@@ -23,6 +23,8 @@ import { secureHeaders } from "./middleware/secure-headers";
 import { timeout } from "./middleware/timeout";
 import { setDefaultOptions } from "date-fns";
 import { id } from "date-fns/locale";
+import { registerEmailWorker } from "./workers/email.worker";
+import { queueService } from "@tepian-k3/services/queue";
 
 const redisConfig = {
   host: env.MEMURAI_HOST,
@@ -39,6 +41,9 @@ initializeEventBus(redisConfig);
 z.config(z.locales.id());
 // Set date-fns default locale to Indonesian
 setDefaultOptions({ locale: id });
+
+// Register Workers
+registerEmailWorker();
 
 const app = new Hono();
 
@@ -228,15 +233,14 @@ serve(
   },
 );
 
-// Graceful shutdown
-process.on("SIGTERM", async () => {
+const shutdown = async () => {
   logInfo("Server", "Shutting down...");
   await shutdownEventBus();
+  await queueService.shutdown();
   process.exit(0);
-});
+};
 
-process.on("SIGINT", async () => {
-  logInfo("Server", "Shutting down...");
-  await shutdownEventBus();
-  process.exit(0);
-});
+// Graceful shutdown
+process.on("SIGTERM", shutdown);
+
+process.on("SIGINT", shutdown);

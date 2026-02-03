@@ -5,7 +5,6 @@
 import {
   Queue,
   Worker,
-  type Processor,
   type JobsOptions,
   type WorkerOptions,
   type ConnectionOptions,
@@ -13,11 +12,25 @@ import {
 import { env } from "../../env";
 import { logInfo, logWarn, logError } from "../logger";
 import { queuePresets } from "./presets";
-import type { QueueName } from "./types";
+import type {
+  QueueName,
+  QueueJobName,
+  QueueJobDataUnion,
+  QueueJobDataMap,
+  QueueJobEntry,
+} from "./types";
+import { QUEUE_PREFIX } from "./types";
 
-export { QueueName } from "./types";
+export { QueueName, QUEUE_PREFIX } from "./types";
 export { queuePresets } from "./presets";
-export type { QueuePreset } from "./types";
+export type {
+  QueuePreset,
+  QueueJobName,
+  QueueJobData,
+  QueueJobDataMap,
+  QueueJobDataUnion,
+  QueueJobEntry,
+} from "./types";
 
 class QueueService {
   private connection: ConnectionOptions | null = null;
@@ -51,6 +64,7 @@ class QueueService {
 
     const queue = new Queue(name, {
       connection: this.connection,
+      prefix: QUEUE_PREFIX,
       defaultJobOptions: preset?.defaultJobOptions,
     });
 
@@ -63,10 +77,10 @@ class QueueService {
    * Add a job to a queue. Returns the job instance or null if Redis is
    * unavailable.
    */
-  async addJob<TData>(
-    queueName: string,
-    jobName: string,
-    data: TData,
+  async addJob<Q extends QueueName, J extends QueueJobName<Q>>(
+    queueName: Q,
+    jobName: J,
+    data: QueueJobDataMap[Q][J],
     opts?: JobsOptions,
   ) {
     const queue = this.getQueue(queueName);
@@ -93,14 +107,15 @@ class QueueService {
   }
 
   /**
-   * Register a worker for a queue. The processor function receives each job
-   * and should return a result or throw on failure.
+   * Register a worker for a queue. The processor callback receives a
+   * discriminated `{ name, data }` object so switching on `name` narrows
+   * `data` to the correct type automatically.
    */
-  createWorker<TData = unknown, TResult = unknown>(
-    queueName: string,
-    processor: Processor<TData, TResult>,
+  createWorker<Q extends QueueName, TResult = void>(
+    queueName: Q,
+    processor: (job: QueueJobEntry<Q>) => Promise<TResult>,
     opts?: Partial<WorkerOptions>,
-  ): Worker<TData, TResult> | null {
+  ): Worker<QueueJobDataUnion<Q>, TResult> | null {
     if (!this.connection) {
       logWarn(
         "QueueService.createWorker",
@@ -111,11 +126,17 @@ class QueueService {
 
     const preset = queuePresets[queueName as QueueName];
 
-    const worker = new Worker<TData, TResult>(queueName, processor, {
-      connection: this.connection,
-      ...preset?.workerOptions,
-      ...opts,
-    });
+    const worker = new Worker<QueueJobDataUnion<Q>, TResult>(
+      queueName,
+      async (job) =>
+        processor({ name: job.name, data: job.data } as QueueJobEntry<Q>),
+      {
+        connection: this.connection,
+        prefix: QUEUE_PREFIX,
+        ...preset?.workerOptions,
+        ...opts,
+      },
+    );
 
     worker.on("completed", (job) => {
       logInfo(
