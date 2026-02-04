@@ -485,6 +485,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "pending",
                 oldStatus: "pending",
@@ -538,6 +539,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "rejected",
                 oldStatus: "pending",
@@ -590,6 +592,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "pembayaran_diterima",
                 oldStatus: "proses_validasi_pembayaran",
@@ -652,6 +655,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "rejected",
                 oldStatus: "pending",
