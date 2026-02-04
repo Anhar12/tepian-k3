@@ -34,7 +34,7 @@ import {
   NOTIFICATION_TYPE_LABELS,
   type NotificationType,
 } from "@tepian-k3/constants";
-import { Bell, CheckCheck, Loader2, Trash2 } from "lucide-react";
+import { ArrowLeft, Bell, CheckCheck, Loader2, Trash2 } from "lucide-react";
 import z from "zod";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 
@@ -216,7 +216,18 @@ function NotificationsPage() {
   const hasUnread = notifications.some((n) => !n.isRead);
 
   return (
-    <div className="mx-auto flex h-full max-w-3xl flex-col">
+    <div className="mx-auto flex h-full max-w-3xl flex-col p-4">
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="mb-2 w-fit gap-2"
+        onClick={() => navigate({ to: "/" })}
+      >
+        <ArrowLeft className="size-4" />
+        Kembali ke Beranda
+      </Button>
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="mb-1 text-2xl font-bold text-foreground">Notifikasi</h1>

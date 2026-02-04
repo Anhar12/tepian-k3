@@ -43,6 +43,7 @@ export default function NavbarNotifications() {
     trpc.notifications.getAll.queryOptions({
       page: 1,
       limit: 5,
+      isRead: false,
     }),
   );
 
@@ -193,25 +194,21 @@ export default function NavbarNotifications() {
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Bell className="mb-2 size-8 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Tidak ada notifikasi
+                Tidak ada notifikasi yang belum dibaca.
               </p>
             </div>
           )}
         </DropdownMenuGroup>
-        {notifications?.data && notifications.data.length > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link
-                to="/notifications"
-                className="flex w-full items-center justify-center gap-1 text-sm text-primary"
-              >
-                Lihat semua
-                <ExternalLink className="size-3" />
-              </Link>
-            </DropdownMenuItem>
-          </>
-        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link
+            to="/notifications"
+            className="flex w-full items-center justify-center gap-1 text-sm text-primary"
+          >
+            Lihat semua
+            <ExternalLink className="size-3" />
+          </Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
