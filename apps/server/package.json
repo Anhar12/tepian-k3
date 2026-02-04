@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node -e \"const{cpSync}=require('fs');cpSync('../../packages/services/src/pdf/assets','./assets',{recursive:true,force:true})\"",
     "check-types": "tsc -b",
     "compile": "bun with-env build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "pnpm with-env:local tsx watch src/index.ts",

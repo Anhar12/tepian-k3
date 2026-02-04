@@ -68,7 +68,7 @@ export default function GenerateOfferingDialog({
       },
       onError: (error) => {
         globalErrorToast(
-          "Gagal membuat surat penawaran :" + (error?.message || ""),
+          "Gagal membuat surat penawaran : " + (error?.message || ""),
         );
       },
     }),
@@ -93,10 +93,9 @@ export default function GenerateOfferingDialog({
       <form>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tambah Bahan Kimia Terkait Parameter</DialogTitle>
+            <DialogTitle>Buat Surat Penawaran</DialogTitle>
             <DialogDescription>
-              Isi formulir di bawah untuk menambahkan bahan kimia baru yang
-              terkait dengan parameter
+              Isi form berikut untuk membuat surat penawaran.
             </DialogDescription>
           </DialogHeader>
           <form

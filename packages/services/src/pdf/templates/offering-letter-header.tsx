@@ -167,10 +167,13 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
         {/* Body */}
         <Text style={styles.bodyText}>
           Sesuai dengan surat saudara nomor {referenceNumber} tanggal{" "}
-          {format(new Date(referenceDate), "dd MMMM yyyy")} perihal Permohonan
-          Pengajuan K3 Lingkungan Kerja, pada prinsipnya Balai Keselamatan dan
-          Kesehatan Kerja Samarinda bersedia untuk melakukan pengujian
-          keselamatan dan kesehatan kerja dengan hal-hal sebagai berikut:
+          {referenceDate
+            ? format(new Date(referenceDate), "dd MMMM yyyy")
+            : "-"}{" "}
+          perihal Permohonan Pengajuan K3 Lingkungan Kerja, pada prinsipnya
+          Balai Keselamatan dan Kesehatan Kerja Samarinda bersedia untuk
+          melakukan pengujian keselamatan dan kesehatan kerja dengan hal-hal
+          sebagai berikut:
         </Text>
 
         {/* Numbered List */}

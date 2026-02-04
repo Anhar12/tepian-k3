@@ -2,6 +2,7 @@ import generateDocumentSchema from "@tepian-k3/schema/generate-document.schema";
 import { createTRPCRouter, withPermission } from "..";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
+import { tryPromise } from "../utils/try-promise";
 import { Effect } from "effect";
 import {
   addCoverPage,
@@ -32,24 +33,28 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            const offeringLetterHeader = yield* Effect.tryPromise(() =>
-              generateOfferingLetterHeaderPdf({
-                companyName: worksheet.order.company.name,
-                regencyName: worksheet.order.company.regency.name,
-                letterNumber: input.letterNumber,
-                referenceNumber: input.referenceNumber ?? "",
-                referenceDate: input.referenceDate ?? "",
-                adminEmail: input.adminEmail,
-                adminContact: input.adminContact,
-              }),
+            const offeringLetterHeader = yield* tryPromise(
+              () =>
+                generateOfferingLetterHeaderPdf({
+                  companyName: worksheet.order.company.name,
+                  regencyName: worksheet.order.company.regency.name,
+                  letterNumber: input.letterNumber,
+                  referenceNumber: input.referenceNumber ?? "",
+                  referenceDate: input.referenceDate ?? "",
+                  adminEmail: input.adminEmail,
+                  adminContact: input.adminContact,
+                }),
+              "Gagal menghasilkan header surat penawaran",
             );
 
-            const offeringLetter = yield* Effect.tryPromise(() =>
-              generateOfferingLetterPdf({
-                worksheet,
-                companyName: worksheet.order.company.name,
-                letterNumber: input.letterNumber,
-              }),
+            const offeringLetter = yield* tryPromise(
+              () =>
+                generateOfferingLetterPdf({
+                  worksheet,
+                  companyName: worksheet.order.company.name,
+                  letterNumber: input.letterNumber,
+                }),
+              "Gagal menghasilkan surat penawaran",
             );
 
             // Merge using the service
@@ -94,22 +99,24 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            const spk = yield* Effect.tryPromise(() =>
-              generateSpkPdf({
-                worksheet,
-                agreementDate: input.agreementDate,
-                companyRepName: input.companyRepName,
-                companyRepPosition: input.companyRepPosition,
-                companyRepAddress: input.companyRepAddress,
-                companyBankName: input.companyBankName,
-                companyBankAccount: input.companyBankAccount,
-                companyBankAccountName: input.companyBankAccountName,
-                operationalBankName: input.operationalBankName,
-                operationalBankAccount: input.operationalBankAccount,
-                operationalBankAccountName: input.operationalBankAccountName,
-                letterNumber: input.letterNumber,
-                companyName: worksheet.order.company.name,
-              }),
+            const spk = yield* tryPromise(
+              () =>
+                generateSpkPdf({
+                  worksheet,
+                  agreementDate: input.agreementDate,
+                  companyRepName: input.companyRepName,
+                  companyRepPosition: input.companyRepPosition,
+                  companyRepAddress: input.companyRepAddress,
+                  companyBankName: input.companyBankName,
+                  companyBankAccount: input.companyBankAccount,
+                  companyBankAccountName: input.companyBankAccountName,
+                  operationalBankName: input.operationalBankName,
+                  operationalBankAccount: input.operationalBankAccount,
+                  operationalBankAccountName: input.operationalBankAccountName,
+                  letterNumber: input.letterNumber,
+                  companyName: worksheet.order.company.name,
+                }),
+              "Gagal menghasilkan dokumen SPK",
             );
 
             // const uploadedSpk = yield* storageService.upload(spk as Buffer, {
@@ -145,22 +152,24 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            const tagihan = yield* Effect.tryPromise(() =>
-              generateTagihanPdf({
-                companyRegency: worksheet.order.company.regency.name,
-                letterNumber: input.letterNumber,
-                referenceNumber: input.referenceNumber,
-                referenceDate: input.referenceDate,
-                billingCode: input.billingCode,
-                billingAmount: input.billingAmount,
-                operationalAmount: input.operationalAmount,
-                operationalBankAccount: input.operationalBankAccount,
-                operationalBankAccountName: input.operationalBankAccountName,
-                billingExpiryDate: input.billingExpiryDate,
-                adminEmail: input.adminEmail,
-                adminContact: input.adminContact,
-                companyName: worksheet.order.company.name,
-              }),
+            const tagihan = yield* tryPromise(
+              () =>
+                generateTagihanPdf({
+                  companyRegency: worksheet.order.company.regency.name,
+                  letterNumber: input.letterNumber,
+                  referenceNumber: input.referenceNumber,
+                  referenceDate: input.referenceDate,
+                  billingCode: input.billingCode,
+                  billingAmount: input.billingAmount,
+                  operationalAmount: input.operationalAmount,
+                  operationalBankAccount: input.operationalBankAccount,
+                  operationalBankAccountName: input.operationalBankAccountName,
+                  billingExpiryDate: input.billingExpiryDate,
+                  adminEmail: input.adminEmail,
+                  adminContact: input.adminContact,
+                  companyName: worksheet.order.company.name,
+                }),
+              "Gagal menghasilkan dokumen tagihan",
             );
 
             // const uploadedTagihan = yield* storageService.upload(
