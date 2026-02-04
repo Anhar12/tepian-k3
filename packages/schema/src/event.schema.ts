@@ -17,6 +17,7 @@ export const notificationEventSchema = z.object({
 
 export const orderStatusChangedEventSchema = z.object({
   orderId: z.uuidv7(),
+  orderNumber: z.string(),
   userId: z.uuidv7(),
   oldStatus: z.enum(ORDER_STATUS),
   newStatus: z.enum(ORDER_STATUS),

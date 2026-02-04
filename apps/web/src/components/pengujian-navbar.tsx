@@ -2,10 +2,11 @@ import { trpc } from "@/utils/trpc";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import { Button } from "./ui/button";
-import { Bell, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useCartSheetStore } from "@/stores/cart-sheet.stores";
 import NavbarDropdown from "./navbar-dropdown";
 import ImageWithFallback from "./image-with-fallback";
+import NavbarNotifications from "./navbar-notifications";
 
 const navItems: {
   label: string;
@@ -63,10 +64,7 @@ export default function PengujianNavbar() {
               )}
               <ShoppingCart className="size-5" />
             </Button>
-            <Button className="relative flex size-9 items-center justify-center rounded-full">
-              <div className="absolute top-0 -right-0.5 flex size-3 items-center justify-center rounded-full bg-orange-500 text-xs" />
-              <Bell className="size-5" />
-            </Button>
+            <NavbarNotifications />
           </div>
           <NavbarDropdown />
         </div>

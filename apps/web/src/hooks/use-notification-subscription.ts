@@ -49,3 +49,24 @@ export function useNotificationSubscription(
     },
   });
 }
+
+export function useOnOrderStatusChangedSubscription(
+  options: NotificationSubscriptionOptions = {},
+) {
+  const { showToast = true, onNotification } = options;
+
+  useSubscription({
+    ...trpc.event.onOrderStatusChanged.subscriptionOptions(),
+    onData: (data) => {
+      if (showToast) {
+        globalInfoToast(
+          `Status order ${data.orderNumber} berubah dari ${data.oldStatus} ke ${data.newStatus}`,
+        );
+      }
+
+      onNotification?.(
+        `Status order ${data.orderNumber} berubah dari ${data.oldStatus} ke ${data.newStatus}`,
+      );
+    },
+  });
+}

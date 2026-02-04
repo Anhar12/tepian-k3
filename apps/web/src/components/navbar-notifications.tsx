@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import type { NotificationType } from "@tepian-k3/constants";
+import { useOnOrderStatusChangedSubscription } from "@/hooks/use-notification-subscription";
 
 const notificationTypeIcons: Record<NotificationType, string> = {
   order_status_changed: "📦",
@@ -80,6 +81,21 @@ export default function NavbarNotifications() {
   };
 
   const hasUnread = unreadCount && unreadCount > 0;
+
+  useOnOrderStatusChangedSubscription({
+    showToast: true,
+    onNotification: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.notifications.getUnreadCount.queryKey(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: trpc.notifications.getAll.queryKey(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: trpc.order.getAllOrders.queryKey(),
+      });
+    },
+  });
 
   return (
     <DropdownMenu>

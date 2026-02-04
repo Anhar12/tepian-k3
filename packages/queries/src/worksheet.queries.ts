@@ -487,7 +487,7 @@ const worksheetQueries = {
         ),
       );
 
-      return result.worksheet;
+      return result;
     });
   },
 

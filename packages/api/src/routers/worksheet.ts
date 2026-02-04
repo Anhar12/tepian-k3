@@ -14,6 +14,7 @@ import worksheetNoteQueries from "@tepian-k3/queries/worksheet-note.queries";
 import { EventTypes } from "@tepian-k3/schema/event.schema";
 import { handleTRPCError } from "@tepian-k3/utils/handle-trpc-error";
 import orderQueries from "@tepian-k3/queries/order.queries";
+import { notificationsQueries } from "@tepian-k3/queries/notifications.queries";
 
 export const worksheetRouter = createTRPCRouter({
   /**
@@ -78,12 +79,42 @@ export const worksheetRouter = createTRPCRouter({
     .mutation(
       async ({ input, ctx }) =>
         await runEffect(
-          worksheetQueries.createWorksheetFromOrder(
-            input.orderId,
-            ctx.user.id,
-            input.mainSupervisorId,
-            input.accompanyingSupervisorId,
-          ),
+          Effect.gen(function* () {
+            const result = yield* worksheetQueries.createWorksheetFromOrder(
+              input.orderId,
+              ctx.user.id,
+              input.mainSupervisorId,
+              input.accompanyingSupervisorId,
+            );
+
+            yield* Effect.forkDaemon(
+              notificationsQueries.create({
+                userId: result.order.userId,
+                title: "Order Sedang Dikaji Ulang",
+                message: `Order dengan nomor ${result.order.orderNumber} sedang dikaji ulang oleh tim kami.`,
+                type: "order_status_changed",
+                orderId: result.order.id,
+                metadata: {
+                  worksheetId: result.worksheet.id,
+                  orderStatus: "kaji_ulang",
+                  orderNumber: result.order.orderNumber,
+                },
+              }),
+            );
+
+            yield* Effect.tryPromise(() =>
+              ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                orderId: result.order.id,
+                orderNumber: result.order.orderNumber,
+                userId: result.order.userId,
+                newStatus: "kaji_ulang",
+                oldStatus: "pending",
+                triggeredBy: ctx.user.id,
+              }),
+            );
+
+            return result.worksheet;
+          }),
         ),
     ),
 

@@ -133,7 +133,7 @@ function RouteComponent() {
   );
 
   // Fetch worksheet for this order
-  const { data: worksheet, isLoading: worksheetLoading } = useQuery(
+  const { data: worksheet } = useQuery(
     trpc.worksheet.getByOrderId.queryOptions({
       orderId,
     }),
@@ -492,9 +492,6 @@ function RouteComponent() {
   );
   const hasCooperationAgreementDocument = order.documents.some(
     (doc) => doc.type === "cooperation_agreement",
-  );
-  const hasCooperationAgreementUserDocument = order.documents.some(
-    (doc) => doc.type === "cooperation_agreement_user",
   );
   const hasInvoice = order.documents.some((doc) => doc.type === "invoice");
   const hasBothDocuments =
