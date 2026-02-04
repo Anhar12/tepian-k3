@@ -50,6 +50,31 @@ export function useNotificationSubscription(
   });
 }
 
+/**
+ * Hook to subscribe to real-time order status change notifications
+ *
+ * @example
+ * // Basic usage - shows toast automatically
+ * useOnOrderStatusChangedSubscription();
+ *
+ * @example
+ * // With custom handler
+ * useOnOrderStatusChangedSubscription({
+ *   onNotification: (message) => {
+ *     console.log('Received:', message);
+ *   },
+ * });
+ *
+ * @example
+ * // Disable toast, handle manually
+ * useOnOrderStatusChangedSubscription({
+ *   showToast: false,
+ *   onNotification: (message) => {
+ *     // Custom handling
+ *   },
+ * });
+ *
+ */
 export function useOnOrderStatusChangedSubscription(
   options: NotificationSubscriptionOptions = {},
 ) {
