@@ -21,14 +21,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { globalInfoToast } from "@/lib/toast";
+import { useNotificationSubscription } from "@/hooks/use-notification-subscription";
 import { trpc } from "@/utils/trpc";
 import {
   createFileRoute,
   useNavigate,
   type LinkProps,
 } from "@tanstack/react-router";
-import { useSubscription } from "@trpc/tanstack-react-query";
 import {
   AlarmClock,
   ArrowRight,
@@ -87,13 +86,7 @@ function HomeComponent() {
     trpc.news.getFirst5News.queryOptions(),
   );
 
-  useSubscription({
-    ...trpc.event.onBroadcastTest.subscriptionOptions(),
-    onData: (data) => {
-      // ✅ data is BroadcastTestEvent - no type guard needed!
-      globalInfoToast(data.message);
-    },
-  });
+  useNotificationSubscription();
 
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
