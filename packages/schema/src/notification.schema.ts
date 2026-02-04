@@ -34,6 +34,13 @@ const getNotificationsSchema = z.object({
   type: z.enum(NOTIFICATION_TYPES).optional(), // Filter by type
 });
 
+const getCursorPaginatedNotificationsSchema = z.object({
+  cursor: z.uuidv7().optional(), // UUIDv7 of the last item from previous page
+  limit: z.number().int().positive().max(100).default(10),
+  isRead: z.boolean().optional(), // Filter by read status
+  type: z.enum(NOTIFICATION_TYPES).optional(), // Filter by type
+});
+
 const markAsReadSchema = z.object({
   id: z.uuidv7(),
 });
@@ -50,6 +57,7 @@ const notificationSchema = {
   createNotificationSchema,
   updateNotificationSchema,
   getNotificationsSchema,
+  getCursorPaginatedNotificationsSchema,
   markAsReadSchema,
   markAllAsReadSchema,
   deleteNotificationSchema,
@@ -58,6 +66,9 @@ const notificationSchema = {
 export type CreateNotificationInput = z.infer<typeof createNotificationSchema>;
 export type UpdateNotificationInput = z.infer<typeof updateNotificationSchema>;
 export type GetNotificationsInput = z.infer<typeof getNotificationsSchema>;
+export type GetCursorPaginatedNotificationsInput = z.infer<
+  typeof getCursorPaginatedNotificationsSchema
+>;
 export type MarkAsReadInput = z.infer<typeof markAsReadSchema>;
 export type MarkAllAsReadInput = z.infer<typeof markAllAsReadSchema>;
 export type DeleteNotificationInput = z.infer<typeof deleteNotificationSchema>;

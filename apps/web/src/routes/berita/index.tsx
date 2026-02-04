@@ -1,4 +1,4 @@
-import { InfiniteScrollGrid } from "@/components/infinite-scroll-list";
+import { InfiniteScrollGrid } from "@/components/infinite-scroll-grid";
 import GridBackground from "@/components/grid-background";
 import LandingNavbar from "@/components/navbar";
 import {

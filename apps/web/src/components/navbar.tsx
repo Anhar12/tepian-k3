@@ -1,9 +1,8 @@
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
-import { Button } from "./ui/button";
-import { Bell } from "lucide-react";
 import NavbarDropdown from "./navbar-dropdown";
+import NavbarNotifications from "./navbar-notifications";
 import ImageWithFallback from "./image-with-fallback";
 
 const navItems: {
@@ -42,12 +41,7 @@ export default function Navbar() {
       </div>
       {user ? (
         <div className="flex flex-row gap-10">
-          <div className="flex flex-row gap-4">
-            <Button className="relative flex size-9 items-center justify-center rounded-full">
-              <div className="absolute top-0 -right-0.5 flex size-3 items-center justify-center rounded-full bg-orange-500 text-xs" />
-              <Bell className="size-5" />
-            </Button>
-          </div>
+          <NavbarNotifications />
           <NavbarDropdown />
         </div>
       ) : (
