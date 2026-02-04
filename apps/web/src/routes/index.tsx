@@ -21,7 +21,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useNotificationSubscription } from "@/hooks/use-notification-subscription";
 import { trpc } from "@/utils/trpc";
 import {
   createFileRoute,
@@ -85,8 +84,6 @@ function HomeComponent() {
   const { data: news, isLoading: isNewsLoading } = useQuery(
     trpc.news.getFirst5News.queryOptions(),
   );
-
-  useNotificationSubscription();
 
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">

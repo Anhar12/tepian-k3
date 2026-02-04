@@ -107,6 +107,10 @@ export const createTRPCContext = async (context: HonoContext) => {
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
+  sse: {
+    ping: { enabled: true, intervalMs: 10_000 },
+    client: { reconnectAfterInactivityMs: 30_000 },
+  },
   errorFormatter({ shape, error }) {
     return {
       ...shape,

@@ -64,7 +64,12 @@ if (env.NODE_ENV === "production") {
 
 app.use(logger());
 app.use(secureHeaders());
-app.use(timeout(30000)); // 30 second request timeout
+app.use(async (c, next) => {
+  if (c.req.path.startsWith("/trpc/event.")) {
+    return await next(); // SSE subscriptions are long-lived, skip timeout
+  }
+  return await timeout(30000)(c, next);
+});
 
 // Parse CORS origins (supports comma-separated values)
 const corsOrigins: string[] = env.CORS_ORIGIN
