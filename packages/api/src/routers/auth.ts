@@ -7,6 +7,8 @@ import {
   createAccessToken,
   createRefreshToken,
   verifyRefreshToken,
+  blacklistToken,
+  blacklistAllUserTokens,
 } from "@tepian-k3/auth";
 import userSchema from "@tepian-k3/schema/users.schema";
 import otpSchema from "@tepian-k3/schema/otp.schema";
@@ -21,6 +23,7 @@ import refreshTokensQueries from "@tepian-k3/queries/refresh-tokens.queries";
 import { v7 as uuidv7 } from "uuid";
 import { logError } from "@tepian-k3/services/logger";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { strongPasswordSchema } from "@tepian-k3/schema/password.schema";
 
 export const authRouter = createTRPCRouter({
   login: withRateLimit(rateLimiters.auth())
@@ -273,9 +276,7 @@ export const authRouter = createTRPCRouter({
     .input(
       z.object({
         token: z.string(),
-        newPassword: z
-          .string()
-          .min(8, "Password harus terdiri dari minimal 8 karakter"),
+        newPassword: strongPasswordSchema,
       }),
     )
     .mutation(async ({ input }) => {
@@ -469,6 +470,13 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       await runEffect(refreshTokensQueries.revokeTokenById(input.sessionId));
 
+      // Blacklist the session's access token (30 days TTL to match token expiry)
+      await blacklistToken(
+        input.sessionId,
+        30 * 24 * 60 * 60,
+        "session_revoked",
+      );
+
       return {
         success: true,
         message: "Sesi berhasil dicabut.",
@@ -481,6 +489,9 @@ export const authRouter = createTRPCRouter({
   ).mutation(async ({ ctx }) => {
     await runEffect(refreshTokensQueries.revokeAllUserTokens(ctx.user.id));
 
+    // Blacklist all tokens for this user (30 days TTL)
+    await blacklistAllUserTokens(ctx.user.id, 30 * 24 * 60 * 60);
+
     return {
       success: true,
       message: "Semua sesi berhasil dicabut.",
@@ -492,8 +503,13 @@ export const authRouter = createTRPCRouter({
     (ctx) => `logout:${ctx.user.id}`,
   )
     .input(authSchema.refreshTokenSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       await runEffect(refreshTokensQueries.revokeToken(input.refreshToken));
+
+      // Blacklist the current access token (use session.id which is the JWT's jti)
+      if (ctx.session?.id) {
+        await blacklistToken(ctx.session.id, 30 * 24 * 60 * 60, "logout");
+      }
 
       return {
         success: true,

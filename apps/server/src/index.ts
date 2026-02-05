@@ -16,7 +16,11 @@ import {
   shutdownEventBus,
   isEventBusReady,
 } from "@tepian-k3/services/notifications";
-import { logInfo } from "@tepian-k3/services/logger";
+import {
+  initializeTokenBlacklist,
+  shutdownTokenBlacklist,
+} from "@tepian-k3/services/token-blacklist";
+import { logInfo, logWarn } from "@tepian-k3/services/logger";
 import { db, sql } from "@tepian-k3/db/client";
 import { devRouter } from "./routes/dev";
 import { secureHeaders } from "./middleware/secure-headers";
@@ -36,6 +40,9 @@ const redisConfig = {
 };
 
 initializeEventBus(redisConfig);
+
+// Initialize token blacklist for JWT revocation
+initializeTokenBlacklist(redisConfig);
 
 // Set Zod locale to Indonesian
 z.config(z.locales.id());
@@ -175,12 +182,22 @@ app.get("/health", async (c) => {
 
 app.get("/api/public/*", async (c) => {
   // Get the full path after /api/public/
-  const fullPath = c.req.path.replace("/api/public/", "");
-  const publicDir = path.resolve(process.cwd(), "public");
-  const filePath = path.resolve(publicDir, fullPath);
+  const requestedPath = c.req.path.replace("/api/public/", "");
 
-  // Security check: prevent directory traversal
+  // Normalize the path to prevent directory traversal
+  const normalizedPath = path
+    .normalize(requestedPath)
+    .replace(/^(\.\.[/\\])+/, "");
+  const publicDir = path.resolve(process.cwd(), "public");
+  const filePath = path.resolve(publicDir, normalizedPath);
+
+  // Security check: prevent directory traversal (double check after normalization)
   if (!filePath.startsWith(publicDir + path.sep)) {
+    logWarn("FileAccess", "Directory traversal attempt blocked", {
+      requestedPath,
+      normalizedPath,
+      ip: c.req.header("x-forwarded-for") || c.req.header("x-real-ip"),
+    });
     return c.text("Invalid path", 400);
   }
 
@@ -201,12 +218,22 @@ app.get("/api/public/*", async (c) => {
 
 app.get("/api/uploads/*", async (c) => {
   // Get the full path after /api/uploads/
-  const fullPath = c.req.path.replace("/api/uploads/", "");
-  const resolvedUploadsDir = path.resolve(uploadsDir);
-  const filePath = path.resolve(resolvedUploadsDir, fullPath);
+  const requestedPath = c.req.path.replace("/api/uploads/", "");
 
-  // Security check: prevent directory traversal
+  // Normalize the path to prevent directory traversal
+  const normalizedPath = path
+    .normalize(requestedPath)
+    .replace(/^(\.\.[/\\])+/, "");
+  const resolvedUploadsDir = path.resolve(uploadsDir);
+  const filePath = path.resolve(resolvedUploadsDir, normalizedPath);
+
+  // Security check: prevent directory traversal (double check after normalization)
   if (!filePath.startsWith(resolvedUploadsDir + path.sep)) {
+    logWarn("FileAccess", "Directory traversal attempt blocked", {
+      requestedPath,
+      normalizedPath,
+      ip: c.req.header("x-forwarded-for") || c.req.header("x-real-ip"),
+    });
     return c.text("Invalid path", 400);
   }
 
@@ -241,6 +268,7 @@ serve(
 const shutdown = async () => {
   logInfo("Server", "Shutting down...");
   await shutdownEventBus();
+  await shutdownTokenBlacklist();
   await queueService.shutdown();
   process.exit(0);
 };

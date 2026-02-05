@@ -68,7 +68,8 @@
       "WebFetch(domain:tanstack.com)",
       "Bash(pnpm tsr:*)",
       "Bash(pnpm exec tsr:*)",
-      "Bash(npx @tanstack/router-cli generate:*)"
+      "Bash(npx @tanstack/router-cli generate:*)",
+      "Bash(pnpm install:*)"
     ]
   }
 }

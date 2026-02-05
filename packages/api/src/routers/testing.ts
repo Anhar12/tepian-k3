@@ -7,7 +7,12 @@ import {
 } from "../index";
 import testingQueries from "@tepian-k3/queries/testing.queries";
 import documentQueries from "@tepian-k3/queries/document.queries";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 import { z } from "zod";
 import { runEffect } from "../utils/run-effect";
 import { TESTING_STATUSES, type DocumentType } from "@tepian-k3/constants";
@@ -155,6 +160,14 @@ export const testingRouter = createTRPCRouter({
               file.arrayBuffer(),
             );
             const buffer = Buffer.from(arrayBuffer);
+
+            // Validate file (testing documents should be PDF)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(buffer, file.name, file.type, {
+                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+              }),
+            );
 
             // Upload file to storage
             const filename = `${documentType}-${testing.testingNumber}-${Date.now()}.${file.name.split(".").pop()}`;

@@ -40,6 +40,9 @@
     },
     "./queue": {
       "default": "./src/queue/index.ts"
+    },
+    "./token-blacklist": {
+      "default": "./src/token-blacklist/index.ts"
     }
   },
   "dependencies": {
@@ -52,6 +55,7 @@
     "clsx": "^2.1.1",
     "date-fns": "catalog:",
     "file-saver": "^2.0.5",
+    "file-type": "^21.3.0",
     "ioredis": "^5.9.1",
     "jose": "catalog:",
     "logform": "^2.7.0",

@@ -4,6 +4,7 @@ import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
 import { zfd } from "zod-form-data";
 import { createPaginationSchema } from "./pagination.schema";
+import { strongPasswordSchema } from "./password.schema";
 
 const SORTABLE_USER_FIELDS = [
   "name",
@@ -23,7 +24,7 @@ const createUserSchema = createInsertSchema(users, {
     .string()
     .min(1)
     .regex(/^\+?[0-9\s\-()]+$/, "Nomor telepon tidak valid"),
-  password: z.string().min(8, "Password minimal 8 karakter"),
+  password: strongPasswordSchema,
 }).pick({
   name: true,
   address: true,
@@ -39,7 +40,7 @@ const adminCreateUserSchema = createInsertSchema(users, {
     .string()
     .min(1)
     .regex(/^\+?[0-9\s\-()]+$/, "Nomor telepon tidak valid"),
-  password: z.string().min(8, "Password minimal 8 karakter"),
+  password: strongPasswordSchema,
   email: z.email(),
   emailVerified: z.boolean(),
   emailVerifiedAt: z.date().nullable(),
@@ -68,7 +69,7 @@ const adminUpdateUserSchema = createUpdateSchema(users, {
   email: z.email(),
   emailVerified: z.boolean(),
   emailVerifiedAt: z.date().nullable(),
-  password: z.optional(z.string().min(8, "Password minimal 8 karakter")),
+  password: z.optional(strongPasswordSchema),
 })
   .pick({
     id: true,
@@ -115,8 +116,8 @@ const updateUserProfileSchema = zfd.formData({
 
 const updateUserPasswordSchema = z
   .object({
-    newPassword: z.string().min(8, "Password minimal 8 karakter"),
-    newPasswordConfirm: z.string().min(8, "Password minimal 8 karakter"),
+    newPassword: strongPasswordSchema,
+    newPasswordConfirm: z.string(),
   })
   .refine((data) => data.newPassword === data.newPasswordConfirm, {
     message: "Konfirmasi password tidak sesuai",

@@ -12,7 +12,12 @@ import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
 import toolCalibrationQueries from "@tepian-k3/queries/tool-calibration.queries";
 import { Effect } from "effect";
 import { imageService } from "@tepian-k3/services/image";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 import { TRPCError } from "@trpc/server";
 
 export const toolRouter = createTRPCRouter({
@@ -151,6 +156,19 @@ export const toolRouter = createTRPCRouter({
               .then((ab) => Buffer.from(ab)),
           );
 
+          // Validate certification file (PDF or document)
+          yield* Effect.tryPromise(() =>
+            assertValidFileBuffer(
+              buffer,
+              ctx.input.data.certificationFile.name,
+              ctx.input.data.certificationFile.type,
+              {
+                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+              },
+            ),
+          );
+
           const uploadedFile = yield* storageService.upload(buffer, {
             filename: ctx.input.data.certificationFile.name,
             folder: "tool-certifications",
@@ -178,6 +196,14 @@ export const toolRouter = createTRPCRouter({
           for (const file of ctx.input.data.documentationFiles) {
             const buffer = yield* Effect.tryPromise(() =>
               file.arrayBuffer().then((ab) => Buffer.from(ab)),
+            );
+
+            // Validate documentation image
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(buffer, file.name, file.type, {
+                maxSize: FILE_SIZE_LIMITS.IMAGE,
+                allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+              }),
             );
 
             const convertedImage = yield* imageService.convertToWebP(buffer, {

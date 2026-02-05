@@ -15,7 +15,12 @@ import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
 import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 import { Effect } from "effect";
 import { imageService } from "@tepian-k3/services/image";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 
 export const newsRouter = createTRPCRouter({
   getFirst5News: withRateLimit(rateLimiters.moderate()).query(
@@ -109,6 +114,19 @@ export const newsRouter = createTRPCRouter({
 
                 const buffer = Buffer.from(arrayBuffer);
 
+                // Validate image file
+                yield* Effect.tryPromise(() =>
+                  assertValidFileBuffer(
+                    buffer,
+                    ctx.input.data.image.name,
+                    ctx.input.data.image.type,
+                    {
+                      maxSize: FILE_SIZE_LIMITS.IMAGE,
+                      allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+                    },
+                  ),
+                );
+
                 const convertedImage = yield* imageService.convertToWebP(
                   buffer,
                   {
@@ -159,6 +177,19 @@ export const newsRouter = createTRPCRouter({
                   );
 
                   const buffer = Buffer.from(arrayBuffer);
+
+                  // Validate image file
+                  yield* Effect.tryPromise(() =>
+                    assertValidFileBuffer(
+                      buffer,
+                      ctx.input.data.image!.name,
+                      ctx.input.data.image!.type,
+                      {
+                        maxSize: FILE_SIZE_LIMITS.IMAGE,
+                        allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+                      },
+                    ),
+                  );
 
                   const convertedImage = yield* imageService.convertToWebP(
                     buffer,

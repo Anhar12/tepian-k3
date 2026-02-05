@@ -8,7 +8,12 @@ import {
 } from "../index";
 import documentQueries from "@tepian-k3/queries/document.queries";
 import documentSchema from "@tepian-k3/schema/document.schema";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 import { z } from "zod";
 import { runEffect } from "../utils/run-effect";
 import { createDocumentSignature } from "@tepian-k3/services/document-signing";
@@ -34,6 +39,19 @@ export const documentRouter = createTRPCRouter({
               ctx.input.data.file.arrayBuffer(),
             );
             const buffer = Buffer.from(arrayBuffer);
+
+            // Validate file before processing
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                buffer,
+                ctx.input.data.file.name,
+                ctx.input.data.file.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+                },
+              ),
+            );
 
             // Upload file to storage
             const uploadedFile = yield* storageService.upload(buffer, {
@@ -231,6 +249,19 @@ export const documentRouter = createTRPCRouter({
             );
             const buffer = Buffer.from(arrayBuffer);
 
+            // Validate file (invoices must be PDF)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                buffer,
+                ctx.input.data.file.name,
+                ctx.input.data.file.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ["application/pdf"],
+                },
+              ),
+            );
+
             const uploadedFile = yield* storageService.upload(buffer, {
               filename: ctx.input.data.file.name,
               folder: "documents/order/invoice",
@@ -292,6 +323,19 @@ export const documentRouter = createTRPCRouter({
             ctx.input.data.file.arrayBuffer(),
           );
           const buffer = Buffer.from(arrayBuffer);
+
+          // Validate file (testing reports must be PDF)
+          yield* Effect.tryPromise(() =>
+            assertValidFileBuffer(
+              buffer,
+              ctx.input.data.file.name,
+              ctx.input.data.file.type,
+              {
+                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                allowedMimeTypes: ["application/pdf"],
+              },
+            ),
+          );
 
           const uploadedFile = yield* storageService.upload(buffer, {
             filename: ctx.input.data.file.name,
@@ -367,6 +411,19 @@ export const documentRouter = createTRPCRouter({
               ctx.input.data.file.arrayBuffer(),
             );
             const originalBuffer = Buffer.from(arrayBuffer);
+
+            // Validate file (must be PDF for signing)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                originalBuffer,
+                ctx.input.data.file.name,
+                ctx.input.data.file.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ["application/pdf"],
+                },
+              ),
+            );
 
             // First, create document signatures for all signers
             const baseUrl = process.env.APP_URL || "http://localhost:3000";

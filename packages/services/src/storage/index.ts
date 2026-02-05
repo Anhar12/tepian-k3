@@ -79,3 +79,17 @@ export const storageService = new StorageService();
 export { StorageService };
 export type { UploadOptions, UploadResult, StorageType };
 export { StorageError, UploadFailedError, FileNotFoundError };
+
+// File validation utilities
+export {
+  FILE_SIZE_LIMITS,
+  ALLOWED_MIME_TYPES,
+  validateFile,
+  validateFileBuffer,
+  assertValidFile,
+  assertValidFileBuffer,
+} from "./file-validator";
+export type {
+  FileValidationOptions,
+  FileValidationResult,
+} from "./file-validator";
