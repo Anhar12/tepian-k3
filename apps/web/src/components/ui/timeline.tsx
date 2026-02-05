@@ -207,7 +207,7 @@ function TimelineHeader({
   return (
     <div
       className={cn(
-        "flex w-14 flex-col items-end text-sm text-muted-foreground",
+        "flex w-16 shrink-0 flex-col items-end text-xs text-muted-foreground sm:w-20 sm:text-sm",
         className,
       )}
       {...props}

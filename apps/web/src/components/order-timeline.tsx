@@ -6,6 +6,11 @@ import {
   TimelineContent,
   TimelineHeader,
 } from "@/components/ui/timeline";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Fragment } from "react";
 import {
   ORDER_STATUS_FLOW,
@@ -112,9 +117,20 @@ export function OrderTimeline({
             {ORDER_STATUS_LABELS[status]}
           </span>
           {record?.note && (
-            <p className="mt-0.5 max-h-4 w-32 overflow-y-auto text-xs text-muted-foreground">
-              {record.note}
-            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <p className="mt-0.5 line-clamp-2 max-w-28 cursor-pointer text-xs text-muted-foreground hover:text-foreground sm:max-w-40">
+                  {record.note}
+                </p>
+              </PopoverTrigger>
+              <PopoverContent
+                side="bottom"
+                align="start"
+                className="max-w-70 sm:max-w-xs"
+              >
+                <p className="text-sm">{record.note}</p>
+              </PopoverContent>
+            </Popover>
           )}
         </TimelineContent>
       </TimelineItem>

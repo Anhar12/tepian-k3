@@ -300,9 +300,14 @@ function RouteComponent() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="flex flex-1 flex-row gap-6 px-6 py-6">
-        {/* Timeline Section - Left Side */}
-        <OrderTimeline history={orderDetail?.statusHistory ?? []} />
+      <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:flex-row md:px-6">
+        {/* Timeline Section - Left Side (horizontal scroll on mobile) */}
+        <div className="w-full overflow-x-auto md:w-auto md:overflow-visible">
+          <OrderTimeline
+            history={orderDetail?.statusHistory ?? []}
+            className="min-w-max md:min-w-0"
+          />
+        </div>
 
         {/* Content Card - Right Side */}
         <Card className="flex flex-1 flex-col rounded-2xl p-6 shadow-sm">
