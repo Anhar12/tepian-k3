@@ -1511,7 +1511,7 @@ function RouteComponent() {
                               )!.fileUrl,
                             )}
                             alt="Bukti pembayaran"
-                            className="max-h-96 w-full cursor-pointer rounded object-contain"
+                            className="size-64 cursor-pointer rounded object-contain"
                             onClick={() =>
                               window.open(
                                 getPublicUrl(

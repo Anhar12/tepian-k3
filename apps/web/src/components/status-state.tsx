@@ -245,11 +245,11 @@ export function StatusState2({
         </p>
 
         {/* Document Upload Card */}
-        <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+        <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
             <FileText className="h-5 w-5 text-blue-500" />
           </div>
-          <span className="min-w-30 font-medium text-foreground">
+          <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
             Surat Persetujuan
           </span>
           {!approvalLetterFile ? (
@@ -272,7 +272,7 @@ export function StatusState2({
               />
               <Button
                 size="icon"
-                className="h-10 w-10 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
+                className="h-10 w-10 shrink-0 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
                 asChild
               >
                 <span>
@@ -283,7 +283,7 @@ export function StatusState2({
           ) : (
             <Button
               size="sm"
-              className="rounded-lg bg-blue-500 hover:bg-blue-600"
+              className="shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
               onClick={handleUploadApprovalLetter}
               disabled={uploadingApprovalLetter}
             >
@@ -376,17 +376,17 @@ export function StatusState4({
         <h3 className="text-lg font-semibold text-foreground">
           Dokumen Tagihan
         </h3>
-        <div className="flex flex-wrap gap-4">
-          <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
               <FileText className="h-5 w-5 text-blue-500" />
             </div>
-            <span className="min-w-30 font-medium text-foreground">
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
               Invoice
             </span>
             <Button
               size="icon"
-              className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
               onClick={() =>
                 window.open(getPublicUrl(invoiceDoc!.fileUrl), "_blank")
               }
@@ -394,16 +394,16 @@ export function StatusState4({
               <Download className="h-4 w-4" />
             </Button>
           </div>
-          <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
               <FileText className="h-5 w-5 text-blue-500" />
             </div>
-            <span className="min-w-30 font-medium text-foreground">
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
               Surat Perjanjian
             </span>
             <Button
               size="icon"
-              className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
               onClick={() =>
                 window.open(
                   getPublicUrl(cooperationAgreementDoc!.fileUrl),
@@ -430,17 +430,17 @@ export function StatusState4({
           ditandatangani.
         </p>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
           {/* Payment Proof Upload */}
-          <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
+          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-lg ${paymentProofFile ? "bg-emerald-100" : "bg-blue-100"}`}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${paymentProofFile ? "bg-emerald-100" : "bg-blue-100"}`}
             >
               <FileText
                 className={`h-5 w-5 ${paymentProofFile ? "text-emerald-500" : "text-blue-500"}`}
               />
             </div>
-            <span className="min-w-30 font-medium text-foreground">
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
               Bukti Pembayaran
             </span>
             {!paymentProofFile ? (
@@ -457,7 +457,7 @@ export function StatusState4({
                 />
                 <Button
                   size="icon"
-                  className="h-10 w-10 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
+                  className="h-10 w-10 shrink-0 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
                   asChild
                 >
                   <span>
@@ -466,22 +466,22 @@ export function StatusState4({
                 </Button>
               </label>
             ) : (
-              <span className="text-sm text-emerald-600">
+              <span className="shrink-0 truncate text-sm text-emerald-600 sm:max-w-32">
                 ✓ {paymentProofFile.name}
               </span>
             )}
           </div>
 
           {/* Cooperation Agreement Upload */}
-          <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
+          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-lg ${cooperationAgreementFile ? "bg-emerald-100" : "bg-blue-100"}`}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${cooperationAgreementFile ? "bg-emerald-100" : "bg-blue-100"}`}
             >
               <FileText
                 className={`h-5 w-5 ${cooperationAgreementFile ? "text-emerald-500" : "text-blue-500"}`}
               />
             </div>
-            <span className="min-w-30 font-medium text-foreground">
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
               Surat Perjanjian
             </span>
             {!cooperationAgreementFile ? (
@@ -504,7 +504,7 @@ export function StatusState4({
                 />
                 <Button
                   size="icon"
-                  className="h-10 w-10 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
+                  className="h-10 w-10 shrink-0 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
                   asChild
                 >
                   <span>
@@ -513,7 +513,7 @@ export function StatusState4({
                 </Button>
               </label>
             ) : (
-              <span className="text-sm text-emerald-600">
+              <span className="shrink-0 truncate text-sm text-emerald-600 sm:max-w-32">
                 ✓ {cooperationAgreementFile.name}
               </span>
             )}
@@ -570,18 +570,18 @@ export function StatusState5({
       </div>
 
       {/* Show uploaded payment documents */}
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
         {paymentProofDoc && (
-          <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
+          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
               <FileText className="h-5 w-5 text-emerald-500" />
             </div>
-            <span className="min-w-30 font-medium text-foreground">
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
               Bukti Pembayaran
             </span>
             <Button
               size="icon"
-              className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
               onClick={() =>
                 window.open(getPublicUrl(paymentProofDoc.fileUrl), "_blank")
               }
@@ -591,16 +591,16 @@ export function StatusState5({
           </div>
         )}
         {cooperationAgreementUserDoc && (
-          <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
+          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
               <FileText className="h-5 w-5 text-emerald-500" />
             </div>
-            <span className="min-w-30 font-medium text-foreground">
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
               Surat Perjanjian
             </span>
             <Button
               size="icon"
-              className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
               onClick={() =>
                 window.open(
                   getPublicUrl(cooperationAgreementUserDoc.fileUrl),
@@ -719,7 +719,7 @@ export function StatusState8({ orderDetail }: StatusState8Props) {
       </div>
 
       {/* Download documents */}
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
         {orderDetail.documents
           .filter((doc) =>
             ["testing_report", "lab_certificate"].includes(doc.type),
@@ -727,17 +727,17 @@ export function StatusState8({ orderDetail }: StatusState8Props) {
           .map((doc) => (
             <div
               key={doc.id}
-              className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3"
+              className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
                 <FileText className="h-5 w-5 text-emerald-500" />
               </div>
-              <span className="min-w-30 font-medium text-foreground">
+              <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
                 {doc.title || doc.type}
               </span>
               <Button
                 size="icon"
-                className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+                className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
                 onClick={() => window.open(getPublicUrl(doc.fileUrl), "_blank")}
               >
                 <Download className="h-4 w-4" />

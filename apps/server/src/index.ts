@@ -210,6 +210,8 @@ app.get("/api/public/*", async (c) => {
     c.header("Content-Type", mimeType);
     c.header("Content-Length", file.length.toString());
     c.header("Cache-Control", "public, max-age=31536000");
+    // Allow same-site access for public static files (frontend on different port)
+    c.header("Cross-Origin-Resource-Policy", "same-site");
     return c.body(file);
   } catch (_) {
     return c.text("File not found", 404);
@@ -247,6 +249,8 @@ app.get("/api/uploads/*", async (c) => {
     c.header("Content-Type", mimeType);
     c.header("Content-Length", file.length.toString());
     c.header("Cache-Control", "public, max-age=31536000");
+    // Allow same-site access for static uploads (frontend on different port)
+    c.header("Cross-Origin-Resource-Policy", "same-site");
 
     return c.body(file);
   } catch (_) {

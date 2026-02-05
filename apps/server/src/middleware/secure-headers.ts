@@ -16,7 +16,10 @@ export const secureHeaders = (): MiddlewareHandler => {
     c.header("X-Permitted-Cross-Domain-Policies", "none");
     c.header("Cross-Origin-Embedder-Policy", "require-corp");
     c.header("Cross-Origin-Opener-Policy", "same-origin");
-    c.header("Cross-Origin-Resource-Policy", "same-origin");
+    // Only set CORP if not already set by route handler (allows per-route override)
+    if (!c.res.headers.get("Cross-Origin-Resource-Policy")) {
+      c.header("Cross-Origin-Resource-Policy", "same-origin");
+    }
 
     // Content Security Policy - stricter in production
     if (env.NODE_ENV === "production") {

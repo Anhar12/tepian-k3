@@ -27,15 +27,21 @@ export default function ImageWithFallback({
   const [error, setError] = useState(false);
 
   return (
-    <div className={cn("relative inline-block", className)}>
+    <div
+      className={cn(
+        "relative h-full w-full overflow-hidden rounded",
+        className,
+      )}
+      data-url={src}
+    >
       {loading && !error && (
-        <Skeleton className={cn("absolute inset-0 rounded", loaderClassName)} />
+        <Skeleton className={cn("absolute inset-0", loaderClassName)} />
       )}
 
       {error ? (
         <div
           className={cn(
-            "flex h-full w-full items-center justify-center rounded bg-gray-100 text-gray-400",
+            "flex h-full w-full items-center justify-center bg-gray-100 text-gray-400",
             fallbackClassName,
           )}
         >
@@ -50,7 +56,7 @@ export default function ImageWithFallback({
             setLoading(false);
             setError(true);
           }}
-          className={cn("h-full w-full", loading && "invisible")}
+          className={cn("h-full w-full object-cover", loading && "invisible")}
           {...props}
         />
       )}

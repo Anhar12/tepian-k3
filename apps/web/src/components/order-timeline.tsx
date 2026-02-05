@@ -112,21 +112,21 @@ export function OrderTimeline({
         </div>
         <TimelineContent>
           <span
-            className={`text-sm font-medium ${variant === "pending" ? "text-muted-foreground" : "text-foreground"}`}
+            className={`text-xs font-medium sm:text-sm ${variant === "pending" ? "text-muted-foreground" : "text-foreground"}`}
           >
             {ORDER_STATUS_LABELS[status]}
           </span>
           {record?.note && (
             <Popover>
               <PopoverTrigger asChild>
-                <p className="mt-0.5 line-clamp-2 max-w-28 cursor-pointer text-xs text-muted-foreground hover:text-foreground sm:max-w-40">
+                <p className="mt-0.5 line-clamp-2 max-w-24 cursor-pointer text-[10px] text-muted-foreground hover:text-foreground sm:max-w-40 sm:text-xs">
                   {record.note}
                 </p>
               </PopoverTrigger>
               <PopoverContent
                 side="bottom"
                 align="start"
-                className="max-w-70 sm:max-w-xs"
+                className="max-w-60 sm:max-w-xs"
               >
                 <p className="text-sm">{record.note}</p>
               </PopoverContent>
