@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
+This is a TypeScript monorepo. The primary stack is: TypeScript, tRPC, TanStack Query, TanStack Router, Vite, React, Docker/Coolify for deployment. Always assume TypeScript strict mode is enabled.
+
 **tepian-k3** is a TypeScript monorepo for a K3 (Kesehatan dan Keselamatan Kerja / Occupational Health and Safety) laboratory testing management system. Built with the Better-T-Stack, it provides end-to-end type safety from PostgreSQL to React UI using tRPC, Drizzle ORM, and TanStack Router.
 
 **Tech Stack:**
@@ -738,6 +740,19 @@ Additional documentation in `docs/` folder:
 IMPORTANT: If YOU ADD NEW DOCUMENTATION PUT IT IN THE PACKAGE FOLDERS AS WELL BUT INSIDE THE docs/ FOLDER
 FOR EXAMPLE YOU CAN PUT IT IN THE PACKAGE FOLDERS BUT INSIDE THE docs/example/\*.example.md
 FOR BETTER ORGANIZATION AND EASY TO FIND.
+
+## TypeScript Conventions
+
+- When encountering TypeScript type errors, especially with complex generic types (tRPC, TanStack Query, Zod), stop after 2 failed attempts and present the user with a summary of what was tried, what failed, and 2-3 alternative architectural approaches rather than continuing to iterate on type gymnastics.
+- When creating reusable hooks or utilities for this codebase, prioritize practical type safety over perfect generic inference. If a fully generic approach creates unresolvable type conflicts, use a well-typed wrapper pattern with explicit type parameters at the call site rather than trying to infer everything automatically.
+
+## Framework-Specific Notes
+
+This project uses TanStack Router with Vite. When troubleshooting TanStack Router issues, always check TanStack's official documentation first (https://tanstack.com/router/latest/docs) before suggesting generic React solutions. TanStack Router has its own patterns (autoCodeSplitting, file-based routing) that differ from standard React Router.
+
+## Workflow Rules
+
+When implementing changes across multiple files (skeleton loaders, hooks, utilities), create a checklist of ALL files that need changes BEFORE starting work. Present this checklist to the user for confirmation. Do not begin editing until the full scope is agreed upon.
 
 ## Monorepo Commands Reference
 
