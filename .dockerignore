@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+**/dist
+**/.turbo
+.turbo
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files (injected at runtime)
+.env
+.env.*
+!.env.docker
+
+# Docker files (avoid recursion)
+docker-compose*.yml
+Dockerfile*
+
+# Logs
+**/logs
+**/*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing & dev tools
+coverage
+.nyc_output
+
+# Documentation (not needed in image)
+docs
+**/*.md
+!packages/db/src/migrations/**
+
+# Misc
+*.tgz
+.changeset
+CHANGELOG.md
+scripts
+.husky
