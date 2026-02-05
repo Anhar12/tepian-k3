@@ -193,17 +193,17 @@ export function StatusState1({ orderDetail, offeringDoc }: StatusState1Props) {
       </p>
 
       {/* Document Download Card */}
-      <div className="flex flex-row gap-4">
-        <div className="inline-flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
             <FileText className="h-5 w-5 text-blue-500" />
           </div>
-          <span className="min-w-30 font-medium text-foreground">
+          <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
             Surat Penawaran
           </span>
           <Button
             size="icon"
-            className="h-10 w-10 rounded-lg bg-blue-500 hover:bg-blue-600"
+            className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
             onClick={() => {
               if (offeringDoc?.fileUrl) {
                 window.open(getPublicUrl(offeringDoc.fileUrl), "_blank");

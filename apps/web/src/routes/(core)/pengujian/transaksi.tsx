@@ -37,10 +37,10 @@ function RouteComponent() {
   );
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl px-4 sm:px-0">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="mb-1 text-2xl font-bold text-foreground">
+        <h1 className="mb-1 text-xl font-bold text-foreground sm:text-2xl">
           Pesanan Saya
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -59,13 +59,19 @@ function RouteComponent() {
         }}
         className="mb-6"
       >
-        <TabsList className="bg-white">
-          {statusFilters.map((s) => (
-            <TabsTrigger key={s.value} value={s.value}>
-              {s.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <TabsList className="inline-flex w-max bg-white sm:w-auto">
+            {statusFilters.map((s) => (
+              <TabsTrigger
+                key={s.value}
+                value={s.value}
+                className="text-xs whitespace-nowrap sm:text-sm"
+              >
+                {s.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
       </Tabs>
 
       {/* Order List */}

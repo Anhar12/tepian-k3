@@ -155,11 +155,11 @@ export function LocationSection() {
       </div>
 
       {isLoading ? (
-        <div className="flex gap-6 overflow-x-auto pb-4">
+        <div className="flex gap-4 overflow-x-auto pb-4 sm:gap-6">
           {[1, 2, 3].map((i) => (
             <Card
               key={i}
-              className="min-w-[320px] space-y-4 rounded-3xl border-none bg-white p-6 shadow-md shadow-slate-100"
+              className="min-w-[260px] space-y-4 rounded-3xl border-none bg-white p-4 shadow-md shadow-slate-100 sm:min-w-[320px] sm:p-6"
             >
               <Skeleton className="h-7 w-24" />
               <div className="grid grid-cols-1 gap-4">
@@ -177,12 +177,12 @@ export function LocationSection() {
         </div>
       ) : selectedTestingLocations && selectedTestingLocations.length > 0 ? (
         <div className="flex flex-col items-center justify-center">
-          <Carousel className="w-[calc(100%-6rem)]">
+          <Carousel className="w-full px-8 sm:w-[calc(100%-6rem)] sm:px-0">
             <CarouselContent className="-ml-1">
               {selectedTestingLocations.map((area) => (
                 <CarouselItem
                   key={area.id}
-                  className="max-w-[320px] p-2"
+                  className="w-[280px] max-w-[320px] p-2 sm:w-auto"
                   onClick={() => {
                     const arrayOfObjects = [
                       { id: area.id, name: area.name, items: [] },

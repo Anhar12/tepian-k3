@@ -37,19 +37,19 @@ export function OrderDetailSkeleton() {
       </div>
 
       {/* Main content grid */}
-      <div className="flex gap-6 px-6">
+      <div className="flex flex-col gap-6 px-4 py-6 md:flex-row md:px-6">
         {/* Timeline skeleton */}
-        <div className="pt-4">
+        <div className="w-full overflow-x-auto pt-4 md:w-auto md:overflow-visible">
           <OrderTimelineSkeleton />
         </div>
 
         {/* Content card skeleton */}
-        <Card className="flex-1 rounded-2xl p-6 shadow-sm">
+        <Card className="flex-1 rounded-2xl p-4 shadow-sm md:p-6">
           <div className="flex h-full flex-col">
             {/* Header */}
-            <div className="mb-2 flex items-start justify-between">
+            <div className="mb-2 flex flex-col items-start gap-2 sm:flex-row sm:justify-between">
               <div className="space-y-2">
-                <Skeleton className="h-6 w-56" />
+                <Skeleton className="h-6 w-48 sm:w-56" />
                 <Skeleton className="h-4 w-32" />
               </div>
               <Skeleton className="h-6 w-28" />
@@ -60,13 +60,13 @@ export function OrderDetailSkeleton() {
             <Skeleton className="mb-6 h-4 w-3/4" />
 
             {/* Document skeleton */}
-            <Skeleton className="h-16 w-72 rounded-xl" />
+            <Skeleton className="h-16 w-full rounded-xl sm:w-72" />
 
             {/* Action buttons skeleton */}
-            <div className="mt-8 flex justify-end gap-3 border-t pt-6">
-              <Skeleton className="h-10 w-30 rounded-md" />
-              <Skeleton className="h-10 w-30 rounded-md" />
-              <Skeleton className="h-10 w-30 rounded-md" />
+            <div className="mt-8 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-end">
+              <Skeleton className="h-10 w-full rounded-md sm:w-30" />
+              <Skeleton className="h-10 w-full rounded-md sm:w-30" />
+              <Skeleton className="h-10 w-full rounded-md sm:w-30" />
             </div>
           </div>
         </Card>
