@@ -375,43 +375,36 @@ beforeLoad: async ({ context }) => {
 ### Available Services
 
 1. **Storage Service** (`storage/`)
-
    - Providers: Filesystem, MinIO, S3
    - Operations: upload, download, delete, getUrl
    - Configured via `STORAGE_PROVIDER` env var
 
 2. **Email Service** (`email/`)
-
    - Providers: Nodemailer (SMTP), Resend
    - Templates for: OTP verification, password reset, welcome emails
    - Configured via `EMAIL_PROVIDER` env var
 
 3. **Logger Service** (`logger/`)
-
    - Winston-based logging
    - Transports: Console, File rotation
    - Log levels: error, warn, info, debug
 
 4. **Image Service** (`image/`)
-
    - Image optimization and transformation
    - Format conversion, resizing
 
 5. **PDF Service** (`pdf/`)
-
    - PDF generation and modification using pdf-lib
    - QR code embedding for document verification
    - Client-side PDF signing (`pdf/client/`)
 
 6. **Document Signing Service** (`document-signing/`)
-
    - JWT-based document signatures
    - QR code generation for verification
    - Token expiry: configurable via `DOCUMENT_QR_EXPIRATION`
    - Separate JWT secrets for different document types
 
 7. **Rate Limiter Service** (`rate-limiter/`)
-
    - Multiple strategies: sliding-window, token-bucket, fixed-window
    - Redis-backed with automatic in-memory fallback
    - Preset configurations for common use cases
@@ -431,11 +424,9 @@ beforeLoad: async ({ context }) => {
 **File-based routing with route groups:**
 
 - `(auth)/` - Authentication routes (login, register, verify-email)
-
   - Public routes, no auth required
 
 - `(core)/` - Protected routes (requires authentication)
-
   - `dashboard/` - User dashboard and company management
   - `back-office/` - Admin routes (users, roles, parameters, tools, clusters, kblis)
   - `pengujian/` - Testing workflow (order creation, checkout, status tracking)
@@ -468,12 +459,14 @@ export const Route = createFileRoute("/(core)/back-office/users/")({
 The frontend supports three patterns for making tRPC calls:
 
 1. **Classic Pattern** - Using tRPC hooks directly:
+
    ```typescript
    const user = trpc.user.getById.useQuery({ id });
    const updateUser = trpc.user.update.useMutation();
    ```
 
 2. **Modern Pattern** - Using TanStack Query hooks with tRPC options:
+
    ```typescript
    const user = useQuery(trpc.user.getById.queryOptions({ id }));
    const updateUser = useMutation(trpc.user.update.mutationOptions());
@@ -485,6 +478,14 @@ The frontend supports three patterns for making tRPC calls:
    ```
 
 See [tRPC TanStack Query Usage Guide](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md) for detailed examples and best practices.
+
+## UI/UX Guidelines
+
+- When implementing UI features, always consider mobile/touch compatibility first
+- Avoid tooltips for interactive elements on mobile - prefer popovers or other touch-friendly alternatives
+- Ensure touch targets are at least 44px for accessibility
+- For styling tasks, reference existing similar components (like `index.tsx`) before creating new styles
+- When working with third-party UI libraries (Sonner, Radix, etc.), verify the installed version in `package.json` before implementing features
 
 ## Environment Variables
 
