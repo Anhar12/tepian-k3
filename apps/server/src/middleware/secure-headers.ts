@@ -21,44 +21,49 @@ export const secureHeaders = (): MiddlewareHandler => {
       c.header("Cross-Origin-Resource-Policy", "same-origin");
     }
 
-    // Content Security Policy - stricter in production
-    if (env.NODE_ENV === "production") {
-      c.header(
-        "Content-Security-Policy",
-        [
-          "default-src 'self'",
-          "script-src 'self'",
-          "style-src 'self'",
-          "img-src 'self' data: blob: https:",
-          "font-src 'self' data:",
-          "connect-src 'self' https: wss:",
-          "frame-ancestors 'none'",
-          "base-uri 'self'",
-          "form-action 'self'",
-          "upgrade-insecure-requests",
-        ].join("; "),
-      );
+    // Only set CSP if not already set by route handler (allows per-route override, e.g. nonce-based CSP)
+    if (!c.res.headers.get("Content-Security-Policy")) {
+      // Content Security Policy - stricter in production
+      if (env.NODE_ENV === "production") {
+        c.header(
+          "Content-Security-Policy",
+          [
+            "default-src 'self'",
+            "script-src 'self'",
+            "style-src 'self'",
+            "img-src 'self' data: blob: https:",
+            "font-src 'self' data:",
+            "connect-src 'self' https: wss:",
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "upgrade-insecure-requests",
+          ].join("; "),
+        );
+      } else {
+        // Development - more permissive CSP for hot reload, dev tools
+        c.header(
+          "Content-Security-Policy",
+          [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob: https:",
+            "font-src 'self' data:",
+            "connect-src 'self' https: wss: ws:",
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+          ].join("; "),
+        );
+      }
+    }
 
+    if (env.NODE_ENV === "production") {
       // HSTS - only in production
       c.header(
         "Strict-Transport-Security",
         "max-age=63072000; includeSubDomains; preload",
-      );
-    } else {
-      // Development - more permissive CSP for hot reload, dev tools
-      c.header(
-        "Content-Security-Policy",
-        [
-          "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-          "style-src 'self' 'unsafe-inline'",
-          "img-src 'self' data: blob: https:",
-          "font-src 'self' data:",
-          "connect-src 'self' https: wss: ws:",
-          "frame-ancestors 'none'",
-          "base-uri 'self'",
-          "form-action 'self'",
-        ].join("; "),
       );
     }
   };

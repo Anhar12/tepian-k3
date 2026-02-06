@@ -23,6 +23,7 @@ import {
 import { logInfo, logWarn } from "@tepian-k3/services/logger";
 import { db, sql } from "@tepian-k3/db/client";
 import { devRouter } from "./routes/dev";
+import { logsRouter } from "./routes/logs";
 import { secureHeaders } from "./middleware/secure-headers";
 import { timeout } from "./middleware/timeout";
 import { setDefaultOptions } from "date-fns";
@@ -113,6 +114,9 @@ app.use(
 if (env.NODE_ENV === "development") {
   app.route("/dev", devRouter);
 }
+
+// Developer log viewer (auth handled inside router based on NODE_ENV)
+app.route("/api/logs", logsRouter);
 
 // Only for local testing
 app.use("*", async (c, next) => {

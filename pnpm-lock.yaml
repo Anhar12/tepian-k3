@@ -145,6 +145,9 @@ importers:
       '@tepian-k3/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@tepian-k3/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@tepian-k3/db':
         specifier: workspace:*
         version: link:../../packages/db

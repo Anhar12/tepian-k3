@@ -81,6 +81,9 @@ export const RESOURCES = [
 
   // ==================== NOTIFICATIONS ====================
   "notifications",
+
+  // ==================== SYSTEM ====================
+  "logs",
 ] as const;
 
 export type Resource = (typeof RESOURCES)[number];
