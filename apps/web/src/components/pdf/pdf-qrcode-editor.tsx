@@ -8,6 +8,7 @@ import {
   type DraggableStateSnapshot,
 } from "@hello-pangea/dnd";
 import { throttle } from "@tanstack/react-pacer";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -30,7 +31,7 @@ interface QRCodeElement {
 
 export default function PDFQRCodeEditor() {
   // Get current user
-  const { data: currentUser } = useQuery(trpc.auth.me.queryOptions());
+  const { data: currentUser } = useQuery(authMeQueryOptions());
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);

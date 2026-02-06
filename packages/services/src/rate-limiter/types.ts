@@ -150,6 +150,16 @@ export const RateLimiterPresets = {
   },
 
   /**
+   * Token refresh: 30 attempts per 15 minutes
+   * More lenient than AUTH since refresh is automated by the client
+   */
+  REFRESH: {
+    points: 30,
+    duration: 900,
+    strategy: "sliding-window" as const,
+  },
+
+  /**
    * Email: 10 emails per hour
    */
   EMAIL: {

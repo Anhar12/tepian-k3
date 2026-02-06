@@ -6,7 +6,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { trpc } from "@/utils/trpc";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
@@ -26,7 +26,7 @@ const navItems: {
 ];
 
 export default function Navbar() {
-  const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
+  const { data: user } = useSuspenseQuery(authMeQueryOptions());
   const [open, setOpen] = useState(false);
 
   return (

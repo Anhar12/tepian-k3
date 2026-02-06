@@ -30,6 +30,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { queryClient, trpc } from "@/utils/trpc";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -76,7 +77,7 @@ export function TestingTable({
   const [searchTerm, setSearchTerm] = useState(params.name || "");
   const debouncedSearchTerm = useDebounced(searchTerm, 500);
 
-  const { data: me } = useQuery(trpc.auth.me.queryOptions());
+  const { data: me } = useQuery(authMeQueryOptions());
 
   const hasClusterId =
     params.clusterId !== undefined && params.clusterId !== null;

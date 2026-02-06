@@ -183,6 +183,7 @@ export { RateLimiter } from "./rate-limiter";
 // Convenience exports for presets
 export const rateLimiters = {
   auth: () => createRateLimiterFromPreset("AUTH", "auth"),
+  authRefresh: () => createRateLimiterFromPreset("REFRESH", "auth-refresh"),
   api: () => createRateLimiterFromPreset("API", "api"),
   email: () => createRateLimiterFromPreset("EMAIL", "email"),
   otp: () => createRateLimiterFromPreset("OTP", "otp"),

@@ -1,49 +1,24 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { trpc } from "@/utils/trpc";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
+// Auth + email verification is handled by parent (core) route
 export const Route = createFileRoute("/(core)/back-office")({
   beforeLoad: async ({ context }) => {
-    // Attempt to fetch user data
-    const user = await context.queryClient.ensureQueryData({
-      ...trpc.auth.me.queryOptions(),
-      // 5 minutes cache
-      staleTime: 1000 * 60 * 5,
-      // Keep in cache for 30 minutes (even if unused)
-      gcTime: 1000 * 60 * 30,
-    });
-
-    if (!user) {
-      throw redirect({ to: "/login" });
-    }
-
-    if (user && !user.emailVerified) {
-      throw redirect({
-        to: "/verify-email",
-        search: {
-          email: user.email,
-        },
-      });
-    }
+    // User is guaranteed authenticated by parent route, just check role
+    const user =
+      await context.queryClient.ensureQueryData(authMeQueryOptions());
 
     // Prevent regular users from accessing back office
-    const hasUserRole = user.roles.some((role) => role.name === "user");
+    const hasUserRole = user?.roles.some((role) => role.name === "user");
     if (hasUserRole) {
       throw redirect({ to: "/unauthorized" });
     }
 
     return null;
   },
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData({
-      ...trpc.auth.me.queryOptions(),
-      // 5 minutes cache
-      staleTime: 1000 * 60 * 5,
-      // Keep in cache for 30 minutes (even if unused)
-      gcTime: 1000 * 60 * 30,
-    }),
   component: RouteComponent,
 });
 

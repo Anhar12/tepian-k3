@@ -21,6 +21,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { trpc } from "@/utils/trpc";
 import {
   createFileRoute,
@@ -43,7 +44,7 @@ import ImageWithFallback from "@/components/image-with-fallback";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(context.trpc.auth.me.queryOptions()),
+    context.queryClient.ensureQueryData(authMeQueryOptions()),
   component: HomeComponent,
 });
 

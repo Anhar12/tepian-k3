@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { trpc } from "@/utils/trpc";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
@@ -18,7 +18,7 @@ import { logout } from "@/lib/logout";
 export default function NavbarDropdown() {
   const navigate = useNavigate();
 
-  const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
+  const { data: user } = useSuspenseQuery(authMeQueryOptions());
 
   function onLogout() {
     logout();

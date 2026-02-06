@@ -7,6 +7,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCartSheetStore } from "@/stores/cart-sheet.stores";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { trpc } from "@/utils/trpc";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, type LinkProps } from "@tanstack/react-router";
@@ -29,7 +30,7 @@ export default function PengujianNavbar() {
   const setIsOpenCartSheet = useCartSheetStore((state) => state.setIsOpen);
   const [open, setOpen] = useState(false);
 
-  const { data: user } = useSuspenseQuery(trpc.auth.me.queryOptions());
+  const { data: user } = useSuspenseQuery(authMeQueryOptions());
 
   const { data: cartCount } = useQuery({
     ...trpc.cart.getCartItemCount.queryOptions(),

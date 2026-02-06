@@ -329,7 +329,7 @@ export const authRouter = createTRPCRouter({
     };
   }),
 
-  refresh: withRateLimit(rateLimiters.auth())
+  refresh: withRateLimit(rateLimiters.authRefresh())
     .input(authSchema.refreshTokenSchema)
     .mutation(
       async ({ input, ctx }) =>
