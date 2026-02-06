@@ -34,6 +34,7 @@ import {
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -67,6 +68,7 @@ export const Route = createFileRoute(
   },
   component: RouteComponent,
   pendingComponent: LoaderComponent,
+  head: () => pageHead("Edit Parameter"),
 });
 
 function LoaderComponent() {

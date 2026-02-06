@@ -80,11 +80,13 @@ import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import { getPublicUrl } from "@/utils/url";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "worksheets.read" }),
   component: JadwalPersonilPage,
+  head: () => pageHead("Lembar Kerja - Jadwal Personel"),
 });
 
 const routeApi = getRouteApi("/(core)/worksheets");

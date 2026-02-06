@@ -20,6 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/(core)/back-office/roles/$roleId/edit")({
     ),
   component: RouteComponent,
   pendingComponent: LoaderComponent,
+  head: () => pageHead("Edit Role"),
 });
 
 function LoaderComponent() {

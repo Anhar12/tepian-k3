@@ -1,3 +1,4 @@
+import { pageHead } from "@/utils/page-head";
 import { useState } from "react";
 import { InfiniteScrollList } from "@/components/infinite-scroll-list";
 import { NotificationCard } from "@/components/notification-card";
@@ -52,6 +53,7 @@ export const Route = createFileRoute("/(core)/notifications")({
     type: z.enum(["all", ...NOTIFICATION_TYPES]).default("all"),
   }),
   component: NotificationsPage,
+  head: () => pageHead("Notifikasi"),
 });
 
 // Type for notification from the API

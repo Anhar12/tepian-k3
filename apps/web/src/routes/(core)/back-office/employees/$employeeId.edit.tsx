@@ -18,6 +18,7 @@ import {
   SkeletonCombobox,
 } from "@/components/ui/skeleton-generator";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
@@ -51,6 +52,7 @@ export const Route = createFileRoute(
   },
   pendingComponent: LoaderComponent,
   component: RouteComponent,
+  head: () => pageHead("Edit Karyawan"),
 });
 
 function LoaderComponent() {

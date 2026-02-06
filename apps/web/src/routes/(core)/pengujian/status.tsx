@@ -30,6 +30,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/(core)/pengujian/status")({
   validateSearch: z.object({
     orderId: z.uuidv7(),
   }),
+  head: () => pageHead("Pengujian - Status"),
   beforeLoad: async ({ search }) => {
     // check if orderId exists
     if (!search.orderId) {

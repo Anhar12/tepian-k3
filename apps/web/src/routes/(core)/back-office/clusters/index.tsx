@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/(core)/back-office/clusters/")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "clusters.view" }),
   component: RouteComponent,
+  head: () => pageHead("Manajemen Klaster"),
 });
 
 function RouteComponent() {

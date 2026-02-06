@@ -13,6 +13,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/(core)/back-office/employees/create")({
       permission: "employees.create",
     }),
   component: RouteComponent,
+  head: () => pageHead("Tambah Karyawan"),
 });
 
 function RouteComponent() {

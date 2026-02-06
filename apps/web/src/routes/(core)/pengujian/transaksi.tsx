@@ -1,6 +1,7 @@
 import { OrderCard } from "@/components/order-card";
 import { OrderListSkeleton } from "@/components/order-card-skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/(core)/pengujian/transaksi")({
   validateSearch: z.object({
     tabs: z.enum(["all", ...ORDER_STATUS]).default("all"),
   }),
+  head: () => pageHead("Pengujian - Transaksi"),
   component: RouteComponent,
 });
 

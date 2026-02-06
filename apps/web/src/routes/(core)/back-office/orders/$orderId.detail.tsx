@@ -44,6 +44,7 @@ import {
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient } from "@/utils/trpc";
 import { format } from "date-fns";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import { getClusterColor } from "@/lib/cluster-colors";
@@ -61,6 +62,7 @@ import ImageWithFallback from "@/components/image-with-fallback";
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
 )({
+  head: () => pageHead("Detail Pesanan"),
   beforeLoad: async ({ context }) => {
     await requirePermission(context, { permission: "orders.read" });
   },

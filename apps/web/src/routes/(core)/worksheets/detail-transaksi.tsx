@@ -43,6 +43,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import useDialogs from "@/hooks/use-dialog";
 import GenerateOfferingDialog from "./-components/generate-offering-dialog";
+import { pageHead } from "@/utils/page-head";
 
 const searchParamsSchema = z.object({
   worksheetId: z.uuidv7().optional(),
@@ -53,6 +54,7 @@ export const Route = createFileRoute("/(core)/worksheets/detail-transaksi")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "worksheets.read" }),
   component: RouteComponent,
+  head: () => pageHead("Lembar Kerja - Detail Transaksi"),
 });
 
 interface OperationalCostItem {

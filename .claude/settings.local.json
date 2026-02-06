@@ -73,7 +73,8 @@
       "Bash(docker-compose logs:*)",
       "Bash(curl:*)",
       "Bash(sudo docker compose ps:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

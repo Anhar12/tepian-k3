@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -24,6 +25,7 @@ import { Loader2, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/(core)/pengujian/checkout")({
+  head: () => pageHead("Pengujian - Checkout"),
   component: RouteComponent,
 });
 

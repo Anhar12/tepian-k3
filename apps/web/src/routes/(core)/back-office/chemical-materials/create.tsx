@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import type z from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
@@ -56,6 +57,7 @@ export const Route = createFileRoute(
       permission: "chemical-materials.create",
     }),
   component: RouteComponent,
+  head: () => pageHead("Tambah Bahan Kimia"),
 });
 
 function RouteComponent() {

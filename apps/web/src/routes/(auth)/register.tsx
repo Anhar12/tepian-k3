@@ -1,11 +1,13 @@
 import { RegisterForm } from "@/components/register-form";
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import ImageWithFallback from "@/components/image-with-fallback";
 
 const BannerImage = "/assets/banner-auth.png";
 
 export const Route = createFileRoute("/(auth)/register")({
   component: RouteComponent,
+  head: () => pageHead("Daftar"),
 });
 
 function RouteComponent() {

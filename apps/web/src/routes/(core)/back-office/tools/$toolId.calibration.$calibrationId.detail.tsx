@@ -5,6 +5,7 @@ import CalibrationDetail from "./-components/calibration-detail";
 import { CalibrationCertificate } from "./-components/calibration-certificate";
 import { CalibrationDocumentation } from "./-components/calibration-documentation";
 import DocumentationImageModal from "./-components/documentation-image-modal";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 
 export const Route = createFileRoute(
@@ -18,6 +19,7 @@ export const Route = createFileRoute(
     toolId: z.uuidv7(),
     calibrationId: z.uuidv7(),
   }),
+  head: () => pageHead("Detail Kalibrasi"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "tool-calibrations.view",

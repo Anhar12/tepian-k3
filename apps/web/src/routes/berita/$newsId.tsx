@@ -25,9 +25,11 @@ import {
 } from "lucide-react";
 import { globalSuccessToast } from "@/lib/toast";
 import ImageWithFallback from "@/components/image-with-fallback";
+import { pageHead } from "@/utils/page-head";
 
 export const Route = createFileRoute("/berita/$newsId")({
   component: NewsDetailPage,
+  head: () => pageHead("Detail Berita"),
 });
 
 function NewsDetailSkeleton() {

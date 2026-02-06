@@ -16,6 +16,7 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import z from "zod";
@@ -30,6 +31,7 @@ const validateEmailSchema = z.object({
 export const Route = createFileRoute("/(auth)/verify-email")({
   validateSearch: validateEmailSchema,
   component: VerifyEmailComponent,
+  head: () => pageHead("Verifikasi Email"),
 });
 
 const BannerImage = "/assets/banner-auth.png";

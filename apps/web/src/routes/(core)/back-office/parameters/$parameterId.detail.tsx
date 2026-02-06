@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
@@ -15,6 +16,7 @@ export const Route = createFileRoute(
   params: z.object({
     parameterId: z.string(),
   }),
+  head: () => pageHead("Detail Parameter"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: ["parameters.read", "parameter-tool.view"],

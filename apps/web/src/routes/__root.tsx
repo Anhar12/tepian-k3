@@ -14,6 +14,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { AlertTriangle, FileQuestion } from "lucide-react";
 import { z } from "zod";
+import { pageHead } from "@/utils/page-head";
 import "../index.css";
 
 export interface RouterAppContext {
@@ -26,15 +27,10 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
   head: () => ({
-    meta: [
-      {
-        title: "tepian-k3",
-      },
-      {
-        name: "description",
-        content: "tepian-k3 is a web application",
-      },
-    ],
+    ...pageHead(
+      "Tepian K3",
+      "Sistem Manajemen Laboratorium K3 - Kesehatan dan Keselamatan Kerja",
+    ),
     links: [
       {
         rel: "icon",

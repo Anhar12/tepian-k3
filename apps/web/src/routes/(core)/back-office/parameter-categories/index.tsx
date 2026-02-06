@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
@@ -27,6 +28,7 @@ export const Route = createFileRoute(
     }),
 
   component: RouteComponent,
+  head: () => pageHead("Kategori Parameter"),
 });
 
 function RouteComponent() {

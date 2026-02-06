@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { pageHead } from "@/utils/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import CompanyDetail from "./-components/company-detail";
@@ -17,6 +18,7 @@ export const Route = createFileRoute(
     companyId: z.uuidv7(),
   }),
   component: RouteComponent,
+  head: () => pageHead("Detail Perusahaan"),
 });
 
 function RouteComponent() {

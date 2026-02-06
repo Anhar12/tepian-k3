@@ -25,11 +25,13 @@ import clusterSchema from "@tepian-k3/schema/cluster.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
+import { pageHead } from "@/utils/page-head";
 
 export const Route = createFileRoute("/(core)/back-office/clusters/create")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "clusters.create" }),
   component: RouteComponent,
+  head: () => pageHead("Buat Klaster Baru"),
 });
 
 function RouteComponent() {

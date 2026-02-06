@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { z } from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
@@ -42,6 +43,7 @@ export const Route = createFileRoute(
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "banners.update" }),
   component: RouteComponent,
+  head: () => pageHead("Edit Banner"),
 });
 
 function RouteComponent() {

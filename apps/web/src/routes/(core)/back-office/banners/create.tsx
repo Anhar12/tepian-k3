@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { Controller, useForm } from "react-hook-form";
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/(core)/back-office/banners/create")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "banners.create" }),
   component: RouteComponent,
+  head: () => pageHead("Tambah Banner"),
 });
 
 function RouteComponent() {

@@ -26,23 +26,14 @@ import {
   Download,
 } from "lucide-react";
 import { trpc } from "@/utils/trpc";
+import { pageHead } from "@/utils/page-head";
 import type { DocumentStatus } from "@tepian-k3/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicUrl } from "@/utils/url";
 
 export const Route = createFileRoute("/verify/$token")({
   component: RouteComponent,
-  head: ({ params }) => ({
-    meta: [
-      {
-        title: "Document Verification - Tepian K3",
-      },
-      {
-        name: "description",
-        content: `Verify document authenticity - Token: ${params.token}`,
-      },
-    ],
-  }),
+  head: () => pageHead("Verifikasi Dokumen", "Verifikasi keaslian dokumen"),
 });
 
 function RouteComponent() {

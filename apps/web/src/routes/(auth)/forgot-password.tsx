@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ const resetPasswordSchema = z.object({
 
 export const Route = createFileRoute("/(auth)/forgot-password")({
   component: RouteComponent,
+  head: () => pageHead("Lupa Kata Sandi"),
 });
 
 function RouteComponent() {

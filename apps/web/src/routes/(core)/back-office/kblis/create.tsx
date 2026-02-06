@@ -8,6 +8,7 @@ import {
 import { AutoForm } from "@/components/ui/auto-form";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/(core)/back-office/kblis/create")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "kbli.create" }),
   component: RouteComponent,
+  head: () => pageHead("Tambah KBLI"),
 });
 
 function RouteComponent() {

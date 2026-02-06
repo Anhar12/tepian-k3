@@ -79,6 +79,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AutoForm } from "@/components/ui/auto-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { pageHead } from "@/utils/page-head";
 
 const tabs = [
   "parameter",
@@ -98,6 +99,7 @@ export const Route = createFileRoute("/(core)/worksheets/")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "worksheets.read" }),
   component: RouteComponent,
+  head: () => pageHead("Lembar Kerja - Parameter"),
 });
 
 const routeApi = getRouteApi("/(core)/worksheets");

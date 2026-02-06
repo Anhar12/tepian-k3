@@ -26,6 +26,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -67,6 +68,7 @@ export const Route = createFileRoute(
   "/(core)/back-office/testings/$testingId/detail",
 )({
   validateSearch: (search) => searchSchema.parse(search),
+  head: () => pageHead("Detail Pengujian"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "testing.read" }),
   component: RouteComponent,

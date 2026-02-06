@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import z from "zod";
 import { TabsLayout } from "./-components/tabs-layout";
@@ -13,6 +14,7 @@ export const Route = createFileRoute(
   params: z.object({
     toolId: z.uuidv7(),
   }),
+  head: () => pageHead("Kalibrasi Alat"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "tool-calibrations.view",

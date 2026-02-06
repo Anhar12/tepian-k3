@@ -33,6 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -72,6 +73,7 @@ export const Route = createFileRoute("/(core)/back-office/users/$userId/edit")({
   },
   component: RouteComponent,
   pendingComponent: LoadingComponent,
+  head: () => pageHead("Edit Pengguna"),
 });
 
 function LoadingComponent() {

@@ -1,3 +1,4 @@
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
@@ -11,6 +12,7 @@ export const Route = createFileRoute(
   params: z.object({
     toolId: z.uuidv7(),
   }),
+  head: () => pageHead("Detail Alat"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "tools.read" }),
   component: RouteComponent,

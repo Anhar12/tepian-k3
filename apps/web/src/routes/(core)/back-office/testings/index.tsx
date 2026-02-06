@@ -21,6 +21,7 @@ import {
 import { WorksheetDataTable } from "@/components/ui/worksheet-data-table";
 import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/(core)/back-office/testings/")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "testing.view" }),
   component: RouteComponent,
+  head: () => pageHead("Manajemen Pengujian"),
 });
 
 const STATUS_COLORS: Record<TestingStatus, string> = {

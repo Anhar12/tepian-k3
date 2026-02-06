@@ -5,6 +5,7 @@ import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { Label } from "@/components/ui/label";
 import getOrdersColumns from "@/components/columns/orders-columns";
 import { useDataTable } from "@/hooks/use-data-table";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/(core)/back-office/orders/")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "orders.read" }),
   component: RouteComponent,
+  head: () => pageHead("Manajemen Pesanan"),
 });
 
 function RouteComponent() {

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useDataTable } from "@/hooks/use-data-table";
+import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -19,6 +20,7 @@ import { useMemo, useState } from "react";
 export const Route = createFileRoute("/(core)/dashboard/company/")({
   validateSearch: userCompanySchema.getAllUserCompaniesSchema,
   component: RouteComponent,
+  head: () => pageHead("Perusahaan"),
 });
 
 function RouteComponent() {

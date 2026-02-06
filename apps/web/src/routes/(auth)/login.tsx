@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { LoginForm } from "@/components/login-form";
 import ImageWithFallback from "@/components/image-with-fallback";
 
@@ -6,6 +7,7 @@ const BannerImage = "/assets/banner-auth.png";
 
 export const Route = createFileRoute("/(auth)/login")({
   component: LoginPage,
+  head: () => pageHead("Masuk"),
 });
 
 function LoginPage() {

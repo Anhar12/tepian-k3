@@ -18,9 +18,11 @@ import { Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { News } from "@tepian-k3/types/news.types";
 import ImageWithFallback from "@/components/image-with-fallback";
+import { pageHead } from "@/utils/page-head";
 
 export const Route = createFileRoute("/berita/")({
   component: NewsListPage,
+  head: () => pageHead("Berita"),
 });
 
 function NewsCard({ news }: { news: News }) {
