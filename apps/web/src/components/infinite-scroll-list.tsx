@@ -168,28 +168,28 @@ export function InfiniteScrollList<TData>({
   // Initial loading state
   if (queryResult.isLoading) {
     return (
-      loadingComponent ?? (
-        <div
-          className={cn("flex items-center justify-center", className)}
-          style={{ height }}
-        >
-          <Loader2 className="size-8 animate-spin text-muted-foreground" />
-        </div>
-      )
+      <div className={cn("overflow-auto", className)} style={{ height }}>
+        {loadingComponent ?? (
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+      </div>
     );
   }
 
   // Empty state
   if (flatData.length === 0) {
     return (
-      emptyComponent ?? (
-        <EmptyState
-          icon={Inbox}
-          title="Tidak ada data"
-          description="Data tidak tersedia saat ini"
-          className={className}
-        />
-      )
+      <div className={cn("overflow-auto", className)} style={{ height }}>
+        {emptyComponent ?? (
+          <EmptyState
+            icon={Inbox}
+            title="Tidak ada data"
+            description="Data tidak tersedia saat ini"
+          />
+        )}
+      </div>
     );
   }
 
