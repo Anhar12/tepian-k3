@@ -4,7 +4,6 @@ import { DataTableSortList } from "@/components/data-table/data-table-sort-list"
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { Label } from "@/components/ui/label";
 import getOrdersColumns from "@/components/columns/orders-columns";
-import { useDataTable } from "@/hooks/use-data-table";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
@@ -20,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { OrderStatus } from "@tepian-k3/constants";
+import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
 export const Route = createFileRoute("/(core)/back-office/orders/")({
   validateSearch: orderSchema.getAllOrdersSchema,
@@ -48,16 +48,16 @@ function RouteComponent() {
     [params.page, params.perPage],
   );
 
-  const { table } = useDataTable({
+  const { table } = useDataTableRouter({
     data: ordersData?.data ?? [],
     columns,
-    pageCount: ordersData?.pagination.totalPages ?? 0,
+    pageCount: ordersData?.pageCount ?? 0,
+    search: params,
+    navigate: ({ search: updater }) => {
+      navigate({ search: updater });
+    },
     initialState: {
-      sorting: [{ id: "createdAt", desc: true }],
-      pagination: {
-        pageSize: params.perPage,
-        pageIndex: params.page - 1,
-      },
+      sorting: [{ id: "createdAt", desc: false }],
     },
     getRowId: (row) => row.id,
   });
@@ -115,7 +115,7 @@ function RouteComponent() {
 
         {ordersData && (
           <div className="text-sm text-muted-foreground">
-            Total: {ordersData.pagination.totalItems} order
+            Halaman {params.page} dari {ordersData.pageCount}
           </div>
         )}
       </div>

@@ -7,7 +7,6 @@ import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useDataTable } from "@/hooks/use-data-table";
 import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +15,7 @@ import userCompanySchema from "@tepian-k3/schema/user-company.schema";
 import type { UserCompaniesWithRelations } from "@tepian-k3/types/user-company.types";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
 export const Route = createFileRoute("/(core)/dashboard/company/")({
   validateSearch: userCompanySchema.getAllUserCompaniesSchema,
@@ -46,16 +46,16 @@ function RouteComponent() {
     [params.page, params.perPage],
   );
 
-  const { table } = useDataTable({
+  const { table } = useDataTableRouter({
     data: company?.data ?? [],
-    columns: columns as UserCompaniesWithRelations[],
+    columns: columns as unknown as UserCompaniesWithRelations[],
     pageCount: company?.pageCount ?? 0,
+    search: params,
+    navigate: ({ search: updater }) => {
+      navigate({ search: updater });
+    },
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
-      pagination: {
-        pageSize: params.perPage,
-        pageIndex: params.page - 1,
-      },
     },
     getRowId: (row) => row.id,
   });

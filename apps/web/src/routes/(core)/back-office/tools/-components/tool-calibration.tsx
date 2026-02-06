@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useDataTable } from "@/hooks/use-data-table";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch, useNavigate } from "@tanstack/react-router";
@@ -20,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
 interface ToolCalibrationProps {
   toolId: string;
@@ -55,16 +55,16 @@ export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
     [params.page, params.perPage],
   );
 
-  const { table } = useDataTable({
+  const { table } = useDataTableRouter({
     data: calibrations?.data ?? [],
     columns,
     pageCount: calibrations?.pageCount ?? 0,
+    search: params,
+    navigate: ({ search: updater }) => {
+      navigate({ search: updater });
+    },
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
-      pagination: {
-        pageSize: params.perPage,
-        pageIndex: params.page - 1,
-      },
     },
     getRowId: (row) => row.id,
   });

@@ -2,6 +2,7 @@ import { ORDER_STATUS } from "@tepian-k3/constants";
 import { order } from "@tepian-k3/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
+import { createPaginationSchema } from "./pagination.schema";
 
 const createOrderSchema = createInsertSchema(order, {
   companyId: z.uuidv7(),
@@ -37,11 +38,20 @@ const uploadAssignmentLetterSchema = z.object({
   assignmentLetter: z.file().max(5 * 1024 * 1024),
 });
 
-const getAllOrdersSchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  perPage: z.coerce.number().int().positive().max(100).default(10),
+const SORTABLE_ORDER_FIELDS = [
+  "createdAt",
+  "orderNumber",
+  "status",
+  "totalAmount",
+  "updatedAt",
+] as const satisfies readonly (keyof typeof order.$inferSelect)[];
+
+const getAllOrdersSchema = createPaginationSchema(SORTABLE_ORDER_FIELDS, {
+  id: "createdAt",
+  desc: true,
+}).extend({
   status: z.enum(ORDER_STATUS).optional(),
-  search: z.string().optional(),
+  search: z.string().default(""),
 });
 
 const orderSchema = {

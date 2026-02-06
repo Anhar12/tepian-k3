@@ -7,7 +7,6 @@ import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useDataTable } from "@/hooks/use-data-table";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
@@ -16,6 +15,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import surveySchema from "@tepian-k3/schema/survey.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
 export const Route = createFileRoute("/(core)/back-office/survey-questions/")({
   validateSearch: surveySchema.getAllSurveyQuestionsSchema,
@@ -47,16 +47,16 @@ function RouteComponent() {
     [params.page, params.perPage],
   );
 
-  const { table } = useDataTable({
+  const { table } = useDataTableRouter({
     data: questions?.data ?? [],
     columns,
     pageCount: questions?.pageCount ?? 0,
+    search: params,
+    navigate: ({ search: updater }) => {
+      navigate({ search: updater });
+    },
     initialState: {
-      sorting: [{ id: "order", desc: false }],
-      pagination: {
-        pageSize: params.perPage,
-        pageIndex: params.page - 1,
-      },
+      sorting: [{ id: "createdAt", desc: false }],
     },
     getRowId: (row) => row.id,
   });

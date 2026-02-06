@@ -44,14 +44,7 @@ export const orderRouter = createTRPCRouter({
     .input(orderSchema.getAllOrdersSchema)
     .query(
       async ({ input }) =>
-        await runEffect(
-          orderQueries.getAllOrdersPaginated(
-            input.page,
-            input.perPage,
-            input.status,
-            input.search,
-          ),
-        ),
+        await runEffect(orderQueries.getOffsetPaginatedOrders(input)),
     ),
 
   getOrderById: withProtectedRateLimit(rateLimiters.moderate())

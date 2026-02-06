@@ -6,7 +6,6 @@ import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.sc
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import getParameterCategoriesColumns from "@/components/columns/parameter-categories-columns";
-import { useDataTable } from "@/hooks/use-data-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { PermissionGate } from "@/components/permission-gate";
@@ -17,6 +16,7 @@ import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import type { ParameterCategories } from "@tepian-k3/types/parameter-categories.types";
+import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
 export const Route = createFileRoute(
   "/(core)/back-office/parameter-categories/",
@@ -56,16 +56,16 @@ function RouteComponent() {
     [params.page, params.perPage],
   );
 
-  const { table } = useDataTable({
+  const { table } = useDataTableRouter({
     data: parameterCategories?.data ?? [],
-    columns: columns as ParameterCategories[],
+    columns: columns as unknown as ParameterCategories[],
     pageCount: parameterCategories?.pageCount ?? 0,
+    search: params,
+    navigate: ({ search: updater }) => {
+      navigate({ search: updater });
+    },
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
-      pagination: {
-        pageSize: params.perPage,
-        pageIndex: params.page - 1,
-      },
     },
     getRowId: (row) => row.id,
   });
