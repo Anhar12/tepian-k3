@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import { env } from "@/env";
 import { validateToken } from "@tepian-k3/auth/utils";
+import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
 const logsRouter = new Hono();
 
@@ -54,6 +55,39 @@ logsRouter.use("*", async (c, next) => {
 
   if (!user.permissions.includes("logs.read")) {
     return c.json({ error: "Missing logs.read permission" }, 403);
+  }
+
+  return next();
+});
+
+// Rate limiting: 30 requests/minute per user (or IP in dev)
+// Skips /ui route since it's just static HTML
+const logsRateLimiter = rateLimiters.moderate();
+
+logsRouter.use("*", async (c, next) => {
+  if (c.req.path.endsWith("/ui") || c.req.path.endsWith("/ui/")) {
+    return next();
+  }
+
+  const key =
+    c.req.header("Authorization")?.slice(7) ||
+    c.req.header("x-forwarded-for") ||
+    "unknown";
+
+  const result = await logsRateLimiter.consume(`logs:${key}`);
+
+  c.header("X-RateLimit-Limit", String(result.limit));
+  c.header("X-RateLimit-Remaining", String(result.remaining));
+  c.header("X-RateLimit-Reset", result.resetAt.toISOString());
+
+  if (!result.allowed) {
+    return c.json(
+      {
+        error: "Too many requests",
+        retryAfter: Math.ceil(result.resetMs / 1000),
+      },
+      429,
+    );
   }
 
   return next();
