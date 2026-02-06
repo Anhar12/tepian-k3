@@ -10,9 +10,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tepian} -d ${POSTGRES_DB:-tepian_k3}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-tepian} -d ${POSTGRES_DB:-tepian_k3}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,9 +33,10 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT:-6380}:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_secret}", "ping"]
+      test:
+        ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_secret}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -58,36 +63,20 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
+      # Docker-specific overrides (these take precedence over .env)
       NODE_ENV: production
       SERVER_HOSTNAME: "0.0.0.0"
       SERVER_PORT: 3000
       POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:-tepian_secret}@postgres:5432/${POSTGRES_DB:-tepian_k3}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
       MEMURAI_HOST: redis
       MEMURAI_PORT: "6379"
       MEMURAI_PASSWORD: ${REDIS_PASSWORD:-redis_secret}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_RESET_PASSWORD_SECRET: ${JWT_RESET_PASSWORD_SECRET}
-      JWT_DOCUMENT_SECRET: ${JWT_DOCUMENT_SECRET}
-      JWT_LEGAL_DOCUMENT_SECRET: ${JWT_LEGAL_DOCUMENT_SECRET:-}
-      JWT_TESTING_DOCUMENT_SECRET: ${JWT_TESTING_DOCUMENT_SECRET:-}
-      JWT_COMPANY_DOCUMENT_SECRET: ${JWT_COMPANY_DOCUMENT_SECRET:-}
-      DOCUMENT_QR_EXPIRATION: ${DOCUMENT_QR_EXPIRATION:-10y}
-      DOCUMENT_VERIFICATION_BASE_URL: ${DOCUMENT_VERIFICATION_BASE_URL:-http://localhost:3001/verify}
-      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-filesystem}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
       STORAGE_PATH: /app/uploads
       UPLOADS_DIR: /app/uploads
-      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-ethereal}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@example.com}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_SECURE: ${SMTP_SECURE:-false}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      APP_URL: ${APP_URL:-http://localhost:3001}
-      DASHBOARD_URL: ${DASHBOARD_URL:-http://localhost:3001/dashboard}
     volumes:
       - uploads_data:/app/uploads
       - logs_data:/app/logs

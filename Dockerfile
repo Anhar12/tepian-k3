@@ -56,14 +56,14 @@ RUN addgroup --system --gid 1001 nodejs && \
 RUN mkdir -p /app/uploads /app/logs /app/public && \
     chown -R server:nodejs /app/uploads /app/logs /app/public
 
-# Copy production node_modules
+# Copy production node_modules (pnpm hoisted store + symlinks)
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=prod-deps /app/apps/server/node_modules ./apps/server/node_modules
 COPY --from=prod-deps /app/packages/db/node_modules ./packages/db/node_modules
 
-# Copy built server
-COPY --from=build /app/apps/server/dist ./dist
-COPY --from=build /app/apps/server/assets ./assets
+# Copy built server into apps/server/dist so node_modules resolution works
+COPY --from=build /app/apps/server/dist ./apps/server/dist
+COPY --from=build /app/apps/server/assets ./apps/server/assets
 
 # Copy migration files (for migrate service)
 COPY --from=build /app/packages/db/src/migrations ./packages/db/src/migrations

@@ -27,6 +27,7 @@
     "dotenv": "catalog:",
     "hono": "catalog:",
     "mime-types": "catalog:",
+    "sharp": "^0.34.5",
     "zod": "catalog:"
   },
   "devDependencies": {

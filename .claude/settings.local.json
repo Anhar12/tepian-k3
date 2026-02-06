@@ -68,7 +68,9 @@
       "Bash(pnpm tsr:*)",
       "Bash(pnpm exec tsr:*)",
       "Bash(npx @tanstack/router-cli generate:*)",
-      "Bash(pnpm install:*)"
+      "Bash(pnpm install:*)",
+      "Bash(sudo docker-compose:*)",
+      "Bash(docker-compose logs:*)"
     ]
   }
 }
