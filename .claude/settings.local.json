@@ -72,7 +72,8 @@
       "Bash(sudo docker-compose:*)",
       "Bash(docker-compose logs:*)",
       "Bash(curl:*)",
-      "Bash(sudo docker compose ps:*)"
+      "Bash(sudo docker compose ps:*)",
+      "Bash(cat:*)"
     ]
   }
 }
