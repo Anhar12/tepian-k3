@@ -109,9 +109,7 @@ function NotificationsPage() {
         setMarkingAsReadIds((prev) => new Set(prev).add(variables.id));
       },
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getCursorPaginated.queryKey(),
-        });
+        notificationsQuery.refetch();
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.getAll.queryKey(),
         });
@@ -139,9 +137,7 @@ function NotificationsPage() {
   const markAllAsReadMutation = useMutation(
     trpc.notifications.markAllAsRead.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getCursorPaginated.queryKey(),
-        });
+        notificationsQuery.refetch();
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.getAll.queryKey(),
         });
@@ -165,9 +161,7 @@ function NotificationsPage() {
         setDeletingIds((prev) => new Set(prev).add(variables.id));
       },
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getCursorPaginated.queryKey(),
-        });
+        notificationsQuery.refetch();
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.getAll.queryKey(),
         });
@@ -193,9 +187,7 @@ function NotificationsPage() {
   const deleteAllMutation = useMutation(
     trpc.notifications.deleteAll.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getCursorPaginated.queryKey(),
-        });
+        notificationsQuery.refetch();
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.getAll.queryKey(),
         });
