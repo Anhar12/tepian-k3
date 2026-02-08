@@ -62,10 +62,10 @@ import ImageWithFallback from "@/components/image-with-fallback";
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
 )({
-  head: () => pageHead("Detail Pesanan"),
   beforeLoad: async ({ context }) => {
     await requirePermission(context, { permission: "orders.read" });
   },
+  head: () => pageHead("Detail Pesanan"),
   component: RouteComponent,
 });
 
