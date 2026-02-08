@@ -21,6 +21,8 @@ import { createRateLimiter } from "@tepian-k3/services/rate-limiter";
 import type { RateLimiter } from "@tepian-k3/services/rate-limiter";
 import { UAParser } from "ua-parser-js";
 import { logWarn } from "@tepian-k3/services/logger";
+import { getIdempotencyService } from "@tepian-k3/services/idempotency";
+import { createHash } from "crypto";
 
 /**
  * Isomorphic Session getter for API requests
@@ -86,6 +88,8 @@ export const createTRPCContext = async (context: HonoContext) => {
   const osName = os.name || "";
   const osVersion = os.version || "";
 
+  const idempotencyKey = context.req.header("X-Idempotency-Key") || null;
+
   return {
     session: data?.session,
     user: data?.user,
@@ -95,6 +99,7 @@ export const createTRPCContext = async (context: HonoContext) => {
     osName,
     osVersion,
     eventBus,
+    idempotencyKey,
   };
 };
 
@@ -698,3 +703,157 @@ export const withPermissionAndRateLimit = <TInput = unknown>(
       },
     });
   });
+
+/**
+ * Idempotency wrapper for mutation handlers.
+ *
+ * Wraps a mutation handler to provide request deduplication.
+ * Uses `X-Idempotency-Key` header (set automatically by the frontend tRPC client).
+ *
+ * - If no key is provided, the handler executes normally (pass-through).
+ * - If a key exists with status "completed", returns the cached response.
+ * - If a key exists with status "processing", throws CONFLICT (409).
+ * - If a key exists with status "failed", deletes it and re-executes.
+ * - On success, caches the response for the configured TTL.
+ *
+ * @param handler - The original mutation handler function
+ * @param config - Optional config: `{ ttl: number }` in seconds (default: 86400 = 24h)
+ *
+ * @example
+ * ```typescript
+ * createOrder: withProtectedRateLimit(rateLimiters.moderate())
+ *   .input(orderSchema)
+ *   .mutation(withIdempotency(async ({ input, ctx }) => {
+ *     // ... original handler ...
+ *     return { success: true };
+ *   })),
+ *
+ * // With custom TTL (5 minutes)
+ * insertCartItem: withProtectedRateLimit(rateLimiters.lenient())
+ *   .input(cartSchema)
+ *   .mutation(withIdempotency(async ({ input, ctx }) => {
+ *     // ...
+ *   }, { ttl: 300 })),
+ * ```
+ */
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function createInputFingerprint(input: unknown, path: string): string {
+  const hash = createHash("sha256");
+  hash.update(path + ":" + JSON.stringify(input ?? ""));
+  return hash.digest("hex");
+}
+
+export function withIdempotency<
+  TInput,
+  TOutput,
+  TOpts extends {
+    input: TInput;
+    ctx: {
+      idempotencyKey?: string | null;
+      user?: { id: string } | null;
+      ip?: string;
+    };
+  },
+>(
+  handler: (opts: TOpts) => Promise<TOutput>,
+  config?: { ttl?: number },
+): (opts: TOpts) => Promise<TOutput> {
+  const ttl = config?.ttl ?? 86400;
+
+  return async (opts: TOpts) => {
+    const { ctx } = opts;
+    const idempotencyKey = ctx.idempotencyKey;
+
+    // No key provided — pass through to handler
+    if (!idempotencyKey) {
+      return handler(opts);
+    }
+
+    // Validate UUID format
+    if (!UUID_REGEX.test(idempotencyKey)) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Format Idempotency-Key tidak valid. Gunakan UUID.",
+      });
+    }
+
+    const service = getIdempotencyService();
+    const userId = ctx.user?.id ?? ctx.ip ?? "anonymous";
+    const storageKey = `${userId}:${idempotencyKey}`;
+
+    // Generate input fingerprint for verification
+    const fingerprint = createInputFingerprint(opts.input, storageKey);
+
+    // Check for existing record
+    const existing = await service.check(storageKey);
+
+    if (existing) {
+      // Still processing (concurrent duplicate request)
+      if (existing.status === "processing") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            "Permintaan sebelumnya dengan kunci yang sama sedang diproses. Silakan tunggu.",
+        });
+      }
+
+      // Completed — return cached response
+      if (existing.status === "completed" && existing.response) {
+        // Verify input fingerprint matches
+        if (existing.fingerprint !== fingerprint) {
+          throw new TRPCError({
+            code: "UNPROCESSABLE_CONTENT",
+            message:
+              "Kunci idempotency sudah digunakan dengan input yang berbeda.",
+          });
+        }
+        return JSON.parse(existing.response) as TOutput;
+      }
+
+      // Failed — allow retry by deleting old entry
+      if (existing.status === "failed") {
+        await service.delete(storageKey);
+      }
+    }
+
+    // Acquire processing lock
+    const acquired = await service.acquireLock(storageKey, {
+      status: "processing",
+      response: null,
+      error: null,
+      createdAt: Date.now(),
+      completedAt: null,
+      path: storageKey,
+      fingerprint,
+    });
+
+    if (!acquired) {
+      // Race condition: another request acquired the lock
+      throw new TRPCError({
+        code: "CONFLICT",
+        message:
+          "Permintaan sebelumnya dengan kunci yang sama sedang diproses. Silakan tunggu.",
+      });
+    }
+
+    try {
+      const result = await handler(opts);
+
+      // Cache the successful response
+      await service.markCompleted(storageKey, JSON.stringify(result));
+
+      return result;
+    } catch (error) {
+      // Mark as failed so the same key can be retried
+      const errorMessage =
+        error instanceof TRPCError
+          ? JSON.stringify({ code: error.code, message: error.message })
+          : "Unknown error";
+      await service.markFailed(storageKey, errorMessage);
+      throw error;
+    }
+  };
+}

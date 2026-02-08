@@ -3,6 +3,7 @@ import {
   createTRPCRouter,
   publicProcedure,
   formDataProcedure,
+  withIdempotency,
   withPermission,
   formDataInput,
 } from "../index";
@@ -31,96 +32,101 @@ export const documentRouter = createTRPCRouter({
     .input(formDataInput)
     .use(formDataProcedure(documentSchema.uploadDocumentSchema))
     .mutation(
-      async ({ ctx }) =>
-        await runEffect(
-          Effect.gen(function* () {
-            // Convert file to buffer
-            const arrayBuffer = yield* Effect.tryPromise(() =>
-              ctx.input.data.file.arrayBuffer(),
-            );
-            const buffer = Buffer.from(arrayBuffer);
+      withIdempotency(
+        async ({ ctx }) =>
+          await runEffect(
+            Effect.gen(function* () {
+              // Convert file to buffer
+              const arrayBuffer = yield* Effect.tryPromise(() =>
+                ctx.input.data.file.arrayBuffer(),
+              );
+              const buffer = Buffer.from(arrayBuffer);
 
-            // Validate file before processing
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(
-                buffer,
-                ctx.input.data.file.name,
-                ctx.input.data.file.type,
-                {
-                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                  allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
-                },
-              ),
-            );
+              // Validate file before processing
+              yield* Effect.tryPromise(() =>
+                assertValidFileBuffer(
+                  buffer,
+                  ctx.input.data.file.name,
+                  ctx.input.data.file.type,
+                  {
+                    maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                    allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+                  },
+                ),
+              );
 
-            // Upload file to storage
-            const uploadedFile = yield* storageService.upload(buffer, {
-              filename: ctx.input.data.file.name,
-              folder: `documents/${ctx.input.data.entityType}/${ctx.input.data.type}`,
-            });
+              // Upload file to storage
+              const uploadedFile = yield* storageService.upload(buffer, {
+                filename: ctx.input.data.file.name,
+                folder: `documents/${ctx.input.data.entityType}/${ctx.input.data.type}`,
+              });
 
-            // Generate document number
-            const timestamp = Date.now();
-            const documentNumber = `DOC-${ctx.input.data.type.toUpperCase()}-${timestamp}`;
+              // Generate document number
+              const timestamp = Date.now();
+              const documentNumber = `DOC-${ctx.input.data.type.toUpperCase()}-${timestamp}`;
 
-            // Create document record
-            const document = yield* documentQueries.createDocument({
-              documentNumber,
-              type: ctx.input.data.type,
-              title: ctx.input.data.title,
-              description: ctx.input.data.description,
-              entityType: ctx.input.data.entityType,
-              entityId: ctx.input.data.entityId,
-              fileUrl: uploadedFile.key,
-              fileName: ctx.input.data.file.name,
-              fileSize: ctx.input.data.file.size,
-              mimeType: ctx.input.data.file.type,
-              uploadedByUserId: ctx.user.id,
-            });
+              // Create document record
+              const document = yield* documentQueries.createDocument({
+                documentNumber,
+                type: ctx.input.data.type,
+                title: ctx.input.data.title,
+                description: ctx.input.data.description,
+                entityType: ctx.input.data.entityType,
+                entityId: ctx.input.data.entityId,
+                fileUrl: uploadedFile.key,
+                fileName: ctx.input.data.file.name,
+                fileSize: ctx.input.data.file.size,
+                mimeType: ctx.input.data.file.type,
+                uploadedByUserId: ctx.user.id,
+              });
 
-            // Update order status based on uploaded document type
-            if (ctx.input.data.entityType === "order") {
-              const docType = ctx.input.data.type;
-              const orderId = ctx.input.data.entityId;
+              // Update order status based on uploaded document type
+              if (ctx.input.data.entityType === "order") {
+                const docType = ctx.input.data.type;
+                const orderId = ctx.input.data.entityId;
 
-              if (docType === "offering_document") {
-                // Offering document uploaded → penawaran_diterbitkan
-                yield* orderQueries.updateOrderStatus(
-                  orderId,
-                  "penawaran_diterbitkan",
-                );
-              } else if (docType === "approval_letter") {
-                // Admin approval letter uploaded → persetujuan_disetujui
-                yield* orderQueries.updateOrderStatus(
-                  orderId,
-                  "persetujuan_disetujui",
-                );
-              } else if (
-                docType === "invoice" ||
-                docType === "cooperation_agreement"
-              ) {
-                // Check if both invoice and cooperation agreement now exist
-                const orderDocs = yield* documentQueries.getDocumentsByEntity(
-                  "order",
-                  orderId,
-                );
-                const hasInvoice = orderDocs.some((d) => d.type === "invoice");
-                const hasCooperationAgreement = orderDocs.some(
-                  (d) => d.type === "cooperation_agreement",
-                );
-
-                if (hasInvoice && hasCooperationAgreement) {
+                if (docType === "offering_document") {
+                  // Offering document uploaded → penawaran_diterbitkan
                   yield* orderQueries.updateOrderStatus(
                     orderId,
-                    "tagihan_diterbitkan",
+                    "penawaran_diterbitkan",
                   );
+                } else if (docType === "approval_letter") {
+                  // Admin approval letter uploaded → persetujuan_disetujui
+                  yield* orderQueries.updateOrderStatus(
+                    orderId,
+                    "persetujuan_disetujui",
+                  );
+                } else if (
+                  docType === "invoice" ||
+                  docType === "cooperation_agreement"
+                ) {
+                  // Check if both invoice and cooperation agreement now exist
+                  const orderDocs = yield* documentQueries.getDocumentsByEntity(
+                    "order",
+                    orderId,
+                  );
+                  const hasInvoice = orderDocs.some(
+                    (d) => d.type === "invoice",
+                  );
+                  const hasCooperationAgreement = orderDocs.some(
+                    (d) => d.type === "cooperation_agreement",
+                  );
+
+                  if (hasInvoice && hasCooperationAgreement) {
+                    yield* orderQueries.updateOrderStatus(
+                      orderId,
+                      "tagihan_diterbitkan",
+                    );
+                  }
                 }
               }
-            }
 
-            return document;
-          }),
-        ),
+              return document;
+            }),
+          ),
+        { ttl: 43200 },
+      ),
     ),
 
   /**
@@ -240,62 +246,65 @@ export const documentRouter = createTRPCRouter({
       ),
     )
     .mutation(
-      async ({ input, ctx }) =>
-        await runEffect(
-          Effect.gen(function* () {
-            // Upload invoice
-            const arrayBuffer = yield* Effect.tryPromise(() =>
-              ctx.input.data.file.arrayBuffer(),
-            );
-            const buffer = Buffer.from(arrayBuffer);
+      withIdempotency(
+        async ({ input, ctx }) =>
+          await runEffect(
+            Effect.gen(function* () {
+              // Upload invoice
+              const arrayBuffer = yield* Effect.tryPromise(() =>
+                ctx.input.data.file.arrayBuffer(),
+              );
+              const buffer = Buffer.from(arrayBuffer);
 
-            // Validate file (invoices must be PDF)
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(
-                buffer,
-                ctx.input.data.file.name,
-                ctx.input.data.file.type,
-                {
-                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                  allowedMimeTypes: ["application/pdf"],
-                },
-              ),
-            );
+              // Validate file (invoices must be PDF)
+              yield* Effect.tryPromise(() =>
+                assertValidFileBuffer(
+                  buffer,
+                  ctx.input.data.file.name,
+                  ctx.input.data.file.type,
+                  {
+                    maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                    allowedMimeTypes: ["application/pdf"],
+                  },
+                ),
+              );
 
-            const uploadedFile = yield* storageService.upload(buffer, {
-              filename: ctx.input.data.file.name,
-              folder: "documents/order/invoice",
-            });
+              const uploadedFile = yield* storageService.upload(buffer, {
+                filename: ctx.input.data.file.name,
+                folder: "documents/order/invoice",
+              });
 
-            const documentNumber = `INV-${Date.now()}-${input.orderId.slice(
-              0,
-              8,
-            )}`;
+              const documentNumber = `INV-${Date.now()}-${input.orderId.slice(
+                0,
+                8,
+              )}`;
 
-            // Create document
-            const document = yield* documentQueries.createDocument({
-              documentNumber,
-              type: "invoice",
-              title: `Invoice for Order ${input.orderId}`,
-              entityType: "order",
-              entityId: input.orderId,
-              fileUrl: uploadedFile.key,
-              fileName: ctx.input.data.file.name,
-              fileSize: ctx.input.data.file.size,
-              mimeType: ctx.input.data.file.type,
-              uploadedByUserId: ctx.user.id,
-            });
+              // Create document
+              const document = yield* documentQueries.createDocument({
+                documentNumber,
+                type: "invoice",
+                title: `Invoice for Order ${input.orderId}`,
+                entityType: "order",
+                entityId: input.orderId,
+                fileUrl: uploadedFile.key,
+                fileName: ctx.input.data.file.name,
+                fileSize: ctx.input.data.file.size,
+                mimeType: ctx.input.data.file.type,
+                uploadedByUserId: ctx.user.id,
+              });
 
-            // Sign immediately
-            const signedDocument = yield* documentQueries.signDocumentWithJWT(
-              document.id,
-              ctx.user.id,
-              process.env.APP_URL || "http://localhost:3000",
-            );
+              // Sign immediately
+              const signedDocument = yield* documentQueries.signDocumentWithJWT(
+                document.id,
+                ctx.user.id,
+                process.env.APP_URL || "http://localhost:3000",
+              );
 
-            return signedDocument;
-          }),
-        ),
+              return signedDocument;
+            }),
+          ),
+        { ttl: 43200 },
+      ),
     ),
 
   /**
@@ -403,123 +412,130 @@ export const documentRouter = createTRPCRouter({
       ),
     )
     .mutation(
-      async ({ ctx }) =>
-        await runEffect(
-          Effect.gen(function* () {
-            // Convert file to buffer
-            const arrayBuffer = yield* Effect.tryPromise(() =>
-              ctx.input.data.file.arrayBuffer(),
-            );
-            const originalBuffer = Buffer.from(arrayBuffer);
+      withIdempotency(
+        async ({ ctx }) =>
+          await runEffect(
+            Effect.gen(function* () {
+              // Convert file to buffer
+              const arrayBuffer = yield* Effect.tryPromise(() =>
+                ctx.input.data.file.arrayBuffer(),
+              );
+              const originalBuffer = Buffer.from(arrayBuffer);
 
-            // Validate file (must be PDF for signing)
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(
-                originalBuffer,
-                ctx.input.data.file.name,
-                ctx.input.data.file.type,
-                {
-                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                  allowedMimeTypes: ["application/pdf"],
-                },
-              ),
-            );
-
-            // First, create document signatures for all signers
-            const baseUrl = process.env.APP_URL || "http://localhost:3000";
-            const documentSignatures = [];
-
-            for (const qrCode of ctx.input.data.qrCodes) {
-              const signature = yield* createDocumentSignature(
-                "temp-id", // Will be updated after document creation
-                `TEMP-${Date.now()}`,
-                ctx.input.data.entityType,
-                ctx.input.data.entityId,
-                ctx.input.data.type,
-                "temp-url", // Will be updated after upload
-                originalBuffer,
-                qrCode.userId,
+              // Validate file (must be PDF for signing)
+              yield* Effect.tryPromise(() =>
+                assertValidFileBuffer(
+                  originalBuffer,
+                  ctx.input.data.file.name,
+                  ctx.input.data.file.type,
+                  {
+                    maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                    allowedMimeTypes: ["application/pdf"],
+                  },
+                ),
               );
 
-              documentSignatures.push({
-                ...qrCode,
-                verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
-                signatureData: signature.signatureData,
-                verificationToken: signature.verificationToken,
-                fileHash: signature.fileHash,
-              });
-            }
+              // First, create document signatures for all signers
+              const baseUrl = process.env.APP_URL || "http://localhost:3000";
+              const documentSignatures = [];
 
-            // Embed QR codes into the PDF
-            const qrCodeData = documentSignatures.map((sig) => ({
-              signature: {
-                userId: sig.userId,
-                userName: sig.userName,
-                purpose: sig.purpose,
-                verificationUrl: sig.verificationUrl,
-              },
-              position: sig.position as QRCodePosition,
-            }));
+              for (const qrCode of ctx.input.data.qrCodes) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id", // Will be updated after document creation
+                  `TEMP-${Date.now()}`,
+                  ctx.input.data.entityType,
+                  ctx.input.data.entityId,
+                  ctx.input.data.type,
+                  "temp-url", // Will be updated after upload
+                  originalBuffer,
+                  qrCode.userId,
+                );
 
-            const signedPdfBuffer = yield* pdfSigningService.embedQRCodesInPDF(
-              originalBuffer,
-              qrCodeData,
-            );
+                documentSignatures.push({
+                  ...qrCode,
+                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
+                  signatureData: signature.signatureData,
+                  verificationToken: signature.verificationToken,
+                  fileHash: signature.fileHash,
+                });
+              }
 
-            // Upload signed PDF to storage
-            const uploadedFile = yield* storageService.upload(signedPdfBuffer, {
-              filename: `signed-${ctx.input.data.file.name}`,
-              folder: `documents/${ctx.input.data.entityType}/signed`,
-            });
-
-            // Generate document number
-            const timestamp = Date.now();
-            const documentNumber = `DOC-SIGNED-${ctx.input.data.entityType.toUpperCase()}-${timestamp}`;
-
-            // Create document record
-            const document = yield* documentQueries.createDocument({
-              documentNumber,
-              type: ctx.input.data.type,
-              title: ctx.input.data.title,
-              entityType: ctx.input.data.entityType,
-              entityId: ctx.input.data.entityId,
-              fileUrl: uploadedFile.key,
-              fileName: ctx.input.data.file.name,
-              fileSize: signedPdfBuffer.length,
-              mimeType: "application/pdf",
-              uploadedByUserId: ctx.user.id,
-            });
-
-            // Store document signatures in database
-            const signatureRecords =
-              yield* documentQueries.createDocumentSignatures(
-                documentSignatures.map((sig, index) => ({
-                  documentId: document.id,
-                  signedByUserId: sig.userId,
-                  signerName: sig.userName,
+              // Embed QR codes into the PDF
+              const qrCodeData = documentSignatures.map((sig) => ({
+                signature: {
+                  userId: sig.userId,
+                  userName: sig.userName,
                   purpose: sig.purpose,
-                  signatureOrder: index + 1,
-                  qrCodePosition: sig.position,
-                  verificationToken: sig.verificationToken,
                   verificationUrl: sig.verificationUrl,
-                  signatureData: sig.signatureData,
-                  fileHash: sig.fileHash,
-                })),
+                },
+                position: sig.position as QRCodePosition,
+              }));
+
+              const signedPdfBuffer =
+                yield* pdfSigningService.embedQRCodesInPDF(
+                  originalBuffer,
+                  qrCodeData,
+                );
+
+              // Upload signed PDF to storage
+              const uploadedFile = yield* storageService.upload(
+                signedPdfBuffer,
+                {
+                  filename: `signed-${ctx.input.data.file.name}`,
+                  folder: `documents/${ctx.input.data.entityType}/signed`,
+                },
               );
 
-            return {
-              document,
-              signatures: signatureRecords.map((sig) => ({
-                id: sig.id,
-                userId: sig.signedByUserId,
-                userName: sig.signerName,
-                purpose: sig.purpose,
-                verificationUrl: sig.verificationUrl,
-                signatureOrder: sig.signatureOrder,
-              })),
-              url: storageService.getPublicUrl(uploadedFile.key),
-            };
-          }),
-        ),
+              // Generate document number
+              const timestamp = Date.now();
+              const documentNumber = `DOC-SIGNED-${ctx.input.data.entityType.toUpperCase()}-${timestamp}`;
+
+              // Create document record
+              const document = yield* documentQueries.createDocument({
+                documentNumber,
+                type: ctx.input.data.type,
+                title: ctx.input.data.title,
+                entityType: ctx.input.data.entityType,
+                entityId: ctx.input.data.entityId,
+                fileUrl: uploadedFile.key,
+                fileName: ctx.input.data.file.name,
+                fileSize: signedPdfBuffer.length,
+                mimeType: "application/pdf",
+                uploadedByUserId: ctx.user.id,
+              });
+
+              // Store document signatures in database
+              const signatureRecords =
+                yield* documentQueries.createDocumentSignatures(
+                  documentSignatures.map((sig, index) => ({
+                    documentId: document.id,
+                    signedByUserId: sig.userId,
+                    signerName: sig.userName,
+                    purpose: sig.purpose,
+                    signatureOrder: index + 1,
+                    qrCodePosition: sig.position,
+                    verificationToken: sig.verificationToken,
+                    verificationUrl: sig.verificationUrl,
+                    signatureData: sig.signatureData,
+                    fileHash: sig.fileHash,
+                  })),
+                );
+
+              return {
+                document,
+                signatures: signatureRecords.map((sig) => ({
+                  id: sig.id,
+                  userId: sig.signedByUserId,
+                  userName: sig.signerName,
+                  purpose: sig.purpose,
+                  verificationUrl: sig.verificationUrl,
+                  signatureOrder: sig.signatureOrder,
+                })),
+                url: storageService.getPublicUrl(uploadedFile.key),
+              };
+            }),
+          ),
+        { ttl: 43200 },
+      ),
     ),
 });

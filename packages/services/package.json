@@ -43,6 +43,9 @@
     },
     "./token-blacklist": {
       "default": "./src/token-blacklist/index.ts"
+    },
+    "./idempotency": {
+      "default": "./src/idempotency/index.ts"
     }
   },
   "dependencies": {

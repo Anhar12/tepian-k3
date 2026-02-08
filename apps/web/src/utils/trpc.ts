@@ -156,19 +156,30 @@ export const trpcClient = createTRPCClient<AppRouter>({
     }),
     tokenRefreshLink,
     splitLink({
+      // Route mutations, auth calls, and non-JSON input through httpLink
+      // so each mutation gets its own X-Idempotency-Key header
       condition: (op) => {
-        return op.path.startsWith("auth.") || isNonJsonSerializable(op.input);
+        return (
+          op.type === "mutation" ||
+          op.path.startsWith("auth.") ||
+          isNonJsonSerializable(op.input)
+        );
       },
       true: httpLink({
         url: `${env.VITE_SERVER_URL}/trpc`,
         transformer: SuperJSON,
-        headers: () => {
+        headers: ({ op }) => {
           const headers = new Headers();
 
           const token = localStorage.getItem("accessToken");
 
           if (token) {
             headers.append("Authorization", `Bearer ${token}`);
+          }
+
+          // Add idempotency key for mutation requests
+          if (op.type === "mutation") {
+            headers.append("X-Idempotency-Key", crypto.randomUUID());
           }
 
           return headers;

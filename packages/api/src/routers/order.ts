@@ -4,6 +4,7 @@ import {
   formDataInput,
   formDataProcedure,
   protectedProcedure,
+  withIdempotency,
   withPermission,
   withProtectedRateLimit,
 } from "..";
@@ -123,26 +124,28 @@ export const orderRouter = createTRPCRouter({
         ),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
-      await runEffect(
-        Effect.gen(function* () {
-          const createdOrders = yield* Effect.forEach(
-            input.data,
-            (orderPayload) =>
-              orderQueries.createOrder(
-                ctx.user.id,
-                input.coverTransportationIncluded,
-                input.coverAccommodationIncluded,
-                orderPayload.orderData,
-                orderPayload.orderItems,
-              ),
-          );
-          return createdOrders;
-        }),
-      );
+    .mutation(
+      withIdempotency(async ({ input, ctx }) => {
+        await runEffect(
+          Effect.gen(function* () {
+            const createdOrders = yield* Effect.forEach(
+              input.data,
+              (orderPayload) =>
+                orderQueries.createOrder(
+                  ctx.user.id,
+                  input.coverTransportationIncluded,
+                  input.coverAccommodationIncluded,
+                  orderPayload.orderData,
+                  orderPayload.orderItems,
+                ),
+            );
+            return createdOrders;
+          }),
+        );
 
-      return { success: true };
-    }),
+        return { success: true };
+      }),
+    ),
 
   acceptOffer: withProtectedRateLimit(rateLimiters.moderate())
     .input(
@@ -198,100 +201,102 @@ export const orderRouter = createTRPCRouter({
       ),
     )
     .mutation(
-      async ({ ctx }) =>
-        await runEffect(
-          Effect.gen(function* () {
-            const { orderId, file } = ctx.input.data;
+      withIdempotency(
+        async ({ ctx }) =>
+          await runEffect(
+            Effect.gen(function* () {
+              const { orderId, file } = ctx.input.data;
 
-            // Verify the order belongs to the user and is in confirmed status
-            const order = yield* orderQueries.getOrderWithDocuments(
-              orderId,
-              ctx.user.id,
-            );
+              // Verify the order belongs to the user and is in confirmed status
+              const order = yield* orderQueries.getOrderWithDocuments(
+                orderId,
+                ctx.user.id,
+              );
 
-            if (!order) {
-              return yield* Effect.fail(
-                new TRPCError({
-                  code: "NOT_FOUND",
-                  message: "Order tidak ditemukan",
+              if (!order) {
+                return yield* Effect.fail(
+                  new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Order tidak ditemukan",
+                  }),
+                );
+              }
+
+              // Check if order is confirmed (customer has approved the offer)
+              if (!order.approvedAt) {
+                return yield* Effect.fail(
+                  new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Order belum disetujui",
+                  }),
+                );
+              }
+
+              // Convert file to buffer
+              const arrayBuffer = yield* Effect.tryPromise(() =>
+                file.arrayBuffer(),
+              );
+              const buffer = Buffer.from(arrayBuffer);
+
+              // Validate file (approval letters must be PDF or document)
+              yield* Effect.tryPromise(() =>
+                assertValidFileBuffer(buffer, file.name, file.type, {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
                 }),
               );
-            }
 
-            // Check if order is confirmed (customer has approved the offer)
-            if (!order.approvedAt) {
-              return yield* Effect.fail(
-                new TRPCError({
-                  code: "BAD_REQUEST",
-                  message: "Order belum disetujui",
-                }),
+              // Upload file to storage
+              const filename = `approval-letter-${order.orderNumber}-${Date.now()}.pdf`;
+              const uploadedFile = yield* storageService.upload(buffer, {
+                filename,
+                folder: "approval-letters",
+                contentType: file.type,
+              });
+
+              // Generate document number
+              const documentNumber = `APR-${order.orderNumber}-${Date.now()}`;
+
+              // Create document record
+              const document = yield* documentQueries.createDocument({
+                documentNumber,
+                type: "approval_letter_user",
+                title: `Surat Persetujuan - Order ${order.orderNumber}`,
+                description: `Surat Persetujuan yang ditandatangani pelanggan untuk Order ${order.orderNumber}`,
+                entityType: "order",
+                entityId: orderId,
+                fileUrl: uploadedFile.key,
+                fileName: file.name,
+                fileSize: file.size,
+                mimeType: file.type,
+                uploadedByUserId: ctx.user.id,
+              });
+
+              // Create notification for admin
+              yield* notificationsQueries.create({
+                userId: order.userId,
+                title: "Surat Persetujuan Diunggah",
+                message: `Surat persetujuan untuk Order #${order.orderNumber} telah diunggah.`,
+                type: "document_ready",
+                orderId: order.id,
+                metadata: {
+                  documentType: "offering_user_document",
+                },
+              });
+
+              // Update order status to 'persetujuan_disetujui'
+              yield* orderQueries.updateOrderStatus(
+                order.id,
+                "persetujuan_disetujui",
               );
-            }
 
-            // Convert file to buffer
-            const arrayBuffer = yield* Effect.tryPromise(() =>
-              file.arrayBuffer(),
-            );
-            const buffer = Buffer.from(arrayBuffer);
-
-            // Validate file (approval letters must be PDF or document)
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(buffer, file.name, file.type, {
-                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
-              }),
-            );
-
-            // Upload file to storage
-            const filename = `approval-letter-${order.orderNumber}-${Date.now()}.pdf`;
-            const uploadedFile = yield* storageService.upload(buffer, {
-              filename,
-              folder: "approval-letters",
-              contentType: file.type,
-            });
-
-            // Generate document number
-            const documentNumber = `APR-${order.orderNumber}-${Date.now()}`;
-
-            // Create document record
-            const document = yield* documentQueries.createDocument({
-              documentNumber,
-              type: "approval_letter_user",
-              title: `Surat Persetujuan - Order ${order.orderNumber}`,
-              description: `Surat Persetujuan yang ditandatangani pelanggan untuk Order ${order.orderNumber}`,
-              entityType: "order",
-              entityId: orderId,
-              fileUrl: uploadedFile.key,
-              fileName: file.name,
-              fileSize: file.size,
-              mimeType: file.type,
-              uploadedByUserId: ctx.user.id,
-            });
-
-            // Create notification for admin
-            yield* notificationsQueries.create({
-              userId: order.userId,
-              title: "Surat Persetujuan Diunggah",
-              message: `Surat persetujuan untuk Order #${order.orderNumber} telah diunggah.`,
-              type: "document_ready",
-              orderId: order.id,
-              metadata: {
-                documentType: "offering_user_document",
-              },
-            });
-
-            // Update order status to 'persetujuan_disetujui'
-            yield* orderQueries.updateOrderStatus(
-              order.id,
-              "persetujuan_disetujui",
-            );
-
-            return {
-              documentId: document.id,
-              url: storageService.getPublicUrl(uploadedFile.key),
-            };
-          }),
-        ),
+              return {
+                documentId: document.id,
+                url: storageService.getPublicUrl(uploadedFile.key),
+              };
+            }),
+          ),
+      ),
     ),
 
   uploadPaymentDocuments: protectedProcedure
@@ -306,174 +311,176 @@ export const orderRouter = createTRPCRouter({
       ),
     )
     .mutation(
-      async ({ ctx }) =>
-        await runEffect(
-          Effect.gen(function* () {
-            const { orderId, paymentProof, cooperationAgreement } =
-              ctx.input.data;
+      withIdempotency(
+        async ({ ctx }) =>
+          await runEffect(
+            Effect.gen(function* () {
+              const { orderId, paymentProof, cooperationAgreement } =
+                ctx.input.data;
 
-            // Verify the order belongs to the user
-            const order = yield* orderQueries.getOrderById(
-              orderId,
-              ctx.user.id,
-            );
-
-            if (!order) {
-              return yield* Effect.fail(
-                new TRPCError({
-                  code: "NOT_FOUND",
-                  message: "Order tidak ditemukan",
-                }),
+              // Verify the order belongs to the user
+              const order = yield* orderQueries.getOrderById(
+                orderId,
+                ctx.user.id,
               );
-            }
 
-            // Convert files to buffers
-            const paymentProofBuffer = Buffer.from(
-              yield* Effect.tryPromise(() => paymentProof.arrayBuffer()),
-            );
-            const cooperationAgreementBuffer = Buffer.from(
+              if (!order) {
+                return yield* Effect.fail(
+                  new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Order tidak ditemukan",
+                  }),
+                );
+              }
+
+              // Convert files to buffers
+              const paymentProofBuffer = Buffer.from(
+                yield* Effect.tryPromise(() => paymentProof.arrayBuffer()),
+              );
+              const cooperationAgreementBuffer = Buffer.from(
+                yield* Effect.tryPromise(() =>
+                  cooperationAgreement.arrayBuffer(),
+                ),
+              );
+
+              // Validate payment proof (allow images and PDFs)
               yield* Effect.tryPromise(() =>
-                cooperationAgreement.arrayBuffer(),
-              ),
-            );
+                assertValidFileBuffer(
+                  paymentProofBuffer,
+                  paymentProof.name,
+                  paymentProof.type,
+                  {
+                    maxSize: FILE_SIZE_LIMITS.IMAGE,
+                    allowedMimeTypes: ALLOWED_MIME_TYPES.GENERAL,
+                  },
+                ),
+              );
 
-            // Validate payment proof (allow images and PDFs)
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(
+              // Validate cooperation agreement (must be document)
+              yield* Effect.tryPromise(() =>
+                assertValidFileBuffer(
+                  cooperationAgreementBuffer,
+                  cooperationAgreement.name,
+                  cooperationAgreement.type,
+                  {
+                    maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                    allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+                  },
+                ),
+              );
+
+              // Upload payment proof
+              const paymentProofFilename = `payment-proof-${order.orderNumber}-${Date.now()}-${paymentProof.name}`;
+              const uploadedPaymentProof = yield* storageService.upload(
                 paymentProofBuffer,
-                paymentProof.name,
-                paymentProof.type,
                 {
-                  maxSize: FILE_SIZE_LIMITS.IMAGE,
-                  allowedMimeTypes: ALLOWED_MIME_TYPES.GENERAL,
+                  filename: paymentProofFilename,
+                  folder: "payment-proofs",
+                  contentType: paymentProof.type,
                 },
-              ),
-            );
+              );
 
-            // Validate cooperation agreement (must be document)
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(
+              // Upload cooperation agreement
+              const cooperationAgreementFilename = `cooperation-agreement-${order.orderNumber}-${Date.now()}-${cooperationAgreement.name}`;
+              const uploadedCooperationAgreement = yield* storageService.upload(
                 cooperationAgreementBuffer,
-                cooperationAgreement.name,
-                cooperationAgreement.type,
                 {
-                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                  allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+                  filename: cooperationAgreementFilename,
+                  folder: "cooperation-agreements",
+                  contentType: cooperationAgreement.type,
                 },
-              ),
-            );
+              );
 
-            // Upload payment proof
-            const paymentProofFilename = `payment-proof-${order.orderNumber}-${Date.now()}-${paymentProof.name}`;
-            const uploadedPaymentProof = yield* storageService.upload(
-              paymentProofBuffer,
-              {
-                filename: paymentProofFilename,
-                folder: "payment-proofs",
-                contentType: paymentProof.type,
-              },
-            );
-
-            // Upload cooperation agreement
-            const cooperationAgreementFilename = `cooperation-agreement-${order.orderNumber}-${Date.now()}-${cooperationAgreement.name}`;
-            const uploadedCooperationAgreement = yield* storageService.upload(
-              cooperationAgreementBuffer,
-              {
-                filename: cooperationAgreementFilename,
-                folder: "cooperation-agreements",
-                contentType: cooperationAgreement.type,
-              },
-            );
-
-            const { paymentProofDocument, cooperationAgreementDocument } =
-              yield* Effect.tryPromise({
-                try: () =>
-                  db.transaction(async (tx) => {
-                    // Create document record for payment proof
-                    const paymentProofDocument = await Effect.runPromise(
-                      documentQueries.createDocument(
-                        {
-                          documentNumber: `PAY-${order.orderNumber}-${Date.now()}`,
-                          type: "proof_of_payment",
-                          title: `Bukti Pembayaran - Order ${order.orderNumber}`,
-                          description: `Bukti pembayaran untuk Order ${order.orderNumber}`,
-                          entityType: "order",
-                          entityId: orderId,
-                          fileUrl: uploadedPaymentProof.key,
-                          fileName: paymentProof.name,
-                          fileSize: paymentProof.size,
-                          mimeType: paymentProof.type,
-                          uploadedByUserId: ctx.user.id,
-                        },
-                        tx,
-                      ),
-                    );
-
-                    // Create document record for cooperation agreement
-                    const cooperationAgreementDocument =
-                      await Effect.runPromise(
+              const { paymentProofDocument, cooperationAgreementDocument } =
+                yield* Effect.tryPromise({
+                  try: () =>
+                    db.transaction(async (tx) => {
+                      // Create document record for payment proof
+                      const paymentProofDocument = await Effect.runPromise(
                         documentQueries.createDocument(
                           {
-                            documentNumber: `AGR-${order.orderNumber}-${Date.now()}`,
-                            type: "cooperation_agreement",
-                            title: `Surat Perjanjian Kerjasama - Order ${order.orderNumber}`,
-                            description: `Surat perjanjian kerjasama untuk Order ${order.orderNumber}`,
+                            documentNumber: `PAY-${order.orderNumber}-${Date.now()}`,
+                            type: "proof_of_payment",
+                            title: `Bukti Pembayaran - Order ${order.orderNumber}`,
+                            description: `Bukti pembayaran untuk Order ${order.orderNumber}`,
                             entityType: "order",
                             entityId: orderId,
-                            fileUrl: uploadedCooperationAgreement.key,
-                            fileName: cooperationAgreement.name,
-                            fileSize: cooperationAgreement.size,
-                            mimeType: cooperationAgreement.type,
+                            fileUrl: uploadedPaymentProof.key,
+                            fileName: paymentProof.name,
+                            fileSize: paymentProof.size,
+                            mimeType: paymentProof.type,
                             uploadedByUserId: ctx.user.id,
                           },
                           tx,
                         ),
                       );
 
-                    // Update order status to 'proses_validasi_pembayaran'
-                    await Effect.runPromise(
-                      orderQueries.updateOrderStatus(
-                        order.id,
-                        "proses_validasi_pembayaran",
-                      ),
-                    );
-                    // update order payment status to 'pending_verification'
-                    await Effect.runPromise(
-                      orderQueries.updatePaymentStatus(
-                        order.id,
-                        "pending_verification",
-                        tx,
-                      ),
-                    );
+                      // Create document record for cooperation agreement
+                      const cooperationAgreementDocument =
+                        await Effect.runPromise(
+                          documentQueries.createDocument(
+                            {
+                              documentNumber: `AGR-${order.orderNumber}-${Date.now()}`,
+                              type: "cooperation_agreement",
+                              title: `Surat Perjanjian Kerjasama - Order ${order.orderNumber}`,
+                              description: `Surat perjanjian kerjasama untuk Order ${order.orderNumber}`,
+                              entityType: "order",
+                              entityId: orderId,
+                              fileUrl: uploadedCooperationAgreement.key,
+                              fileName: cooperationAgreement.name,
+                              fileSize: cooperationAgreement.size,
+                              mimeType: cooperationAgreement.type,
+                              uploadedByUserId: ctx.user.id,
+                            },
+                            tx,
+                          ),
+                        );
 
-                    return {
-                      paymentProofDocument,
-                      cooperationAgreementDocument,
-                    };
-                  }),
-                catch: (error) => {
-                  if (error instanceof TRPCError) return error;
-                  return new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message:
-                      "Gagal menyimpan dokumen pembayaran dan perjanjian kerjasama.",
-                    cause: error,
-                  });
-                },
-              });
+                      // Update order status to 'proses_validasi_pembayaran'
+                      await Effect.runPromise(
+                        orderQueries.updateOrderStatus(
+                          order.id,
+                          "proses_validasi_pembayaran",
+                        ),
+                      );
+                      // update order payment status to 'pending_verification'
+                      await Effect.runPromise(
+                        orderQueries.updatePaymentStatus(
+                          order.id,
+                          "pending_verification",
+                          tx,
+                        ),
+                      );
 
-            return {
-              paymentProofDocumentId: paymentProofDocument.id,
-              paymentProofUrl: storageService.getPublicUrl(
-                uploadedPaymentProof.key,
-              ),
-              cooperationAgreementDocumentId: cooperationAgreementDocument.id,
-              cooperationAgreementUrl: storageService.getPublicUrl(
-                uploadedCooperationAgreement.key,
-              ),
-            };
-          }),
-        ),
+                      return {
+                        paymentProofDocument,
+                        cooperationAgreementDocument,
+                      };
+                    }),
+                  catch: (error) => {
+                    if (error instanceof TRPCError) return error;
+                    return new TRPCError({
+                      code: "INTERNAL_SERVER_ERROR",
+                      message:
+                        "Gagal menyimpan dokumen pembayaran dan perjanjian kerjasama.",
+                      cause: error,
+                    });
+                  },
+                });
+
+              return {
+                paymentProofDocumentId: paymentProofDocument.id,
+                paymentProofUrl: storageService.getPublicUrl(
+                  uploadedPaymentProof.key,
+                ),
+                cooperationAgreementDocumentId: cooperationAgreementDocument.id,
+                cooperationAgreementUrl: storageService.getPublicUrl(
+                  uploadedCooperationAgreement.key,
+                ),
+              };
+            }),
+          ),
+      ),
     ),
 
   // Admin procedures

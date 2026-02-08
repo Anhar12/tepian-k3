@@ -1,5 +1,5 @@
 import cartQueries from "@tepian-k3/queries/cart.queries";
-import { createTRPCRouter, withProtectedRateLimit } from "..";
+import { createTRPCRouter, withIdempotency, withProtectedRateLimit } from "..";
 import z from "zod";
 import cartSchema from "@tepian-k3/schema/cart.schema";
 import { runEffect } from "../utils/run-effect";
@@ -19,8 +19,11 @@ export const cartRouter = createTRPCRouter({
   insertCartItem: withProtectedRateLimit(rateLimiters.lenient())
     .input(cartSchema.createCartSchema)
     .mutation(
-      async ({ input, ctx }) =>
-        await runEffect(cartQueries.insertCartItem(ctx.user.id, input)),
+      withIdempotency(
+        async ({ input, ctx }) =>
+          await runEffect(cartQueries.insertCartItem(ctx.user.id, input)),
+        { ttl: 300 },
+      ),
     ),
 
   incrementCartItemQuantity: withProtectedRateLimit(rateLimiters.lenient())
