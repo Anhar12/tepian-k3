@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/table";
 import { WorksheetDataTable } from "@/components/ui/worksheet-data-table";
 import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -46,6 +48,7 @@ export const Route = createFileRoute("/(core)/back-office/testings/")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "testing.view" }),
   component: RouteComponent,
+  head: () => pageHead("Manajemen Pengujian"),
 });
 
 const STATUS_COLORS: Record<TestingStatus, string> = {
@@ -237,15 +240,28 @@ function RouteComponent() {
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="py-12 text-center text-muted-foreground"
-                      >
-                        <FlaskConical className="mx-auto mb-2 h-8 w-8 animate-pulse" />
-                        Memuat data...
-                      </TableCell>
-                    </TableRow>
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-32" />
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-20 rounded-full" />
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          <Skeleton className="h-4 w-28" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="mx-auto h-8 w-20" />
+                        </TableCell>
+                      </TableRow>
+                    ))
                   ) : !data?.data?.length ? (
                     <TableRow>
                       <TableCell

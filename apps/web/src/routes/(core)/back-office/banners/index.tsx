@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import bannerSchema from "@tepian-k3/schema/banner.schema";
 import { requirePermission } from "@/utils/require-permission";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/(core)/back-office/banners/")({
       permission: "banners.view",
     }),
   component: RouteComponent,
+  head: () => pageHead("Manajemen Banner"),
 });
 
 function RouteComponent() {

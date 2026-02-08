@@ -8,7 +8,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [
     tailwindcss(),
-    tanstackRouter({}),
+    tanstackRouter({ autoCodeSplitting: true }),
     react(),
     VitePWA({
       registerType: "autoUpdate",
@@ -22,6 +22,7 @@ export default defineConfig({
       devOptions: { enabled: true },
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        navigateFallbackDenylist: [/^\/api\//],
       },
     }),
   ],
@@ -32,5 +33,16 @@ export default defineConfig({
   },
   server: {
     port: 3001,
+    proxy: {
+      // Proxy API requests to backend server
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+      "/health": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
   },
 });

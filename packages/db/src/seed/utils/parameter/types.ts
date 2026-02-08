@@ -1,6 +1,6 @@
 import z from "zod";
 
-const ParamterSchema = z.array(
+export const ParamterSchema = z.array(
   z.object({
     kategoriParameter: z.string(),
     parameter: z.string(),

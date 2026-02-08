@@ -1,11 +1,8 @@
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconHome,
   IconLogout,
-  IconNotification,
   IconSettings,
-  IconUserCircle,
 } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -104,10 +101,6 @@ export function NavUser() {
               <DropdownMenuItem onSelect={() => navigate({ to: "/" })}>
                 <IconHome />
                 Beranda
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate({ to: "/profile" })}>
-                <IconUserCircle />
-                Profil Saya
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <ModeToggle />

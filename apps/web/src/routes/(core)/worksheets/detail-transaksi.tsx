@@ -1,8 +1,10 @@
-import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
+import {
+  WorksheetHeaderCard,
+  WorksheetHeaderCardSkeleton,
+} from "@/components/worksheet-header-card";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  Check,
   Users,
   MapPin,
   Calendar,
@@ -11,7 +13,6 @@ import {
   Plus,
   Trash2,
   Loader2,
-  ChevronDown,
   AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import useDialogs from "@/hooks/use-dialog";
 import GenerateOfferingDialog from "./-components/generate-offering-dialog";
+import { pageHead } from "@/utils/page-head";
 
 const searchParamsSchema = z.object({
   worksheetId: z.uuidv7().optional(),
@@ -52,6 +54,7 @@ export const Route = createFileRoute("/(core)/worksheets/detail-transaksi")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "worksheets.read" }),
   component: RouteComponent,
+  head: () => pageHead("Lembar Kerja - Detail Transaksi"),
 });
 
 interface OperationalCostItem {
@@ -436,26 +439,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <WorksheetHeaderCard
-          title="Detail Transaksi"
-          subtitle="Rincian biaya parameter dan operasional pengujian"
-          actionButton={[
-            {
-              label: "Simpan",
-              icon: <Save />,
-              variant: "default",
-              size: "default",
-              onClick: () => {},
-            },
-            {
-              label: "Cetak",
-              icon: <Printer />,
-              variant: "outline",
-              size: "default",
-              onClick: () => {},
-            },
-          ]}
-        />
+        <WorksheetHeaderCardSkeleton />
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-48" />

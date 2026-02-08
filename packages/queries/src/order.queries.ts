@@ -4,7 +4,23 @@ import { z } from "zod";
 import orderSchema from "@tepian-k3/schema/order.schema";
 import { Cause, Effect, Exit } from "effect";
 import { logError } from "@tepian-k3/services/logger";
-import { and, eq, inArray, sql } from "@tepian-k3/db";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  sql,
+  type SQL,
+} from "@tepian-k3/db";
+import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
+import { filterColumns } from "@tepian-k3/utils/filter-column";
 import {
   cart,
   documents,
@@ -48,23 +64,78 @@ const orderQueries = {
   /**
    * Get all orders with pagination (Admin)
    */
-  getAllOrdersPaginated(
-    page: number = 1,
-    limit: number = 10,
-    status?: OrderStatus,
-    search?: string,
+  getOffsetPaginatedOrders(
+    input: z.infer<typeof orderSchema.getAllOrdersSchema>,
   ) {
     return Effect.gen(function* () {
-      const offset = (page - 1) * limit;
+      const offset = (input.page - 1) * input.perPage;
+      const advancedTable = input.filters && input.filters.length > 0;
 
-      const [items, totalCount] = yield* Effect.tryPromise({
+      const where = advancedTable
+        ? filterColumns({
+            table: order,
+            filters: input.filters as ExtendedColumnFilter<typeof order>[],
+            joinOperator: input.joinOperator ?? "and",
+          })
+        : and(
+            input.search
+              ? ilike(order.orderNumber, `%${input.search}%`)
+              : undefined,
+            input.status ? eq(order.status, input.status) : undefined,
+            input.createdAt.length > 0
+              ? and(
+                  input.createdAt[0]
+                    ? gte(
+                        order.createdAt,
+                        (() => {
+                          const date = new Date(input.createdAt[0]);
+                          date.setHours(0, 0, 0, 0);
+                          return date.toISOString();
+                        })(),
+                      )
+                    : undefined,
+                  input.createdAt[1]
+                    ? lte(
+                        order.createdAt,
+                        (() => {
+                          const date = new Date(input.createdAt[1]);
+                          date.setHours(23, 59, 59, 999);
+                          return date.toISOString();
+                        })(),
+                      )
+                    : undefined,
+                )
+              : undefined,
+            input.showDeleted
+              ? isNotNull(order.deletedAt)
+              : isNull(order.deletedAt),
+          );
+
+      const orderBy =
+        input.sort.length > 0
+          ? input.sort.map((item) =>
+              item.desc
+                ? desc(
+                    (order as unknown as Record<string, unknown>)[
+                      item.id
+                    ] as SQL,
+                  )
+                : asc(
+                    (order as unknown as Record<string, unknown>)[
+                      item.id
+                    ] as SQL,
+                  ),
+            )
+          : [desc(order.createdAt)];
+
+      const { data, total } = yield* Effect.tryPromise({
         try: () =>
-          Promise.all([
-            db.query.order.findMany({
-              where: status ? eq(order.status, status) : undefined,
-              limit,
+          db.transaction(async (tx) => {
+            const data = await tx.query.order.findMany({
+              where,
+              limit: input.perPage,
               offset,
-              orderBy: (order, { desc }) => [desc(order.createdAt)],
+              orderBy,
               with: {
                 company: {
                   columns: {
@@ -87,23 +158,24 @@ const orderQueries = {
                   },
                 },
               },
-            }),
-            db
-              .select({ count: sql<number>`count(*)` })
+            });
+
+            const total = await tx
+              .select({ count: count() })
               .from(order)
-              .where(status ? eq(order.status, status) : undefined)
-              .then((result) => result[0]?.count),
-          ]),
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
+
+            return { data, total };
+          }),
         catch: (error) => {
           logError(
-            "orderQueries.getAllOrdersPaginated",
-            "Failed to fetch orders",
+            "orderQueries.getOffsetPaginatedOrders",
+            "Failed to fetch paginated orders",
             {
               error,
-              page,
-              limit,
-              status,
-              search,
+              input,
             },
           );
           throw new TRPCError({
@@ -113,14 +185,11 @@ const orderQueries = {
         },
       });
 
+      const pageCount = Math.ceil(total / input.perPage);
+
       return {
-        data: items,
-        pagination: {
-          page,
-          limit,
-          totalPages: Math.ceil((totalCount ?? 0) / limit),
-          totalItems: totalCount,
-        },
+        data,
+        pageCount,
       };
     });
   },
@@ -563,7 +632,7 @@ const orderQueries = {
             where: and(
               eq(order.id, orderId),
               eq(order.userId, userId),
-              eq(order.status, "pending"),
+              eq(order.status, "penawaran_diterbitkan"),
             ),
           }),
         catch: (error) => {
@@ -680,7 +749,7 @@ const orderQueries = {
             where: and(
               eq(order.id, orderId),
               eq(order.userId, userId),
-              eq(order.status, "pending"),
+              eq(order.status, "penawaran_diterbitkan"),
             ),
           }),
         catch: (error) => {
@@ -798,6 +867,17 @@ const orderQueries = {
               .update(worksheets)
               .set({ status: "revision", updatedAt: new Date().toISOString() })
               .where(eq(worksheets.orderId, orderId));
+
+            // add status history
+            await Effect.runPromise(
+              orderStatusHistoryQueries.createOrderStatusHistory(
+                tx,
+                orderId,
+                "revision",
+                userId,
+                `Revision offered to customer. Note: ${revisionNote}`,
+              ),
+            );
 
             return updatedOrders;
           }),
@@ -1227,11 +1307,11 @@ const orderQueries = {
    * Update order status
    * Used when admin completes revision and sends documents back to customer
    */
-  updateOrderStatus(orderId: string, status: OrderStatus) {
+  updateOrderStatus(orderId: string, status: OrderStatus, tx: DBorTx = db) {
     return Effect.gen(function* () {
       const [updatedOrder] = yield* Effect.tryPromise({
         try: () =>
-          db
+          tx
             .update(order)
             .set({ status })
             .where(eq(order.id, orderId))

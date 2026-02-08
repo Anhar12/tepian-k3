@@ -30,11 +30,11 @@ import {
 import {
   SkeletonInput,
   SkeletonButton,
-  SkeletonTextArea,
 } from "@/components/ui/skeleton-generator";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,13 +49,13 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/parameters/$parameterId/edit",
 )({
+  params: z.object({
+    parameterId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "parameters.update",
     }),
-  params: z.object({
-    parameterId: z.uuidv7(),
-  }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.parameter.getParameterById.queryOptions({
@@ -68,6 +68,7 @@ export const Route = createFileRoute(
   },
   component: RouteComponent,
   pendingComponent: LoaderComponent,
+  head: () => pageHead("Edit Parameter"),
 });
 
 function LoaderComponent() {

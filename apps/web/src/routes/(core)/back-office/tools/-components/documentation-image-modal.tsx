@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -12,14 +11,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
 import { getPublicUrl } from "@/utils/url";
-
-interface DocumentationImageModalProps {}
+import ImageWithFallback from "@/components/image-with-fallback";
 
 const calibrationDetailApi = getRouteApi(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail",
 );
 
-export default function DocumentationImageModal({}: DocumentationImageModalProps) {
+export default function DocumentationImageModal() {
   const navigate = calibrationDetailApi.useNavigate();
   const { modalId } = calibrationDetailApi.useSearch();
 
@@ -71,7 +69,7 @@ export default function DocumentationImageModal({}: DocumentationImageModalProps
       </DialogHeader>
       <DialogContent className="w-full sm:max-w-2xl">
         <div className="grid gap-4 p-4">
-          <img
+          <ImageWithFallback
             src={getPublicUrl(documentationImage.documentationFileUrl || "")}
             alt="Dokumentasi Kalibrasi"
             className="max-h-150 w-full rounded-md object-cover"

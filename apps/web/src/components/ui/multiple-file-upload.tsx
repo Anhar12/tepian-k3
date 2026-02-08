@@ -65,15 +65,49 @@ const MultipleFileUpload = forwardRef<HTMLDivElement, MultipleFileUploadProps>(
       }
     }, [value]);
 
-    const validateFile = (file: File): string | null => {
-      if (file.size > maxSize) {
-        return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
-      }
-      return null;
-    };
-
     const addFiles = useCallback(
       (fileList: FileList | File[]) => {
+        const validateFile = (file: File): string | null => {
+          if (file.size > maxSize) {
+            return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
+          }
+          return null;
+        };
+
+        const simulateUpload = (uploadFile: UploadFile) => {
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress >= 100) {
+              progress = 100;
+              clearInterval(interval);
+
+              setFiles((prev) =>
+                prev.map((f) =>
+                  f.id === uploadFile.id
+                    ? { ...f, progress: 100, status: "completed" as const }
+                    : f,
+                ),
+              );
+
+              // Notify parent
+              setFiles((current) => {
+                const completedFiles = current
+                  .filter((f) => f.status === "completed")
+                  .map((f) => f.file);
+                onChange?.(completedFiles);
+                return current;
+              });
+            } else {
+              setFiles((prev) =>
+                prev.map((f) =>
+                  f.id === uploadFile.id ? { ...f, progress } : f,
+                ),
+              );
+            }
+          }, 100);
+        };
+
         const fileArray = Array.from(fileList);
 
         if (files.length + fileArray.length > maxFiles) {
@@ -104,40 +138,8 @@ const MultipleFileUpload = forwardRef<HTMLDivElement, MultipleFileUploadProps>(
         setUploadError(null);
         setFiles((prev) => [...prev, ...newFiles]);
       },
-      [files.length, maxFiles, maxSize],
+      [files.length, maxFiles, maxSize, onChange],
     );
-
-    const simulateUpload = (uploadFile: UploadFile) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === uploadFile.id
-                ? { ...f, progress: 100, status: "completed" as const }
-                : f,
-            ),
-          );
-
-          // Notify parent
-          setFiles((current) => {
-            const completedFiles = current
-              .filter((f) => f.status === "completed")
-              .map((f) => f.file);
-            onChange?.(completedFiles);
-            return current;
-          });
-        } else {
-          setFiles((prev) =>
-            prev.map((f) => (f.id === uploadFile.id ? { ...f, progress } : f)),
-          );
-        }
-      }, 100);
-    };
 
     const removeFile = useCallback(
       (id: string) => {

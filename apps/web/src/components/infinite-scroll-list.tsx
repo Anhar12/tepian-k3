@@ -1,15 +1,16 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Inbox, Loader2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 
-interface CursorPaginationResult<TData> {
+export interface CursorPaginationResult<TData> {
   data: TData[];
   nextCursor: string | null;
   hasMore: boolean;
 }
 
-interface InfiniteQueryResult<TData> {
+export interface InfiniteQueryResult<TData> {
   data:
     | {
         pages: CursorPaginationResult<TData>[];
@@ -161,36 +162,34 @@ export function InfiniteScrollList<TData>({
     queryResult.fetchNextPage,
     scrollThreshold,
     direction,
+    queryResult,
   ]);
 
   // Initial loading state
   if (queryResult.isLoading) {
     return (
-      loadingComponent ?? (
-        <div
-          className={cn("flex items-center justify-center", className)}
-          style={{ height }}
-        >
-          <Loader2 className="size-8 animate-spin text-muted-foreground" />
-        </div>
-      )
+      <div className={cn("overflow-auto", className)} style={{ height }}>
+        {loadingComponent ?? (
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+      </div>
     );
   }
 
   // Empty state
   if (flatData.length === 0) {
     return (
-      emptyComponent ?? (
-        <div
-          className={cn(
-            "flex items-center justify-center text-muted-foreground",
-            className,
-          )}
-          style={{ height }}
-        >
-          <p>No data available</p>
-        </div>
-      )
+      <div className={cn("overflow-auto", className)} style={{ height }}>
+        {emptyComponent ?? (
+          <EmptyState
+            icon={Inbox}
+            title="Tidak ada data"
+            description="Data tidak tersedia saat ini"
+          />
+        )}
+      </div>
     );
   }
 
@@ -244,185 +243,6 @@ export function InfiniteScrollList<TData>({
                     ))
                   : (endComponent ?? null)
                 : renderItem(item, virtualItem.index)}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// Grid variant for card layouts
-interface InfiniteScrollGridProps<TData> extends Omit<
-  InfiniteScrollListProps<TData>,
-  "direction" | "estimateSize"
-> {
-  /**
-   * Number of columns in the grid
-   * @default 1
-   */
-  columns?: number;
-  /**
-   * Estimated height of each row in pixels
-   */
-  estimateRowHeight: number;
-}
-
-export function InfiniteScrollGrid<TData>({
-  queryResult,
-  renderItem,
-  estimateRowHeight,
-  columns = 1,
-  overscan = 3,
-  scrollThreshold = 500,
-  height = "100%",
-  className,
-  loadingComponent,
-  loadingMoreComponent,
-  emptyComponent,
-  endComponent,
-  getItemKey,
-  gap = 0,
-}: InfiniteScrollGridProps<TData>) {
-  const parentRef = React.useRef<HTMLDivElement>(null);
-
-  // Flatten all pages data into a single array
-  const flatData = React.useMemo(() => {
-    return queryResult.data?.pages.flatMap((page) => page.data) ?? [];
-  }, [queryResult.data]);
-
-  // Calculate rows
-  const rowCount = Math.ceil(flatData.length / columns);
-  const hasLoaderRow = queryResult.hasNextPage;
-
-  // Virtualizer for rows
-  const virtualizer = useVirtualizer({
-    count: hasLoaderRow ? rowCount + 1 : rowCount,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => estimateRowHeight,
-    overscan,
-    gap,
-  });
-
-  const virtualRows = virtualizer.getVirtualItems();
-
-  // Infinite scroll
-  React.useEffect(() => {
-    const scrollElement = parentRef.current;
-    if (!scrollElement) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-
-      if (
-        distanceFromBottom < scrollThreshold &&
-        queryResult.hasNextPage &&
-        !queryResult.isFetchingNextPage
-      ) {
-        queryResult.fetchNextPage();
-      }
-    };
-
-    scrollElement.addEventListener("scroll", handleScroll, { passive: true });
-    return () => scrollElement.removeEventListener("scroll", handleScroll);
-  }, [
-    queryResult.hasNextPage,
-    queryResult.isFetchingNextPage,
-    queryResult.fetchNextPage,
-    scrollThreshold,
-  ]);
-
-  // Initial loading state
-  if (queryResult.isLoading) {
-    return (
-      loadingComponent ?? (
-        <div
-          className={cn("flex items-center justify-center", className)}
-          style={{ height }}
-        >
-          <Loader2 className="size-8 animate-spin text-muted-foreground" />
-        </div>
-      )
-    );
-  }
-
-  // Empty state
-  if (flatData.length === 0) {
-    return (
-      emptyComponent ?? (
-        <div
-          className={cn(
-            "flex items-center justify-center text-muted-foreground",
-            className,
-          )}
-          style={{ height }}
-        >
-          <p>No data available</p>
-        </div>
-      )
-    );
-  }
-
-  return (
-    <div
-      ref={parentRef}
-      className={cn("overflow-auto", className)}
-      style={{ height }}
-    >
-      <div
-        className="relative w-full"
-        style={{ height: `${virtualizer.getTotalSize()}px` }}
-      >
-        {virtualRows.map((virtualRow) => {
-          const isLoaderRow = virtualRow.index >= rowCount;
-
-          if (isLoaderRow) {
-            return (
-              <div
-                key="loader"
-                className="absolute top-0 left-0 w-full"
-                style={{
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                {queryResult.hasNextPage
-                  ? (loadingMoreComponent ?? (
-                      <div className="flex items-center justify-center p-4">
-                        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                      </div>
-                    ))
-                  : (endComponent ?? null)}
-              </div>
-            );
-          }
-
-          // Get items for this row
-          const startIndex = virtualRow.index * columns;
-          const rowItems = flatData.slice(startIndex, startIndex + columns);
-
-          return (
-            <div
-              key={virtualRow.key}
-              data-index={virtualRow.index}
-              ref={virtualizer.measureElement}
-              className="absolute top-0 left-0 grid w-full"
-              style={{
-                height: `${virtualRow.size}px`,
-                transform: `translateY(${virtualRow.start}px)`,
-                gridTemplateColumns: `repeat(${columns}, 1fr)`,
-                gap: `${gap}px`,
-              }}
-            >
-              {rowItems.map((item, colIndex) => {
-                const itemIndex = startIndex + colIndex;
-                const key = getItemKey
-                  ? getItemKey(item, itemIndex)
-                  : itemIndex;
-
-                return <div key={key}>{renderItem(item, itemIndex)}</div>;
-              })}
             </div>
           );
         })}

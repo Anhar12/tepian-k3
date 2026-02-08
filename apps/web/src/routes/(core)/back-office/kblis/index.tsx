@@ -7,7 +7,7 @@ import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useDataTable } from "@/hooks/use-data-table";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import kbliSchema from "@tepian-k3/schema/kbli.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
 export const Route = createFileRoute("/(core)/back-office/kblis/")({
   validateSearch: kbliSchema.getAllKBLISchema,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/(core)/back-office/kblis/")({
       permission: "kbli.view",
     }),
   component: RouteComponent,
+  head: () => pageHead("Manajemen KBLI"),
 });
 
 function RouteComponent() {
@@ -46,16 +48,16 @@ function RouteComponent() {
     [params.page, params.perPage],
   );
 
-  const { table } = useDataTable({
+  const { table } = useDataTableRouter({
     data: kblis?.data ?? [],
     columns,
     pageCount: kblis?.pageCount ?? 0,
+    search: params,
+    navigate: ({ search: updater }) => {
+      navigate({ search: updater });
+    },
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
-      pagination: {
-        pageSize: params.perPage,
-        pageIndex: params.page - 1,
-      },
     },
     getRowId: (row) => row.id,
   });

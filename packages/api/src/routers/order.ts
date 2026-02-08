@@ -14,7 +14,12 @@ import orderItemSchema from "@tepian-k3/schema/order-item.schema";
 import { TRPCError } from "@trpc/server";
 import { ORDER_STATUS } from "@tepian-k3/constants";
 import { Effect } from "effect";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 import documentQueries from "@tepian-k3/queries/document.queries";
 import { db } from "@tepian-k3/db/client";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
@@ -39,14 +44,7 @@ export const orderRouter = createTRPCRouter({
     .input(orderSchema.getAllOrdersSchema)
     .query(
       async ({ input }) =>
-        await runEffect(
-          orderQueries.getAllOrdersPaginated(
-            input.page,
-            input.perPage,
-            input.status,
-            input.search,
-          ),
-        ),
+        await runEffect(orderQueries.getOffsetPaginatedOrders(input)),
     ),
 
   getOrderById: withProtectedRateLimit(rateLimiters.moderate())
@@ -236,6 +234,14 @@ export const orderRouter = createTRPCRouter({
             );
             const buffer = Buffer.from(arrayBuffer);
 
+            // Validate file (approval letters must be PDF or document)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(buffer, file.name, file.type, {
+                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+              }),
+            );
+
             // Upload file to storage
             const filename = `approval-letter-${order.orderNumber}-${Date.now()}.pdf`;
             const uploadedFile = yield* storageService.upload(buffer, {
@@ -273,6 +279,12 @@ export const orderRouter = createTRPCRouter({
                 documentType: "offering_user_document",
               },
             });
+
+            // Update order status to 'persetujuan_disetujui'
+            yield* orderQueries.updateOrderStatus(
+              order.id,
+              "persetujuan_disetujui",
+            );
 
             return {
               documentId: document.id,
@@ -322,6 +334,32 @@ export const orderRouter = createTRPCRouter({
             const cooperationAgreementBuffer = Buffer.from(
               yield* Effect.tryPromise(() =>
                 cooperationAgreement.arrayBuffer(),
+              ),
+            );
+
+            // Validate payment proof (allow images and PDFs)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                paymentProofBuffer,
+                paymentProof.name,
+                paymentProof.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.IMAGE,
+                  allowedMimeTypes: ALLOWED_MIME_TYPES.GENERAL,
+                },
+              ),
+            );
+
+            // Validate cooperation agreement (must be document)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                cooperationAgreementBuffer,
+                cooperationAgreement.name,
+                cooperationAgreement.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+                },
               ),
             );
 
@@ -392,6 +430,13 @@ export const orderRouter = createTRPCRouter({
                         ),
                       );
 
+                    // Update order status to 'proses_validasi_pembayaran'
+                    await Effect.runPromise(
+                      orderQueries.updateOrderStatus(
+                        order.id,
+                        "proses_validasi_pembayaran",
+                      ),
+                    );
                     // update order payment status to 'pending_verification'
                     await Effect.runPromise(
                       orderQueries.updatePaymentStatus(
@@ -472,6 +517,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "pending",
                 oldStatus: "pending",
@@ -525,6 +571,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "rejected",
                 oldStatus: "pending",
@@ -577,6 +624,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "pembayaran_diterima",
                 oldStatus: "proses_validasi_pembayaran",
@@ -584,10 +632,13 @@ export const orderRouter = createTRPCRouter({
               }),
             );
 
+            // update payment status to 'paid'
+            yield* orderQueries.updatePaymentStatus(order.id, "paid");
+
             // update order status to pembayaran_diterima
             yield* orderQueries.updateOrderStatus(
               order.id,
-              "pembayaran_diterima",
+              "menunggu_penerbitan_spt_jadwal",
             );
 
             return order;
@@ -636,6 +687,7 @@ export const orderRouter = createTRPCRouter({
             yield* Effect.tryPromise(() =>
               ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
                 orderId: order.id,
+                orderNumber: order.orderNumber,
                 userId: order.userId,
                 newStatus: "rejected",
                 oldStatus: "pending",

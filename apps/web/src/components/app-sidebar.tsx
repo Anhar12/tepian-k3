@@ -14,6 +14,7 @@ import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { backOfficeMenu } from "@/lib/back-office-menu";
 import { userMenu } from "@/lib/user-menu";
+import ImageWithFallback from "./image-with-fallback";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
@@ -46,9 +47,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="#" className="flex flex-row items-center justify-start">
-                <img
+                <ImageWithFallback
                   src="/assets/tepian-k3.png"
-                  alt="Tepian K3 Logo"
+                  alt="Tepian K3 Icon"
                   className="size-6"
                 />
                 <span className="text-base font-semibold">Tepian K3</span>

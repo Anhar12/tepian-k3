@@ -117,6 +117,7 @@ export function useCursorInfiniteScroll<TData, TSearch extends SearchParams>(
 
     scrollElement.addEventListener("scroll", handleScroll, { passive: true });
     return () => scrollElement.removeEventListener("scroll", handleScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- using specific queryResult properties intentionally to avoid re-running on every render
   }, [
     queryResult.hasNextPage,
     queryResult.isFetchingNextPage,
@@ -140,7 +141,10 @@ export function useCursorInfiniteScroll<TData, TSearch extends SearchParams>(
   );
 
   // Advanced filters — derived from search params, updated via navigate
-  const filters = (search.filters ?? []) as ExtendedColumnFilter<TData>[];
+  const filters = React.useMemo(
+    () => (search.filters ?? []) as ExtendedColumnFilter<TData>[],
+    [search.filters],
+  );
 
   const debouncedNavigateAdvancedFilters = useDebouncedCallback(
     (newFilters: ExtendedColumnFilter<TData>[] | null) => {

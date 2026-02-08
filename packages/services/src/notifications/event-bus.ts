@@ -194,7 +194,7 @@ export class EventBus {
         logError(
           "EventBus.parseAndValidateEvent",
           `Invalid payload for ${parsed.type}:`,
-          result.error,
+          { error: result.error.message },
         );
         return null;
       }

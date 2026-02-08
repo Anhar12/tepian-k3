@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,11 +31,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 export const Route = createFileRoute(
   "/(core)/back-office/survey-questions/$questionId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "survey-questions.update" }),
   params: z.object({
     questionId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "survey-questions.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.survey.getQuestionById.queryOptions({
@@ -42,6 +43,7 @@ export const Route = createFileRoute(
       }),
     ),
   component: RouteComponent,
+  head: () => pageHead("Edit Pertanyaan Survei"),
 });
 
 function RouteComponent() {

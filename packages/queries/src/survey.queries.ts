@@ -10,7 +10,6 @@ import {
   isNotNull,
   isNull,
   avg,
-  sql,
 } from "@tepian-k3/db";
 import {
   order,

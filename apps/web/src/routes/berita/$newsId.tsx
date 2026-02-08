@@ -10,6 +10,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPublicUrl } from "@/utils/url";
 import { trpc } from "@/utils/trpc";
+import DOMPurify from "dompurify";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -23,9 +24,12 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { globalSuccessToast } from "@/lib/toast";
+import ImageWithFallback from "@/components/image-with-fallback";
+import { pageHead } from "@/utils/page-head";
 
 export const Route = createFileRoute("/berita/$newsId")({
   component: NewsDetailPage,
+  head: () => pageHead("Detail Berita"),
 });
 
 function NewsDetailSkeleton() {
@@ -34,12 +38,12 @@ function NewsDetailSkeleton() {
       <LandingNavbar />
 
       {/* Hero Skeleton */}
-      <section className="relative h-96 w-full">
+      <section className="relative h-64 w-full md:h-96">
         <Skeleton className="h-full w-full" />
       </section>
 
       {/* Content Skeleton */}
-      <div className="container mx-auto px-10 py-8">
+      <div className="container mx-auto px-4 py-8 sm:px-6 md:px-10">
         <div className="mx-auto max-w-4xl">
           <Skeleton className="mb-4 h-8 w-48" />
           <Skeleton className="mb-6 h-12 w-full" />
@@ -131,21 +135,22 @@ function NewsDetailPage() {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
       <LandingNavbar />
 
       {/* Hero with Image */}
-      <section className="relative h-96 w-full">
+      <section className="relative h-64 w-full md:h-96">
         <div className="absolute inset-0">
-          <img
+          <ImageWithFallback
             src={getPublicUrl(news.imageUrl ?? "")}
             alt={news.title}
             className="h-full w-full object-cover"
+            fallbackClassName="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400"
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
         </div>
         <div className="absolute inset-0 flex items-end">
-          <div className="container mx-auto px-10 pb-8">
+          <div className="container mx-auto px-4 pb-8 sm:px-6 md:px-10">
             <div className="flex items-center gap-2 text-sm text-white/80">
               <Calendar className="size-4" />
               <span>
@@ -156,7 +161,7 @@ function NewsDetailPage() {
                   : "-"}
               </span>
             </div>
-            <h1 className="mt-2 max-w-4xl text-4xl font-bold text-white">
+            <h1 className="mt-2 max-w-4xl text-2xl font-bold text-white md:text-4xl">
               {news.title}
             </h1>
           </div>
@@ -164,7 +169,7 @@ function NewsDetailPage() {
       </section>
 
       {/* Back Button & Share */}
-      <div className="container mx-auto flex items-center justify-between px-10 pt-8">
+      <div className="container mx-auto flex flex-wrap items-center justify-between gap-4 px-4 pt-8 sm:px-6 md:px-10">
         <Button
           variant="ghost"
           className="gap-2 text-muted-foreground hover:text-foreground"
@@ -206,18 +211,20 @@ function NewsDetailPage() {
       </div>
 
       {/* Article Content */}
-      <article className="container mx-auto px-10 py-8">
+      <article className="container mx-auto px-4 py-8 sm:px-6 md:px-10">
         <div className="mx-auto max-w-4xl">
           <div
             className="prose prose-lg dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: news.content }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(news.content),
+            }}
           />
         </div>
       </article>
 
       {/* Related News */}
       {filteredRelatedNews && filteredRelatedNews.length > 0 && (
-        <section className="relative bg-muted/50 px-10 py-16">
+        <section className="relative bg-muted/50 px-4 py-16 sm:px-6 md:px-10">
           <GridBackground />
           <div className="container mx-auto">
             <div className="relative z-10 mb-8 flex flex-col items-center gap-2">
@@ -241,7 +248,7 @@ function NewsDetailPage() {
                 >
                   <CardHeader className="p-0">
                     <div className="h-40 w-full overflow-hidden">
-                      <img
+                      <ImageWithFallback
                         src={getPublicUrl(relatedItem.imageUrl ?? "")}
                         alt={relatedItem.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -280,7 +287,7 @@ function NewsDetailPage() {
       )}
 
       {/* Footer */}
-      <footer className="relative flex h-11 items-center justify-center bg-muted/50 px-10 py-4">
+      <footer className="relative mt-auto flex h-11 items-center justify-center bg-muted/50 px-4 py-4 sm:px-6 md:px-10">
         <p className="text-center text-sm font-normal text-foreground">
           &copy; 2025 Balai K3 Samarinda
         </p>

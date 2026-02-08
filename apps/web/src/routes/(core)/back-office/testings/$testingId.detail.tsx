@@ -19,18 +19,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
+import {
+  WorksheetHeaderCard,
+  WorksheetHeaderCardSkeleton,
+} from "@/components/worksheet-header-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
   TESTING_DOCUMENT_TYPES,
   TESTING_STATUSES,
@@ -66,33 +66,18 @@ export const Route = createFileRoute(
   validateSearch: (search) => searchSchema.parse(search),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "testing.read" }),
+  head: () => pageHead("Detail Pengujian"),
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const router = useRouter();
-  const navigate = useNavigate();
   const { testingId } = Route.useParams();
   const { createWorksheet } = Route.useSearch();
 
   const [activeTab, setActiveTab] = useState<
     "info" | "items" | "worksheets" | "documents"
   >("info");
-
-  // ComboBox states
-  const [openMainSupervisor, setOpenMainSupervisor] = useState(false);
-  const [openAccompanyingSupervisor, setOpenAccompanyingSupervisor] =
-    useState(false);
-
-  // Worksheet creation dialog
-  const [worksheetDialogOpen, setWorksheetDialogOpen] = useState(false);
-  const [worksheetStartDate, setWorksheetStartDate] = useState(
-    new Date().toISOString().slice(0, 16),
-  );
-  const [selectedMainSupervisor, setSelectedMainSupervisor] =
-    useState<string>("");
-  const [selectedAccompanyingSupervisor, setSelectedAccompanyingSupervisor] =
-    useState<string>("");
 
   // Document upload states
   const [selectedDocType, setSelectedDocType] =
@@ -105,13 +90,9 @@ function RouteComponent() {
     trpc.testing.getTestingWithDocuments.queryOptions({ testingId }),
   );
 
-  // Get employees for supervisor selection
-  const { data: employees } = useQuery(trpc.employee.getAll.queryOptions());
-
   // Open worksheet dialog if URL param is set
   useEffect(() => {
     if (createWorksheet === "true") {
-      setWorksheetDialogOpen(true);
       setActiveTab("worksheets");
     }
   }, [createWorksheet]);
@@ -166,8 +147,31 @@ function RouteComponent() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex flex-col gap-4">
+        <WorksheetHeaderCardSkeleton />
+        <Card>
+          <div className="px-3 py-2">
+            <div className="flex gap-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-9 w-24" />
+              ))}
+            </div>
+          </div>
+          <CardContent className="p-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Card key={i} className="border-0 shadow-sm">
+                  <CardContent className="space-y-3 p-4">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

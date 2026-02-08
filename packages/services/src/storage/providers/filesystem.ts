@@ -115,8 +115,12 @@ export class FileSystemProvider {
       try: async () => {
         return await fs.readFile(filePath);
       },
-      catch: (error: any) => {
-        if (error.code === "ENOENT") {
+      catch: (error: unknown) => {
+        if (
+          error instanceof Error &&
+          "code" in error &&
+          error.code === "ENOENT"
+        ) {
           return new FileNotFoundError(key);
         } else {
           return new UploadFailedError("Failed to read file", error);

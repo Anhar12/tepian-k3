@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as TestRouteImport } from './routes/test'
+import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
@@ -21,6 +22,7 @@ import { Route as BeritaNewsIdRouteImport } from './routes/berita/$newsId'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
 import { Route as corePdfEditorRouteImport } from './routes/(core)/pdf-editor'
+import { Route as coreNotificationsRouteImport } from './routes/(core)/notifications'
 import { Route as coreDocumentRouteImport } from './routes/(core)/document'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
@@ -110,6 +112,11 @@ const TestRoute = TestRouteImport.update({
   path: '/test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KatalogRoute = KatalogRouteImport.update({
   id: '/katalog',
   path: '/katalog',
@@ -156,6 +163,11 @@ const coreProfileRoute = coreProfileRouteImport.update({
 const corePdfEditorRoute = corePdfEditorRouteImport.update({
   id: '/pdf-editor',
   path: '/pdf-editor',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreNotificationsRoute = coreNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => coreRouteRoute,
 } as any)
 const coreDocumentRoute = coreDocumentRouteImport.update({
@@ -609,6 +621,7 @@ const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/katalog': typeof KatalogRoute
+  '/profil': typeof ProfilRoute
   '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/back-office': typeof coreBackOfficeRouteRouteWithChildren
@@ -624,6 +637,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/document': typeof coreDocumentRoute
+  '/notifications': typeof coreNotificationsRoute
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
@@ -699,6 +713,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/katalog': typeof KatalogRoute
+  '/profil': typeof ProfilRoute
   '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/konsultasi': typeof coreKonsultasiRouteRoute
@@ -710,6 +725,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof authResetPasswordRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/document': typeof coreDocumentRoute
+  '/notifications': typeof coreNotificationsRoute
   '/pdf-editor': typeof corePdfEditorRoute
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
@@ -788,6 +804,7 @@ export interface FileRoutesById {
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
   '/katalog': typeof KatalogRoute
+  '/profil': typeof ProfilRoute
   '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
@@ -803,6 +820,7 @@ export interface FileRoutesById {
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(core)/document': typeof coreDocumentRoute
+  '/(core)/notifications': typeof coreNotificationsRoute
   '/(core)/pdf-editor': typeof corePdfEditorRoute
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
@@ -880,6 +898,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/katalog'
+    | '/profil'
     | '/test'
     | '/unauthorized'
     | '/back-office'
@@ -895,6 +914,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/document'
+    | '/notifications'
     | '/pdf-editor'
     | '/profile'
     | '/settings'
@@ -970,6 +990,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/katalog'
+    | '/profil'
     | '/test'
     | '/unauthorized'
     | '/konsultasi'
@@ -981,6 +1002,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/verify-email'
     | '/document'
+    | '/notifications'
     | '/pdf-editor'
     | '/profile'
     | '/settings'
@@ -1058,6 +1080,7 @@ export interface FileRouteTypes {
     | '/(auth)'
     | '/(core)'
     | '/katalog'
+    | '/profil'
     | '/test'
     | '/unauthorized'
     | '/(core)/back-office'
@@ -1073,6 +1096,7 @@ export interface FileRouteTypes {
     | '/(auth)/reset-password'
     | '/(auth)/verify-email'
     | '/(core)/document'
+    | '/(core)/notifications'
     | '/(core)/pdf-editor'
     | '/(core)/profile'
     | '/(core)/settings'
@@ -1151,6 +1175,7 @@ export interface RootRouteChildren {
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
   KatalogRoute: typeof KatalogRoute
+  ProfilRoute: typeof ProfilRoute
   TestRoute: typeof TestRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
   BeritaNewsIdRoute: typeof BeritaNewsIdRoute
@@ -1172,6 +1197,13 @@ declare module '@tanstack/react-router' {
       path: '/test'
       fullPath: '/test'
       preLoaderRoute: typeof TestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/katalog': {
@@ -1242,6 +1274,13 @@ declare module '@tanstack/react-router' {
       path: '/pdf-editor'
       fullPath: '/pdf-editor'
       preLoaderRoute: typeof corePdfEditorRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/notifications': {
+      id: '/(core)/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof coreNotificationsRouteImport
       parentRoute: typeof coreRouteRoute
     }
     '/(core)/document': {
@@ -2011,6 +2050,7 @@ interface coreRouteRouteChildren {
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
   coreWorksheetsRouteRoute: typeof coreWorksheetsRouteRouteWithChildren
   coreDocumentRoute: typeof coreDocumentRoute
+  coreNotificationsRoute: typeof coreNotificationsRoute
   corePdfEditorRoute: typeof corePdfEditorRoute
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
@@ -2025,6 +2065,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
   coreWorksheetsRouteRoute: coreWorksheetsRouteRouteWithChildren,
   coreDocumentRoute: coreDocumentRoute,
+  coreNotificationsRoute: coreNotificationsRoute,
   corePdfEditorRoute: corePdfEditorRoute,
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
@@ -2039,6 +2080,7 @@ const rootRouteChildren: RootRouteChildren = {
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
   KatalogRoute: KatalogRoute,
+  ProfilRoute: ProfilRoute,
   TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
   BeritaNewsIdRoute: BeritaNewsIdRoute,

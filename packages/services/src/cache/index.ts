@@ -19,7 +19,7 @@ export class CacheService {
     try {
       this.redis = new Redis({
         host: env.MEMURAI_HOST ?? "localhost",
-        port: Number(env.MEMURAI_PORT) ?? 6379,
+        port: Number(env.MEMURAI_PORT) || 6379,
         password: env.MEMURAI_PASSWORD,
         db: 1, // Use separate DB from rate limiter (db 0)
         retryStrategy: (times: number) => {

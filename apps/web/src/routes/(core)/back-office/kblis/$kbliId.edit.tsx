@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,11 +27,11 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/back-office/kblis/$kbliId/edit")({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "kbli.update" }),
   params: z.object({
     kbliId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "kbli.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.kbli.getKbliById.queryOptions({
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/(core)/back-office/kblis/$kbliId/edit")({
       }),
     ),
   component: RouteComponent,
+  head: () => pageHead("Edit KBLI"),
 });
 
 function RouteComponent() {

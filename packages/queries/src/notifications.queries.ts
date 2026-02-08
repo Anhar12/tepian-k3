@@ -2,11 +2,12 @@ import { Effect } from "effect";
 import { TRPCError } from "@trpc/server";
 import { db } from "@tepian-k3/db/client";
 import { notifications } from "@tepian-k3/db/schema";
-import { and, desc, eq, isNull, sql } from "@tepian-k3/db";
+import { and, desc, eq, isNull, lt, sql } from "@tepian-k3/db";
 import { logError } from "@tepian-k3/services/logger";
 import type {
   CreateNotificationInput,
   GetNotificationsInput,
+  GetCursorPaginatedNotificationsInput,
 } from "@tepian-k3/schema/notification.schema";
 
 export const notificationsQueries = {
@@ -99,6 +100,74 @@ export const notificationsQueries = {
         logError(
           "notificationsQueries.getPaginated",
           "Error fetching notifications",
+          { userId, input, error },
+        );
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch notifications",
+          cause: error,
+        });
+      },
+    }),
+
+  /**
+   * Get cursor paginated notifications for a user (for infinite scroll)
+   */
+  getCursorPaginated: (
+    userId: string,
+    input: GetCursorPaginatedNotificationsInput,
+  ) =>
+    Effect.tryPromise({
+      try: async () => {
+        const { cursor, limit, isRead, type } = input;
+
+        const conditions = [
+          eq(notifications.userId, userId),
+          isNull(notifications.deletedAt),
+        ];
+
+        // Cursor condition - get items with ID less than cursor (since we sort by createdAt desc)
+        // UUIDv7 is time-sortable, so we can use ID for cursor
+        if (cursor) {
+          conditions.push(lt(notifications.id, cursor));
+        }
+
+        if (isRead !== undefined) {
+          conditions.push(eq(notifications.isRead, isRead));
+        }
+
+        if (type) {
+          conditions.push(eq(notifications.type, type));
+        }
+
+        const whereClause = and(...conditions);
+
+        // Fetch limit + 1 to determine if there are more results
+        const items = await db.query.notifications.findMany({
+          where: whereClause,
+          orderBy: [desc(notifications.createdAt), desc(notifications.id)],
+          limit: limit + 1,
+        });
+
+        // Check if there are more results
+        const hasMore = items.length > limit;
+
+        // Remove the extra item if it exists
+        const data = hasMore ? items.slice(0, limit) : items;
+
+        // Get the cursor for the next page (the ID of the last item)
+        const nextCursor = hasMore ? (data[data.length - 1]?.id ?? null) : null;
+
+        return {
+          data,
+          nextCursor,
+          hasMore,
+        };
+      },
+      catch: (error) => {
+        logError(
+          "notificationsQueries.getCursorPaginated",
+          "Error fetching cursor paginated notifications",
           { userId, input, error },
         );
         return new TRPCError({

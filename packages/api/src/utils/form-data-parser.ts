@@ -92,7 +92,7 @@ function setNestedValue(
   path: string,
   value: FormValue,
 ): void {
-  const keys = path.match(/[^.\[\]]+/g) || [];
+  const keys = path.match(/[^.[\]]+/g) || [];
   let current: FormRecord = obj;
 
   for (let i = 0; i < keys.length - 1; i++) {

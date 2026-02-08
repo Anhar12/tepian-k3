@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
@@ -12,13 +13,13 @@ export const Route = createFileRoute(
   validateSearch: z.object({
     tabs: z.enum(["parameter", "tool", "chemical"]).default("parameter"),
   }),
+  params: z.object({
+    parameterId: z.string(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: ["parameters.read", "parameter-tool.view"],
     }),
-  params: z.object({
-    parameterId: z.string(),
-  }),
   loader: async ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.parameter.getParameterById.queryOptions({
@@ -26,6 +27,7 @@ export const Route = createFileRoute(
       }),
     );
   },
+  head: () => pageHead("Detail Parameter"),
   component: RouteComponent,
 });
 

@@ -21,7 +21,10 @@ interface TimelineItemProps extends React.HTMLAttributes<HTMLDivElement> {
 function TimelineItem({ children, className, ...props }: TimelineItemProps) {
   return (
     <div
-      className={cn("relative flex gap-4 pb-8 last:pb-0", className)}
+      className={cn(
+        "relative flex gap-2 pb-6 last:pb-0 sm:gap-4 sm:pb-8",
+        className,
+      )}
       {...props}
     >
       {children}
@@ -54,7 +57,7 @@ function TimelineConnector({
   return (
     <div
       className={cn(
-        "absolute top-6 h-[calc(100%+1.5rem)] w-px border-l-2",
+        "absolute top-6 h-[calc(100%+1rem)] w-px border-l-2 sm:h-[calc(100%+1.5rem)]",
         variant === "dashed" ? "border-dashed" : "border-solid",
         colorStyles[color],
         className,
@@ -189,7 +192,7 @@ function TimelineContent({
   ...props
 }: TimelineContentProps) {
   return (
-    <div className={cn("flex-1 pt-0.5", className)} {...props}>
+    <div className={cn("min-w-0 flex-1 pt-0.5", className)} {...props}>
       {children}
     </div>
   );
@@ -207,7 +210,7 @@ function TimelineHeader({
   return (
     <div
       className={cn(
-        "flex w-14 flex-col items-end text-sm text-muted-foreground",
+        "flex w-14 shrink-0 flex-col items-end text-[10px] text-muted-foreground sm:w-20 sm:text-sm",
         className,
       )}
       {...props}

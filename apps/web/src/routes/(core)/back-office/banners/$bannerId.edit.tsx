@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { z } from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
@@ -20,7 +21,6 @@ import {
   SkeletonButton,
   SkeletonImageUpload,
   SkeletonInput,
-  SkeletonTextArea,
 } from "@/components/ui/skeleton-generator";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -37,12 +37,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute(
   "/(core)/back-office/banners/$bannerId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "banners.update" }),
   params: z.object({
     bannerId: z.string(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "banners.update" }),
   component: RouteComponent,
+  head: () => pageHead("Edit Banner"),
 });
 
 function RouteComponent() {

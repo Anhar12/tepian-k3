@@ -1,30 +1,15 @@
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
+import base from "./packages/config/eslint/base.js";
+import react from "./packages/config/eslint/react.js";
 
-export default tseslint.config(
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    ignores: [
-      "**/dist/**",
-      "**/node_modules/**",
-      "**/.turbo/**",
-      "**/drizzle/**",
-      "**/migrations/**",
-    ],
-  },
-  {
-    rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
-        },
-      ],
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-empty-object-type": "off",
-    },
-  },
+// Extract react-specific config for web app files so lint-staged
+// (which runs from root) recognizes react-hooks eslint-disable comments
+const reactHooksConfig = react.find(
+  (config) => config.plugins?.["react-hooks"],
 );
+
+export default [
+  ...base,
+  ...(reactHooksConfig
+    ? [{ ...reactHooksConfig, files: ["apps/web/**/*.{ts,tsx}"] }]
+    : []),
+];

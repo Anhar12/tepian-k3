@@ -17,7 +17,7 @@ const ToasterBackdrop = () => {
       className="fixed inset-0 z-99 bg-black/25 transition-opacity duration-300"
       style={{
         opacity: visible ? 1 : 0,
-        pointerEvents: visible ? "auto" : "none",
+        pointerEvents: "none",
       }}
     />
   );

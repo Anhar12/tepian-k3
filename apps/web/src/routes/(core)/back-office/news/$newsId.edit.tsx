@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { Controller, useForm } from "react-hook-form";
@@ -6,7 +7,7 @@ import { z } from "zod";
 import newsSchema from "@tepian-k3/schema/news.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { queryClient, trpc } from "@/utils/trpc";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import {
   Card,
@@ -44,12 +45,13 @@ import {
 } from "@/components/ui/skeleton-generator";
 
 export const Route = createFileRoute("/(core)/back-office/news/$newsId/edit")({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "news.update" }),
   params: z.object({
     newsId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "news.update" }),
   component: RouteComponent,
+  head: () => pageHead("Edit Berita"),
 });
 
 function RouteComponent() {

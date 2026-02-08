@@ -12,7 +12,6 @@ import {
   type TRPCLink,
 } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
-import { toast } from "sonner";
 import { env } from "@/env";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import SuperJSON from "superjson";
@@ -182,8 +181,6 @@ export const trpcClient = createTRPCClient<AppRouter>({
           transformer: SuperJSON,
           EventSource: EventSourcePolyfill,
           eventSourceOptions: async ({ op }) => {
-            //                          ^ Includes the operation that's being executed
-            // you can use this to generate a signature for the operation
             const token = localStorage.getItem("accessToken");
             return {
               headers: {

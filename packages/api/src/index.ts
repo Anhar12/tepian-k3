@@ -20,6 +20,7 @@ import { getRateLimitConfig } from "@tepian-k3/constants";
 import { createRateLimiter } from "@tepian-k3/services/rate-limiter";
 import type { RateLimiter } from "@tepian-k3/services/rate-limiter";
 import { UAParser } from "ua-parser-js";
+import { logWarn } from "@tepian-k3/services/logger";
 
 /**
  * Isomorphic Session getter for API requests
@@ -106,6 +107,10 @@ export const createTRPCContext = async (context: HonoContext) => {
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
+  sse: {
+    ping: { enabled: true, intervalMs: 10_000 },
+    client: { reconnectAfterInactivityMs: 30_000 },
+  },
   errorFormatter({ shape, error }) {
     return {
       ...shape,
@@ -157,7 +162,13 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next();
 
   const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  const duration = end - start;
+
+  if (t._config.isDev) {
+    console.log(`[TRPC] ${path} took ${duration}ms to execute`);
+  } else if (duration > 2000) {
+    logWarn("tRPC", `Slow endpoint: ${path}`, { duration });
+  }
 
   return result;
 });

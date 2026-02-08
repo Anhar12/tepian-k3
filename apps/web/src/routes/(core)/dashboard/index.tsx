@@ -8,9 +8,11 @@ import {
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 
 export const Route = createFileRoute("/(core)/dashboard/")({
   component: RouteComponent,
+  head: () => pageHead("Dashboard"),
 });
 
 function RouteComponent() {

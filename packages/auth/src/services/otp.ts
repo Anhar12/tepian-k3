@@ -2,7 +2,6 @@ import type z from "zod";
 import otpSchema from "@tepian-k3/schema/otp.schema";
 import userQueries from "@tepian-k3/queries/users.queries";
 import otpQueries from "@tepian-k3/queries/otp.queries";
-import { emailService } from "@tepian-k3/services/email";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import { createAccessToken, createRefreshToken } from "..";
 import { logError, logInfo } from "@tepian-k3/services/logger";
@@ -11,6 +10,7 @@ import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { db } from "@tepian-k3/db/client";
 import refreshTokensQueries from "@tepian-k3/queries/refresh-tokens.queries";
 import { v7 as uuidv7 } from "uuid";
+import { QueueName, queueService } from "@tepian-k3/services/queue";
 
 class OTPError extends Data.TaggedError("OTPError")<{
   status: boolean;
@@ -74,21 +74,44 @@ export class OTPService {
           },
         });
 
+        // yield* Effect.tryPromise({
+        //   try: () =>
+        //     emailService.sendOTP({
+        //       email,
+        //       code,
+        //       expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
+        //     }),
+        //   catch: (error) => {
+        //     logError("OTPService.createOTP", "Failed to send OTP email", {
+        //       email,
+        //       error,
+        //     });
+        //     return new OTPError({
+        //       status: false,
+        //       message: "Gagal mengirim email OTP.",
+        //     });
+        //   },
+        // });
+
         yield* Effect.tryPromise({
           try: () =>
-            emailService.sendOTP({
-              email,
+            queueService.addJob(QueueName.EMAIL, "send-otp", {
               code,
+              email,
               expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
             }),
           catch: (error) => {
-            logError("OTPService.createOTP", "Failed to send OTP email", {
-              email,
-              error,
-            });
+            logError(
+              "OTPService.createOTP",
+              "Failed to enqueue OTP email job",
+              {
+                email,
+                error,
+              },
+            );
             return new OTPError({
               status: false,
-              message: "Gagal mengirim email OTP.",
+              message: "Gagal mengantri pengiriman email OTP.",
             });
           },
         });
@@ -332,21 +355,44 @@ export class OTPService {
           },
         });
 
+        // yield* Effect.tryPromise({
+        //   try: () =>
+        //     emailService.sendOTP({
+        //       email,
+        //       code,
+        //       expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
+        //     }),
+        //   catch: (error) => {
+        //     logError("OTPService.resendOTP", "Failed to send OTP email", {
+        //       email,
+        //       error,
+        //     });
+        //     return new OTPError({
+        //       status: false,
+        //       message: "Gagal mengirim email OTP.",
+        //     });
+        //   },
+        // });
+
         yield* Effect.tryPromise({
           try: () =>
-            emailService.sendOTP({
-              email,
+            queueService.addJob(QueueName.EMAIL, "send-otp", {
               code,
+              email,
               expiresInMinutes: OTPService.OTP_EXPIRY_MINUTES,
             }),
           catch: (error) => {
-            logError("OTPService.resendOTP", "Failed to send OTP email", {
-              email,
-              error,
-            });
+            logError(
+              "OTPService.resendOTP",
+              "Failed to enqueue OTP email job",
+              {
+                email,
+                error,
+              },
+            );
             return new OTPError({
               status: false,
-              message: "Gagal mengirim email OTP.",
+              message: "Gagal mengantri pengiriman email OTP.",
             });
           },
         });

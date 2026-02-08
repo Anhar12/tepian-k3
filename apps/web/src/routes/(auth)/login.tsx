@@ -1,17 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { LoginForm } from "@/components/login-form";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 const BannerImage = "/assets/banner-auth.png";
 
 export const Route = createFileRoute("/(auth)/login")({
   component: LoginPage,
+  head: () => pageHead("Masuk"),
 });
 
 function LoginPage() {
   return (
     <div className="grid min-h-svh bg-[#F4F4F4] lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-[#F4F4F4] lg:block">
-        <img
+        <ImageWithFallback
           src={BannerImage}
           alt="Login Banner"
           className="absolute inset-0 h-full w-full object-cover object-center"

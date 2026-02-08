@@ -24,7 +24,9 @@ export const PricingTable: React.FC<PricingTableProps> = ({
   operationalCosts,
   showGrandTotal = true,
 }) => {
-  const totalServicesCost = items.reduce((total, item) => {
+  const isReadyParameters = items.filter((item) => item.isReady);
+
+  const totalServicesCost = isReadyParameters.reduce((total, item) => {
     return (
       total + (item.parameter ? item.parameter.price * (item.quantity ?? 0) : 0)
     );
@@ -68,12 +70,12 @@ export const PricingTable: React.FC<PricingTableProps> = ({
           </Text>
           <Text style={tw("w-11/12 p-2")}>Jasa Pelayanan Pengujian</Text>
         </View>
-        {items.map((item, index) => (
+        {isReadyParameters.map((item, index) => (
           <View
             key={item.id}
             style={tw(
               `flex-row border-black ${
-                index === items.length - 1 ? "" : "border-b"
+                index === isReadyParameters.length - 1 ? "" : "border-b"
               }`.trim(),
             )}
           >

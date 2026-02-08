@@ -25,7 +25,10 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { WorksheetDataTable } from "@/components/ui/worksheet-data-table";
-import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
+import {
+  WorksheetHeaderCard,
+  WorksheetHeaderCardSkeleton,
+} from "@/components/worksheet-header-card";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { usePagination } from "@/lib/pagination";
 import { TabsContent } from "@radix-ui/react-tabs";
@@ -43,7 +46,6 @@ import {
   type BahanUnit,
   type ToolsAvailability,
   type ToolsCondition,
-  type WorksheetNoteStatus,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
 import {
@@ -76,6 +78,8 @@ import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AutoForm } from "@/components/ui/auto-form";
+import { Skeleton } from "@/components/ui/skeleton";
+import { pageHead } from "@/utils/page-head";
 
 const tabs = [
   "parameter",
@@ -95,6 +99,7 @@ export const Route = createFileRoute("/(core)/worksheets/")({
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "worksheets.read" }),
   component: RouteComponent,
+  head: () => pageHead("Lembar Kerja - Parameter"),
 });
 
 const routeApi = getRouteApi("/(core)/worksheets");
@@ -741,8 +746,25 @@ function RouteComponent() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <WorksheetHeaderCardSkeleton />
+        </div>
+        <Card>
+          <CardContent className="p-4">
+            <div className="mb-4 flex gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-9 w-24" />
+              ))}
+            </div>
+            <Skeleton className="mb-4 h-10 w-64" />
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -1282,7 +1304,7 @@ function RouteComponent() {
                         ).length;
                         const totalCount = tool.parameters.length;
                         const allReady = readyCount === totalCount;
-                        const toolState = getToolState(tool.id);
+                        // const toolState = getToolState(tool.id);
 
                         return (
                           <TableRow
@@ -1444,8 +1466,17 @@ function RouteComponent() {
             </div>
 
             {isLoadingChemicalMaterials ? (
-              <div className="flex h-48 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="space-y-3 p-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
               </div>
             ) : filteredChemicalMaterials.length === 0 ? (
               <div className="py-12 text-center">

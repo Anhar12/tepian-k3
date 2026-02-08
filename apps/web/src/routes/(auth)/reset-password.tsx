@@ -1,5 +1,6 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/(auth)/reset-password")({
     token: z.string(),
   }),
   component: RouteComponent,
+  head: () => pageHead("Reset Kata Sandi"),
 });
 
 function RouteComponent() {

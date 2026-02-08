@@ -26,6 +26,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { cn } from "@/lib/utils";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -42,20 +43,21 @@ import { Spinner } from "@/components/ui/spinner";
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, {
-      permission: "tool-calibrations.update",
-    }),
   params: z.object({
     toolId: z.uuidv7(),
     calibrationId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, {
+      permission: "tool-calibrations.update",
+    }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.tool.getToolCalibrationDetails.queryOptions({
         id: params.calibrationId,
       }),
     ),
+  head: () => pageHead("Edit Kalibrasi"),
 
   component: RouteComponent,
   pendingComponent: LoaderComponent,

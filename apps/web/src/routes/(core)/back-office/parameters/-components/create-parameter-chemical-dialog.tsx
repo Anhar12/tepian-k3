@@ -92,6 +92,7 @@ export default function CreateParameterChemicalDialog({
     if (!isOpen) {
       form.reset();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only reset form when dialog closes
   }, [isOpen]);
 
   return (

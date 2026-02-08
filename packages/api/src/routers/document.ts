@@ -8,7 +8,12 @@ import {
 } from "../index";
 import documentQueries from "@tepian-k3/queries/document.queries";
 import documentSchema from "@tepian-k3/schema/document.schema";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 import { z } from "zod";
 import { runEffect } from "../utils/run-effect";
 import { createDocumentSignature } from "@tepian-k3/services/document-signing";
@@ -16,12 +21,7 @@ import {
   pdfSigningService,
   type QRCodePosition,
 } from "@tepian-k3/services/pdf";
-import { db } from "@tepian-k3/db/client";
 import orderQueries from "@tepian-k3/queries/order.queries";
-import { eq } from "@tepian-k3/db";
-import { order } from "@tepian-k3/db/schema";
-import { TRPCError } from "@trpc/server";
-import { logError } from "@tepian-k3/services/logger";
 
 export const documentRouter = createTRPCRouter({
   /**
@@ -39,6 +39,19 @@ export const documentRouter = createTRPCRouter({
               ctx.input.data.file.arrayBuffer(),
             );
             const buffer = Buffer.from(arrayBuffer);
+
+            // Validate file before processing
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                buffer,
+                ctx.input.data.file.name,
+                ctx.input.data.file.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+                },
+              ),
+            );
 
             // Upload file to storage
             const uploadedFile = yield* storageService.upload(buffer, {
@@ -65,38 +78,43 @@ export const documentRouter = createTRPCRouter({
               uploadedByUserId: ctx.user.id,
             });
 
-            // Special handling: If uploading offering_document for an order in revision status,
-            // update order status back to pending
-            if (
-              ctx.input.data.entityType === "order" &&
-              ctx.input.data.type === "offering_document"
-            ) {
-              const currentOrder = yield* Effect.tryPromise({
-                try: () =>
-                  db.query.order.findFirst({
-                    where: eq(order.id, ctx.input.data.entityId),
-                  }),
-                catch: (error) => {
-                  logError(
-                    "documentRouter.uploadDocument",
-                    "Failed to fetch order data",
-                    {
-                      orderId: ctx.input.data.entityId,
-                      error,
-                    },
-                  );
-                  throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Gagal mengambil data pesanan",
-                  });
-                },
-              });
+            // Update order status based on uploaded document type
+            if (ctx.input.data.entityType === "order") {
+              const docType = ctx.input.data.type;
+              const orderId = ctx.input.data.entityId;
 
-              if (currentOrder?.status === "revision") {
+              if (docType === "offering_document") {
+                // Offering document uploaded → penawaran_diterbitkan
                 yield* orderQueries.updateOrderStatus(
-                  ctx.input.data.entityId,
-                  "pending",
+                  orderId,
+                  "penawaran_diterbitkan",
                 );
+              } else if (docType === "approval_letter") {
+                // Admin approval letter uploaded → persetujuan_disetujui
+                yield* orderQueries.updateOrderStatus(
+                  orderId,
+                  "persetujuan_disetujui",
+                );
+              } else if (
+                docType === "invoice" ||
+                docType === "cooperation_agreement"
+              ) {
+                // Check if both invoice and cooperation agreement now exist
+                const orderDocs = yield* documentQueries.getDocumentsByEntity(
+                  "order",
+                  orderId,
+                );
+                const hasInvoice = orderDocs.some((d) => d.type === "invoice");
+                const hasCooperationAgreement = orderDocs.some(
+                  (d) => d.type === "cooperation_agreement",
+                );
+
+                if (hasInvoice && hasCooperationAgreement) {
+                  yield* orderQueries.updateOrderStatus(
+                    orderId,
+                    "tagihan_diterbitkan",
+                  );
+                }
               }
             }
 
@@ -231,6 +249,19 @@ export const documentRouter = createTRPCRouter({
             );
             const buffer = Buffer.from(arrayBuffer);
 
+            // Validate file (invoices must be PDF)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                buffer,
+                ctx.input.data.file.name,
+                ctx.input.data.file.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ["application/pdf"],
+                },
+              ),
+            );
+
             const uploadedFile = yield* storageService.upload(buffer, {
               filename: ctx.input.data.file.name,
               folder: "documents/order/invoice",
@@ -292,6 +323,19 @@ export const documentRouter = createTRPCRouter({
             ctx.input.data.file.arrayBuffer(),
           );
           const buffer = Buffer.from(arrayBuffer);
+
+          // Validate file (testing reports must be PDF)
+          yield* Effect.tryPromise(() =>
+            assertValidFileBuffer(
+              buffer,
+              ctx.input.data.file.name,
+              ctx.input.data.file.type,
+              {
+                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                allowedMimeTypes: ["application/pdf"],
+              },
+            ),
+          );
 
           const uploadedFile = yield* storageService.upload(buffer, {
             filename: ctx.input.data.file.name,
@@ -367,6 +411,19 @@ export const documentRouter = createTRPCRouter({
               ctx.input.data.file.arrayBuffer(),
             );
             const originalBuffer = Buffer.from(arrayBuffer);
+
+            // Validate file (must be PDF for signing)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                originalBuffer,
+                ctx.input.data.file.name,
+                ctx.input.data.file.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                  allowedMimeTypes: ["application/pdf"],
+                },
+              ),
+            );
 
             // First, create document signatures for all signers
             const baseUrl = process.env.APP_URL || "http://localhost:3000";

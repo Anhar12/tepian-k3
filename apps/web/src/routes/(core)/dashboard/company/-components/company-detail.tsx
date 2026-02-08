@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { Building2 } from "lucide-react";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 interface CompanyDetailProps {
   companyId: string;
@@ -89,7 +90,7 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
             <div className="flex justify-start">
               {company.companyPictureUrl ? (
                 // If company has a logo, display it
-                <img
+                <ImageWithFallback
                   src={company.companyPictureUrl}
                   alt="Logo Perusahaan"
                   className="h-32 w-32 rounded-lg object-cover"

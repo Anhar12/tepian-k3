@@ -25,7 +25,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
-import { getPublicUrl } from "@/utils/url";
+// import { getPublicUrl } from "@/utils/url";
+import { openBase64InNewTab } from "@/utils/download";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import generateDocumentSchema from "@tepian-k3/schema/generate-document.schema";
@@ -61,12 +62,13 @@ export default function GenerateOfferingDialog({
     trpc.generateDocument.generateOfferingLetter.mutationOptions({
       onSuccess: (data) => {
         globalSuccessToast("Surat penawaran berhasil dibuat");
-        window.open(getPublicUrl(data.offeringLetterUrl), "_blank");
+        // window.open(getPublicUrl(data.offeringLetterUrl), "_blank");
+        openBase64InNewTab(data.base64, data.contentType);
         setIsOpen(false);
       },
       onError: (error) => {
         globalErrorToast(
-          "Gagal membuat surat penawaran :" + (error?.message || ""),
+          "Gagal membuat surat penawaran : " + (error?.message || ""),
         );
       },
     }),
@@ -91,10 +93,9 @@ export default function GenerateOfferingDialog({
       <form>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tambah Bahan Kimia Terkait Parameter</DialogTitle>
+            <DialogTitle>Buat Surat Penawaran</DialogTitle>
             <DialogDescription>
-              Isi formulir di bawah untuk menambahkan bahan kimia baru yang
-              terkait dengan parameter
+              Isi form berikut untuk membuat surat penawaran.
             </DialogDescription>
           </DialogHeader>
           <form

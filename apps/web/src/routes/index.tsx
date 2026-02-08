@@ -21,14 +21,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { globalInfoToast } from "@/lib/toast";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { trpc } from "@/utils/trpc";
 import {
   createFileRoute,
   useNavigate,
   type LinkProps,
 } from "@tanstack/react-router";
-import { useSubscription } from "@trpc/tanstack-react-query";
 import {
   AlarmClock,
   ArrowRight,
@@ -41,10 +40,11 @@ import { getPublicUrl } from "@/utils/url";
 import Autoplay from "embla-carousel-autoplay";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(context.trpc.auth.me.queryOptions()),
+    context.queryClient.ensureQueryData(authMeQueryOptions()),
   component: HomeComponent,
 });
 
@@ -86,14 +86,6 @@ function HomeComponent() {
     trpc.news.getFirst5News.queryOptions(),
   );
 
-  useSubscription({
-    ...trpc.event.onBroadcastTest.subscriptionOptions(),
-    onData: (data) => {
-      // ✅ data is BroadcastTestEvent - no type guard needed!
-      globalInfoToast(data.message);
-    },
-  });
-
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
       {/* Landing Page Navbar */}
@@ -106,7 +98,7 @@ function HomeComponent() {
       >
         {/* Background Image/SVG */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <img
+          <ImageWithFallback
             src="/assets/hero-banner.jpg"
             className="h-full w-full object-fill"
           />
@@ -147,7 +139,7 @@ function HomeComponent() {
 
       {/* Pusat layanan kami */}
       <section
-        className="relative flex min-h-screen flex-col bg-muted/50 px-10 py-16"
+        className="relative flex min-h-[calc(100vh-80vh)] flex-col bg-muted/50 px-10 py-16"
         id="layanan"
       >
         <GridBackground />
@@ -157,7 +149,7 @@ function HomeComponent() {
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
-        <div className="relative z-10 mt-12 flex flex-row flex-wrap items-center justify-center gap-6">
+        <div className="relative z-10 my-auto flex flex-row flex-wrap items-center justify-center gap-6">
           {/* Service Cards */}
           {pusatLayananItems.map((item) => (
             <Card
@@ -166,11 +158,13 @@ function HomeComponent() {
               onClick={() => navigate({ to: item.to })}
             >
               <CardHeader>
-                <img
-                  src={item.imageSrc}
-                  alt={item.title}
-                  className="h-40 w-full object-contain"
-                />
+                <div className="flex flex-row items-center justify-center overflow-hidden">
+                  <ImageWithFallback
+                    src={item.imageSrc}
+                    alt={item.title}
+                    className="size-40 object-contain"
+                  />
+                </div>
               </CardHeader>
               <CardFooter className="flex flex-row items-center">
                 <a className="w-full text-center text-2xl font-semibold text-primary">
@@ -184,14 +178,14 @@ function HomeComponent() {
 
       {/* Profile */}
       <section
-        className="relative flex h-[60vh] flex-row gap-4 px-10 py-16"
+        className="relative flex h-[60vh] flex-row items-center justify-center gap-4 px-10 py-16"
         id="profile"
       >
         {/* Logo */}
-        <img
+        <ImageWithFallback
           src="/assets/logo-balai-k3.png"
           alt="Balai Tepian K3 Logo"
-          className="mx-auto w-64 object-contain"
+          className="mx-auto h-auto w-full max-w-64 object-contain"
         />
         <div className="relative z-10 mx-auto flex h-full w-fit flex-col items-start justify-between gap-4">
           <h2 className="text-start text-4xl font-semibold text-primary">
@@ -207,6 +201,7 @@ function HomeComponent() {
           <Button
             variant="outline"
             className="inline-flex h-10 items-center justify-center rounded-3xl border-primary bg-white px-6 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+            onClick={() => navigate({ to: "/profil" })}
           >
             Baca selengkapnya
             <ArrowRight className="size-4" />
@@ -256,10 +251,11 @@ function HomeComponent() {
                       <div className="p-1">
                         <Card className="h-96 w-full rounded-2xl">
                           <CardContent className="flex h-full flex-col items-center justify-center">
-                            <img
+                            <ImageWithFallback
                               src={getPublicUrl(banner.bannerUrl ?? "")}
                               alt={banner.title}
                               className="h-full w-full object-contain"
+                              fallbackClassName="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400"
                             />
                           </CardContent>
                         </Card>
@@ -318,7 +314,7 @@ function HomeComponent() {
                 >
                   <CardHeader className="p-0">
                     <div className="h-40 w-full overflow-hidden">
-                      <img
+                      <ImageWithFallback
                         src={getPublicUrl(newsItem.imageUrl ?? "")}
                         alt={newsItem.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -448,7 +444,7 @@ function HomeComponent() {
         id="stakeholder"
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">
-          <img
+          <ImageWithFallback
             src="/assets/stakeholder-tepian-k3.png"
             alt="Tepian K3 Stakeholder Logos"
             className="h-32 w-96 self-end object-contain"

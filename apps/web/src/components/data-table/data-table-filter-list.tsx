@@ -97,8 +97,10 @@ export function DataTableFilterList<TData>({
       .filter((column) => column.columnDef.enableColumnFilter);
   }, [table]);
 
-  const filters = (table.options.meta?.filters ??
-    []) as ExtendedColumnFilter<TData>[];
+  const filters = React.useMemo(
+    () => (table.options.meta?.filters ?? []) as ExtendedColumnFilter<TData>[],
+    [table.options.meta?.filters],
+  );
   const metaSetFilters = table.options.meta?.setFilters as
     | ((
         value:

@@ -104,8 +104,10 @@ export function DataTableFilterMenu<TData>({
     [inputValue, selectedColumn],
   );
 
-  const filters = (table.options.meta?.filters ??
-    []) as ExtendedColumnFilter<TData>[];
+  const filters = React.useMemo(
+    () => (table.options.meta?.filters ?? []) as ExtendedColumnFilter<TData>[],
+    [table.options.meta?.filters],
+  );
   const metaSetFilters = table.options.meta?.setFilters as
     | ((
         value:

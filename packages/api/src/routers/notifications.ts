@@ -19,6 +19,15 @@ export const notificationsRouter = createTRPCRouter({
     ),
 
   /**
+   * Get cursor paginated notifications for the current user (for infinite scroll)
+   */
+  getCursorPaginated: withProtectedRateLimit(rateLimiters.moderate())
+    .input(notificationSchema.getCursorPaginatedNotificationsSchema)
+    .query(async ({ input, ctx }) =>
+      runEffect(notificationsQueries.getCursorPaginated(ctx.user.id, input)),
+    ),
+
+  /**
    * Get unread notification count for the current user
    */
   getUnreadCount: withProtectedRateLimit(rateLimiters.moderate()).query(

@@ -4,10 +4,12 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node -e \"const{cpSync}=require('fs');cpSync('../../packages/services/src/pdf/assets','./assets',{recursive:true,force:true})\"",
     "check-types": "tsc -b",
     "compile": "bun with-env build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "pnpm with-env:local tsx watch src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "start": "pnpm with-env:prod node dist/index.mjs",
     "with-env:local": "dotenv -e ../../.env.local -e ../../.env --",
     "with-env:prod": "dotenv -e ../../.env.production -e ../../.env --"
@@ -18,6 +20,7 @@
     "@node-rs/argon2": "catalog:",
     "@t3-oss/env-core": "^0.13.10",
     "@tepian-k3/api": "workspace:*",
+    "@tepian-k3/auth": "workspace:*",
     "@tepian-k3/db": "workspace:*",
     "@tepian-k3/services": "workspace:*",
     "@trpc/server": "catalog:",
@@ -25,6 +28,7 @@
     "dotenv": "catalog:",
     "hono": "catalog:",
     "mime-types": "catalog:",
+    "sharp": "^0.34.5",
     "zod": "catalog:"
   },
   "devDependencies": {

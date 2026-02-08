@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/(core)/back-office/chemical-materials/")(
         permission: "chemical-materials.view",
       }),
     component: RouteComponent,
+    head: () => pageHead("Manajemen Bahan Kimia"),
   },
 );
 

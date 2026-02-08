@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "check-types": "tsc -b"
+    "check-types": "tsc -b",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "exports": {
     "./*": "./src/*.ts"

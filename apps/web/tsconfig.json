@@ -1,5 +1,5 @@
 {
-  "extends": "@tepian-k3/config/tsconfig.base.json",
+  "extends": "@tepian-k3/config/typescript/tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],

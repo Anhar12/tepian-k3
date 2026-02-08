@@ -25,7 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { toFormData } from "@/utils/form-data-mapper";
-import { requirePermission } from "@/utils/require-permission";
+import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";
@@ -36,6 +36,7 @@ import { LoaderCircle, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 export const Route = createFileRoute(
   "/(core)/dashboard/company/$companyId/edit",
@@ -57,6 +58,7 @@ export const Route = createFileRoute(
     );
   },
   component: RouteComponent,
+  head: () => pageHead("Edit Perusahaan"),
 });
 
 function RouteComponent() {
@@ -170,7 +172,7 @@ function RouteComponent() {
               <div className="flex justify-start">
                 {company.companyPictureUrl ? (
                   // If company has a logo, display it
-                  <img
+                  <ImageWithFallback
                     src={company.companyPictureUrl}
                     alt="Logo Perusahaan"
                     className="h-32 w-32 rounded-lg object-cover"

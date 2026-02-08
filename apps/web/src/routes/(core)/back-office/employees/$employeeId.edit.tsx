@@ -18,6 +18,7 @@ import {
   SkeletonCombobox,
 } from "@/components/ui/skeleton-generator";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
@@ -35,13 +36,13 @@ import useDialogs from "@/hooks/use-dialog";
 export const Route = createFileRoute(
   "/(core)/back-office/employees/$employeeId/edit",
 )({
+  params: z.object({
+    employeeId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "employees.update",
     }),
-  params: z.object({
-    employeeId: z.uuidv7(),
-  }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.employee.getEmployeeDetails.queryOptions({
@@ -51,6 +52,7 @@ export const Route = createFileRoute(
   },
   pendingComponent: LoaderComponent,
   component: RouteComponent,
+  head: () => pageHead("Edit Karyawan"),
 });
 
 function LoaderComponent() {

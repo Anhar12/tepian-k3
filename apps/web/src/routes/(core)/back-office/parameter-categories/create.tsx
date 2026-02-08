@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,6 +54,7 @@ export const Route = createFileRoute(
       context.trpc.cluster.getAllClusters.queryOptions(),
     ),
   component: RouteComponent,
+  head: () => pageHead("Tambah Kategori Parameter"),
 });
 
 function RouteComponent() {

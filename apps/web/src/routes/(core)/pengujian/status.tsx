@@ -30,6 +30,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -41,6 +42,9 @@ import z from "zod";
 // TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
 
 export const Route = createFileRoute("/(core)/pengujian/status")({
+  validateSearch: z.object({
+    orderId: z.uuidv7(),
+  }),
   beforeLoad: async ({ search }) => {
     // check if orderId exists
     if (!search.orderId) {
@@ -49,9 +53,7 @@ export const Route = createFileRoute("/(core)/pengujian/status")({
       });
     }
   },
-  validateSearch: z.object({
-    orderId: z.uuidv7(),
-  }),
+  head: () => pageHead("Pengujian - Status"),
   component: RouteComponent,
 });
 
@@ -204,9 +206,6 @@ function RouteComponent() {
     const offeringDoc = orderDetail?.documents.find(
       (doc) => doc.type === "offering_document",
     );
-    const approvalLetterDoc = orderDetail?.documents.find(
-      (doc) => doc.type === "approval_letter",
-    );
     const approvalLetterUserDoc = orderDetail?.documents.find(
       (doc) => doc.type === "approval_letter_user",
     );
@@ -243,9 +242,6 @@ function RouteComponent() {
   const hasApprovalLetter = !!approvalLetterUserDoc;
   const hasInvoice = !!invoiceDoc;
   const hasCooperationAgreement = !!cooperationAgreementDoc;
-  const hasCooperationAgreementUser = !!cooperationAgreementUserDoc;
-  const hasBothCooperationAgreement =
-    !!cooperationAgreementDoc && !!cooperationAgreementUserDoc;
   const hasPaymentProof = !!paymentProofDoc;
   const isPendingPaymentVerification =
     orderDetail.paymentStatus === "pending_verification";
@@ -300,9 +296,14 @@ function RouteComponent() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="flex flex-1 flex-row gap-6 px-6 py-6">
-        {/* Timeline Section - Left Side */}
-        <OrderTimeline history={orderDetail?.statusHistory ?? []} />
+      <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:flex-row md:px-6">
+        {/* Timeline Section - Left Side (horizontal scroll on mobile) */}
+        <div className="w-full overflow-x-auto md:w-auto md:overflow-visible">
+          <OrderTimeline
+            history={orderDetail?.statusHistory ?? []}
+            className="min-w-max md:min-w-0"
+          />
+        </div>
 
         {/* Content Card - Right Side */}
         <Card className="flex flex-1 flex-col rounded-2xl p-6 shadow-sm">

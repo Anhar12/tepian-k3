@@ -33,6 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,13 +54,13 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/back-office/users/$userId/edit")({
+  params: z.object({
+    userId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: ["users.update", "roles.read"],
     }),
-  params: z.object({
-    userId: z.uuidv7(),
-  }),
   loader: async ({ params, context }) => {
     context.queryClient.ensureQueryData(
       context.trpc.user.getUserDetailWithRolesAndPermissions.queryOptions({
@@ -72,6 +73,7 @@ export const Route = createFileRoute("/(core)/back-office/users/$userId/edit")({
   },
   component: RouteComponent,
   pendingComponent: LoadingComponent,
+  head: () => pageHead("Edit Pengguna"),
 });
 
 function LoadingComponent() {
@@ -161,7 +163,10 @@ function RouteComponent() {
   const [type, setType] = useState<"text" | "password">("password");
 
   // Store original user roles as a Set for O(1) lookups
-  const originalUserRoles = new Set(user.roles.map((role) => role.id) ?? []);
+  const originalUserRoles = useMemo(
+    () => new Set(user.roles.map((role) => role.id) ?? []),
+    [user.roles],
+  );
 
   // Track current selected roles
   const [selectedRoles, setSelectedRoles] = useState<Set<string>>(

@@ -14,10 +14,10 @@ export const env = createEnv({
     MEMURAI_HOST: z.string().default("localhost"),
     MEMURAI_PORT: z.string().default("6379"),
     MEMURAI_PASSWORD: z.string().default(""),
-    JWT_SECRET: z.string().min(1).default("change-this-in-production"),
+    JWT_SECRET: z.string().min(32).default("change-this-in-production"),
     JWT_RESET_PASSWORD_SECRET: z
       .string()
-      .min(1)
+      .min(32)
       .default("change-this-too-in-production"),
   },
 

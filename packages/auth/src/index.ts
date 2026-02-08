@@ -7,6 +7,17 @@ import type {
   ResetTokenPayload,
 } from "./types/auth.types";
 
+// Re-export token blacklist service from services package
+export {
+  initializeTokenBlacklist,
+  isBlacklistReady,
+  blacklistToken,
+  isTokenBlacklisted,
+  blacklistAllUserTokens,
+  isTokenIssuedBeforeBlacklist,
+  shutdownTokenBlacklist,
+} from "@tepian-k3/services/token-blacklist";
+
 const secretKey = env.JWT_SECRET;
 const key = new TextEncoder().encode(secretKey);
 
@@ -94,7 +105,7 @@ export async function decryptResetToken(
     }
 
     return payload as unknown as ResetTokenPayload;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

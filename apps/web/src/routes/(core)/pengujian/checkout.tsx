@@ -14,188 +14,49 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useCartFilters } from "@/hooks/use-cart-filters";
+import { useCartMutations } from "@/hooks/use-cart-mutations";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc } from "@/utils/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/(core)/pengujian/checkout")({
+  head: () => pageHead("Pengujian - Checkout"),
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const [currentCompany, setCurrentCompany] = useState<string | null>(null);
-  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
-  const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
-  const [deleteLoadingItems, setDeleteLoadingItems] = useState<Set<string>>(
-    new Set(),
-  );
+  const {
+    cartItems,
+    currentCompany,
+    setCurrentCompany,
+    currentLocation,
+    setCurrentLocation,
+    mappedCompanyFromCartItem,
+    mappedLocationFromCartItem,
+    mappedItems,
+    totalPrice,
+  } = useCartFilters();
+
+  const {
+    incrementCartItemQuantity,
+    decrementCartItemQuantity,
+    deleteCartItem,
+    loadingItems,
+    deleteLoadingItems,
+  } = useCartMutations();
+
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [coverTransportationIncluded, setCoverTransportationIncluded] =
     useState(false);
   const [coverAccommodationIncluded, setCoverAccommodationIncluded] =
     useState(false);
-
-  const { data: cartItems } = useQuery(
-    trpc.cart.getAllCartItems.queryOptions(),
-  );
-
-  const incrementCartItemQuantity = useMutation(
-    trpc.cart.incrementCartItemQuantity.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-      },
-      onError: (error) => {
-        globalErrorToast(
-          `Gagal menambah jumlah item di keranjang: ${error.message}`,
-        );
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const decrementCartItemQuantity = useMutation(
-    trpc.cart.decrementCartItemQuantity.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-      },
-      onError: (error) => {
-        globalErrorToast(
-          `Gagal mengurangi jumlah item di keranjang: ${error.message}`,
-        );
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const deleteCartItem = useMutation(
-    trpc.cart.deleteCartItem.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setDeleteLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-
-        globalSuccessToast("Item berhasil dihapus dari keranjang");
-      },
-      onError: (error) => {
-        globalErrorToast(`Gagal menghapus item di keranjang: ${error.message}`);
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setDeleteLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const mappedCompanyFromCartItem = useMemo(() => {
-    if (cartItems) {
-      return cartItems.map((company) => ({
-        id: company.id,
-        name: company.name,
-      }));
-    }
-    return [];
-  }, [cartItems]);
-
-  const mappedLocationFromCartItem = useMemo(() => {
-    if (cartItems && currentCompany) {
-      const company = cartItems.find((comp) => comp.id === currentCompany);
-      return (
-        company?.locations.map((location) => ({
-          id: location.id,
-          name: location.name,
-        })) ?? []
-      );
-    }
-    return cartItems
-      ? cartItems.flatMap((comp) =>
-          comp.locations.map((location) => ({
-            id: location.id,
-            name: location.name,
-          })),
-        )
-      : [];
-  }, [cartItems, currentCompany]);
-
-  const mappedItems = useMemo(() => {
-    if (cartItems) {
-      let filteredItems = cartItems;
-      if (currentCompany) {
-        filteredItems = filteredItems.filter(
-          (company) => company.id === currentCompany,
-        );
-      }
-      if (currentLocation) {
-        filteredItems = filteredItems
-          .map((company) => ({
-            ...company,
-            locations: company.locations.filter(
-              (location) => location.id === currentLocation,
-            ),
-          }))
-          .filter((company) => company.locations.length > 0);
-      }
-      return filteredItems.flatMap((company) =>
-        company.locations.flatMap((location) => location.clusters),
-      );
-    }
-    return [];
-  }, [cartItems, currentLocation]);
-
-  const totalPrice = useMemo(() => {
-    if (!cartItems) return 0;
-
-    return cartItems.reduce((companyAcc, company) => {
-      return (
-        companyAcc +
-        company.locations.reduce((locationAcc, location) => {
-          return (
-            locationAcc +
-            location.clusters.reduce((clusterAcc, cluster) => {
-              return (
-                clusterAcc +
-                cluster.items.reduce((itemAcc, item) => {
-                  return itemAcc + item.price * item.quantity;
-                }, 0)
-              );
-            }, 0)
-          );
-        }, 0)
-      );
-    }, 0);
-  }, [cartItems]);
 
   const createOrderMutation = useMutation(
     trpc.order.createOrder.mutationOptions({
@@ -310,7 +171,7 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
         <Select
           value={currentCompany ?? undefined}
           onValueChange={(value) => {
@@ -321,7 +182,7 @@ function RouteComponent() {
             }
           }}
         >
-          <SelectTrigger className="w-1/2">
+          <SelectTrigger className="w-full sm:w-1/2">
             <SelectValue placeholder="Pilih perusahaan" />
           </SelectTrigger>
           <SelectContent>
@@ -351,7 +212,7 @@ function RouteComponent() {
             }
           }}
         >
-          <SelectTrigger className="w-1/2">
+          <SelectTrigger className="w-full sm:w-1/2">
             <SelectValue placeholder="Pilih area" />
           </SelectTrigger>
           <SelectContent>
@@ -372,14 +233,14 @@ function RouteComponent() {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-col-reverse gap-4 lg:flex-row lg:gap-2">
         <Card className="flex flex-1 flex-col space-y-6">
           <CardContent className="h-full space-y-6">
             {mappedItems.length > 0 ? (
-              <div className="max-h-[calc(100vh-300px)] space-y-6 overflow-y-auto">
+              <div className="space-y-4 sm:space-y-6 lg:max-h-[calc(100vh-300px)] lg:overflow-y-auto">
                 {mappedItems.map((cluster, idx) => {
                   return (
-                    <div key={idx} className="max-w-3xl">
+                    <div key={idx} className="w-full max-w-3xl">
                       {/* Header */}
                       <div
                         className={cn(
@@ -399,10 +260,10 @@ function RouteComponent() {
                             const isLoading = loadingItems.has(item.id);
 
                             return (
-                              <div key={item.id} className="p-6">
-                                <div className="flex items-start justify-between">
-                                  <div className="max-w-[calc(100%-325px)]">
-                                    <h3 className="truncate text-lg font-semibold text-gray-900">
+                              <div key={item.id} className="p-4 sm:p-6">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                  <div className="min-w-0 flex-1 sm:max-w-[calc(100%-325px)]">
+                                    <h3 className="truncate text-base font-semibold text-gray-900 sm:text-lg">
                                       {item.parameter.name}
                                     </h3>
                                     <p className="mt-1 text-sm text-gray-500">
@@ -410,9 +271,9 @@ function RouteComponent() {
                                     </p>
                                   </div>
 
-                                  <div className="ml-4 flex items-center gap-4">
+                                  <div className="flex items-center justify-between gap-3 sm:ml-4 sm:gap-4">
                                     {/* Quantity Controls */}
-                                    <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2">
+                                    <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-2 py-1.5 sm:px-3 sm:py-2">
                                       <button
                                         onClick={() =>
                                           decrementCartItemQuantity.mutate({
@@ -445,7 +306,7 @@ function RouteComponent() {
                                     </div>
 
                                     {/* Price */}
-                                    <span className="min-w-25 text-right font-semibold text-gray-900">
+                                    <span className="min-w-20 text-right text-sm font-semibold text-gray-900 sm:min-w-25 sm:text-base">
                                       Rp {item.price.toLocaleString("id-ID")}
                                     </span>
 
@@ -485,8 +346,8 @@ function RouteComponent() {
             )}
           </CardContent>
         </Card>
-        <div className="w-96 shrink-0">
-          <Card className="sticky top-4 border-0 p-6 shadow-sm">
+        <div className="w-full lg:w-96 lg:shrink-0">
+          <Card className="border-0 p-4 shadow-sm sm:p-6 lg:sticky lg:top-4">
             {/* Transportasi Section */}
             <div>
               <div className="mb-4 flex items-start gap-2">

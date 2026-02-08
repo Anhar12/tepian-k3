@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/skeleton-generator";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,13 +35,13 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/positions/$positionId/edit",
 )({
+  params: z.object({
+    positionId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "positions.update",
     }),
-  params: z.object({
-    positionId: z.uuidv7(),
-  }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.position.getPositionDetails.queryOptions({
@@ -50,6 +51,7 @@ export const Route = createFileRoute(
   },
   pendingComponent: LoaderComponent,
   component: RouteComponent,
+  head: () => pageHead("Edit Jabatan"),
 });
 
 function LoaderComponent() {

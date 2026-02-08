@@ -49,7 +49,6 @@
       "Bash(gh repo view:*)",
       "Bash(gh label list:*)",
       "Bash(gh label create:*)",
-      "Bash(gh issue create --title \"Set up Vitest with monorepo configuration\" --body \"$\\(cat <<''EOF''\n## Description\nSet up Vitest with monorepo configuration including `vitest.config.ts` and `vitest.workspace.ts`.\n\n## Tasks\n- [ ] Configure `vitest.config.ts` at root\n- [ ] Configure `vitest.workspace.ts` for monorepo packages\n- [ ] Add test scripts to root `package.json`\n\n**Source:** `TODO.md` - Critical Priority > Testing\nEOF\n\\)\" --label \"priority: critical,testing,enhancement\")",
       "Bash(gh issue create:*)",
       "Bash(pnpm git-cliff:*)",
       "Bash(git -C /home/rizrmdhn/Project/Monorepo/tepian-k3 remote get-url origin)",
@@ -58,7 +57,24 @@
       "Bash(git checkout:*)",
       "WebFetch(domain:ui.shadcn.com)",
       "Bash(if exist \"f:\\\\Monorepo\\\\tepian-k3\\\\apps\\\\web\\\\src\\\\lib\\\\form-field.ts\" del \"f:\\\\Monorepo\\\\tepian-k3\\\\apps\\\\web\\\\src\\\\lib\\\\form-field.ts\")",
-      "Bash(node -e \"const m = require\\(''./node_modules/@tanstack/react-query/build/modern/useMutation.d.ts''\\); console.log\\(''check file''\\)\")"
+      "Bash(node -e \"const m = require\\(''./node_modules/@tanstack/react-query/build/modern/useMutation.d.ts''\\); console.log\\(''check file''\\)\")",
+      "Bash(npx eslint:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(npx prettier:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(for f in packages/utils/package.json packages/queries/package.json packages/schema/package.json packages/services/package.json packages/shared/package.json packages/types/package.json packages/db/package.json packages/constants/package.json packages/auth/package.json packages/api/package.json apps/web/package.json apps/server/package.json)",
+      "Bash(do sed -i 's/\"\"lint\"\": \"\"eslint \\\\.\"\"/\"\"lint\"\": \"\"eslint .\"\",\\\\n    \"\"lint:fix\"\": \"\"eslint . --fix\"\"/' \"$f\")",
+      "WebFetch(domain:tanstack.com)",
+      "Bash(pnpm tsr:*)",
+      "Bash(pnpm exec tsr:*)",
+      "Bash(npx @tanstack/router-cli generate:*)",
+      "Bash(pnpm install:*)",
+      "Bash(sudo docker-compose:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(curl:*)",
+      "Bash(sudo docker compose ps:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

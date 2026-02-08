@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import userSchema from "@tepian-k3/schema/users.schema";
 import { format } from "date-fns";
 import {
@@ -46,6 +46,7 @@ import {
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 
@@ -58,6 +59,7 @@ export const Route = createFileRoute("/(core)/back-office/users/create")({
       context.trpc.role.getAllRoles.queryOptions(),
     ),
   component: RouteComponent,
+  head: () => pageHead("Tambah Pengguna"),
 });
 
 function RouteComponent() {

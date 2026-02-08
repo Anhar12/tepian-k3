@@ -1,17 +1,12 @@
-import { trpc } from "@/utils/trpc";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(core)")({
   beforeLoad: async ({ context }) => {
     try {
       // Attempt to fetch user data
-      const user = await context.queryClient.ensureQueryData({
-        ...trpc.auth.me.queryOptions(),
-        // 5 minutes cache
-        staleTime: 1000 * 60 * 5,
-        // Keep in cache for 30 minutes (even if unused)
-        gcTime: 1000 * 60 * 30,
-      });
+      const user =
+        await context.queryClient.ensureQueryData(authMeQueryOptions());
 
       if (!user) {
         throw redirect({ to: "/login" });

@@ -859,6 +859,9 @@ export const order = createTable(
     index("order_order_number_idx").using("btree", table.orderNumber),
     index("order_user_id_idx").using("btree", table.userId),
     index("order_company_id_idx").using("btree", table.companyId),
+    index("order_status_idx").using("btree", table.status),
+    index("order_approval_status_idx").using("btree", table.approvalStatus),
+    index("order_payment_status_idx").using("btree", table.paymentStatus),
   ],
 );
 

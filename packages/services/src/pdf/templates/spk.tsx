@@ -5,7 +5,6 @@ import { tw } from "../utils/tw";
 import { Letterhead } from "../components/letterhead";
 import { SectionHeader } from "../components/section-header";
 import { LabeledField } from "../components/labeled-field";
-import { HeadSignature } from "../components/head-signature";
 import { PricingTable } from "../components/pricing-table";
 import { storageService } from "../../storage";
 import { format } from "date-fns";

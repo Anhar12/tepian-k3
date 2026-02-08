@@ -11,12 +11,12 @@ import {
 } from "./ui/dropdown-menu";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/utils/trpc";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { logout } from "@/lib/logout";
 
 export default function MainHeader() {
   const navigate = useNavigate();
-  const { data: user } = useQuery(trpc.auth.me.queryOptions());
+  const { data: user } = useQuery(authMeQueryOptions());
 
   function handleLogout() {
     logout();

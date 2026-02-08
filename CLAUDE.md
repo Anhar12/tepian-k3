@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
+This is a TypeScript monorepo. The primary stack is: TypeScript, tRPC, TanStack Query, TanStack Router, Vite, React, Docker/Coolify for deployment. Always assume TypeScript strict mode is enabled.
+
 **tepian-k3** is a TypeScript monorepo for a K3 (Kesehatan dan Keselamatan Kerja / Occupational Health and Safety) laboratory testing management system. Built with the Better-T-Stack, it provides end-to-end type safety from PostgreSQL to React UI using tRPC, Drizzle ORM, and TanStack Router.
 
 **Tech Stack:**
@@ -375,43 +377,36 @@ beforeLoad: async ({ context }) => {
 ### Available Services
 
 1. **Storage Service** (`storage/`)
-
    - Providers: Filesystem, MinIO, S3
    - Operations: upload, download, delete, getUrl
    - Configured via `STORAGE_PROVIDER` env var
 
 2. **Email Service** (`email/`)
-
    - Providers: Nodemailer (SMTP), Resend
    - Templates for: OTP verification, password reset, welcome emails
    - Configured via `EMAIL_PROVIDER` env var
 
 3. **Logger Service** (`logger/`)
-
    - Winston-based logging
    - Transports: Console, File rotation
    - Log levels: error, warn, info, debug
 
 4. **Image Service** (`image/`)
-
    - Image optimization and transformation
    - Format conversion, resizing
 
 5. **PDF Service** (`pdf/`)
-
    - PDF generation and modification using pdf-lib
    - QR code embedding for document verification
    - Client-side PDF signing (`pdf/client/`)
 
 6. **Document Signing Service** (`document-signing/`)
-
    - JWT-based document signatures
    - QR code generation for verification
    - Token expiry: configurable via `DOCUMENT_QR_EXPIRATION`
    - Separate JWT secrets for different document types
 
 7. **Rate Limiter Service** (`rate-limiter/`)
-
    - Multiple strategies: sliding-window, token-bucket, fixed-window
    - Redis-backed with automatic in-memory fallback
    - Preset configurations for common use cases
@@ -431,11 +426,9 @@ beforeLoad: async ({ context }) => {
 **File-based routing with route groups:**
 
 - `(auth)/` - Authentication routes (login, register, verify-email)
-
   - Public routes, no auth required
 
 - `(core)/` - Protected routes (requires authentication)
-
   - `dashboard/` - User dashboard and company management
   - `back-office/` - Admin routes (users, roles, parameters, tools, clusters, kblis)
   - `pengujian/` - Testing workflow (order creation, checkout, status tracking)
@@ -468,12 +461,14 @@ export const Route = createFileRoute("/(core)/back-office/users/")({
 The frontend supports three patterns for making tRPC calls:
 
 1. **Classic Pattern** - Using tRPC hooks directly:
+
    ```typescript
    const user = trpc.user.getById.useQuery({ id });
    const updateUser = trpc.user.update.useMutation();
    ```
 
 2. **Modern Pattern** - Using TanStack Query hooks with tRPC options:
+
    ```typescript
    const user = useQuery(trpc.user.getById.queryOptions({ id }));
    const updateUser = useMutation(trpc.user.update.mutationOptions());
@@ -485,6 +480,14 @@ The frontend supports three patterns for making tRPC calls:
    ```
 
 See [tRPC TanStack Query Usage Guide](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md) for detailed examples and best practices.
+
+## UI/UX Guidelines
+
+- When implementing UI features, always consider mobile/touch compatibility first
+- Avoid tooltips for interactive elements on mobile - prefer popovers or other touch-friendly alternatives
+- Ensure touch targets are at least 44px for accessibility
+- For styling tasks, reference existing similar components (like `index.tsx`) before creating new styles
+- When working with third-party UI libraries (Sonner, Radix, etc.), verify the installed version in `package.json` before implementing features
 
 ## Environment Variables
 
@@ -737,6 +740,19 @@ Additional documentation in `docs/` folder:
 IMPORTANT: If YOU ADD NEW DOCUMENTATION PUT IT IN THE PACKAGE FOLDERS AS WELL BUT INSIDE THE docs/ FOLDER
 FOR EXAMPLE YOU CAN PUT IT IN THE PACKAGE FOLDERS BUT INSIDE THE docs/example/\*.example.md
 FOR BETTER ORGANIZATION AND EASY TO FIND.
+
+## TypeScript Conventions
+
+- When encountering TypeScript type errors, especially with complex generic types (tRPC, TanStack Query, Zod), stop after 2 failed attempts and present the user with a summary of what was tried, what failed, and 2-3 alternative architectural approaches rather than continuing to iterate on type gymnastics.
+- When creating reusable hooks or utilities for this codebase, prioritize practical type safety over perfect generic inference. If a fully generic approach creates unresolvable type conflicts, use a well-typed wrapper pattern with explicit type parameters at the call site rather than trying to infer everything automatically.
+
+## Framework-Specific Notes
+
+This project uses TanStack Router with Vite. When troubleshooting TanStack Router issues, always check TanStack's official documentation first (https://tanstack.com/router/latest/docs) before suggesting generic React solutions. TanStack Router has its own patterns (autoCodeSplitting, file-based routing) that differ from standard React Router.
+
+## Workflow Rules
+
+When implementing changes across multiple files (skeleton loaders, hooks, utilities), create a checklist of ALL files that need changes BEFORE starting work. Present this checklist to the user for confirmation. Do not begin editing until the full scope is agreed upon.
 
 ## Monorepo Commands Reference
 

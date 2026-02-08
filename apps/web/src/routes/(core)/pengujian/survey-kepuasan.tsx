@@ -1,4 +1,5 @@
 import { SurveyForm } from "@/components/survey-form";
+import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -6,6 +7,9 @@ import { Loader2 } from "lucide-react";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
+  validateSearch: z.object({
+    orderId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context, search }) => {
     // check if orderId exists
     if (!search.orderId) {
@@ -44,9 +48,7 @@ export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
 
     return;
   },
-  validateSearch: z.object({
-    orderId: z.uuidv7(),
-  }),
+  head: () => pageHead("Pengujian - Survey Kepuasan"),
   component: RouteComponent,
 });
 

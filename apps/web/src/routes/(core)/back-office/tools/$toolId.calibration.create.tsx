@@ -23,6 +23,7 @@ import SingleFileUpload from "@/components/ui/single-file-upload";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { cn } from "@/lib/utils";
 import { toFormData } from "@/utils/form-data-mapper";
@@ -42,6 +43,7 @@ export const Route = createFileRoute(
     await requirePermission(context, {
       permission: "tool-calibrations.create",
     }),
+  head: () => pageHead("Tambah Kalibrasi"),
   component: RouteComponent,
 });
 

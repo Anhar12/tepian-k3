@@ -5,12 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(core)/back-office/")({
   component: RouteComponent,
+  head: () => pageHead("Back Office"),
 });
 
 function RouteComponent() {

@@ -9,7 +9,13 @@ import {
 import userCompanyQueries from "@tepian-k3/queries/user-company.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
-import { storageService, type UploadResult } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+  type UploadResult,
+} from "@tepian-k3/services/storage";
 import { runEffect } from "../utils/run-effect";
 import { Effect } from "effect";
 import { imageService } from "@tepian-k3/services/image";
@@ -111,6 +117,19 @@ export const userCompanyRouter = createTRPCRouter({
 
           const buffer = Buffer.from(arrayBuffer);
 
+          // Validate image file
+          yield* Effect.tryPromise(() =>
+            assertValidFileBuffer(
+              buffer,
+              ctx.input.data.picture.name,
+              ctx.input.data.picture.type,
+              {
+                maxSize: FILE_SIZE_LIMITS.IMAGE,
+                allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+              },
+            ),
+          );
+
           const convertedImage = yield* imageService.convertToWebP(buffer, {
             quality: 80,
             effort: 4,
@@ -151,6 +170,19 @@ export const userCompanyRouter = createTRPCRouter({
             );
 
             const buffer = Buffer.from(arrayBuffer);
+
+            // Validate image file
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(
+                buffer,
+                input.data.picture!.name,
+                input.data.picture!.type,
+                {
+                  maxSize: FILE_SIZE_LIMITS.IMAGE,
+                  allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+                },
+              ),
+            );
 
             const convertedImage = yield* imageService.convertToWebP(buffer, {
               quality: 80,

@@ -1,6 +1,11 @@
 import userSchema from "@tepian-k3/schema/users.schema";
 import { createTRPCRouter, withPermission, withProtectedRateLimit } from "..";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import z from "zod";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
@@ -100,6 +105,19 @@ export const userRouter = createTRPCRouter({
             input.avatar.arrayBuffer(),
           );
           const buffer = Buffer.from(arrayBuffer);
+
+          // Validate avatar image
+          yield* Effect.tryPromise(() =>
+            assertValidFileBuffer(
+              buffer,
+              input.avatar.name,
+              input.avatar.type,
+              {
+                maxSize: FILE_SIZE_LIMITS.AVATAR,
+                allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+              },
+            ),
+          );
 
           const convertedImage = yield* imageService.convertToWebP(buffer, {
             quality: 80,

@@ -41,19 +41,21 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useState } from "react";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient } from "@/utils/trpc";
 import { format } from "date-fns";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { getPublicUrl } from "@/utils/url";
 import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation";
 import useDialogs from "@/hooks/use-dialog";
 import z from "zod";
+import ImageWithFallback from "@/components/image-with-fallback";
 
 // TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
 
@@ -63,6 +65,7 @@ export const Route = createFileRoute(
   beforeLoad: async ({ context }) => {
     await requirePermission(context, { permission: "orders.read" });
   },
+  head: () => pageHead("Detail Pesanan"),
   component: RouteComponent,
 });
 
@@ -132,7 +135,7 @@ function RouteComponent() {
   );
 
   // Fetch worksheet for this order
-  const { data: worksheet, isLoading: worksheetLoading } = useQuery(
+  const { data: worksheet } = useQuery(
     trpc.worksheet.getByOrderId.queryOptions({
       orderId,
     }),
@@ -412,9 +415,71 @@ function RouteComponent() {
 
   if (isLoading || !order) {
     return (
-      <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <Card className="container min-h-[calc(100vh-8rem)]">
+        <div className="border-b px-6 py-4">
+          <div className="flex items-start justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-40" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-48" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-full" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-24 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-40" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-24" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </Card>
     );
   }
 
@@ -427,12 +492,15 @@ function RouteComponent() {
   const hasCooperationAgreement = order.documents.some(
     (doc) => doc.type === "cooperation_agreement",
   );
-  const hasCooperationAgreementUserDocument = order.documents.some(
-    (doc) => doc.type === "cooperation_agreement_user",
+  const hasCooperationAgreementDocument = order.documents.some(
+    (doc) => doc.type === "cooperation_agreement",
   );
   const hasInvoice = order.documents.some((doc) => doc.type === "invoice");
   const hasBothDocuments =
-    hasOfferingLetter && hasInvoice && hasApprovalLetterUserDocument;
+    hasOfferingLetter &&
+    hasInvoice &&
+    hasApprovalLetterUserDocument &&
+    hasCooperationAgreementDocument;
 
   // Determine current workflow state
   const isPendingApproval = order.approvalStatus === "pending";
@@ -443,7 +511,7 @@ function RouteComponent() {
     !isRevisionRequested;
   const isAcceptingDocuments =
     order.approvalStatus === "approved" &&
-    order.status === "surat_persetujuan_diproses" &&
+    order.status === "persetujuan_disetujui" &&
     !isRevisionRequested;
   const isAwaitingPayment =
     order.approvalStatus === "approved" &&
@@ -451,7 +519,10 @@ function RouteComponent() {
     order.paymentStatus === "unpaid" &&
     !isRevisionRequested;
   const isPendingPaymentVerification =
+    hasInvoice &&
+    hasApprovalLetterUserDocument &&
     order.paymentStatus === "pending_verification";
+  const isPaymentVerified = order.paymentStatus === "paid";
   const isPaymentVerifiedNeedsTesting =
     order.paymentStatus === "paid" && !order.testing;
   const hasTestingCreated = !!order.testing;
@@ -1435,14 +1506,14 @@ function RouteComponent() {
                             </div>
                           </div>
                         ) : (
-                          <img
+                          <ImageWithFallback
                             src={getPublicUrl(
                               order.documents.find(
                                 (doc) => doc.type === "proof_of_payment",
                               )!.fileUrl,
                             )}
                             alt="Bukti pembayaran"
-                            className="max-h-96 w-full cursor-pointer rounded object-contain"
+                            className="size-64 cursor-pointer rounded object-contain"
                             onClick={() =>
                               window.open(
                                 getPublicUrl(
@@ -1484,6 +1555,56 @@ function RouteComponent() {
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
                         Verifikasi Pembayaran
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {isPaymentVerified && hasWorksheet && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Buat Penjadwalan dan SPT</CardTitle>
+                  <CardDescription>
+                    Worksheet telah dibuat. Lihat detail worksheet dan buat
+                    penjadwalan serta SPT untuk memulai proses pengujian.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-muted-foreground">
+                        Nomor Worksheet
+                      </Label>
+                      <p className="font-medium">
+                        {worksheet.id.slice(0, 8).toUpperCase()}
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label className="text-muted-foreground">
+                        Status Worksheet
+                      </Label>
+                      <div>
+                        <Badge className="bg-purple-100 text-purple-800">
+                          {worksheet.status ?? "pending"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          navigate({
+                            to: "/worksheets/jadwal-personel",
+                            search: { worksheetId: worksheet!.id },
+                          })
+                        }
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Lihat Worksheet
                       </Button>
                     </div>
                   </div>

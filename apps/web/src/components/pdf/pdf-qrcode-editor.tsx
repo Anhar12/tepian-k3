@@ -8,11 +8,13 @@ import {
   type DraggableStateSnapshot,
 } from "@hello-pangea/dnd";
 import { throttle } from "@tanstack/react-pacer";
+import { authMeQueryOptions } from "@/utils/auth-query";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { toFormData } from "@/utils/form-data-mapper";
 import { Loader2 } from "lucide-react";
+import ImageWithFallback from "../image-with-fallback";
 
 interface QRCodeElement {
   id: string;
@@ -29,7 +31,7 @@ interface QRCodeElement {
 
 export default function PDFQRCodeEditor() {
   // Get current user
-  const { data: currentUser } = useQuery(trpc.auth.me.queryOptions());
+  const { data: currentUser } = useQuery(authMeQueryOptions());
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
@@ -115,15 +117,6 @@ export default function PDFQRCodeEditor() {
 
     try {
       setError(null);
-
-      // Create QR code data with user and purpose info
-      const qrData = JSON.stringify({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        email: currentUser.email,
-        purpose: purpose.trim(),
-        timestamp: new Date().toISOString(),
-      });
 
       // Generate a placeholder QR code
       const canvas = document.createElement("canvas");
@@ -224,6 +217,7 @@ export default function PDFQRCodeEditor() {
     [qrElements, canvasSize.width],
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- throttle wrapper obscures deps from linter
   const handleMouseMove = useCallback(
     throttle(
       (e: MouseEvent | TouchEvent) => {
@@ -534,7 +528,7 @@ export default function PDFQRCodeEditor() {
                                   <div className="cursor-move text-gray-400">
                                     ⋮⋮
                                   </div>
-                                  <img
+                                  <ImageWithFallback
                                     src={qr.dataUrl}
                                     alt="QR Code"
                                     className="h-8 w-8"
@@ -665,7 +659,7 @@ export default function PDFQRCodeEditor() {
                         setSelectedQRId(qr.id);
                       }}
                     >
-                      <img
+                      <ImageWithFallback
                         src={qr.dataUrl}
                         alt="QR Code"
                         className="pointer-events-none h-full w-full select-none"

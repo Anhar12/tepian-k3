@@ -27,7 +27,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { createFileRoute, getRouteApi } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import type z from "zod";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
@@ -46,7 +47,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useOptimisticMutation } from "@/lib/optimistic-update";
 import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute(
@@ -57,6 +57,7 @@ export const Route = createFileRoute(
       permission: "chemical-materials.create",
     }),
   component: RouteComponent,
+  head: () => pageHead("Tambah Bahan Kimia"),
 });
 
 function RouteComponent() {

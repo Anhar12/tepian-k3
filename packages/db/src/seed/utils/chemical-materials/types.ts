@@ -1,7 +1,7 @@
 import z from "zod";
 import { BAHAN_UNITS, BAHAN_STATUS } from "@tepian-k3/constants";
 
-const ChemicalMaterialSchema = z.object({
+export const ChemicalMaterialSchema = z.object({
   code: z.string(),
   catalogNumber: z.string().nullable().optional(),
   chemicalFormula: z.string().nullable().optional(),
@@ -20,7 +20,5 @@ const ChemicalMaterialSchema = z.object({
   parameters: z.array(z.string()),
 });
 
-const ChemicalMaterialsSchema = z.array(ChemicalMaterialSchema);
-
 export type ChemicalMaterial = z.infer<typeof ChemicalMaterialSchema>;
-export type ChemicalMaterials = z.infer<typeof ChemicalMaterialsSchema>;
+export type ChemicalMaterials = ChemicalMaterial[];

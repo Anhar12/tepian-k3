@@ -35,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,13 +50,13 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/parameter-categories/$parameterCategoriesId/edit",
 )({
+  params: z.object({
+    parameterCategoriesId: z.uuidv7(),
+  }),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "parameter-categories.update",
     }),
-  params: z.object({
-    parameterCategoriesId: z.uuidv7(),
-  }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.parameterCategories.getParameterCategoryById.queryOptions({
@@ -68,6 +69,7 @@ export const Route = createFileRoute(
   },
   component: RouteComponent,
   pendingComponent: LoaderComponent,
+  head: () => pageHead("Edit Kategori Parameter"),
 });
 
 function LoaderComponent() {

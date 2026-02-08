@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- Mock data generator uses loose types for generated test data */
 import { faker, Faker, id_ID, type LocaleDefinition } from "@faker-js/faker";
 
 interface MockDataGeneratorOptions {

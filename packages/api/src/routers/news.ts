@@ -15,7 +15,12 @@ import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
 import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 import { Effect } from "effect";
 import { imageService } from "@tepian-k3/services/image";
-import { storageService } from "@tepian-k3/services/storage";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
 
 export const newsRouter = createTRPCRouter({
   getFirst5News: withRateLimit(rateLimiters.moderate()).query(
@@ -31,20 +36,27 @@ export const newsRouter = createTRPCRouter({
         id: z.uuidv7(),
       }),
     )
-    .query(async ({ input }) => {
-      const newsItem = await runEffect(
-        newsQueries.getPublishedNewsById(input.id),
-      );
+    .query(
+      async ({ input }) =>
+        await withCache(
+          `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
+          CACHE_TTL.MEDIUM,
+          async () => {
+            const newsItem = await runEffect(
+              newsQueries.getPublishedNewsById(input.id),
+            );
 
-      if (!newsItem) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Berita tidak ditemukan",
-        });
-      }
+            if (!newsItem) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Berita tidak ditemukan",
+              });
+            }
 
-      return newsItem;
-    }),
+            return newsItem;
+          },
+        ),
+    ),
 
   getCursorPaginatedNews: withRateLimit(rateLimiters.moderate())
     .input(newsSchema.getCursorPaginatedNewsSchema)
@@ -102,6 +114,19 @@ export const newsRouter = createTRPCRouter({
 
                 const buffer = Buffer.from(arrayBuffer);
 
+                // Validate image file
+                yield* Effect.tryPromise(() =>
+                  assertValidFileBuffer(
+                    buffer,
+                    ctx.input.data.image.name,
+                    ctx.input.data.image.type,
+                    {
+                      maxSize: FILE_SIZE_LIMITS.IMAGE,
+                      allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+                    },
+                  ),
+                );
+
                 const convertedImage = yield* imageService.convertToWebP(
                   buffer,
                   {
@@ -136,7 +161,11 @@ export const newsRouter = createTRPCRouter({
     .mutation(
       async ({ ctx }) =>
         await withCacheInvalidation(
-          [CACHE_KEYS.NEWS_ALL, CACHE_KEYS.NEWS_FIRST_5],
+          [
+            CACHE_KEYS.NEWS_ALL,
+            CACHE_KEYS.NEWS_FIRST_5,
+            `${CACHE_KEYS.NEWS_PREFIX}${ctx.input.data.id}`,
+          ],
           () =>
             runEffect(
               Effect.gen(function* () {
@@ -148,6 +177,19 @@ export const newsRouter = createTRPCRouter({
                   );
 
                   const buffer = Buffer.from(arrayBuffer);
+
+                  // Validate image file
+                  yield* Effect.tryPromise(() =>
+                    assertValidFileBuffer(
+                      buffer,
+                      ctx.input.data.image!.name,
+                      ctx.input.data.image!.type,
+                      {
+                        maxSize: FILE_SIZE_LIMITS.IMAGE,
+                        allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
+                      },
+                    ),
+                  );
 
                   const convertedImage = yield* imageService.convertToWebP(
                     buffer,
@@ -189,7 +231,11 @@ export const newsRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await withCacheInvalidation(
-          [CACHE_KEYS.NEWS_ALL, CACHE_KEYS.NEWS_FIRST_5],
+          [
+            CACHE_KEYS.NEWS_ALL,
+            CACHE_KEYS.NEWS_FIRST_5,
+            `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
+          ],
           () => runEffect(newsQueries.deleteNews(input.id)),
         ),
     ),
@@ -203,7 +249,11 @@ export const newsRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await withCacheInvalidation(
-          [CACHE_KEYS.NEWS_ALL, CACHE_KEYS.NEWS_FIRST_5],
+          [
+            CACHE_KEYS.NEWS_ALL,
+            CACHE_KEYS.NEWS_FIRST_5,
+            `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
+          ],
           () => runEffect(newsQueries.restoreDeletedNews(input.id)),
         ),
     ),

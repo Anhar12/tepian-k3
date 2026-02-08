@@ -15,6 +15,7 @@ import {
   SkeletonInput,
 } from "@/components/ui/skeleton-generator";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
@@ -26,11 +27,11 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/roles/$roleId/detail",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "roles.read" }),
   params: z.object({
     roleId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "roles.read" }),
   loader: async ({ context, params }) => {
     context.queryClient.ensureQueryData(
       context.trpc.role.getRoleWithPermissionsById.queryOptions({
@@ -42,6 +43,7 @@ export const Route = createFileRoute(
       context.trpc.permission.getAllPermissions.queryOptions(),
     );
   },
+  head: () => pageHead("Detail Role"),
   component: RouteComponent,
   pendingComponent: LoaderComponent,
 });

@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,11 +30,11 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/clusters/$clusterId/edit",
 )({
-  beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "clusters.update" }),
   params: z.object({
     clusterId: z.uuidv7(),
   }),
+  beforeLoad: async ({ context }) =>
+    await requirePermission(context, { permission: "clusters.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
       context.trpc.cluster.getClusterById.queryOptions({
@@ -41,6 +42,7 @@ export const Route = createFileRoute(
       }),
     ),
   component: RouteComponent,
+  head: () => pageHead("Edit Klaster"),
 });
 
 function RouteComponent() {

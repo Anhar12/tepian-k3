@@ -14,12 +14,22 @@ import path from "path";
 import {
   initializeEventBus,
   shutdownEventBus,
+  isEventBusReady,
 } from "@tepian-k3/services/notifications";
-import { logInfo } from "@tepian-k3/services/logger";
+import {
+  initializeTokenBlacklist,
+  shutdownTokenBlacklist,
+} from "@tepian-k3/services/token-blacklist";
+import { logInfo, logWarn } from "@tepian-k3/services/logger";
+import { db, sql } from "@tepian-k3/db/client";
 import { devRouter } from "./routes/dev";
+import { logsRouter } from "./routes/logs";
 import { secureHeaders } from "./middleware/secure-headers";
+import { timeout } from "./middleware/timeout";
 import { setDefaultOptions } from "date-fns";
 import { id } from "date-fns/locale";
+import { registerEmailWorker } from "./workers/email.worker";
+import { queueService } from "@tepian-k3/services/queue";
 
 const redisConfig = {
   host: env.MEMURAI_HOST,
@@ -32,10 +42,16 @@ const redisConfig = {
 
 initializeEventBus(redisConfig);
 
+// Initialize token blacklist for JWT revocation
+initializeTokenBlacklist(redisConfig);
+
 // Set Zod locale to Indonesian
 z.config(z.locales.id());
 // Set date-fns default locale to Indonesian
 setDefaultOptions({ locale: id });
+
+// Register Workers
+registerEmailWorker();
 
 const app = new Hono();
 
@@ -56,6 +72,12 @@ if (env.NODE_ENV === "production") {
 
 app.use(logger());
 app.use(secureHeaders());
+app.use(async (c, next) => {
+  if (c.req.path.startsWith("/trpc/event.")) {
+    return await next(); // SSE subscriptions are long-lived, skip timeout
+  }
+  return await timeout(30000)(c, next);
+});
 
 // Parse CORS origins (supports comma-separated values)
 const corsOrigins: string[] = env.CORS_ORIGIN
@@ -63,6 +85,13 @@ const corsOrigins: string[] = env.CORS_ORIGIN
       .map((o) => o.trim())
       .filter(Boolean)
   : [];
+
+// Validate CORS_ORIGIN is set in production
+if (env.NODE_ENV === "production" && corsOrigins.length === 0) {
+  throw new Error(
+    "CORS_ORIGIN must be set in production. Using '*' is not allowed.",
+  );
+}
 
 const corsOrigin: string | string[] =
   corsOrigins.length === 1
@@ -81,7 +110,13 @@ app.use(
   }),
 );
 
-app.route("/dev", devRouter);
+// Only mount dev router in development
+if (env.NODE_ENV === "development") {
+  app.route("/dev", devRouter);
+}
+
+// Developer log viewer (auth handled inside router based on NODE_ENV)
+app.route("/api/logs", logsRouter);
 
 // Only for local testing
 app.use("*", async (c, next) => {
@@ -105,10 +140,70 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
+app.get("/health", async (c) => {
+  const startTime = Date.now();
+
+  // Check database connectivity
+  let dbStatus: "healthy" | "unhealthy" = "unhealthy";
+  let dbLatency = 0;
+  try {
+    const dbStart = Date.now();
+    await db.execute(sql`SELECT 1`);
+    dbLatency = Date.now() - dbStart;
+    dbStatus = "healthy";
+  } catch {
+    dbStatus = "unhealthy";
+  }
+
+  // Check Redis connectivity
+  const redisStatus: "healthy" | "unhealthy" = isEventBusReady()
+    ? "healthy"
+    : "unhealthy";
+
+  const overallStatus =
+    dbStatus === "healthy" && redisStatus === "healthy"
+      ? "healthy"
+      : "unhealthy";
+
+  const response = {
+    status: overallStatus,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    services: {
+      database: {
+        status: dbStatus,
+        latency: dbLatency,
+      },
+      redis: {
+        status: redisStatus,
+      },
+    },
+    responseTime: Date.now() - startTime,
+  };
+
+  return c.json(response, overallStatus === "healthy" ? 200 : 503);
+});
+
 app.get("/api/public/*", async (c) => {
   // Get the full path after /api/public/
-  const fullPath = c.req.path.replace("/api/public/", "");
-  const filePath = path.join("public", fullPath);
+  const requestedPath = c.req.path.replace("/api/public/", "");
+
+  // Normalize the path to prevent directory traversal
+  const normalizedPath = path
+    .normalize(requestedPath)
+    .replace(/^(\.\.[/\\])+/, "");
+  const publicDir = path.resolve(process.cwd(), "public");
+  const filePath = path.resolve(publicDir, normalizedPath);
+
+  // Security check: prevent directory traversal (double check after normalization)
+  if (!filePath.startsWith(publicDir + path.sep)) {
+    logWarn("FileAccess", "Directory traversal attempt blocked", {
+      requestedPath,
+      normalizedPath,
+      ip: c.req.header("x-forwarded-for") || c.req.header("x-real-ip"),
+    });
+    return c.text("Invalid path", 400);
+  }
 
   try {
     await fs.access(filePath);
@@ -119,6 +214,8 @@ app.get("/api/public/*", async (c) => {
     c.header("Content-Type", mimeType);
     c.header("Content-Length", file.length.toString());
     c.header("Cache-Control", "public, max-age=31536000");
+    // Allow same-site access for public static files (frontend on different port)
+    c.header("Cross-Origin-Resource-Policy", "same-site");
     return c.body(file);
   } catch (_) {
     return c.text("File not found", 404);
@@ -127,14 +224,24 @@ app.get("/api/public/*", async (c) => {
 
 app.get("/api/uploads/*", async (c) => {
   // Get the full path after /api/uploads/
-  const fullPath = c.req.path.replace("/api/uploads/", "");
+  const requestedPath = c.req.path.replace("/api/uploads/", "");
 
-  // Security check: prevent directory traversal
-  if (fullPath.includes("..")) {
+  // Normalize the path to prevent directory traversal
+  const normalizedPath = path
+    .normalize(requestedPath)
+    .replace(/^(\.\.[/\\])+/, "");
+  const resolvedUploadsDir = path.resolve(uploadsDir);
+  const filePath = path.resolve(resolvedUploadsDir, normalizedPath);
+
+  // Security check: prevent directory traversal (double check after normalization)
+  if (!filePath.startsWith(resolvedUploadsDir + path.sep)) {
+    logWarn("FileAccess", "Directory traversal attempt blocked", {
+      requestedPath,
+      normalizedPath,
+      ip: c.req.header("x-forwarded-for") || c.req.header("x-real-ip"),
+    });
     return c.text("Invalid path", 400);
   }
-
-  const filePath = path.join(uploadsDir, fullPath);
 
   try {
     await fs.access(filePath);
@@ -146,6 +253,8 @@ app.get("/api/uploads/*", async (c) => {
     c.header("Content-Type", mimeType);
     c.header("Content-Length", file.length.toString());
     c.header("Cache-Control", "public, max-age=31536000");
+    // Allow same-site access for static uploads (frontend on different port)
+    c.header("Cross-Origin-Resource-Policy", "same-site");
 
     return c.body(file);
   } catch (_) {
@@ -164,15 +273,15 @@ serve(
   },
 );
 
-// Graceful shutdown
-process.on("SIGTERM", async () => {
+const shutdown = async () => {
   logInfo("Server", "Shutting down...");
   await shutdownEventBus();
+  await shutdownTokenBlacklist();
+  await queueService.shutdown();
   process.exit(0);
-});
+};
 
-process.on("SIGINT", async () => {
-  logInfo("Server", "Shutting down...");
-  await shutdownEventBus();
-  process.exit(0);
-});
+// Graceful shutdown
+process.on("SIGTERM", shutdown);
+
+process.on("SIGINT", shutdown);
