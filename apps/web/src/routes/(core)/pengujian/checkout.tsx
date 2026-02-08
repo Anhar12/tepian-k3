@@ -174,7 +174,7 @@ function RouteComponent() {
       );
     }
     return [];
-  }, [cartItems, currentLocation]);
+  }, [cartItems, currentCompany, currentLocation]);
 
   const totalPrice = useMemo(() => {
     if (!cartItems) return 0;
