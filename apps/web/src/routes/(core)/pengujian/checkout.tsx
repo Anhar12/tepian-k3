@@ -14,15 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useCartFilters } from "@/hooks/use-cart-filters";
+import { useCartMutations } from "@/hooks/use-cart-mutations";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc } from "@/utils/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/(core)/pengujian/checkout")({
   head: () => pageHead("Pengujian - Checkout"),
@@ -30,174 +32,31 @@ export const Route = createFileRoute("/(core)/pengujian/checkout")({
 });
 
 function RouteComponent() {
-  const [currentCompany, setCurrentCompany] = useState<string | null>(null);
-  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
-  const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
-  const [deleteLoadingItems, setDeleteLoadingItems] = useState<Set<string>>(
-    new Set(),
-  );
+  const {
+    cartItems,
+    currentCompany,
+    setCurrentCompany,
+    currentLocation,
+    setCurrentLocation,
+    mappedCompanyFromCartItem,
+    mappedLocationFromCartItem,
+    mappedItems,
+    totalPrice,
+  } = useCartFilters();
+
+  const {
+    incrementCartItemQuantity,
+    decrementCartItemQuantity,
+    deleteCartItem,
+    loadingItems,
+    deleteLoadingItems,
+  } = useCartMutations();
+
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [coverTransportationIncluded, setCoverTransportationIncluded] =
     useState(false);
   const [coverAccommodationIncluded, setCoverAccommodationIncluded] =
     useState(false);
-
-  const { data: cartItems } = useQuery(
-    trpc.cart.getAllCartItems.queryOptions(),
-  );
-
-  const incrementCartItemQuantity = useMutation(
-    trpc.cart.incrementCartItemQuantity.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-      },
-      onError: (error) => {
-        globalErrorToast(
-          `Gagal menambah jumlah item di keranjang: ${error.message}`,
-        );
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const decrementCartItemQuantity = useMutation(
-    trpc.cart.decrementCartItemQuantity.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-      },
-      onError: (error) => {
-        globalErrorToast(
-          `Gagal mengurangi jumlah item di keranjang: ${error.message}`,
-        );
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const deleteCartItem = useMutation(
-    trpc.cart.deleteCartItem.mutationOptions({
-      onMutate: ({ cartItemId }) => {
-        setDeleteLoadingItems((prev) => new Set(prev).add(cartItemId));
-      },
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
-        );
-
-        globalSuccessToast("Item berhasil dihapus dari keranjang");
-      },
-      onError: (error) => {
-        globalErrorToast(`Gagal menghapus item di keranjang: ${error.message}`);
-      },
-      onSettled: (_, __, { cartItemId }) => {
-        setDeleteLoadingItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(cartItemId);
-          return newSet;
-        });
-      },
-    }),
-  );
-
-  const mappedCompanyFromCartItem = useMemo(() => {
-    if (cartItems) {
-      return cartItems.map((company) => ({
-        id: company.id,
-        name: company.name,
-      }));
-    }
-    return [];
-  }, [cartItems]);
-
-  const mappedLocationFromCartItem = useMemo(() => {
-    if (cartItems && currentCompany) {
-      const company = cartItems.find((comp) => comp.id === currentCompany);
-      return (
-        company?.locations.map((location) => ({
-          id: location.id,
-          name: location.name,
-        })) ?? []
-      );
-    }
-    return cartItems
-      ? cartItems.flatMap((comp) =>
-          comp.locations.map((location) => ({
-            id: location.id,
-            name: location.name,
-          })),
-        )
-      : [];
-  }, [cartItems, currentCompany]);
-
-  const mappedItems = useMemo(() => {
-    if (cartItems) {
-      let filteredItems = cartItems;
-      if (currentCompany) {
-        filteredItems = filteredItems.filter(
-          (company) => company.id === currentCompany,
-        );
-      }
-      if (currentLocation) {
-        filteredItems = filteredItems
-          .map((company) => ({
-            ...company,
-            locations: company.locations.filter(
-              (location) => location.id === currentLocation,
-            ),
-          }))
-          .filter((company) => company.locations.length > 0);
-      }
-      return filteredItems.flatMap((company) =>
-        company.locations.flatMap((location) => location.clusters),
-      );
-    }
-    return [];
-  }, [cartItems, currentCompany, currentLocation]);
-
-  const totalPrice = useMemo(() => {
-    if (!cartItems) return 0;
-
-    return cartItems.reduce((companyAcc, company) => {
-      return (
-        companyAcc +
-        company.locations.reduce((locationAcc, location) => {
-          return (
-            locationAcc +
-            location.clusters.reduce((clusterAcc, cluster) => {
-              return (
-                clusterAcc +
-                cluster.items.reduce((itemAcc, item) => {
-                  return itemAcc + item.price * item.quantity;
-                }, 0)
-              );
-            }, 0)
-          );
-        }, 0)
-      );
-    }, 0);
-  }, [cartItems]);
 
   const createOrderMutation = useMutation(
     trpc.order.createOrder.mutationOptions({

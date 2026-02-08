@@ -1,6 +1,6 @@
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
-import { globalErrorToast } from "@/lib/toast";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { useState, useCallback } from "react";
 
 /**
@@ -82,7 +82,10 @@ export function useCartMutations() {
       onMutate: ({ cartItemId }) => {
         addDeleteLoadingItem(cartItemId);
       },
-      onSuccess: invalidateCart,
+      onSuccess: async () => {
+        await invalidateCart();
+        globalSuccessToast("Item berhasil dihapus dari keranjang");
+      },
       onError: (error) => {
         globalErrorToast(`Gagal menghapus item di keranjang: ${error.message}`);
       },
