@@ -75,17 +75,44 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
           setUploadedFile(null);
         }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omitting `uploadedFile` to avoid infinite loop
     }, [value]);
-
-    const validateFile = (file: File): string | null => {
-      if (file.size > maxSize) {
-        return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
-      }
-      return null;
-    };
 
     const addFile = useCallback(
       (file: File) => {
+        const validateFile = (f: File): string | null => {
+          if (f.size > maxSize) {
+            return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
+          }
+          return null;
+        };
+
+        const simulateUpload = (uploadedFile: File) => {
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress >= 100) {
+              progress = 100;
+              clearInterval(interval);
+
+              setUploadedFile((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      progress: 100,
+                      status: "completed",
+                    }
+                  : null,
+              );
+
+              // Notify parent component
+              onChange?.(uploadedFile);
+            } else {
+              setUploadedFile((prev) => (prev ? { ...prev, progress } : null));
+            }
+          }, 100);
+        };
+
         const validationError = validateFile(file);
         if (validationError) {
           setUploadError(validationError);
@@ -103,36 +130,10 @@ const SingleFileUpload = forwardRef<HTMLDivElement, SingleFileUploadProps>(
         setUploadedFile(fileUpload);
 
         // Simulate upload progress
-        simulateUpload(fileUpload, file);
+        simulateUpload(file);
       },
-      [maxSize],
+      [maxSize, onChange],
     );
-
-    const simulateUpload = (_fileUpload: UploadFile, file: File) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-
-          setUploadedFile((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  progress: 100,
-                  status: "completed",
-                }
-              : null,
-          );
-
-          // Notify parent component
-          onChange?.(file);
-        } else {
-          setUploadedFile((prev) => (prev ? { ...prev, progress } : null));
-        }
-      }, 100);
-    };
 
     const removeFile = useCallback(() => {
       setUploadedFile(null);

@@ -59,7 +59,7 @@ export function createCrudActionCell<
   const {
     resourceName,
     nestedPathRoute,
-    resourcePath,
+    resourcePath: _resourcePath,
     permissionPrefix,
     deleteMutation,
     restoreMutation,

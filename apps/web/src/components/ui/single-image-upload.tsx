@@ -88,20 +88,47 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
           setPreview(null);
         }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omitting `image` to avoid infinite loop
     }, [value]);
-
-    const validateFile = (file: File): string | null => {
-      if (!file.type.startsWith("image/")) {
-        return "File must be an image";
-      }
-      if (file.size > maxSize) {
-        return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
-      }
-      return null;
-    };
 
     const addImage = useCallback(
       (file: File) => {
+        const validateFile = (f: File): string | null => {
+          if (!f.type.startsWith("image/")) {
+            return "File must be an image";
+          }
+          if (f.size > maxSize) {
+            return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
+          }
+          return null;
+        };
+
+        const simulateUpload = (uploadedFile: File) => {
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress >= 100) {
+              progress = 100;
+              clearInterval(interval);
+
+              setImage((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      progress: 100,
+                      status: "completed",
+                    }
+                  : null,
+              );
+
+              // Notify parent component
+              onChange?.(uploadedFile);
+            } else {
+              setImage((prev) => (prev ? { ...prev, progress } : null));
+            }
+          }, 100);
+        };
+
         const validationError = validateFile(file);
         if (validationError) {
           setUploadError(validationError);
@@ -126,36 +153,10 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
         setPreview(imageFile.preview);
 
         // Simulate upload progress
-        simulateUpload(imageFile, file);
+        simulateUpload(file);
       },
-      [image, maxSize],
+      [image, maxSize, onChange],
     );
-
-    const simulateUpload = (_imageFile: ImageFile, file: File) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-
-          setImage((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  progress: 100,
-                  status: "completed",
-                }
-              : null,
-          );
-
-          // Notify parent component
-          onChange?.(file);
-        } else {
-          setImage((prev) => (prev ? { ...prev, progress } : null));
-        }
-      }, 100);
-    };
 
     const removeImage = useCallback(() => {
       if (image) {

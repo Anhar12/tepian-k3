@@ -30,7 +30,6 @@ export const Route = createFileRoute(
   params: z.object({
     roleId: z.uuidv7(),
   }),
-  head: () => pageHead("Detail Role"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "roles.read" }),
   loader: async ({ context, params }) => {
@@ -44,6 +43,7 @@ export const Route = createFileRoute(
       context.trpc.permission.getAllPermissions.queryOptions(),
     );
   },
+  head: () => pageHead("Detail Role"),
   component: RouteComponent,
   pendingComponent: LoaderComponent,
 });

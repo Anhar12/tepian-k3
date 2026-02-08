@@ -16,7 +16,6 @@ export const Route = createFileRoute(
   params: z.object({
     parameterId: z.string(),
   }),
-  head: () => pageHead("Detail Parameter"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: ["parameters.read", "parameter-tool.view"],
@@ -28,6 +27,7 @@ export const Route = createFileRoute(
       }),
     );
   },
+  head: () => pageHead("Detail Parameter"),
   component: RouteComponent,
 });
 

@@ -31,7 +31,7 @@ declare module "@tanstack/react-table" {
     setJoinOperator?: (value: JoinOperator) => void;
   }
 
-  // biome-ignore lint/correctness/noUnusedVariables: TData and TValue are used in the ColumnMeta interface
+  // eslint-disable-next-line unused-imports/no-unused-vars -- TData and TValue required by @tanstack/react-table module augmentation
   interface ColumnMeta<TData extends RowData, TValue> {
     label?: string;
     placeholder?: string;

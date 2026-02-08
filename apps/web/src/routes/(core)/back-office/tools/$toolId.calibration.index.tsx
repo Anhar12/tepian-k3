@@ -14,11 +14,11 @@ export const Route = createFileRoute(
   params: z.object({
     toolId: z.uuidv7(),
   }),
-  head: () => pageHead("Kalibrasi Alat"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "tool-calibrations.view",
     }),
+  head: () => pageHead("Kalibrasi Alat"),
   component: RouteComponent,
 });
 

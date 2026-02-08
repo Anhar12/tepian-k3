@@ -47,7 +47,6 @@ export const Route = createFileRoute(
     toolId: z.uuidv7(),
     calibrationId: z.uuidv7(),
   }),
-  head: () => pageHead("Edit Kalibrasi"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "tool-calibrations.update",
@@ -58,6 +57,7 @@ export const Route = createFileRoute(
         id: params.calibrationId,
       }),
     ),
+  head: () => pageHead("Edit Kalibrasi"),
 
   component: RouteComponent,
   pendingComponent: LoaderComponent,

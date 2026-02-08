@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- Required for Drizzle ORM generic type constraints */
 import type { Exact } from "type-fest";
 
 import type {

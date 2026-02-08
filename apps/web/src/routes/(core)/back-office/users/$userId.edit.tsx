@@ -163,7 +163,10 @@ function RouteComponent() {
   const [type, setType] = useState<"text" | "password">("password");
 
   // Store original user roles as a Set for O(1) lookups
-  const originalUserRoles = new Set(user.roles.map((role) => role.id) ?? []);
+  const originalUserRoles = useMemo(
+    () => new Set(user.roles.map((role) => role.id) ?? []),
+    [user.roles],
+  );
 
   // Track current selected roles
   const [selectedRoles, setSelectedRoles] = useState<Set<string>>(

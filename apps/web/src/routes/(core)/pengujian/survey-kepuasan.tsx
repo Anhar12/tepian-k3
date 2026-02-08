@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
-  head: () => pageHead("Pengujian - Survey Kepuasan"),
   validateSearch: z.object({
     orderId: z.uuidv7(),
   }),
@@ -49,6 +48,7 @@ export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
 
     return;
   },
+  head: () => pageHead("Pengujian - Survey Kepuasan"),
   component: RouteComponent,
 });
 

@@ -19,11 +19,11 @@ export const Route = createFileRoute(
     toolId: z.uuidv7(),
     calibrationId: z.uuidv7(),
   }),
-  head: () => pageHead("Detail Kalibrasi"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "tool-calibrations.view",
     }),
+  head: () => pageHead("Detail Kalibrasi"),
   component: RouteComponent,
 });
 

@@ -118,15 +118,6 @@ export default function PDFQRCodeEditor() {
     try {
       setError(null);
 
-      // Create QR code data with user and purpose info
-      const qrData = JSON.stringify({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        email: currentUser.email,
-        purpose: purpose.trim(),
-        timestamp: new Date().toISOString(),
-      });
-
       // Generate a placeholder QR code
       const canvas = document.createElement("canvas");
       canvas.width = 200;
@@ -226,6 +217,7 @@ export default function PDFQRCodeEditor() {
     [qrElements, canvasSize.width],
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- throttle wrapper obscures deps from linter
   const handleMouseMove = useCallback(
     throttle(
       (e: MouseEvent | TouchEvent) => {

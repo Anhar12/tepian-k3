@@ -307,8 +307,6 @@ export function StatusState2({
   );
 }
 
-interface StatusState3Props {}
-
 export function StatusState3() {
   return (
     <StateLayout>
@@ -616,8 +614,6 @@ export function StatusState5({
     </StateLayout>
   );
 }
-
-interface StatusState6Props {}
 
 export function StatusState6() {
   return (

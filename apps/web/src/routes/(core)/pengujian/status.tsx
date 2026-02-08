@@ -45,7 +45,6 @@ export const Route = createFileRoute("/(core)/pengujian/status")({
   validateSearch: z.object({
     orderId: z.uuidv7(),
   }),
-  head: () => pageHead("Pengujian - Status"),
   beforeLoad: async ({ search }) => {
     // check if orderId exists
     if (!search.orderId) {
@@ -54,6 +53,7 @@ export const Route = createFileRoute("/(core)/pengujian/status")({
       });
     }
   },
+  head: () => pageHead("Pengujian - Status"),
   component: RouteComponent,
 });
 
@@ -206,9 +206,6 @@ function RouteComponent() {
     const offeringDoc = orderDetail?.documents.find(
       (doc) => doc.type === "offering_document",
     );
-    const approvalLetterDoc = orderDetail?.documents.find(
-      (doc) => doc.type === "approval_letter",
-    );
     const approvalLetterUserDoc = orderDetail?.documents.find(
       (doc) => doc.type === "approval_letter_user",
     );
@@ -245,9 +242,6 @@ function RouteComponent() {
   const hasApprovalLetter = !!approvalLetterUserDoc;
   const hasInvoice = !!invoiceDoc;
   const hasCooperationAgreement = !!cooperationAgreementDoc;
-  const hasCooperationAgreementUser = !!cooperationAgreementUserDoc;
-  const hasBothCooperationAgreement =
-    !!cooperationAgreementDoc && !!cooperationAgreementUserDoc;
   const hasPaymentProof = !!paymentProofDoc;
   const isPendingPaymentVerification =
     orderDetail.paymentStatus === "pending_verification";

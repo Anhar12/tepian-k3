@@ -39,11 +39,11 @@ import z from "zod";
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/create",
 )({
-  head: () => pageHead("Tambah Kalibrasi"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, {
       permission: "tool-calibrations.create",
     }),
+  head: () => pageHead("Tambah Kalibrasi"),
   component: RouteComponent,
 });
 

@@ -12,9 +12,9 @@ export const Route = createFileRoute(
   params: z.object({
     toolId: z.uuidv7(),
   }),
-  head: () => pageHead("Detail Alat"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "tools.read" }),
+  head: () => pageHead("Detail Alat"),
   component: RouteComponent,
 });
 

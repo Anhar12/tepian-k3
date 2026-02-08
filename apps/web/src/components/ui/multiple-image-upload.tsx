@@ -69,20 +69,55 @@ const MultipleImageUpload = forwardRef<
         });
         setImages([]);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omitting `images` to avoid infinite loop
     }, [value]);
-
-    const validateFile = (file: File): string | null => {
-      if (!file.type.startsWith("image/")) {
-        return "File must be an image";
-      }
-      if (file.size > maxSize) {
-        return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
-      }
-      return null;
-    };
 
     const addImages = useCallback(
       (files: FileList | File[]) => {
+        const validateFile = (file: File): string | null => {
+          if (!file.type.startsWith("image/")) {
+            return "File must be an image";
+          }
+          if (file.size > maxSize) {
+            return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
+          }
+          return null;
+        };
+
+        const simulateUpload = (imageFile: UploadFile) => {
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress >= 100) {
+              progress = 100;
+              clearInterval(interval);
+
+              setImages((prev) =>
+                prev.map((img) =>
+                  img.id === imageFile.id
+                    ? { ...img, progress: 100, status: "completed" as const }
+                    : img,
+                ),
+              );
+
+              // Notify parent
+              setImages((current) => {
+                const completedFiles = current
+                  .filter((img) => img.status === "completed")
+                  .map((img) => img.file);
+                onChange?.(completedFiles);
+                return current;
+              });
+            } else {
+              setImages((prev) =>
+                prev.map((img) =>
+                  img.id === imageFile.id ? { ...img, progress } : img,
+                ),
+              );
+            }
+          }, 100);
+        };
+
         const fileArray = Array.from(files);
 
         if (images.length + fileArray.length > maxFiles) {
@@ -114,42 +149,8 @@ const MultipleImageUpload = forwardRef<
         setUploadError(null);
         setImages((prev) => [...prev, ...newImages]);
       },
-      [images.length, maxFiles, maxSize],
+      [images.length, maxFiles, maxSize, onChange],
     );
-
-    const simulateUpload = (imageFile: UploadFile) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-
-          setImages((prev) =>
-            prev.map((img) =>
-              img.id === imageFile.id
-                ? { ...img, progress: 100, status: "completed" as const }
-                : img,
-            ),
-          );
-
-          // Notify parent
-          setImages((current) => {
-            const completedFiles = current
-              .filter((img) => img.status === "completed")
-              .map((img) => img.file);
-            onChange?.(completedFiles);
-            return current;
-          });
-        } else {
-          setImages((prev) =>
-            prev.map((img) =>
-              img.id === imageFile.id ? { ...img, progress } : img,
-            ),
-          );
-        }
-      }, 100);
-    };
 
     const removeImage = useCallback(
       (id: string) => {

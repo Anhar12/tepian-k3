@@ -105,7 +105,7 @@ export async function decryptResetToken(
     }
 
     return payload as unknown as ResetTokenPayload;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

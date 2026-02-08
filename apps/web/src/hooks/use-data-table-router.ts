@@ -198,7 +198,10 @@ export function useDataTableRouter<TData, TSearch extends SearchParams>(
   );
 
   // Advanced filters — derived from search params, updated via navigate
-  const filters = (search.filters ?? []) as ExtendedColumnFilter<TData>[];
+  const filters = React.useMemo(
+    () => (search.filters ?? []) as ExtendedColumnFilter<TData>[],
+    [search.filters],
+  );
 
   const debouncedNavigateAdvancedFilters = useDebouncedCallback(
     (newFilters: ExtendedColumnFilter<TData>[] | null) => {

@@ -30,11 +30,7 @@ import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  createFileRoute,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
   TESTING_DOCUMENT_TYPES,
   TESTING_STATUSES,
@@ -68,36 +64,20 @@ export const Route = createFileRoute(
   "/(core)/back-office/testings/$testingId/detail",
 )({
   validateSearch: (search) => searchSchema.parse(search),
-  head: () => pageHead("Detail Pengujian"),
   beforeLoad: async ({ context }) =>
     await requirePermission(context, { permission: "testing.read" }),
+  head: () => pageHead("Detail Pengujian"),
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const router = useRouter();
-  const navigate = useNavigate();
   const { testingId } = Route.useParams();
   const { createWorksheet } = Route.useSearch();
 
   const [activeTab, setActiveTab] = useState<
     "info" | "items" | "worksheets" | "documents"
   >("info");
-
-  // ComboBox states
-  const [openMainSupervisor, setOpenMainSupervisor] = useState(false);
-  const [openAccompanyingSupervisor, setOpenAccompanyingSupervisor] =
-    useState(false);
-
-  // Worksheet creation dialog
-  const [worksheetDialogOpen, setWorksheetDialogOpen] = useState(false);
-  const [worksheetStartDate, setWorksheetStartDate] = useState(
-    new Date().toISOString().slice(0, 16),
-  );
-  const [selectedMainSupervisor, setSelectedMainSupervisor] =
-    useState<string>("");
-  const [selectedAccompanyingSupervisor, setSelectedAccompanyingSupervisor] =
-    useState<string>("");
 
   // Document upload states
   const [selectedDocType, setSelectedDocType] =
@@ -110,13 +90,9 @@ function RouteComponent() {
     trpc.testing.getTestingWithDocuments.queryOptions({ testingId }),
   );
 
-  // Get employees for supervisor selection
-  const { data: employees } = useQuery(trpc.employee.getAll.queryOptions());
-
   // Open worksheet dialog if URL param is set
   useEffect(() => {
     if (createWorksheet === "true") {
-      setWorksheetDialogOpen(true);
       setActiveTab("worksheets");
     }
   }, [createWorksheet]);
