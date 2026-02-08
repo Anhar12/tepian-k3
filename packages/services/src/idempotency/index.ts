@@ -132,17 +132,23 @@ export class IdempotencyService {
   /**
    * Mark a request as completed with its serialized response
    */
-  async markCompleted(key: string, response: string): Promise<void> {
+  async markCompleted(
+    key: string,
+    response: string,
+    ttl?: number,
+  ): Promise<void> {
     await this.withFallback((s) =>
-      s.setCompleted(key, response, this.config.ttl),
+      s.setCompleted(key, response, ttl ?? this.config.ttl),
     );
   }
 
   /**
    * Mark a request as failed (allows retry with same key)
    */
-  async markFailed(key: string, error: string): Promise<void> {
-    await this.withFallback((s) => s.setFailed(key, error, this.config.ttl));
+  async markFailed(key: string, error: string, ttl?: number): Promise<void> {
+    await this.withFallback((s) =>
+      s.setFailed(key, error, ttl ?? this.config.ttl),
+    );
   }
 
   /**

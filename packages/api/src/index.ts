@@ -843,7 +843,7 @@ export function withIdempotency<
       const result = await handler(opts);
 
       // Cache the successful response
-      await service.markCompleted(storageKey, JSON.stringify(result));
+      await service.markCompleted(storageKey, JSON.stringify(result), ttl);
 
       return result;
     } catch (error) {
@@ -852,7 +852,7 @@ export function withIdempotency<
         error instanceof TRPCError
           ? JSON.stringify({ code: error.code, message: error.message })
           : "Unknown error";
-      await service.markFailed(storageKey, errorMessage);
+      await service.markFailed(storageKey, errorMessage, ttl);
       throw error;
     }
   };
