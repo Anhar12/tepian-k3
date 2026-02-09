@@ -12,12 +12,19 @@ export interface SendEmailOptions {
   from?: string;
 }
 
+const poolOptions = {
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+};
+
 // Create transporter based on your email service
 const createTransporter = () => {
   // Option 1: Gmail
   if (env.EMAIL_PROVIDER === "gmail") {
     return nodemailer.createTransport({
       service: "gmail",
+      ...poolOptions,
       auth: {
         user: env.EMAIL_USER,
         pass: env.EMAIL_PASSWORD, // Use App Password for Gmail
@@ -28,6 +35,7 @@ const createTransporter = () => {
   // Option 2: SMTP (Generic - works with most providers)
   if (env.EMAIL_PROVIDER === "smtp") {
     return nodemailer.createTransport({
+      ...poolOptions,
       host: env.SMTP_HOST,
       port: Number(env.SMTP_PORT) || 587,
       secure: env.SMTP_SECURE === "true", // true for 465, false for other ports
@@ -41,6 +49,7 @@ const createTransporter = () => {
   // Option 3: SendGrid SMTP
   if (env.EMAIL_PROVIDER === "sendgrid") {
     return nodemailer.createTransport({
+      ...poolOptions,
       host: "smtp.sendgrid.net",
       port: 587,
       auth: {
@@ -53,6 +62,7 @@ const createTransporter = () => {
   // Option 4: Mailgun SMTP
   if (env.EMAIL_PROVIDER === "mailgun") {
     return nodemailer.createTransport({
+      ...poolOptions,
       host: env.MAILGUN_SMTP_HOST || "smtp.mailgun.org",
       port: 587,
       auth: {
@@ -65,6 +75,7 @@ const createTransporter = () => {
   // Option 5: AWS SES
   if (env.EMAIL_PROVIDER === "ses") {
     return nodemailer.createTransport({
+      ...poolOptions,
       host: `email-smtp.${env.AWS_REGION || "us-east-1"}.amazonaws.com`,
       port: 587,
       secure: false,
@@ -97,11 +108,11 @@ const transporter = createTransporter();
 export const nodemailerProvider = {
   async send(options: SendEmailOptions) {
     try {
-      // Render React component to HTML
-      const html = await render(options.react);
-
-      // Also render plain text version
-      const text = await render(options.react, { plainText: true });
+      // Render HTML and plain text versions in parallel
+      const [html, text] = await Promise.all([
+        render(options.react),
+        render(options.react, { plainText: true }),
+      ]);
 
       const info = await transporter.sendMail({
         from: options.from || env.EMAIL_FROM || "noreply@yourdomain.com",
