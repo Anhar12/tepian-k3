@@ -58,6 +58,30 @@ pnpm email:verify     # Send test verification email
 pnpm web:prettier     # Format web app with Prettier
 ```
 
+### Docker
+
+```bash
+# All-in-one (easiest)
+docker compose up -d                    # Start all services
+docker compose down                     # Stop all services
+docker compose logs -f                  # View logs
+
+# Separate services (more control)
+docker compose -f docker-compose.infra.yml up -d   # Infrastructure (postgres, redis)
+docker compose -f docker-compose.server.yml up -d  # API server + migrations
+docker compose -f docker-compose.web.yml up -d     # Web frontend (nginx + React)
+
+# Rebuild after code changes
+docker compose build --no-cache         # Rebuild all
+docker compose up -d                    # Restart with new build
+
+# Database operations in Docker
+docker compose exec postgres psql -U tepian -d tepian_k3  # Access PostgreSQL
+docker compose exec server sh           # Access server container
+```
+
+See [Docker Compose Guide](docs/DOCKER_COMPOSE_GUIDE.md) for detailed usage and troubleshooting.
+
 ## Architecture Overview
 
 ### Monorepo Structure
