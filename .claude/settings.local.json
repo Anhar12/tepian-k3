@@ -74,7 +74,10 @@
       "Bash(curl:*)",
       "Bash(sudo docker compose ps:*)",
       "Bash(cat:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(dos2unix:*)",
+      "Bash({ echo \"dos2unix not found, using sed instead...\")",
+      "Bash(})"
     ]
   }
 }
