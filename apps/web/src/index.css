@@ -57,7 +57,7 @@ body {
   --sidebar-ring: oklch(0.5208 0.1943 259.4);
   --accent-linear-1: oklch(0.5208 0.1943 259.4);
   --accent-linear-2: oklch(0.8241 0.1771 143.24);
-  --accent-linear-3: oklch(0.9672 0 0);
+  --accent-linear-3: oklch(1 0 0);
 }
 
 .dark {

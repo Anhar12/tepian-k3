@@ -280,7 +280,7 @@ function NotificationsPage() {
         </div>
 
         {/* Bulk Actions - fixed dimensions prevent layout shift */}
-        <div className="flex min-h-9 min-w-85 justify-end gap-2">
+        <div className="flex min-h-9 min-w-94 justify-end gap-2">
           {hasUnread && (
             <Button
               variant="outline"

@@ -74,7 +74,9 @@
       "Bash(curl:*)",
       "Bash(sudo docker compose ps:*)",
       "Bash(cat:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__figma-desktop__get_design_context",
+      "mcp__figma-desktop__get_screenshot"
     ]
   }
 }
