@@ -76,7 +76,10 @@
       "Bash(cat:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__figma-desktop__get_design_context",
-      "mcp__figma-desktop__get_screenshot"
+      "mcp__figma-desktop__get_screenshot",
+      "Bash(dos2unix:*)",
+      "Bash({ echo \"dos2unix not found, using sed instead...\")",
+      "Bash(})"
     ]
   }
 }

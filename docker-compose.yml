@@ -1,3 +1,16 @@
+# All-in-one Docker Compose
+# Starts all services: infrastructure, server, and web
+#
+# Usage:
+#   docker compose up -d                    # Start all services
+#   docker compose down                     # Stop all services
+#   docker compose logs -f                  # View logs
+#
+# For separate control, use individual compose files:
+#   - docker-compose.infra.yml   (postgres, redis)
+#   - docker-compose.server.yml  (migrations, API server)
+#   - docker-compose.web.yml     (nginx + React SPA)
+
 services:
   # ---- PostgreSQL ----
   postgres:
@@ -20,6 +33,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tepian-network
 
   # ---- Redis ----
   redis:
@@ -40,6 +55,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tepian-network
 
   # ---- Database Migrations ----
   migrate:
@@ -56,6 +73,8 @@ services:
       postgres:
         condition: service_healthy
     restart: "no"
+    networks:
+      - tepian-network
 
   # ---- API Server ----
   server:
@@ -89,6 +108,8 @@ services:
     # Not exposed publicly - nginx proxies to it
     expose:
       - "3000"
+    networks:
+      - tepian-network
 
   # ---- Web (Nginx + SPA) ----
   web:
@@ -102,9 +123,15 @@ services:
       - "${WEB_PORT:-3001}:80"
     depends_on:
       - server
+    networks:
+      - tepian-network
 
 volumes:
   postgres_data:
   redis_data:
   uploads_data:
   logs_data:
+
+networks:
+  tepian-network:
+    driver: bridge
