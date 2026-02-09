@@ -8,136 +8,14 @@ import {
   isNonJsonSerializable,
   loggerLink,
   splitLink,
-  TRPCClientError,
-  type TRPCLink,
 } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { env } from "@/env";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import SuperJSON from "superjson";
-import { observable } from "@trpc/server/observable";
-import { auth } from "./auth";
 import { globalErrorToast } from "@/lib/toast";
-
-// Token management
-let isRefreshing = false;
-let refreshPromise: Promise<void> | null = null;
-
-// Create a separate simple tRPC client for refresh calls (to avoid circular dependencies)
-const refreshClient = createTRPCClient<AppRouter>({
-  links: [
-    httpLink({
-      url: `${env.VITE_SERVER_URL}/trpc`,
-      transformer: SuperJSON,
-      headers: () => {
-        const headers = new Headers();
-        headers.append("Content-Type", "application/json");
-        return headers;
-      },
-    }),
-  ],
-});
-
-async function refreshTokens() {
-  // If already refreshing, return the existing promise
-  if (isRefreshing && refreshPromise) {
-    return refreshPromise;
-  }
-
-  isRefreshing = true;
-  refreshPromise = (async () => {
-    try {
-      const refreshToken = localStorage.getItem("refreshToken");
-
-      if (!refreshToken) {
-        throw new Error("No refresh token available");
-      }
-
-      // Use tRPC client to call refresh endpoint
-      const result = await refreshClient.auth.refresh.mutate({
-        refreshToken,
-      });
-
-      if (result.accessToken && result.refreshToken) {
-        auth.setTokens(result.accessToken, result.refreshToken);
-      } else {
-        throw new Error("Invalid refresh response");
-      }
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      // Clear tokens and redirect to login
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      window.location.href = "/login";
-      throw error;
-    } finally {
-      isRefreshing = false;
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-}
-
-// Custom tRPC link that handles token refresh on 401 errors
-const tokenRefreshLink: TRPCLink<AppRouter> = () => {
-  return ({ next, op }) => {
-    return observable((observer) => {
-      const unsubscribe = next(op).subscribe({
-        next(value) {
-          observer.next(value);
-        },
-        error(err) {
-          // Check if it's a 401 UNAUTHORIZED error
-          if (
-            err instanceof TRPCClientError &&
-            err.data?.code === "UNAUTHORIZED"
-          ) {
-            const refreshToken = localStorage.getItem("refreshToken");
-
-            if (refreshToken) {
-              console.log("401 error detected, attempting token refresh...");
-
-              // Attempt to refresh the token
-              refreshTokens()
-                .then(() => {
-                  console.log("Token refreshed, retrying request...");
-                  // Retry the original operation
-                  next(op).subscribe({
-                    next(value) {
-                      observer.next(value);
-                    },
-                    error(retryErr) {
-                      observer.error(retryErr);
-                    },
-                    complete() {
-                      observer.complete();
-                    },
-                  });
-                })
-                .catch((refreshErr) => {
-                  console.error("Token refresh failed:", refreshErr);
-                  // If refresh fails, pass through the original error
-                  observer.error(err);
-                });
-            } else {
-              // No refresh token, pass through the error
-              observer.error(err);
-            }
-          } else {
-            // Not a 401 error, pass it through
-            observer.error(err);
-          }
-        },
-        complete() {
-          observer.complete();
-        },
-      });
-
-      return unsubscribe;
-    });
-  };
-};
+import { tokenRefreshLink } from "./refresh";
+import { idempotencyLink } from "./idempotency";
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -155,6 +33,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
         (op.direction === "down" && op.result instanceof Error),
     }),
     tokenRefreshLink,
+    idempotencyLink,
     splitLink({
       // Route mutations, auth calls, and non-JSON input through httpLink
       // so each mutation gets its own X-Idempotency-Key header
@@ -178,8 +57,9 @@ export const trpcClient = createTRPCClient<AppRouter>({
           }
 
           // Add idempotency key for mutation requests
-          if (op.type === "mutation") {
-            headers.append("X-Idempotency-Key", crypto.randomUUID());
+          const key = op.context?.idempotencyKey as string | undefined;
+          if (op.type === "mutation" && key) {
+            headers.append("X-Idempotency-Key", key);
           }
 
           return headers;
@@ -211,6 +91,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
             if (token) {
               headers.append("Authorization", `Bearer ${token}`);
             }
+
             return headers;
           },
         }),
