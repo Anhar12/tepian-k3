@@ -9,17 +9,14 @@ import {
 import userCompanyQueries from "@tepian-k3/queries/user-company.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
-import {
-  storageService,
-  assertValidFileBuffer,
-  ALLOWED_MIME_TYPES,
-  FILE_SIZE_LIMITS,
-  type UploadResult,
-} from "@tepian-k3/services/storage";
+import { storageService } from "@tepian-k3/services/storage";
 import { runEffect } from "../utils/run-effect";
 import { Effect } from "effect";
-import { imageService } from "@tepian-k3/services/image";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import {
+  processAndUploadImage,
+  processAndUploadImageIfPresent,
+} from "../utils/image-upload";
 
 export const userCompanyRouter = createTRPCRouter({
   getAllUserCompaniesByUserId: withProtectedRateLimit(
@@ -110,36 +107,9 @@ export const userCompanyRouter = createTRPCRouter({
     .mutation(async ({ ctx }) =>
       runEffect(
         Effect.gen(function* () {
-          // convert file to buffer
-          const arrayBuffer = yield* Effect.tryPromise(() =>
-            ctx.input.data.picture.arrayBuffer(),
-          );
-
-          const buffer = Buffer.from(arrayBuffer);
-
-          // Validate image file
-          yield* Effect.tryPromise(() =>
-            assertValidFileBuffer(
-              buffer,
-              ctx.input.data.picture.name,
-              ctx.input.data.picture.type,
-              {
-                maxSize: FILE_SIZE_LIMITS.IMAGE,
-                allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-              },
-            ),
-          );
-
-          const convertedImage = yield* imageService.convertToWebP(buffer, {
-            quality: 80,
-            effort: 4,
-            filename: ctx.input.data.picture.name,
-          });
-
-          const uploadedFile = yield* storageService.upload(
-            convertedImage.buffer,
+          const uploadedFile = yield* processAndUploadImage(
+            ctx.input.data.picture,
             {
-              filename: convertedImage.filename!,
               folder: "company-pictures",
             },
           );
@@ -161,45 +131,17 @@ export const userCompanyRouter = createTRPCRouter({
     .mutation(async ({ ctx: { user, input } }) =>
       runEffect(
         Effect.gen(function* () {
-          let uploadedFile: UploadResult | null = null;
-
-          if (input.data.picture && input.data.picture !== undefined) {
-            // convert file to buffer
-            const arrayBuffer = yield* Effect.tryPromise(() =>
-              input.data.picture!.arrayBuffer(),
-            );
-
-            const buffer = Buffer.from(arrayBuffer);
-
-            // Validate image file
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(
-                buffer,
-                input.data.picture!.name,
-                input.data.picture!.type,
-                {
-                  maxSize: FILE_SIZE_LIMITS.IMAGE,
-                  allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-                },
-              ),
-            );
-
-            const convertedImage = yield* imageService.convertToWebP(buffer, {
-              quality: 80,
-              effort: 4,
-              filename: input.data.picture.name,
-            });
-
-            uploadedFile = yield* storageService.upload(convertedImage.buffer, {
-              filename: convertedImage.filename!,
+          const uploadedFile = yield* processAndUploadImageIfPresent(
+            input.data.picture,
+            {
               folder: "company-pictures",
-            });
-          }
+            },
+          );
 
           const result = yield* userCompanyQueries.userUpdateUserCompany(
             user.id,
             input.data,
-            uploadedFile?.key,
+            uploadedFile,
           );
 
           return result;

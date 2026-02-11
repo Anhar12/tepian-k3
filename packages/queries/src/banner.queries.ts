@@ -7,7 +7,7 @@ import bannerSchema from "@tepian-k3/schema/banner.schema";
 import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
 import { getOffsetPaginated } from "./utils/get-offset-paginated";
-import { storageService } from "@tepian-k3/services/storage";
+import { replaceStorageFile } from "./helpers/storage.helpers";
 
 const bannerQueries = {
   /**
@@ -229,30 +229,11 @@ const bannerQueries = {
         );
       }
 
-      // Only delete old banner if we're uploading a NEW one
-      if (
-        bannerUrl &&
-        existingBanner.bannerUrl &&
-        bannerUrl !== existingBanner.bannerUrl
-      ) {
-        const key = storageService.getKeyFromUrl(existingBanner.bannerUrl);
-
-        if (!key) {
-          logError("banner.queries", "updateBanner", {
-            error: "Gagal mendapatkan key dari URL banner.",
-            bannerUrl: existingBanner.bannerUrl,
-            key,
-          });
-          return yield* Effect.fail(
-            new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal memperbarui banner.",
-            }),
-          );
-        }
-
-        yield* storageService.delete(key);
-      }
+      yield* replaceStorageFile(
+        bannerUrl,
+        existingBanner.bannerUrl,
+        "banner.queries",
+      );
 
       return updatedBanner;
     }),

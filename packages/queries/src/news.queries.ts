@@ -18,8 +18,8 @@ import newsSchema from "@tepian-k3/schema/news.schema";
 import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
 import { getOffsetPaginated } from "./utils/get-offset-paginated";
-import { storageService } from "@tepian-k3/services/storage";
 import { getCursorPaginated } from "./utils/get-cursor-paginated";
+import { replaceStorageFile } from "./helpers/storage.helpers";
 
 const newsQueries = {
   /**
@@ -216,11 +216,11 @@ const newsQueries = {
   /**
    * Update News
    * @param {z.infer<typeof newsSchema.updateNewsSchema>} data
-   * @param {string | null} imageUrl
+   * @param {string | null | undefined} imageUrl
    */
   updateNews: (
     data: z.infer<typeof newsSchema.updateNewsSchema>,
-    imageUrl: string | null,
+    imageUrl: string | null | undefined,
   ) =>
     Effect.gen(function* () {
       const isExist = yield* newsQueries.getNewsById(data.id);
@@ -262,26 +262,7 @@ const newsQueries = {
         );
       }
 
-      if (imageUrl === null && isExist.imageUrl) {
-        // Delete old image from storage if imageUrl is set to null
-        const key = storageService.getKeyFromUrl(isExist.imageUrl);
-
-        if (!key) {
-          logError("news.queries", "updateNews", {
-            message: "Deleting old image from storage",
-            imageUrl: isExist.imageUrl,
-            key,
-          });
-          return yield* Effect.fail(
-            new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal memperbarui berita",
-            }),
-          );
-        }
-
-        yield* storageService.delete(key);
-      }
+      yield* replaceStorageFile(imageUrl, isExist.imageUrl, "news.queries");
 
       return updatedNews;
     }),

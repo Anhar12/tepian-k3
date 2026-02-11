@@ -1,19 +1,14 @@
 import userSchema from "@tepian-k3/schema/users.schema";
 import { createTRPCRouter, withPermission, withProtectedRateLimit } from "..";
-import {
-  storageService,
-  assertValidFileBuffer,
-  ALLOWED_MIME_TYPES,
-  FILE_SIZE_LIMITS,
-} from "@tepian-k3/services/storage";
+import { storageService, FILE_SIZE_LIMITS } from "@tepian-k3/services/storage";
 import usersQueries from "@tepian-k3/queries/users.queries";
 import z from "zod";
 import permissionQueries from "@tepian-k3/queries/permission.queries";
 import { TRPCError } from "@trpc/server";
 import { runEffect } from "../utils/run-effect";
 import { Effect } from "effect";
-import { imageService } from "@tepian-k3/services/image";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { processAndUploadImage } from "../utils/image-upload";
 
 export const userRouter = createTRPCRouter({
   getAllUsers: withPermission("users.view").query(
@@ -100,40 +95,12 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { user } }) =>
       runEffect(
         Effect.gen(function* () {
-          // Convert file to buffer
-          const arrayBuffer = yield* Effect.tryPromise(() =>
-            input.avatar.arrayBuffer(),
-          );
-          const buffer = Buffer.from(arrayBuffer);
-
-          // Validate avatar image
-          yield* Effect.tryPromise(() =>
-            assertValidFileBuffer(
-              buffer,
-              input.avatar.name,
-              input.avatar.type,
-              {
-                maxSize: FILE_SIZE_LIMITS.AVATAR,
-                allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-              },
-            ),
-          );
-
-          const convertedImage = yield* imageService.convertToWebP(buffer, {
-            quality: 80,
-            effort: 4,
-            filename: input.avatar.name,
+          const uploaded = yield* processAndUploadImage(input.avatar, {
+            folder: "avatars",
+            maxSize: FILE_SIZE_LIMITS.AVATAR,
           });
 
-          const uploadedFile = yield* storageService.upload(
-            convertedImage.buffer,
-            {
-              filename: convertedImage.filename!,
-              folder: "avatars",
-            },
-          );
-
-          yield* usersQueries.updateUserAvatar(user.id, uploadedFile.key);
+          yield* usersQueries.updateUserAvatar(user.id, uploaded.key);
         }),
       ),
     ),

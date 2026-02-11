@@ -18,7 +18,7 @@ import {
 } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
-import { Cause, Effect, Exit } from "effect";
+import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
@@ -329,10 +329,17 @@ const toolCalibrationQueries = {
 
   /**
    * Create tool calibration
+   *
+   * File uploads should be handled at the router level using upload helpers.
+   * This query only receives storage keys.
    */
-  createToolCalibration: (
-    data: z.infer<typeof toolCalibrationSchema.createToolCalibrationSchema>,
-  ) =>
+  createToolCalibration: (data: {
+    toolId: string;
+    calibrationDate: string;
+    note: string;
+    certificateKey?: string;
+    documentationKeys?: string[];
+  }) =>
     Effect.gen(function* () {
       yield* toolsQueries.getToolById(data.toolId);
 
@@ -355,70 +362,20 @@ const toolCalibrationQueries = {
               });
             }
 
-            // Certificate file upload handling
-            if (data.certificateFile) {
-              // Convert file to buffer
-              const arrayBuffer = await data.certificateFile.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
-
-              // Upload file to storage and get the file path
-              const result = await Effect.runPromiseExit(
-                storageService.upload(buffer, {
-                  filename: data.certificateFile.name,
-                  folder: "tool-calibration-certificates",
-                }),
-              );
-
-              if (Exit.isFailure(result)) {
-                const error = Cause.squash(result.cause) as TRPCError;
-                throw new TRPCError({
-                  code: error.code ?? "INTERNAL_SERVER_ERROR",
-                  message:
-                    error.message ||
-                    "Gagal mengunggah file sertifikat kalibrasi",
-                  cause: error,
-                });
-              }
-
-              // Insert certificate file handling logic here
+            if (data.certificateKey) {
               await tx.insert(toolCalibrationCertificates).values({
                 toolCalibrationId: insertedToolCalibration.id,
-                certificateFileUrl: result.value.key,
+                certificateFileUrl: data.certificateKey,
               });
             }
 
-            // Documentation files upload handling
-            if (data.documentationFiles && data.documentationFiles.length > 0) {
-              for (const docFile of data.documentationFiles) {
-                // Convert file to buffer
-                const arrayBuffer = await docFile.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-
-                // Upload file to storage and get the file path
-                const result = await Effect.runPromiseExit(
-                  storageService.upload(buffer, {
-                    filename: docFile.name,
-                    folder: "tool-calibration-documentations",
-                  }),
-                );
-
-                if (Exit.isFailure(result)) {
-                  const error = Cause.squash(result.cause) as TRPCError;
-                  throw new TRPCError({
-                    code: error.code ?? "INTERNAL_SERVER_ERROR",
-                    message:
-                      error.message ||
-                      "Gagal mengunggah file dokumentasi kalibrasi",
-                    cause: error,
-                  });
-                }
-
-                // Insert documentation file handling logic here
-                await tx.insert(toolCalibrationDocumentations).values({
+            if (data.documentationKeys && data.documentationKeys.length > 0) {
+              await tx.insert(toolCalibrationDocumentations).values(
+                data.documentationKeys.map((key) => ({
                   toolCalibrationId: insertedToolCalibration.id,
-                  documentationFileUrl: result.value.key,
-                });
-              }
+                  documentationFileUrl: key,
+                })),
+              );
             }
 
             return insertedToolCalibration;
@@ -555,10 +512,16 @@ const toolCalibrationQueries = {
 
   /**
    * Update tool calibration
+   *
+   * File uploads should be handled at the router level using upload helpers.
+   * This query only receives storage keys.
    */
-  updateToolCalibration: (
-    data: z.infer<typeof toolCalibrationSchema.updateToolCalibrationSchema>,
-  ) =>
+  updateToolCalibration: (data: {
+    id: string;
+    calibrationDate?: string;
+    note?: string;
+    certificateKey?: string;
+  }) =>
     Effect.gen(function* () {
       const existingToolCalibration =
         yield* toolCalibrationQueries.getToolCalibrationById(data.id);
@@ -591,9 +554,8 @@ const toolCalibrationQueries = {
               });
             }
 
-            // Certificate file update handling
-            if (data.certificateFile) {
-              // Delete existing certificate if exists
+            // Replace certificate if a new key is provided
+            if (data.certificateKey) {
               const existingCertificate =
                 await tx.query.toolCalibrationCertificates.findFirst({
                   where: eq(
@@ -609,41 +571,19 @@ const toolCalibrationQueries = {
                     eq(toolCalibrationCertificates.id, existingCertificate.id),
                   );
 
-                // Optionally delete the file from storage as well
-                await Effect.runPromise(
-                  storageService.delete(
-                    existingCertificate.certificateFileUrl!,
-                  ),
-                );
+                // Delete old file from storage
+                if (existingCertificate.certificateFileUrl) {
+                  await Effect.runPromise(
+                    storageService.delete(
+                      existingCertificate.certificateFileUrl,
+                    ),
+                  );
+                }
               }
 
-              // Convert file to buffer
-              const arrayBuffer = await data.certificateFile.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
-
-              // Upload file to storage and get the file path
-              const result = await Effect.runPromiseExit(
-                storageService.upload(buffer, {
-                  filename: data.certificateFile.name,
-                  folder: "tool-calibration-certificates",
-                }),
-              );
-
-              if (Exit.isFailure(result)) {
-                const error = Cause.squash(result.cause) as TRPCError;
-                throw new TRPCError({
-                  code: error.code ?? "INTERNAL_SERVER_ERROR",
-                  message:
-                    error.message ||
-                    "Gagal mengunggah file sertifikat kalibrasi",
-                  cause: error,
-                });
-              }
-
-              // Insert new certificate record
               await tx.insert(toolCalibrationCertificates).values({
                 toolCalibrationId: data.id,
-                certificateFileUrl: result.value.key,
+                certificateFileUrl: data.certificateKey,
               });
             }
 

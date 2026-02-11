@@ -12,7 +12,6 @@ import documentSchema from "@tepian-k3/schema/document.schema";
 import {
   storageService,
   assertValidFileBuffer,
-  ALLOWED_MIME_TYPES,
   FILE_SIZE_LIMITS,
 } from "@tepian-k3/services/storage";
 import { z } from "zod";
@@ -23,6 +22,7 @@ import {
   type QRCodePosition,
 } from "@tepian-k3/services/pdf";
 import orderQueries from "@tepian-k3/queries/order.queries";
+import { processAndUploadFile } from "../utils/image-upload";
 
 export const documentRouter = createTRPCRouter({
   /**
@@ -36,30 +36,12 @@ export const documentRouter = createTRPCRouter({
         async ({ ctx }) =>
           await runEffect(
             Effect.gen(function* () {
-              // Convert file to buffer
-              const arrayBuffer = yield* Effect.tryPromise(() =>
-                ctx.input.data.file.arrayBuffer(),
+              const uploadedFile = yield* processAndUploadFile(
+                ctx.input.data.file,
+                {
+                  folder: `documents/${ctx.input.data.entityType}/${ctx.input.data.type}`,
+                },
               );
-              const buffer = Buffer.from(arrayBuffer);
-
-              // Validate file before processing
-              yield* Effect.tryPromise(() =>
-                assertValidFileBuffer(
-                  buffer,
-                  ctx.input.data.file.name,
-                  ctx.input.data.file.type,
-                  {
-                    maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                    allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
-                  },
-                ),
-              );
-
-              // Upload file to storage
-              const uploadedFile = yield* storageService.upload(buffer, {
-                filename: ctx.input.data.file.name,
-                folder: `documents/${ctx.input.data.entityType}/${ctx.input.data.type}`,
-              });
 
               // Generate document number
               const timestamp = Date.now();
@@ -74,9 +56,9 @@ export const documentRouter = createTRPCRouter({
                 entityType: ctx.input.data.entityType,
                 entityId: ctx.input.data.entityId,
                 fileUrl: uploadedFile.key,
-                fileName: ctx.input.data.file.name,
-                fileSize: ctx.input.data.file.size,
-                mimeType: ctx.input.data.file.type,
+                fileName: uploadedFile.filename,
+                fileSize: uploadedFile.size,
+                mimeType: uploadedFile.contentType,
                 uploadedByUserId: ctx.user.id,
               });
 
@@ -250,29 +232,12 @@ export const documentRouter = createTRPCRouter({
         async ({ input, ctx }) =>
           await runEffect(
             Effect.gen(function* () {
-              // Upload invoice
-              const arrayBuffer = yield* Effect.tryPromise(() =>
-                ctx.input.data.file.arrayBuffer(),
+              const uploadedFile = yield* processAndUploadFile(
+                ctx.input.data.file,
+                {
+                  folder: "documents/orders/invoices",
+                },
               );
-              const buffer = Buffer.from(arrayBuffer);
-
-              // Validate file (invoices must be PDF)
-              yield* Effect.tryPromise(() =>
-                assertValidFileBuffer(
-                  buffer,
-                  ctx.input.data.file.name,
-                  ctx.input.data.file.type,
-                  {
-                    maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                    allowedMimeTypes: ["application/pdf"],
-                  },
-                ),
-              );
-
-              const uploadedFile = yield* storageService.upload(buffer, {
-                filename: ctx.input.data.file.name,
-                folder: "documents/order/invoice",
-              });
 
               const documentNumber = `INV-${Date.now()}-${input.orderId.slice(
                 0,
@@ -287,9 +252,9 @@ export const documentRouter = createTRPCRouter({
                 entityType: "order",
                 entityId: input.orderId,
                 fileUrl: uploadedFile.key,
-                fileName: ctx.input.data.file.name,
-                fileSize: ctx.input.data.file.size,
-                mimeType: ctx.input.data.file.type,
+                fileName: uploadedFile.filename,
+                fileSize: uploadedFile.size,
+                mimeType: uploadedFile.contentType,
                 uploadedByUserId: ctx.user.id,
               });
 
@@ -328,28 +293,12 @@ export const documentRouter = createTRPCRouter({
     .mutation(({ input, ctx }) =>
       Effect.runPromise(
         Effect.gen(function* () {
-          const arrayBuffer = yield* Effect.tryPromise(() =>
-            ctx.input.data.file.arrayBuffer(),
+          const uploadedFile = yield* processAndUploadFile(
+            ctx.input.data.file,
+            {
+              folder: "documents/testings/reports",
+            },
           );
-          const buffer = Buffer.from(arrayBuffer);
-
-          // Validate file (testing reports must be PDF)
-          yield* Effect.tryPromise(() =>
-            assertValidFileBuffer(
-              buffer,
-              ctx.input.data.file.name,
-              ctx.input.data.file.type,
-              {
-                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                allowedMimeTypes: ["application/pdf"],
-              },
-            ),
-          );
-
-          const uploadedFile = yield* storageService.upload(buffer, {
-            filename: ctx.input.data.file.name,
-            folder: "documents/testing/testing_report",
-          });
 
           const documentNumber = `RPT-${Date.now()}-${input.testingId.slice(
             0,

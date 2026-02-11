@@ -22,6 +22,7 @@ import { storageService } from "@tepian-k3/services/storage";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import userRolesQueries from "./user-roles.queries";
+import { replaceStorageFile } from "./helpers/storage.helpers";
 
 const usersQueries = {
   getAllUsers() {
@@ -737,26 +738,11 @@ const usersQueries = {
         );
       }
 
-      // this should remove previous profile picture from storage if user had one
-      if (user.profilePictureUrl) {
-        const key = storageService.getKeyFromUrl(user.profilePictureUrl);
-
-        if (!key) {
-          logError(
-            "usersQueries.updateUserAvatar",
-            "Failed to extract key from existing company picture URL",
-            { url: user.profilePictureUrl },
-          );
-          return yield* Effect.fail(
-            new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal menghapus gambar profil sebelumnya.",
-            }),
-          );
-        }
-
-        yield* storageService.delete(key);
-      }
+      yield* replaceStorageFile(
+        url,
+        user.profilePictureUrl,
+        "usersQueries.updateUserAvatar",
+      );
 
       return updatedUser;
     });

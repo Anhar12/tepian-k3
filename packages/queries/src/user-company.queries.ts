@@ -27,6 +27,7 @@ import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
 import { storageService } from "@tepian-k3/services/storage";
+import { replaceStorageFile } from "./helpers/storage.helpers";
 
 const userCompanyQueries = {
   getAllUserCompaniesByUserId(userId: string) {
@@ -583,28 +584,6 @@ const userCompanyQueries = {
         );
       }
 
-      if (existingUserCompany.companyPictureUrl) {
-        const key = storageService.getKeyFromUrl(
-          existingUserCompany.companyPictureUrl,
-        );
-
-        if (!key) {
-          logError(
-            "userCompanyQueries.userUpdateUserCompany",
-            "Failed to extract key from existing company picture URL",
-            { url: existingUserCompany.companyPictureUrl },
-          );
-          return yield* Effect.fail(
-            new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Gagal memperbarui data perusahaan",
-            }),
-          );
-        }
-
-        yield* storageService.delete(key);
-      }
-
       const [updatedUserCompany] = yield* Effect.tryPromise({
         try: () =>
           db
@@ -665,6 +644,12 @@ const userCompanyQueries = {
           message: "Gagal memperbarui data perusahaan",
         });
       }
+
+      yield* replaceStorageFile(
+        url,
+        existingUserCompany.companyPictureUrl,
+        "user-company.queries",
+      );
 
       return updatedUserCompany;
     });

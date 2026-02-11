@@ -14,13 +14,10 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
 import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 import { Effect } from "effect";
-import { imageService } from "@tepian-k3/services/image";
 import {
-  storageService,
-  assertValidFileBuffer,
-  ALLOWED_MIME_TYPES,
-  FILE_SIZE_LIMITS,
-} from "@tepian-k3/services/storage";
+  processAndUploadImage,
+  processAndUploadImageIfPresent,
+} from "../utils/image-upload";
 
 export const newsRouter = createTRPCRouter({
   getFirst5News: withRateLimit(rateLimiters.moderate()).query(
@@ -107,39 +104,9 @@ export const newsRouter = createTRPCRouter({
           () =>
             runEffect(
               Effect.gen(function* () {
-                // convert image file to buffer
-                const arrayBuffer = yield* Effect.promise(() =>
-                  ctx.input.data.image.arrayBuffer(),
-                );
-
-                const buffer = Buffer.from(arrayBuffer);
-
-                // Validate image file
-                yield* Effect.tryPromise(() =>
-                  assertValidFileBuffer(
-                    buffer,
-                    ctx.input.data.image.name,
-                    ctx.input.data.image.type,
-                    {
-                      maxSize: FILE_SIZE_LIMITS.IMAGE,
-                      allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-                    },
-                  ),
-                );
-
-                const convertedImage = yield* imageService.convertToWebP(
-                  buffer,
+                const uploadedFile = yield* processAndUploadImage(
+                  ctx.input.data.image,
                   {
-                    quality: 80,
-                    effort: 4,
-                    filename: ctx.input.data.image.name,
-                  },
-                );
-
-                const uploadedFile = yield* storageService.upload(
-                  convertedImage.buffer,
-                  {
-                    filename: convertedImage.filename,
                     folder: "news",
                   },
                 );
@@ -169,47 +136,10 @@ export const newsRouter = createTRPCRouter({
           () =>
             runEffect(
               Effect.gen(function* () {
-                let imageUrl: string | null = null;
-                if (ctx.input.data.image) {
-                  // convert file to buffer
-                  const arrayBuffer = yield* Effect.promise(() =>
-                    ctx.input.data.image!.arrayBuffer(),
-                  );
-
-                  const buffer = Buffer.from(arrayBuffer);
-
-                  // Validate image file
-                  yield* Effect.tryPromise(() =>
-                    assertValidFileBuffer(
-                      buffer,
-                      ctx.input.data.image!.name,
-                      ctx.input.data.image!.type,
-                      {
-                        maxSize: FILE_SIZE_LIMITS.IMAGE,
-                        allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-                      },
-                    ),
-                  );
-
-                  const convertedImage = yield* imageService.convertToWebP(
-                    buffer,
-                    {
-                      quality: 80,
-                      effort: 4,
-                      filename: ctx.input.data.image.name,
-                    },
-                  );
-
-                  const uploadedFile = yield* storageService.upload(
-                    convertedImage.buffer,
-                    {
-                      filename: convertedImage.filename,
-                      folder: "news",
-                    },
-                  );
-
-                  imageUrl = uploadedFile.key;
-                }
+                const imageUrl = yield* processAndUploadImageIfPresent(
+                  ctx.input.data.image,
+                  { folder: "news" },
+                );
 
                 const result = yield* newsQueries.updateNews(
                   ctx.input.data,

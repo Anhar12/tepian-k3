@@ -11,14 +11,11 @@ import { runEffect } from "../utils/run-effect";
 import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
 import toolCalibrationQueries from "@tepian-k3/queries/tool-calibration.queries";
 import { Effect } from "effect";
-import { imageService } from "@tepian-k3/services/image";
-import {
-  storageService,
-  assertValidFileBuffer,
-  ALLOWED_MIME_TYPES,
-  FILE_SIZE_LIMITS,
-} from "@tepian-k3/services/storage";
 import { TRPCError } from "@trpc/server";
+import {
+  processAndUploadFile,
+  processAndUploadImages,
+} from "../utils/image-upload";
 
 export const toolRouter = createTRPCRouter({
   getAllUnassignedTools: withPermission("tools.view").query(
@@ -137,11 +134,35 @@ export const toolRouter = createTRPCRouter({
   createToolCalibration: withPermission("tool-calibrations.create")
     .input(formDataInput)
     .use(formDataProcedure(toolCalibrationSchema.createToolCalibrationSchema))
-    .mutation(
-      async ({ ctx }) =>
-        await runEffect(
-          toolCalibrationQueries.createToolCalibration(ctx.input.data),
-        ),
+    .mutation(async ({ ctx }) =>
+      runEffect(
+        Effect.gen(function* () {
+          const certificateKey = ctx.input.data.certificateFile
+            ? (yield* processAndUploadFile(ctx.input.data.certificateFile, {
+                folder: "tool-calibration-certificates",
+              })).key
+            : undefined;
+
+          const documentationKeys =
+            ctx.input.data.documentationFiles &&
+            ctx.input.data.documentationFiles.length > 0
+              ? yield* processAndUploadImages(
+                  ctx.input.data.documentationFiles,
+                  { folder: "tool-calibration-documentations" },
+                )
+              : undefined;
+
+          const result = yield* toolCalibrationQueries.createToolCalibration({
+            toolId: ctx.input.data.toolId,
+            calibrationDate: ctx.input.data.calibrationDate,
+            note: ctx.input.data.note,
+            certificateKey,
+            documentationKeys,
+          });
+
+          return result;
+        }),
+      ),
     ),
 
   createToolCertification: withPermission("tool-certifications.create")
@@ -150,29 +171,12 @@ export const toolRouter = createTRPCRouter({
     .mutation(async ({ ctx }) =>
       runEffect(
         Effect.gen(function* () {
-          const buffer = yield* Effect.tryPromise(() =>
-            ctx.input.data.certificationFile
-              .arrayBuffer()
-              .then((ab) => Buffer.from(ab)),
+          const uploadedFile = yield* processAndUploadFile(
+            ctx.input.data.certificationFile,
+            {
+              folder: "tool-certifications",
+            },
           );
-
-          // Validate certification file (PDF or document)
-          yield* Effect.tryPromise(() =>
-            assertValidFileBuffer(
-              buffer,
-              ctx.input.data.certificationFile.name,
-              ctx.input.data.certificationFile.type,
-              {
-                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
-                allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
-              },
-            ),
-          );
-
-          const uploadedFile = yield* storageService.upload(buffer, {
-            filename: ctx.input.data.certificationFile.name,
-            folder: "tool-certifications",
-          });
 
           const result =
             yield* toolCalibrationQueries.createToolCalibrationCertificate({
@@ -191,42 +195,15 @@ export const toolRouter = createTRPCRouter({
     .mutation(async ({ ctx }) =>
       runEffect(
         Effect.gen(function* () {
-          const documetationKey: string[] = [];
-
-          for (const file of ctx.input.data.documentationFiles) {
-            const buffer = yield* Effect.tryPromise(() =>
-              file.arrayBuffer().then((ab) => Buffer.from(ab)),
-            );
-
-            // Validate documentation image
-            yield* Effect.tryPromise(() =>
-              assertValidFileBuffer(buffer, file.name, file.type, {
-                maxSize: FILE_SIZE_LIMITS.IMAGE,
-                allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-              }),
-            );
-
-            const convertedImage = yield* imageService.convertToWebP(buffer, {
-              quality: 80,
-              effort: 4,
-              filename: file.name,
-            });
-
-            const uploadedFile = yield* storageService.upload(
-              convertedImage.buffer,
-              {
-                filename: convertedImage.filename!,
-                folder: "tool-documentations",
-              },
-            );
-
-            documetationKey.push(uploadedFile.key);
-          }
+          const documentationKeys = yield* processAndUploadImages(
+            ctx.input.data.documentationFiles,
+            { folder: "tool-documentations" },
+          );
 
           const result =
             yield* toolCalibrationQueries.createToolCalibrationDocumentation({
               toolCalibrationId: ctx.input.data.toolCalibrationId,
-              key: documetationKey,
+              key: documentationKeys,
             });
 
           return result;
@@ -241,10 +218,27 @@ export const toolRouter = createTRPCRouter({
     ),
 
   updateToolCalibration: withPermission("tool-calibrations.update")
-    .input(toolCalibrationSchema.updateToolCalibrationSchema)
-    .mutation(
-      async ({ input }) =>
-        await runEffect(toolCalibrationQueries.updateToolCalibration(input)),
+    .input(formDataInput)
+    .use(formDataProcedure(toolCalibrationSchema.updateToolCalibrationSchema))
+    .mutation(async ({ ctx }) =>
+      runEffect(
+        Effect.gen(function* () {
+          const certificateKey = ctx.input.data.certificateFile
+            ? (yield* processAndUploadFile(ctx.input.data.certificateFile, {
+                folder: "tool-calibration-certificates",
+              })).key
+            : undefined;
+
+          const result = yield* toolCalibrationQueries.updateToolCalibration({
+            id: ctx.input.data.id!,
+            calibrationDate: ctx.input.data.calibrationDate,
+            note: ctx.input.data.note,
+            certificateKey,
+          });
+
+          return result;
+        }),
+      ),
     ),
 
   deleteTool: withPermission("tools.delete")

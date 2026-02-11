@@ -14,13 +14,10 @@ import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 import { CACHE_KEYS, CACHE_TTL } from "@tepian-k3/constants";
 import { withCache, withCacheInvalidation } from "../utils/cache-helper";
 import { Effect } from "effect";
-import { imageService } from "@tepian-k3/services/image";
 import {
-  storageService,
-  assertValidFileBuffer,
-  ALLOWED_MIME_TYPES,
-  FILE_SIZE_LIMITS,
-} from "@tepian-k3/services/storage";
+  processAndUploadImage,
+  processAndUploadImageIfPresent,
+} from "../utils/image-upload";
 
 export const bannerRouter = createTRPCRouter({
   getAllBanners: withRateLimit(rateLimiters.moderate()).query(
@@ -67,36 +64,9 @@ export const bannerRouter = createTRPCRouter({
         await withCacheInvalidation(CACHE_KEYS.BANNERS_PREFIX, () =>
           runEffect(
             Effect.gen(function* () {
-              // convert file to buffer
-              const arrayBuffer = yield* Effect.promise(() =>
-                ctx.input.data.picture.arrayBuffer(),
-              );
-
-              const buffer = Buffer.from(arrayBuffer);
-
-              // Validate image file
-              yield* Effect.tryPromise(() =>
-                assertValidFileBuffer(
-                  buffer,
-                  ctx.input.data.picture.name,
-                  ctx.input.data.picture.type,
-                  {
-                    maxSize: FILE_SIZE_LIMITS.IMAGE,
-                    allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-                  },
-                ),
-              );
-
-              const convertedImage = yield* imageService.convertToWebP(buffer, {
-                quality: 80,
-                effort: 4,
-                filename: ctx.input.data.picture.name,
-              });
-
-              const uploadedFile = yield* storageService.upload(
-                convertedImage.buffer,
+              const uploadedFile = yield* processAndUploadImage(
+                ctx.input.data.picture,
                 {
-                  filename: convertedImage.filename,
                   folder: "banners",
                 },
               );
@@ -120,47 +90,10 @@ export const bannerRouter = createTRPCRouter({
         await withCacheInvalidation(CACHE_KEYS.BANNERS_PREFIX, () =>
           runEffect(
             Effect.gen(function* () {
-              let bannerUrl: string | undefined = undefined;
-              if (ctx.input.data.picture) {
-                // convert file to buffer
-                const arrayBuffer = yield* Effect.promise(() =>
-                  ctx.input.data.picture!.arrayBuffer(),
-                );
-
-                const buffer = Buffer.from(arrayBuffer);
-
-                // Validate image file
-                yield* Effect.tryPromise(() =>
-                  assertValidFileBuffer(
-                    buffer,
-                    ctx.input.data.picture!.name,
-                    ctx.input.data.picture!.type,
-                    {
-                      maxSize: FILE_SIZE_LIMITS.IMAGE,
-                      allowedMimeTypes: ALLOWED_MIME_TYPES.IMAGE,
-                    },
-                  ),
-                );
-
-                const convertedImage = yield* imageService.convertToWebP(
-                  buffer,
-                  {
-                    quality: 80,
-                    effort: 4,
-                    filename: ctx.input.data.picture.name,
-                  },
-                );
-
-                const uploadedFile = yield* storageService.upload(
-                  convertedImage.buffer,
-                  {
-                    filename: convertedImage.filename,
-                    folder: "banners",
-                  },
-                );
-
-                bannerUrl = uploadedFile.key;
-              }
+              const bannerUrl = yield* processAndUploadImageIfPresent(
+                ctx.input.data.picture,
+                { folder: "banners" },
+              );
 
               const result = yield* bannerQueries.updateBanner(
                 ctx.input.data,
