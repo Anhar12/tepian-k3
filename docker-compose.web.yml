@@ -30,4 +30,4 @@ services:
 
 networks:
   tepian-network:
-    external: true
+    driver: bridge

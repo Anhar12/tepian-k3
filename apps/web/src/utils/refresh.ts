@@ -5,10 +5,12 @@ import {
   type TRPCLink,
 } from "@trpc/client";
 import type { AppRouter } from "@tepian-k3/api/root";
-import { env } from "@/env";
 import SuperJSON from "superjson";
 import { auth } from "./auth";
 import { observable } from "@trpc/server/observable";
+import { getBaseUrl } from "./get-base-url";
+
+const trpcUrl = `${getBaseUrl()}/trpc`;
 
 /**
  * In-flight refresh coordination.
@@ -24,7 +26,7 @@ let refreshPromise: Promise<void> | null = null;
 const refreshClient = createTRPCClient<AppRouter>({
   links: [
     httpLink({
-      url: `${env.VITE_SERVER_URL}/trpc`,
+      url: trpcUrl,
       transformer: SuperJSON,
       headers: () => {
         const headers = new Headers();

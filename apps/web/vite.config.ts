@@ -34,6 +34,11 @@ export default defineConfig({
   server: {
     port: 3001,
     proxy: {
+      // Proxy tRPC requests to backend server
+      "/trpc": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
       // Proxy API requests to backend server
       "/api": {
         target: "http://localhost:3000",

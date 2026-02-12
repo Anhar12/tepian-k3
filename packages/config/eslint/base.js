@@ -12,6 +12,7 @@ export default tseslint.config(
       "**/.turbo/**",
       "**/drizzle/**",
       "**/migrations/**",
+      "scripts/regenerate-jwt-secrets.js",
     ],
   },
   {

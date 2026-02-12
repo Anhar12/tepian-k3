@@ -10,12 +10,14 @@ import {
   splitLink,
 } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
-import { env } from "@/env";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import SuperJSON from "superjson";
 import { globalErrorToast } from "@/lib/toast";
 import { tokenRefreshLink } from "./refresh";
 import { idempotencyLink } from "./idempotency";
+import { getBaseUrl } from "./get-base-url";
+
+const trpcUrl = `${getBaseUrl()}/trpc`;
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -45,7 +47,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
         );
       },
       true: httpLink({
-        url: `${env.VITE_SERVER_URL}/trpc`,
+        url: trpcUrl,
         transformer: SuperJSON,
         headers: ({ op }) => {
           const headers = new Headers();
@@ -68,7 +70,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
       false: splitLink({
         condition: (op) => op.type === "subscription",
         true: httpSubscriptionLink({
-          url: `${env.VITE_SERVER_URL}/trpc`,
+          url: trpcUrl,
           transformer: SuperJSON,
           EventSource: EventSourcePolyfill,
           eventSourceOptions: async ({ op }) => {
@@ -82,7 +84,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
           },
         }),
         false: httpBatchLink({
-          url: `${env.VITE_SERVER_URL}/trpc`,
+          url: trpcUrl,
           transformer: SuperJSON,
           headers: () => {
             const headers = new Headers();

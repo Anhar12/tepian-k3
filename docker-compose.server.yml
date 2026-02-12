@@ -2,13 +2,7 @@
 # Requires infrastructure services to be running
 #
 # Usage:
-#   # Start infrastructure first
-#   docker compose -f docker-compose.infra.yml up -d
-#
-#   # Then start server
-#   docker compose -f docker-compose.server.yml up -d
-#
-#   # Or start both together
+#   # Start infra + server together
 #   docker compose -f docker-compose.infra.yml -f docker-compose.server.yml up -d
 
 services:
@@ -22,7 +16,7 @@ services:
     command: >
       sh -c "cd packages/db && npx drizzle-kit migrate"
     environment:
-      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:-tepian_secret}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tepian_k3}
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,10 +37,10 @@ services:
       NODE_ENV: production
       SERVER_HOSTNAME: "0.0.0.0"
       SERVER_PORT: 3000
-      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:-tepian_secret}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tepian_k3}
       MEMURAI_HOST: redis
       MEMURAI_PORT: "6379"
-      MEMURAI_PASSWORD: ${REDIS_PASSWORD:-redis_secret}
+      MEMURAI_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
       BASE_URL: ${BASE_URL:-http://localhost:3001}
       STORAGE_PATH: /app/uploads
@@ -70,4 +64,4 @@ volumes:
 
 networks:
   tepian-network:
-    external: true
+    driver: bridge
