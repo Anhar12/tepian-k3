@@ -22,7 +22,12 @@ export default defineConfig({
       devOptions: { enabled: true },
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/health$/,
+          /^\/healthz$/,
+          /^\/trpc\//,
+        ],
       },
     }),
   ],

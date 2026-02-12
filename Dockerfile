@@ -65,6 +65,7 @@ COPY --from=prod-deps /app/packages/db/node_modules ./packages/db/node_modules
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/apps/server/assets ./apps/server/assets
 COPY --from=build /app/apps/server/assets ./public/assets
+COPY --from=build /app/apps/server/public ./public
 
 # Copy migration files (for migrate service)
 COPY --from=build /app/packages/db/src/migrations ./packages/db/src/migrations
