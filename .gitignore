@@ -13,6 +13,7 @@ build
 .env*.local
 .env.test
 .env.production
+.env.docker
 
 # IDEs and editors
 .vscode/*
@@ -49,4 +50,4 @@ coverage
 *.tgz
 .cache
 tmp
-temp
+temp.env.docker
