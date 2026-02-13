@@ -70,6 +70,33 @@ main
 │   └── feat/pelatihan-polish             ← rc.1
 ```
 
+### Existing Module Changes (e.g., Pengujian)
+
+For modules that already exist, branch strategy depends on the scope of work:
+
+**Small/isolated changes** — branch directly from `beta`:
+
+```
+main
+├── beta
+├── feat/pengujian-ui-result-table       ← single new feature
+├── fix/pengujian-status-calculation     ← single bug fix
+├── feat/pengujian-api-batch-export      ← single API addition
+```
+
+**Large batch of related changes** — use a parent branch:
+
+```
+main
+├── beta
+├── feat/pengujian-v2                        ← parent feature branch
+│   ├── feat/pengujian-v2-db-schema          ← schema changes
+│   ├── feat/pengujian-v2-api-routers        ← new/updated API endpoints
+│   ├── fix/pengujian-v2-status-bug          ← fix discovered during work
+│   ├── feat/pengujian-v2-ui-results         ← new UI feature
+│   └── feat/pengujian-v2-ui-admin           ← admin panel updates
+```
+
 ### Minor Feature
 
 ```
@@ -109,23 +136,30 @@ fix/order-total-calculation ─────────────────�
 hotfix/auth-token-expiry ─────────────────────────┴──→ main
 ```
 
-| Branch              | Merges Into     | When                           |
-| ------------------- | --------------- | ------------------------------ |
-| `feat/<module>-*`   | `feat/<module>` | Sub-feature complete           |
-| `feat/<module>`     | `beta`          | Alpha/Beta milestone complete  |
-| `fix/*`             | `beta`          | Fix verified                   |
-| `beta`              | `main`          | RC approved, ready for release |
-| `hotfix/*`          | `main` + `beta` | Critical production fix        |
-| `chore/*`, `docs/*` | `beta`          | Change verified                |
+| Branch              | Merges Into     | When                                 |
+| ------------------- | --------------- | ------------------------------------ |
+| `feat/<module>-*`   | `feat/<module>` | Sub-feature complete (parent branch) |
+| `feat/<module>`     | `beta`          | Alpha/Beta milestone complete        |
+| `feat/<scope>-*`    | `beta`          | Isolated feature on existing module  |
+| `fix/<scope>-*`     | `beta`          | Fix on existing module verified      |
+| `fix/*`             | `beta`          | Fix verified                         |
+| `beta`              | `main`          | RC approved, ready for release       |
+| `hotfix/*`          | `main` + `beta` | Critical production fix              |
+| `chore/*`, `docs/*` | `beta`          | Change verified                      |
 
 ## Examples
 
 ### Good
 
 ```
-feat/pelatihan                     # parent feature branch
+feat/pelatihan                     # parent feature branch (new module)
 feat/pelatihan-db-schema           # database schema sub-branch
 feat/pelatihan-ui-browse           # frontend sub-branch
+feat/pengujian-ui-result-table     # new feature on existing module
+feat/pengujian-api-batch-export    # new API on existing module
+fix/pengujian-status-calculation   # bug fix on existing module
+feat/pengujian-v2                  # parent branch for large existing module overhaul
+feat/pengujian-v2-db-schema        # sub-branch of existing module overhaul
 feat/order-bulk-download           # minor feature
 fix/cart-quantity-validation        # bug fix
 hotfix/jwt-secret-rotation         # critical production fix
@@ -150,12 +184,28 @@ temp/test-stuff                    # non-standard type
 ## Quick Reference
 
 ```bash
-# Major feature parent
+# Major feature parent (new module)
 git checkout -b feat/pelatihan
 
 # Sub-branch from parent
 git checkout feat/pelatihan
 git checkout -b feat/pelatihan-db-schema
+
+# Existing module — isolated feature
+git checkout beta
+git checkout -b feat/pengujian-ui-result-table
+
+# Existing module — isolated fix
+git checkout beta
+git checkout -b fix/pengujian-status-calculation
+
+# Existing module — large overhaul parent
+git checkout beta
+git checkout -b feat/pengujian-v2
+
+# Existing module — overhaul sub-branch
+git checkout feat/pengujian-v2
+git checkout -b feat/pengujian-v2-api-routers
 
 # Bug fix
 git checkout beta

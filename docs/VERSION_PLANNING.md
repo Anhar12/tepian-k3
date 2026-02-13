@@ -26,6 +26,38 @@ MAJOR.MINOR.PATCH
 | **v1.0.3** | Document verification and signing                      | Released |
 | **v1.0.4** | Docker deployment, Dockerfile improvements, env config | Released |
 
+### Existing Module Changes (MINOR / PATCH)
+
+Changes to existing modules (e.g., Pengujian, Order, Auth) follow MINOR or PATCH versioning depending on scope:
+
+| Change Type                              | SemVer | Example         |
+| ---------------------------------------- | ------ | --------------- |
+| Bug fix in pengujian status calculation  | PATCH  | v1.0.5          |
+| New API endpoint for batch export        | MINOR  | v1.1.0          |
+| New UI feature (result table, filters)   | MINOR  | v1.2.0          |
+| Multiple related improvements (overhaul) | MINOR  | v1.3.0          |
+| Breaking schema change on existing table | MAJOR  | v2.0.0 / v3.0.0 |
+
+**Branching for existing modules:**
+
+```
+# Small/isolated changes → branch from beta, merge back to beta
+beta
+├── feat/pengujian-ui-result-table       → v1.1.0
+├── fix/pengujian-status-calculation     → v1.0.5
+├── feat/pengujian-api-batch-export      → v1.2.0
+
+# Large overhaul → parent branch with sub-branches
+beta
+├── feat/pengujian-v2                    → v1.3.0 (or MAJOR if breaking)
+│   ├── feat/pengujian-v2-db-schema
+│   ├── feat/pengujian-v2-api-routers
+│   ├── fix/pengujian-v2-status-bug
+│   └── feat/pengujian-v2-ui-results
+```
+
+> **Note:** An overhaul of an existing module is only MAJOR if it introduces breaking schema changes or removes/renames existing API procedures. Adding new tables, endpoints, or UI pages to an existing module is MINOR.
+
 ## Upcoming Releases
 
 ---
@@ -102,24 +134,39 @@ MAJOR.MINOR.PATCH
 ## Git Branching Strategy
 
 ```
-main                    ← Production (tagged releases)
-├── beta                ← Staging / pre-release testing
-├── feat/pelatihan      ← v2.0.0 feature branch
+main                                ← Production (tagged releases)
+├── beta                            ← Staging / pre-release testing
+│
+│   # Existing module changes (MINOR/PATCH)
+├── feat/pengujian-ui-result-table  ← v1.1.0 (isolated feature)
+├── fix/pengujian-status-calc       ← v1.0.5 (isolated fix)
+├── feat/pengujian-v2               ← v1.3.0 (large overhaul, parent branch)
+│   ├── feat/pengujian-v2-db-schema
+│   ├── feat/pengujian-v2-api-routers
+│   └── feat/pengujian-v2-ui-results
+│
+│   # New module (MAJOR)
+├── feat/pelatihan                  ← v2.0.0 feature branch
 │   ├── feat/pelatihan-schema       ← alpha.1
 │   ├── feat/pelatihan-api          ← alpha.2 - alpha.4
 │   ├── feat/pelatihan-frontend     ← beta.1 - beta.4
 │   └── feat/pelatihan-polish       ← rc.1
-└── hotfix/xxx          ← Patches for current production (v1.0.x)
+│
+└── hotfix/xxx                      ← Patches for current production (v1.0.x)
 ```
 
 ### Branch Rules
 
-| Branch             | Merges Into      | When                           |
-| ------------------ | ---------------- | ------------------------------ |
-| `feat/pelatihan-*` | `feat/pelatihan` | Sub-feature complete           |
-| `feat/pelatihan`   | `beta`           | Alpha/Beta milestone complete  |
-| `beta`             | `main`           | RC approved, ready for release |
-| `hotfix/*`         | `main` + `beta`  | Critical production fix        |
+| Branch               | Merges Into        | When                                    |
+| -------------------- | ------------------ | --------------------------------------- |
+| `feat/<scope>-*`     | `beta`             | Isolated feature on existing module     |
+| `fix/<scope>-*`      | `beta`             | Isolated fix on existing module         |
+| `feat/<module>-v*-*` | `feat/<module>-v*` | Sub-feature of existing module overhaul |
+| `feat/<module>-v*`   | `beta`             | Existing module overhaul complete       |
+| `feat/pelatihan-*`   | `feat/pelatihan`   | Sub-feature of new module               |
+| `feat/pelatihan`     | `beta`             | Alpha/Beta milestone complete           |
+| `beta`               | `main`             | RC approved, ready for release          |
+| `hotfix/*`           | `main` + `beta`    | Critical production fix                 |
 
 ## Tagging & Release Workflow
 

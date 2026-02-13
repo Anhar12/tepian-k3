@@ -33,8 +33,19 @@ jobs:
       - name: Generate changelog
         run: git-cliff --latest --strip header -o RELEASE_NOTES.md
 
+      - name: Detect pre-release
+        id: prerelease
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ "$TAG" =~ -(alpha|beta|rc) ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE_NOTES.md
           generate_release_notes: false
+          prerelease: ${{ steps.prerelease.outputs.is_prerelease == 'true' }}
