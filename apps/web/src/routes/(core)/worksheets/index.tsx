@@ -1098,11 +1098,11 @@ function RouteComponent() {
               fieldOverrides={{
                 worksheetId: false,
                 estimatedAmountOfMembers: {
-                  label: "Perkiraan Jumlah Anggota",
+                  label: "Perkiraan Jumlah PPS",
                   component: "number",
-                  placeholder: "Masukkan jumlah anggota...",
+                  placeholder: "Masukkan jumlah PPS...",
                   description:
-                    "Perkiraan jumlah anggota yang akan terlibat dalam worksheet ini.",
+                    "Perkiraan jumlah PPS yang akan terlibat dalam worksheet ini.",
                 },
                 estimatedAmountOfDays: {
                   label: "Perkiraan Jumlah Hari",

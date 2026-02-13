@@ -16,19 +16,29 @@ type NestedKeyOf<T> = {
     : K;
 }[keyof T & string];
 
+interface NumberColumnOptions {
+  /** Width class (e.g., 'w-48', 'max-w-64') */
+  width?: string;
+}
+
 /**
  * Creates a numbered row column (1, 2, 3...)
  */
 export function createNumberColumn<T>(
   currentPage: number,
   perPage: number,
+  options: NumberColumnOptions = {},
 ): ColumnDef<T> {
+  const { width = "w-12" } = options;
+
   return {
     id: "no",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="No" label="No" />
     ),
-    cell: ({ row }) => <div>{row.index + 1 + (currentPage - 1) * perPage}</div>,
+    cell: ({ row }) => (
+      <div className={width}>{row.index + 1 + (currentPage - 1) * perPage}</div>
+    ),
   };
 }
 
