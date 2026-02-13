@@ -39,6 +39,7 @@ import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Spinner } from "@/components/ui/spinner";
+import { toFormData } from "@/utils/form-data-mapper";
 
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit",
@@ -127,7 +128,8 @@ function RouteComponent() {
   function handleSubmit(
     data: z.infer<typeof toolCalibrationSchema.updateToolCalibrationSchema>,
   ) {
-    updateToolCalibrationMutation.mutate(data);
+    const formData = toFormData(data);
+    updateToolCalibrationMutation.mutate(formData);
   }
 
   return (

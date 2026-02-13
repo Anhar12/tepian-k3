@@ -62,6 +62,12 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
     const now = Date.now();
     const windowStart = now - this.config.duration * 1000;
 
+    if (!Number.isInteger(points) || points === 0) {
+      throw new Error(
+        "Sliding window strategy requires a non-zero integer points value",
+      );
+    }
+
     // Lua script for atomic sliding window operation
     const script = `
       local key = KEYS[1]
@@ -78,12 +84,37 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
       -- Count current points in the window
       local current = redis.call('ZCOUNT', key, window_start, now)
 
-      -- Check if blocked
       local block_key = key .. ':blocked'
+      -- Check if blocked
       local blocked_until = redis.call('GET', block_key)
       if blocked_until and tonumber(blocked_until) > now then
         local reset_ms = tonumber(blocked_until) - now
         return {0, current, max_points, reset_ms, current}
+      end
+      if blocked_until and tonumber(blocked_until) <= now then
+        redis.call('DEL', block_key)
+      end
+
+      -- Reward support: negative points remove prior consumed entries from this window
+      if points < 0 then
+        local reward = -points
+        local remove_count = math.min(current, reward)
+        if remove_count > 0 then
+          local to_remove = redis.call('ZRANGE', key, 0, remove_count - 1)
+          if #to_remove > 0 then
+            redis.call('ZREM', key, unpack(to_remove))
+          end
+        end
+
+        local new_current = current - remove_count
+        local remaining = math.max(0, max_points - new_current)
+        local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
+        local reset_ms = duration * 1000
+        if #oldest > 0 then
+          local oldest_score = tonumber(oldest[2])
+          reset_ms = math.max(0, oldest_score + (duration * 1000) - now)
+        end
+        return {1, remaining, max_points, reset_ms, new_current}
       end
 
       -- Check if adding points would exceed limit
@@ -91,11 +122,13 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
         -- Block the key
         redis.call('SET', block_key, now + (block_duration * 1000), 'PX', block_duration * 1000)
         local reset_ms = block_duration * 1000
-        return {0, 0, max_points, reset_ms, current}
+        return {0, math.max(0, max_points - current), max_points, reset_ms, current}
       end
 
-      -- Add the request
-      redis.call('ZADD', key, now, now .. ':' .. math.random())
+      -- Add one entry per point so weighted consume() is respected
+      for i = 1, points do
+        redis.call('ZADD', key, now, now .. ':' .. i .. ':' .. math.random())
+      end
       redis.call('EXPIRE', key, duration)
 
       local remaining = max_points - current - points
@@ -271,6 +304,25 @@ export class RedisRateLimiterStorage implements IRateLimiterStorage {
       const windowStart = now - this.config.duration * 1000;
       await this.redis.zremrangebyscore(redisKey, 0, windowStart);
       const count = await this.redis.zcount(redisKey, windowStart, now);
+      const blockKey = `${redisKey}:blocked`;
+      const blockedUntilRaw = await this.redis.get(blockKey);
+      const blockedUntil = blockedUntilRaw ? parseInt(blockedUntilRaw) : 0;
+      if (blockedUntilRaw && blockedUntil <= now) {
+        await this.redis.del(blockKey);
+      }
+
+      if (blockedUntil > now) {
+        const resetMs = blockedUntil - now;
+        return {
+          allowed: false,
+          remaining: 0,
+          limit: this.config.points,
+          resetMs,
+          resetAt: new Date(now + resetMs),
+          consumed: count,
+        };
+      }
+
       const remaining = Math.max(0, this.config.points - count);
       const oldest = await this.redis.zrange(redisKey, 0, 0, "WITHSCORES");
       let resetMs = this.config.duration * 1000;

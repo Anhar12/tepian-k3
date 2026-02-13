@@ -76,10 +76,10 @@ export const createTRPCContext = async (context: HonoContext) => {
 
   const eventBus = getEventBus();
 
-  const ip =
-    context.req.header("x-forwarded-for") ||
-    context.req.header("x-real-ip") ||
-    "";
+  const forwardedFor = context.req.header("x-forwarded-for");
+  const realIp = context.req.header("x-real-ip");
+  const ipFromForwarded = forwardedFor?.split(",")[0]?.trim();
+  const ip = ipFromForwarded || realIp || "unknown";
   const userAgent = context.req.header("user-agent") || "";
 
   // Parse User-Agent to extract OS information
@@ -413,7 +413,9 @@ export const withRateLimit = <TInput = unknown>(
   publicProcedure.use(async ({ ctx, next, getRawInput }) => {
     // Get the rate limit key
     const rawInput = await getRawInput();
-    const key = getKey ? getKey(ctx, rawInput as TInput) : ctx.ip;
+    const key = getKey
+      ? getKey(ctx, rawInput as TInput)
+      : `ip:${ctx.ip || "unknown"}`;
 
     // should skip rate limiting for localhost IPs or dev mode
     if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
