@@ -48,22 +48,22 @@ const pusatLayananItems: {
   to: LinkProps["to"];
 }[] = [
   {
-    imageSrc: "/assets/pengujian.jpg",
+    imageSrc: "/assets/pengujian.webp",
     title: "Pengujian",
     to: "/pengujian",
   },
   {
-    imageSrc: "/assets/pelatihan.jpg",
+    imageSrc: "/assets/pelatihan.webp",
     title: "Pelatihan",
     to: "/pelatihan",
   },
   {
-    imageSrc: "/assets/uji-kompetensi.jpg",
+    imageSrc: "/assets/uji-kompetensi.webp",
     title: "Uji Kompetensi",
     to: "/uji-kompetensi",
   },
   {
-    imageSrc: "/assets/konsultasi.jpg",
+    imageSrc: "/assets/konsultasi.webp",
     title: "Konsultasi",
     to: "/konsultasi",
   },
@@ -150,7 +150,7 @@ function HomeComponent() {
         {/* Background Image */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden bg-primary">
           <ImageWithFallback
-            src="/assets/hero-banner.png"
+            src="/assets/hero-banner.webp"
             className="h-full w-full"
             imgClassName="object-cover object-bottom-right"
           />
@@ -258,7 +258,7 @@ function HomeComponent() {
         <div className="relative hidden w-full max-w-md shrink-0 md:block">
           <div className="overflow-hidden rounded-2xl">
             <ImageWithFallback
-              src="/assets/profile-banner.jpg"
+              src="/assets/profile-banner.webp"
               alt="Balai Tepian K3"
               className="h-105 w-full object-cover"
             />
@@ -266,7 +266,7 @@ function HomeComponent() {
           {/* Top-left Icon */}
           <div className="absolute top-4 left-4">
             <ImageWithFallback
-              src="/assets/profile-banner-icon.png"
+              src="/assets/profile-banner-icon.webp"
               alt="Balai K3 Icon"
               className="h-16 w-auto object-contain brightness-0 invert"
             />
@@ -513,7 +513,7 @@ function HomeComponent() {
           {/* Column 1: Logo & Description */}
           <div className="flex flex-col gap-4">
             <ImageWithFallback
-              src="/assets/logo-tepiank3-white.png"
+              src="/assets/logo-tepiank3-white.webp"
               alt="Tepian K3 Logo"
               className="h-12 w-fit object-contain"
             />

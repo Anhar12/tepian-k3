@@ -58,7 +58,7 @@ export default function PengujianNavbar() {
       {/* Logo */}
       <a href="/" className="text-xl font-bold text-primary">
         <ImageWithFallback
-          src="/assets/logo-tepiank3.png"
+          src="/assets/logo-tepiank3.webp"
           alt="Tepian K3 Logo"
           className="w-32 object-contain sm:w-44"
         />

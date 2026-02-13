@@ -34,7 +34,7 @@ export const Route = createFileRoute("/(auth)/verify-email")({
   head: () => pageHead("Verifikasi Email"),
 });
 
-const BannerImage = "/assets/banner-auth.png";
+const BannerImage = "/assets/banner-auth.webp";
 
 type Step = "email" | "otp" | "success";
 

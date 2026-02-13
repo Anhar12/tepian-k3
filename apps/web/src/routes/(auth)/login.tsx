@@ -3,7 +3,7 @@ import { pageHead } from "@/utils/page-head";
 import { LoginForm } from "@/components/login-form";
 import ImageWithFallback from "@/components/image-with-fallback";
 
-const BannerImage = "/assets/banner-auth.png";
+const BannerImage = "/assets/banner-auth.webp";
 
 export const Route = createFileRoute("/(auth)/login")({
   component: LoginPage,

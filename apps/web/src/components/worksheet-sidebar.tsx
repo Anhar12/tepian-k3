@@ -59,7 +59,7 @@ export function WorksheetSidebar({
             >
               <a href="#" className="flex flex-row items-center justify-start">
                 <ImageWithFallback
-                  src="/assets/tepian-k3.png"
+                  src="/assets/tepian-k3.webp"
                   alt="Tepian K3 Logo"
                   className="size-6"
                 />

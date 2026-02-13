@@ -54,22 +54,22 @@ const pusatLayananItems: {
   to: LinkProps["to"];
 }[] = [
   {
-    imageSrc: "/assets/pengujian.jpg",
+    imageSrc: "/assets/pengujian.webp",
     title: "Pengujian",
     to: "/pengujian",
   },
   {
-    imageSrc: "/assets/pelatihan.jpg",
+    imageSrc: "/assets/pelatihan.webp",
     title: "Pelatihan",
     to: "/pelatihan",
   },
   {
-    imageSrc: "/assets/uji-kompetensi.jpg",
+    imageSrc: "/assets/uji-kompetensi.webp",
     title: "Uji Kompetensi",
     to: "/uji-kompetensi",
   },
   {
-    imageSrc: "/assets/konsultasi.jpg",
+    imageSrc: "/assets/konsultasi.webp",
     title: "Konsultasi",
     to: "/konsultasi",
   },
@@ -99,7 +99,7 @@ function HomeComponent() {
         {/* Background Image/SVG */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <ImageWithFallback
-            src="/assets/hero-banner.jpg"
+            src="/assets/hero-banner.webp"
             className="h-full w-full object-fill"
           />
         </div>
@@ -183,7 +183,7 @@ function HomeComponent() {
       >
         {/* Logo */}
         <ImageWithFallback
-          src="/assets/logo-balai-k3.png"
+          src="/assets/logo-balai-k3.webp"
           alt="Balai Tepian K3 Logo"
           className="mx-auto h-auto w-full max-w-64 object-contain"
         />
@@ -445,7 +445,7 @@ function HomeComponent() {
       >
         <div className="flex h-full w-full flex-col justify-center gap-4">
           <ImageWithFallback
-            src="/assets/stakeholder-tepian-k3.png"
+            src="/assets/stakeholder-tepian-k3.webp"
             alt="Tepian K3 Stakeholder Logos"
             className="h-32 w-96 self-end object-contain"
           />
