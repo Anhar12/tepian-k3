@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import GridBackground from "@/components/grid-background";
+// import GridBackground from "@/components/grid-background";
 import LandingNavbar from "@/components/navbar";
 import {
   Accordion,
@@ -212,7 +212,7 @@ function HomeComponent() {
         className="relative flex min-h-[calc(100vh-80vh)] flex-col bg-muted/50 px-10 py-16"
         id="layanan"
       >
-        <GridBackground />
+        {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
           <span className="flex items-center gap-1.5 text-sm font-medium tracking-wider text-primary">
             <GradientBox /> layanan pusat K3
@@ -311,7 +311,7 @@ function HomeComponent() {
         className="relative flex flex-col bg-accent/10 px-10 py-16"
         id="informasi"
       >
-        <GridBackground />
+        {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
           <span className="flex items-center gap-1.5 text-sm font-medium tracking-wider text-primary">
             <GradientBox /> insights & updates
