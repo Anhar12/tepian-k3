@@ -20,7 +20,7 @@ import { useParameterToolDialogStore } from "@/stores/parameter-tool-dialog.stor
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import parameterToolSchema from "@tepian-k3/schema/parameter-tool.schema";
+import parameterToolSchema from "@tepian-k3/schema/pengujian/parameter-tool.schema";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -52,15 +52,17 @@ export default function CreateParameterToolDialog({
   });
 
   const createParameterToolMutation = useMutation(
-    trpc.parameterTool.assignToolsToParameter.mutationOptions({
+    trpc.pengujian.parameterTool.assignToolsToParameter.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.parameterTool.getAllParameterToolsByParameterId.queryOptions({
-            parameterId,
-          }),
+          trpc.pengujian.parameterTool.getAllParameterToolsByParameterId.queryOptions(
+            {
+              parameterId,
+            },
+          ),
         );
         await queryClient.invalidateQueries(
-          trpc.tool.getAllUnassignedTools.queryOptions(),
+          trpc.pengujian.tool.getAllUnassignedTools.queryOptions(),
         );
         form.reset();
         globalSuccessToast("Alat berhasil ditambahkan ke parameter.");
@@ -75,7 +77,7 @@ export default function CreateParameterToolDialog({
   );
 
   const { data: tools, isLoading } = useQuery(
-    trpc.tool.getAllUnassignedTools.queryOptions(),
+    trpc.pengujian.tool.getAllUnassignedTools.queryOptions(),
   );
 
   function handleSubmit(
@@ -122,7 +124,7 @@ export default function CreateParameterToolDialog({
                       options={
                         tools?.map((tool) => ({
                           id: tool.id,
-                          name: `${tool.toolCode} - ${tool.toolName}`,
+                          name: `${tool.toolCode?.code} - ${tool.toolName}`,
                         })) ?? []
                       }
                       value={field.value ?? ""}

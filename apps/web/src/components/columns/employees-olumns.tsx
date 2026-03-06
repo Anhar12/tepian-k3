@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Employees } from "@tepian-k3/types/employee.types";
+import type { Employees } from "@tepian-k3/types/platform/employee.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/employees";
 import {
@@ -22,10 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "employee",
   resourcePath: "employees",
   permissionPrefix: "employees",
-  deleteMutation: trpc.employee.deleteEmployee,
-  restoreMutation: trpc.employee.restoreEmployee,
+  deleteMutation: trpc.platform.employee.deleteEmployee,
+  restoreMutation: trpc.platform.employee.restoreEmployee,
   getQueryOptions: (params) =>
-    trpc.employee.getEmployeePaginated.queryOptions(params),
+    trpc.platform.employee.getEmployeePaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

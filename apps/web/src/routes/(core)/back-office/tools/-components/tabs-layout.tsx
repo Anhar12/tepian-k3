@@ -14,7 +14,9 @@ export function TabsLayout({ toolId, children }: TabsLayoutProps) {
     ? "detail"
     : matchRoute({ to: "/back-office/tools/$toolId/calibration" })
       ? "calibration"
-      : "detail";
+      : matchRoute({ to: "/back-office/tools/$toolId/status" })
+        ? "status"
+        : "detail";
 
   return (
     <div className="flex flex-col">
@@ -38,6 +40,16 @@ export function TabsLayout({ toolId, children }: TabsLayoutProps) {
               }}
             >
               Calibration
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value="status" asChild>
+            <Link
+              to="/back-office/tools/$toolId/status"
+              params={{
+                toolId,
+              }}
+            >
+              Status
             </Link>
           </TabsTrigger>
         </TabsList>

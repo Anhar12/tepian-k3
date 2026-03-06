@@ -49,7 +49,9 @@ const navItems: {
 const route = getRouteApi("/(core)/worksheets");
 
 export function WorksheetHeader() {
-  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
   const location = useLocation();
   const navigate = route.useNavigate();
 

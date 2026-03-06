@@ -5,6 +5,8 @@ import path from "path";
 import { env } from "@/env";
 import { validateToken } from "@tepian-k3/auth/utils";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
+import { runEffect } from "@tepian-k3/api/utils/run-effect";
+import permissionQueries from "@tepian-k3/queries/platform/permission.queries";
 
 const logsRouter = new Hono();
 
@@ -36,9 +38,9 @@ logsRouter.use("*", async (c, next) => {
 
   // Allow the UI page to load without auth (it's just HTML)
   // c.req.path returns the full path (e.g. /api/logs/ui), not the sub-router path
-  if (c.req.path.endsWith("/ui") || c.req.path.endsWith("/ui/")) {
-    return next();
-  }
+  // if (c.req.path.endsWith("/ui") || c.req.path.endsWith("/ui/")) {
+  //   return next();
+  // }
 
   // Production: require JWT with logs.read permission
   const authHeader = c.req.header("Authorization");
@@ -53,7 +55,15 @@ logsRouter.use("*", async (c, next) => {
     return c.json({ error: "Invalid or expired token" }, 401);
   }
 
-  if (!user.permissions.includes("logs.read")) {
+  const res = await runEffect(
+    permissionQueries.getUserWithPermissions(user.id),
+  );
+
+  if (!res) {
+    return c.json({ error: "Failed to verify permissions" }, 500);
+  }
+
+  if (!res.permissions.includes("logs.read")) {
     return c.json({ error: "Missing logs.read permission" }, 403);
   }
 

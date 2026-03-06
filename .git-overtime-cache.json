@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "holidays": {
+    "nager:ID:2026": [
+      {
+        "date": "2026-01-01",
+        "name": "Tahun Baru Masehi",
+        "type": "national"
+      },
+      {
+        "date": "2026-04-03",
+        "name": "Wafat Isa Almasih",
+        "type": "national"
+      },
+      {
+        "date": "2026-04-05",
+        "name": "Paskah",
+        "type": "national"
+      },
+      {
+        "date": "2026-05-01",
+        "name": "Hari Buruh Internasional",
+        "type": "national"
+      },
+      {
+        "date": "2026-05-14",
+        "name": "Kenaikan Isa Almasih",
+        "type": "national"
+      },
+      {
+        "date": "2026-06-01",
+        "name": "Hari Lahir Pancasila",
+        "type": "national"
+      },
+      {
+        "date": "2026-08-17",
+        "name": "Hari Ulang Tahun Kemerdekaan Republik Indonesia",
+        "type": "national"
+      },
+      {
+        "date": "2026-12-25",
+        "name": "Hari Raya Natal",
+        "type": "national"
+      }
+    ],
+    "nager:ID:2025": [
+      {
+        "date": "2025-01-01",
+        "name": "Tahun Baru Masehi",
+        "type": "national"
+      },
+      {
+        "date": "2025-04-18",
+        "name": "Wafat Isa Almasih",
+        "type": "national"
+      },
+      {
+        "date": "2025-04-20",
+        "name": "Paskah",
+        "type": "national"
+      },
+      {
+        "date": "2025-05-01",
+        "name": "Hari Buruh Internasional",
+        "type": "national"
+      },
+      {
+        "date": "2025-05-29",
+        "name": "Kenaikan Isa Almasih",
+        "type": "national"
+      },
+      {
+        "date": "2025-06-01",
+        "name": "Hari Lahir Pancasila",
+        "type": "national"
+      },
+      {
+        "date": "2025-08-17",
+        "name": "Hari Ulang Tahun Kemerdekaan Republik Indonesia",
+        "type": "national"
+      },
+      {
+        "date": "2025-12-25",
+        "name": "Hari Raya Natal",
+        "type": "national"
+      }
+    ]
+  },
+  "ramadhan": {
+    "2025": {
+      "start": "2025-03-01",
+      "end": "2025-03-29",
+      "year": 2025
+    },
+    "2026": {
+      "start": "2026-02-18",
+      "end": "2026-03-19",
+      "year": 2026
+    }
+  }
+}

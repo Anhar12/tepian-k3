@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Tools } from "@tepian-k3/types/tools.types";
+import type { Tools } from "@tepian-k3/types/pengujian/tools.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/tools";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
@@ -22,9 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "tool",
   resourcePath: "tools",
   permissionPrefix: "tools",
-  deleteMutation: trpc.tool.deleteTool,
-  restoreMutation: trpc.tool.restoreTool,
-  getQueryOptions: (params) => trpc.tool.getToolPaginated.queryOptions(params),
+  deleteMutation: trpc.pengujian.tool.deleteTool,
+  restoreMutation: trpc.pengujian.tool.restoreTool,
+  getQueryOptions: (params) =>
+    trpc.pengujian.tool.getToolPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
 });
@@ -40,7 +41,10 @@ export default function getToolsColumns({
       enableFilter: true,
       placeholder: "Cari nama alat...",
     }),
-    createTextColumn<Tools>("toolCode", "Kode Alat", {
+    createTextColumn<Tools>("toolCode.code", "Kode Alat", {
+      width: "w-64",
+    }),
+    createTextColumn<Tools>("toolUniqueCode", "Kode Unik", {
       width: "w-64",
     }),
     createDateColumn<Tools>("createdAt", "Dibuat"),

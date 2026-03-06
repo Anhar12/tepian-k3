@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { PaginatedParameters } from "@tepian-k3/types/parameters.types";
+import type { PaginatedParameters } from "@tepian-k3/types/pengujian/parameters.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/parameters";
 import {
@@ -23,10 +23,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "parameter",
   resourcePath: "parameters",
   permissionPrefix: "parameters",
-  deleteMutation: trpc.parameter.deleteParameter,
-  restoreMutation: trpc.parameter.restoreParameter,
+  deleteMutation: trpc.pengujian.parameter.deleteParameter,
+  restoreMutation: trpc.pengujian.parameter.restoreParameter,
   getQueryOptions: (params) =>
-    trpc.parameter.getPaginatedParameters.queryOptions(params),
+    trpc.pengujian.parameter.getPaginatedParameters.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
 });

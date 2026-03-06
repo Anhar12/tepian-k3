@@ -13,9 +13,9 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "tepian-k3",
-        short_name: "tepian-k3",
-        description: "tepian-k3 - PWA Application",
+        name: "Tepian K3",
+        short_name: "Tepian K3",
+        description: "Tepian K3 - PWA Application",
         theme_color: "#0c0c0c",
       },
       pwaAssets: { disabled: false, config: true },
@@ -38,21 +38,5 @@ export default defineConfig({
   },
   server: {
     port: 3001,
-    proxy: {
-      // Proxy tRPC requests to backend server
-      "/trpc": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-      },
-      // Proxy API requests to backend server
-      "/api": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-      },
-      "/health": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-      },
-    },
   },
 });

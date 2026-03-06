@@ -32,7 +32,7 @@ export default function CompanyTestingLocationList({
   );
 
   const { data: testingLocations, isLoading } = useQuery(
-    trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
+    trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
       { companyId, showDeleted: showDeleted ?? false },
     ),
   );

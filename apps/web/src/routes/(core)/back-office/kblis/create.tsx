@@ -13,7 +13,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import kbliSchema from "@tepian-k3/schema/kbli.schema";
+import kbliSchema from "@tepian-k3/schema/pengujian/kbli.schema";
 
 export const Route = createFileRoute("/(core)/back-office/kblis/create")({
   beforeLoad: async ({ context }) =>
@@ -26,7 +26,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const createKBLIMutation = useMutation(
-    trpc.kbli.createKbli.mutationOptions({
+    trpc.pengujian.kbli.createKbli.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil membuat KBLI");
         await redirectBack(350);

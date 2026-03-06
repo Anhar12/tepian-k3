@@ -34,10 +34,14 @@ import { Route as coreUjiKompetensiRouteRouteImport } from './routes/(core)/uji-
 import { Route as corePengujianRouteRouteImport } from './routes/(core)/pengujian/route'
 import { Route as corePelatihanRouteRouteImport } from './routes/(core)/pelatihan/route'
 import { Route as coreKonsultasiRouteRouteImport } from './routes/(core)/konsultasi/route'
+import { Route as coreEmployeeRouteRouteImport } from './routes/(core)/employee/route'
+import { Route as coreDisplayBoardRouteRouteImport } from './routes/(core)/display-board/route'
 import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
 import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
 import { Route as coreWorksheetsIndexRouteImport } from './routes/(core)/worksheets/index'
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
+import { Route as coreEmployeeIndexRouteImport } from './routes/(core)/employee/index'
+import { Route as coreDisplayBoardIndexRouteImport } from './routes/(core)/display-board/index'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
 import { Route as coreWorksheetsJadwalPersonelRouteImport } from './routes/(core)/worksheets/jadwal-personel'
@@ -45,11 +49,18 @@ import { Route as coreWorksheetsDetailTransaksiRouteImport } from './routes/(cor
 import { Route as corePengujianTransaksiRouteImport } from './routes/(core)/pengujian/transaksi'
 import { Route as corePengujianSurveyKepuasanRouteImport } from './routes/(core)/pengujian/survey-kepuasan'
 import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
+import { Route as corePengujianSertifikatRouteImport } from './routes/(core)/pengujian/sertifikat'
 import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
+import { Route as coreEmployeeWorksheetsIndexRouteImport } from './routes/(core)/employee/worksheets/index'
+import { Route as coreEmployeeToolsIndexRouteImport } from './routes/(core)/employee/tools/index'
+import { Route as coreEmployeeTestingsIndexRouteImport } from './routes/(core)/employee/testings/index'
+import { Route as coreEmployeeSptIndexRouteImport } from './routes/(core)/employee/spt/index'
+import { Route as coreEmployeeCertificationsIndexRouteImport } from './routes/(core)/employee/certifications/index'
 import { Route as coreDashboardCompanyIndexRouteImport } from './routes/(core)/dashboard/company/index'
 import { Route as coreBackOfficeWorksheetsIndexRouteImport } from './routes/(core)/back-office/worksheets/index'
 import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/back-office/users/index'
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
+import { Route as coreBackOfficeToolCodesIndexRouteImport } from './routes/(core)/back-office/tool-codes/index'
 import { Route as coreBackOfficeTestingsIndexRouteImport } from './routes/(core)/back-office/testings/index'
 import { Route as coreBackOfficeSurveyQuestionsIndexRouteImport } from './routes/(core)/back-office/survey-questions/index'
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
@@ -63,9 +74,11 @@ import { Route as coreBackOfficeEmployeesIndexRouteImport } from './routes/(core
 import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)/back-office/clusters/index'
 import { Route as coreBackOfficeChemicalMaterialsIndexRouteImport } from './routes/(core)/back-office/chemical-materials/index'
 import { Route as coreBackOfficeBannersIndexRouteImport } from './routes/(core)/back-office/banners/index'
+import { Route as coreBackOfficeAuditsIndexRouteImport } from './routes/(core)/back-office/audits/index'
 import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
 import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
 import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
+import { Route as coreBackOfficeToolCodesCreateRouteImport } from './routes/(core)/back-office/tool-codes/create'
 import { Route as coreBackOfficeSurveyQuestionsCreateRouteImport } from './routes/(core)/back-office/survey-questions/create'
 import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/back-office/roles/create'
 import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
@@ -77,11 +90,15 @@ import { Route as coreBackOfficeEmployeesCreateRouteImport } from './routes/(cor
 import { Route as coreBackOfficeClustersCreateRouteImport } from './routes/(core)/back-office/clusters/create'
 import { Route as coreBackOfficeChemicalMaterialsCreateRouteImport } from './routes/(core)/back-office/chemical-materials/create'
 import { Route as coreBackOfficeBannersCreateRouteImport } from './routes/(core)/back-office/banners/create'
+import { Route as coreBackOfficeAuditsAuditIdRouteImport } from './routes/(core)/back-office/audits/$auditId'
+import { Route as coreEmployeeToolsWorksheetIdReturnRouteImport } from './routes/(core)/employee/tools/$worksheetId.return'
+import { Route as coreEmployeeToolsWorksheetIdDetailRouteImport } from './routes/(core)/employee/tools/$worksheetId.detail'
 import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
 import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
 import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
 import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.edit'
 import { Route as coreBackOfficeToolsToolIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.detail'
+import { Route as coreBackOfficeToolCodesToolCodeIdEditRouteImport } from './routes/(core)/back-office/tool-codes/$toolCodeId.edit'
 import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
 import { Route as coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport } from './routes/(core)/back-office/survey-questions/$questionId.edit'
 import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
@@ -97,8 +114,11 @@ import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './rou
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
 import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport } from './routes/(core)/back-office/chemical-materials/$chemicalMaterialId.edit'
 import { Route as coreBackOfficeBannersBannerIdEditRouteImport } from './routes/(core)/back-office/banners/$bannerId.edit'
+import { Route as coreBackOfficeToolsToolIdStatusIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.status.index'
 import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.index'
+import { Route as coreBackOfficeToolsToolIdStatusCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.status.create'
 import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.create'
+import { Route as coreBackOfficeToolsToolIdStatusStatusIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.status.$statusId.edit'
 import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit'
 import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.detail'
 
@@ -225,6 +245,16 @@ const coreKonsultasiRouteRoute = coreKonsultasiRouteRouteImport.update({
   path: '/konsultasi',
   getParentRoute: () => coreRouteRoute,
 } as any)
+const coreEmployeeRouteRoute = coreEmployeeRouteRouteImport.update({
+  id: '/employee',
+  path: '/employee',
+  getParentRoute: () => coreRouteRoute,
+} as any)
+const coreDisplayBoardRouteRoute = coreDisplayBoardRouteRouteImport.update({
+  id: '/display-board',
+  path: '/display-board',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 const coreDashboardRouteRoute = coreDashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -244,6 +274,16 @@ const corePengujianIndexRoute = corePengujianIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => corePengujianRouteRoute,
+} as any)
+const coreEmployeeIndexRoute = coreEmployeeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => coreEmployeeRouteRoute,
+} as any)
+const coreDisplayBoardIndexRoute = coreDisplayBoardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => coreDisplayBoardRouteRoute,
 } as any)
 const coreDashboardIndexRoute = coreDashboardIndexRouteImport.update({
   id: '/',
@@ -283,11 +323,44 @@ const corePengujianStatusRoute = corePengujianStatusRouteImport.update({
   path: '/status',
   getParentRoute: () => corePengujianRouteRoute,
 } as any)
+const corePengujianSertifikatRoute = corePengujianSertifikatRouteImport.update({
+  id: '/sertifikat',
+  path: '/sertifikat',
+  getParentRoute: () => corePengujianRouteRoute,
+} as any)
 const corePengujianCheckoutRoute = corePengujianCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
   getParentRoute: () => corePengujianRouteRoute,
 } as any)
+const coreEmployeeWorksheetsIndexRoute =
+  coreEmployeeWorksheetsIndexRouteImport.update({
+    id: '/worksheets/',
+    path: '/worksheets/',
+    getParentRoute: () => coreEmployeeRouteRoute,
+  } as any)
+const coreEmployeeToolsIndexRoute = coreEmployeeToolsIndexRouteImport.update({
+  id: '/tools/',
+  path: '/tools/',
+  getParentRoute: () => coreEmployeeRouteRoute,
+} as any)
+const coreEmployeeTestingsIndexRoute =
+  coreEmployeeTestingsIndexRouteImport.update({
+    id: '/testings/',
+    path: '/testings/',
+    getParentRoute: () => coreEmployeeRouteRoute,
+  } as any)
+const coreEmployeeSptIndexRoute = coreEmployeeSptIndexRouteImport.update({
+  id: '/spt/',
+  path: '/spt/',
+  getParentRoute: () => coreEmployeeRouteRoute,
+} as any)
+const coreEmployeeCertificationsIndexRoute =
+  coreEmployeeCertificationsIndexRouteImport.update({
+    id: '/certifications/',
+    path: '/certifications/',
+    getParentRoute: () => coreEmployeeRouteRoute,
+  } as any)
 const coreDashboardCompanyIndexRoute =
   coreDashboardCompanyIndexRouteImport.update({
     id: '/company/',
@@ -310,6 +383,12 @@ const coreBackOfficeToolsIndexRoute =
   coreBackOfficeToolsIndexRouteImport.update({
     id: '/tools/',
     path: '/tools/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeToolCodesIndexRoute =
+  coreBackOfficeToolCodesIndexRouteImport.update({
+    id: '/tool-codes/',
+    path: '/tool-codes/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeTestingsIndexRoute =
@@ -389,6 +468,12 @@ const coreBackOfficeBannersIndexRoute =
     path: '/banners/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeAuditsIndexRoute =
+  coreBackOfficeAuditsIndexRouteImport.update({
+    id: '/audits/',
+    path: '/audits/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreDashboardCompanyCreateRoute =
   coreDashboardCompanyCreateRouteImport.update({
     id: '/company/create',
@@ -405,6 +490,12 @@ const coreBackOfficeToolsCreateRoute =
   coreBackOfficeToolsCreateRouteImport.update({
     id: '/tools/create',
     path: '/tools/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeToolCodesCreateRoute =
+  coreBackOfficeToolCodesCreateRouteImport.update({
+    id: '/tool-codes/create',
+    path: '/tool-codes/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeSurveyQuestionsCreateRoute =
@@ -473,6 +564,24 @@ const coreBackOfficeBannersCreateRoute =
     path: '/banners/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeAuditsAuditIdRoute =
+  coreBackOfficeAuditsAuditIdRouteImport.update({
+    id: '/audits/$auditId',
+    path: '/audits/$auditId',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreEmployeeToolsWorksheetIdReturnRoute =
+  coreEmployeeToolsWorksheetIdReturnRouteImport.update({
+    id: '/tools/$worksheetId/return',
+    path: '/tools/$worksheetId/return',
+    getParentRoute: () => coreEmployeeRouteRoute,
+  } as any)
+const coreEmployeeToolsWorksheetIdDetailRoute =
+  coreEmployeeToolsWorksheetIdDetailRouteImport.update({
+    id: '/tools/$worksheetId/detail',
+    path: '/tools/$worksheetId/detail',
+    getParentRoute: () => coreEmployeeRouteRoute,
+  } as any)
 const coreDashboardCompanyCompanyIdEditRoute =
   coreDashboardCompanyCompanyIdEditRouteImport.update({
     id: '/company/$companyId/edit',
@@ -501,6 +610,12 @@ const coreBackOfficeToolsToolIdDetailRoute =
   coreBackOfficeToolsToolIdDetailRouteImport.update({
     id: '/tools/$toolId/detail',
     path: '/tools/$toolId/detail',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeToolCodesToolCodeIdEditRoute =
+  coreBackOfficeToolCodesToolCodeIdEditRouteImport.update({
+    id: '/tool-codes/$toolCodeId/edit',
+    path: '/tool-codes/$toolCodeId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeTestingsTestingIdDetailRoute =
@@ -593,16 +708,34 @@ const coreBackOfficeBannersBannerIdEditRoute =
     path: '/banners/$bannerId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeToolsToolIdStatusIndexRoute =
+  coreBackOfficeToolsToolIdStatusIndexRouteImport.update({
+    id: '/tools/$toolId/status/',
+    path: '/tools/$toolId/status/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeToolsToolIdCalibrationIndexRoute =
   coreBackOfficeToolsToolIdCalibrationIndexRouteImport.update({
     id: '/tools/$toolId/calibration/',
     path: '/tools/$toolId/calibration/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeToolsToolIdStatusCreateRoute =
+  coreBackOfficeToolsToolIdStatusCreateRouteImport.update({
+    id: '/tools/$toolId/status/create',
+    path: '/tools/$toolId/status/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeToolsToolIdCalibrationCreateRoute =
   coreBackOfficeToolsToolIdCalibrationCreateRouteImport.update({
     id: '/tools/$toolId/calibration/create',
     path: '/tools/$toolId/calibration/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeToolsToolIdStatusStatusIdEditRoute =
+  coreBackOfficeToolsToolIdStatusStatusIdEditRouteImport.update({
+    id: '/tools/$toolId/status/$statusId/edit',
+    path: '/tools/$toolId/status/$statusId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute =
@@ -626,6 +759,8 @@ export interface FileRoutesByFullPath {
   '/unauthorized': typeof UnauthorizedRoute
   '/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/dashboard': typeof coreDashboardRouteRouteWithChildren
+  '/display-board': typeof coreDisplayBoardRouteRouteWithChildren
+  '/employee': typeof coreEmployeeRouteRouteWithChildren
   '/konsultasi': typeof coreKonsultasiRouteRoute
   '/pelatihan': typeof corePelatihanRouteRoute
   '/pengujian': typeof corePengujianRouteRouteWithChildren
@@ -645,6 +780,7 @@ export interface FileRoutesByFullPath {
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
@@ -652,8 +788,11 @@ export interface FileRoutesByFullPath {
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
+  '/display-board/': typeof coreDisplayBoardIndexRoute
+  '/employee/': typeof coreEmployeeIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
   '/worksheets/': typeof coreWorksheetsIndexRoute
+  '/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
@@ -665,9 +804,11 @@ export interface FileRoutesByFullPath {
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
+  '/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/back-office/audits': typeof coreBackOfficeAuditsIndexRoute
   '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
@@ -681,10 +822,16 @@ export interface FileRoutesByFullPath {
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
+  '/back-office/tool-codes': typeof coreBackOfficeToolCodesIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
+  '/employee/certifications': typeof coreEmployeeCertificationsIndexRoute
+  '/employee/spt': typeof coreEmployeeSptIndexRoute
+  '/employee/testings': typeof coreEmployeeTestingsIndexRoute
+  '/employee/tools': typeof coreEmployeeToolsIndexRoute
+  '/employee/worksheets': typeof coreEmployeeWorksheetsIndexRoute
   '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
   '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
@@ -700,15 +847,21 @@ export interface FileRoutesByFullPath {
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
+  '/back-office/tool-codes/$toolCodeId/edit': typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
+  '/employee/tools/$worksheetId/detail': typeof coreEmployeeToolsWorksheetIdDetailRoute
+  '/employee/tools/$worksheetId/return': typeof coreEmployeeToolsWorksheetIdReturnRoute
   '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  '/back-office/tools/$toolId/status/create': typeof coreBackOfficeToolsToolIdStatusCreateRoute
   '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  '/back-office/tools/$toolId/status': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
   '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  '/back-office/tools/$toolId/status/$statusId/edit': typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -733,6 +886,7 @@ export interface FileRoutesByTo {
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
@@ -740,8 +894,11 @@ export interface FileRoutesByTo {
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
   '/back-office': typeof coreBackOfficeIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
+  '/display-board': typeof coreDisplayBoardIndexRoute
+  '/employee': typeof coreEmployeeIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
   '/worksheets': typeof coreWorksheetsIndexRoute
+  '/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
@@ -753,9 +910,11 @@ export interface FileRoutesByTo {
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
+  '/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/back-office/audits': typeof coreBackOfficeAuditsIndexRoute
   '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
@@ -769,10 +928,16 @@ export interface FileRoutesByTo {
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
+  '/back-office/tool-codes': typeof coreBackOfficeToolCodesIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
   '/back-office/users': typeof coreBackOfficeUsersIndexRoute
   '/back-office/worksheets': typeof coreBackOfficeWorksheetsIndexRoute
   '/dashboard/company': typeof coreDashboardCompanyIndexRoute
+  '/employee/certifications': typeof coreEmployeeCertificationsIndexRoute
+  '/employee/spt': typeof coreEmployeeSptIndexRoute
+  '/employee/testings': typeof coreEmployeeTestingsIndexRoute
+  '/employee/tools': typeof coreEmployeeToolsIndexRoute
+  '/employee/worksheets': typeof coreEmployeeWorksheetsIndexRoute
   '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
   '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
@@ -788,15 +953,21 @@ export interface FileRoutesByTo {
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
+  '/back-office/tool-codes/$toolCodeId/edit': typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
+  '/employee/tools/$worksheetId/detail': typeof coreEmployeeToolsWorksheetIdDetailRoute
+  '/employee/tools/$worksheetId/return': typeof coreEmployeeToolsWorksheetIdReturnRoute
   '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  '/back-office/tools/$toolId/status/create': typeof coreBackOfficeToolsToolIdStatusCreateRoute
   '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  '/back-office/tools/$toolId/status': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
   '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  '/back-office/tools/$toolId/status/$statusId/edit': typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -809,6 +980,8 @@ export interface FileRoutesById {
   '/unauthorized': typeof UnauthorizedRoute
   '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/(core)/dashboard': typeof coreDashboardRouteRouteWithChildren
+  '/(core)/display-board': typeof coreDisplayBoardRouteRouteWithChildren
+  '/(core)/employee': typeof coreEmployeeRouteRouteWithChildren
   '/(core)/konsultasi': typeof coreKonsultasiRouteRoute
   '/(core)/pelatihan': typeof corePelatihanRouteRoute
   '/(core)/pengujian': typeof corePengujianRouteRouteWithChildren
@@ -828,6 +1001,7 @@ export interface FileRoutesById {
   '/verify/$token': typeof VerifyTokenRoute
   '/berita/': typeof BeritaIndexRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/(core)/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
   '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/(core)/pengujian/transaksi': typeof corePengujianTransaksiRoute
@@ -835,8 +1009,11 @@ export interface FileRoutesById {
   '/(core)/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
+  '/(core)/display-board/': typeof coreDisplayBoardIndexRoute
+  '/(core)/employee/': typeof coreEmployeeIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
   '/(core)/worksheets/': typeof coreWorksheetsIndexRoute
+  '/(core)/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/(core)/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/(core)/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
@@ -848,9 +1025,11 @@ export interface FileRoutesById {
   '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/(core)/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/(core)/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
+  '/(core)/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
+  '/(core)/back-office/audits/': typeof coreBackOfficeAuditsIndexRoute
   '/(core)/back-office/banners/': typeof coreBackOfficeBannersIndexRoute
   '/(core)/back-office/chemical-materials/': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/(core)/back-office/clusters/': typeof coreBackOfficeClustersIndexRoute
@@ -864,10 +1043,16 @@ export interface FileRoutesById {
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
   '/(core)/back-office/survey-questions/': typeof coreBackOfficeSurveyQuestionsIndexRoute
   '/(core)/back-office/testings/': typeof coreBackOfficeTestingsIndexRoute
+  '/(core)/back-office/tool-codes/': typeof coreBackOfficeToolCodesIndexRoute
   '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
   '/(core)/back-office/users/': typeof coreBackOfficeUsersIndexRoute
   '/(core)/back-office/worksheets/': typeof coreBackOfficeWorksheetsIndexRoute
   '/(core)/dashboard/company/': typeof coreDashboardCompanyIndexRoute
+  '/(core)/employee/certifications/': typeof coreEmployeeCertificationsIndexRoute
+  '/(core)/employee/spt/': typeof coreEmployeeSptIndexRoute
+  '/(core)/employee/testings/': typeof coreEmployeeTestingsIndexRoute
+  '/(core)/employee/tools/': typeof coreEmployeeToolsIndexRoute
+  '/(core)/employee/worksheets/': typeof coreEmployeeWorksheetsIndexRoute
   '/(core)/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
   '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
@@ -883,15 +1068,21 @@ export interface FileRoutesById {
   '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/(core)/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
+  '/(core)/back-office/tool-codes/$toolCodeId/edit': typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   '/(core)/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/(core)/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/(core)/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
+  '/(core)/employee/tools/$worksheetId/detail': typeof coreEmployeeToolsWorksheetIdDetailRoute
+  '/(core)/employee/tools/$worksheetId/return': typeof coreEmployeeToolsWorksheetIdReturnRoute
   '/(core)/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  '/(core)/back-office/tools/$toolId/status/create': typeof coreBackOfficeToolsToolIdStatusCreateRoute
   '/(core)/back-office/tools/$toolId/calibration/': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  '/(core)/back-office/tools/$toolId/status/': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
   '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  '/(core)/back-office/tools/$toolId/status/$statusId/edit': typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -903,6 +1094,8 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/back-office'
     | '/dashboard'
+    | '/display-board'
+    | '/employee'
     | '/konsultasi'
     | '/pelatihan'
     | '/pengujian'
@@ -922,6 +1115,7 @@ export interface FileRouteTypes {
     | '/verify/$token'
     | '/berita'
     | '/pengujian/checkout'
+    | '/pengujian/sertifikat'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
     | '/pengujian/transaksi'
@@ -929,8 +1123,11 @@ export interface FileRouteTypes {
     | '/worksheets/jadwal-personel'
     | '/back-office/'
     | '/dashboard/'
+    | '/display-board/'
+    | '/employee/'
     | '/pengujian/'
     | '/worksheets/'
+    | '/back-office/audits/$auditId'
     | '/back-office/banners/create'
     | '/back-office/chemical-materials/create'
     | '/back-office/clusters/create'
@@ -942,9 +1139,11 @@ export interface FileRouteTypes {
     | '/back-office/positions/create'
     | '/back-office/roles/create'
     | '/back-office/survey-questions/create'
+    | '/back-office/tool-codes/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
     | '/dashboard/company/create'
+    | '/back-office/audits'
     | '/back-office/banners'
     | '/back-office/chemical-materials'
     | '/back-office/clusters'
@@ -958,10 +1157,16 @@ export interface FileRouteTypes {
     | '/back-office/roles'
     | '/back-office/survey-questions'
     | '/back-office/testings'
+    | '/back-office/tool-codes'
     | '/back-office/tools'
     | '/back-office/users'
     | '/back-office/worksheets'
     | '/dashboard/company'
+    | '/employee/certifications'
+    | '/employee/spt'
+    | '/employee/testings'
+    | '/employee/tools'
+    | '/employee/worksheets'
     | '/back-office/banners/$bannerId/edit'
     | '/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/back-office/clusters/$clusterId/edit'
@@ -977,15 +1182,21 @@ export interface FileRouteTypes {
     | '/back-office/roles/$roleId/edit'
     | '/back-office/survey-questions/$questionId/edit'
     | '/back-office/testings/$testingId/detail'
+    | '/back-office/tool-codes/$toolCodeId/edit'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/tools/$toolId/edit'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
+    | '/employee/tools/$worksheetId/detail'
+    | '/employee/tools/$worksheetId/return'
     | '/back-office/tools/$toolId/calibration/create'
+    | '/back-office/tools/$toolId/status/create'
     | '/back-office/tools/$toolId/calibration'
+    | '/back-office/tools/$toolId/status'
     | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
     | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
+    | '/back-office/tools/$toolId/status/$statusId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1010,6 +1221,7 @@ export interface FileRouteTypes {
     | '/verify/$token'
     | '/berita'
     | '/pengujian/checkout'
+    | '/pengujian/sertifikat'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
     | '/pengujian/transaksi'
@@ -1017,8 +1229,11 @@ export interface FileRouteTypes {
     | '/worksheets/jadwal-personel'
     | '/back-office'
     | '/dashboard'
+    | '/display-board'
+    | '/employee'
     | '/pengujian'
     | '/worksheets'
+    | '/back-office/audits/$auditId'
     | '/back-office/banners/create'
     | '/back-office/chemical-materials/create'
     | '/back-office/clusters/create'
@@ -1030,9 +1245,11 @@ export interface FileRouteTypes {
     | '/back-office/positions/create'
     | '/back-office/roles/create'
     | '/back-office/survey-questions/create'
+    | '/back-office/tool-codes/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
     | '/dashboard/company/create'
+    | '/back-office/audits'
     | '/back-office/banners'
     | '/back-office/chemical-materials'
     | '/back-office/clusters'
@@ -1046,10 +1263,16 @@ export interface FileRouteTypes {
     | '/back-office/roles'
     | '/back-office/survey-questions'
     | '/back-office/testings'
+    | '/back-office/tool-codes'
     | '/back-office/tools'
     | '/back-office/users'
     | '/back-office/worksheets'
     | '/dashboard/company'
+    | '/employee/certifications'
+    | '/employee/spt'
+    | '/employee/testings'
+    | '/employee/tools'
+    | '/employee/worksheets'
     | '/back-office/banners/$bannerId/edit'
     | '/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/back-office/clusters/$clusterId/edit'
@@ -1065,15 +1288,21 @@ export interface FileRouteTypes {
     | '/back-office/roles/$roleId/edit'
     | '/back-office/survey-questions/$questionId/edit'
     | '/back-office/testings/$testingId/detail'
+    | '/back-office/tool-codes/$toolCodeId/edit'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/tools/$toolId/edit'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
+    | '/employee/tools/$worksheetId/detail'
+    | '/employee/tools/$worksheetId/return'
     | '/back-office/tools/$toolId/calibration/create'
+    | '/back-office/tools/$toolId/status/create'
     | '/back-office/tools/$toolId/calibration'
+    | '/back-office/tools/$toolId/status'
     | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
     | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
+    | '/back-office/tools/$toolId/status/$statusId/edit'
   id:
     | '__root__'
     | '/'
@@ -1085,6 +1314,8 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/(core)/back-office'
     | '/(core)/dashboard'
+    | '/(core)/display-board'
+    | '/(core)/employee'
     | '/(core)/konsultasi'
     | '/(core)/pelatihan'
     | '/(core)/pengujian'
@@ -1104,6 +1335,7 @@ export interface FileRouteTypes {
     | '/verify/$token'
     | '/berita/'
     | '/(core)/pengujian/checkout'
+    | '/(core)/pengujian/sertifikat'
     | '/(core)/pengujian/status'
     | '/(core)/pengujian/survey-kepuasan'
     | '/(core)/pengujian/transaksi'
@@ -1111,8 +1343,11 @@ export interface FileRouteTypes {
     | '/(core)/worksheets/jadwal-personel'
     | '/(core)/back-office/'
     | '/(core)/dashboard/'
+    | '/(core)/display-board/'
+    | '/(core)/employee/'
     | '/(core)/pengujian/'
     | '/(core)/worksheets/'
+    | '/(core)/back-office/audits/$auditId'
     | '/(core)/back-office/banners/create'
     | '/(core)/back-office/chemical-materials/create'
     | '/(core)/back-office/clusters/create'
@@ -1124,9 +1359,11 @@ export interface FileRouteTypes {
     | '/(core)/back-office/positions/create'
     | '/(core)/back-office/roles/create'
     | '/(core)/back-office/survey-questions/create'
+    | '/(core)/back-office/tool-codes/create'
     | '/(core)/back-office/tools/create'
     | '/(core)/back-office/users/create'
     | '/(core)/dashboard/company/create'
+    | '/(core)/back-office/audits/'
     | '/(core)/back-office/banners/'
     | '/(core)/back-office/chemical-materials/'
     | '/(core)/back-office/clusters/'
@@ -1140,10 +1377,16 @@ export interface FileRouteTypes {
     | '/(core)/back-office/roles/'
     | '/(core)/back-office/survey-questions/'
     | '/(core)/back-office/testings/'
+    | '/(core)/back-office/tool-codes/'
     | '/(core)/back-office/tools/'
     | '/(core)/back-office/users/'
     | '/(core)/back-office/worksheets/'
     | '/(core)/dashboard/company/'
+    | '/(core)/employee/certifications/'
+    | '/(core)/employee/spt/'
+    | '/(core)/employee/testings/'
+    | '/(core)/employee/tools/'
+    | '/(core)/employee/worksheets/'
     | '/(core)/back-office/banners/$bannerId/edit'
     | '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
     | '/(core)/back-office/clusters/$clusterId/edit'
@@ -1159,15 +1402,21 @@ export interface FileRouteTypes {
     | '/(core)/back-office/roles/$roleId/edit'
     | '/(core)/back-office/survey-questions/$questionId/edit'
     | '/(core)/back-office/testings/$testingId/detail'
+    | '/(core)/back-office/tool-codes/$toolCodeId/edit'
     | '/(core)/back-office/tools/$toolId/detail'
     | '/(core)/back-office/tools/$toolId/edit'
     | '/(core)/back-office/users/$userId/edit'
     | '/(core)/dashboard/company/$companyId/detail'
     | '/(core)/dashboard/company/$companyId/edit'
+    | '/(core)/employee/tools/$worksheetId/detail'
+    | '/(core)/employee/tools/$worksheetId/return'
     | '/(core)/back-office/tools/$toolId/calibration/create'
+    | '/(core)/back-office/tools/$toolId/status/create'
     | '/(core)/back-office/tools/$toolId/calibration/'
+    | '/(core)/back-office/tools/$toolId/status/'
     | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
     | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
+    | '/(core)/back-office/tools/$toolId/status/$statusId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1360,6 +1609,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreKonsultasiRouteRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/employee': {
+      id: '/(core)/employee'
+      path: '/employee'
+      fullPath: '/employee'
+      preLoaderRoute: typeof coreEmployeeRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
+    '/(core)/display-board': {
+      id: '/(core)/display-board'
+      path: '/display-board'
+      fullPath: '/display-board'
+      preLoaderRoute: typeof coreDisplayBoardRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/dashboard': {
       id: '/(core)/dashboard'
       path: '/dashboard'
@@ -1387,6 +1650,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/pengujian/'
       preLoaderRoute: typeof corePengujianIndexRouteImport
       parentRoute: typeof corePengujianRouteRoute
+    }
+    '/(core)/employee/': {
+      id: '/(core)/employee/'
+      path: '/'
+      fullPath: '/employee/'
+      preLoaderRoute: typeof coreEmployeeIndexRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
+    }
+    '/(core)/display-board/': {
+      id: '/(core)/display-board/'
+      path: '/'
+      fullPath: '/display-board/'
+      preLoaderRoute: typeof coreDisplayBoardIndexRouteImport
+      parentRoute: typeof coreDisplayBoardRouteRoute
     }
     '/(core)/dashboard/': {
       id: '/(core)/dashboard/'
@@ -1437,12 +1714,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof corePengujianStatusRouteImport
       parentRoute: typeof corePengujianRouteRoute
     }
+    '/(core)/pengujian/sertifikat': {
+      id: '/(core)/pengujian/sertifikat'
+      path: '/sertifikat'
+      fullPath: '/pengujian/sertifikat'
+      preLoaderRoute: typeof corePengujianSertifikatRouteImport
+      parentRoute: typeof corePengujianRouteRoute
+    }
     '/(core)/pengujian/checkout': {
       id: '/(core)/pengujian/checkout'
       path: '/checkout'
       fullPath: '/pengujian/checkout'
       preLoaderRoute: typeof corePengujianCheckoutRouteImport
       parentRoute: typeof corePengujianRouteRoute
+    }
+    '/(core)/employee/worksheets/': {
+      id: '/(core)/employee/worksheets/'
+      path: '/worksheets'
+      fullPath: '/employee/worksheets'
+      preLoaderRoute: typeof coreEmployeeWorksheetsIndexRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
+    }
+    '/(core)/employee/tools/': {
+      id: '/(core)/employee/tools/'
+      path: '/tools'
+      fullPath: '/employee/tools'
+      preLoaderRoute: typeof coreEmployeeToolsIndexRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
+    }
+    '/(core)/employee/testings/': {
+      id: '/(core)/employee/testings/'
+      path: '/testings'
+      fullPath: '/employee/testings'
+      preLoaderRoute: typeof coreEmployeeTestingsIndexRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
+    }
+    '/(core)/employee/spt/': {
+      id: '/(core)/employee/spt/'
+      path: '/spt'
+      fullPath: '/employee/spt'
+      preLoaderRoute: typeof coreEmployeeSptIndexRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
+    }
+    '/(core)/employee/certifications/': {
+      id: '/(core)/employee/certifications/'
+      path: '/certifications'
+      fullPath: '/employee/certifications'
+      preLoaderRoute: typeof coreEmployeeCertificationsIndexRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
     }
     '/(core)/dashboard/company/': {
       id: '/(core)/dashboard/company/'
@@ -1470,6 +1789,13 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/back-office/tools'
       preLoaderRoute: typeof coreBackOfficeToolsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/tool-codes/': {
+      id: '/(core)/back-office/tool-codes/'
+      path: '/tool-codes'
+      fullPath: '/back-office/tool-codes'
+      preLoaderRoute: typeof coreBackOfficeToolCodesIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/testings/': {
@@ -1563,6 +1889,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeBannersIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/audits/': {
+      id: '/(core)/back-office/audits/'
+      path: '/audits'
+      fullPath: '/back-office/audits'
+      preLoaderRoute: typeof coreBackOfficeAuditsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/dashboard/company/create': {
       id: '/(core)/dashboard/company/create'
       path: '/company/create'
@@ -1582,6 +1915,13 @@ declare module '@tanstack/react-router' {
       path: '/tools/create'
       fullPath: '/back-office/tools/create'
       preLoaderRoute: typeof coreBackOfficeToolsCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/tool-codes/create': {
+      id: '/(core)/back-office/tool-codes/create'
+      path: '/tool-codes/create'
+      fullPath: '/back-office/tool-codes/create'
+      preLoaderRoute: typeof coreBackOfficeToolCodesCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/survey-questions/create': {
@@ -1661,6 +2001,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeBannersCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/audits/$auditId': {
+      id: '/(core)/back-office/audits/$auditId'
+      path: '/audits/$auditId'
+      fullPath: '/back-office/audits/$auditId'
+      preLoaderRoute: typeof coreBackOfficeAuditsAuditIdRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/employee/tools/$worksheetId/return': {
+      id: '/(core)/employee/tools/$worksheetId/return'
+      path: '/tools/$worksheetId/return'
+      fullPath: '/employee/tools/$worksheetId/return'
+      preLoaderRoute: typeof coreEmployeeToolsWorksheetIdReturnRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
+    }
+    '/(core)/employee/tools/$worksheetId/detail': {
+      id: '/(core)/employee/tools/$worksheetId/detail'
+      path: '/tools/$worksheetId/detail'
+      fullPath: '/employee/tools/$worksheetId/detail'
+      preLoaderRoute: typeof coreEmployeeToolsWorksheetIdDetailRouteImport
+      parentRoute: typeof coreEmployeeRouteRoute
+    }
     '/(core)/dashboard/company/$companyId/edit': {
       id: '/(core)/dashboard/company/$companyId/edit'
       path: '/company/$companyId/edit'
@@ -1694,6 +2055,13 @@ declare module '@tanstack/react-router' {
       path: '/tools/$toolId/detail'
       fullPath: '/back-office/tools/$toolId/detail'
       preLoaderRoute: typeof coreBackOfficeToolsToolIdDetailRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/tool-codes/$toolCodeId/edit': {
+      id: '/(core)/back-office/tool-codes/$toolCodeId/edit'
+      path: '/tool-codes/$toolCodeId/edit'
+      fullPath: '/back-office/tool-codes/$toolCodeId/edit'
+      preLoaderRoute: typeof coreBackOfficeToolCodesToolCodeIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/testings/$testingId/detail': {
@@ -1801,6 +2169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeBannersBannerIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/tools/$toolId/status/': {
+      id: '/(core)/back-office/tools/$toolId/status/'
+      path: '/tools/$toolId/status'
+      fullPath: '/back-office/tools/$toolId/status'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdStatusIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/tools/$toolId/calibration/': {
       id: '/(core)/back-office/tools/$toolId/calibration/'
       path: '/tools/$toolId/calibration'
@@ -1808,11 +2183,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/tools/$toolId/status/create': {
+      id: '/(core)/back-office/tools/$toolId/status/create'
+      path: '/tools/$toolId/status/create'
+      fullPath: '/back-office/tools/$toolId/status/create'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdStatusCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/tools/$toolId/calibration/create': {
       id: '/(core)/back-office/tools/$toolId/calibration/create'
       path: '/tools/$toolId/calibration/create'
       fullPath: '/back-office/tools/$toolId/calibration/create'
       preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/tools/$toolId/status/$statusId/edit': {
+      id: '/(core)/back-office/tools/$toolId/status/$statusId/edit'
+      path: '/tools/$toolId/status/$statusId/edit'
+      fullPath: '/back-office/tools/$toolId/status/$statusId/edit'
+      preLoaderRoute: typeof coreBackOfficeToolsToolIdStatusStatusIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': {
@@ -1854,6 +2243,7 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeIndexRoute: typeof coreBackOfficeIndexRoute
+  coreBackOfficeAuditsAuditIdRoute: typeof coreBackOfficeAuditsAuditIdRoute
   coreBackOfficeBannersCreateRoute: typeof coreBackOfficeBannersCreateRoute
   coreBackOfficeChemicalMaterialsCreateRoute: typeof coreBackOfficeChemicalMaterialsCreateRoute
   coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute
@@ -1865,8 +2255,10 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
   coreBackOfficeRolesCreateRoute: typeof coreBackOfficeRolesCreateRoute
   coreBackOfficeSurveyQuestionsCreateRoute: typeof coreBackOfficeSurveyQuestionsCreateRoute
+  coreBackOfficeToolCodesCreateRoute: typeof coreBackOfficeToolCodesCreateRoute
   coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
   coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
+  coreBackOfficeAuditsIndexRoute: typeof coreBackOfficeAuditsIndexRoute
   coreBackOfficeBannersIndexRoute: typeof coreBackOfficeBannersIndexRoute
   coreBackOfficeChemicalMaterialsIndexRoute: typeof coreBackOfficeChemicalMaterialsIndexRoute
   coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute
@@ -1880,6 +2272,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
   coreBackOfficeSurveyQuestionsIndexRoute: typeof coreBackOfficeSurveyQuestionsIndexRoute
   coreBackOfficeTestingsIndexRoute: typeof coreBackOfficeTestingsIndexRoute
+  coreBackOfficeToolCodesIndexRoute: typeof coreBackOfficeToolCodesIndexRoute
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
   coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
   coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
@@ -1898,17 +2291,22 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
   coreBackOfficeSurveyQuestionsQuestionIdEditRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
+  coreBackOfficeToolCodesToolCodeIdEditRoute: typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute
   coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
   coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
   coreBackOfficeToolsToolIdCalibrationCreateRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
+  coreBackOfficeToolsToolIdStatusCreateRoute: typeof coreBackOfficeToolsToolIdStatusCreateRoute
   coreBackOfficeToolsToolIdCalibrationIndexRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
+  coreBackOfficeToolsToolIdStatusIndexRoute: typeof coreBackOfficeToolsToolIdStatusIndexRoute
   coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
   coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
+  coreBackOfficeToolsToolIdStatusStatusIdEditRoute: typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
 }
 
 const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeIndexRoute: coreBackOfficeIndexRoute,
+  coreBackOfficeAuditsAuditIdRoute: coreBackOfficeAuditsAuditIdRoute,
   coreBackOfficeBannersCreateRoute: coreBackOfficeBannersCreateRoute,
   coreBackOfficeChemicalMaterialsCreateRoute:
     coreBackOfficeChemicalMaterialsCreateRoute,
@@ -1923,8 +2321,10 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeRolesCreateRoute: coreBackOfficeRolesCreateRoute,
   coreBackOfficeSurveyQuestionsCreateRoute:
     coreBackOfficeSurveyQuestionsCreateRoute,
+  coreBackOfficeToolCodesCreateRoute: coreBackOfficeToolCodesCreateRoute,
   coreBackOfficeToolsCreateRoute: coreBackOfficeToolsCreateRoute,
   coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
+  coreBackOfficeAuditsIndexRoute: coreBackOfficeAuditsIndexRoute,
   coreBackOfficeBannersIndexRoute: coreBackOfficeBannersIndexRoute,
   coreBackOfficeChemicalMaterialsIndexRoute:
     coreBackOfficeChemicalMaterialsIndexRoute,
@@ -1941,6 +2341,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeSurveyQuestionsIndexRoute:
     coreBackOfficeSurveyQuestionsIndexRoute,
   coreBackOfficeTestingsIndexRoute: coreBackOfficeTestingsIndexRoute,
+  coreBackOfficeToolCodesIndexRoute: coreBackOfficeToolCodesIndexRoute,
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
   coreBackOfficeUsersIndexRoute: coreBackOfficeUsersIndexRoute,
   coreBackOfficeWorksheetsIndexRoute: coreBackOfficeWorksheetsIndexRoute,
@@ -1970,17 +2371,25 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeSurveyQuestionsQuestionIdEditRoute,
   coreBackOfficeTestingsTestingIdDetailRoute:
     coreBackOfficeTestingsTestingIdDetailRoute,
+  coreBackOfficeToolCodesToolCodeIdEditRoute:
+    coreBackOfficeToolCodesToolCodeIdEditRoute,
   coreBackOfficeToolsToolIdDetailRoute: coreBackOfficeToolsToolIdDetailRoute,
   coreBackOfficeToolsToolIdEditRoute: coreBackOfficeToolsToolIdEditRoute,
   coreBackOfficeUsersUserIdEditRoute: coreBackOfficeUsersUserIdEditRoute,
   coreBackOfficeToolsToolIdCalibrationCreateRoute:
     coreBackOfficeToolsToolIdCalibrationCreateRoute,
+  coreBackOfficeToolsToolIdStatusCreateRoute:
+    coreBackOfficeToolsToolIdStatusCreateRoute,
   coreBackOfficeToolsToolIdCalibrationIndexRoute:
     coreBackOfficeToolsToolIdCalibrationIndexRoute,
+  coreBackOfficeToolsToolIdStatusIndexRoute:
+    coreBackOfficeToolsToolIdStatusIndexRoute,
   coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute:
     coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute,
   coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute:
     coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute,
+  coreBackOfficeToolsToolIdStatusStatusIdEditRoute:
+    coreBackOfficeToolsToolIdStatusStatusIdEditRoute,
 }
 
 const coreBackOfficeRouteRouteWithChildren =
@@ -2007,8 +2416,49 @@ const coreDashboardRouteRouteChildren: coreDashboardRouteRouteChildren = {
 const coreDashboardRouteRouteWithChildren =
   coreDashboardRouteRoute._addFileChildren(coreDashboardRouteRouteChildren)
 
+interface coreDisplayBoardRouteRouteChildren {
+  coreDisplayBoardIndexRoute: typeof coreDisplayBoardIndexRoute
+}
+
+const coreDisplayBoardRouteRouteChildren: coreDisplayBoardRouteRouteChildren = {
+  coreDisplayBoardIndexRoute: coreDisplayBoardIndexRoute,
+}
+
+const coreDisplayBoardRouteRouteWithChildren =
+  coreDisplayBoardRouteRoute._addFileChildren(
+    coreDisplayBoardRouteRouteChildren,
+  )
+
+interface coreEmployeeRouteRouteChildren {
+  coreEmployeeIndexRoute: typeof coreEmployeeIndexRoute
+  coreEmployeeCertificationsIndexRoute: typeof coreEmployeeCertificationsIndexRoute
+  coreEmployeeSptIndexRoute: typeof coreEmployeeSptIndexRoute
+  coreEmployeeTestingsIndexRoute: typeof coreEmployeeTestingsIndexRoute
+  coreEmployeeToolsIndexRoute: typeof coreEmployeeToolsIndexRoute
+  coreEmployeeWorksheetsIndexRoute: typeof coreEmployeeWorksheetsIndexRoute
+  coreEmployeeToolsWorksheetIdDetailRoute: typeof coreEmployeeToolsWorksheetIdDetailRoute
+  coreEmployeeToolsWorksheetIdReturnRoute: typeof coreEmployeeToolsWorksheetIdReturnRoute
+}
+
+const coreEmployeeRouteRouteChildren: coreEmployeeRouteRouteChildren = {
+  coreEmployeeIndexRoute: coreEmployeeIndexRoute,
+  coreEmployeeCertificationsIndexRoute: coreEmployeeCertificationsIndexRoute,
+  coreEmployeeSptIndexRoute: coreEmployeeSptIndexRoute,
+  coreEmployeeTestingsIndexRoute: coreEmployeeTestingsIndexRoute,
+  coreEmployeeToolsIndexRoute: coreEmployeeToolsIndexRoute,
+  coreEmployeeWorksheetsIndexRoute: coreEmployeeWorksheetsIndexRoute,
+  coreEmployeeToolsWorksheetIdDetailRoute:
+    coreEmployeeToolsWorksheetIdDetailRoute,
+  coreEmployeeToolsWorksheetIdReturnRoute:
+    coreEmployeeToolsWorksheetIdReturnRoute,
+}
+
+const coreEmployeeRouteRouteWithChildren =
+  coreEmployeeRouteRoute._addFileChildren(coreEmployeeRouteRouteChildren)
+
 interface corePengujianRouteRouteChildren {
   corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute
+  corePengujianSertifikatRoute: typeof corePengujianSertifikatRoute
   corePengujianStatusRoute: typeof corePengujianStatusRoute
   corePengujianSurveyKepuasanRoute: typeof corePengujianSurveyKepuasanRoute
   corePengujianTransaksiRoute: typeof corePengujianTransaksiRoute
@@ -2017,6 +2467,7 @@ interface corePengujianRouteRouteChildren {
 
 const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
   corePengujianCheckoutRoute: corePengujianCheckoutRoute,
+  corePengujianSertifikatRoute: corePengujianSertifikatRoute,
   corePengujianStatusRoute: corePengujianStatusRoute,
   corePengujianSurveyKepuasanRoute: corePengujianSurveyKepuasanRoute,
   corePengujianTransaksiRoute: corePengujianTransaksiRoute,
@@ -2044,6 +2495,8 @@ const coreWorksheetsRouteRouteWithChildren =
 interface coreRouteRouteChildren {
   coreBackOfficeRouteRoute: typeof coreBackOfficeRouteRouteWithChildren
   coreDashboardRouteRoute: typeof coreDashboardRouteRouteWithChildren
+  coreDisplayBoardRouteRoute: typeof coreDisplayBoardRouteRouteWithChildren
+  coreEmployeeRouteRoute: typeof coreEmployeeRouteRouteWithChildren
   coreKonsultasiRouteRoute: typeof coreKonsultasiRouteRoute
   corePelatihanRouteRoute: typeof corePelatihanRouteRoute
   corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
@@ -2059,6 +2512,8 @@ interface coreRouteRouteChildren {
 const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreBackOfficeRouteRoute: coreBackOfficeRouteRouteWithChildren,
   coreDashboardRouteRoute: coreDashboardRouteRouteWithChildren,
+  coreDisplayBoardRouteRoute: coreDisplayBoardRouteRouteWithChildren,
+  coreEmployeeRouteRoute: coreEmployeeRouteRouteWithChildren,
   coreKonsultasiRouteRoute: coreKonsultasiRouteRoute,
   corePelatihanRouteRoute: corePelatihanRouteRoute,
   corePengujianRouteRoute: corePengujianRouteRouteWithChildren,

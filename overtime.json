@@ -1,0 +1,57 @@
+{
+  "locale": "id-ID",
+  "country": "ID",
+  "timezone": "Asia/Jakarta",
+  "workingHours": {
+    "default": {
+      "start": "07:30",
+      "end": "16:00",
+      "hoursPerDay": 7.5,
+      "breakMinutes": 60
+    },
+    "overrides": {
+      "Friday": {
+        "start": "07:30",
+        "end": "16:30",
+        "hoursPerDay": 8.5,
+        "breakMinutes": 90
+      }
+    },
+    "ramadhan": {
+      "start": "07:30",
+      "end": "14:30",
+      "hoursPerDay": 6,
+      "breakMinutes": 30
+    },
+    "ramadhanOverrides": {
+      "Friday": {
+        "start": "07:30",
+        "end": "15:00",
+        "hoursPerDay": 6,
+        "breakMinutes": 60
+      }
+    }
+  },
+  "workingDays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+  "overtime": {
+    "rateMultiplier": 1.5,
+    "holidayRateMultiplier": 2.0,
+    "ramadhanShortened": true,
+    "ramadhanWorkHours": 6
+  },
+  "sessionGapMinutes": 120,
+  "sessionStartBuffer": 15,
+  "git": {
+    "repoPath": ".",
+    "author": "rizrmdhn",
+    "branch": "",
+    "since": "",
+    "until": ""
+  },
+  "holidays": {
+    "fetchNational": true,
+    "fetchRamadhan": true,
+    "apiProvider": "nager",
+    "customHolidays": []
+  }
+}

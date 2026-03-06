@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import type { Audit } from "@tepian-k3/types/audit.types";
+import type { Audit } from "@tepian-k3/types/platform/audit.types";
 import { useQuery } from "@tanstack/react-query";
 import type { AuditEntityType } from "@tepian-k3/constants";
 
@@ -17,7 +17,7 @@ interface AuditLogViewerProps {
 
 export function AuditLogViewer({ entityType, entityId }: AuditLogViewerProps) {
   const { data: logs, isLoading } = useQuery(
-    trpc.audit.getEntityHistory.queryOptions({
+    trpc.platform.audit.getEntityHistory.queryOptions({
       entityType,
       entityId,
     }),

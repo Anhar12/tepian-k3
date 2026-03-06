@@ -32,16 +32,16 @@ export function CalibrationCertificate({
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
 
   const { data: calibration, isLoading } = useQuery(
-    trpc.tool.getToolCalibrationCertificate.queryOptions({
+    trpc.pengujian.tool.getToolCalibrationCertificate.queryOptions({
       id: calibrationId,
     }),
   );
 
   const createToolCertificateMutation = useMutation(
-    trpc.tool.createToolCertification.mutationOptions({
+    trpc.pengujian.tool.createToolCertification.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.tool.getToolCalibrationCertificate.queryOptions({
+          trpc.pengujian.tool.getToolCalibrationCertificate.queryOptions({
             id: calibrationId,
           }),
         );

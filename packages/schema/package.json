@@ -1,5 +1,7 @@
 {
   "name": "@tepian-k3/schema",
+  "version": "1.9.0",
+  "private": true,
   "exports": {
     ".": {
       "default": "./src/index.ts"

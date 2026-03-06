@@ -1,8 +1,8 @@
-import usersQueries from "@tepian-k3/queries/users.queries";
+import usersQueries from "@tepian-k3/queries/platform/users.queries";
 import { Data, Effect } from "effect";
 import { decryptResetToken, encryptResetToken } from "..";
 import { logError } from "@tepian-k3/services/logger";
-import passwordResetsQueries from "@tepian-k3/queries/password-resets.queries";
+import passwordResetsQueries from "@tepian-k3/queries/platform/password-resets.queries";
 import { env } from "../../env";
 import { emailService } from "@tepian-k3/services/email";
 import { db } from "@tepian-k3/db/client";

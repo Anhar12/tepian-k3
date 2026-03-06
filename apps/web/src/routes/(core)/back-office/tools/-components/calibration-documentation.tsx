@@ -40,16 +40,16 @@ export function CalibrationDocumentation({
   const [documentationFile, setDocumentationFile] = useState<File[]>([]);
 
   const { data: calibration, isLoading } = useQuery(
-    trpc.tool.getToolCalibrationDocumentation.queryOptions({
+    trpc.pengujian.tool.getToolCalibrationDocumentation.queryOptions({
       id: calibrationId,
     }),
   );
 
   const createToolDocumentationMutation = useMutation(
-    trpc.tool.createToolDocumentation.mutationOptions({
+    trpc.pengujian.tool.createToolDocumentation.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.tool.getToolCalibrationDocumentation.queryOptions({
+          trpc.pengujian.tool.getToolCalibrationDocumentation.queryOptions({
             id: calibrationId,
           }),
         );

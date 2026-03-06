@@ -20,7 +20,7 @@ interface ParameterDetailProps {
 
 export default function ParameterDetail({ parameterId }: ParameterDetailProps) {
   const { data: parameter, isLoading } = useQuery(
-    trpc.parameter.getParameterById.queryOptions({
+    trpc.pengujian.parameter.getParameterById.queryOptions({
       id: parameterId,
     }),
   );

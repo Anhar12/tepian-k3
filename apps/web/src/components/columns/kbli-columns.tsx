@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { KBLI } from "@tepian-k3/types/kbli.types";
+import type { KBLI } from "@tepian-k3/types/pengujian/kbli.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/kblis";
 import {
@@ -22,9 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "kbli",
   resourcePath: "kblis",
   permissionPrefix: "kbli",
-  deleteMutation: trpc.kbli.deleteKbli,
-  restoreMutation: trpc.kbli.restoreKbli,
-  getQueryOptions: (params) => trpc.kbli.getPaginatedKblis.queryOptions(params),
+  deleteMutation: trpc.pengujian.kbli.deleteKbli,
+  restoreMutation: trpc.pengujian.kbli.restoreKbli,
+  getQueryOptions: (params) =>
+    trpc.pengujian.kbli.getPaginatedKblis.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Clusters } from "@tepian-k3/types/clusters.types";
+import type { Clusters } from "@tepian-k3/types/pengujian/clusters.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/clusters";
 import {
@@ -22,10 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "cluster",
   resourcePath: "clusters",
   permissionPrefix: "clusters",
-  deleteMutation: trpc.cluster.deleteCluster,
-  restoreMutation: trpc.cluster.restoreCluster,
+  deleteMutation: trpc.pengujian.cluster.deleteCluster,
+  restoreMutation: trpc.pengujian.cluster.restoreCluster,
   getQueryOptions: (params) =>
-    trpc.cluster.getPaginatedClusters.queryOptions(params),
+    trpc.pengujian.cluster.getPaginatedClusters.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

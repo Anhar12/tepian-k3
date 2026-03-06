@@ -17,7 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Calendar, Trash2 } from "lucide-react";
 import { useState } from "react";
-import type { ParameterChemicals } from "@tepian-k3/types/parameter-chemical-material.types";
+import type { ParameterChemicals } from "@tepian-k3/types/pengujian/parameter-chemical-material.types";
 import { IconFlask } from "@tabler/icons-react";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -32,11 +32,11 @@ export default function ParameterChemicalCard({
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const deleteParameterChemicalMutation = useMutation(
-    trpc.parameterChemicalMaterial.deleteParameterChemicalMaterial.mutationOptions(
+    trpc.pengujian.parameterChemicalMaterial.deleteParameterChemicalMaterial.mutationOptions(
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(
-            trpc.parameterChemicalMaterial.getAllChemicalMaterialsByParameterId.queryOptions(
+            trpc.pengujian.parameterChemicalMaterial.getAllChemicalMaterialsByParameterId.queryOptions(
               {
                 parameterId: parameterChemical.parameterId,
               },

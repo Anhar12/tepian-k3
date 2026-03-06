@@ -1,51 +1,68 @@
-import { inArray } from "drizzle-orm";
 import { db } from "../../client";
-import { regencies, districts } from "../../schema";
+import { districts } from "../../schema";
 import { getIndonesianDistricts } from "../utils/indonesian-countries/index";
 
-type InsertDistrict = typeof districts.$inferInsert;
+const BATCH_SIZE = 1000;
 
-const generateDistricts = async (): Promise<InsertDistrict[]> => {
+/**
+ * Seeds all Indonesian districts using the regency code → UUID map
+ * returned by the regency seeder. Returns a district code → UUID map
+ * for use by the village seeder.
+ *
+ * @param regencyMap - Map of full regency BPS code to UUID (from seedRegencies)
+ * @returns Map of full district BPS code (e.g. "1101010") to inserted UUID
+ */
+async function seedDistricts(
+  regencyMap: Map<string, string>,
+): Promise<Map<string, string>> {
+  console.log("🌱 Starting district seeding...");
+
   const districtsList = await getIndonesianDistricts();
+  console.log(`📊 Total districts to seed: ${districtsList.length}`);
 
-  // extract unique regency IDs
-  const uniqueRegencyOldIds = [
-    ...new Set(districtsList.map((d) => Number(d.regency_id))),
-  ];
+  await db.delete(districts).execute();
+  console.log("🗑️  Cleared existing districts");
 
-  // fetch all regencies in a single query
-  const regencyRecords = await db.query.regencies.findMany({
-    where: inArray(regencies.oldId, uniqueRegencyOldIds),
-  });
-
-  // create a map for O(1) lookups
-  const regencyMap = new Map(regencyRecords.map((r) => [r.oldId, r.id]));
-
-  // map districts with regency IDs
-  return districtsList.map((district) => {
-    const oldRegencyId = Number(district.regency_id);
-    const regencyId = regencyMap.get(oldRegencyId);
-
+  const data = districtsList.map((d) => {
+    const regencyId = regencyMap.get(d.regencyCode);
     if (!regencyId) {
-      throw new Error(`Regency with oldId ${oldRegencyId} not found`);
+      throw new Error(
+        `Regency UUID not found for code "${d.regencyCode}" (district: ${d.name})`,
+      );
     }
-
-    return {
-      oldId: Number(district.id),
-      regencyId,
-      oldRegencyId,
-      name: district.name,
-    };
+    return { name: d.name, regencyId };
   });
-};
 
-async function seedDistricts() {
-  const districtsData = await generateDistricts();
+  const totalBatches = Math.ceil(data.length / BATCH_SIZE);
+  for (let i = 0; i < totalBatches; i++) {
+    const batch = data.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
+    await db.insert(districts).values(batch).execute();
+    console.log(
+      `📦 Inserted batch ${i + 1}/${totalBatches} (${batch.length} districts)`,
+    );
+  }
 
-  await db.delete(districts).execute(); // Hapus semua data yang ada sebelum melakukan seed ulang
+  // Build code → UUID map by matching name + regencyId
+  const inserted = await db.query.districts.findMany();
+  const nameRegToUuid = new Map(
+    inserted.map((d) => [`${d.name}:${d.regencyId}`, d.id]),
+  );
 
-  await db.insert(districts).values(districtsData).execute();
-  console.log("✅ Districts have been seeded");
+  const codeToUuid = new Map(
+    districtsList.map((d) => {
+      const regencyId = regencyMap.get(d.regencyCode)!;
+      const uuid = nameRegToUuid.get(`${d.name}:${regencyId}`);
+      if (!uuid) {
+        throw new Error(
+          `District UUID not found after insert for "${d.name}" in regency "${d.regencyCode}"`,
+        );
+      }
+      return [d.code, uuid] as const;
+    }),
+  );
+
+  console.log("✅ Districts have been seeded successfully");
+  return codeToUuid;
 }
 
 export default seedDistricts;

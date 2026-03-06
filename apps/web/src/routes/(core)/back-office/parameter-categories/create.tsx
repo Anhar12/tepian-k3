@@ -36,7 +36,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
+import parameterCategoriesSchema from "@tepian-k3/schema/pengujian/parameter-categories.schema";
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -51,7 +51,7 @@ export const Route = createFileRoute(
     }),
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.cluster.getAllClusters.queryOptions(),
+      context.trpc.pengujian.cluster.getAllClusters.queryOptions(),
     ),
   component: RouteComponent,
   head: () => pageHead("Tambah Kategori Parameter"),
@@ -61,7 +61,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: clusters } = useSuspenseQuery(
-    trpc.cluster.getAllClusters.queryOptions(),
+    trpc.pengujian.cluster.getAllClusters.queryOptions(),
   );
 
   const [clusterOpen, setClusterOpen] = useState(false);
@@ -80,7 +80,7 @@ function RouteComponent() {
   });
 
   const createParameterCategoryMutation = useMutation(
-    trpc.parameterCategories.createParameterCategory.mutationOptions({
+    trpc.pengujian.parameterCategories.createParameterCategory.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil membuat parameter category");
         form.reset();

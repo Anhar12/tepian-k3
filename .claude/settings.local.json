@@ -79,7 +79,14 @@
       "mcp__figma-desktop__get_screenshot",
       "Bash(dos2unix:*)",
       "Bash({ echo \"dos2unix not found, using sed instead...\")",
-      "Bash(})"
+      "Bash(})",
+      "Bash(python3:*)",
+      "Bash(for f in \"apps/web/src/hooks/use-upload-document-mutation.ts\" \"apps/web/src/routes/verify.$token.tsx\" \"apps/web/src/components/columns/spt-columns.tsx\" \"apps/web/src/components/pdf/pdf-qrcode-editor.tsx\" \"apps/web/src/routes/\\(core\\)/worksheets/-components/upload-spt-dialog.tsx\" \"apps/web/src/routes/\\(core\\)/employee/spt/index.tsx\")",
+      "Bash(do)",
+      "Bash(sed -i 's/trpc\\\\.platform\\\\.document\\\\./trpc.pengujian.document./g' \"$f\")",
+      "Bash(echo \"OK: $f\")",
+      "Bash(echo \"FAIL: $f\")",
+      "Bash(grep -rl '\"\"./utils.types\"\"' platform/ pengujian/)"
     ]
   }
 }

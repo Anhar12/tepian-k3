@@ -30,7 +30,9 @@ export function NavUser() {
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
 
-  const { data: user } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+  const { data: user } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
 
   function onLogout() {
     logout();

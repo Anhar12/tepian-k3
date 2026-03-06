@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import authSchema from "@tepian-k3/schema/auth.schema";
+import authSchema from "@tepian-k3/schema/platform/auth.schema";
+import { EMPLOYEE_ROLES } from "@tepian-k3/constants";
 import type z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
@@ -39,14 +40,19 @@ export function LoginForm({
   });
 
   const loginMutation = useMutation(
-    trpc.auth.login.mutationOptions({
+    trpc.platform.auth.login.mutationOptions({
       onSuccess: async (data) => {
         auth.setTokens(data.accessToken, data.refreshToken);
-        await queryClient.refetchQueries(trpc.auth.me.queryFilter());
+        await queryClient.refetchQueries(trpc.platform.auth.me.queryFilter());
         globalSuccessToast("Login berhasil");
 
-        if (data.user.roles?.find((role) => role.name === "user")) {
+        const userRoleNames = data.user.roles?.map((r) => r.name) ?? [];
+        if (userRoleNames.includes("user")) {
           navigate({ to: "/dashboard" });
+        } else if (
+          EMPLOYEE_ROLES.some((r) => userRoleNames.includes(r as string))
+        ) {
+          navigate({ to: "/employee" });
         } else {
           navigate({ to: "/back-office" });
         }

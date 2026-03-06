@@ -92,7 +92,7 @@ function NotificationsPage() {
 
   // Infinite query for notifications using cursor-based pagination
   const notificationsQuery = useInfiniteQuery(
-    trpc.notifications.getCursorPaginated.infiniteQueryOptions(
+    trpc.platform.notifications.getCursorPaginated.infiniteQueryOptions(
       {
         limit: 10,
         isRead: isReadParam,
@@ -106,17 +106,17 @@ function NotificationsPage() {
 
   // Mark as read mutation
   const markAsReadMutation = useMutation(
-    trpc.notifications.markAsRead.mutationOptions({
+    trpc.platform.notifications.markAsRead.mutationOptions({
       onMutate: (variables) => {
         setMarkingAsReadIds((prev) => new Set(prev).add(variables.id));
       },
       onSuccess: () => {
         notificationsQuery.refetch();
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getAll.queryKey(),
+          queryKey: trpc.platform.notifications.getAll.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getUnreadCount.queryKey(),
+          queryKey: trpc.platform.notifications.getUnreadCount.queryKey(),
         });
         globalSuccessToast("Notifikasi ditandai sebagai dibaca");
       },
@@ -137,14 +137,14 @@ function NotificationsPage() {
 
   // Mark all as read mutation
   const markAllAsReadMutation = useMutation(
-    trpc.notifications.markAllAsRead.mutationOptions({
+    trpc.platform.notifications.markAllAsRead.mutationOptions({
       onSuccess: () => {
         notificationsQuery.refetch();
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getAll.queryKey(),
+          queryKey: trpc.platform.notifications.getAll.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getUnreadCount.queryKey(),
+          queryKey: trpc.platform.notifications.getUnreadCount.queryKey(),
         });
         globalSuccessToast("Semua notifikasi ditandai sebagai dibaca");
       },
@@ -158,17 +158,17 @@ function NotificationsPage() {
 
   // Delete mutation
   const deleteMutation = useMutation(
-    trpc.notifications.delete.mutationOptions({
+    trpc.platform.notifications.delete.mutationOptions({
       onMutate: (variables) => {
         setDeletingIds((prev) => new Set(prev).add(variables.id));
       },
       onSuccess: () => {
         notificationsQuery.refetch();
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getAll.queryKey(),
+          queryKey: trpc.platform.notifications.getAll.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getUnreadCount.queryKey(),
+          queryKey: trpc.platform.notifications.getUnreadCount.queryKey(),
         });
         globalSuccessToast("Notifikasi dihapus");
       },
@@ -187,14 +187,14 @@ function NotificationsPage() {
 
   // Delete all mutation
   const deleteAllMutation = useMutation(
-    trpc.notifications.deleteAll.mutationOptions({
+    trpc.platform.notifications.deleteAll.mutationOptions({
       onSuccess: () => {
         notificationsQuery.refetch();
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getAll.queryKey(),
+          queryKey: trpc.platform.notifications.getAll.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getUnreadCount.queryKey(),
+          queryKey: trpc.platform.notifications.getUnreadCount.queryKey(),
         });
         globalSuccessToast("Semua notifikasi dihapus");
       },

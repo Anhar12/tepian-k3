@@ -83,7 +83,7 @@ export function TestingTable({
     params.clusterId !== undefined && params.clusterId !== null;
 
   const { data: parameters, isLoading } = useQuery({
-    ...trpc.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
+    ...trpc.pengujian.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
       {
         clusterId: params.clusterId,
         parameterCategoryId: params.parameterCategoryId,
@@ -96,17 +96,17 @@ export function TestingTable({
   });
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
-    trpc.parameterCategories.getAllParameterCategories.queryOptions(),
+    trpc.pengujian.parameterCategories.getAllParameterCategories.queryOptions(),
   );
 
   const addToCartMutation = useMutation(
-    trpc.cart.insertCartItem.mutationOptions({
+    trpc.pengujian.cart.insertCartItem.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
+          trpc.pengujian.cart.getAllCartItems.queryOptions(),
         );
         await queryClient.invalidateQueries(
-          trpc.cart.getCartItemCount.queryOptions(),
+          trpc.pengujian.cart.getCartItemCount.queryOptions(),
         );
         globalSuccessToast(
           `Parameter ${data.parameter.name} berhasil ditambahkan ke keranjang`,

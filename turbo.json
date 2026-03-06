@@ -41,7 +41,8 @@
       "cache": false
     },
     "db:generate": {
-      "cache": false
+      "cache": false,
+      "interactive": true
     },
     "db:seed": {
       "cache": false

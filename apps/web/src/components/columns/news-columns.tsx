@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { News } from "@tepian-k3/types/news.types";
+import type { News } from "@tepian-k3/types/platform/news.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/news";
 import {
@@ -23,9 +23,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "news",
   resourcePath: "news",
   permissionPrefix: "news",
-  deleteMutation: trpc.news.deleteNews,
-  restoreMutation: trpc.news.restoreNews,
-  getQueryOptions: (params) => trpc.news.getPaginatedNews.queryOptions(params),
+  deleteMutation: trpc.platform.news.deleteNews,
+  restoreMutation: trpc.platform.news.restoreNews,
+  getQueryOptions: (params) =>
+    trpc.platform.news.getPaginatedNews.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

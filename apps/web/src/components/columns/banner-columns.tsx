@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Banner } from "@tepian-k3/types/banner.types";
+import type { Banner } from "@tepian-k3/types/platform/banner.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/banners";
 import {
@@ -23,10 +23,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "banner",
   resourcePath: "banners",
   permissionPrefix: "banners",
-  deleteMutation: trpc.banner.deleteBanner,
-  restoreMutation: trpc.banner.restoreBanner,
+  deleteMutation: trpc.platform.banner.deleteBanner,
+  restoreMutation: trpc.platform.banner.restoreBanner,
   getQueryOptions: (params) =>
-    trpc.banner.getPaginatedBanners.queryOptions(params),
+    trpc.platform.banner.getPaginatedBanners.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

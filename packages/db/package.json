@@ -1,5 +1,7 @@
 {
   "name": "@tepian-k3/db",
+  "version": "1.9.0",
+  "private": true,
   "type": "module",
   "exports": {
     ".": {
@@ -47,6 +49,7 @@
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
     "drizzle-seed": "^0.3.1",
+    "ioredis": "^5.9.1",
     "postgres": "^3.4.7",
     "tsx": "^4.21.0",
     "uuid": "catalog:",

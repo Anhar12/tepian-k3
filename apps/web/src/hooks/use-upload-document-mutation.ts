@@ -26,10 +26,12 @@ export const useUploadDocumentMutation = ({
   const queryClient = useQueryClient();
 
   const uploadDocumentMutation = useMutation(
-    trpc.document.uploadDocument.mutationOptions({
+    trpc.pengujian.document.uploadDocument.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
         );
         globalSuccessToast("Dokumen berhasil diunggah");
       },

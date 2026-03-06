@@ -87,7 +87,7 @@ function RouteComponent() {
   const [uploading, setUploading] = useState(false);
 
   const { data: testing, isLoading } = useQuery(
-    trpc.testing.getTestingWithDocuments.queryOptions({ testingId }),
+    trpc.pengujian.testing.getTestingWithDocuments.queryOptions({ testingId }),
   );
 
   // Open worksheet dialog if URL param is set
@@ -98,10 +98,12 @@ function RouteComponent() {
   }, [createWorksheet]);
 
   const updateStatusMutation = useMutation(
-    trpc.testing.updateStatus.mutationOptions({
+    trpc.pengujian.testing.updateStatus.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.testing.getTestingWithDocuments.queryOptions({ testingId }),
+          trpc.pengujian.testing.getTestingWithDocuments.queryOptions({
+            testingId,
+          }),
         );
         globalSuccessToast("Status testing berhasil diperbarui");
       },
@@ -125,10 +127,12 @@ function RouteComponent() {
       formData.append("title", documentTitle);
       formData.append("file", documentFile);
 
-      await trpcClient.testing.uploadDocument.mutate(formData);
+      await trpcClient.pengujian.testing.uploadDocument.mutate(formData);
 
       await queryClient.invalidateQueries(
-        trpc.testing.getTestingWithDocuments.queryOptions({ testingId }),
+        trpc.pengujian.testing.getTestingWithDocuments.queryOptions({
+          testingId,
+        }),
       );
 
       // Reset form

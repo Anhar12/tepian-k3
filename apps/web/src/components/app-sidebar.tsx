@@ -13,29 +13,75 @@ import {
 import { trpc } from "@/utils/trpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { backOfficeMenu } from "@/lib/back-office-menu";
+import { employeeMenu } from "@/lib/employee-menu";
 import { userMenu } from "@/lib/user-menu";
+import { EMPLOYEE_ROLES, BACK_OFFICE_ROLES } from "@tepian-k3/constants";
+import { useRouterState } from "@tanstack/react-router";
 import ImageWithFallback from "./image-with-fallback";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
 
-  const hasUserRole = profile.roles.some((role) => role.name === "user");
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isOnBackOffice = pathname.startsWith("/back-office");
 
-  // Separate user dashboard and back office menus
-  const filteredNavMain = React.useMemo(() => {
-    // For regular users: only show user dashboard menu
-    if (hasUserRole) {
-      return userMenu.navMain;
-    }
-
-    // For back office users: only show back office menu items based on permissions
-    const backOfficeItems = backOfficeMenu.navMain.filter(
-      (item) =>
-        !item.permission || profile.permissions.includes(item.permission),
+  const roleNames = profile.roles.map((role) => role.name);
+  const hasUserRole = roleNames.includes("user");
+  const hasEmployeeRole = roleNames.some((name) =>
+    (EMPLOYEE_ROLES as readonly string[]).includes(name),
+  );
+  const hasBackOfficeRole =
+    isOnBackOffice ||
+    roleNames.some((name) =>
+      (BACK_OFFICE_ROLES as readonly string[]).includes(name),
     );
 
-    return backOfficeItems;
-  }, [hasUserRole, profile.permissions]);
+  // A user may have multiple roles — collect items from all applicable menus
+  // and deduplicate by URL so overlapping items don't appear twice.
+  // When on /back-office/* routes, back-office menu takes priority over employee menu.
+  const filteredNavMain = React.useMemo(() => {
+    const seen = new Set<string>();
+    const items: (typeof userMenu.navMain)[number][] = [];
+
+    const push = (candidate: (typeof userMenu.navMain)[number]) => {
+      if (!seen.has(candidate.url)) {
+        seen.add(candidate.url);
+        items.push(candidate);
+      }
+    };
+
+    if (hasUserRole) {
+      userMenu.navMain.forEach(push);
+    }
+
+    if (hasEmployeeRole && !isOnBackOffice) {
+      employeeMenu.navMain
+        .filter(
+          (item) =>
+            !item.permission || profile.permissions.includes(item.permission),
+        )
+        .forEach(push);
+    }
+
+    if (hasBackOfficeRole) {
+      backOfficeMenu.navMain
+        .filter(
+          (item) =>
+            !item.permission || profile.permissions.includes(item.permission),
+        )
+        .forEach(push);
+    }
+
+    return items;
+  }, [
+    hasUserRole,
+    hasEmployeeRole,
+    hasBackOfficeRole,
+    isOnBackOffice,
+    profile.permissions,
+  ]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

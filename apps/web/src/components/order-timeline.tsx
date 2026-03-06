@@ -17,8 +17,25 @@ import {
   ORDER_STATUS_LABELS,
   type OrderStatus,
 } from "@tepian-k3/constants";
-import { type OrderStatusHistory } from "@tepian-k3/types/order-status-history.types";
+import { type OrderStatusHistory } from "@tepian-k3/types/pengujian/order-status-history.types";
 import { format } from "date-fns";
+
+/**
+ * Formats a note string for display. If the note matches a known OrderStatus key,
+ * returns the human-readable label. Otherwise converts snake_case to Title Case.
+ *
+ * @param note - Raw note string, possibly a snake_case status key
+ * @returns Human-readable formatted string
+ */
+function formatNote(note: string): string {
+  if (note in ORDER_STATUS_LABELS) {
+    return ORDER_STATUS_LABELS[note as OrderStatus];
+  }
+  return note
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 interface OrderTimelineProps {
   history: OrderStatusHistory[];
@@ -120,7 +137,7 @@ export function OrderTimeline({
             <Popover>
               <PopoverTrigger asChild>
                 <p className="mt-0.5 line-clamp-2 max-w-24 cursor-pointer text-[10px] text-muted-foreground hover:text-foreground sm:max-w-40 sm:text-xs">
-                  {record.note}
+                  {formatNote(record.note)}
                 </p>
               </PopoverTrigger>
               <PopoverContent
@@ -128,7 +145,7 @@ export function OrderTimeline({
                 align="start"
                 className="max-w-60 sm:max-w-xs"
               >
-                <p className="text-sm">{record.note}</p>
+                <p className="text-sm">{formatNote(record.note)}</p>
               </PopoverContent>
             </Popover>
           )}

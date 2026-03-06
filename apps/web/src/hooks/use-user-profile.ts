@@ -7,7 +7,7 @@ export const useUserProfile = () => {
     isLoading,
     error,
   } = useQuery({
-    ...trpc.auth.profile.queryOptions(),
+    ...trpc.platform.auth.profile.queryOptions(),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
   });

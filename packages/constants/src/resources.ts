@@ -11,8 +11,10 @@ export const RESOURCES = [
   "user-permissions",
 
   // ==================== TOOLS ====================
+  "tool-codes",
   "tools",
   "tool-calibrations",
+  "tool-checks",
   "tool-certifications",
   "tool-documentations",
   "chemical-materials",
@@ -44,6 +46,8 @@ export const RESOURCES = [
 
   // ==================== ORDERS ====================
   "orders",
+  "orders-approval", // Approve / reject order (admin, lab_manager, head_of_institution)
+  "orders-payment", // Verify / reject payment (treasurer)
   "order-items",
   "order-status-history",
 
@@ -55,6 +59,8 @@ export const RESOURCES = [
   "documents",
   "document-signature",
   "document-verifications",
+  "documents-spt", // SPT / Assignment Letter generation & upload (penjadwalan, head_of_institution)
+  "documents-admin", // Admin documents: offering letter, SPK, tagihan (admin_manager)
 
   // ==================== AUDITS ====================
   "audits",
@@ -65,6 +71,7 @@ export const RESOURCES = [
 
   // ==================== WORKSHEETS ====================
   "worksheets",
+  "worksheets-status", // Workflow transitions: verify, requestRevision, complete, syncToTesting, updateStatus
   "worksheets-parameters",
   "worksheets-personnel-assignments",
   "worksheets-transaction-details",

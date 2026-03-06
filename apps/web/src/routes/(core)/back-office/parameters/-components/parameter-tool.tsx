@@ -20,9 +20,11 @@ interface ParameterToolsProps {
 
 export default function ParameterTools({ parameterId }: ParameterToolsProps) {
   const { data: tools, isLoading } = useQuery(
-    trpc.parameterTool.getAllParameterToolsByParameterId.queryOptions({
-      parameterId,
-    }),
+    trpc.pengujian.parameterTool.getAllParameterToolsByParameterId.queryOptions(
+      {
+        parameterId,
+      },
+    ),
   );
 
   const setIsCreateDialogOpen = useParameterToolDialogStore(

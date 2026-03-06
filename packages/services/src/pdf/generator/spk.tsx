@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
 import { Spk } from "../templates/spk";
-import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
+import type { WorksheetTransactionDetail } from "@tepian-k3/types/pengujian/worksheet.types";
 
 interface GenerateSpkOptions {
   worksheet: WorksheetTransactionDetail;

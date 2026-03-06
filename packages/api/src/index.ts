@@ -11,7 +11,7 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod";
 import type { Context as HonoContext } from "hono";
-import permissionQueries from "@tepian-k3/queries/permission.queries";
+import permissionQueries from "@tepian-k3/queries/platform/permission.queries";
 import { Effect } from "effect";
 import { parseAndValidateSafe } from "./utils/form-data-parser";
 import { getEventBus } from "@tepian-k3/services/notifications";
@@ -297,10 +297,10 @@ export const withPermission = (permission: Permission) =>
 /**
  * The `withRole` function checks if a user has a specific role before allowing access to a protected
  * procedure.
- * @param {string} role - The `role` parameter in the `withRole` function is a string that represents
+ * @param {Role} role - The `role` parameter in the `withRole` function is a Role enum value that represents
  * the role that a user must have in order to access a specific resource or perform a specific action.
  */
-export const withRole = (role: string) =>
+export const withRole = (role: Role) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
       permissionQueries.userHasRole(ctx.user.id, role),
@@ -321,10 +321,10 @@ export const withRole = (role: string) =>
 /**
  * The function `withAnyRole` checks if a user has any of the specified roles before allowing access to
  * a protected procedure.
- * @param {string[]} roleNames - The `roleNames` parameter is an array of strings that represent the
+ * @param {Role[]} roleNames - The `roleNames` parameter is an array of Role enum values that represent the
  * roles that a user must have in order to access a particular resource or perform a specific action.
  */
-export const withAnyRole = (roleNames: string[]) =>
+export const withAnyRole = (roleNames: Role[]) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
       permissionQueries.userHasAnyRole(ctx.user.id, roleNames),
@@ -345,12 +345,12 @@ export const withAnyRole = (roleNames: string[]) =>
 /**
  * The function `withAllRoles` checks if a user has all specified roles before allowing access to a
  * protected procedure.
- * @param {string[]} roleNames - The `roleNames` parameter is an array of strings that contains the
+ * @param {Role[]} roleNames - The `roleNames` parameter is an array of Role enum values that contains the
  * names of roles that a user must have in order to access a specific resource or perform a specific
  * action. The `withAllRoles` function checks if the user has all the specified roles before allowing
  * them to proceed.
  */
-export const withAllRoles = (roleNames: string[]) =>
+export const withAllRoles = (roleNames: Role[]) =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const hasRole = await Effect.runPromise(
       permissionQueries.userHasAllRoles(ctx.user.id, roleNames),

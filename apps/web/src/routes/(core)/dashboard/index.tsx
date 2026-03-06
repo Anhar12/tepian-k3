@@ -16,7 +16,9 @@ export const Route = createFileRoute("/(core)/dashboard/")({
 });
 
 function RouteComponent() {
-  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

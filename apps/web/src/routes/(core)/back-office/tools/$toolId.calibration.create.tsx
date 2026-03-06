@@ -30,7 +30,7 @@ import { toFormData } from "@/utils/form-data-mapper";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
+import toolCalibrationSchema from "@tepian-k3/schema/pengujian/tool-calibration.schema";
 import { format } from "date-fns";
 import { CalendarIcon, LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
@@ -52,7 +52,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const createToolCalibrationMutation = useMutation(
-    trpc.tool.createToolCalibration.mutationOptions({
+    trpc.pengujian.tool.createToolCalibration.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Kalibrasi alat berhasil dibuat");
         await redirectBack();

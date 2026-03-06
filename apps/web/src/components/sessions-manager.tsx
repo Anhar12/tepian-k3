@@ -82,10 +82,10 @@ export function SessionsManager() {
     data: sessions,
     isLoading,
     refetch,
-  } = useQuery(trpc.auth.getSessions.queryOptions());
+  } = useQuery(trpc.platform.auth.getSessions.queryOptions());
 
   const revokeMutation = useMutation(
-    trpc.auth.revokeSession.mutationOptions({
+    trpc.platform.auth.revokeSession.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Sesi berhasil dicabut");
         refetch();
@@ -98,7 +98,7 @@ export function SessionsManager() {
   );
 
   const revokeAllMutation = useMutation(
-    trpc.auth.revokeAllSessions.mutationOptions({
+    trpc.platform.auth.revokeAllSessions.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Semua sesi berhasil dicabut. Anda akan logout.");
         // Clear tokens and redirect to login

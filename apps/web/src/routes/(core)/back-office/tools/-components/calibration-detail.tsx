@@ -27,7 +27,7 @@ export default function CalibrationDetail({
   const router = useRouter();
 
   const { data: calibration, isLoading } = useQuery(
-    trpc.tool.getToolCalibrationDetails.queryOptions({
+    trpc.pengujian.tool.getToolCalibrationDetails.queryOptions({
       id: calibrationId,
     }),
   );

@@ -4,7 +4,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
-import bannerSchema from "@tepian-k3/schema/banner.schema";
+import bannerSchema from "@tepian-k3/schema/platform/banner.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/utils/trpc";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -44,7 +44,7 @@ function RouteComponent() {
   });
 
   const createBannerMutation = useMutation({
-    ...trpc.banner.createBanner.mutationOptions(),
+    ...trpc.platform.banner.createBanner.mutationOptions(),
     onSuccess: async () => {
       globalSuccessToast("Banner berhasil dibuat");
       await redirectBack();

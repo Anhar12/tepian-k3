@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { News } from "@tepian-k3/types/news.types";
+import type { News } from "@tepian-k3/types/platform/news.types";
 import ImageWithFallback from "@/components/image-with-fallback";
 import { pageHead } from "@/utils/page-head";
 
@@ -106,7 +106,7 @@ function NewsListPage() {
   const navigate = useNavigate();
 
   const newsQuery = useInfiniteQuery(
-    trpc.news.getCursorPaginatedNews.infiniteQueryOptions(
+    trpc.platform.news.getCursorPaginatedNews.infiniteQueryOptions(
       {
         limit: 12,
       },

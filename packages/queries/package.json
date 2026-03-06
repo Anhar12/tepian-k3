@@ -1,5 +1,7 @@
 {
   "name": "@tepian-k3/queries",
+  "version": "1.10.0",
+  "private": true,
   "exports": {
     ".": {
       "default": "./src/index.ts"

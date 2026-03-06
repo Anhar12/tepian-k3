@@ -30,13 +30,18 @@ MAJOR.MINOR.PATCH
 
 Changes to existing modules (e.g., Pengujian, Order, Auth) follow MINOR or PATCH versioning depending on scope:
 
-| Change Type                              | SemVer | Example         |
-| ---------------------------------------- | ------ | --------------- |
-| Bug fix in pengujian status calculation  | PATCH  | v1.0.5          |
-| New API endpoint for batch export        | MINOR  | v1.1.0          |
-| New UI feature (result table, filters)   | MINOR  | v1.2.0          |
-| Multiple related improvements (overhaul) | MINOR  | v1.3.0          |
-| Breaking schema change on existing table | MAJOR  | v2.0.0 / v3.0.0 |
+| Change Type                              | SemVer | Example |
+| ---------------------------------------- | ------ | ------- |
+| Bug fix in pengujian status calculation  | PATCH  | v1.0.5  |
+| Add column to existing table             | PATCH  | v1.0.5  |
+| Add new enum value                       | PATCH  | v1.0.5  |
+| Rename/remove column (internal refactor) | PATCH  | v1.0.5  |
+| UI tweak / styling improvement           | PATCH  | v1.0.5  |
+| New API endpoint for batch export        | MINOR  | v1.1.0  |
+| New UI page or component                 | MINOR  | v1.1.0  |
+| Add new table                            | MINOR  | v1.1.0  |
+| Multiple related improvements (overhaul) | MINOR  | v1.3.0  |
+| New business domain module (pelatihan)   | MAJOR  | v2.0.0  |
 
 **Branching for existing modules:**
 
@@ -56,7 +61,7 @@ beta
 │   └── feat/pengujian-v2-ui-results
 ```
 
-> **Note:** An overhaul of an existing module is only MAJOR if it introduces breaking schema changes or removes/renames existing API procedures. Adding new tables, endpoints, or UI pages to an existing module is MINOR.
+> **Note:** MAJOR is reserved for entirely new business domains (e.g., pelatihan with 12+ new tables). Schema changes to existing modules (add/rename/remove columns, add enum values) are PATCH. New tables, endpoints, or UI pages are MINOR.
 
 ## Upcoming Releases
 

@@ -51,7 +51,7 @@ function RouteComponent() {
   >("password");
 
   const verifyToken = useQuery({
-    ...trpc.auth.verifyResetToken.queryOptions({ token }),
+    ...trpc.platform.auth.verifyResetToken.queryOptions({ token }),
     enabled: !!token,
   });
 
@@ -65,7 +65,7 @@ function RouteComponent() {
   });
 
   const resetPasswordMutation = useMutation(
-    trpc.auth.resetPassword.mutationOptions({
+    trpc.platform.auth.resetPassword.mutationOptions({
       onSuccess: () => {
         globalSuccessToast(
           "Password berhasil direset. Silakan masuk dengan password baru Anda.",

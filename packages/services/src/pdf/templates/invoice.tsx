@@ -2,7 +2,7 @@ import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
 import { QRCodeImage } from "../components/qrcode";
-import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
+import type { OrderWithCompanyAndItems } from "@tepian-k3/types/pengujian/order.types";
 
 const styles = StyleSheet.create({
   page: {

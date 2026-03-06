@@ -39,7 +39,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import userSchema from "@tepian-k3/schema/users.schema";
+import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { format } from "date-fns";
 import {
   CalendarIcon,
@@ -63,12 +63,14 @@ export const Route = createFileRoute("/(core)/back-office/users/$userId/edit")({
     }),
   loader: async ({ params, context }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.user.getUserDetailWithRolesAndPermissions.queryOptions({
-        userId: params.userId,
-      }),
+      context.trpc.platform.user.getUserDetailWithRolesAndPermissions.queryOptions(
+        {
+          userId: params.userId,
+        },
+      ),
     );
     context.queryClient.ensureQueryData(
-      context.trpc.role.getAllRoles.queryOptions(),
+      context.trpc.platform.role.getAllRoles.queryOptions(),
     );
   },
   component: RouteComponent,
@@ -152,11 +154,13 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: roles } = useSuspenseQuery(
-    trpc.role.getAllRoles.queryOptions(),
+    trpc.platform.role.getAllRoles.queryOptions(),
   );
 
   const { data: user } = useSuspenseQuery(
-    trpc.user.getUserDetailWithRolesAndPermissions.queryOptions({ userId }),
+    trpc.platform.user.getUserDetailWithRolesAndPermissions.queryOptions({
+      userId,
+    }),
   );
 
   const [open, setOpen] = useState(false);
@@ -207,10 +211,10 @@ function RouteComponent() {
   });
 
   const updateUserMutation = useMutation(
-    trpc.user.updateUser.mutationOptions({
+    trpc.platform.user.updateUser.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
-          trpc.user.getUserDetails.queryFilter({ userId: data.id }),
+          trpc.platform.user.getUserDetails.queryFilter({ userId: data.id }),
         );
         globalSuccessToast("User berhasil diperbarui");
         await redirectBack();

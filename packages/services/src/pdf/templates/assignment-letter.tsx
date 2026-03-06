@@ -1,6 +1,7 @@
 import React from "react";
 import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { tw } from "../utils/tw";
+import { PAGE_MARGINS } from "../utils/page-styles";
 import { Letterhead } from "../components/letterhead";
 import { storageService } from "../../storage";
 import { differenceInBusinessDays, format } from "date-fns";
@@ -9,7 +10,7 @@ import { LabeledField } from "../components/labeled-field";
 import { SectionHeader } from "../components/section-header";
 import { SignatureTable } from "../components/signature-table";
 import { HeadSignature } from "../components/head-signature";
-import type { WorksheetAssignmentDetail } from "@tepian-k3/types/worksheet-assignment.types";
+import type { WorksheetAssignmentDetail } from "@tepian-k3/types/pengujian/worksheet-assignment.types";
 import { Table, type TableColumn } from "../components/table";
 
 interface AssignmentLetterProps {
@@ -40,7 +41,10 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
       orderDate,
       "dd MMMM yyyy",
     )}.`,
-    `Peraturan Menteri Ketenagakerjaan Republik Indonesia Nomor 5 Tahun 2018 tentang Keselamatan dan Kesehatan Kerja Lingkungan Kerja.`,
+    `Surat Persetujuan Pelaksanaan Pengujian K3 Nomor ${assignmentLetterNumber} Tanggal ${format(
+      new Date(),
+      "dd MMMM yyyy",
+    )}.`,
   ];
 
   const untukItems = [
@@ -48,10 +52,9 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
     `Dilaksanakan pada tanggal ${format(
       assignmentDateStart,
       "dd MMMM yyyy",
-    )} - ${format(assignmentDateEnd, "dd MMMM yyyy")} (${differenceInBusinessDays(
-      assignmentDateEnd,
-      assignmentDateStart,
-    )} hari).`,
+    )} - ${format(assignmentDateEnd, "dd MMMM yyyy")} (${
+      differenceInBusinessDays(assignmentDateEnd, assignmentDateStart) + 1
+    } hari).`,
     `Melaporkan pelaksanaan kegiatan secara tertulis kepada Kepala Balai K3 Samarinda.`,
     `Melaksanakan perintah ini dengan sebaik-baiknya dan penuh rasa tanggung jawab.`,
   ];
@@ -87,7 +90,10 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
 
   return (
     <Document>
-      <Page size="A4" style={tw("p-10 text-[11px] font-sans")}>
+      <Page
+        size="A4"
+        style={[PAGE_MARGINS.assignmentLetter, tw("text-[11px] font-sans")]}
+      >
         {/* First Page */}
         <View>
           <Letterhead
@@ -98,7 +104,7 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
           <SectionHeader
             text="SURAT TUGAS"
             underline
-            body={`NOMOR 5.4/${assignmentLetterNumber}/AS.03.00/XII/2026`}
+            body={assignmentLetterNumber}
           />
 
           {/* Pertimbangan */}
@@ -130,7 +136,10 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
           </View>
 
           {/* Pembiayaan */}
-          <LabeledField label="Pembiayaan" value={financingSource} />
+          <LabeledField
+            label="Pembiayaan"
+            value={`${financingSource} dibebankan pada RPL 046 PS Balai K3 SMD.`}
+          />
 
           {/* Closing */}
           <Text style={tw("my-5")}>
@@ -196,7 +205,7 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
             <View style={tw("flex flex-col justify-center items-start w-full")}>
               <LabeledField
                 label="Nomor"
-                value={`5.4/${assignmentLetterNumber}/AS.03.00/XII/2026`}
+                value={assignmentLetterNumber}
                 spacing="mb-1"
                 labelWidth="w-14"
                 valueWidth="flex"

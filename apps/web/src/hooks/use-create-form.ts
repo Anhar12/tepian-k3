@@ -29,7 +29,7 @@ interface UseCreateFormOptions<T extends FieldValues> {
  * >({
  *   schema: clusterSchema.createClusterSchema,
  *   defaultValues: { name: "", description: "" },
- *   mutationOptions: trpc.cluster.createCluster.mutationOptions(),
+ *   mutationOptions: trpc.pengujian.cluster.createCluster.mutationOptions(),
  *   successMessage: "Berhasil membuat cluster",
  *   errorMessage: "Gagal membuat cluster",
  * });

@@ -9,7 +9,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import orderSchema from "@tepian-k3/schema/order.schema";
+import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
 import { useMemo } from "react";
 import {
   Select,
@@ -24,7 +24,7 @@ import { useDataTableRouter } from "@/hooks/use-data-table-router";
 export const Route = createFileRoute("/(core)/back-office/orders/")({
   validateSearch: orderSchema.getAllOrdersSchema,
   beforeLoad: async ({ context }) =>
-    await requirePermission(context, { permission: "orders.read" }),
+    await requirePermission(context, { permission: "orders.view" }),
   component: RouteComponent,
   head: () => pageHead("Manajemen Pesanan"),
 });
@@ -37,7 +37,7 @@ function RouteComponent() {
     data: ordersData,
     isLoading,
     error,
-  } = useQuery(trpc.order.getAllOrdersPaginated.queryOptions(params));
+  } = useQuery(trpc.pengujian.order.getAllOrdersPaginated.queryOptions(params));
 
   const columns = useMemo(
     () =>

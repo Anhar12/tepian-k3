@@ -1,19 +1,53 @@
 import { inArray } from "drizzle-orm";
 import { db } from "../../client";
-import { tools, parameters, parameterTools } from "../../schema";
+import { tools, toolCodes, parameters, parameterTools } from "../../schema";
 import { getTools } from "../utils/tools";
 
+type InsertToolCode = typeof toolCodes.$inferInsert;
 type InsertTool = typeof tools.$inferInsert;
 type InsertParameterTool = typeof parameterTools.$inferInsert;
 
+/**
+ * Extracts the prefix from a tool code string (e.g. "SLM" from "SLM-001").
+ */
+function getToolCodePrefix(toolCode: string): string {
+  return toolCode.split("-")[0] ?? toolCode;
+}
+
+function getToolCodeSuffix(toolCode: string): string {
+  return toolCode.split("-").slice(1).join("-") || toolCode;
+}
+
 export const generateTools = async (): Promise<{
-  toolsData: InsertTool[];
-  parameterToolsData: { toolCode: string; parameterNames: string[] }[];
+  toolCodesData: InsertToolCode[];
+  toolsData: {
+    toolUniqueCode: string;
+    toolCodePrefix: string;
+    toolName: string;
+    function?: string;
+    location?: string;
+    shelf?: string;
+    brand?: string;
+    type?: string;
+    condition: InsertTool["condition"];
+    availability: InsertTool["availability"];
+  }[];
+  parameterToolsData: { toolUniqueCode: string; parameterNames: string[] }[];
 }> => {
   const toolsList = await getTools();
 
-  const toolsData: InsertTool[] = toolsList.map((tool) => ({
-    toolCode: tool.toolCode,
+  // Extract unique prefixes for the toolCodes table
+  const uniquePrefixes = [
+    ...new Set(toolsList.map((t) => getToolCodePrefix(t.toolCode))),
+  ];
+  const toolCodesData: InsertToolCode[] = uniquePrefixes.map((prefix) => ({
+    code: prefix,
+    isActive: true,
+  }));
+
+  const toolsData = toolsList.map((tool) => ({
+    toolCodePrefix: getToolCodePrefix(tool.toolCode),
+    toolUniqueCode: getToolCodeSuffix(tool.toolCode),
     toolName: tool.toolName,
     function: tool.function,
     location: tool.location,
@@ -25,28 +59,72 @@ export const generateTools = async (): Promise<{
   }));
 
   const parameterToolsData = toolsList.map((tool) => ({
-    toolCode: tool.toolCode,
+    toolUniqueCode: getToolCodeSuffix(tool.toolCode),
     parameterNames: tool.parameters,
   }));
 
-  return { toolsData, parameterToolsData };
+  return { toolCodesData, toolsData, parameterToolsData };
 };
 
 async function seedTools() {
-  const { toolsData, parameterToolsData } = await generateTools();
+  const { toolCodesData, toolsData, parameterToolsData } =
+    await generateTools();
 
-  // Delete existing parameter_tools and tools
-  await db.delete(parameterTools).execute();
-  await db.delete(tools).execute();
+  // Insert tool codes first (skip existing by code)
+  const insertedToolCodes = await db
+    .insert(toolCodes)
+    .values(toolCodesData)
+    .onConflictDoNothing({ target: toolCodes.code })
+    .returning();
 
-  // Insert tools
-  const insertedTools = await db.insert(tools).values(toolsData).returning();
-  console.log(`✅ ${insertedTools.length} Tools have been seeded`);
+  // Also fetch any pre-existing tool codes that were skipped
+  const allToolCodes = await db.query.toolCodes.findMany();
+  console.log(
+    `✅ ${insertedToolCodes.length} new Tool Codes seeded (${allToolCodes.length} total)`,
+  );
 
-  // Create a map of toolCode to toolId
-  const toolCodeToId = new Map(insertedTools.map((t) => [t.toolCode, t.id]));
+  // Map prefix → toolCode UUID (from both new and existing)
+  const prefixToId = new Map(allToolCodes.map((tc) => [tc.code, tc.id]));
 
-  // Get all unique parameter names from the tool mappings
+  // Build tools insert data
+  const toolsInsertData: InsertTool[] = toolsData.map((tool) => {
+    const toolCodeId = prefixToId.get(tool.toolCodePrefix);
+    if (!toolCodeId) {
+      throw new Error(`Tool code prefix "${tool.toolCodePrefix}" not found`);
+    }
+    return {
+      toolCodeId,
+      toolUniqueCode: tool.toolUniqueCode,
+      toolName: tool.toolName,
+      function: tool.function,
+      location: tool.location,
+      shelf: tool.shelf,
+      brand: tool.brand,
+      type: tool.type,
+      condition: tool.condition,
+      availability: tool.availability,
+    };
+  });
+
+  // Append tools (skip existing by toolUniqueCode)
+  const insertedTools = await db
+    .insert(tools)
+    .values(toolsInsertData)
+    .onConflictDoNothing({ target: tools.toolUniqueCode })
+    .returning();
+
+  // Also fetch any pre-existing tools that were skipped
+  const allTools = await db.query.tools.findMany();
+  console.log(
+    `✅ ${insertedTools.length} new Tools seeded (${allTools.length} total)`,
+  );
+
+  // Map toolUniqueCode → toolId (from both new and existing)
+  const toolUniqueCodeToId = new Map(
+    allTools.map((t) => [t.toolUniqueCode, t.id]),
+  );
+
+  // Get all unique parameter names
   const allParameterNames = [
     ...new Set(parameterToolsData.flatMap((pt) => pt.parameterNames)),
   ];
@@ -56,18 +134,20 @@ async function seedTools() {
     where: inArray(parameters.name, allParameterNames),
   });
 
-  // Create a map of parameter name to parameterId
+  // Map parameter name → parameterId
   const parameterNameToId = new Map(
     parameterRecords.map((p) => [p.name, p.id]),
   );
 
-  // Build parameter_tools data
+  // Build parameter_tools insert data
   const parameterToolsInsertData: InsertParameterTool[] = [];
 
-  for (const { toolCode, parameterNames } of parameterToolsData) {
-    const toolId = toolCodeToId.get(toolCode);
+  for (const { toolUniqueCode, parameterNames } of parameterToolsData) {
+    const toolId = toolUniqueCodeToId.get(toolUniqueCode);
     if (!toolId) {
-      console.warn(`⚠️ Tool with code ${toolCode} not found, skipping...`);
+      console.warn(
+        `⚠️ Tool with unique code ${toolUniqueCode} not found, skipping...`,
+      );
       continue;
     }
 
@@ -75,23 +155,24 @@ async function seedTools() {
       const parameterId = parameterNameToId.get(parameterName);
       if (!parameterId) {
         console.warn(
-          `⚠️ Parameter "${parameterName}" not found for tool ${toolCode}, skipping...`,
+          `⚠️ Parameter "${parameterName}" not found for tool ${toolUniqueCode}, skipping...`,
         );
         continue;
       }
 
-      parameterToolsInsertData.push({
-        toolId,
-        parameterId,
-      });
+      parameterToolsInsertData.push({ toolId, parameterId });
     }
   }
 
-  // Insert parameter_tools
+  // Append parameter-tool relationships (skip existing)
   if (parameterToolsInsertData.length > 0) {
-    await db.insert(parameterTools).values(parameterToolsInsertData).execute();
+    await db
+      .insert(parameterTools)
+      .values(parameterToolsInsertData)
+      .onConflictDoNothing()
+      .execute();
     console.log(
-      `✅ ${parameterToolsInsertData.length} Parameter-Tool relationships have been seeded`,
+      `✅ ${parameterToolsInsertData.length} Parameter-Tool relationships seeded`,
     );
   }
 }

@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ComboBox from "@/components/ui/combobox";
 import {
   Field,
   FieldError,
@@ -21,13 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import useDialogs from "@/hooks/use-dialog";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   TOOLS_AVAILABILITY,
@@ -35,7 +37,7 @@ import {
   TOOLS_CONDITIONS,
   TOOLS_CONDITIONS_LABELS,
 } from "@tepian-k3/constants";
-import toolsSchema from "@tepian-k3/schema/tools.schema";
+import toolsSchema from "@tepian-k3/schema/pengujian/tools.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
@@ -48,19 +50,22 @@ export const Route = createFileRoute("/(core)/back-office/tools/create")({
 });
 
 function RouteComponent() {
+  const dialogs = useDialogs({
+    toolCode: null,
+  });
+
   const redirectBack = useRedirectBackWithTimeout();
 
   const form = useForm<z.infer<typeof toolsSchema.createToolSchema>>({
     resolver: zodResolver(toolsSchema.createToolSchema),
     defaultValues: {
-      toolCode: "",
       toolName: "",
       function: "",
     },
   });
 
   const createToolMutation = useMutation(
-    trpc.tool.createTool.mutationOptions({
+    trpc.pengujian.tool.createTool.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Alat berhasil dibuat");
         form.reset();
@@ -75,6 +80,10 @@ function RouteComponent() {
   function handleSubmit(data: z.infer<typeof toolsSchema.createToolSchema>) {
     createToolMutation.mutate(data);
   }
+
+  const { data: toolCode, isLoading: isToolCodeLoading } = useQuery(
+    trpc.pengujian.toolCode.getAllFlattenedToolCodes.queryOptions(),
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -91,30 +100,71 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
-              <Controller
-                control={form.control}
-                name="toolCode"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="space-y-1"
-                  >
-                    <FieldLabel className="ml-1 text-sm font-bold">
-                      Kode Alat
-                    </FieldLabel>
-                    <Input
-                      type="text"
-                      placeholder="Masukkan kode alat"
-                      className="h-10 text-sm"
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+              <div className="flex flex-row gap-4">
+                <Controller
+                  control={form.control}
+                  name="toolCodeId"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Kode Alat
+                      </FieldLabel>
+                      <ComboBox
+                        options={
+                          toolCode?.map((code) => ({
+                            id: code.id,
+                            name: code.code,
+                          })) ?? []
+                        }
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        placeholder="Pilih kode alat..."
+                        searchPlaceholder="Cari kode alat..."
+                        emptyMessage="Tidak ada kode alat yang ditemukan."
+                        open={dialogs.isOpen("toolCode")}
+                        onOpenChange={(open) =>
+                          open
+                            ? dialogs.open("toolCode")
+                            : dialogs.close("toolCode")
+                        }
+                        invalid={fieldState.invalid}
+                        isLoading={isToolCodeLoading}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  control={form.control}
+                  name="toolUniqueCode"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Kode Unik Alat
+                      </FieldLabel>
+                      <Input
+                        type="text"
+                        placeholder="Masukkan kode unik alat"
+                        className="h-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
 
               <Controller
                 control={form.control}

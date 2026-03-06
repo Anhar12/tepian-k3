@@ -40,7 +40,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import parameterSchema from "@tepian-k3/schema/parameter.schema";
+import parameterSchema from "@tepian-k3/schema/pengujian/parameter.schema";
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -58,12 +58,12 @@ export const Route = createFileRoute(
     }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.parameter.getParameterById.queryOptions({
+      context.trpc.pengujian.parameter.getParameterById.queryOptions({
         id: params.parameterId,
       }),
     );
     context.queryClient.ensureQueryData(
-      context.trpc.parameterCategories.getAllParameterCategories.queryOptions(),
+      context.trpc.pengujian.parameterCategories.getAllParameterCategories.queryOptions(),
     );
   },
   component: RouteComponent,
@@ -101,13 +101,13 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: parameter } = useSuspenseQuery(
-    trpc.parameter.getParameterById.queryOptions({
+    trpc.pengujian.parameter.getParameterById.queryOptions({
       id: parameterId,
     }),
   );
 
   const { data: parameterCategories } = useSuspenseQuery(
-    trpc.parameterCategories.getAllParameterCategories.queryOptions(),
+    trpc.pengujian.parameterCategories.getAllParameterCategories.queryOptions(),
   );
 
   const [parameterCategoryOpen, setParameterCategoryOpen] = useState(false);
@@ -125,7 +125,7 @@ function RouteComponent() {
   });
 
   const updateParameterMutation = useMutation(
-    trpc.parameter.updateParameter.mutationOptions({
+    trpc.pengujian.parameter.updateParameter.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil memperbarui parameter");
         await redirectBack();

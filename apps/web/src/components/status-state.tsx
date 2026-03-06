@@ -1,28 +1,493 @@
-import type { OrderDetailWithStatus } from "@tepian-k3/types/order.types";
+import { CalendarIcon, type LucideIcon } from "lucide-react";
+import type { OrderDetailWithStatus } from "@tepian-k3/types/pengujian/order.types";
+import type { Document } from "@tepian-k3/types/platform/document.types";
+import type { OrderStatus } from "@tepian-k3/constants";
+import type { VariantProps } from "class-variance-authority";
 import {
-  Calendar,
   CheckCircle2,
   Clock,
   CreditCard,
+  Calendar,
   Download,
   FileCheckIcon,
   FileText,
   Loader2,
   Upload,
 } from "lucide-react";
+import { cva } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import type { Document } from "@tepian-k3/types/document.types";
-import { getPublicUrl } from "@/utils/url";
 import { Input } from "./ui/input";
-import { globalErrorToast } from "@/lib/toast";
-import type { OrderStatus } from "@tepian-k3/constants";
+import { getPublicUrl } from "@/utils/url";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { Controller, useForm } from "react-hook-form";
+import type { z } from "zod";
+import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient, trpc } from "@/utils/trpc";
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { format } from "date-fns";
+import { Calendar as CalendarComponent } from "./ui/calendar";
+import { Spinner } from "./ui/spinner";
+import { Link } from "@tanstack/react-router";
 
-interface SharedStatusStateProps {
-  orderDetail: OrderDetailWithStatus;
+// ---------------------------------------------------------------------------
+// CVA variant definitions
+// ---------------------------------------------------------------------------
+
+const illustrationBoxVariants = cva(
+  "mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2",
+  {
+    variants: {
+      colorScheme: {
+        slate: "border-slate-200 bg-slate-50",
+        blue: "border-blue-200 bg-blue-50",
+        amber: "border-amber-200 bg-amber-50",
+        purple: "border-purple-200 bg-purple-50",
+        emerald: "border-emerald-200 bg-emerald-50",
+      },
+      dashed: {
+        true: "border-dashed",
+        false: "",
+      },
+    },
+    defaultVariants: {
+      colorScheme: "blue",
+      dashed: true,
+    },
+  },
+);
+
+const illustrationIconVariants = cva("", {
+  variants: {
+    colorScheme: {
+      slate: "text-slate-500",
+      blue: "text-blue-500",
+      amber: "text-amber-500",
+      purple: "text-purple-500",
+      emerald: "text-emerald-500",
+    },
+    size: {
+      sm: "size-5",
+      md: "size-10",
+      lg: "size-12",
+    },
+  },
+  defaultVariants: {
+    colorScheme: "blue",
+    size: "md",
+  },
+});
+
+const bannerRootVariants = cva("rounded-xl border p-4", {
+  variants: {
+    colorScheme: {
+      amber: "border-amber-200 bg-amber-50",
+      emerald: "border-emerald-200 bg-emerald-50",
+      purple: "border-purple-200 bg-purple-50",
+    },
+  },
+});
+
+const bannerIconBoxVariants = cva(
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+  {
+    variants: {
+      colorScheme: {
+        amber: "bg-amber-100",
+        emerald: "bg-emerald-100",
+        purple: "bg-purple-100",
+      },
+    },
+  },
+);
+
+const bannerIconVariants = cva("size-5", {
+  variants: {
+    colorScheme: {
+      amber: "text-amber-600",
+      emerald: "text-emerald-600",
+      purple: "text-purple-600",
+    },
+  },
+});
+
+const bannerTitleVariants = cva("font-medium", {
+  variants: {
+    colorScheme: {
+      amber: "text-amber-800",
+      emerald: "text-emerald-800",
+      purple: "text-purple-800",
+    },
+  },
+});
+
+const bannerDescVariants = cva("mt-1 text-sm", {
+  variants: {
+    colorScheme: {
+      amber: "text-amber-700",
+      emerald: "text-emerald-700",
+      purple: "text-purple-700",
+    },
+  },
+});
+
+const docCardIconBoxVariants = cva(
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+  {
+    variants: {
+      colorScheme: {
+        blue: "bg-blue-100",
+        emerald: "bg-emerald-100",
+      },
+    },
+    defaultVariants: {
+      colorScheme: "blue",
+    },
+  },
+);
+
+const docCardIconVariants = cva("size-5", {
+  variants: {
+    colorScheme: {
+      blue: "text-blue-500",
+      emerald: "text-emerald-500",
+    },
+  },
+  defaultVariants: {
+    colorScheme: "blue",
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Reusable sub-components
+// ---------------------------------------------------------------------------
+
+interface DocumentCardProps {
+  /** Document title shown in the card label */
+  title: string;
+  /** URL of the document file. When `undefined` the download button is disabled. */
+  fileUrl?: string;
+  /** Icon color theme — `"blue"` (default) or `"emerald"` for verified documents. */
+  colorScheme?: VariantProps<typeof docCardIconBoxVariants>["colorScheme"];
+  /** Custom icon component. Defaults to `FileText` when omitted. */
+  icon?: LucideIcon;
+  /** Whether to show the download button. Defaults to `true`. */
+  showDownload?: boolean;
 }
+
+/**
+ * Compact card for downloading a single document.
+ *
+ * @param props - Component props
+ * @param props.title - Document title shown in the card label
+ * @param props.fileUrl - URL of the document file. When `undefined` the download button is disabled.
+ * @param props.colorScheme - Icon color theme — `"blue"` (default) or `"emerald"` for verified documents.
+ * @param props.icon - Custom icon component. Defaults to `FileText` when omitted.
+ *
+ * @example
+ * ```tsx
+ * <DocumentCard title="Invoice" fileUrl={doc.fileUrl} />
+ * <DocumentCard title="Lab Certificate" fileUrl={doc.fileUrl} colorScheme="emerald" />
+ * <DocumentCard title="Certificate" fileUrl={doc.fileUrl} icon={Award} colorScheme="emerald" />
+ * ```
+ */
+export function DocumentCard({
+  title,
+  fileUrl,
+  colorScheme = "blue",
+  icon: Icon = FileText,
+  showDownload = true,
+}: DocumentCardProps) {
+  return (
+    <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+      <div className={docCardIconBoxVariants({ colorScheme })}>
+        <Icon className={docCardIconVariants({ colorScheme })} />
+      </div>
+      <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
+        {title}
+      </span>
+      {showDownload && (
+        <Button
+          size="icon"
+          className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
+          onClick={() => {
+            if (fileUrl) {
+              window.open(getPublicUrl(fileUrl), "_blank");
+            }
+          }}
+          disabled={!fileUrl}
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
+interface FileUploadCardProps {
+  /** Unique HTML `id` for the hidden file input. */
+  id: string;
+  /** Label displayed in the card. */
+  title: string;
+  /** Currently selected file, or `null` when nothing is selected. */
+  file: File | null;
+  /** Called when the user picks a file. Perform validation here before storing it. */
+  onFileSelect: (file: File) => void;
+  /** Accepted file types passed to the `<input>` element (e.g. `".pdf,.jpg"`). */
+  accept: string;
+  /**
+   * Custom content rendered when a file is selected.
+   * When omitted the card shows a green "✓ filename" indicator and switches
+   * the icon color to emerald.
+   */
+  selectedContent?: React.ReactNode;
+}
+
+/**
+ * Card with a hidden file input that lets the user pick a file for upload.
+ *
+ * @example
+ * ```tsx
+ * // Default selected indicator (green checkmark)
+ * <FileUploadCard id="proof" title="Bukti" file={file} onFileSelect={setFile} accept=".pdf" />
+ *
+ * // Custom action when selected (e.g. an upload button)
+ * <FileUploadCard id="letter" title="Surat" file={file} onFileSelect={setFile} accept=".pdf"
+ *   selectedContent={<Button onClick={handleUpload}>Upload</Button>}
+ * />
+ * ```
+ */
+export function FileUploadCard({
+  id,
+  title,
+  file,
+  onFileSelect,
+  accept,
+  selectedContent,
+}: FileUploadCardProps) {
+  const hasFile = !!file;
+  const showDefaultSelected = hasFile && !selectedContent;
+  const iconColor = showDefaultSelected ? "emerald" : "blue";
+
+  return (
+    <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
+      <div className={docCardIconBoxVariants({ colorScheme: iconColor })}>
+        <FileText className={docCardIconVariants({ colorScheme: iconColor })} />
+      </div>
+      <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
+        {title}
+      </span>
+      {!hasFile ? (
+        <label htmlFor={id}>
+          <Input
+            id={id}
+            type="file"
+            accept={accept}
+            className="hidden"
+            onChange={(e) => {
+              const selected = e.target.files?.[0];
+              if (selected) onFileSelect(selected);
+            }}
+          />
+          <Button
+            size="icon"
+            className="h-10 w-10 shrink-0 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
+            asChild
+          >
+            <span>
+              <Upload className="h-4 w-4" />
+            </span>
+          </Button>
+        </label>
+      ) : selectedContent ? (
+        selectedContent
+      ) : (
+        <span className="shrink-0 truncate text-sm text-emerald-600 sm:max-w-32">
+          ✓ {file.name}
+        </span>
+      )}
+    </div>
+  );
+}
+
+interface StatusIllustrationProps {
+  /** Primary icon rendered inside the illustration box. */
+  icon: LucideIcon;
+  /** Optional secondary icon at the bottom-right corner of the primary icon. */
+  overlayIcon?: LucideIcon;
+  /** Extra classes for the overlay icon (e.g. `"animate-spin"`). */
+  overlayIconClassName?: string;
+  /** Override the icon text-color class derived from `colorScheme`. */
+  iconClassName?: string;
+  /** Heading text shown below the icon. */
+  heading?: string;
+  /** Heading HTML tag — `"h2"` (default) or `"h3"`. Styles adjust automatically. */
+  headingAs?: "h2" | "h3";
+  /** Description text shown below the heading. */
+  description?: string;
+  /** Color theme for the illustration box border, background and icon. */
+  colorScheme: NonNullable<
+    VariantProps<typeof illustrationBoxVariants>["colorScheme"]
+  >;
+  /** Show a dashed border on the icon box (default `true`). */
+  dashed?: boolean;
+  /** Icon size — `"sm"` (20 px), `"md"` (40 px, default) or `"lg"` (48 px). */
+  iconSize?: "sm" | "md" | "lg";
+  /** Overlay icon size — `"sm"` (20 px, default), `"md"` (40 px) or `"lg"` (48 px). */
+  overlayIconSize?: "sm" | "md" | "lg";
+  /** Extra classes appended to the outer container (e.g. `"h-full w-full self-center"`). */
+  className?: string;
+}
+
+/**
+ * Centered illustration block with an icon, optional overlay, heading and description.
+ * Used as the hero section inside status-state cards.
+ *
+ * @example
+ * ```tsx
+ * <StatusIllustration
+ *   icon={Calendar}
+ *   overlayIcon={Clock}
+ *   heading="Menunggu Jadwal"
+ *   description="Pembayaran telah diverifikasi."
+ *   colorScheme="blue"
+ * />
+ * ```
+ */
+export function StatusIllustration({
+  icon: Icon,
+  overlayIcon: OverlayIcon,
+  overlayIconClassName,
+  iconClassName,
+  heading,
+  headingAs = "h2",
+  description,
+  colorScheme,
+  dashed = true,
+  iconSize = "md",
+  overlayIconSize = "sm",
+  className,
+}: StatusIllustrationProps) {
+  const iconColor = cn(
+    illustrationIconVariants({ colorScheme, size: iconSize }),
+    iconClassName,
+  );
+  const overlayColor = iconClassName
+    ? cn(
+        "absolute -right-1 -bottom-1",
+        illustrationIconVariants({ size: overlayIconSize }),
+        iconClassName,
+        overlayIconClassName,
+      )
+    : cn(
+        "absolute -right-1 -bottom-1",
+        illustrationIconVariants({ colorScheme, size: overlayIconSize }),
+        overlayIconClassName,
+      );
+  const HeadingTag = headingAs;
+  const headingClass =
+    headingAs === "h3"
+      ? "mb-2 text-center text-lg font-medium text-foreground"
+      : "mb-2 text-center text-xl font-semibold text-foreground";
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center py-8",
+        className,
+      )}
+    >
+      <div className={illustrationBoxVariants({ colorScheme, dashed })}>
+        {OverlayIcon ? (
+          <div className="relative">
+            <Icon className={iconColor} />
+            <OverlayIcon className={overlayColor} />
+          </div>
+        ) : (
+          <Icon className={iconColor} />
+        )}
+      </div>
+      {heading && <HeadingTag className={headingClass}>{heading}</HeadingTag>}
+      {description && (
+        <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
+          {description}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface StatusInfoBannerProps {
+  /** Icon displayed in the banner's accent box. */
+  icon: LucideIcon;
+  /** Banner title. */
+  title: string;
+  /** Short description text. */
+  description: string;
+  /** Color theme for the banner. */
+  colorScheme: NonNullable<
+    VariantProps<typeof bannerRootVariants>["colorScheme"]
+  >;
+  /** Extra classes appended to the outer container (e.g. `"mb-4"`). */
+  className?: string;
+  /** Additional content rendered below the description (e.g. a revision-note card). */
+  children?: React.ReactNode;
+}
+
+/**
+ * Colored information banner with icon, title, description and optional children.
+ *
+ * @example
+ * ```tsx
+ * <StatusInfoBanner
+ *   icon={CheckCircle2}
+ *   title="Pembayaran Terverifikasi"
+ *   description="Pembayaran Anda telah dikonfirmasi oleh admin."
+ *   colorScheme="emerald"
+ * />
+ * ```
+ */
+export function StatusInfoBanner({
+  icon: Icon,
+  title,
+  description,
+  colorScheme,
+  children,
+  className,
+}: StatusInfoBannerProps) {
+  return (
+    <div className={cn(bannerRootVariants({ colorScheme }), className)}>
+      <div className="flex items-start gap-3">
+        <div className={bannerIconBoxVariants({ colorScheme })}>
+          <Icon className={bannerIconVariants({ colorScheme })} />
+        </div>
+        <div className="flex-1">
+          <h3 className={bannerTitleVariants({ colorScheme })}>{title}</h3>
+          <p className={bannerDescVariants({ colorScheme })}>{description}</p>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Internal layout
+// ---------------------------------------------------------------------------
 
 function StateLayout({ children }: { children: React.ReactNode }) {
   return <div className="flex h-full flex-1 flex-col">{children}</div>;
+}
+
+// ---------------------------------------------------------------------------
+// Status-state components
+// ---------------------------------------------------------------------------
+
+interface SharedStatusStateProps {
+  orderDetail: OrderDetailWithStatus;
 }
 
 interface StatusStateWaitingForRevisionProps extends SharedStatusStateProps {
@@ -52,37 +517,30 @@ export function StatusStateWaitingForRevision({
         dokumen penawaran.
       </p>
 
-      {/* Revision Status Card */}
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100">
-            <Clock className="h-5 w-5 text-amber-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-amber-800">
-              Menunggu Revisi Dokumen
-            </h3>
-            <p className="mt-1 text-sm text-amber-700">
-              Admin sedang memproses permintaan revisi Anda.
+      <StatusInfoBanner
+        icon={Clock}
+        title="Menunggu Revisi Dokumen"
+        description="Admin sedang memproses permintaan revisi Anda."
+        colorScheme="amber"
+      >
+        {revisionHistory?.note && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-white p-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              Catatan Revisi:
             </p>
-            {revisionHistory?.note && (
-              <div className="mt-3 rounded-lg border border-amber-200 bg-white p-3">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Catatan Revisi:
-                </p>
-                <p className="mt-1 text-sm text-foreground">
-                  {revisionHistory.note}
-                </p>
-              </div>
-            )}
+            <p className="mt-1 text-sm text-foreground">
+              {revisionHistory.note}
+            </p>
           </div>
-        </div>
-      </div>
+        )}
+      </StatusInfoBanner>
     </StateLayout>
   );
 }
 
-export function StatusState0({ orderDetail }: SharedStatusStateProps) {
+export function StatusStatePendingReview({
+  orderDetail,
+}: SharedStatusStateProps) {
   return (
     <StateLayout>
       <h2 className="mb-2 text-xl font-semibold text-foreground">
@@ -92,16 +550,16 @@ export function StatusState0({ orderDetail }: SharedStatusStateProps) {
         Order pengujian telah diterima. Admin sedang melakukan kaji ulang teknis
         untuk menentukan parameter, alat, dan estimasi waktu pengujian.
       </p>
-      <div className="flex h-full w-full flex-col items-center justify-center self-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50">
-          <FileCheckIcon className="h-10 w-10 text-green-500" />
-        </div>
-      </div>
+      <StatusIllustration
+        icon={FileCheckIcon}
+        colorScheme="slate"
+        iconClassName="text-green-500"
+        className="h-full w-full self-center"
+      />
     </StateLayout>
   );
 }
 
-// State: Worksheet sedang dalam kaji ulang (draft/pending_verification)
 interface StatusStateWorksheetInReviewProps extends SharedStatusStateProps {
   worksheetStatus: string;
 }
@@ -126,26 +584,19 @@ export function StatusStateWorksheetInReview({
         Tim kami sedang melakukan kaji ulang teknis untuk order pengujian Anda.
       </p>
 
-      <div className="flex h-full w-full flex-col items-center justify-center self-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50">
-          <div className="relative">
-            <FileText className="h-10 w-10 text-blue-500" />
-            <Clock className="absolute -right-1 -bottom-1 h-5 w-5 text-blue-500" />
-          </div>
-        </div>
-        <h3 className="mb-2 text-center text-lg font-medium text-foreground">
-          {statusText}
-        </h3>
-        <p className="max-w-md text-center text-sm text-muted-foreground">
-          Koordinator akan memverifikasi kelayakan teknis, menentukan tim
-          pengujian, dan menyiapkan dokumen penawaran.
-        </p>
-      </div>
+      <StatusIllustration
+        icon={FileText}
+        overlayIcon={Clock}
+        heading={statusText}
+        headingAs="h3"
+        description="Koordinator akan memverifikasi kelayakan teknis, menentukan tim pengujian, dan menyiapkan dokumen penawaran."
+        colorScheme="blue"
+        className="h-full w-full self-center"
+      />
     </StateLayout>
   );
 }
 
-// State: Worksheet sudah verified, menunggu penawaran dikirim
 export function StatusStateWorksheetVerified({
   orderDetail,
 }: SharedStatusStateProps) {
@@ -159,29 +610,26 @@ export function StatusStateWorksheetVerified({
         dokumen penawaran.
       </p>
 
-      <div className="flex h-full w-full flex-col items-center justify-center self-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50">
-          <div className="relative">
-            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
-          </div>
-        </div>
-        <h3 className="mb-2 text-center text-lg font-medium text-foreground">
-          Kaji Ulang Teknis Selesai
-        </h3>
-        <p className="max-w-md text-center text-sm text-muted-foreground">
-          Worksheet telah diverifikasi. Admin sedang menyiapkan dokumen
-          penawaran untuk Anda.
-        </p>
-      </div>
+      <StatusIllustration
+        icon={CheckCircle2}
+        heading="Kaji Ulang Teknis Selesai"
+        headingAs="h3"
+        description="Worksheet telah diverifikasi. Admin sedang menyiapkan dokumen penawaran untuk Anda."
+        colorScheme="emerald"
+        className="h-full w-full self-center"
+      />
     </StateLayout>
   );
 }
 
-interface StatusState1Props extends SharedStatusStateProps {
+interface StatusStateOfferPublishedProps extends SharedStatusStateProps {
   offeringDoc: Document | undefined;
 }
 
-export function StatusState1({ orderDetail, offeringDoc }: StatusState1Props) {
+export function StatusStateOfferPublished({
+  orderDetail,
+  offeringDoc,
+}: StatusStateOfferPublishedProps) {
   return (
     <StateLayout>
       <h2 className="mb-2 text-xl font-semibold text-foreground">
@@ -192,49 +640,28 @@ export function StatusState1({ orderDetail, offeringDoc }: StatusState1Props) {
         tahap pembayaran.
       </p>
 
-      {/* Document Download Card */}
       <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-            <FileText className="h-5 w-5 text-blue-500" />
-          </div>
-          <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-            Surat Penawaran
-          </span>
-          <Button
-            size="icon"
-            className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
-            onClick={() => {
-              if (offeringDoc?.fileUrl) {
-                window.open(getPublicUrl(offeringDoc.fileUrl), "_blank");
-              }
-            }}
-            disabled={!offeringDoc}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-        </div>
+        <DocumentCard title="Surat Penawaran" fileUrl={offeringDoc?.fileUrl} />
       </div>
     </StateLayout>
   );
 }
 
-interface StatusState2Props {
+interface StatusStateUploadApprovalProps {
   approvalLetterFile: File | null;
   setApprovalLetterFile: (file: File | null) => void;
   uploadingApprovalLetter: boolean;
   handleUploadApprovalLetter: () => void;
 }
 
-export function StatusState2({
+export function StatusStateUploadApproval({
   approvalLetterFile,
   setApprovalLetterFile,
   uploadingApprovalLetter,
   handleUploadApprovalLetter,
-}: StatusState2Props) {
+}: StatusStateUploadApprovalProps) {
   return (
     <StateLayout>
-      {/* Upload Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-foreground">
           Upload Surat Persetujuan
@@ -244,43 +671,19 @@ export function StatusState2({
           melanjutkan ke tahap berikutnya.
         </p>
 
-        {/* Document Upload Card */}
-        <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-            <FileText className="h-5 w-5 text-blue-500" />
-          </div>
-          <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-            Surat Persetujuan
-          </span>
-          {!approvalLetterFile ? (
-            <label htmlFor="approval-letter-input">
-              <Input
-                id="approval-letter-input"
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    if (file.type !== "application/pdf") {
-                      globalErrorToast("Format file harus PDF");
-                      return;
-                    }
-                    setApprovalLetterFile(file);
-                  }
-                }}
-              />
-              <Button
-                size="icon"
-                className="h-10 w-10 shrink-0 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
-                asChild
-              >
-                <span>
-                  <Upload className="h-4 w-4" />
-                </span>
-              </Button>
-            </label>
-          ) : (
+        <FileUploadCard
+          id="approval-letter-input"
+          title="Surat Persetujuan"
+          file={approvalLetterFile}
+          onFileSelect={(file) => {
+            if (file.type !== "application/pdf") {
+              globalErrorToast("Format file harus PDF");
+              return;
+            }
+            setApprovalLetterFile(file);
+          }}
+          accept=".pdf"
+          selectedContent={
             <Button
               size="sm"
               className="shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
@@ -294,8 +697,8 @@ export function StatusState2({
               )}
               Upload
             </Button>
-          )}
-        </div>
+          }
+        />
 
         {approvalLetterFile && (
           <p className="text-sm text-muted-foreground">
@@ -307,29 +710,22 @@ export function StatusState2({
   );
 }
 
-export function StatusState3() {
+export function StatusStateAwaitingInvoice() {
   return (
     <StateLayout>
-      <div className="flex h-full flex-col items-center justify-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50">
-          <div className="relative">
-            <FileText className="h-10 w-10 text-blue-500" />
-            <Clock className="absolute -right-1 -bottom-1 h-5 w-5 text-blue-500" />
-          </div>
-        </div>
-        <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
-          Menunggu Dokumen Tagihan
-        </h2>
-        <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
-          Surat persetujuan telah diunggah. Mohon tunggu admin untuk menerbitkan
-          invoice dan surat perjanjian kerjasama.
-        </p>
-      </div>
+      <StatusIllustration
+        icon={FileText}
+        overlayIcon={Clock}
+        heading="Menunggu Dokumen Tagihan"
+        description="Surat persetujuan telah diunggah. Mohon tunggu admin untuk menerbitkan invoice dan surat perjanjian kerjasama."
+        colorScheme="blue"
+        className="h-full"
+      />
     </StateLayout>
   );
 }
 
-interface StatusState4Props {
+interface StatusStateUploadPaymentProps {
   invoiceDoc: Document | undefined;
   cooperationAgreementDoc: Document | undefined;
   paymentProofFile: File | null;
@@ -340,7 +736,7 @@ interface StatusState4Props {
   handleUploadPaymentDocs: () => void;
 }
 
-export function StatusState4({
+export function StatusStateUploadPayment({
   invoiceDoc,
   cooperationAgreementDoc,
   paymentProofFile,
@@ -349,25 +745,16 @@ export function StatusState4({
   setCooperationAgreementFile,
   uploadingPaymentDocs,
   handleUploadPaymentDocs,
-}: StatusState4Props) {
+}: StatusStateUploadPaymentProps) {
   return (
     <StateLayout>
-      <div className="flex flex-col items-center justify-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50">
-          <div className="relative">
-            <CreditCard className="h-10 w-10 text-blue-500" />
-            <Upload className="absolute -right-1 -bottom-1 h-5 w-5 text-blue-500" />
-          </div>
-        </div>
-        <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
-          Upload Bukti Pembayaran
-        </h2>
-        <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
-          Silakan unduh invoice dan surat perjanjian kerjasama, lakukan
-          pembayaran, dan unggah bukti pembayaran beserta surat perjanjian yang
-          telah ditandatangani.
-        </p>
-      </div>
+      <StatusIllustration
+        icon={CreditCard}
+        overlayIcon={Upload}
+        heading="Upload Bukti Pembayaran"
+        description="Silakan unduh invoice dan surat perjanjian kerjasama, lakukan pembayaran, dan unggah bukti pembayaran beserta surat perjanjian yang telah ditandatangani."
+        colorScheme="blue"
+      />
 
       {/* Download Documents Section */}
       <div className="mb-6 space-y-3">
@@ -375,43 +762,11 @@ export function StatusState4({
           Dokumen Tagihan
         </h3>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-              <FileText className="h-5 w-5 text-blue-500" />
-            </div>
-            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-              Invoice
-            </span>
-            <Button
-              size="icon"
-              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
-              onClick={() =>
-                window.open(getPublicUrl(invoiceDoc!.fileUrl), "_blank")
-              }
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-              <FileText className="h-5 w-5 text-blue-500" />
-            </div>
-            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-              Surat Perjanjian
-            </span>
-            <Button
-              size="icon"
-              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
-              onClick={() =>
-                window.open(
-                  getPublicUrl(cooperationAgreementDoc!.fileUrl),
-                  "_blank",
-                )
-              }
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
+          <DocumentCard title="Invoice" fileUrl={invoiceDoc?.fileUrl} />
+          <DocumentCard
+            title="Surat Perjanjian"
+            fileUrl={cooperationAgreementDoc?.fileUrl}
+          />
         </div>
       </div>
 
@@ -429,93 +784,26 @@ export function StatusState4({
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-          {/* Payment Proof Upload */}
-          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${paymentProofFile ? "bg-emerald-100" : "bg-blue-100"}`}
-            >
-              <FileText
-                className={`h-5 w-5 ${paymentProofFile ? "text-emerald-500" : "text-blue-500"}`}
-              />
-            </div>
-            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-              Bukti Pembayaran
-            </span>
-            {!paymentProofFile ? (
-              <label htmlFor="payment-proof-input">
-                <Input
-                  id="payment-proof-input"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setPaymentProofFile(file);
-                  }}
-                />
-                <Button
-                  size="icon"
-                  className="h-10 w-10 shrink-0 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
-                  asChild
-                >
-                  <span>
-                    <Upload className="h-4 w-4" />
-                  </span>
-                </Button>
-              </label>
-            ) : (
-              <span className="shrink-0 truncate text-sm text-emerald-600 sm:max-w-32">
-                ✓ {paymentProofFile.name}
-              </span>
-            )}
-          </div>
-
-          {/* Cooperation Agreement Upload */}
-          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${cooperationAgreementFile ? "bg-emerald-100" : "bg-blue-100"}`}
-            >
-              <FileText
-                className={`h-5 w-5 ${cooperationAgreementFile ? "text-emerald-500" : "text-blue-500"}`}
-              />
-            </div>
-            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-              Surat Perjanjian
-            </span>
-            {!cooperationAgreementFile ? (
-              <label htmlFor="cooperation-agreement-input">
-                <Input
-                  id="cooperation-agreement-input"
-                  type="file"
-                  accept=".pdf"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      if (file.type !== "application/pdf") {
-                        globalErrorToast("Format file harus PDF");
-                        return;
-                      }
-                      setCooperationAgreementFile(file);
-                    }
-                  }}
-                />
-                <Button
-                  size="icon"
-                  className="h-10 w-10 shrink-0 cursor-pointer rounded-lg bg-blue-500 hover:bg-blue-600"
-                  asChild
-                >
-                  <span>
-                    <Upload className="h-4 w-4" />
-                  </span>
-                </Button>
-              </label>
-            ) : (
-              <span className="shrink-0 truncate text-sm text-emerald-600 sm:max-w-32">
-                ✓ {cooperationAgreementFile.name}
-              </span>
-            )}
-          </div>
+          <FileUploadCard
+            id="payment-proof-input"
+            title="Bukti Pembayaran"
+            file={paymentProofFile}
+            onFileSelect={setPaymentProofFile}
+            accept=".pdf,.jpg,.jpeg,.png"
+          />
+          <FileUploadCard
+            id="cooperation-agreement-input"
+            title="Surat Perjanjian"
+            file={cooperationAgreementFile}
+            onFileSelect={(file) => {
+              if (file.type !== "application/pdf") {
+                globalErrorToast("Format file harus PDF");
+                return;
+              }
+              setCooperationAgreementFile(file);
+            }}
+            accept=".pdf"
+          />
         </div>
 
         {/* Upload Button */}
@@ -540,207 +828,331 @@ export function StatusState4({
   );
 }
 
-interface StatusState5Props {
+interface StatusStatePendingPaymentVerificationProps {
   paymentProofDoc: Document | undefined;
   cooperationAgreementUserDoc: Document | undefined;
 }
 
-export function StatusState5({
+export function StatusStatePendingPaymentVerification({
   cooperationAgreementUserDoc,
   paymentProofDoc,
-}: StatusState5Props) {
+}: StatusStatePendingPaymentVerificationProps) {
   return (
     <StateLayout>
-      <div className="flex flex-col items-center justify-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50">
-          <div className="relative">
-            <CreditCard className="h-10 w-10 text-amber-500" />
-            <Clock className="absolute -right-1 -bottom-1 h-5 w-5 text-amber-500" />
-          </div>
-        </div>
-        <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
-          Menunggu Verifikasi Pembayaran
-        </h2>
-        <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
-          Dokumen pembayaran telah diunggah. Mohon tunggu admin untuk
-          memverifikasi pembayaran Anda.
-        </p>
-      </div>
+      <StatusIllustration
+        icon={CreditCard}
+        overlayIcon={Clock}
+        heading="Menunggu Verifikasi Pembayaran"
+        description="Dokumen pembayaran telah diunggah. Mohon tunggu admin untuk memverifikasi pembayaran Anda."
+        colorScheme="amber"
+      />
 
-      {/* Show uploaded payment documents */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
         {paymentProofDoc && (
-          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-              <FileText className="h-5 w-5 text-emerald-500" />
-            </div>
-            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-              Bukti Pembayaran
-            </span>
-            <Button
-              size="icon"
-              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
-              onClick={() =>
-                window.open(getPublicUrl(paymentProofDoc.fileUrl), "_blank")
-              }
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
+          <DocumentCard
+            title="Bukti Pembayaran"
+            fileUrl={paymentProofDoc.fileUrl}
+            colorScheme="emerald"
+          />
         )}
         {cooperationAgreementUserDoc && (
-          <div className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-              <FileText className="h-5 w-5 text-emerald-500" />
-            </div>
-            <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-              Surat Perjanjian
-            </span>
-            <Button
-              size="icon"
-              className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
-              onClick={() =>
-                window.open(
-                  getPublicUrl(cooperationAgreementUserDoc.fileUrl),
-                  "_blank",
-                )
-              }
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
+          <DocumentCard
+            title="Surat Perjanjian"
+            fileUrl={cooperationAgreementUserDoc.fileUrl}
+            colorScheme="emerald"
+          />
         )}
       </div>
     </StateLayout>
   );
 }
 
-export function StatusState6() {
+export function StatusStateAwaitingSchedule() {
   return (
     <StateLayout>
-      <div className="flex flex-col items-center justify-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50">
-          <div className="relative">
-            <Calendar className="h-10 w-10 text-blue-500" />
-            <Clock className="absolute -right-1 -bottom-1 h-5 w-5 text-blue-500" />
-          </div>
-        </div>
-        <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
-          Menunggu Jadwal Pengujian
-        </h2>
-        <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
-          Pembayaran telah diverifikasi. Mohon tunggu penerbitan Surat Perintah
-          Tugas (SPT) dan jadwal pengujian.
-        </p>
-      </div>
+      <StatusIllustration
+        icon={Calendar}
+        overlayIcon={Clock}
+        heading="Menunggu Jadwal Pengujian"
+        description="Pembayaran telah diverifikasi. Mohon tunggu penerbitan Surat Perintah Tugas (SPT) dan jadwal pengujian."
+        colorScheme="blue"
+      />
 
-      {/* Show verified payment status */}
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-emerald-800">
-              Pembayaran Terverifikasi
-            </h3>
-            <p className="mt-1 text-sm text-emerald-700">
-              Pembayaran Anda telah dikonfirmasi oleh admin.
-            </p>
-          </div>
-        </div>
-      </div>
+      <StatusInfoBanner
+        icon={CheckCircle2}
+        title="Pembayaran Terverifikasi"
+        description="Pembayaran Anda telah dikonfirmasi oleh admin."
+        colorScheme="emerald"
+      />
     </StateLayout>
   );
 }
 
-interface StatusState7Props extends SharedStatusStateProps {}
+export function StatusStateTestingInProgress({
+  orderDetail,
+}: SharedStatusStateProps) {
+  const form = useForm<
+    z.infer<typeof orderSchema.createArrivalDepartureDateSchema>
+  >({
+    resolver: zodResolver(orderSchema.createArrivalDepartureDateSchema),
+    defaultValues: {
+      orderId: orderDetail.id,
+      arrivalDate: orderDetail.arrivalDate
+        ? new Date(orderDetail.arrivalDate).toISOString()
+        : undefined,
+      departureDate: orderDetail.departureDate
+        ? new Date(orderDetail.departureDate).toISOString()
+        : undefined,
+    },
+  });
 
-export function StatusState7({ orderDetail }: StatusState7Props) {
+  const createArrivalDepartureMutation = useMutation({
+    ...trpc.pengujian.order.createArrivalDepartureDate.mutationOptions(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(
+        trpc.pengujian.order.getOrderWithDocuments.queryOptions({
+          orderId: orderDetail.id,
+        }),
+      );
+      globalSuccessToast(
+        "Tanggal kedatangan atau keberangkatan berhasil disimpan",
+      );
+    },
+    onError: (error) => {
+      globalErrorToast(
+        error.message || "Gagal menyimpan tanggal kedatangan dan keberangkatan",
+      );
+    },
+  });
+
+  const handleSubmit = (
+    data: z.infer<typeof orderSchema.createArrivalDepartureDateSchema>,
+  ) => {
+    createArrivalDepartureMutation.mutate({
+      orderId: data.orderId,
+      arrivalDate: data.arrivalDate,
+      departureDate: data.departureDate,
+    });
+  };
+
+  // 1. Tanggal Pengujian (dari worksheet)
+  const dateRange =
+    orderDetail.worksheet?.startDate && orderDetail.worksheet?.endDate
+      ? `${format(new Date(orderDetail.worksheet.startDate), "d")} - ${format(
+          new Date(orderDetail.worksheet.endDate),
+          "d MMMM yyyy",
+        )}`
+      : null;
+
+  // 2. Surat Perintah Tugas
+  const assignmentLetterDoc = orderDetail.documents?.find(
+    (d) => d.type === "assignment_letter",
+  );
+
+  // 3. Berita Acara
+  const beritaAcaraDoc = orderDetail.documents?.find(
+    (d) => d.type === "testing_report",
+  );
+
   return (
     <StateLayout>
-      <div className="flex h-full flex-col items-center justify-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed border-purple-200 bg-purple-50">
-          <div className="relative">
-            <Calendar className="h-10 w-10 text-purple-500" />
-            <Loader2 className="absolute -right-1 -bottom-1 h-5 w-5 animate-spin text-purple-500" />
-          </div>
-        </div>
-        <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
-          Pengujian Sedang Berlangsung
-        </h2>
-        <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
-          Tim kami sedang melakukan pengujian sesuai jadwal. Mohon tunggu hasil
-          pengujian.
-        </p>
-      </div>
+      <StatusIllustration
+        icon={Calendar}
+        overlayIcon={Loader2}
+        overlayIconClassName="animate-spin"
+        heading="Pengujian Sedang Berlangsung"
+        description="Tim kami sedang melakukan pengujian sesuai jadwal. Mohon tunggu hasil pengujian."
+        colorScheme="purple"
+        className="h-full"
+      />
 
-      {/* Show testing info if available */}
-      {orderDetail.testing && (
-        <div className="rounded-xl border border-purple-200 bg-purple-50 p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
-              <Calendar className="h-5 w-5 text-purple-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-purple-800">
-                Informasi Pengujian
-              </h3>
-              <p className="mt-1 text-sm text-purple-700">
-                No. Testing: {orderDetail.testing.testingNumber}
-              </p>
-            </div>
+      {dateRange && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-row flex-wrap items-start gap-4">
+            {/* Date range */}
+            <DocumentCard
+              title={dateRange ?? "Tanggal belum ditentukan"}
+              colorScheme="blue"
+              icon={Calendar}
+              showDownload={false}
+            />
+
+            {/* Surat Perintah Tugas */}
+            {assignmentLetterDoc && (
+              <DocumentCard
+                title="Surat Perintah Tugas"
+                fileUrl={assignmentLetterDoc.fileUrl}
+                colorScheme="blue"
+              />
+            )}
+
+            {/* Berita Acara */}
+            {beritaAcaraDoc && (
+              <DocumentCard
+                title="Berita Acara"
+                fileUrl={beritaAcaraDoc.fileUrl}
+                colorScheme="blue"
+              />
+            )}
           </div>
+          {/* Lihat Sertifikasi */}
+          <Link
+            to="/pengujian/sertifikat"
+            search={{ orderId: orderDetail.id }}
+            target="_blank"
+          >
+            <Button variant="outline" className="mb-4 w-full">
+              Lihat Sertifikat
+            </Button>
+          </Link>
         </div>
       )}
+
+      {orderDetail.testing && (
+        <StatusInfoBanner
+          icon={Calendar}
+          title="Informasi Pengujian"
+          description={`No. Testing: ${orderDetail.testing.testingNumber}`}
+          colorScheme="purple"
+          className="mb-4"
+        />
+      )}
+
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="flex w-[calc(100%-theme(space.1))] flex-col gap-4"
+      >
+        <FieldGroup>
+          <div className="flex flex-row gap-4">
+            <Controller
+              control={form.control}
+              name="arrivalDate"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="space-y-1">
+                  <FieldLabel className="ml-1 text-sm font-bold">
+                    Tanggal Kedatangan
+                  </FieldLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-60 pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                        disabled={!!orderDetail.arrivalDate} // Disable if arrival date is set
+                      >
+                        {field.value
+                          ? format(new Date(field.value), "PPP")
+                          : "Pick a date"}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={new Date(field.value ?? "")}
+                        onSelect={(value) => {
+                          field.onChange(value?.toISOString() ?? null);
+                        }}
+                        autoFocus
+                        disabled={!!orderDetail.arrivalDate} // Disable if departure date is set
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="departureDate"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="space-y-1">
+                  <FieldLabel className="ml-1 text-sm font-bold">
+                    Tanggal Keberangkatan
+                  </FieldLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-60 pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                        disabled={!!orderDetail.departureDate} // Disable if departure date is set
+                      >
+                        {field.value
+                          ? format(new Date(field.value), "PPP")
+                          : "Pick a date"}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={new Date(field.value ?? "")}
+                        onSelect={(value) => {
+                          field.onChange(value?.toISOString() ?? null);
+                        }}
+                        autoFocus
+                        disabled={!!orderDetail.departureDate} // Disable if departure date is set
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+        </FieldGroup>
+
+        {!(orderDetail.arrivalDate && orderDetail.departureDate) && (
+          <Button
+            type="submit"
+            disabled={createArrivalDepartureMutation.isPending}
+            className="self-end"
+          >
+            {createArrivalDepartureMutation.isPending ? <Spinner /> : null}
+            Simpan Tanggal
+          </Button>
+        )}
+      </form>
     </StateLayout>
   );
 }
 
-interface StatusState8Props extends SharedStatusStateProps {}
-
-export function StatusState8({ orderDetail }: StatusState8Props) {
+export function StatusStateCompleted({ orderDetail }: SharedStatusStateProps) {
   return (
-    <>
-      <div className="flex flex-col items-center justify-center py-8">
-        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-emerald-200 bg-emerald-50">
-          <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-        </div>
-        <h2 className="mb-2 text-center text-xl font-semibold text-foreground">
-          Pengujian Selesai
-        </h2>
-        <p className="mb-8 max-w-md text-center text-sm text-muted-foreground">
-          Pengujian telah selesai. Anda dapat mengunduh laporan hasil pengujian.
-        </p>
-      </div>
+    <StateLayout>
+      <StatusIllustration
+        icon={CheckCircle2}
+        heading="Pengujian Selesai"
+        description="Pengujian telah selesai. Anda dapat mengunduh laporan hasil pengujian."
+        colorScheme="emerald"
+        dashed={false}
+        iconSize="lg"
+      />
 
-      {/* Download documents */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
         {orderDetail.documents
           .filter((doc) =>
             ["testing_report", "lab_certificate"].includes(doc.type),
           )
           .map((doc) => (
-            <div
+            <DocumentCard
               key={doc.id}
-              className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 sm:inline-flex sm:w-auto sm:gap-4 sm:px-4 sm:pr-3"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-                <FileText className="h-5 w-5 text-emerald-500" />
-              </div>
-              <span className="min-w-0 flex-1 truncate font-medium text-foreground sm:min-w-30 sm:flex-none">
-                {doc.title || doc.type}
-              </span>
-              <Button
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
-                onClick={() => window.open(getPublicUrl(doc.fileUrl), "_blank")}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-            </div>
+              title={doc.title || doc.type}
+              fileUrl={doc.fileUrl}
+              colorScheme="emerald"
+            />
           ))}
       </div>
-    </>
+    </StateLayout>
   );
 }

@@ -310,7 +310,7 @@ export default function PDFQRCodeEditor() {
   );
 
   const signDocumentMutation = useMutation(
-    trpc.document.signDocumentWithQRCodes.mutationOptions({
+    trpc.pengujian.document.signDocumentWithQRCodes.mutationOptions({
       onMutate: () => {
         setIsProcessing(true);
         setError(null);

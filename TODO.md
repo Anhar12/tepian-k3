@@ -8,177 +8,368 @@
 
 ---
 
-## 🔴 Critical Priority
+## Kode Alat
 
-### Testing
+> **Goal:** Build a kode alat management feature in the pengujian domain, allowing lab technicians to assign unique codes to each tool for better tracking and inventory management. This includes:
 
-- [ ] Set up Vitest with monorepo configuration (`vitest.config.ts`, `vitest.workspace.ts`)
-- [ ] Write unit tests for auth flows (login, register, OTP, password reset, refresh token)
-- [ ] Write unit tests for query functions (`packages/queries/`) - especially `users.queries.ts`
-- [ ] Write integration tests for critical routers (auth, order, document, worksheet)
-- [ ] Write schema validation tests (`packages/schema/`)
-- [ ] Add coverage reporting with minimum thresholds (auth: 90%, queries: 80%, routers: 80%)
+- [x] New `kodeAlat` table in DB schema (pengujian module) with fields: `id`, `kode`, `isActive`, `createdAt`, `updatedAt`
+- [x] New `kodeAlat` tRPC router (pengujianRouter) with mutations to create, update, deactivate kode alat, and a query to list kode alat for a given tool
+- [x] New CRUD "Kode Alat" page in admin panel (frontend)
 
-### Data Integrity - Transaction Handling
+## Mengembalikan Alat
 
-- [x] Wrap `createUser()` in a transaction (user creation + default role assignment)
-- [x] Wrap `updateUser()` in a transaction (role deletion + role insertion + user update)
-- [x] Fix `updateUserAvatar()` - DB update BEFORE file deletion (not after)
-- [x] Fix `adminCreateUser()` - wrap in transaction
-- [x] Implement transaction in order router (line 349: explicit TODO in code)
-- [x] Audit `worksheet.ts` for missing transactions (37+ Effect.gen calls, only 13 use transactions)
+> **Goal:** Implement the "return tools" flow in pengujian, allowing users to return borrowed tools after testing is complete. This includes:
 
-### CI/CD
+- New "Return Tools" button in worksheet details page (frontend)
+- New `returnTools` tRPC mutation in `pengujianRouter`
 
-- [x] Create `.github/workflows/ci.yml` (type-check, lint, test, build on PR)
-- [x] Block merges without passing CI checks
-- [x] Add build artifact caching for pnpm and Turborepo
+- [x] Backend: `returnTools` mutation that:
+  - Validates the worksheet is in a state that allows returning tools
+  - Updates the `tool` records to set availability back to "available"
+  - Creates a new `worksheetNote` with type "return" for audit purposes
+  - this add `checkTool` too like the bottom one 4 checks and then determine the condition of the tool if it is good or damaged and then update the tools condition and availability based on the check tool result using select
+- [ ] Frontend: "Return Tools" button that:
+  - Calls `returnTools` mutation when clicked
+  - Shows a confirmation modal before proceeding
+  - Displays success or error notifications based on the result
+  - Updates the worksheet details page to reflect the returned tools and their updated availability/condition
 
-### Input Validation Hardening
+## Pengecekan Alat di detail alat
 
-- [x] Replace all `z.string()` ID inputs with `z.uuidv7()` across routers
-- [x] Add min/max length validation on string fields (name, email, description)
-- [x] Add file upload validation (size limits, MIME type whitelist)
+> **Goal:** Add a "Check Tool" button in the tool details page that shows current availability and condition, and allows users to report issues with the tool. This includes:
 
----
+- New "Check Tool" button in tool details page (frontend)
+- New `checkTool` tRPC query in `pengujianRouter` that returns current availability and condition, as well as a history of
+  reported issues for that tool.
+- New this Check Tool will determine the `tools` Condition based on the latest `Check Tool` result, and if the tool is reported as damaged, it will update the `tools` Condition to "damaged" and set availability to "unavailable". If the tool is repaired, users can update the condition back to "good" and availability to "available".
 
-## 🟠 High Priority
-
-### Code Quality
-
-- [x] Set up ESLint with `typescript-eslint` for the entire monorepo
-- [x] Configure lint-staged in root `package.json` (runs `eslint --fix`)
-- [x] Eliminate `any` types in `form-data-parser.ts` and `table.tsx`
-- [x] Eliminate remaining `any` type usages across API code
-- [x] Replace `console.log` calls in production code with logger service
-- [x] Remove legacy `encrypt()`/`decrypt()` auth functions
-
-### Security
-
-- [x] Add security headers middleware for Hono (X-Content-Type-Options, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy)
-- [x] Add startup validation to reject default JWT secrets in production
-- [x] Add failed login attempt lockout (5 attempts → 30 min cooldown via sliding-window rate limiter)
-- [x] Support multiple CORS origins (comma-separated `CORS_ORIGIN`)
-- [x] Add audit logging for permission changes (role assignment/removal)
-
-### Frontend UX
-
-- [ ] Add `pendingComponent` (loading skeleton) to 20+ routes that lack them
-- [x] Add route-level `errorComponent` to all 14 back-office data-fetching routes
-- [x] Create reusable `<TableSkeleton />` and `<FormSkeleton />` components
-- [x] Create `<RouteErrorBoundary />` component
-
-### Pagination Validation
-
-- [x] Create shared pagination schema (`packages/schema/src/pagination.schema.ts`)
-- [x] Apply shared pagination schema across all 16+ paginated endpoints
+- [x] Backend: `checkTool` query that:
+  - Accepts a tool ID as input
+  - Returns the current availability and condition of the tool
+  - There was 4 check for this first is Alat Menyala, Penyimpangan +- 5%, Kelengkapan Alat, dan Kondisi Fisik Alat and then the checker determines the overall condition based on these checks. so there will be an select for selecting condition
+- [x] Frontend: "Check Tool" button that:
+  - Calls `checkTool` query when clicked
+  - Displays the current availability and condition of the tool
+  - Shows a history of reported issues for that tool
+  - If the tool is reported as damaged, show an option to update the condition and availability
 
 ---
 
-## 🟡 Medium Priority
+## Modular Monolith Migration
 
-### Documentation
+> **Goal:** Reorganize the flat package structure into clearly bounded domain modules
+> without changing any business logic or breaking existing functionality.
+> Pure file/folder reorganization + import path updates only.
 
-- [ ] Create `docs/ARCHITECTURE.md` - tech choices (Effect, Drizzle, tRPC) with rationale
-- [ ] Create `docs/TESTING.md` - how to write and run tests for each package
-- [ ] Create `docs/DEPLOYMENT.md` - build process, migrations, environment setup
-- [ ] Create `docs/TROUBLESHOOTING.md` - common issues and solutions
-- [x] Convert in-code TODOs to GitHub Issues with labels
+### Background & Decision
 
-### Performance
+tepian-k3 has 4 business domains:
 
-- [ ] Audit largest routers for N+1 queries (worksheet.ts, order.ts, document.ts)
-- [ ] Add Drizzle `with()` relations where needed to avoid N+1
-- [ ] Configure Vite manual chunks for code splitting (vendor, router, pdf libs)
-- [ ] Lazy-load TanStack Router routes for `/back-office/*` and `/pengujian/*`
-- [ ] Lazy-load PDF generation imports (pdf-lib, @react-pdf/renderer)
-- [x] Add Redis caching for frequently accessed read-only data (parameters, clusters)
+| Domain             | Status                    | Description                                         |
+| ------------------ | ------------------------- | --------------------------------------------------- |
+| **Pengujian**      | Fully built (~35 routers) | Lab testing: order → testing → worksheet → document |
+| **Pelatihan**      | Stub only (route.tsx)     | Training management                                 |
+| **Uji Kompetensi** | Stub only (route.tsx)     | Competency testing                                  |
+| **Konsultasi**     | Stub only (route.tsx)     | Consultation management                             |
 
-### Database
+**Why modular monolith, not microservices:**
 
-- [ ] Add `db:rollback` script for migration rollbacks
-- [ ] Enhance seed data with realistic test scenarios
-- [ ] Document production migration safety (backup, rollback, dry-run)
-- [ ] Handle database constraint violations gracefully with user-friendly messages
+- All 4 domains share: users, employees, documents, audit logs, notifications, geography
+- Distributed transactions (e.g., worksheet completion deducting chemical stock) are trivial in monolith, complex in microservices
+- Only 1 of 4 domains is built — wrong time to split
+- tRPC end-to-end type safety would break across service boundaries
+- No independent scaling requirements yet
 
-### In-Code TODOs
+**Why not stay fully flat:**
 
-- [x] `packages/api/src/routers/user.ts:14` - Add combobox search support for user lists
-- [x] `packages/api/src/routers/order.ts:349` - Convert to transaction (see Critical section)
-- [x] `apps/web/src/routes/(core)/worksheets/index.tsx:137` - Create worksheet items API
+- No way to tell "this is pengujian code" from "this is platform code"
+- Any file can import from any other — no boundaries enforced
+- When building the 3 new features, code will mix without structure
+
+### Module Boundaries
+
+```
+platform        <- no domain imports allowed
+    ^
+pengujian       <- can import from platform only
+pelatihan       <- can import from platform only
+uji-kompetensi  <- can import from platform only
+konsultasi      <- can import from platform only
+```
+
+Domain modules CANNOT import from each other. Cross-domain data goes through `platform` exports only.
+
+### Target Structure
+
+```
+packages/
+  db/src/
+    schema/
+      platform.ts          <- users, roles, permissions, employees, positions,
+                              geography, notifications, audit, documents, banners, news,
+                              surveyQuestions, surveyResponses, surveyFeedback
+      pengujian.ts         <- parameters, parameterCategories, tools, clusters,
+                              chemicalMaterials, cart, order, testing, worksheets,
+                              kbli, userCompany, userCompanyTestingLocation
+    schema.ts              <- re-exports from both (backwards compat, no changes elsewhere)
+
+  queries/src/
+    platform/              <- 19 query files + index.ts (public API)
+    pengujian/             <- 19 query files + index.ts (public API)
+    pelatihan/             <- index.ts (empty scaffold)
+    uji-kompetensi/        <- index.ts (empty scaffold)
+    konsultasi/            <- index.ts (empty scaffold)
+
+  schema/src/ (Zod schemas)
+    platform/              <- ~20 schema files + index.ts
+    pengujian/             <- ~19 schema files + index.ts
+    pelatihan/             <- index.ts (empty scaffold)
+    uji-kompetensi/        <- index.ts (empty scaffold)
+    konsultasi/            <- index.ts (empty scaffold)
+
+  api/src/routers/
+    platform/              <- 13 routers + index.ts (exports platformRouter)
+    pengujian/             <- 14 routers + index.ts (exports pengujianRouter)
+    pelatihan/             <- index.ts (exports pelatihanRouter, empty)
+    uji-kompetensi/        <- index.ts (exports ujiKompetensiRouter, empty)
+    konsultasi/            <- index.ts (exports konsultasiRouter, empty)
+
+  api/src/root.ts          <- 5 module routers instead of 35 individual ones
+```
+
+### Phase 1 — Split DB Schema
+
+> Risk: Low. `schema.ts` re-exports everything — no imports break anywhere.
+
+#### Cross-module FK rules
+
+Drizzle `.references()` creates an import dependency between schema files. The allowed
+direction is pengujian → platform. The reverse direction (platform → pengujian) must be avoided.
+
+Two issues to fix before splitting:
+
+1. **`notifications.orderId` and `notifications.testingId`** — these are platform-side columns
+   that reference pengujian tables (`order`, `testing`). Since orders use soft delete and are
+   never actually hard-deleted, the cascade constraint was never firing anyway. Remove `.references()`
+   and keep them as plain nullable UUIDs. Handle notification cleanup at the application level
+   (mutation deletes notifications when deleting an order). `documentId` stays — `documents` is platform.
+
+2. **`surveyQuestions`, `surveyResponses`, `surveyFeedback`** — these are order satisfaction
+   surveys. `surveyResponses` references `order.id`, so they belong in pengujian, not platform.
+
+#### Checklist
+
+- [x] Fix `notifications` cross-module FKs in existing `schema.ts` first:
+  - Change `orderId` from `.references(() => order.id, { onDelete: "cascade" })` to plain `uuid("order_id")`
+  - Change `testingId` from `.references(() => testing.id, { onDelete: "cascade" })` to plain `uuid("testing_id")`
+  - Run `pnpm db:generate` to create a migration that drops those FK constraints
+  - Run `pnpm db:migrate`
+- [x] Create `packages/db/src/schema/` directory
+- [x] Create `packages/db/src/schema/platform.ts`
+  - Move: `users`, `otpCodes`, `passwordResets`, `refreshTokens`
+  - Move: `roles`, `permissions`, `userRoles`, `rolePermissions`, `userPermissions`
+  - Move: `employees`, `positions`, `employeeCertifications`
+  - Move: `provinces`, `regencies`, `districts`, `villages`
+  - Move: `notifications`, `audits`
+  - Move: `documents`, `documentSignatures`, `documentVerifications`
+  - Move: `banners`, `news`
+  - Move: related enums (`permissionActionEnum`, `auditActionEnum`, `employeeStatusEnum`, `notificationTypeEnum`, `documentEntityTypeEnum`, `documentTypeEnum`, `documentStatusEnum`)
+  - NOTE: `surveyQuestions/Responses/Feedback` go to pengujian, NOT here
+- [x] Create `packages/db/src/schema/pengujian.ts`
+  - `pengujian.ts` imports platform tables only for `.references()` — this is the allowed direction
+  - Move: `parameters`, `parameterCategories`, `parameterTools`, `parameterChemicalMaterials`
+  - Move: `tools`, `toolCalibrations`, `toolCalibrationCertificates`, `toolCalibrationDocumentations`
+  - Move: `clusters`, `chemicalMaterials`
+  - Move: `kblis`, `userCompanies`, `userCompanyTestingLocation`
+  - Move: `cart`, `order`, `orderItem`, `orderStatusHistory`
+  - Move: `testing`, `testingItem`
+  - Move: `worksheets`, `worksheetItems`, `worksheetTools`, `worksheetChemicalMaterials`, `worksheetNotes`, `worksheetAssignments`, `worksheetOperationalCosts`
+  - Move: `surveyQuestions`, `surveyResponses`, `surveyFeedback` (references order — belongs here)
+  - Move: related enums (`orderStatusEnum`, `testingStatusEnum`, `approvalStatusEnum`, `paymentStatusEnum`, `ToolsConditionEnum`, `ToolsAvailabilityEnum`, `BahanUnitEnum`, `BahanStatusEnum`, `worksheetStatusEnum`, `worksheetNoteStatusEnum`)
+- [x] Update `packages/db/src/schema.ts` to re-export from `./schema/platform` and `./schema/pengujian`
+- [x] Run `pnpm check-types` — must pass before proceeding
+
+### Phase 2 — Group Query Files
+
+> Risk: Low-medium. Import paths inside query files change, public interface stays the same.
+
+- [x] Create `packages/queries/src/platform/` — move 19 platform query files
+  - `users.queries.ts`, `roles.queries.ts`, `permission.queries.ts`, `user-permission.queries.ts`, `user-roles.queries.ts`
+  - `employees.queries.ts`, `employee-certification.queries.ts`, `position.queries.ts`
+  - `province.queries.ts`, `regency.queries.ts`, `district.queries.ts`, `village.queries.ts`
+  - `notifications.queries.ts`, `audit.queries.ts`
+  - `document.queries.ts`, `document-transaction.queries.ts`
+  - `banner.queries.ts`, `news.queries.ts`
+  - `otp.queries.ts`, `password-resets.queries.ts`, `refresh-tokens.queries.ts`
+  - Create `index.ts` re-exporting all platform queries
+  - NOTE: `survey.queries.ts` goes to pengujian, NOT here
+- [x] Create `packages/queries/src/pengujian/` — move 19 pengujian query files
+  - `parameter.queries.ts`, `parameter-categories.queries.ts`, `parameter-tool.queries.ts`, `parameter-chemical-material.queries.ts`
+  - `tools.queries.ts`, `tool-calibration.queries.ts`, `clusters.queries.ts`, `chemical-material.queries.ts`
+  - `kbli.queries.ts`, `user-company.queries.ts`, `user-company-testing-location.queries.ts`
+  - `cart.queries.ts`, `order.queries.ts`, `order-item.queries.ts`, `order-status-history.queries.ts`
+  - `testing.queries.ts`, `worksheet.queries.ts`, `worksheet-note.queries.ts`, `survey.queries.ts`
+  - Create `index.ts` re-exporting all pengujian queries
+- [x] Scaffold: `pelatihan/index.ts`, `uji-kompetensi/index.ts`, `konsultasi/index.ts`
+- [x] Run `pnpm check-types`
+
+### Phase 3 — Group Zod Schema Files
+
+> Risk: Low. Only import paths change, Zod schema shapes are unchanged.
+
+- [x] Create `packages/schema/src/platform/` — move ~20 schema files
+  - `auth.schema.ts`, `users.schema.ts`, `role.schema.ts`, `password.schema.ts`, `otp.schema.ts`
+  - `employee.schema.ts`, `employee-certification.schema.ts`, `position.schema.ts`
+  - `province.schema.ts`, `district.schema.ts`, `regency.schema.ts`, `village.schema.ts`
+  - `notification.schema.ts`, `audit.schema.ts`, `event.schema.ts`
+  - `document.schema.ts`, `banner.schema.ts`, `news.schema.ts`
+  - `filter.schema.ts`, `pagination.schema.ts`
+  - Create `index.ts`
+  - NOTE: `survey.schema.ts` goes to pengujian, NOT here
+- [x] Create `packages/schema/src/pengujian/` — move ~19 schema files
+  - `parameter.schema.ts`, `parameter-categories.schema.ts`, `parameter-tool.schema.ts`, `parameter-chemical-material.schema.ts`
+  - `tools.schema.ts`, `tool-calibration.schema.ts`, `cluster.schema.ts`, `chemical-material.schema.ts`
+  - `kbli.schema.ts`, `user-company.schema.ts`, `user-company-testing-location.schema.ts`
+  - `cart.schema.ts`, `order.schema.ts`, `order-item.schema.ts`
+  - `testing.schema.ts`, `testing-item.schema.ts`, `worksheet.schema.ts`
+  - `survey.schema.ts`, `generate-document.schema.ts`
+  - Create `index.ts`
+- [x] Scaffold: `pelatihan/index.ts`, `uji-kompetensi/index.ts`, `konsultasi/index.ts`
+- [x] Update all `@tepian-k3/schema/*` import paths in routers and queries
+- [x] Run `pnpm check-types`
+
+### Phase 4 — Group API Routers
+
+> Risk: Medium. `root.ts` changes + all frontend tRPC calls need updating.
+
+- [x] Create `packages/api/src/routers/platform/` — move 13 routers
+  - `auth.ts`, `user.ts`, `role.ts`, `permission.ts`
+  - `employee.ts`, `employee-certification.ts`, `position.ts`
+  - `province.ts`, `regency.ts`, `district.ts`, `village.ts`
+  - `notifications.ts`, `event.ts`, `audit.ts`, `document.ts`, `banner.ts`, `news.ts`
+  - Create `index.ts` exporting `platformRouter`
+- [x] Create `packages/api/src/routers/pengujian/` — move 14 routers
+  - `parameter.ts`, `parameter-categories.ts`, `parameter-tool.ts`, `parameter-chemical-material.ts`
+  - `tool.ts`, `cluster.ts`, `chemical-material.ts`
+  - `cart.ts`, `order.ts`, `order.notification-config.ts`, `test.ts`, `testing.ts`
+  - `worksheet.ts`, `survey.ts`, `kbli.ts`, `user-company.ts`, `user-company-testing-location.ts`, `generate-document.ts`
+  - Create `index.ts` exporting `pengujianRouter`
+- [x] Scaffold module routers:
+  - `pelatihan/index.ts` — empty `pelatihanRouter`
+  - `uji-kompetensi/index.ts` — empty `ujiKompetensiRouter`
+  - `konsultasi/index.ts` — empty `konsultasiRouter`
+- [x] Update `packages/api/src/root.ts`:
+  ```ts
+  export const appRouter = createTRPCRouter({
+    platform: platformRouter,
+    pengujian: pengujianRouter,
+    pelatihan: pelatihanRouter,
+    ujiKompetensi: ujiKompetensiRouter,
+    konsultasi: konsultasiRouter,
+  });
+  ```
+- [x] Update all frontend tRPC calls in `apps/web/src/` (see mapping table below)
+- [x] Run `pnpm check-types`
+
+### Phase 5 — Enforce Boundaries (Lint Rules)
+
+> Risk: Zero. Additive only.
+
+- [x] Add `eslint-plugin-import` boundary rules — domain modules cannot import from each other
+- [x] Create `docs/MODULE_BOUNDARIES.md` for future contributors
 
 ---
 
-## 🟢 Low Priority
+### Frontend tRPC Call Mapping (for Phase 4)
 
-### Build & Monitoring
-
-- [ ] Add Vite bundle analyzer (`rollup-plugin-visualizer`) as `pnpm build:analyze`
-- [ ] Set bundle size budgets (fail CI if bundle > threshold)
-- [ ] Add dead code / unused export detection
-- [ ] Add query performance logging/monitoring
-
-### Advanced Security
-
-- [ ] Implement Content Security Policy (CSP) headers
-- [ ] Consider TOTP/2FA for admin accounts
-- [ ] Document row-level security patterns for orders, testing, documents
-- [ ] Add email enumeration prevention review
-
-### Accessibility
-
-- [ ] Audit forms, tables, and modals for ARIA compliance
-- [ ] Test keyboard navigation across all routes
-- [ ] Test with screen readers (NVDA)
-
-### Developer Experience
-
-- [x] Add `pnpm dev:all` script to run web + server + db:studio together
-- [ ] Set up MSW (Mock Service Worker) for offline/test development
-- [x] Add `db:snapshot` / `db:restore` scripts for testing workflows
-- [x] Add Prettier config at monorepo root (currently only in web app)
-
----
-
-## Stats Snapshot
-
-| Area                       | Current                   | Target                   |
-| -------------------------- | ------------------------- | ------------------------ |
-| Test files                 | 0                         | 50+                      |
-| CI/CD pipelines            | 0                         | 1 (GitHub Actions)       |
-| ESLint config              | ✅ Monorepo-wide          | Monorepo-wide            |
-| `any` type usages          | Reduced (key files fixed) | 0                        |
-| Routes with loading UI     | ~9/30                     | 30/30                    |
-| Routes with error boundary | ✅ 16/30                  | 30/30                    |
-| Transaction coverage       | Partial                   | All multi-step mutations |
+| Before                              | After                                         |
+| ----------------------------------- | --------------------------------------------- |
+| `trpc.auth.*`                       | `trpc.platform.auth.*`                        |
+| `trpc.user.*`                       | `trpc.platform.user.*`                        |
+| `trpc.role.*`                       | `trpc.platform.role.*`                        |
+| `trpc.permission.*`                 | `trpc.platform.permission.*`                  |
+| `trpc.employee.*`                   | `trpc.platform.employee.*`                    |
+| `trpc.employeeCertification.*`      | `trpc.platform.employeeCertification.*`       |
+| `trpc.position.*`                   | `trpc.platform.position.*`                    |
+| `trpc.province.*`                   | `trpc.platform.province.*`                    |
+| `trpc.regency.*`                    | `trpc.platform.regency.*`                     |
+| `trpc.district.*`                   | `trpc.platform.district.*`                    |
+| `trpc.village.*`                    | `trpc.platform.village.*`                     |
+| `trpc.notifications.*`              | `trpc.platform.notifications.*`               |
+| `trpc.event.*`                      | `trpc.platform.event.*`                       |
+| `trpc.audit.*`                      | `trpc.platform.audit.*`                       |
+| `trpc.document.*`                   | `trpc.platform.document.*`                    |
+| `trpc.banner.*`                     | `trpc.platform.banner.*`                      |
+| `trpc.news.*`                       | `trpc.platform.news.*`                        |
+| `trpc.parameter.*`                  | `trpc.pengujian.parameter.*`                  |
+| `trpc.parameterCategories.*`        | `trpc.pengujian.parameterCategories.*`        |
+| `trpc.parameterTool.*`              | `trpc.pengujian.parameterTool.*`              |
+| `trpc.parameterChemicalMaterial.*`  | `trpc.pengujian.parameterChemicalMaterial.*`  |
+| `trpc.tool.*`                       | `trpc.pengujian.tool.*`                       |
+| `trpc.cluster.*`                    | `trpc.pengujian.cluster.*`                    |
+| `trpc.chemicalMaterial.*`           | `trpc.pengujian.chemicalMaterial.*`           |
+| `trpc.cart.*`                       | `trpc.pengujian.cart.*`                       |
+| `trpc.order.*`                      | `trpc.pengujian.order.*`                      |
+| `trpc.test.*`                       | `trpc.pengujian.test.*`                       |
+| `trpc.testing.*`                    | `trpc.pengujian.testing.*`                    |
+| `trpc.worksheet.*`                  | `trpc.pengujian.worksheet.*`                  |
+| `trpc.survey.*`                     | `trpc.pengujian.survey.*`                     |
+| `trpc.kbli.*`                       | `trpc.pengujian.kbli.*`                       |
+| `trpc.userCompany.*`                | `trpc.pengujian.userCompany.*`                |
+| `trpc.userCompanyTestingLocation.*` | `trpc.pengujian.userCompanyTestingLocation.*` |
+| `trpc.generateDocument.*`           | `trpc.pengujian.generateDocument.*`           |
 
 ---
 
-## Summary of Completed Work
+### New Feature Convention (Pelatihan / Uji Kompetensi / Konsultasi)
 
-### Code Quality
+When building a new domain module, follow this order:
 
-- **ESLint**: Installed `eslint`, `@eslint/js`, `typescript-eslint` at root. Created `eslint.config.js` (flat config) with TypeScript strict rules, ignoring `dist/node_modules/.turbo/drizzle/migrations`.
-- **lint-staged**: Updated root `package.json` lint-staged from empty to `"eslint --fix"`. Updated `.husky/pre-commit` to run `npx lint-staged`.
-- **Legacy auth removal**: Deleted `encrypt()`/`decrypt()` from `packages/auth/src/index.ts`. Updated `packages/auth/src/utils.ts` to use `verifyAccessToken` instead.
-- **console.log cleanup**: Removed debug logs from `packages/queries/src/order.queries.ts`. Replaced `console.log` with `logInfo` in `apps/server/src/index.ts` (server startup and shutdown).
-- **`any` elimination**: Fixed `packages/api/src/utils/form-data-parser.ts` (introduced `FormDataRecord` type alias, typed `coerceValue` return). Fixed `packages/services/src/pdf/components/table.tsx` default generic from `any` to `unknown`.
+1. Add DB tables to `packages/db/src/schema/<module>.ts`
+2. Add queries to `packages/queries/src/<module>/`
+3. Add Zod schemas to `packages/schema/src/<module>/`
+4. Add routers to `packages/api/src/routers/<module>/`
+5. Export from the module's `index.ts`
+6. Module router is already registered in `root.ts` — no change needed there
 
-### Security
+### Phase 6 — Group Types Package
 
-- **Security headers**: Created `apps/server/src/middleware/secure-headers.ts` — sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 0`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, and `Strict-Transport-Security` (production only).
-- **JWT validation**: Added startup check in `apps/server/src/index.ts` — throws if JWT secrets contain placeholder values (`your-secret`, `change-this`, etc.) in production.
-- **Login lockout**: Added per-email sliding-window rate limiter in `packages/api/src/routers/auth.ts` — 5 failed attempts triggers 30-minute lockout using `createRateLimiter`.
-- **Multi-origin CORS**: Updated `apps/server/src/index.ts` to parse comma-separated `CORS_ORIGIN`. Changed `apps/server/env.ts` validation from `z.url()` to `z.string().min(1)`.
-- **Permission audit logging**: Added audit log to `updateRolePermissions` mutation in `packages/api/src/routers/permission.ts`. Added `"role"`, `"role_permission"`, `"user_permission"` to `AuditEntityType` in `packages/types/src/audit.types.ts`.
+> Risk: Low. Only file/folder reorganization + import path updates. The `./*` export in `package.json` already supports deep imports so consumer paths like `@tepian-k3/types/users.types` continue to work after moving files into subdirectories.
 
-### Frontend UX
+- [x] Create `packages/types/src/platform/` — move platform type files:
+  - `users.types.ts`, `employee.types.ts`, `position.types.ts`
+  - `permission.types.ts`, `roles.types.ts`
+  - `document.types.ts`
+  - `provinces.types.ts`, `regencies.types.ts`, `districts.types.ts`, `villages.types.ts`
+  - Also moved: `auth.types.ts`, `audit.types.ts`, `banner.types.ts`, `news.types.ts`
+- [x] Create `packages/types/src/pengujian/` — move pengujian type files:
+  - `parameters.types.ts`, `parameter-categories.types.ts`, `parameter-chemical-material.types.ts`
+  - `clusters.types.ts`, `chemical-material.types.ts`
+  - `tool-calibration.types.ts`, `tool-calibration-certificate.types.ts`, `tool-calibration-documentation.types.ts`
+  - `cart.types.ts`, `order-item.types.ts`, `order-status-history.types.ts`
+  - `testing.types.ts`, `testing-item.types.ts`
+  - `worksheet-assignment.types.ts`
+  - `kbli.types.ts`, `user-company.types.ts`, `user-company-testing-location.types.ts`
+  - `survey.types.ts`
+  - Also moved: `order.types.ts`, `worksheet.types.ts`, `parameter-tool.types.ts`, `tool-codes.types.ts`, `tools.types.ts`
+- [x] Scaffold empty directories: `pelatihan/`, `uji-kompetensi/`, `konsultasi/`
+- [x] Update `packages/types/package.json` exports to include subdirectory paths
+- [x] Update all `@tepian-k3/types/*` import paths across the monorepo
+- [x] Enforce boundaries: add `...boundaries` to `packages/types/eslint.config.js`, update `boundaries.js` file patterns, add `packages/types` to root `eslint.config.js`
+- [x] Run `pnpm check-types`
 
-- **RouteErrorBoundary**: Created `apps/web/src/components/route-error-boundary.tsx` — inline error card with reload button, Indonesian text.
-- **Skeleton wrappers**: Created `apps/web/src/components/table-skeleton.tsx` and `apps/web/src/components/form-skeleton.tsx`.
-- **errorComponent**: Added `errorComponent: RouteErrorBoundary` to all 14 back-office index routes (users, roles, parameters, parameter-categories, tools, clusters, employees, positions, kblis, orders, testings, worksheets, chemical-materials, survey-questions).
+### Execution Order
 
-### Pagination Validation
+Run phases in sequence. Each phase must pass `pnpm check-types` before proceeding.
 
-- **Shared schema**: Created `packages/schema/src/pagination.schema.ts` with `page` (int, min 1, default 1) and `perPage` (int, min 1, max 100, default 10).
-- **Applied to 16+ schemas**: cluster, tools, role, users, parameter (2 schemas), parameter-categories, employee, position, kbli, chemical-material, survey, district, regency, province, village, tool-calibration, user-company, user-company-testing-location — all now use `paginationSchema.extend({...})`.
+```
+Phase 1 (DB Schema split)     -> safe, no downstream import changes
+Phase 2 (Query grouping)      -> update imports within query files only
+Phase 3 (Zod schema grouping) -> update imports in routers + queries
+Phase 4 (Router grouping)     -> update root.ts + all frontend trpc calls  <- biggest step
+Phase 5 (Lint boundaries)     -> additive only, no code changes
+Phase 6 (Types grouping)      -> update imports across all packages
+```
+
+Phases 1-3 are internal refactors with zero visible effect on the running app.
+Phase 4 is the only phase that changes the public tRPC API surface.

@@ -32,7 +32,7 @@ export default function ToolDetail({ toolId }: ToolDetailProps) {
   const router = useRouter();
 
   const { data: tool, isLoading } = useQuery(
-    trpc.tool.getToolDetails.queryOptions({
+    trpc.pengujian.tool.getToolDetails.queryOptions({
       id: toolId,
     }),
   );
@@ -125,10 +125,20 @@ export default function ToolDetail({ toolId }: ToolDetailProps) {
                   {tool.toolName}
                 </span>
               </div>
-              <div className="space-y-1">
-                <Label className="ml-1 text-sm font-bold">Kode Alat</Label>
-                <div className="block w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-50">
-                  {tool.toolCode}
+              <div className="flex flex-row gap-4 space-y-1">
+                <div className="w-full space-y-1">
+                  <Label className="ml-1 text-sm font-bold">Kode Alat</Label>
+                  <div className="block w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-50">
+                    {tool.toolCode?.code || "-"}
+                  </div>
+                </div>
+                <div className="w-full space-y-1">
+                  <Label className="ml-1 text-sm font-bold">
+                    Kode Unik Alat
+                  </Label>
+                  <div className="block w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-50">
+                    {tool.toolUniqueCode || "-"}
+                  </div>
                 </div>
               </div>
               <div className="space-y-1">

@@ -44,7 +44,7 @@ function RouteComponent() {
   const [submitted, setSubmitted] = useState(false);
 
   const requestReset = useMutation(
-    trpc.auth.requestPasswordReset.mutationOptions({
+    trpc.platform.auth.requestPasswordReset.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Email reset password telah dikirim.");
 

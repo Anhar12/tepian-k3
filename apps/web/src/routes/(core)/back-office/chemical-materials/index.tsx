@@ -13,7 +13,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
+import chemicalMaterialSchema from "@tepian-k3/schema/pengujian/chemical-material.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -38,7 +38,7 @@ function RouteComponent() {
     isLoading,
     error,
   } = useQuery({
-    ...trpc.chemicalMaterial.getPaginated.queryOptions(params),
+    ...trpc.pengujian.chemicalMaterial.getPaginated.queryOptions(params),
     placeholderData: keepPreviousData,
   });
 

@@ -4,7 +4,7 @@ import { requirePermission } from "@/utils/require-permission";
 import z from "zod";
 import { TabsLayout } from "./-components/tabs-layout";
 import ToolCalibration from "./-components/tool-calibration";
-import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
+import toolCalibrationSchema from "@tepian-k3/schema/pengujian/tool-calibration.schema";
 import { TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute(

@@ -12,7 +12,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import newsSchema from "@tepian-k3/schema/news.schema";
+import newsSchema from "@tepian-k3/schema/platform/news.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
@@ -33,7 +33,7 @@ function RouteComponent() {
     data: news,
     isLoading,
     error,
-  } = useQuery(trpc.news.getPaginatedNews.queryOptions(params));
+  } = useQuery(trpc.platform.news.getPaginatedNews.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 

@@ -22,7 +22,7 @@ export const Route = createFileRoute(
     }),
   loader: async ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.parameter.getParameterById.queryOptions({
+      context.trpc.pengujian.parameter.getParameterById.queryOptions({
         id: params.parameterId,
       }),
     );

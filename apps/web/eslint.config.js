@@ -5,6 +5,6 @@ export default [
   ...react,
   ...pluginRouter.configs["flat/recommended"],
   {
-    ignores: ["dev-dist/**"],
+    ignores: ["dev-dist/**", "src/routeTree.gen.ts"],
   },
 ];

@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Positions } from "@tepian-k3/types/position.types";
+import type { Positions } from "@tepian-k3/types/platform/position.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/positions";
 import {
@@ -22,10 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "position",
   resourcePath: "positions",
   permissionPrefix: "positions",
-  deleteMutation: trpc.position.deletePosition,
-  restoreMutation: trpc.position.restorePosition,
+  deleteMutation: trpc.platform.position.deletePosition,
+  restoreMutation: trpc.platform.position.restorePosition,
   getQueryOptions: (params) =>
-    trpc.position.getPositionPaginated.queryOptions(params),
+    trpc.platform.position.getPositionPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

@@ -33,7 +33,7 @@ export default function PengujianNavbar() {
   const { data: user } = useSuspenseQuery(authMeQueryOptions());
 
   const { data: cartCount } = useQuery({
-    ...trpc.cart.getCartItemCount.queryOptions(),
+    ...trpc.pengujian.cart.getCartItemCount.queryOptions(),
     enabled: !!user,
   });
 

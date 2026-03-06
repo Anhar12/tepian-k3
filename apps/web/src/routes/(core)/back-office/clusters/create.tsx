@@ -21,7 +21,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import clusterSchema from "@tepian-k3/schema/cluster.schema";
+import clusterSchema from "@tepian-k3/schema/pengujian/cluster.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -46,7 +46,7 @@ function RouteComponent() {
   });
 
   const createClusterMutation = useMutation(
-    trpc.cluster.createCluster.mutationOptions({
+    trpc.pengujian.cluster.createCluster.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil membuat cluster");
         form.reset();

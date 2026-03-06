@@ -12,7 +12,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import surveySchema from "@tepian-k3/schema/survey.schema";
+import surveySchema from "@tepian-k3/schema/pengujian/survey.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
@@ -33,7 +33,9 @@ function RouteComponent() {
     data: questions,
     isLoading,
     error,
-  } = useQuery(trpc.survey.getPaginatedQuestions.queryOptions(params));
+  } = useQuery(
+    trpc.pengujian.survey.getPaginatedQuestions.queryOptions(params),
+  );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
   const [showInactive, setShowInactive] = useState(params.showInactive);

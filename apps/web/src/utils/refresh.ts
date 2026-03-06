@@ -57,7 +57,7 @@ async function refreshTokens() {
       }
 
       // Use tRPC client to call refresh endpoint
-      const result = await refreshClient.auth.refresh.mutate({
+      const result = await refreshClient.platform.auth.refresh.mutate({
         refreshToken,
       });
 

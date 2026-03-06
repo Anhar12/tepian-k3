@@ -12,7 +12,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import kbliSchema from "@tepian-k3/schema/kbli.schema";
+import kbliSchema from "@tepian-k3/schema/pengujian/kbli.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
@@ -35,7 +35,7 @@ function RouteComponent() {
     data: kblis,
     isLoading,
     error,
-  } = useQuery(trpc.kbli.getPaginatedKblis.queryOptions(params));
+  } = useQuery(trpc.pengujian.kbli.getPaginatedKblis.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 

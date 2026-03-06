@@ -22,7 +22,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import surveySchema from "@tepian-k3/schema/survey.schema";
+import surveySchema from "@tepian-k3/schema/pengujian/survey.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -38,7 +38,7 @@ export const Route = createFileRoute(
     await requirePermission(context, { permission: "survey-questions.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.survey.getQuestionById.queryOptions({
+      context.trpc.pengujian.survey.getQuestionById.queryOptions({
         id: params.questionId,
       }),
     ),
@@ -51,7 +51,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: question } = useSuspenseQuery(
-    trpc.survey.getQuestionById.queryOptions({ id: questionId }),
+    trpc.pengujian.survey.getQuestionById.queryOptions({ id: questionId }),
   );
 
   const form = useForm<z.infer<typeof surveySchema.updateSurveyQuestionSchema>>(
@@ -67,10 +67,12 @@ function RouteComponent() {
   );
 
   const updateQuestionMutation = useMutation(
-    trpc.survey.updateQuestion.mutationOptions({
+    trpc.pengujian.survey.updateQuestion.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.survey.getQuestionById.queryOptions({ id: questionId }),
+          trpc.pengujian.survey.getQuestionById.queryOptions({
+            id: questionId,
+          }),
         );
         globalSuccessToast("Berhasil memperbarui pertanyaan survey");
         await redirectBack();

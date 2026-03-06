@@ -6,7 +6,7 @@ This example shows how to add rate limiting to an existing authentication router
 
 ```typescript
 // packages/api/src/routers/auth.ts
-import authSchema from "@tepian-k3/schema/auth.schema";
+import authSchema from "@tepian-k3/schema/platform/auth.schema";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "..";
 
 export const authRouter = createTRPCRouter({
@@ -38,7 +38,7 @@ export const authRouter = createTRPCRouter({
 
 ```typescript
 // packages/api/src/routers/auth.ts
-import authSchema from "@tepian-k3/schema/auth.schema";
+import authSchema from "@tepian-k3/schema/platform/auth.schema";
 import { createTRPCRouter, withRateLimit, publicProcedure } from "..";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 
@@ -147,7 +147,7 @@ rateLimiters.auth()
 ## Real-World Example: Complete Auth Router
 
 ```typescript
-import authSchema from "@tepian-k3/schema/auth.schema";
+import authSchema from "@tepian-k3/schema/platform/auth.schema";
 import {
   createTRPCRouter,
   withRateLimit,

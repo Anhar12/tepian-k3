@@ -1,53 +1,29 @@
-import z from "zod";
+export type Province = {
+  /** BPS province code e.g. "11" */
+  code: string;
+  name: string;
+};
 
-const ProvincesSchema = z.array(
-  z.object({
-    id: z.string(),
-    name: z.string(),
-    alt_name: z.string(),
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-  }),
-);
+export type Regency = {
+  /** Full BPS regency code e.g. "1101" */
+  code: string;
+  /** Parent province BPS code e.g. "11" */
+  provinceCode: string;
+  name: string;
+};
 
-export type Provinces = z.infer<typeof ProvincesSchema>;
+export type District = {
+  /** Full BPS district code e.g. "1101010" */
+  code: string;
+  /** Parent regency BPS code e.g. "1101" */
+  regencyCode: string;
+  name: string;
+};
 
-const RegenciesSchema = z.array(
-  z.object({
-    id: z.string(),
-    province_id: z.string(),
-    name: z.string(),
-    alt_name: z.string(),
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-  }),
-);
-
-export type Regencies = z.infer<typeof RegenciesSchema>;
-
-const DistrictsSchema = z.array(
-  z.object({
-    id: z.string(),
-    regency_id: z.string(),
-    name: z.string(),
-    alt_name: z.string(),
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-  }),
-);
-
-export type Districts = z.infer<typeof DistrictsSchema>;
-
-const VillagesSchema = z.array(
-  z.object({
-    id: z.string(),
-    district_id: z.string(),
-    name: z.string(),
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
-  }),
-);
-
-export type Villages = z.infer<typeof VillagesSchema>;
-
-export { DistrictsSchema, ProvincesSchema, RegenciesSchema, VillagesSchema };
+export type Village = {
+  /** Full BPS village code e.g. "1101010001" */
+  code: string;
+  /** Parent district BPS code e.g. "1101010" */
+  districtCode: string;
+  name: string;
+};

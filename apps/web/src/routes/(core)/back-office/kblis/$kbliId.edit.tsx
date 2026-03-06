@@ -21,7 +21,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import kbliSchema from "@tepian-k3/schema/kbli.schema";
+import kbliSchema from "@tepian-k3/schema/pengujian/kbli.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/(core)/back-office/kblis/$kbliId/edit")({
     await requirePermission(context, { permission: "kbli.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.kbli.getKbliById.queryOptions({
+      context.trpc.pengujian.kbli.getKbliById.queryOptions({
         id: params.kbliId,
       }),
     ),
@@ -47,7 +47,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: kbli } = useSuspenseQuery(
-    trpc.kbli.getKbliById.queryOptions({ id: kbliId }),
+    trpc.pengujian.kbli.getKbliById.queryOptions({ id: kbliId }),
   );
 
   const form = useForm<z.infer<typeof kbliSchema.updateKBLISchema>>({
@@ -59,10 +59,10 @@ function RouteComponent() {
   });
 
   const updateKBLIMutation = useMutation(
-    trpc.kbli.updateKbli.mutationOptions({
+    trpc.pengujian.kbli.updateKbli.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.kbli.getKbliById.queryOptions({ id: kbliId }),
+          trpc.pengujian.kbli.getKbliById.queryOptions({ id: kbliId }),
         );
         globalSuccessToast("Berhasil memperbarui KBLI");
         await redirectBack();

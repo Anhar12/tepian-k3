@@ -12,10 +12,11 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import toolsSchema from "@tepian-k3/schema/tools.schema";
+import toolsSchema from "@tepian-k3/schema/pengujian/tools.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
+import type { Tools } from "@tepian-k3/types/pengujian/tools.types";
 
 export const Route = createFileRoute("/(core)/back-office/tools/")({
   validateSearch: toolsSchema.getAllToolsSchema,
@@ -33,7 +34,7 @@ function RouteComponent() {
     data: tools,
     isLoading,
     error,
-  } = useQuery(trpc.tool.getToolPaginated.queryOptions(params));
+  } = useQuery(trpc.pengujian.tool.getToolPaginated.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 
@@ -48,7 +49,7 @@ function RouteComponent() {
 
   const { table } = useDataTableRouter({
     data: tools?.data ?? [],
-    columns,
+    columns: columns as Tools[],
     pageCount: tools?.pageCount ?? 0,
     search: params,
     navigate: ({ search: updater }) => {
@@ -65,7 +66,7 @@ function RouteComponent() {
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex flex-row gap-2">
           <Checkbox
-            id="show-deleted-users"
+            id="show-deleted-tools"
             checked={showDeleted}
             onCheckedChange={(checked) => {
               navigate({

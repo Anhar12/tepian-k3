@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
-import type { UserCompanyTestingLocation } from "@tepian-k3/types/user-company-testing-location.types";
+import type { UserCompanyTestingLocation } from "@tepian-k3/types/pengujian/user-company-testing-location.types";
 import { format } from "date-fns";
 import {
   ArchiveRestore,
@@ -51,11 +51,11 @@ export default function TestingLocationCard({
   const isDeleted = testingLocation.deletedAt !== null;
 
   const deleteTestingLocationMutation = useMutation(
-    trpc.userCompanyTestingLocation.userDeleteUserCompanyTestingLocation.mutationOptions(
+    trpc.pengujian.userCompanyTestingLocation.userDeleteUserCompanyTestingLocation.mutationOptions(
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(
-            trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
+            trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
               {
                 companyId: testingLocation.userCompanyId,
                 showDeleted: showDeleted ?? false,
@@ -76,11 +76,11 @@ export default function TestingLocationCard({
   );
 
   const restoreTestingLocationMutation = useMutation(
-    trpc.userCompanyTestingLocation.userRestoreUserCompanyTestingLocation.mutationOptions(
+    trpc.pengujian.userCompanyTestingLocation.userRestoreUserCompanyTestingLocation.mutationOptions(
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(
-            trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
+            trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
               {
                 companyId: testingLocation.userCompanyId,
                 showDeleted: showDeleted ?? false,
@@ -126,7 +126,7 @@ export default function TestingLocationCard({
                 size="sm"
                 onClick={() => {
                   queryClient.prefetchQuery(
-                    trpc.userCompanyTestingLocation.getUserCompanyTestingLocationById.queryOptions(
+                    trpc.pengujian.userCompanyTestingLocation.getUserCompanyTestingLocationById.queryOptions(
                       {
                         id: testingLocation.id,
                       },

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "@react-pdf/renderer";
 import { tw } from "../utils/tw";
-import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
+import type { WorksheetTransactionDetail } from "@tepian-k3/types/pengujian/worksheet.types";
 
 type WorksheetItem = WorksheetTransactionDetail["items"][number];
 type OperationalCost = WorksheetTransactionDetail["operationalCosts"][number];

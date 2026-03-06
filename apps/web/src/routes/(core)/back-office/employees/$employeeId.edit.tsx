@@ -23,7 +23,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import employeeSchema from "@tepian-k3/schema/employee.schema";
+import employeeSchema from "@tepian-k3/schema/platform/employee.schema";
 import { LoaderCircle } from "lucide-react";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { Controller, useForm } from "react-hook-form";
@@ -45,7 +45,7 @@ export const Route = createFileRoute(
     }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.employee.getEmployeeDetails.queryOptions({
+      context.trpc.platform.employee.getEmployeeDetails.queryOptions({
         id: params.employeeId,
       }),
     );
@@ -91,7 +91,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: employee } = useSuspenseQuery(
-    trpc.employee.getEmployeeDetails.queryOptions({
+    trpc.platform.employee.getEmployeeDetails.queryOptions({
       id: employeeId,
     }),
   );
@@ -105,7 +105,7 @@ function RouteComponent() {
   });
 
   const updateEmployeeMutation = useMutation(
-    trpc.employee.updateEmployee.mutationOptions({
+    trpc.platform.employee.updateEmployee.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil memperbarui karyawan");
         await redirectBack();
@@ -123,11 +123,11 @@ function RouteComponent() {
   }
 
   const { data: positions, isLoading: isLoadingPositions } = useQuery(
-    trpc.position.getAll.queryOptions(),
+    trpc.platform.position.getAll.queryOptions(),
   );
 
   const { data: users, isLoading: isLoadingUsers } = useQuery(
-    trpc.user.getAllUsers.queryOptions(),
+    trpc.platform.user.getAllUsers.queryOptions(),
   );
 
   return (

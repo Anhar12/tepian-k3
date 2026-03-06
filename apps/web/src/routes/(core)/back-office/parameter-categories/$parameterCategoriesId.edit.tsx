@@ -41,7 +41,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
+import parameterCategoriesSchema from "@tepian-k3/schema/pengujian/parameter-categories.schema";
 import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -59,12 +59,14 @@ export const Route = createFileRoute(
     }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.parameterCategories.getParameterCategoryById.queryOptions({
-        id: params.parameterCategoriesId,
-      }),
+      context.trpc.pengujian.parameterCategories.getParameterCategoryById.queryOptions(
+        {
+          id: params.parameterCategoriesId,
+        },
+      ),
     );
     context.queryClient.ensureQueryData(
-      context.trpc.cluster.getAllClusters.queryOptions(),
+      context.trpc.pengujian.cluster.getAllClusters.queryOptions(),
     );
   },
   component: RouteComponent,
@@ -100,13 +102,13 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: parameterCategory } = useSuspenseQuery(
-    trpc.parameterCategories.getParameterCategoryById.queryOptions({
+    trpc.pengujian.parameterCategories.getParameterCategoryById.queryOptions({
       id: parameterCategoriesId,
     }),
   );
 
   const { data: clusters } = useSuspenseQuery(
-    trpc.cluster.getAllClusters.queryOptions(),
+    trpc.pengujian.cluster.getAllClusters.queryOptions(),
   );
 
   const [clusterOpen, setClusterOpen] = useState(false);
@@ -126,12 +128,14 @@ function RouteComponent() {
   });
 
   const updateParameterCategoryMutation = useMutation(
-    trpc.parameterCategories.updateParameterCategory.mutationOptions({
+    trpc.pengujian.parameterCategories.updateParameterCategory.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.parameterCategories.getParameterCategoryById.queryOptions({
-            id: parameterCategoriesId,
-          }),
+          trpc.pengujian.parameterCategories.getParameterCategoryById.queryOptions(
+            {
+              id: parameterCategoriesId,
+            },
+          ),
         );
         globalSuccessToast("Berhasil memperbarui parameter category");
 

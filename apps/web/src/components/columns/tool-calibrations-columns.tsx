@@ -1,5 +1,5 @@
 import type { ColumnDef, Row } from "@tanstack/react-table";
-import type { ToolCalibration } from "@tepian-k3/types/tool-calibration.types";
+import type { ToolCalibration } from "@tepian-k3/types/pengujian/tool-calibration.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/tools/$toolId.calibration.index";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
@@ -25,10 +25,10 @@ function ActionCell(row: Row<ToolCalibration>) {
     resourceName: "tool-calibration",
     resourcePath: "tool-calibrations",
     permissionPrefix: "tool-calibrations",
-    deleteMutation: trpc.tool.deleteToolCalibration,
-    restoreMutation: trpc.tool.restoreToolCalibration,
+    deleteMutation: trpc.pengujian.tool.deleteToolCalibration,
+    restoreMutation: trpc.pengujian.tool.restoreToolCalibration,
     getQueryOptions: (params) =>
-      trpc.tool.getPaginatedCalibrations.queryOptions({
+      trpc.pengujian.tool.getPaginatedCalibrations.queryOptions({
         toolId,
         ...params,
       }),

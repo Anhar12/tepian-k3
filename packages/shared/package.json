@@ -1,5 +1,7 @@
 {
   "name": "@tepian-k3/shared",
+  "version": "1.0.5",
+  "private": true,
   "type": "module",
   "exports": {
     ".": {

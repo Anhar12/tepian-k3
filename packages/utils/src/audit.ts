@@ -1,4 +1,7 @@
-import type { AuditDiff, FieldChange } from "@tepian-k3/types/audit.types";
+import type {
+  AuditDiff,
+  FieldChange,
+} from "@tepian-k3/types/platform/audit.types";
 
 /**
  * Compare two objects and return the differences

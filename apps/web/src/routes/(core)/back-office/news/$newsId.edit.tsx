@@ -4,7 +4,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import newsSchema from "@tepian-k3/schema/news.schema";
+import newsSchema from "@tepian-k3/schema/platform/news.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -59,7 +59,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: news, isLoading } = useQuery(
-    trpc.news.getNewsById.queryOptions({ id: newsId }),
+    trpc.platform.news.getNewsById.queryOptions({ id: newsId }),
   );
 
   const form = useForm<z.infer<typeof newsSchema.updateNewsSchema>>({
@@ -76,10 +76,10 @@ function RouteComponent() {
   });
 
   const updateNewsMutation = useMutation(
-    trpc.news.updateNews.mutationOptions({
+    trpc.platform.news.updateNews.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.news.getNewsById.queryOptions({ id: newsId }),
+          trpc.platform.news.getNewsById.queryOptions({ id: newsId }),
         );
         globalSuccessToast("Berita berhasil diperbarui");
         await redirectBack();

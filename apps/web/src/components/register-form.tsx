@@ -18,7 +18,7 @@ import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { Link, useNavigate } from "@tanstack/react-router";
-import userSchema from "@tepian-k3/schema/users.schema";
+import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { Separator } from "./ui/separator";
 
 export function RegisterForm({
@@ -40,7 +40,7 @@ export function RegisterForm({
   });
 
   const registerMutation = useMutation(
-    trpc.auth.register.mutationOptions({
+    trpc.platform.auth.register.mutationOptions({
       onSuccess: (data) => {
         globalSuccessToast("Daftar berhasil, silahkan verifikasi email Anda.");
         navigate({

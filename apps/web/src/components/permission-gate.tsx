@@ -34,7 +34,9 @@ export function PermissionGate({
   children,
   fallback = null,
 }: PermissionGateProps) {
-  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
 
   const permissions = Array.isArray(permission) ? permission : [permission];
 

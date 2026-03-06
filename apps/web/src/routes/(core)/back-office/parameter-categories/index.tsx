@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import parameterCategoriesSchema from "@tepian-k3/schema/parameter-categories.schema";
+import parameterCategoriesSchema from "@tepian-k3/schema/pengujian/parameter-categories.schema";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import getParameterCategoriesColumns from "@/components/columns/parameter-categories-columns";
@@ -15,7 +15,7 @@ import { DataTable } from "@/components/data-table/data-table";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
-import type { ParameterCategories } from "@tepian-k3/types/parameter-categories.types";
+import type { ParameterCategories } from "@tepian-k3/types/pengujian/parameter-categories.types";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
 export const Route = createFileRoute(
@@ -40,7 +40,7 @@ function RouteComponent() {
     isLoading,
     error,
   } = useQuery(
-    trpc.parameterCategories.getPaginatedParameterCategories.queryOptions(
+    trpc.pengujian.parameterCategories.getPaginatedParameterCategories.queryOptions(
       params,
     ),
   );

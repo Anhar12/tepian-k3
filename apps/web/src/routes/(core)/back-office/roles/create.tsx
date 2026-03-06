@@ -22,7 +22,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import rolesSchema from "@tepian-k3/schema/role.schema";
+import rolesSchema from "@tepian-k3/schema/platform/role.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -46,7 +46,7 @@ function RouteComponent() {
   });
 
   const createRoleMutation = useMutation(
-    trpc.role.createRole.mutationOptions({
+    trpc.platform.role.createRole.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil membuat role");
         form.reset();

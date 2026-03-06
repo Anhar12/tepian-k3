@@ -17,7 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Calendar, LoaderCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
-import type { ParameterTools } from "@tepian-k3/types/parameter-tool.types";
+import type { ParameterTools } from "@tepian-k3/types/pengujian/parameter-tool.types";
 import { IconTools } from "@tabler/icons-react";
 
 interface ParameterToolCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -31,12 +31,14 @@ export default function ParameterToolCard({
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const deleteParameterToolMutation = useMutation(
-    trpc.parameterTool.deleteParameterTool.mutationOptions({
+    trpc.pengujian.parameterTool.deleteParameterTool.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.parameterTool.getAllParameterToolsByParameterId.queryOptions({
-            parameterId: parameterTool.parameterId,
-          }),
+          trpc.pengujian.parameterTool.getAllParameterToolsByParameterId.queryOptions(
+            {
+              parameterId: parameterTool.parameterId,
+            },
+          ),
         );
 
         globalSuccessToast("Alat berhasil dihapus dari parameter.");
@@ -61,7 +63,8 @@ export default function ParameterToolCard({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="truncate text-sm font-semibold text-foreground">
-                {parameterTool.tool.toolName} - ({parameterTool.tool.toolCode})
+                {parameterTool.tool.toolName} - (
+                {parameterTool.tool.toolCode.code})
               </h2>
             </div>
           </div>
@@ -117,7 +120,7 @@ export default function ParameterToolCard({
           <div className="flex items-center gap-2">
             <IconTools className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="truncate text-xs text-foreground">
-              {parameterTool.tool.toolCode} - {parameterTool.tool.toolName}
+              {parameterTool.tool.toolCode.code} - {parameterTool.tool.toolName}
             </p>
           </div>
 

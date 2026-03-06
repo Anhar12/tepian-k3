@@ -27,7 +27,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import positionSchema from "@tepian-k3/schema/position.schema";
+import positionSchema from "@tepian-k3/schema/platform/position.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -44,7 +44,7 @@ export const Route = createFileRoute(
     }),
   loader: ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.position.getPositionDetails.queryOptions({
+      context.trpc.platform.position.getPositionDetails.queryOptions({
         id: params.positionId,
       }),
     );
@@ -81,7 +81,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: position } = useSuspenseQuery(
-    trpc.position.getPositionDetails.queryOptions({
+    trpc.platform.position.getPositionDetails.queryOptions({
       id: positionId,
     }),
   );
@@ -96,7 +96,7 @@ function RouteComponent() {
   });
 
   const updatePositionMutation = useMutation(
-    trpc.position.updatePosition.mutationOptions({
+    trpc.platform.position.updatePosition.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil memperbarui posisi");
         form.reset();

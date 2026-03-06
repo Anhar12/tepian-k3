@@ -45,3 +45,6 @@ export const CACHE_TTL = {
 } as const;
 
 export type CacheTTL = (typeof CACHE_TTL)[keyof typeof CACHE_TTL];
+
+/** Redis pub/sub channel for server-sent events */
+export const REDIS_CHANNEL = "tepian-k3-events";

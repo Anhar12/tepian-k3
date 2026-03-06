@@ -53,12 +53,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   ClipboardList,
-  Download,
   Lock,
   Loader2,
   MessageSquare,
   Package,
-  Save,
   Search,
   Send,
   Wrench,
@@ -73,7 +71,7 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { requirePermission } from "@/utils/require-permission";
 import { PermissionGate } from "@/components/permission-gate";
 import { useUserProfile } from "@/hooks/use-user-profile";
-import worksheetSchema from "@tepian-k3/schema/worksheet.schema";
+import worksheetSchema from "@tepian-k3/schema/pengujian/worksheet.schema";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -112,7 +110,8 @@ interface Tool {
   condition: ToolsCondition;
   availability: ToolsAvailability;
   selected?: boolean;
-  toolNeeded: number;
+  plannedToolNeeded: number;
+  isBorrowed: boolean | null;
 }
 
 interface WorksheetItemWithMeta {
@@ -130,6 +129,7 @@ interface WorksheetItemWithMeta {
 
 function RouteComponent() {
   const { worksheetId } = routeApi.useSearch();
+  const { tabs: initialTab } = Route.useSearch();
   const queryClient = useQueryClient();
 
   const { profile } = useUserProfile();
@@ -139,11 +139,13 @@ function RouteComponent() {
     data: worksheet,
     isLoading,
     error,
-  } = useQuery(trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }));
+  } = useQuery(
+    trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+  );
 
   // Fetch worksheet notes
   const { data: notes } = useQuery(
-    trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+    trpc.pengujian.worksheet.getNotes.queryOptions({ worksheetId }),
   );
 
   // Ref for auto-scrolling notes to bottom
@@ -158,7 +160,7 @@ function RouteComponent() {
 
   // Fetch all tools for assignment
   const { data: allToolsData } = useQuery(
-    trpc.tool.getForWorksheet.queryOptions({
+    trpc.pengujian.tool.getForWorksheet.queryOptions({
       worksheetId,
     }),
   );
@@ -166,12 +168,14 @@ function RouteComponent() {
   // Fetch chemical materials linked to parameters in this worksheet
   const { data: chemicalMaterialsData, isLoading: isLoadingChemicalMaterials } =
     useQuery(
-      trpc.chemicalMaterial.getForWorksheet.queryOptions({ worksheetId }),
+      trpc.pengujian.chemicalMaterial.getForWorksheet.queryOptions({
+        worksheetId,
+      }),
     );
 
   // Fetch worksheet-specific chemical materials (with required quantities)
   const { data: worksheetChemicalMaterialsData } = useQuery(
-    trpc.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
+    trpc.pengujian.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
   );
 
   // Worksheet is only editable in draft or revision status
@@ -194,10 +198,12 @@ function RouteComponent() {
 
   // Mutations
   const batchUpdateMutation = useMutation(
-    trpc.worksheet.batchUpdateItems.mutationOptions({
+    trpc.pengujian.worksheet.batchUpdateItems.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({
+            worksheetId,
+          }),
         );
         globalSuccessToast("Perubahan berhasil disimpan");
         setLocalItemUpdates(new Map());
@@ -209,10 +215,12 @@ function RouteComponent() {
   );
 
   const createEstimateMutation = useMutation(
-    trpc.worksheet.createEstimate.mutationOptions({
+    trpc.pengujian.worksheet.createEstimate.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({
+            worksheetId,
+          }),
         );
         globalSuccessToast("Estimasi berhasil dibuat");
       },
@@ -223,10 +231,12 @@ function RouteComponent() {
   );
 
   const assignToolsMutation = useMutation(
-    trpc.worksheet.assignTools.mutationOptions({
+    trpc.pengujian.worksheet.assignTools.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({
+            worksheetId,
+          }),
         );
         globalSuccessToast("Alat berhasil disimpan");
       },
@@ -237,10 +247,10 @@ function RouteComponent() {
   );
 
   const addNoteMutation = useMutation(
-    trpc.worksheet.addNote.mutationOptions({
+    trpc.pengujian.worksheet.addNote.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getNotes.queryOptions({ worksheetId }),
         );
         globalSuccessToast("Catatan berhasil ditambahkan");
         noteForm.reset();
@@ -252,10 +262,12 @@ function RouteComponent() {
   );
 
   const saveChemicalMaterialsMutation = useMutation(
-    trpc.worksheet.saveChemicalMaterials.mutationOptions({
+    trpc.pengujian.worksheet.saveChemicalMaterials.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getChemicalMaterials.queryOptions({
+            worksheetId,
+          }),
         );
         globalSuccessToast("Bahan berhasil disimpan");
         setLocalRequiredUpdates(new Map());
@@ -272,7 +284,7 @@ function RouteComponent() {
   const [toolCodeFilter, setToolCodeFilter] = useState<string>("all");
   const [conditionFilter, setConditionFilter] = useState<string>("all");
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
-  const [activeSubTab, setActiveSubTab] = useState<TabsType>("parameter");
+  const [activeSubTab, setActiveSubTab] = useState<TabsType>(initialTab);
   const [selectedToolIds, setSelectedToolIds] = useState<Set<string>>(
     new Set(),
   );
@@ -299,12 +311,24 @@ function RouteComponent() {
     Map<string, number>
   >(new Map());
 
-  // Initialize selected tools from worksheet data
+  // Initialize selected tools and quantities from planned tool data
   useMemo(() => {
-    if (worksheet?.tools) {
-      setSelectedToolIds(new Set(worksheet.tools.map((t) => t.toolId)));
+    if (worksheet?.plannedTools) {
+      setSelectedToolIds(new Set(worksheet.plannedTools.map((t) => t.toolId)));
+      setLocalToolUpdates((prev) => {
+        const newMap = new Map(prev);
+        for (const t of worksheet.plannedTools) {
+          if (!newMap.has(t.toolId)) {
+            newMap.set(t.toolId, {
+              parameterId: [],
+              toolNeeded: t.toolNeeded,
+            });
+          }
+        }
+        return newMap;
+      });
     }
-  }, [worksheet?.tools]);
+  }, [worksheet?.plannedTools]);
 
   // Transform worksheet items to display format
   const worksheetItems: WorksheetItemWithMeta[] = useMemo(() => {
@@ -342,7 +366,7 @@ function RouteComponent() {
     if (!allToolsData) return [];
 
     const codes = allToolsData
-      .map((tool) => tool.toolCode.split("-")[0])
+      .map((tool) => tool.toolCode?.code.split("-")[0])
       .filter((code): code is string => code !== undefined && code !== "");
 
     return [...new Set(codes)];
@@ -359,12 +383,16 @@ function RouteComponent() {
           parameterId: tool.parameterId,
           parameterName: tool.parameterName,
         });
-        // the toolNeeded is combined from worksheetTools join, so it should be the same for all entries
-        existing.toolNeeded = tool.toolNeeded + (existing.toolNeeded ?? 0);
+        if (tool.plannedToolNeeded != null) {
+          existing.plannedToolNeeded = tool.plannedToolNeeded;
+        }
+        if (tool.isBorrowed) {
+          existing.isBorrowed = true;
+        }
       } else {
         toolMap.set(tool.id, {
           id: tool.id,
-          toolCode: tool.toolCode,
+          toolCode: tool.toolCode?.code ?? "N/A",
           toolName: tool.toolName,
           parameters: [
             {
@@ -375,7 +403,8 @@ function RouteComponent() {
           condition: tool.condition,
           availability: tool.availability,
           selected: selectedToolIds.has(tool.id),
-          toolNeeded: tool.toolNeeded ?? 0,
+          plannedToolNeeded: tool.plannedToolNeeded ?? 0,
+          isBorrowed: tool.isBorrowed ?? null,
         });
       }
     }
@@ -587,7 +616,7 @@ function RouteComponent() {
     return tool
       ? {
           parameterId: tool.parameters.map((p) => p.parameterId),
-          toolNeeded: tool.toolNeeded,
+          toolNeeded: tool.plannedToolNeeded,
         }
       : { parameterId: [], toolNeeded: 0 };
   };
@@ -735,11 +764,11 @@ function RouteComponent() {
   const hasLocalBahanChanges = localRequiredUpdates.size > 0;
 
   useSubscription({
-    ...trpc.event.onWorksheetNoteCreated.subscriptionOptions(),
+    ...trpc.platform.event.onWorksheetNoteCreated.subscriptionOptions(),
     onData: (event) => {
       if (event.worksheetId === worksheetId)
         queryClient.invalidateQueries(
-          trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getNotes.queryOptions({ worksheetId }),
         );
     },
   });
@@ -786,22 +815,6 @@ function RouteComponent() {
       <WorksheetHeaderCard
         title="Rincian parameter"
         subtitle={`Worksheet untuk ${worksheet?.order?.company?.name ?? "Unknown"}`}
-        actionButton={[
-          {
-            label: "Simpan",
-            icon: <Save className="h-4 w-4" />,
-            variant: "outline",
-            size: "sm",
-            onClick: () => {},
-          },
-          {
-            label: "Export",
-            icon: <Download className="h-4 w-4" />,
-            variant: "default",
-            size: "sm",
-            onClick: () => {},
-          },
-        ]}
       />
 
       {/* Show readonly alert when worksheet is not editable */}
@@ -1291,8 +1304,11 @@ function RouteComponent() {
                       <TableHead className="text-xs font-semibold sm:text-sm">
                         Ketersediaan
                       </TableHead>
-                      <TableHead className="text-xs font-semibold sm:text-sm">
-                        Jumlah yang dibutuhkan
+                      <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                        Direncanakan
+                      </TableHead>
+                      <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                        Dipinjam
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -1388,20 +1404,40 @@ function RouteComponent() {
                                 value={tool.availability}
                               />
                             </TableCell>
-                            <TableCell className="text-xs sm:text-sm">
-                              <Input
-                                onChange={(e) =>
-                                  handleToolChange(
-                                    tool.id,
-                                    "toolNeeded",
-                                    parseInt(e.target.value) || 0,
-                                  )
-                                }
-                                type="number"
-                                value={getToolState(tool.id).toolNeeded || "0"}
-                                className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
-                                placeholder="Jumlah..."
-                              />
+                            <TableCell className="text-center text-xs sm:text-sm">
+                              {isEditable ? (
+                                <Input
+                                  onChange={(e) =>
+                                    handleToolChange(
+                                      tool.id,
+                                      "toolNeeded",
+                                      parseInt(e.target.value) || 0,
+                                    )
+                                  }
+                                  type="number"
+                                  min={0}
+                                  value={
+                                    getToolState(tool.id).toolNeeded || "0"
+                                  }
+                                  className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
+                                  placeholder="0"
+                                />
+                              ) : (
+                                <span className="font-mono text-sm">
+                                  {getToolState(tool.id).toolNeeded || "—"}
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {tool.isBorrowed ? (
+                                <Badge className="bg-emerald-100 text-xs text-emerald-700 hover:bg-emerald-100">
+                                  Dipinjam
+                                </Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">
+                                  —
+                                </span>
+                              )}
                             </TableCell>
                           </TableRow>
                         );
@@ -1409,7 +1445,7 @@ function RouteComponent() {
                     ) : (
                       <TableRow>
                         <TableCell
-                          colSpan={7}
+                          colSpan={8}
                           className="py-6 text-center text-sm text-muted-foreground"
                         >
                           Tidak ada alat ditemukan
@@ -1541,7 +1577,7 @@ function RouteComponent() {
                 </div>
 
                 {hasLocalBahanChanges && isEditable && (
-                  <PermissionGate permission="worksheets.update">
+                  <PermissionGate permission="worksheet-chemical-materials.update">
                     <div className="mb-4 flex justify-end">
                       <Button
                         onClick={handleSaveBahan}
@@ -1617,7 +1653,7 @@ function RouteComponent() {
                             </TableCell>
                             <TableCell className="text-center">
                               <PermissionGate
-                                permission="worksheets.update"
+                                permission="worksheet-chemical-materials.update"
                                 fallback={
                                   <span className="text-xs text-muted-foreground">
                                     {item.required}

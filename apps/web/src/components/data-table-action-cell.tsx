@@ -20,7 +20,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Ellipsis, Eye, LoaderCircle, Pencil, Printer } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-type CustomAction = {
+export type CustomAction = {
   icon: React.ReactNode;
   text: string;
   action: string | (() => void);

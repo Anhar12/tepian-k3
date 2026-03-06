@@ -98,6 +98,9 @@ devRouter.get("/offering-letter/:orderId", async (c) => {
       ...mockData,
       letterNumber: "LET-2024-001",
       companyName: mockData.order.company.name,
+      companyBankName: mockData.order.company.companyBankName,
+      companyBankAccount: mockData.order.company.companyBankAccount,
+      companyBankAccountName: mockData.order.company.companyBankAccountName,
     });
 
     return new Response(pdfBuffer, {
@@ -191,13 +194,9 @@ devRouter.get("/tagihan/:orderId", async (c) => {
       billingCode: "820251203334581",
       billingAmount: 500000,
       operationalAmount: 400000,
-      operationalBankAccount: "1480024954110",
-      operationalBankAccountName: "RPL 046 PS BALAI K3 SMD Utk Ops",
       billingExpiryDate: new Date(
         Date.now() + 7 * 24 * 60 * 60 * 1000,
       ).toISOString(),
-      adminEmail: "admin@balai-k3.go.id",
-      adminContact: "0812-3456-7890",
     });
 
     return new Response(pdfBuffer, {

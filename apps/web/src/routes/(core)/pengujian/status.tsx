@@ -1,15 +1,15 @@
 import { OrderDetailSkeleton } from "@/components/order-detail-skeleton";
 import { OrderTimeline } from "@/components/order-timeline";
 import {
-  StatusState0,
-  StatusState1,
-  StatusState2,
-  StatusState3,
-  StatusState4,
-  StatusState5,
-  StatusState6,
-  StatusState7,
-  StatusState8,
+  StatusStateAwaitingInvoice,
+  StatusStateAwaitingSchedule,
+  StatusStateCompleted,
+  StatusStateOfferPublished,
+  StatusStatePendingPaymentVerification,
+  StatusStatePendingReview,
+  StatusStateTestingInProgress,
+  StatusStateUploadApproval,
+  StatusStateUploadPayment,
   StatusStateWaitingForRevision,
   StatusStateWorksheetInReview,
   StatusStateWorksheetVerified,
@@ -37,9 +37,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
-
-// TODO: When order is cancelled, make sure all related documents/worksheets are handled properly (maybe soft delete or archive)
-// TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
 
 export const Route = createFileRoute("/(core)/pengujian/status")({
   validateSearch: z.object({
@@ -74,16 +71,16 @@ function RouteComponent() {
   const cooperationAgreementFile = useFileUpload();
 
   const { data: orderDetail, isLoading } = useQuery(
-    trpc.order.getOrderWithDocuments.queryOptions({
+    trpc.pengujian.order.getOrderWithDocuments.queryOptions({
       orderId,
     }),
   );
 
   const acceptOfferMutation = useMutation(
-    trpc.order.acceptOffer.mutationOptions({
+    trpc.pengujian.order.acceptOffer.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocuments.queryOptions({
+          trpc.pengujian.order.getOrderWithDocuments.queryOptions({
             orderId,
           }),
         );
@@ -99,10 +96,10 @@ function RouteComponent() {
   );
 
   const reviseOfferMutation = useMutation(
-    trpc.order.reviseOrder.mutationOptions({
+    trpc.pengujian.order.reviseOrder.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocuments.queryOptions({
+          trpc.pengujian.order.getOrderWithDocuments.queryOptions({
             orderId,
           }),
         );
@@ -119,10 +116,10 @@ function RouteComponent() {
   );
 
   const cancelOrderMutation = useMutation(
-    trpc.order.cancelOrder.mutationOptions({
+    trpc.pengujian.order.cancelOrder.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocuments.queryOptions({
+          trpc.pengujian.order.getOrderWithDocuments.queryOptions({
             orderId,
           }),
         );
@@ -146,9 +143,9 @@ function RouteComponent() {
       formData.append("orderId", orderId);
       formData.append("file", approvalLetterFile.file);
 
-      await trpcClient.order.uploadApprovalLetter.mutate(formData);
+      await trpcClient.pengujian.order.uploadApprovalLetter.mutate(formData);
       await queryClient.invalidateQueries(
-        trpc.order.getOrderWithDocuments.queryOptions({
+        trpc.pengujian.order.getOrderWithDocuments.queryOptions({
           orderId,
         }),
       );
@@ -175,9 +172,9 @@ function RouteComponent() {
       formData.append("paymentProof", paymentProofFile.file);
       formData.append("cooperationAgreement", cooperationAgreementFile.file);
 
-      await trpcClient.order.uploadPaymentDocuments.mutate(formData);
+      await trpcClient.pengujian.order.uploadPaymentDocuments.mutate(formData);
       await queryClient.invalidateQueries(
-        trpc.order.getOrderWithDocuments.queryOptions({
+        trpc.pengujian.order.getOrderWithDocuments.queryOptions({
           orderId,
         }),
       );
@@ -311,17 +308,13 @@ function RouteComponent() {
             {/* Card Content */}
             <div className="flex h-full flex-1 overflow-auto">
               {isCompleted ? (
-                // State 8: Testing Completed
-                <StatusState8 orderDetail={orderDetail} />
+                <StatusStateCompleted orderDetail={orderDetail} />
               ) : isInProgress ? (
-                // State 7: Testing in Progress
-                <StatusState7 orderDetail={orderDetail} />
+                <StatusStateTestingInProgress orderDetail={orderDetail} />
               ) : isPaymentVerified && !isInProgress ? (
-                // State 6: Payment verified, waiting for SPT & schedule
-                <StatusState6 />
+                <StatusStateAwaitingSchedule />
               ) : isPendingPaymentVerification ? (
-                // State 5: Payment pending verification
-                <StatusState5
+                <StatusStatePendingPaymentVerification
                   cooperationAgreementUserDoc={cooperationAgreementUserDoc}
                   paymentProofDoc={paymentProofDoc}
                 />
@@ -330,8 +323,7 @@ function RouteComponent() {
                 hasInvoice &&
                 hasCooperationAgreement &&
                 !hasPaymentProof ? (
-                // State 4: Invoice ready, user uploads payment proof & signed cooperation agreement
-                <StatusState4
+                <StatusStateUploadPayment
                   invoiceDoc={invoiceDoc}
                   cooperationAgreementDoc={cooperationAgreementDoc}
                   paymentProofFile={paymentProofFile.file}
@@ -345,14 +337,12 @@ function RouteComponent() {
                   handleUploadPaymentDocs={handleUploadPaymentDocs}
                 />
               ) : isRevisionStatus && revisionHistory ? (
-                // State: Waiting for revision
                 <StatusStateWaitingForRevision
                   orderDetail={orderDetail}
                   revisionHistory={revisionHistory}
                 />
               ) : isApproved && !hasApprovalLetter ? (
-                // State 2: Customer approved, needs to upload approval letter
-                <StatusState2
+                <StatusStateUploadApproval
                   approvalLetterFile={approvalLetterFile.file}
                   setApprovalLetterFile={approvalLetterFile.setFile}
                   uploadingApprovalLetter={approvalLetterFile.uploading}
@@ -361,23 +351,18 @@ function RouteComponent() {
               ) : isApproved &&
                 hasApprovalLetter &&
                 (!hasInvoice || !hasCooperationAgreement) ? (
-                // State 3: Approval letter uploaded, waiting for invoice & cooperation agreement
-                <StatusState3 />
+                <StatusStateAwaitingInvoice />
               ) : isWorksheetInReview ? (
-                // State 0a: Worksheet in review (kaji ulang phase)
                 <StatusStateWorksheetInReview
                   orderDetail={orderDetail}
                   worksheetStatus={worksheetStatus || "draft"}
                 />
               ) : isWorksheetVerified && !offeringDoc ? (
-                // State 0b: Worksheet verified, waiting for offering document
                 <StatusStateWorksheetVerified orderDetail={orderDetail} />
               ) : freshlySubmitted && !hasWorksheet ? (
-                // State 0: Freshly submitted, no worksheet yet
-                <StatusState0 orderDetail={orderDetail} />
+                <StatusStatePendingReview orderDetail={orderDetail} />
               ) : (
-                // State 1: Offer sent, waiting for customer to approve
-                <StatusState1
+                <StatusStateOfferPublished
                   orderDetail={orderDetail}
                   offeringDoc={offeringDoc}
                 />

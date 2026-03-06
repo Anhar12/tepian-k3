@@ -21,7 +21,7 @@ import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
+import userCompanyTestingLocationSchema from "@tepian-k3/schema/pengujian/user-company-testing-location.schema";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -60,11 +60,11 @@ export default function CreateCompanyLocationDialog({
   const regencyId = form.watch("regencyId");
 
   const createCompanyTestingLocationMutation = useMutation(
-    trpc.userCompanyTestingLocation.userCreateUserCompanyTestingLocation.mutationOptions(
+    trpc.pengujian.userCompanyTestingLocation.userCreateUserCompanyTestingLocation.mutationOptions(
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(
-            trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
+            trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
               {
                 companyId,
               },
@@ -86,11 +86,11 @@ export default function CreateCompanyLocationDialog({
   );
 
   const { data: regency } = useQuery(
-    trpc.regency.getAllRegencies.queryOptions(),
+    trpc.platform.regency.getAllRegencies.queryOptions(),
   );
 
   const { data: districts } = useQuery({
-    ...trpc.district.getAllDistrictsByRegencyId.queryOptions({
+    ...trpc.platform.district.getAllDistrictsByRegencyId.queryOptions({
       regencyId: regencyId!,
     }),
     enabled: !!regencyId,

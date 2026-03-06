@@ -11,7 +11,7 @@ export function useCartFilters() {
   const [currentLocation, setCurrentLocation] = useState<string | null>(null);
 
   const { data: cartItems } = useQuery(
-    trpc.cart.getAllCartItems.queryOptions(),
+    trpc.pengujian.cart.getAllCartItems.queryOptions(),
   );
 
   const mappedCompanyFromCartItem = useMemo(() => {

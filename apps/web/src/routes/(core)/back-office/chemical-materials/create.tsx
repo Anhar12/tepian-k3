@@ -36,7 +36,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { trpc } from "@/utils/trpc";
 import { Spinner } from "@/components/ui/spinner";
-import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
+import chemicalMaterialSchema from "@tepian-k3/schema/pengujian/chemical-material.schema";
 import {
   BAHAN_STATUS,
   BAHAN_STATUS_LABELS,
@@ -81,7 +81,7 @@ function RouteComponent() {
   });
 
   const createChemicalMaterialMutation = useMutation({
-    ...trpc.chemicalMaterial.create.mutationOptions(),
+    ...trpc.pengujian.chemicalMaterial.create.mutationOptions(),
     onSuccess: async () => {
       globalSuccessToast("Bahan kimia berhasil dibuat");
       await redirectBack();

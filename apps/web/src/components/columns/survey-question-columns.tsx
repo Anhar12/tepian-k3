@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { SurveyQuestion } from "@tepian-k3/types/survey.types";
+import type { SurveyQuestion } from "@tepian-k3/types/pengujian/survey.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/survey-questions";
 import {
@@ -24,10 +24,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "pertanyaan survey",
   resourcePath: "survey-questions",
   permissionPrefix: "survey-questions",
-  deleteMutation: trpc.survey.deleteQuestion,
-  restoreMutation: trpc.survey.restoreQuestion,
+  deleteMutation: trpc.pengujian.survey.deleteQuestion,
+  restoreMutation: trpc.pengujian.survey.restoreQuestion,
   getQueryOptions: (params) =>
-    trpc.survey.getPaginatedQuestions.queryOptions(params),
+    trpc.pengujian.survey.getPaginatedQuestions.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

@@ -7,8 +7,10 @@ import {
 } from "@/components/ui/card";
 import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
+import { EMPLOYEE_ROLES } from "@tepian-k3/constants";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/(core)/back-office/")({
   component: RouteComponent,
@@ -16,7 +18,13 @@ export const Route = createFileRoute("/(core)/back-office/")({
 });
 
 function RouteComponent() {
-  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
+
+  const isEmployee = profile.roles.some((r) =>
+    (EMPLOYEE_ROLES as readonly string[]).includes(r.name),
+  );
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -25,11 +33,18 @@ function RouteComponent() {
           <CardTitle>Selamat Datang, {profile.name}!</CardTitle>
           <CardDescription>Mulai kelola sistem Anda dari sini</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
             Ini adalah dashboard utama Anda. Mulai jelajahi fitur-fitur yang
             tersedia.
           </p>
+          {isEmployee && (
+            <Link to="/employee">
+              <Button variant="outline" size="sm">
+                Buka Dashboard Karyawan
+              </Button>
+            </Link>
+          )}
         </CardContent>
       </Card>
 

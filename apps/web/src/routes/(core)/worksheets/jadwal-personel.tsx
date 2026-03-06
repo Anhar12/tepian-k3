@@ -15,6 +15,7 @@ import {
   Lock,
   CalendarDays,
   CalendarClock,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -81,6 +82,10 @@ import { PermissionGate } from "@/components/permission-gate";
 import { getPublicUrl } from "@/utils/url";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { pageHead } from "@/utils/page-head";
+import useDialogs from "@/hooks/use-dialog";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import GenerateSPTDialog from "./-components/generate-spt-dialog";
+import UploadSPTDialog from "./-components/upload-spt-dialog";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
@@ -149,21 +154,37 @@ function JadwalPersonilPage() {
   const { worksheetId } = routeApi.useSearch();
   const queryClient = useQueryClient();
 
+  const dialogs = useDialogs({
+    saveDate: null,
+    generateSPT: null,
+    uploadSPT: null,
+  });
+
   // Fetch worksheet data
   const {
     data: worksheet,
     isLoading: worksheetLoading,
     error: worksheetError,
-  } = useQuery(trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }));
+  } = useQuery(
+    trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+  );
+
+  // Fetch worksheet spt
+  const { data: spt, isLoading: sptLoading } = useQuery(
+    trpc.pengujian.worksheet.getWorksheetDocument.queryOptions({
+      worksheetId,
+      documentType: "assignment_letter",
+    }),
+  );
 
   // Fetch all employees
   const { data: employeesData, isLoading: employeesLoading } = useQuery(
-    trpc.employee.getAll.queryOptions(),
+    trpc.platform.employee.getAll.queryOptions(),
   );
 
   // Fetch all worksheets for schedule calendar display
   const { data: allWorksheetsData, isLoading: allWorksheetsLoading } = useQuery(
-    trpc.worksheet.getWorksheetsForSchedule.queryOptions(),
+    trpc.pengujian.worksheet.getWorksheetsForSchedule.queryOptions(),
   );
 
   const [calendarView, setCalendarView] = useState<CalendarView>("month");
@@ -191,15 +212,36 @@ function JadwalPersonilPage() {
     setSelectedEndDate(undefined);
   };
 
-  // Mutation to assign employees to worksheet
-  const assignEmployeesMutation = useMutation(
-    trpc.worksheet.assignEmployees.mutationOptions({
+  // Mutation to set IsPersonnelDateSet flag on worksheet
+  const setPersonnelDateSetMutation = useMutation(
+    trpc.pengujian.worksheet.updateWorksheetPersonnelDateSet.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({
+            worksheetId,
+          }),
+        );
+
+        globalSuccessToast("Tanggal personil berhasil disimpan");
+        dialogs.close("saveDate");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal menyimpan tanggal personil: " + error.message);
+      },
+    }),
+  );
+
+  // Mutation to assign employees to worksheet
+  const assignEmployeesMutation = useMutation(
+    trpc.pengujian.worksheet.assignEmployees.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({
+            worksheetId,
+          }),
         );
         await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetsForSchedule.queryOptions(),
+          trpc.pengujian.worksheet.getWorksheetsForSchedule.queryOptions(),
         );
         globalSuccessToast("Personil berhasil ditugaskan");
         resetDialogState();
@@ -230,7 +272,12 @@ function JadwalPersonilPage() {
     return allWorksheetsData.map((ws, index) => ({
       id: ws.id,
       company: ws.order?.company?.name ?? "Perusahaan",
-      location: ws.testing?.items?.[0]?.location?.name ?? "Lokasi Pengujian",
+      location:
+        [
+          ...new Set(
+            ws.items?.map((item) => item.location?.name).filter(Boolean),
+          ),
+        ].join(", ") || "Lokasi Pengujian",
       // Use different color for current worksheet, cycle through palette for others
       color:
         ws.id === worksheetId ? "bg-blue-600" : getColorForIndex(index + 1),
@@ -253,11 +300,13 @@ function JadwalPersonilPage() {
     );
   }, [worksheet]);
 
-  // Check if worksheet is editable (status is 'verified')
+  // Check if worksheet is editable (status is 'verified') or personnel dates are not set yet
   const isEditable = useMemo(() => {
     if (!worksheet?.status) return false;
-    return ["verified"].includes(worksheet.status);
-  }, [worksheet?.status]);
+    return (
+      ["verified"].includes(worksheet.status) && !worksheet.isPersonnelDateSet
+    );
+  }, [worksheet?.isPersonnelDateSet, worksheet?.status]);
 
   // Initialize selected personnel and dates when opening dialog
   useEffect(() => {
@@ -328,7 +377,20 @@ function JadwalPersonilPage() {
     );
   };
 
-  const availablePersonnel = personnelData.filter((p) => p.status === "siap");
+  // Employees with status "spt" can also be selected if the worksheet hasn't started yet,
+  // since their current assignment may end before this worksheet begins.
+  const worksheetStartDate = worksheet?.startDate
+    ? new Date(worksheet.startDate)
+    : null;
+  const isBeforeWorksheetStart = worksheetStartDate
+    ? new Date() < worksheetStartDate
+    : false;
+
+  const availablePersonnel = personnelData.filter((p) =>
+    isBeforeWorksheetStart
+      ? p.status === "siap" || p.status === "spt"
+      : p.status === "siap",
+  );
 
   const togglePersonnel = (personId: string) => {
     setSelectedPersonnel((prev) =>
@@ -754,14 +816,26 @@ function JadwalPersonilPage() {
             icon: <Save className="h-4 w-4" />,
             variant: "outline",
             size: "sm",
-            onClick: () => {},
+            showButton: isEditable,
+            onClick: () => dialogs.open("saveDate"),
           },
           {
-            label: "Export",
+            label: "Buat SPT",
             icon: <Download className="h-4 w-4" />,
             variant: "default",
             size: "sm",
-            onClick: () => {},
+            permission: "documents-spt.create",
+            onClick: () => dialogs.open("generateSPT"),
+          },
+          {
+            label: "Upload SPT",
+            icon: <Upload className="h-4 w-4" />,
+            variant: "outline",
+            size: "sm",
+            permission: "documents-spt.create",
+            disabled: sptLoading || !!spt,
+            showButton: !sptLoading && !spt,
+            onClick: () => dialogs.open("uploadSPT"),
           },
         ]}
       />
@@ -1162,10 +1236,13 @@ function JadwalPersonilPage() {
 
             <div className="space-y-2">
               <p className="text-sm font-medium">
-                Pilih Personel (Status: Siap)
+                Pilih Personel (Status:{" "}
+                {isBeforeWorksheetStart ? "Siap / SPT" : "Siap"})
               </p>
               <p className="text-xs text-muted-foreground">
-                Hanya personel dengan status "Siap" yang dapat ditugaskan
+                {isBeforeWorksheetStart
+                  ? 'Personel dengan status "Siap" atau "SPT" dapat dipilih karena pengujian belum dimulai'
+                  : 'Hanya personel dengan status "Siap" yang dapat ditugaskan'}
               </p>
               <ScrollArea className="h-60 rounded-lg border p-2">
                 <div className="space-y-2">
@@ -1203,7 +1280,8 @@ function JadwalPersonilPage() {
                   ))}
                   {availablePersonnel.length === 0 && (
                     <p className="py-4 text-center text-sm text-muted-foreground">
-                      Tidak ada personel dengan status "Siap"
+                      Tidak ada personel dengan status{" "}
+                      {isBeforeWorksheetStart ? '"Siap" atau "SPT"' : '"Siap"'}
                     </p>
                   )}
                 </div>
@@ -1408,6 +1486,32 @@ function JadwalPersonilPage() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+      <GenerateSPTDialog
+        worksheetId={worksheetId}
+        isOpen={dialogs.isOpen("generateSPT")}
+        setIsOpen={(isOpen) =>
+          isOpen ? dialogs.open("generateSPT") : dialogs.close("generateSPT")
+        }
+      />
+      <UploadSPTDialog
+        worksheetId={worksheetId}
+        isOpen={dialogs.isOpen("uploadSPT")}
+        setIsOpen={(isOpen) =>
+          isOpen ? dialogs.open("uploadSPT") : dialogs.close("uploadSPT")
+        }
+      />
+      <ConfirmationDialog
+        open={dialogs.isOpen("saveDate")}
+        onOpenChange={(isOpen) =>
+          isOpen ? dialogs.open("saveDate") : dialogs.close("saveDate")
+        }
+        title="Simpan Jadwal"
+        description="Apakah Anda yakin ingin menyimpan jadwal ini? Pastikan semua informasi sudah benar sebelum menyimpan."
+        isLoading={setPersonnelDateSetMutation.isPending}
+        onConfirm={() =>
+          setPersonnelDateSetMutation.mutate({ worksheetId, isSet: true })
+        }
+      />
     </div>
   );
 }

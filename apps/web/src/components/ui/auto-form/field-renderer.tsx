@@ -1,3 +1,4 @@
+import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -51,7 +52,7 @@ export function AutoFormField({
   const description = override?.description;
   const disabled = override?.disabled;
 
-  return (
+  const field = (
     <Controller
       control={control}
       name={name}
@@ -177,6 +178,19 @@ export function AutoFormField({
       }}
     />
   );
+
+  if (override?.permission) {
+    return (
+      <PermissionGate
+        permission={override.permission}
+        requireAll={override.requireAll}
+      >
+        {field}
+      </PermissionGate>
+    );
+  }
+
+  return field;
 }
 
 function SelectField({

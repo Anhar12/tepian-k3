@@ -79,11 +79,11 @@ function HomeComponent() {
   const navigate = useNavigate();
 
   const { data: banners, isLoading: isBannersLoading } = useQuery(
-    trpc.banner.getAllBanners.queryOptions(),
+    trpc.platform.banner.getAllBanners.queryOptions(),
   );
 
   const { data: news, isLoading: isNewsLoading } = useQuery(
-    trpc.news.getFirst5News.queryOptions(),
+    trpc.platform.news.getFirst5News.queryOptions(),
   );
 
   return (

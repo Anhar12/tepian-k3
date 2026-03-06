@@ -8,7 +8,7 @@ import {
   users,
 } from "../schema";
 import { exit } from "process";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import seedClusters from "./clusters";
 import seedParameterCategories from "./parameter-categories";
 import seedProvinces from "./provinces";
@@ -27,9 +27,86 @@ import {
   type Role,
 } from "@tepian-k3/constants";
 import { seedPositions } from "./positions";
+import { seedUserCompanies } from "./user-companies";
+import { seedOrders } from "./orders";
+import { clearAllCache } from "./clear-cache";
+
+/**
+ * Daftar akun uji untuk setiap peran dalam sistem.
+ * Di lingkungan produksi hanya super_admin dan admin yang dibuat.
+ * Di lingkungan non-produksi seluruh peran dibuatkan akun uji.
+ */
+const SEED_USERS: {
+  role: Role;
+  email: string;
+  name: string;
+  productionOnly?: boolean;
+}[] = [
+  {
+    role: "super_admin",
+    email: "superadmin@mail.com",
+    name: "Super Admin",
+    productionOnly: true,
+  },
+  {
+    role: "admin",
+    email: "admin@mail.com",
+    name: "Admin",
+    productionOnly: true,
+  },
+  { role: "user", email: "user@mail.com", name: "User" },
+  { role: "employee", email: "employee@mail.com", name: "Employee" },
+  {
+    role: "sample_collector",
+    email: "sample-collector@mail.com",
+    name: "Sample Collector",
+  },
+  {
+    role: "lab_technician",
+    email: "lab-technician@mail.com",
+    name: "Lab Technician",
+  },
+  { role: "lab_manager", email: "lab-manager@mail.com", name: "Lab Manager" },
+  { role: "kaji_ulang", email: "kaji-ulang@mail.com", name: "Kaji Ulang" },
+  {
+    role: "head_of_institution",
+    email: "head@mail.com",
+    name: "Head of Institution",
+  },
+  {
+    role: "admin_manager",
+    email: "admin-manager@mail.com",
+    name: "Admin Manager",
+  },
+  { role: "treasurer", email: "treasurer@mail.com", name: "Treasurer" },
+  {
+    role: "penjadwalan",
+    email: "penjadwalan@mail.com",
+    name: "Petugas Penjadwalan",
+  },
+  {
+    role: "equipment_officer",
+    email: "equipment@mail.com",
+    name: "Equipment Officer",
+  },
+  {
+    role: "petugas_koding",
+    email: "petugas-koding@mail.com",
+    name: "Petugas Koding",
+  },
+  { role: "viewer", email: "viewer@mail.com", name: "Viewer" },
+];
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
+
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (isProduction) {
+    console.log(
+      "🔒 Production environment detected — only super_admin and admin will be seeded.",
+    );
+  }
 
   // Generate all permissions using type-safe utility
   // This generates 165 permissions (33 resources × 5 actions)
@@ -94,6 +171,9 @@ async function seed() {
 
   const rolePermissionsToAdd = [];
 
+  // Build the full set of role-permission pairs that SHOULD exist
+  const expectedRolePermSet = new Set<string>();
+
   // Assign permissions to each role based on ROLE_PERMISSIONS
   for (const [roleName, permissionNames] of Object.entries(ROLE_PERMISSIONS)) {
     const role = roleMap.get(roleName as Role);
@@ -112,6 +192,8 @@ async function seed() {
       }
 
       const key = `${role.id}-${permissionId}`;
+      expectedRolePermSet.add(key);
+
       if (!existingRolePermSet.has(key)) {
         rolePermissionsToAdd.push({
           roleId: role.id,
@@ -121,108 +203,38 @@ async function seed() {
     }
   }
 
+  // Remove stale role-permission assignments no longer in ROLE_PERMISSIONS
+  const staleRolePerms = existingRolePerms.filter(
+    (rp) => !expectedRolePermSet.has(`${rp.roleId}-${rp.permissionId}`),
+  );
+
+  if (staleRolePerms.length > 0) {
+    console.log(
+      `   🗑️  Removing ${staleRolePerms.length} stale role-permission assignments...`,
+    );
+    // Group by roleId so we can batch-delete per role
+    const staleByRole = Map.groupBy(staleRolePerms, (rp) => rp.roleId);
+    for (const [roleId, entries] of staleByRole) {
+      const permIds = entries.map((rp) => rp.permissionId);
+      await db
+        .delete(rolePermissions)
+        .where(
+          and(
+            eq(rolePermissions.roleId, roleId),
+            inArray(rolePermissions.permissionId, permIds),
+          ),
+        );
+    }
+  }
+
   if (rolePermissionsToAdd.length > 0) {
     console.log(
-      `   ➕ Adding ${rolePermissionsToAdd.length} role-permission assignments...`,
+      `   ➕ Adding ${rolePermissionsToAdd.length} new role-permission assignments...`,
     );
     await db.insert(rolePermissions).values(rolePermissionsToAdd);
   }
 
   console.log("✅ Role permissions synced");
-
-  const password = await hash("test12345");
-
-  // Create example users (only if they don't exist)
-  console.log("👤 Syncing example users...");
-
-  const existingSuperAdminUser = await db.query.users.findFirst({
-    where: eq(users.email, "superadmin@mail.com"),
-  });
-
-  const existingAdminUser = await db.query.users.findFirst({
-    where: eq(users.email, "admin@mail.com"),
-  });
-
-  const existingRegularUser = await db.query.users.findFirst({
-    where: eq(users.email, "user@mail.com"),
-  });
-
-  const superAdminUser =
-    existingSuperAdminUser ||
-    (
-      await db
-        .insert(users)
-        .values({
-          email: "superadmin@mail.com",
-          password,
-          address: "Jl. Test Address No.123",
-          name: "superadmin",
-          phone: "081234567890",
-          emailVerified: true,
-          emailVerifiedAt: new Date().toISOString(),
-        })
-        .returning()
-    )[0];
-
-  const adminUser =
-    existingAdminUser ||
-    (
-      await db
-        .insert(users)
-        .values({
-          email: "admin@mail.com",
-          password,
-          address: "Jl. Test Address No.123",
-          name: "admin",
-          phone: "081234567890",
-          emailVerified: true,
-          emailVerifiedAt: new Date().toISOString(),
-        })
-        .returning()
-    )[0];
-
-  const regularUser =
-    existingRegularUser ||
-    (
-      await db
-        .insert(users)
-        .values({
-          email: "user@mail.com",
-          password,
-          address: "Jl. Test Address No.123",
-          name: "user",
-          phone: "081234567890",
-          emailVerified: true,
-          emailVerifiedAt: new Date().toISOString(),
-        })
-        .returning()
-    )[0];
-
-  if (!superAdminUser || !adminUser || !regularUser) {
-    throw new Error("Failed to create or retrieve example users");
-  }
-
-  console.log("✅ Users synced");
-
-  // Assign roles to users (idempotent)
-  console.log("🔗 Syncing user roles...");
-
-  const superAdminRole = roleMap.get("super_admin");
-  const adminRole = roleMap.get("admin");
-  const userRole = roleMap.get("user");
-
-  if (!superAdminRole || !adminRole || !userRole) {
-    throw new Error("Required roles not found in database");
-  }
-
-  await db
-    .insert(userRoles)
-    .values([
-      { userId: superAdminUser.id, roleId: superAdminRole.id },
-      { userId: adminUser.id, roleId: adminRole.id },
-      { userId: regularUser.id, roleId: userRole.id },
-    ])
-    .onConflictDoNothing();
 
   // seeding other data can go here...
   await seedClusters();
@@ -230,20 +242,89 @@ async function seed() {
   await seedParameters();
   await seedTools();
   await seedChemicalMaterials();
-  await seedProvinces();
-  await seedRegencies();
-  await seedDistricts();
-  await seedVillages();
+  const provinceMap = await seedProvinces();
+  const regencyMap = await seedRegencies(provinceMap);
+  const districtMap = await seedDistricts(regencyMap);
+  await seedVillages(districtMap);
   await seedKblis();
+  await clearAllCache();
   await seedPositions();
-  await seedEmployees();
 
+  // Create one seed user per role.
+  // In production only users marked productionOnly: true are created.
+  // Must run before seedEmployees so test users exist when employee records are linked.
+  console.log("👤 Syncing example users...");
+
+  const password = await hash("test12345");
+
+  const usersToSeed = isProduction
+    ? SEED_USERS.filter((u) => u.productionOnly)
+    : SEED_USERS;
+
+  const seedUserRecords: { userId: string; roleId: string }[] = [];
+
+  for (const { role, email, name } of usersToSeed) {
+    const roleRecord = roleMap.get(role);
+    if (!roleRecord) {
+      console.warn(`⚠️  Role '${role}' not found, skipping user '${email}'`);
+      continue;
+    }
+
+    let userRecord = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (!userRecord) {
+      const [inserted] = await db
+        .insert(users)
+        .values({
+          email,
+          password,
+          address: "Jl. Test Address No.123",
+          name,
+          phone: "081234567890",
+          emailVerified: true,
+          emailVerifiedAt: new Date().toISOString(),
+        })
+        .returning();
+      userRecord = inserted;
+    }
+
+    if (!userRecord) {
+      console.warn(`⚠️  Failed to create user '${email}', skipping...`);
+      continue;
+    }
+
+    seedUserRecords.push({ userId: userRecord.id, roleId: roleRecord.id });
+  }
+
+  if (seedUserRecords.length > 0) {
+    await db.insert(userRoles).values(seedUserRecords).onConflictDoNothing();
+  }
+
+  console.log("✅ Users synced");
   console.log("✅ User roles synced");
+
+  await seedEmployees(isProduction);
+  await seedUserCompanies(isProduction);
+  await seedOrders(isProduction);
+
   console.log("\n🎉 Database seeding completed successfully!");
-  console.log("\n📝 Default credentials:");
-  console.log("   Super Admin: superadmin@mail.com / test12345");
-  console.log("   Admin:       admin@mail.com / test12345");
-  console.log("   User:        user@mail.com / test12345\n");
+  console.log("\n📝 Default credentials (password: test12345):");
+  for (const { role, email } of usersToSeed) {
+    const label = role
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    console.log(`   ${label.padEnd(22)}: ${email}`);
+  }
+  if (isProduction) {
+    console.log(
+      "\n⚠️  Hanya super_admin dan admin yang dibuat di lingkungan produksi.",
+    );
+    console.log("⚠️  Segera ganti password default setelah login pertama!\n");
+  } else {
+    console.log("\n⚠️  Please change these credentials in production!\n");
+  }
 
   exit(0);
 }

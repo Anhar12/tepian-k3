@@ -45,7 +45,15 @@ export const ROLE_RATE_LIMIT_TIERS: Record<Role, RateLimitTier> = {
 
   // Staff tiers - moderate limits
   lab_technician: "premium",
+  head_of_institution: "premium",
+  admin_manager: "premium",
+  treasurer: "premium",
   employee: "standard",
+  sample_collector: "standard",
+  equipment_officer: "standard",
+  kaji_ulang: "standard",
+  penjadwalan: "standard",
+  petugas_koding: "standard",
 
   // User tiers - standard limits
   user: "standard",
