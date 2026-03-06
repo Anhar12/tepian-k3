@@ -51,7 +51,7 @@ export async function requirePermission(
   } = options;
 
   const profile = await context.queryClient.ensureQueryData({
-    ...context.trpc.auth.profile.queryOptions(),
+    ...context.trpc.platform.auth.profile.queryOptions(),
     // 5 minutes cache
     staleTime: 1000 * 60 * 5,
     // Keep in cache for 30 minutes (even if unused)

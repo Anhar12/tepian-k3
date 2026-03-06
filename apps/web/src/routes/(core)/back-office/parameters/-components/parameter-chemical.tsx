@@ -26,7 +26,7 @@ export default function ParameterChemical({
   });
 
   const { data: chemicals, isLoading } = useQuery(
-    trpc.parameterChemicalMaterial.getAllChemicalMaterialsByParameterId.queryOptions(
+    trpc.pengujian.parameterChemicalMaterial.getAllChemicalMaterialsByParameterId.queryOptions(
       {
         parameterId,
       },

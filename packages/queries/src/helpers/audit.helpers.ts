@@ -1,5 +1,5 @@
-import auditQueries from "../audit.queries";
-import type { AuditEntityType } from "@tepian-k3/types/audit.types";
+import auditQueries from "../platform/audit.queries";
+import type { AuditEntityType } from "@tepian-k3/types/platform/audit.types";
 import { Effect } from "effect";
 
 /**

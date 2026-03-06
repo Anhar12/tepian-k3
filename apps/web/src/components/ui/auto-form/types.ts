@@ -2,6 +2,7 @@ import type {
   ControllerFieldState,
   ControllerRenderProps,
 } from "react-hook-form";
+import type { Permission } from "@tepian-k3/constants";
 import type { z } from "zod";
 
 export type InferredFieldType =
@@ -29,6 +30,8 @@ export type FieldOverride = {
     field: ControllerRenderProps;
     fieldState: ControllerFieldState;
   }) => React.ReactNode;
+  permission?: Permission | Permission[];
+  requireAll?: boolean;
 };
 
 export type AutoFormProps<T extends z.ZodObject<z.ZodRawShape>> = {

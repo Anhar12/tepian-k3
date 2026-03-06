@@ -18,7 +18,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import employeeSchema from "@tepian-k3/schema/employee.schema";
+import employeeSchema from "@tepian-k3/schema/platform/employee.schema";
 import { LoaderCircle } from "lucide-react";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { Controller, useForm } from "react-hook-form";
@@ -57,7 +57,7 @@ function RouteComponent() {
   });
 
   const createEmployeeMutation = useMutation(
-    trpc.employee.createEmployee.mutationOptions({
+    trpc.platform.employee.createEmployee.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil membuat karyawan");
         form.reset();
@@ -76,11 +76,11 @@ function RouteComponent() {
   }
 
   const { data: positions, isLoading: isLoadingPositions } = useQuery(
-    trpc.position.getAll.queryOptions(),
+    trpc.platform.position.getAll.queryOptions(),
   );
 
   const { data: users, isLoading: isLoadingUsers } = useQuery(
-    trpc.user.getAllUsers.queryOptions(),
+    trpc.platform.user.getAllUsers.queryOptions(),
   );
 
   return (

@@ -8,7 +8,7 @@ export const userMenu: {
 } = {
   navMain: [
     {
-      title: "Dashboard",
+      title: "Dasbor",
       url: urlStarter,
       icon: IconDashboard,
     },

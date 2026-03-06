@@ -40,7 +40,7 @@ export function WorksheetSidebar({
   const { worksheetId } = routeApi.useSearch();
 
   const { data: worksheet, isLoading } = useQuery(
-    trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+    trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
   );
 
   const company = worksheet?.order?.company;
@@ -59,7 +59,7 @@ export function WorksheetSidebar({
             >
               <a href="#" className="flex flex-row items-center justify-start">
                 <ImageWithFallback
-                  src="/assets/tepian-k3.png"
+                  src="/assets/tepian-k3.webp"
                   alt="Tepian K3 Logo"
                   className="size-6"
                 />
@@ -233,10 +233,15 @@ export function WorksheetSidebar({
         <Button
           variant="secondary"
           className="w-full"
-          onClick={() => navigate({ to: "/dashboard" })}
+          onClick={() =>
+            navigate({
+              to: "/back-office/orders/$orderId/detail",
+              params: { orderId: worksheet?.orderId ?? "" },
+            })
+          }
         >
           <Home className="size-5" />
-          Back to Dashboard
+          Kembali ke Order
         </Button>
       </SidebarFooter>
     </Sidebar>

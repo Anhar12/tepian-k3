@@ -65,7 +65,7 @@ function RouteComponent() {
   const [searchInput, setSearchInput] = useState("");
 
   const { data, isLoading } = useQuery(
-    trpc.worksheet.getAllWorksheets.queryOptions({
+    trpc.pengujian.worksheet.getAllWorksheets.queryOptions({
       page: params.page,
       perPage: params.perPage,
       status: params.status,

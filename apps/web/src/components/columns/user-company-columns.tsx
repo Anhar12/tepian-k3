@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { UserCompaniesWithRelations } from "@tepian-k3/types/user-company.types";
+import type { UserCompaniesWithRelations } from "@tepian-k3/types/pengujian/user-company.types";
 import { queryClient, trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/dashboard/company";
 import {
@@ -22,20 +22,26 @@ const ActionCell = createCrudActionCell<
   resourceName: "company",
   resourcePath: "company",
   permissionPrefix: "user-company",
-  deleteMutation: trpc.userCompany.userDeleteUserCompany,
-  restoreMutation: trpc.userCompany.userRestoreUserCompany,
+  deleteMutation: trpc.pengujian.userCompany.userDeleteUserCompany,
+  restoreMutation: trpc.pengujian.userCompany.userRestoreUserCompany,
   getQueryOptions: (params) =>
-    trpc.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(params),
+    trpc.pengujian.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(
+      params,
+    ),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
   onHoverDetail: (id) => {
     queryClient.prefetchQuery(
-      trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({ id }),
+      trpc.pengujian.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+        id,
+      }),
     );
   },
   onHoverEdit: (id) => {
     queryClient.prefetchQuery(
-      trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({ id }),
+      trpc.pengujian.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+        id,
+      }),
     );
   },
 });

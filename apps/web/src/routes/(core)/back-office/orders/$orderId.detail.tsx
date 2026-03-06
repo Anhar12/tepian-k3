@@ -56,8 +56,9 @@ import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation"
 import useDialogs from "@/hooks/use-dialog";
 import z from "zod";
 import ImageWithFallback from "@/components/image-with-fallback";
-
-// TODO: Approval Doc should not be uploaded by admin/user its from offering doc that has been signed by both parties
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import GenerateSPKDialog from "./-components/generate-spk-dialog";
+import GenerateInvoiceDialog from "./-components/generate-invoice-dialog";
 
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
@@ -121,6 +122,15 @@ function RouteComponent() {
         .min(20, "Payment rejection must be at least 20 characters")
         .max(1000, "Reason must not exceed 1000 characters"),
     }),
+    reviseWorksheet: z.object({
+      revisionNotes: z
+        .string()
+        .min(1, "Revision notes are required")
+        .min(20, "Revision notes must be at least 20 characters")
+        .max(1000, "Revision notes must not exceed 1000 characters"),
+    }),
+    generateSPK: null,
+    generateInvoice: null,
   } as const);
 
   // Document upload states
@@ -129,24 +139,26 @@ function RouteComponent() {
   const invoice = useFileUpload();
 
   const { data: order, isLoading } = useQuery(
-    trpc.order.getOrderWithDocumentsAdmin.queryOptions({
+    trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
       orderId,
     }),
   );
 
   // Fetch worksheet for this order
   const { data: worksheet } = useQuery(
-    trpc.worksheet.getByOrderId.queryOptions({
+    trpc.pengujian.worksheet.getByOrderId.queryOptions({
       orderId,
     }),
   );
 
   // Approval mutations
   const approveMutation = useMutation(
-    trpc.order.approveOrder.mutationOptions({
+    trpc.pengujian.order.approveOrder.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
         );
         globalSuccessToast("Order berhasil disetujui");
       },
@@ -157,10 +169,12 @@ function RouteComponent() {
   );
 
   const rejectApprovalMutation = useMutation(
-    trpc.order.rejectOrderApproval.mutationOptions({
+    trpc.pengujian.order.rejectOrderApproval.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
         );
         dialogs.close("reject");
         dialogs.reset("reject");
@@ -174,10 +188,12 @@ function RouteComponent() {
 
   // Payment verification mutations
   const verifyPaymentMutation = useMutation(
-    trpc.order.verifyPayment.mutationOptions({
+    trpc.pengujian.order.verifyPayment.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
         );
         globalSuccessToast("Pembayaran berhasil diverifikasi");
       },
@@ -188,10 +204,12 @@ function RouteComponent() {
   );
 
   const rejectPaymentMutation = useMutation(
-    trpc.order.rejectPayment.mutationOptions({
+    trpc.pengujian.order.rejectPayment.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
         );
         dialogs.close("rejectPayment");
         dialogs.updateData("rejectPayment", { reason: "" });
@@ -206,9 +224,10 @@ function RouteComponent() {
   // Document upload mutation
   const { uploadDocument } = useUploadDocumentMutation({ orderId });
 
-  // Notify customer mutation
+  // Notify customer mutation — documentType selects which document's notification to send.
+  // To support a new document type, add an entry to order.notification-config.ts on the API.
   const notifyCustomerMutation = useMutation(
-    trpc.order.notifyCustomer.mutationOptions({
+    trpc.pengujian.order.notifyCustomer.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Notifikasi berhasil dikirim ke pelanggan");
       },
@@ -220,31 +239,35 @@ function RouteComponent() {
 
   // Create testing mutation
   const createTestingMutation = useMutation(
-    trpc.order.createTesting.mutationOptions({
+    trpc.pengujian.order.createTesting.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
         );
         await queryClient.invalidateQueries(
-          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+          trpc.pengujian.worksheet.getByOrderId.queryOptions({ orderId }),
         );
-        globalSuccessToast("Testing berhasil dibuat");
+        globalSuccessToast("Pengujian berhasil dibuat");
       },
       onError: (error) => {
-        globalErrorToast("Gagal membuat testing: " + error.message);
+        globalErrorToast("Gagal membuat pengujian: " + error.message);
       },
     }),
   );
 
   // Create worksheet mutation (kaji ulang phase)
   const createWorksheetMutation = useMutation(
-    trpc.worksheet.createFromOrder.mutationOptions({
+    trpc.pengujian.worksheet.createFromOrder.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
-          trpc.order.getOrderWithDocumentsAdmin.queryOptions({ orderId }),
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
         );
         await queryClient.invalidateQueries(
-          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+          trpc.pengujian.worksheet.getByOrderId.queryOptions({ orderId }),
         );
         globalSuccessToast("Worksheet berhasil dibuat");
         // Navigate to worksheet detail
@@ -263,10 +286,10 @@ function RouteComponent() {
 
   // Submit worksheet for verification
   const submitWorksheetMutation = useMutation(
-    trpc.worksheet.submitForVerification.mutationOptions({
+    trpc.pengujian.worksheet.submitForVerification.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+          trpc.pengujian.worksheet.getByOrderId.queryOptions({ orderId }),
         );
         globalSuccessToast("Worksheet berhasil diajukan untuk verifikasi");
       },
@@ -276,12 +299,30 @@ function RouteComponent() {
     }),
   );
 
-  // Verify worksheet (coordinator action)
-  const verifyWorksheetMutation = useMutation(
-    trpc.worksheet.verify.mutationOptions({
+  // Revise worksheet (coordinator action)
+  const reviseWorksheetMutation = useMutation(
+    trpc.pengujian.worksheet.requestRevision.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getByOrderId.queryOptions({ orderId }),
+          trpc.pengujian.worksheet.getByOrderId.queryOptions({ orderId }),
+        );
+
+        dialogs.close("reviseWorksheet");
+        dialogs.updateData("reviseWorksheet", { revisionNotes: "" });
+        globalSuccessToast("Worksheet berhasil direvisi");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal merevisi worksheet: " + error.message);
+      },
+    }),
+  );
+
+  // Verify worksheet (coordinator action)
+  const verifyWorksheetMutation = useMutation(
+    trpc.pengujian.worksheet.verify.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.worksheet.getByOrderId.queryOptions({ orderId }),
         );
         globalSuccessToast("Worksheet berhasil diverifikasi");
       },
@@ -329,6 +370,30 @@ function RouteComponent() {
     const { reason } = result.data;
 
     rejectPaymentMutation.mutate({ orderId, reason });
+  };
+
+  const handleReviseWorksheet = () => {
+    const result = dialogs.validate("reviseWorksheet");
+
+    if (!result.success) {
+      globalErrorToast(
+        dialogs.getErrors("reviseWorksheet").revisionNotes ||
+          "Catatan revisi tidak valid",
+      );
+      return;
+    }
+
+    const { revisionNotes } = result.data;
+
+    if (!worksheet?.id) {
+      globalErrorToast("Worksheet tidak ditemukan");
+      return;
+    }
+
+    reviseWorksheetMutation.mutate({
+      worksheetId: worksheet.id,
+      revisionNotes,
+    });
   };
 
   const handleUploadOfferingLetter = async () => {
@@ -388,8 +453,12 @@ function RouteComponent() {
     });
   };
 
-  const handleNotifyCustomer = () => {
-    notifyCustomerMutation.mutate({ orderId });
+  const handleNotifyCustomer = (
+    documentType: Parameters<
+      typeof notifyCustomerMutation.mutate
+    >[0]["documentType"],
+  ) => {
+    notifyCustomerMutation.mutate({ orderId, documentType });
   };
 
   const handleCreateTesting = () => {
@@ -532,6 +601,7 @@ function RouteComponent() {
   const worksheetStatus = worksheet?.status;
   const needsWorksheet = isPendingApproval && !hasWorksheet;
   const worksheetInDraft = hasWorksheet && worksheetStatus === "draft";
+  const worksheetInRevision = hasWorksheet && worksheetStatus === "revision";
   const worksheetPendingVerification =
     hasWorksheet && worksheetStatus === "pending_verification";
   const worksheetVerified = hasWorksheet && worksheetStatus === "verified";
@@ -676,6 +746,7 @@ function RouteComponent() {
             {/* Worksheet Management Card - Kaji Ulang Phase */}
             {(needsWorksheet ||
               worksheetInDraft ||
+              worksheetInRevision ||
               worksheetPendingVerification ||
               worksheetVerified) && (
               <Card>
@@ -683,6 +754,7 @@ function RouteComponent() {
                   <CardTitle>
                     {needsWorksheet && "Buat Worksheet untuk Kaji Ulang"}
                     {worksheetInDraft && "Worksheet dalam Draft"}
+                    {worksheetInRevision && "Worksheet dalam Revisi"}
                     {worksheetPendingVerification &&
                       "Worksheet Menunggu Verifikasi"}
                     {worksheetVerified && "Worksheet Terverifikasi"}
@@ -692,6 +764,8 @@ function RouteComponent() {
                       "Buat worksheet untuk melakukan kaji ulang sebelum menerbitkan surat penawaran."}
                     {worksheetInDraft &&
                       "Worksheet sedang diisi. Ajukan untuk verifikasi setelah selesai."}
+                    {worksheetInRevision &&
+                      "Worksheet direvisi oleh koordinator. Perbaiki sesuai catatan revisi dan ajukan kembali."}
                     {worksheetPendingVerification &&
                       "Worksheet telah diajukan dan menunggu verifikasi dari koordinator."}
                     {worksheetVerified &&
@@ -775,6 +849,37 @@ function RouteComponent() {
                         </PermissionGate>
                       )}
 
+                      {worksheetInRevision && (
+                        <>
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              navigate({
+                                to: "/worksheets",
+                                search: { worksheetId: worksheet!.id },
+                              })
+                            }
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                          </Button>
+                          <PermissionGate permission="worksheets.update">
+                            <Button
+                              className="bg-yellow-500 hover:bg-yellow-600"
+                              onClick={handleSubmitWorksheetForVerification}
+                              disabled={submitWorksheetMutation.isPending}
+                            >
+                              {submitWorksheetMutation.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <FileText className="mr-2 h-4 w-4" />
+                              )}
+                              Ajukan Verifikasi
+                            </Button>
+                          </PermissionGate>
+                        </>
+                      )}
+
                       {worksheetInDraft && (
                         <>
                           <Button
@@ -821,6 +926,43 @@ function RouteComponent() {
                             Lihat Detail
                           </Button>
                           <PermissionGate permission="worksheets.verify">
+                            <ConfirmationDialog
+                              open={dialogs.isOpen("reviseWorksheet")}
+                              onOpenChange={(isOpen) =>
+                                isOpen
+                                  ? dialogs.open("reviseWorksheet")
+                                  : dialogs.close("reviseWorksheet")
+                              }
+                              title="Revisi Worksheet"
+                              description="Apakah Anda yakin ingin merevisi worksheet ini? Berikan catatan revisi untuk pelanggan."
+                              isLoading={reviseWorksheetMutation.isPending}
+                              onConfirm={handleReviseWorksheet}
+                              trigger={
+                                <Button className="bg-yellow-500 hover:bg-yellow-600">
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Revisi Worksheet
+                                </Button>
+                              }
+                              children={
+                                <div className="space-y-2">
+                                  <Label>Catatan Revisi</Label>
+                                  <Textarea
+                                    placeholder="Jelaskan apa yang perlu direvisi oleh pelanggan..."
+                                    value={
+                                      dialogs.getData("reviseWorksheet")
+                                        ?.revisionNotes ?? ""
+                                    }
+                                    onChange={(e) =>
+                                      dialogs.updateData("reviseWorksheet", {
+                                        revisionNotes: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
+                              }
+                            />
+                          </PermissionGate>
+                          <PermissionGate permission="worksheets.verify">
                             <Button
                               className="bg-green-500 hover:bg-green-600"
                               onClick={handleVerifyWorksheet}
@@ -850,6 +992,26 @@ function RouteComponent() {
                           <Eye className="mr-2 h-4 w-4" />
                           Lihat Worksheet
                         </Button>
+                      )}
+
+                      {worksheetVerified && (
+                        <PermissionGate permission="documents-admin.create">
+                          <Button
+                            onClick={() => dialogs.open("generateInvoice")}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Buat Invoice
+                          </Button>
+                        </PermissionGate>
+                      )}
+
+                      {worksheetVerified && (
+                        <PermissionGate permission="documents-admin.create">
+                          <Button onClick={() => dialogs.open("generateSPK")}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Buat SPK
+                          </Button>
+                        </PermissionGate>
                       )}
                     </div>
                   </div>
@@ -982,7 +1144,9 @@ function RouteComponent() {
                     <PermissionGate permission="notifications.create">
                       <Button
                         className="bg-blue-500 hover:bg-blue-600"
-                        onClick={handleNotifyCustomer}
+                        onClick={() =>
+                          handleNotifyCustomer("offering_document")
+                        }
                         disabled={notifyCustomerMutation.isPending}
                       >
                         {notifyCustomerMutation.isPending ? (
@@ -1111,7 +1275,9 @@ function RouteComponent() {
                       <PermissionGate permission="notifications.create">
                         <Button
                           className="bg-blue-500 hover:bg-blue-600"
-                          onClick={handleNotifyCustomer}
+                          onClick={() =>
+                            handleNotifyCustomer("offering_document")
+                          }
                           disabled={notifyCustomerMutation.isPending}
                         >
                           {notifyCustomerMutation.isPending ? (
@@ -1119,7 +1285,7 @@ function RouteComponent() {
                           ) : (
                             <Mail className="mr-2 h-4 w-4" />
                           )}
-                          Kirim Dokumen ke Pelanggan
+                          Kirim Notifikasi ke Pelanggan
                         </Button>
                       </PermissionGate>
                     </div>
@@ -1426,7 +1592,7 @@ function RouteComponent() {
                     <div className="flex justify-end pt-2">
                       <Button
                         variant="outline"
-                        onClick={handleNotifyCustomer}
+                        onClick={() => handleNotifyCustomer("invoice")}
                         disabled={notifyCustomerMutation.isPending}
                       >
                         {notifyCustomerMutation.isPending ? (
@@ -1434,7 +1600,7 @@ function RouteComponent() {
                         ) : (
                           <Mail className="mr-2 h-4 w-4" />
                         )}
-                        Kirim Ulang Dokumen
+                        Kirim Pengingat ke Pelanggan
                       </Button>
                     </div>
                   </div>
@@ -1593,7 +1759,7 @@ function RouteComponent() {
                       </div>
                     </div>
 
-                    <div className="flex justify-end pt-4">
+                    <div className="flex justify-end gap-2 pt-4">
                       <Button
                         variant="outline"
                         onClick={() =>
@@ -1615,10 +1781,12 @@ function RouteComponent() {
             {isPaymentVerifiedNeedsTesting && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Pembayaran Terverifikasi - Buat Testing</CardTitle>
+                  <CardTitle>
+                    Pembayaran Terverifikasi - Buat Pengujian
+                  </CardTitle>
                   <CardDescription>
-                    Pembayaran telah diverifikasi. Buat testing record untuk
-                    memulai proses pengujian.
+                    Pembayaran telah diverifikasi. Buat pengujian untuk memulai
+                    proses pengujian.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1689,7 +1857,7 @@ function RouteComponent() {
                         ) : (
                           <Plus className="mr-2 h-4 w-4" />
                         )}
-                        Buat Testing Record
+                        Buat Pengujian
                       </Button>
                     </div>
                   </div>
@@ -1700,10 +1868,9 @@ function RouteComponent() {
             {hasTestingCreated && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Testing Sedang Berjalan</CardTitle>
+                  <CardTitle>Pengujian Sedang Berjalan</CardTitle>
                   <CardDescription>
-                    Testing record telah dibuat. Lihat detail atau buat
-                    worksheet.
+                    Pengujian telah dibuat. Lihat detail atau buat worksheet.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1952,6 +2119,22 @@ function RouteComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <GenerateSPKDialog
+        worksheetId={worksheet?.id ?? ""}
+        isOpen={dialogs.isOpen("generateSPK")}
+        setIsOpen={(isOpen) =>
+          isOpen ? dialogs.open("generateSPK") : dialogs.close("generateSPK")
+        }
+      />
+      <GenerateInvoiceDialog
+        worksheetId={worksheet?.id ?? ""}
+        isOpen={dialogs.isOpen("generateInvoice")}
+        setIsOpen={(isOpen) =>
+          isOpen
+            ? dialogs.open("generateInvoice")
+            : dialogs.close("generateInvoice")
+        }
+      />
     </Card>
   );
 }

@@ -35,7 +35,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import userSchema from "@tepian-k3/schema/users.schema";
+import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { format } from "date-fns";
 import {
   CalendarIcon,
@@ -56,7 +56,7 @@ export const Route = createFileRoute("/(core)/back-office/users/create")({
   },
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.role.getAllRoles.queryOptions(),
+      context.trpc.platform.role.getAllRoles.queryOptions(),
     ),
   component: RouteComponent,
   head: () => pageHead("Tambah Pengguna"),
@@ -66,7 +66,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: roles } = useSuspenseQuery(
-    trpc.role.getAllRoles.queryOptions(),
+    trpc.platform.role.getAllRoles.queryOptions(),
   );
 
   const [open, setOpen] = useState(false);
@@ -79,7 +79,7 @@ function RouteComponent() {
   });
 
   const createUserMutation = useMutation(
-    trpc.user.createUser.mutationOptions({
+    trpc.platform.user.createUser.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Pengguna berhasil dibuat");
         form.reset();

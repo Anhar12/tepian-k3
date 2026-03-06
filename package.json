@@ -44,6 +44,12 @@
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "clean:turbo": "rm -rf .turbo",
     "changeset": "changeset",
+    "changeset:from-commit": "node ./scripts/create-changeset-from-commit.mjs",
+    "list-packages": "node ./scripts/list-commit-packages.mjs",
+    "list-packages:week": "node ./scripts/list-commit-packages.mjs --weeks 1",
+    "list-packages:2weeks": "node ./scripts/list-commit-packages.mjs --weeks 2",
+    "list-packages:7days": "node ./scripts/list-commit-packages.mjs --days 7",
+    "list-packages:14days": "node ./scripts/list-commit-packages.mjs --days 14",
     "changeset:version": "changeset version",
     "changeset:publish": "changeset publish",
     "changeset:status": "changeset status"
@@ -65,13 +71,6 @@
     "turbo": "^2.6.3",
     "typescript": "catalog:",
     "typescript-eslint": "^8.21.0"
-  },
-  "lint-staged": {
-    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}": [
-      "npx eslint --fix",
-      "npx prettier --write"
-    ],
-    "**/*.{json,md,css}": "npx prettier --write"
   },
   "packageManager": "pnpm@10.5.2",
   "engines": {

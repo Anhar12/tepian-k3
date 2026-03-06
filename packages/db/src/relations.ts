@@ -7,6 +7,7 @@ import {
   documents,
   documentSignatures,
   documentVerifications,
+  employeeCertifications,
   employees,
   kblis,
   order,
@@ -30,6 +31,7 @@ import {
   toolCalibrationCertificates,
   toolCalibrationDocumentations,
   toolCalibrations,
+  toolCodes,
   tools,
   userCompanies,
   userCompanyTestingLocation,
@@ -43,6 +45,7 @@ import {
   worksheetNotes,
   worksheetOperationalCosts,
   worksheets,
+  worksheetToolNeeded,
   worksheetTools,
 } from "./schema";
 
@@ -164,7 +167,11 @@ export const userPermissionsRelations = relations(
   }),
 );
 
-export const toolsRelations = relations(tools, ({ many }) => ({
+export const toolsRelations = relations(tools, ({ one, many }) => ({
+  toolCode: one(toolCodes, {
+    fields: [tools.toolCodeId],
+    references: [toolCodes.id],
+  }),
   parameterTools: many(parameterTools),
   calibrations: many(toolCalibrations),
 }));
@@ -378,6 +385,7 @@ export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
   assignments: many(worksheetAssignments),
   items: many(worksheetItems),
   tools: many(worksheetTools),
+  plannedTools: many(worksheetToolNeeded),
   chemicalMaterials: many(worksheetChemicalMaterials),
   notes: many(worksheetNotes),
   operationalCosts: many(worksheetOperationalCosts),
@@ -408,6 +416,20 @@ export const worksheetToolRelations = relations(worksheetTools, ({ one }) => ({
     references: [tools.id],
   }),
 }));
+
+export const worksheetToolNeededRelations = relations(
+  worksheetToolNeeded,
+  ({ one }) => ({
+    worksheet: one(worksheets, {
+      fields: [worksheetToolNeeded.worksheetId],
+      references: [worksheets.id],
+    }),
+    tool: one(tools, {
+      fields: [worksheetToolNeeded.toolId],
+      references: [tools.id],
+    }),
+  }),
+);
 
 export const worksheetChemicalMaterialRelations = relations(
   worksheetChemicalMaterials,
@@ -583,7 +605,7 @@ export const positionRelations = relations(positions, ({ many }) => ({
   employees: many(employees),
 }));
 
-export const employeeRelations = relations(employees, ({ one }) => ({
+export const employeeRelations = relations(employees, ({ one, many }) => ({
   user: one(users, {
     fields: [employees.userId],
     references: [users.id],
@@ -592,7 +614,18 @@ export const employeeRelations = relations(employees, ({ one }) => ({
     fields: [employees.positionId],
     references: [positions.id],
   }),
+  certifications: many(employeeCertifications),
 }));
+
+export const employeeCertificationsRelations = relations(
+  employeeCertifications,
+  ({ one }) => ({
+    employee: one(employees, {
+      fields: [employeeCertifications.employeeId],
+      references: [employees.id],
+    }),
+  }),
+);
 
 // ==================== SURVEY KEPUASAN RELATIONS ====================
 

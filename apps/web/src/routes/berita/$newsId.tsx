@@ -70,13 +70,13 @@ function NewsDetailPage() {
     isLoading,
     isError,
   } = useQuery(
-    trpc.news.getPublishedNewsById.queryOptions({
+    trpc.platform.news.getPublishedNewsById.queryOptions({
       id: newsId,
     }),
   );
 
   const { data: relatedNews } = useQuery(
-    trpc.news.getFirst5News.queryOptions(),
+    trpc.platform.news.getFirst5News.queryOptions(),
   );
 
   const handleShare = async (platform: "facebook" | "twitter" | "copy") => {

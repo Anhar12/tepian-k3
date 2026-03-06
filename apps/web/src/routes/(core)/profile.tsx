@@ -25,14 +25,14 @@ export const Route = createFileRoute("/(core)/profile")({
 function RouteComponent() {
   const navigate = useNavigate();
   const { data: user, refetch } = useSuspenseQuery(
-    trpc.auth.profile.queryOptions(),
+    trpc.platform.auth.profile.queryOptions(),
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const uploadAvatarMutation = useMutation(
-    trpc.user.updateAvatar.mutationOptions({
+    trpc.platform.user.updateAvatar.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Avatar berhasil diunggah");
         setSelectedFile(null);

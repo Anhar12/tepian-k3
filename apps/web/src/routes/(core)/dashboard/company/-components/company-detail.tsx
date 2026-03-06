@@ -31,7 +31,7 @@ interface CompanyDetailProps {
 
 export default function CompanyDetail({ companyId }: CompanyDetailProps) {
   const { data: company, isLoading } = useQuery(
-    trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+    trpc.pengujian.userCompany.getUserCompanyByIdAndUserId.queryOptions({
       id: companyId,
     }),
   );
@@ -380,6 +380,48 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                   placeholder="Masukkan telepon penanggung jawab pengujian"
                   className="h-10 text-sm"
                   value={company.responsibleTestingPersonPhone}
+                  disabled
+                  readOnly
+                />
+              </Field>
+            </FieldGroup>
+
+            <FieldGroup>
+              <Field className="space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Nama Bank Perusahaan
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan nama bank perusahaan"
+                  className="h-10 text-sm"
+                  value={company.companyBankName || "-"}
+                  disabled
+                  readOnly
+                />
+              </Field>
+              <Field className="space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Nomor Rekening Perusahaan
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan nomor rekening perusahaan"
+                  className="h-10 text-sm"
+                  value={company.companyBankAccount || "-"}
+                  disabled
+                  readOnly
+                />
+              </Field>
+              <Field className="space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Nama Pemilik Rekening Perusahaan
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan nama pemilik rekening perusahaan"
+                  className="h-10 text-sm"
+                  value={company.companyBankAccountName || "-"}
                   disabled
                   readOnly
                 />

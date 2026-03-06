@@ -19,7 +19,7 @@ export function Clusters({ route }: ClustersProps) {
     data: clusters,
     isLoading,
     error,
-  } = useQuery(trpc.cluster.getAllClusters.queryOptions());
+  } = useQuery(trpc.pengujian.cluster.getAllClusters.queryOptions());
 
   return (
     <div className="space-y-8 rounded-4xl border border-slate-100 bg-white p-10 shadow-sm">

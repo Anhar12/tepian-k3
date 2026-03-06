@@ -9,9 +9,9 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import type { Users } from "@tepian-k3/types/users.types";
+import type { Users } from "@tepian-k3/types/platform/users.types";
 import z from "zod";
-import userSchema from "@tepian-k3/schema/users.schema";
+import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -44,9 +44,9 @@ export default function UpdateUserProfileForm({
   });
 
   const updateProfileMutation = useMutation(
-    trpc.user.updateProfile.mutationOptions({
+    trpc.platform.user.updateProfile.mutationOptions({
       onSuccess: async () => {
-        await queryClient.refetchQueries(trpc.auth.me.queryOptions());
+        await queryClient.refetchQueries(trpc.platform.auth.me.queryOptions());
         globalSuccessToast("Profil berhasil diperbarui");
       },
       onError: (error) => {

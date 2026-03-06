@@ -4,7 +4,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
-import newsSchema from "@tepian-k3/schema/news.schema";
+import newsSchema from "@tepian-k3/schema/platform/news.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
@@ -54,7 +54,7 @@ function RouteComponent() {
   });
 
   const createNewsMutation = useMutation({
-    ...trpc.news.createNews.mutationOptions(),
+    ...trpc.platform.news.createNews.mutationOptions(),
     onSuccess: async () => {
       globalSuccessToast("Berita berhasil dibuat");
       await redirectBack();

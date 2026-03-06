@@ -71,7 +71,7 @@ const emailGenerator = (name: string) => {
   return `${formattedName}@mail.com`;
 };
 
-async function seedEmployees() {
+async function seedEmployees(isProduction: boolean) {
   console.log("👷 Syncing employees...");
 
   // Get employee role
@@ -177,6 +177,61 @@ async function seedEmployees() {
         roleId: employeeRole.id,
       });
       console.log(`   ➕ Assigned employee role to: ${emp.name}`);
+    }
+  }
+
+  // Seed test users as employees — skip in production (productionOnly users don't need employee records)
+  if (!isProduction) {
+    const testEmployeeUsers: { email: string; roleName: string }[] = [
+      { email: "superadmin@mail.com", roleName: "super_admin" },
+      { email: "admin@mail.com", roleName: "admin" },
+      { email: "employee@mail.com", roleName: "employee" },
+      { email: "sample-collector@mail.com", roleName: "sample_collector" },
+      { email: "lab-technician@mail.com", roleName: "lab_technician" },
+      { email: "lab-manager@mail.com", roleName: "lab_manager" },
+      { email: "kaji-ulang@mail.com", roleName: "kaji_ulang" },
+      { email: "head@mail.com", roleName: "head_of_institution" },
+      { email: "admin-manager@mail.com", roleName: "admin_manager" },
+      { email: "treasurer@mail.com", roleName: "treasurer" },
+      { email: "penjadwalan@mail.com", roleName: "penjadwalan" },
+      { email: "equipment@mail.com", roleName: "equipment_officer" },
+      { email: "petugas-koding@mail.com", roleName: "petugas_koding" },
+    ];
+
+    const defaultPosition = await db.query.positions.findFirst({
+      where: eq(positions.name, "Penguji K3 Ahli Pertama"),
+    });
+
+    if (!defaultPosition) {
+      throw new Error(
+        "Default position not found. Please run positions seed first.",
+      );
+    }
+
+    for (const testUser of testEmployeeUsers) {
+      const user = await db.query.users.findFirst({
+        where: eq(users.email, testUser.email),
+      });
+
+      if (!user) continue;
+
+      const existingEmployee = await db.query.employees.findFirst({
+        where: eq(employees.userId, user.id),
+      });
+
+      if (!existingEmployee) {
+        await db.insert(employees).values({
+          positionId: defaultPosition.id,
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          type: "III/a",
+          nip: faker.string.numeric(10),
+        });
+        console.log(
+          `   ➕ Created employee record for test user: ${user.email}`,
+        );
+      }
     }
   }
 

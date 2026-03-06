@@ -1,5 +1,7 @@
 {
   "name": "@tepian-k3/types",
+  "version": "1.5.0",
+  "private": true,
   "type": "module",
   "exports": {
     ".": {
@@ -7,6 +9,21 @@
     },
     "./*": {
       "default": "./src/*.ts"
+    },
+    "./platform/*": {
+      "default": "./src/platform/*.ts"
+    },
+    "./pengujian/*": {
+      "default": "./src/pengujian/*.ts"
+    },
+    "./pelatihan/*": {
+      "default": "./src/pelatihan/*.ts"
+    },
+    "./uji-kompetensi/*": {
+      "default": "./src/uji-kompetensi/*.ts"
+    },
+    "./konsultasi/*": {
+      "default": "./src/konsultasi/*.ts"
     }
   },
   "scripts": {

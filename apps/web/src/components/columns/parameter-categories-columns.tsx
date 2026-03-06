@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { ParameterCategories } from "@tepian-k3/types/parameter-categories.types";
+import type { ParameterCategories } from "@tepian-k3/types/pengujian/parameter-categories.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/parameter-categories";
 import {
@@ -22,10 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "parameter-category",
   resourcePath: "parameter-categories",
   permissionPrefix: "parameter-categories",
-  deleteMutation: trpc.parameterCategories.deleteParameterCategory,
-  restoreMutation: trpc.parameterCategories.restoreParameterCategory,
+  deleteMutation: trpc.pengujian.parameterCategories.deleteParameterCategory,
+  restoreMutation: trpc.pengujian.parameterCategories.restoreParameterCategory,
   getQueryOptions: (params) =>
-    trpc.parameterCategories.getPaginatedParameterCategories.queryOptions(
+    trpc.pengujian.parameterCategories.getPaginatedParameterCategories.queryOptions(
       params,
     ),
   useSearchParams: () => Route.useSearch(),

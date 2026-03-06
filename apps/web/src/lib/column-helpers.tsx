@@ -16,19 +16,29 @@ type NestedKeyOf<T> = {
     : K;
 }[keyof T & string];
 
+interface NumberColumnOptions {
+  /** Width class (e.g., 'w-48', 'max-w-64') */
+  width?: string;
+}
+
 /**
  * Creates a numbered row column (1, 2, 3...)
  */
 export function createNumberColumn<T>(
   currentPage: number,
   perPage: number,
+  options: NumberColumnOptions = {},
 ): ColumnDef<T> {
+  const { width = "w-12" } = options;
+
   return {
     id: "no",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="No" label="No" />
     ),
-    cell: ({ row }) => <div>{row.index + 1 + (currentPage - 1) * perPage}</div>,
+    cell: ({ row }) => (
+      <div className={width}>{row.index + 1 + (currentPage - 1) * perPage}</div>
+    ),
   };
 }
 
@@ -43,6 +53,8 @@ interface TextColumnOptions {
   variant?: FilterVariant;
   /** Icon for the filter */
   icon?: LucideIcon;
+  /** Whether the text value is nullable */
+  nullable?: boolean;
 }
 
 /**
@@ -59,6 +71,7 @@ export function createTextColumn<T extends RowData>(
     placeholder = `Cari ${label.toLowerCase()}...`,
     variant = "text",
     icon = Text,
+    nullable = false,
   } = options;
 
   const meta: ColumnMeta<T, unknown> = enableFilter
@@ -78,7 +91,7 @@ export function createTextColumn<T extends RowData>(
     ),
     cell: ({ row }) => (
       <div className={`${width} truncate`} title={row.getValue(id)}>
-        {row.getValue(id)}
+        {row.getValue(id) ?? (nullable ? "-" : "")}
       </div>
     ),
     meta,
@@ -159,6 +172,97 @@ export function createBadgeColumn<T extends RowData>(
   };
 }
 
+interface StatusColumnOptions {
+  /** Width class (e.g., 'w-48', 'max-w-64') */
+  width?: string;
+  /** Enable column filtering */
+  enableFilter?: boolean;
+  /** Custom placeholder for filter */
+  placeholder?: string;
+  /** Filter variant */
+  variant?: FilterVariant;
+  /** Icon for the filter */
+  icon?: LucideIcon;
+  /** Whether the status value is boolean */
+  valueIsBoolean?: boolean;
+  /** Mapping of status values to display text and badge colors */
+  statusMap: Record<
+    string,
+    {
+      text: string;
+      color?: "green" | "red" | "blue" | "yellow" | "gray" | "custom";
+      /* Optional custom colors for the badge (overrides color) using tailwind classes */
+      customColors?: string;
+    }
+  >;
+}
+
+export function createStatusColumn<T extends RowData>(
+  id: Extract<NestedKeyOf<T>, string>,
+  label: string,
+  options: StatusColumnOptions,
+): ColumnDef<T> {
+  const {
+    width = "w-48",
+    enableFilter = false,
+    placeholder = `Cari ${label.toLowerCase()}...`,
+    variant = "text",
+    icon = Text,
+    valueIsBoolean = false,
+    statusMap,
+  } = options;
+
+  const meta: ColumnMeta<T, string> = enableFilter
+    ? {
+        label,
+        placeholder,
+        variant,
+        icon,
+      }
+    : { label };
+
+  return {
+    id,
+    accessorKey: id,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={label} label={label} />
+    ),
+    cell: ({ row }) => {
+      let value: unknown;
+      if (valueIsBoolean) {
+        value = Boolean(row.getValue(id));
+      } else {
+        value = row.getValue(id);
+      }
+
+      const status = statusMap[String(value)] || {
+        text: String(value),
+        color: "gray",
+      };
+
+      return (
+        <div className={width}>
+          <Badge
+            variant="secondary"
+            className={cn(
+              status.color === "green" && "bg-green-100 text-green-800",
+              status.color === "red" && "bg-red-100 text-red-800",
+              status.color === "blue" && "bg-blue-100 text-blue-800",
+              status.color === "yellow" && "bg-yellow-100 text-yellow-800",
+              status.color === "gray" && "bg-gray-100 text-gray-800",
+              status.customColors,
+            )}
+          >
+            {status.text}
+          </Badge>
+        </div>
+      );
+    },
+    meta,
+    enableColumnFilter: enableFilter,
+  };
+}
+
 /**
  * Creates a price column with consistent formatting
  */
@@ -223,8 +327,7 @@ export function createDateColumn<T extends RowData>(
   label: string,
   options: DateColumnOptions = {},
 ): ColumnDef<T> {
-  const { nullable = false, format: dateFormat = "dd/MM/yyyy HH:mm:ss" } =
-    options;
+  const { nullable = false, format: dateFormat = "dd/MM/yyyy" } = options;
 
   return {
     id,

@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Roles } from "@tepian-k3/types/roles.types";
+import type { Roles } from "@tepian-k3/types/platform/roles.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/roles";
 import { createCrudActionCell } from "@/lib/create-crud-action-cell";
@@ -22,9 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "role",
   resourcePath: "roles",
   permissionPrefix: "roles",
-  deleteMutation: trpc.role.deleteRole,
-  restoreMutation: trpc.role.restoreRole,
-  getQueryOptions: (params) => trpc.role.getPaginatedRoles.queryOptions(params),
+  deleteMutation: trpc.platform.role.deleteRole,
+  restoreMutation: trpc.platform.role.restoreRole,
+  getQueryOptions: (params) =>
+    trpc.platform.role.getPaginatedRoles.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
 });

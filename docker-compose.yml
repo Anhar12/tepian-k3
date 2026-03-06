@@ -1,3 +1,16 @@
+# All-in-one Docker Compose
+# Starts all services: infrastructure, server, and web
+#
+# Usage:
+#   docker compose up -d                    # Start all services
+#   docker compose down                     # Stop all services
+#   docker compose logs -f                  # View logs
+#
+# For separate control, use individual compose files:
+#   - docker-compose.infra.yml   (postgres, redis)
+#   - docker-compose.server.yml  (migrations, API server)
+#   - docker-compose.web.yml     (nginx + React SPA)
+
 services:
   # ---- PostgreSQL ----
   postgres:
@@ -5,12 +18,12 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-tepian}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tepian_secret}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:-tepian_k3}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${POSTGRES_PORT:-5433}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
     healthcheck:
       test:
         [
@@ -20,6 +33,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tepian-network
 
   # ---- Redis ----
   redis:
@@ -27,19 +42,21 @@ services:
     restart: unless-stopped
     command: >
       redis-server
-      --requirepass ${REDIS_PASSWORD:-redis_secret}
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     ports:
-      - "${REDIS_PORT:-6380}:6379"
+      - "127.0.0.1:${REDIS_PORT:-6380}:6379"
     healthcheck:
       test:
         ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_secret}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - tepian-network
 
   # ---- Database Migrations ----
   migrate:
@@ -51,11 +68,13 @@ services:
     command: >
       sh -c "cd packages/db && npx drizzle-kit migrate"
     environment:
-      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:-tepian_secret}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tepian_k3}
     depends_on:
       postgres:
         condition: service_healthy
     restart: "no"
+    networks:
+      - tepian-network
 
   # ---- API Server ----
   server:
@@ -70,10 +89,10 @@ services:
       NODE_ENV: production
       SERVER_HOSTNAME: "0.0.0.0"
       SERVER_PORT: 3000
-      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:-tepian_secret}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tepian_k3}
       MEMURAI_HOST: redis
       MEMURAI_PORT: "6379"
-      MEMURAI_PASSWORD: ${REDIS_PASSWORD:-redis_secret}
+      MEMURAI_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
       BASE_URL: ${BASE_URL:-http://localhost:3001}
       STORAGE_PATH: /app/uploads
@@ -89,6 +108,8 @@ services:
     # Not exposed publicly - nginx proxies to it
     expose:
       - "3000"
+    networks:
+      - tepian-network
 
   # ---- Web (Nginx + SPA) ----
   web:
@@ -102,9 +123,15 @@ services:
       - "${WEB_PORT:-3001}:80"
     depends_on:
       - server
+    networks:
+      - tepian-network
 
 volumes:
   postgres_data:
   redis_data:
   uploads_data:
   logs_data:
+
+networks:
+  tepian-network:
+    driver: bridge

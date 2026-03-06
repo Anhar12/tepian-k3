@@ -38,7 +38,7 @@ export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
     isLoading,
     error,
   } = useQuery(
-    trpc.tool.getPaginatedCalibrations.queryOptions({
+    trpc.pengujian.tool.getPaginatedCalibrations.queryOptions({
       toolId,
       ...params,
     }),

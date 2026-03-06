@@ -4,9 +4,12 @@ import {
   eventSchemas,
   type EventName,
   type EventMap,
-} from "@tepian-k3/schema/event.schema";
+} from "@tepian-k3/schema/platform/event.schema";
 import z from "zod";
-import type { SessionUser, JWTPayload } from "@tepian-k3/types/auth.types";
+import type {
+  SessionUser,
+  JWTPayload,
+} from "@tepian-k3/types/platform/auth.types";
 import { REDIS_CHANNEL } from "@tepian-k3/constants";
 import { v7 as uuidv7 } from "uuid";
 import { logError, logInfo, logWarn } from "../logger";

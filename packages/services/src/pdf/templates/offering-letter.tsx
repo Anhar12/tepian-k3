@@ -1,6 +1,6 @@
 import React from "react";
 import { Document, Page, View, Text } from "@react-pdf/renderer";
-import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
+import type { WorksheetTransactionDetail } from "@tepian-k3/types/pengujian/worksheet.types";
 import { tw } from "../utils/tw";
 import { PricingTable } from "../components/pricing-table";
 
@@ -8,12 +8,18 @@ interface OfferingLetterProps {
   worksheet: WorksheetTransactionDetail;
   companyName: string;
   letterNumber: string;
+  companyBankName: string;
+  companyBankAccount: string;
+  companyBankAccountName: string;
 }
 
 export const OfferingLetter: React.FC<OfferingLetterProps> = ({
   worksheet,
   companyName,
   letterNumber,
+  companyBankName,
+  companyBankAccount,
+  companyBankAccountName,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
     day: "numeric",
@@ -149,17 +155,17 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
           <View style={tw("flex-row items-center mb-1")}>
             <Text style={tw("text-[10px] w-32")}>Nama Bank</Text>
             <Text style={tw("text-[10px] mx-2")}>:</Text>
-            <Text style={tw("text-[10px]")}>________________________</Text>
+            <Text style={tw("text-[10px]")}>{companyBankName}</Text>
           </View>
           <View style={tw("flex-row items-center mb-1")}>
             <Text style={tw("text-[10px] w-32")}>Nomor Rekening</Text>
             <Text style={tw("text-[10px] mx-2")}>:</Text>
-            <Text style={tw("text-[10px]")}>________________________</Text>
+            <Text style={tw("text-[10px]")}>{companyBankAccount}</Text>
           </View>
           <View style={tw("flex-row items-center mb-1")}>
             <Text style={tw("text-[10px] w-32")}>Atas Nama</Text>
             <Text style={tw("text-[10px] mx-2")}>:</Text>
-            <Text style={tw("text-[10px]")}>________________________</Text>
+            <Text style={tw("text-[10px]")}>{companyBankAccountName}</Text>
           </View>
         </View>
       </Page>

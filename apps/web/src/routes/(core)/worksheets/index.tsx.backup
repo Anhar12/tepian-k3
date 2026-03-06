@@ -119,11 +119,11 @@ function RouteComponent() {
     data: worksheet,
     isLoading,
     error,
-  } = useQuery(trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }));
+  } = useQuery(trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }));
 
   // Fetch worksheet notes
   const { data: notes } = useQuery(
-    trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+    trpc.pengujian.worksheet.getNotes.queryOptions({ worksheetId }),
   );
 
   // Ref for auto-scrolling notes to bottom
@@ -138,7 +138,7 @@ function RouteComponent() {
 
   // Fetch all tools for assignment
   const { data: allToolsData } = useQuery(
-    trpc.tool.getForWorksheet.queryOptions({
+    trpc.pengujian.tool.getForWorksheet.queryOptions({
       worksheetId,
     }),
   );
@@ -146,12 +146,12 @@ function RouteComponent() {
   // Fetch chemical materials linked to parameters in this worksheet
   const { data: chemicalMaterialsData, isLoading: isLoadingChemicalMaterials } =
     useQuery(
-      trpc.chemicalMaterial.getForWorksheet.queryOptions({ worksheetId }),
+      trpc.pengujian.chemicalMaterial.getForWorksheet.queryOptions({ worksheetId }),
     );
 
   // Fetch worksheet-specific chemical materials (with required quantities)
   const { data: worksheetChemicalMaterialsData } = useQuery(
-    trpc.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
+    trpc.pengujian.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
   );
 
   // Worksheet is only editable in draft or revision status
@@ -160,10 +160,10 @@ function RouteComponent() {
 
   // Mutations
   const batchUpdateMutation = useMutation(
-    trpc.worksheet.batchUpdateItems.mutationOptions({
+    trpc.pengujian.worksheet.batchUpdateItems.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
         );
         globalSuccessToast("Perubahan berhasil disimpan");
         setLocalItemUpdates(new Map());
@@ -175,10 +175,10 @@ function RouteComponent() {
   );
 
   const assignToolsMutation = useMutation(
-    trpc.worksheet.assignTools.mutationOptions({
+    trpc.pengujian.worksheet.assignTools.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getWorksheetById.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
         );
         globalSuccessToast("Alat berhasil disimpan");
       },
@@ -189,10 +189,10 @@ function RouteComponent() {
   );
 
   const addNoteMutation = useMutation(
-    trpc.worksheet.addNote.mutationOptions({
+    trpc.pengujian.worksheet.addNote.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getNotes.queryOptions({ worksheetId }),
         );
         globalSuccessToast("Catatan berhasil ditambahkan");
         setNewNote("");
@@ -205,10 +205,10 @@ function RouteComponent() {
   );
 
   const saveChemicalMaterialsMutation = useMutation(
-    trpc.worksheet.saveChemicalMaterials.mutationOptions({
+    trpc.pengujian.worksheet.saveChemicalMaterials.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getChemicalMaterials.queryOptions({ worksheetId }),
         );
         globalSuccessToast("Bahan berhasil disimpan");
         setLocalRequiredUpdates(new Map());
@@ -564,11 +564,11 @@ function RouteComponent() {
   const hasLocalBahanChanges = localRequiredUpdates.size > 0;
 
   useSubscription({
-    ...trpc.event.onWorksheetNoteCreated.subscriptionOptions(),
+    ...trpc.platform.event.onWorksheetNoteCreated.subscriptionOptions(),
     onData: (event) => {
       if (event.worksheetId === worksheetId)
         queryClient.invalidateQueries(
-          trpc.worksheet.getNotes.queryOptions({ worksheetId }),
+          trpc.pengujian.worksheet.getNotes.queryOptions({ worksheetId }),
         );
     },
   });

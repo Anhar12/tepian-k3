@@ -12,7 +12,10 @@ import { trpc, queryClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { globalSuccessToast, globalErrorToast } from "@/lib/toast";
 import { Loader2, CheckCircle } from "lucide-react";
-import type { Order, PaginatedOrder } from "@tepian-k3/types/order.types";
+import type {
+  Order,
+  PaginatedOrder,
+} from "@tepian-k3/types/pengujian/order.types";
 
 interface SurveyFormProps {
   order: Order | PaginatedOrder;
@@ -22,23 +25,25 @@ interface SurveyFormProps {
 export function SurveyForm({ order, onComplete }: SurveyFormProps) {
   // Fetch active questions
   const { data: questions, isLoading: questionsLoading } = useQuery(
-    trpc.survey.getActiveQuestions.queryOptions(),
+    trpc.pengujian.survey.getActiveQuestions.queryOptions(),
   );
 
   // Check if survey already submitted
   const { data: surveyStatus, isLoading: statusLoading } = useQuery(
-    trpc.survey.checkSurveyStatus.queryOptions({ orderId: order.id }),
+    trpc.pengujian.survey.checkSurveyStatus.queryOptions({ orderId: order.id }),
   );
 
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState("");
 
   const submitSurveyMutation = useMutation(
-    trpc.survey.submitSurvey.mutationOptions({
+    trpc.pengujian.survey.submitSurvey.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Terima kasih! Survey berhasil dikirim.");
         await queryClient.invalidateQueries(
-          trpc.survey.checkSurveyStatus.queryOptions({ orderId: order.id }),
+          trpc.pengujian.survey.checkSurveyStatus.queryOptions({
+            orderId: order.id,
+          }),
         );
         onComplete?.();
       },

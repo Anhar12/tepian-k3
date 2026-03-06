@@ -108,9 +108,9 @@ interface UseOptimisticMutationOptions<
  * @example
  * ```ts
  * const deleteMut = useOptimisticMutation(
- *   trpc.chemicalMaterial.delete.mutationOptions(),
+ *   trpc.pengujian.chemicalMaterial.delete.mutationOptions(),
  *   {
- *     queryOptions: trpc.chemicalMaterial.getPaginated.queryOptions(params),
+ *     queryOptions: trpc.pengujian.chemicalMaterial.getPaginated.queryOptions(params),
  *     operation: { type: "delete", getId: (input) => input.id },
  *     onSuccess: () => globalSuccessToast("Deleted"),
  *   },

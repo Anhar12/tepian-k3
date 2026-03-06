@@ -24,7 +24,7 @@ export default function DocumentationImageModal() {
   const isOpen = useMemo(() => !!modalId, [modalId]);
 
   const { data: documentationImage, isLoading } = useQuery({
-    ...trpc.tool.getToolCalibrationDocumentationById.queryOptions({
+    ...trpc.pengujian.tool.getToolCalibrationDocumentationById.queryOptions({
       id: modalId!,
     }),
     enabled: !!modalId,

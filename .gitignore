@@ -13,10 +13,13 @@ build
 .env*.local
 .env.test
 .env.production
+.env.docker
 
 # IDEs and editors
 .vscode/*
 !.vscode/settings.json
+!.vscode/custom.css
+!.vscode/custom.js
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -49,4 +52,5 @@ coverage
 *.tgz
 .cache
 tmp
-temp
+temp.env.docker
+docs/PRICING_SUMMARY.md

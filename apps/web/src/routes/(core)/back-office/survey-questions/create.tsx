@@ -22,7 +22,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import surveySchema from "@tepian-k3/schema/survey.schema";
+import surveySchema from "@tepian-k3/schema/pengujian/survey.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -52,7 +52,7 @@ function RouteComponent() {
   });
 
   const createQuestionMutation = useMutation(
-    trpc.survey.createQuestion.mutationOptions({
+    trpc.pengujian.survey.createQuestion.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil membuat pertanyaan survey");
         form.reset();

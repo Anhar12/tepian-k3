@@ -2,7 +2,7 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import unusedImports from "eslint-plugin-unused-imports";
 
-export default tseslint.config(
+export default [
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -12,9 +12,14 @@ export default tseslint.config(
       "**/.turbo/**",
       "**/drizzle/**",
       "**/migrations/**",
+      "scripts/**",
+      "**/scripts/**",
+      "**/playwright/**",
+      "**/.vscode/**",
     ],
   },
   {
+    files: ["**/*.{ts,tsx,mts,cts}"],
     plugins: {
       "unused-imports": unusedImports,
     },
@@ -33,4 +38,4 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-object-type": "off",
     },
   },
-);
+];

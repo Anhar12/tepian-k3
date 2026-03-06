@@ -39,7 +39,7 @@ export function useNotificationSubscription(
   const { showToast = true, onNotification } = options;
 
   useSubscription({
-    ...trpc.event.onNotification.subscriptionOptions(),
+    ...trpc.platform.event.onNotification.subscriptionOptions(),
     onData: (data) => {
       if (showToast) {
         globalInfoToast(data.message);
@@ -81,7 +81,7 @@ export function useOnOrderStatusChangedSubscription(
   const { showToast = true, onNotification } = options;
 
   useSubscription({
-    ...trpc.event.onOrderStatusChanged.subscriptionOptions(),
+    ...trpc.platform.event.onOrderStatusChanged.subscriptionOptions(),
     onData: (data) => {
       if (showToast) {
         globalInfoToast(

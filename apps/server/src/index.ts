@@ -20,6 +20,7 @@ import {
   initializeTokenBlacklist,
   shutdownTokenBlacklist,
 } from "@tepian-k3/services/token-blacklist";
+import { shutdownIdempotencyService } from "@tepian-k3/services/idempotency";
 import { logInfo, logWarn } from "@tepian-k3/services/logger";
 import { db, sql } from "@tepian-k3/db/client";
 import { devRouter } from "./routes/dev";
@@ -105,7 +106,12 @@ app.use(
   cors({
     origin: corsOrigin,
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization", "X-Signature"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Signature",
+      "X-Idempotency-Key",
+    ],
     credentials: true,
   }),
 );
@@ -277,6 +283,7 @@ const shutdown = async () => {
   logInfo("Server", "Shutting down...");
   await shutdownEventBus();
   await shutdownTokenBlacklist();
+  await shutdownIdempotencyService();
   await queueService.shutdown();
   process.exit(0);
 };

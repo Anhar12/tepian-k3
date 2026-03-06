@@ -43,7 +43,9 @@ export function ShowFor({
   children,
   fallback = null,
 }: ShowForProps) {
-  const { data: profile } = useSuspenseQuery(trpc.auth.profile.queryOptions());
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
 
   const isAuthenticated = !!profile;
 

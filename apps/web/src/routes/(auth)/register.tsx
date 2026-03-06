@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { pageHead } from "@/utils/page-head";
 import ImageWithFallback from "@/components/image-with-fallback";
 
-const BannerImage = "/assets/banner-auth.png";
+const BannerImage = "/assets/banner-auth.webp";
 
 export const Route = createFileRoute("/(auth)/register")({
   component: RouteComponent,

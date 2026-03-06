@@ -11,8 +11,8 @@ import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import userCompanySchema from "@tepian-k3/schema/user-company.schema";
-import type { UserCompaniesWithRelations } from "@tepian-k3/types/user-company.types";
+import userCompanySchema from "@tepian-k3/schema/pengujian/user-company.schema";
+import type { UserCompaniesWithRelations } from "@tepian-k3/types/pengujian/user-company.types";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
@@ -32,7 +32,9 @@ function RouteComponent() {
     isLoading,
     error,
   } = useQuery(
-    trpc.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(params),
+    trpc.pengujian.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(
+      params,
+    ),
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);

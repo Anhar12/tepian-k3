@@ -1,4 +1,7 @@
 import { authMeQueryOptions } from "@/utils/auth-query";
+import { useOnOrderStatusChangedSubscription } from "@/hooks/use-notification-subscription";
+import { trpc } from "@/utils/trpc";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/(core)")({
@@ -32,5 +35,32 @@ export const Route = createFileRoute("/(core)")({
       throw redirect({ to: "/login" });
     }
   },
-  component: () => <Outlet />,
+  component: CoreLayout,
 });
+
+/**
+ * Root layout for all authenticated (core) routes.
+ * Runs a single order-status subscription for the entire authenticated session,
+ * so notifications and query invalidations fire exactly once regardless of how
+ * many navbar instances are rendered.
+ */
+function CoreLayout() {
+  const queryClient = useQueryClient();
+
+  useOnOrderStatusChangedSubscription({
+    showToast: true,
+    onNotification: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.platform.notifications.getUnreadCount.queryKey(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: trpc.platform.notifications.getAll.queryKey(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: trpc.pengujian.order.getAllOrders.queryKey(),
+      });
+    },
+  });
+
+  return <Outlet />;
+}

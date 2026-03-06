@@ -75,7 +75,7 @@ function ProfilePage() {
         {/* Background Image */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <ImageWithFallback
-            src="/assets/hero-banner.jpg"
+            src="/assets/hero-banner.webp"
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-black/50" />
@@ -85,7 +85,7 @@ function ProfilePage() {
         <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl flex-row items-center justify-center gap-8">
           {/* Logo */}
           <ImageWithFallback
-            src="/assets/logo-balai-k3.png"
+            src="/assets/logo-balai-k3.webp"
             alt="Balai Tepian K3 Logo"
             className="hidden h-auto w-full max-w-64 rounded-2xl bg-white/95 object-contain p-6 shadow-xl md:block"
           />

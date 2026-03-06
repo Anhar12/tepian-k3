@@ -26,7 +26,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import rolesSchema from "@tepian-k3/schema/role.schema";
+import rolesSchema from "@tepian-k3/schema/platform/role.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -39,7 +39,9 @@ export const Route = createFileRoute("/(core)/back-office/roles/$roleId/edit")({
     await requirePermission(context, { permission: "roles.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.role.getRoleById.queryOptions({ id: params.roleId }),
+      context.trpc.platform.role.getRoleById.queryOptions({
+        id: params.roleId,
+      }),
     ),
   component: RouteComponent,
   pendingComponent: LoaderComponent,
@@ -73,7 +75,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: role } = useSuspenseQuery(
-    trpc.role.getRoleById.queryOptions({ id: roleId }),
+    trpc.platform.role.getRoleById.queryOptions({ id: roleId }),
   );
 
   const form = useForm<z.infer<typeof rolesSchema.updateRoleSchema>>({
@@ -86,10 +88,10 @@ function RouteComponent() {
   });
 
   const updateRoleMutation = useMutation(
-    trpc.role.updateRole.mutationOptions({
+    trpc.platform.role.updateRole.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.role.getRoleById.queryOptions({ id: roleId }),
+          trpc.platform.role.getRoleById.queryOptions({ id: roleId }),
         );
         globalSuccessToast("Berhasil memperbarui role");
         await redirectBack();

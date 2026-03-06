@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import type { PaginatedOrder } from "@tepian-k3/types/order.types";
+import type { PaginatedOrder } from "@tepian-k3/types/pengujian/order.types";
 import { PermissionGate } from "@/components/permission-gate";
 
 interface OrdersColumnsProps {
@@ -126,34 +126,34 @@ export default function getOrdersColumns({
         </Badge>
       ),
     },
-    {
-      accessorKey: "testing",
-      header: "Testing",
-      cell: ({ row }) => {
-        if (!row.original.testing) {
-          return (
-            <Badge variant="outline" className="text-muted-foreground">
-              Belum dibuat
-            </Badge>
-          );
-        }
-        return (
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">
-              {row.original.testing.testingNumber}
-            </span>
-            <Badge
-              className={cn(
-                "mt-1 w-fit",
-                getStatusColor(row.original.testing.status),
-              )}
-            >
-              {getStatusLabel(row.original.testing.status)}
-            </Badge>
-          </div>
-        );
-      },
-    },
+    // {
+    //   accessorKey: "testing",
+    //   header: "Testing",
+    //   cell: ({ row }) => {
+    //     if (!row.original.testing) {
+    //       return (
+    //         <Badge variant="outline" className="text-muted-foreground">
+    //           Belum dibuat
+    //         </Badge>
+    //       );
+    //     }
+    //     return (
+    //       <div className="flex flex-col">
+    //         <span className="text-sm font-medium">
+    //           {row.original.testing.testingNumber}
+    //         </span>
+    //         <Badge
+    //           className={cn(
+    //             "mt-1 w-fit",
+    //             getStatusColor(row.original.testing.status),
+    //           )}
+    //         >
+    //           {getStatusLabel(row.original.testing.status)}
+    //         </Badge>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       accessorKey: "totalAmount",
       header: "Total",
@@ -163,6 +163,12 @@ export default function getOrdersColumns({
         </div>
       ),
     },
+    createDateColumn<PaginatedOrder>("worksheet.startDate", "Tanggal Mulai", {
+      nullable: true,
+    }),
+    createDateColumn<PaginatedOrder>("worksheet.endDate", "Tanggal Selesai", {
+      nullable: true,
+    }),
     createDateColumn<PaginatedOrder>("createdAt", "Tanggal Order"),
     createActionColumn<PaginatedOrder>(({ row }) => (
       <PermissionGate permission="orders.read">

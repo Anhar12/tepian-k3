@@ -31,8 +31,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import userCompanySchema from "@tepian-k3/schema/user-company.schema";
-import { LoaderCircle, MapPin } from "lucide-react";
+import userCompanySchema from "@tepian-k3/schema/pengujian/user-company.schema";
+import { CreditCard, LoaderCircle, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -46,15 +46,17 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
-        id: params.companyId,
-      }),
+      context.trpc.pengujian.userCompany.getUserCompanyByIdAndUserId.queryOptions(
+        {
+          id: params.companyId,
+        },
+      ),
     );
     context.queryClient.ensureQueryData(
-      context.trpc.kbli.getAllKblis.queryOptions(),
+      context.trpc.pengujian.kbli.getAllKblis.queryOptions(),
     );
     context.queryClient.ensureQueryData(
-      context.trpc.province.getAllProvinces.queryOptions(),
+      context.trpc.platform.province.getAllProvinces.queryOptions(),
     );
   },
   component: RouteComponent,
@@ -72,7 +74,7 @@ function RouteComponent() {
   const [villageOpen, setVillageOpen] = useState(false);
 
   const { data: company } = useSuspenseQuery(
-    trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+    trpc.pengujian.userCompany.getUserCompanyByIdAndUserId.queryOptions({
       id: companyId,
     }),
   );
@@ -108,10 +110,10 @@ function RouteComponent() {
   const wlkpStatus = form.watch("wlkpStatus") || false;
 
   const updateUserCompanyMutation = useMutation(
-    trpc.userCompany.userUpdateUserCompany.mutationOptions({
+    trpc.pengujian.userCompany.userUpdateUserCompany.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.userCompany.getUserCompanyByIdAndUserId.queryOptions({
+          trpc.pengujian.userCompany.getUserCompanyByIdAndUserId.queryOptions({
             id: companyId,
           }),
         );
@@ -131,24 +133,26 @@ function RouteComponent() {
     updateUserCompanyMutation.mutate(formData);
   };
 
-  const { data: kbli } = useSuspenseQuery(trpc.kbli.getAllKblis.queryOptions());
+  const { data: kbli } = useSuspenseQuery(
+    trpc.pengujian.kbli.getAllKblis.queryOptions(),
+  );
   const { data: province } = useSuspenseQuery(
-    trpc.province.getAllProvinces.queryOptions(),
+    trpc.platform.province.getAllProvinces.queryOptions(),
   );
   const { data: regency } = useQuery({
-    ...trpc.regency.getAllRegenciesByProvinceId.queryOptions({
+    ...trpc.platform.regency.getAllRegenciesByProvinceId.queryOptions({
       provinceId,
     }),
     enabled: !!provinceId,
   });
   const { data: district } = useQuery({
-    ...trpc.district.getAllDistrictsByRegencyId.queryOptions({
+    ...trpc.platform.district.getAllDistrictsByRegencyId.queryOptions({
       regencyId,
     }),
     enabled: !!regencyId,
   });
   const { data: village } = useQuery({
-    ...trpc.village.getAllVillagesByDistrictId.queryOptions({
+    ...trpc.platform.village.getAllVillagesByDistrictId.queryOptions({
       districtId,
     }),
     enabled: !!districtId,
@@ -731,6 +735,96 @@ function RouteComponent() {
                   )}
                 />
               </div>
+
+              <div className="flex w-full flex-row gap-4">
+                <div className="flex size-12 items-center justify-center rounded-xl bg-primary/30">
+                  <CreditCard className="text-primary" />
+                </div>
+                <div className="flex flex-col items-start justify-start">
+                  <p className="text- text-xl font-medium">
+                    Informasi Bank Perusahaan
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Lengkapi data bank perusahaan untuk keperluan administrasi
+                    dan pembayaran.
+                  </p>
+                </div>
+              </div>
+
+              <Controller
+                control={form.control}
+                name="companyBankName"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Nama Bank Perusahaan
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nama bank perusahaan"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="companyBankAccount"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Nomor Rekening Bank Perusahaan
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nomor rekening bank perusahaan"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="companyBankAccountName"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Nama Pemilik Rekening Bank Perusahaan
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nama pemilik rekening bank perusahaan"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
 
               <Button
                 type="submit"

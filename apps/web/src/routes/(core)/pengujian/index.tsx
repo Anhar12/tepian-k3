@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LocationSection } from "./-components/location-section";
 import { Clusters } from "./-components/parameter-categories";
 import { TestingTable } from "./-components/testing-table";
-import parameterSchema from "@tepian-k3/schema/parameter.schema";
+import parameterSchema from "@tepian-k3/schema/pengujian/parameter.schema";
 import { pageHead } from "@/utils/page-head";
 
 export const Route = createFileRoute("/(core)/pengujian/")({

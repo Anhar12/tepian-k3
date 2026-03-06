@@ -19,7 +19,7 @@ export const Route = createFileRoute("/(core)/pengujian/survey-kepuasan")({
     }
 
     const data = await context.queryClient.ensureQueryData(
-      context.trpc.order.getOrderById.queryOptions({
+      context.trpc.pengujian.order.getOrderById.queryOptions({
         orderId: search.orderId,
       }),
     );
@@ -56,7 +56,7 @@ function RouteComponent() {
   const { orderId } = Route.useSearch();
 
   const { data: order, isLoading } = useQuery(
-    trpc.order.getOrderById.queryOptions({ orderId }),
+    trpc.pengujian.order.getOrderById.queryOptions({ orderId }),
   );
 
   if (isLoading || !order) {

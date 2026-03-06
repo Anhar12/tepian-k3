@@ -22,7 +22,7 @@ import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import positionSchema from "@tepian-k3/schema/position.schema";
+import positionSchema from "@tepian-k3/schema/platform/position.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -48,7 +48,7 @@ function RouteComponent() {
   });
 
   const createPositionMutation = useMutation(
-    trpc.position.createPosition.mutationOptions({
+    trpc.platform.position.createPosition.mutationOptions({
       onSuccess: async () => {
         globalSuccessToast("Berhasil membuat posisi");
         form.reset();

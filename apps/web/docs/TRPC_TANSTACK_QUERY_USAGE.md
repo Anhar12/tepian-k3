@@ -42,7 +42,7 @@ import { trpc } from "@/utils/trpc";
 
 function UserProfile() {
   // Using tRPC hook
-  const { data, isLoading, error } = trpc.user.getById.useQuery({
+  const { data, isLoading, error } = trpc.platform.user.getById.useQuery({
     id: "user-id"
   });
 
@@ -56,7 +56,7 @@ function UserProfile() {
 import { trpc } from "@/utils/trpc";
 
 function UpdateUserForm() {
-  const updateUser = trpc.user.update.useMutation({
+  const updateUser = trpc.platform.user.update.useMutation({
     onSuccess: () => {
       console.log("User updated!");
     },
@@ -99,7 +99,7 @@ import { useQuery } from "@tanstack/react-query";
 function UserProfile() {
   // Using TanStack Query hook with tRPC options
   const { data, isLoading, error } = useQuery(
-    trpc.user.getById.queryOptions({ id: "user-id" })
+    trpc.platform.user.getById.queryOptions({ id: "user-id" })
   );
 
   return <div>{data?.name}</div>;
@@ -112,7 +112,7 @@ function UserProfile() {
 export const Route = createFileRoute("/(core)")({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData({
-      ...trpc.auth.me.queryOptions(),
+      ...trpc.platform.auth.me.queryOptions(),
       staleTime: 1000 * 60 * 5,
       gcTime: 1000 * 60 * 30,
     });
@@ -129,7 +129,7 @@ import { useMutation } from "@tanstack/react-query";
 
 function UpdateUserForm() {
   const updateUser = useMutation(
-    trpc.user.update.mutationOptions({
+    trpc.platform.user.update.mutationOptions({
       onSuccess: () => {
         console.log("User updated!");
       },
@@ -148,13 +148,13 @@ function UpdateUserForm() {
 
 ```typescript
 const incrementCartItemQuantity = useMutation(
-  trpc.cart.incrementCartItemQuantity.mutationOptions({
+  trpc.pengujian.cart.incrementCartItemQuantity.mutationOptions({
     onMutate: ({ cartItemId }) => {
       setLoadingItems((prev) => new Set(prev).add(cartItemId));
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries(
-        trpc.cart.getAllCartItems.queryOptions(),
+        trpc.pengujian.cart.getAllCartItems.queryOptions(),
       );
     },
     onError: (error) => {
@@ -214,16 +214,16 @@ export async function logout() {
 
 ## Comparison Table
 
-| Feature                        | Classic Pattern                  | Modern Pattern                                    | Direct Client                     |
-| ------------------------------ | -------------------------------- | ------------------------------------------------- | --------------------------------- |
-| **Usage Location**             | React components                 | React components                                  | Utility functions, lib files      |
-| **Import**                     | `trpc` from utils                | `trpc` + `useQuery`/`useMutation`                 | `trpcClient` from utils           |
-| **Query Syntax**               | `trpc.user.getById.useQuery()`   | `useQuery(trpc.user.getById.queryOptions())`      | `trpcClient.user.getById.query()` |
-| **Mutation Syntax**            | `trpc.user.update.useMutation()` | `useMutation(trpc.user.update.mutationOptions())` | `trpcClient.user.update.mutate()` |
-| **TanStack Query Integration** | Indirect                         | Direct                                            | N/A (no hooks)                    |
-| **Advanced Query Features**    | Limited                          | Full access                                       | N/A                               |
-| **Type Safety**                | ✅ Full                          | ✅ Full                                           | ✅ Full                           |
-| **SSR/Prefetching**            | Requires workarounds             | Native support                                    | Native support                    |
+| Feature                        | Classic Pattern                           | Modern Pattern                                             | Direct Client                     |
+| ------------------------------ | ----------------------------------------- | ---------------------------------------------------------- | --------------------------------- |
+| **Usage Location**             | React components                          | React components                                           | Utility functions, lib files      |
+| **Import**                     | `trpc` from utils                         | `trpc` + `useQuery`/`useMutation`                          | `trpcClient` from utils           |
+| **Query Syntax**               | `trpc.platform.user.getById.useQuery()`   | `useQuery(trpc.platform.user.getById.queryOptions())`      | `trpcClient.user.getById.query()` |
+| **Mutation Syntax**            | `trpc.platform.user.update.useMutation()` | `useMutation(trpc.platform.user.update.mutationOptions())` | `trpcClient.user.update.mutate()` |
+| **TanStack Query Integration** | Indirect                                  | Direct                                                     | N/A (no hooks)                    |
+| **Advanced Query Features**    | Limited                                   | Full access                                                | N/A                               |
+| **Type Safety**                | ✅ Full                                   | ✅ Full                                                    | ✅ Full                           |
+| **SSR/Prefetching**            | Requires workarounds                      | Native support                                             | Native support                    |
 
 ## When to Use Each Pattern
 
@@ -254,21 +254,21 @@ export async function logout() {
 
 ```typescript
 const updateUser = useMutation(
-  trpc.user.update.mutationOptions({
+  trpc.platform.user.update.mutationOptions({
     onMutate: async (newUser) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries(
-        trpc.user.getById.queryOptions({ id: newUser.id })
+        trpc.platform.user.getById.queryOptions({ id: newUser.id })
       );
 
       // Snapshot previous value
       const previousUser = queryClient.getQueryData(
-        trpc.user.getById.queryOptions({ id: newUser.id })
+        trpc.platform.user.getById.queryOptions({ id: newUser.id })
       );
 
       // Optimistically update
       queryClient.setQueryData(
-        trpc.user.getById.queryOptions({ id: newUser.id }),
+        trpc.platform.user.getById.queryOptions({ id: newUser.id }),
         newUser
       );
 
@@ -277,14 +277,14 @@ const updateUser = useMutation(
     onError: (err, newUser, context) => {
       // Rollback on error
       queryClient.setQueryData(
-        trpc.user.getById.queryOptions({ id: newUser.id }),
+        trpc.platform.user.getById.queryOptions({ id: newUser.id }),
         context?.previousUser
       );
     },
     onSettled: (data, error, variables) => {
       // Refetch after mutation
       queryClient.invalidateQueries(
-        trpc.user.getById.queryOptions({ id: variables.id })
+        trpc.platform.user.getById.queryOptions({ id: variables.id })
       );
     },
   })
@@ -298,7 +298,7 @@ export const Route = createFileRoute("/users/$userId")({
   loader: async ({ context, params }) => {
     // Prefetch user data before rendering
     await context.queryClient.prefetchQuery(
-      trpc.user.getById.queryOptions({ id: params.userId })
+      trpc.platform.user.getById.queryOptions({ id: params.userId })
     );
   },
   component: UserDetail,
@@ -312,7 +312,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 function UserList() {
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
-    trpc.user.list.infiniteQueryOptions(
+    trpc.platform.user.list.infiniteQueryOptions(
       { limit: 10 },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -339,12 +339,12 @@ function UserList() {
 function UserOrders({ userId }: { userId: string }) {
   // First query
   const userQuery = useQuery(
-    trpc.user.getById.queryOptions({ id: userId })
+    trpc.platform.user.getById.queryOptions({ id: userId })
   );
 
   // Second query depends on first
   const ordersQuery = useQuery(
-    trpc.order.listByUser.queryOptions(
+    trpc.pengujian.order.listByUser.queryOptions(
       { userId },
       {
         enabled: !!userQuery.data, // Only run when user data exists
@@ -367,16 +367,16 @@ Choose one pattern per component and stick with it. Don't mix patterns unnecessa
 
 ```typescript
 // ❌ Bad - mixing patterns
-const user = trpc.user.getById.useQuery({ id });
-const updateUser = useMutation(trpc.user.update.mutationOptions());
+const user = trpc.platform.user.getById.useQuery({ id });
+const updateUser = useMutation(trpc.platform.user.update.mutationOptions());
 
 // ✅ Good - consistent classic pattern
-const user = trpc.user.getById.useQuery({ id });
-const updateUser = trpc.user.update.useMutation();
+const user = trpc.platform.user.getById.useQuery({ id });
+const updateUser = trpc.platform.user.update.useMutation();
 
 // ✅ Good - consistent modern pattern
-const user = useQuery(trpc.user.getById.queryOptions({ id }));
-const updateUser = useMutation(trpc.user.update.mutationOptions());
+const user = useQuery(trpc.platform.user.getById.queryOptions({ id }));
+const updateUser = useMutation(trpc.platform.user.update.mutationOptions());
 ```
 
 ### 2. Use Type Inference
@@ -385,7 +385,7 @@ Both patterns have full type inference. Don't manually type unless necessary.
 
 ```typescript
 // ✅ Good - types are inferred
-const { data } = useQuery(trpc.user.getById.queryOptions({ id }));
+const { data } = useQuery(trpc.platform.user.getById.queryOptions({ id }));
 //      ^? data: User | undefined
 
 // ❌ Unnecessary
@@ -398,11 +398,11 @@ Always use tRPC query keys for invalidation:
 
 ```typescript
 const updateUser = useMutation(
-  trpc.user.update.mutationOptions({
+  trpc.platform.user.update.mutationOptions({
     onSuccess: () => {
       // ✅ Invalidate using tRPC query options
       queryClient.invalidateQueries(
-        trpc.user.getById.queryOptions()
+        trpc.platform.user.getById.queryOptions()
       );
     },
   })
@@ -415,7 +415,7 @@ Both patterns support the same error handling approach:
 
 ```typescript
 const { data, error } = useQuery(
-  trpc.user.getById.queryOptions({ id }, {
+  trpc.platform.user.getById.queryOptions({ id }, {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   })
@@ -432,23 +432,23 @@ if (error) {
 
 ```typescript
 // Before (Classic)
-const users = trpc.user.list.useQuery({ page: 1 });
+const users = trpc.platform.user.list.useQuery({ page: 1 });
 
 // After (Modern)
 import { useQuery } from "@tanstack/react-query";
-const users = useQuery(trpc.user.list.queryOptions({ page: 1 }));
+const users = useQuery(trpc.platform.user.list.queryOptions({ page: 1 }));
 ```
 
 ```typescript
 // Before (Classic)
-const createUser = trpc.user.create.useMutation({
+const createUser = trpc.platform.user.create.useMutation({
   onSuccess: () => toast.success("User created"),
 });
 
 // After (Modern)
 import { useMutation } from "@tanstack/react-query";
 const createUser = useMutation(
-  trpc.user.create.mutationOptions({
+  trpc.platform.user.create.mutationOptions({
     onSuccess: () => toast.success("User created"),
   })
 );
@@ -471,7 +471,7 @@ function UserProfile() {
 // ✅ Good - use hooks
 function UserProfile() {
   const { data: user } = useQuery(
-    trpc.user.getById.queryOptions({ id })
+    trpc.platform.user.getById.queryOptions({ id })
   );
 }
 ```
@@ -481,14 +481,14 @@ function UserProfile() {
 ```typescript
 // ❌ Bad - data won't refresh
 const deleteUser = useMutation(
-  trpc.user.delete.mutationOptions()
+  trpc.platform.user.delete.mutationOptions()
 );
 
 // ✅ Good - invalidate related queries
 const deleteUser = useMutation(
-  trpc.user.delete.mutationOptions({
+  trpc.platform.user.delete.mutationOptions({
     onSuccess: () => {
-      queryClient.invalidateQueries(trpc.user.list.queryOptions());
+      queryClient.invalidateQueries(trpc.platform.user.list.queryOptions());
     },
   })
 );
@@ -499,14 +499,14 @@ const deleteUser = useMutation(
 ```typescript
 // ❌ Bad - potential undefined access
 function UserProfile() {
-  const { data } = useQuery(trpc.user.getById.queryOptions({ id }));
+  const { data } = useQuery(trpc.platform.user.getById.queryOptions({ id }));
   return <div>{data.name}</div>; // Error if data is undefined
 }
 
 // ✅ Good - handle loading/undefined states
 function UserProfile() {
   const { data, isLoading } = useQuery(
-    trpc.user.getById.queryOptions({ id })
+    trpc.platform.user.getById.queryOptions({ id })
   );
 
   if (isLoading) return <div>Loading...</div>;

@@ -22,7 +22,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import clusterSchema from "@tepian-k3/schema/cluster.schema";
+import clusterSchema from "@tepian-k3/schema/pengujian/cluster.schema";
 import { LoaderCircle } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -37,7 +37,7 @@ export const Route = createFileRoute(
     await requirePermission(context, { permission: "clusters.update" }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.cluster.getClusterById.queryOptions({
+      context.trpc.pengujian.cluster.getClusterById.queryOptions({
         id: params.clusterId,
       }),
     ),
@@ -50,7 +50,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: cluster } = useSuspenseQuery(
-    trpc.cluster.getClusterById.queryOptions({ id: clusterId }),
+    trpc.pengujian.cluster.getClusterById.queryOptions({ id: clusterId }),
   );
 
   const form = useForm<z.infer<typeof clusterSchema.updateClusterSchema>>({
@@ -63,10 +63,10 @@ function RouteComponent() {
   });
 
   const updateClusterMutation = useMutation(
-    trpc.cluster.updateCluster.mutationOptions({
+    trpc.pengujian.cluster.updateCluster.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.cluster.getClusterById.queryOptions({ id: clusterId }),
+          trpc.pengujian.cluster.getClusterById.queryOptions({ id: clusterId }),
         );
         globalSuccessToast("Berhasil memperbarui cluster");
         await redirectBack();

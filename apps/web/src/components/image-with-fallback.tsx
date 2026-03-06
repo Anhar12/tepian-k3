@@ -10,6 +10,7 @@ interface ImageWithFallbackProps extends Omit<
   src: string;
   alt?: string;
   fallbackIcon?: LucideIcon;
+  imgClassName?: string;
   loaderClassName?: string;
   fallbackClassName?: string;
 }
@@ -19,6 +20,7 @@ export default function ImageWithFallback({
   alt = "Image",
   fallbackIcon: FallbackIcon = ImageOff,
   className,
+  imgClassName,
   loaderClassName,
   fallbackClassName,
   ...props
@@ -56,7 +58,11 @@ export default function ImageWithFallback({
             setLoading(false);
             setError(true);
           }}
-          className={cn("h-full w-full object-cover", loading && "invisible")}
+          className={cn(
+            "h-full w-full object-cover",
+            imgClassName,
+            loading && "invisible",
+          )}
           {...props}
         />
       )}

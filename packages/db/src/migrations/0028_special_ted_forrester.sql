@@ -1,0 +1,1 @@
+ALTER TABLE "worksheet_tools" DROP COLUMN "tool_needed";

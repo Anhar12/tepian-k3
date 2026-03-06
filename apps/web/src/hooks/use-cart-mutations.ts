@@ -15,7 +15,7 @@ export function useCartMutations() {
 
   const invalidateCart = useCallback(async () => {
     await queryClient.invalidateQueries(
-      trpc.cart.getAllCartItems.queryOptions(),
+      trpc.pengujian.cart.getAllCartItems.queryOptions(),
     );
   }, []);
 
@@ -44,7 +44,7 @@ export function useCartMutations() {
   }, []);
 
   const incrementCartItemQuantity = useMutation(
-    trpc.cart.incrementCartItemQuantity.mutationOptions({
+    trpc.pengujian.cart.incrementCartItemQuantity.mutationOptions({
       onMutate: ({ cartItemId }) => {
         addLoadingItem(cartItemId);
       },
@@ -61,7 +61,7 @@ export function useCartMutations() {
   );
 
   const decrementCartItemQuantity = useMutation(
-    trpc.cart.decrementCartItemQuantity.mutationOptions({
+    trpc.pengujian.cart.decrementCartItemQuantity.mutationOptions({
       onMutate: ({ cartItemId }) => {
         addLoadingItem(cartItemId);
       },
@@ -78,7 +78,7 @@ export function useCartMutations() {
   );
 
   const deleteCartItem = useMutation(
-    trpc.cart.deleteCartItem.mutationOptions({
+    trpc.pengujian.cart.deleteCartItem.mutationOptions({
       onMutate: ({ cartItemId }) => {
         addDeleteLoadingItem(cartItemId);
       },

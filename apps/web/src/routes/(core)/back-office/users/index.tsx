@@ -12,7 +12,7 @@ import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import userSchema from "@tepian-k3/schema/users.schema";
+import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
@@ -33,7 +33,7 @@ function RouteComponent() {
     data: users,
     isLoading,
     error,
-  } = useQuery(trpc.user.getUserPaginated.queryOptions(params));
+  } = useQuery(trpc.platform.user.getUserPaginated.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
 

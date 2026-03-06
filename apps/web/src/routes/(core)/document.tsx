@@ -29,7 +29,7 @@ import { useEffect, useState } from "react";
 import type {
   DocumentWithRelations,
   VerificationResult,
-} from "@tepian-k3/types/document.types";
+} from "@tepian-k3/types/platform/document.types";
 import type { DocumentStatus } from "@tepian-k3/constants";
 
 export const Route = createFileRoute("/(core)/document")({

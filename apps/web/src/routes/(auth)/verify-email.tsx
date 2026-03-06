@@ -34,7 +34,7 @@ export const Route = createFileRoute("/(auth)/verify-email")({
   head: () => pageHead("Verifikasi Email"),
 });
 
-const BannerImage = "/assets/banner-auth.png";
+const BannerImage = "/assets/banner-auth.webp";
 
 type Step = "email" | "otp" | "success";
 
@@ -48,7 +48,7 @@ function VerifyEmailComponent() {
   const navigate = useNavigate();
 
   const sendOTPMutation = useMutation(
-    trpc.auth.sendOTP.mutationOptions({
+    trpc.platform.auth.sendOTP.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Kode verifikasi telah dikirim ke email Anda.");
         setStep("otp");
@@ -60,11 +60,11 @@ function VerifyEmailComponent() {
   );
 
   const verifyMutation = useMutation(
-    trpc.auth.verifyOTP.mutationOptions({
+    trpc.platform.auth.verifyOTP.mutationOptions({
       onSuccess: async (data) => {
         setStep("success");
         auth.setTokens(data.accessToken, data.refreshToken);
-        await queryClient.refetchQueries(trpc.auth.me.queryFilter());
+        await queryClient.refetchQueries(trpc.platform.auth.me.queryFilter());
         setTimeout(() => {
           navigate({ to: "/dashboard" });
         }, 350);
@@ -76,7 +76,7 @@ function VerifyEmailComponent() {
   );
 
   const resendMutation = useMutation(
-    trpc.auth.resendOTP.mutationOptions({
+    trpc.platform.auth.resendOTP.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Kode verifikasi telah dikirim ulang.");
         setCode("");

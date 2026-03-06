@@ -1,0 +1,33 @@
+# Web application (Nginx + React SPA)
+# Can run independently if server is accessible
+#
+# Usage:
+#   # Build and run web only
+#   docker compose -f docker-compose.web.yml up -d
+#
+#   # Or run with server
+#   docker compose -f docker-compose.infra.yml -f docker-compose.server.yml -f docker-compose.web.yml up -d
+
+services:
+  # ---- Web (Nginx + SPA) ----
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        # This URL is baked into the JS bundle at build time
+        # - For local Docker: http://localhost:3001 (nginx proxies to server container)
+        # - For production: https://yourdomain.com
+        VITE_SERVER_URL: ${VITE_SERVER_URL:-http://localhost:3001}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3001}:80"
+    networks:
+      - tepian-network
+    # Optional: depend on server if running in same compose stack
+    # depends_on:
+    #   - server
+
+networks:
+  tepian-network:
+    driver: bridge

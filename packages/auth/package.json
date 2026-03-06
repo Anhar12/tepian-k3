@@ -1,5 +1,7 @@
 {
   "name": "@tepian-k3/auth",
+  "version": "1.2.0",
+  "private": true,
   "exports": {
     ".": {
       "default": "./src/index.ts"

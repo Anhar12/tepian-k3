@@ -9,7 +9,7 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import z from "zod";
-import userSchema from "@tepian-k3/schema/users.schema";
+import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
@@ -34,7 +34,7 @@ export default function ChangePasswordForm() {
   });
 
   const updatePasswordMutation = useMutation(
-    trpc.user.updatePassword.mutationOptions({
+    trpc.platform.user.updatePassword.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Password berhasil diperbarui");
         form.reset();

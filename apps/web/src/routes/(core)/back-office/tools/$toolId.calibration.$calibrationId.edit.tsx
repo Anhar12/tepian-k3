@@ -32,13 +32,14 @@ import { cn } from "@/lib/utils";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import toolCalibrationSchema from "@tepian-k3/schema/tool-calibration.schema";
+import toolCalibrationSchema from "@tepian-k3/schema/pengujian/tool-calibration.schema";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Spinner } from "@/components/ui/spinner";
+import { toFormData } from "@/utils/form-data-mapper";
 
 export const Route = createFileRoute(
   "/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit",
@@ -53,12 +54,11 @@ export const Route = createFileRoute(
     }),
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.tool.getToolCalibrationDetails.queryOptions({
+      context.trpc.pengujian.tool.getToolCalibrationDetails.queryOptions({
         id: params.calibrationId,
       }),
     ),
   head: () => pageHead("Edit Kalibrasi"),
-
   component: RouteComponent,
   pendingComponent: LoaderComponent,
 });
@@ -90,7 +90,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: calibration } = useSuspenseQuery(
-    trpc.tool.getToolCalibrationDetails.queryOptions({
+    trpc.pengujian.tool.getToolCalibrationDetails.queryOptions({
       id: calibrationId,
     }),
   );
@@ -108,10 +108,10 @@ function RouteComponent() {
   });
 
   const updateToolCalibrationMutation = useMutation(
-    trpc.tool.updateToolCalibration.mutationOptions({
+    trpc.pengujian.tool.updateToolCalibration.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.tool.getToolCalibrationDetails.queryOptions({
+          trpc.pengujian.tool.getToolCalibrationDetails.queryOptions({
             id: calibrationId,
           }),
         );
@@ -127,7 +127,8 @@ function RouteComponent() {
   function handleSubmit(
     data: z.infer<typeof toolCalibrationSchema.updateToolCalibrationSchema>,
   ) {
-    updateToolCalibrationMutation.mutate(data);
+    const formData = toFormData(data);
+    updateToolCalibrationMutation.mutate(formData);
   }
 
   return (

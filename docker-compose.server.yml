@@ -1,0 +1,67 @@
+# Server services (migrations, API server)
+# Requires infrastructure services to be running
+#
+# Usage:
+#   # Start infra + server together
+#   docker compose -f docker-compose.infra.yml -f docker-compose.server.yml up -d
+
+services:
+  # ---- Database Migrations ----
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    working_dir: /app
+    command: >
+      sh -c "cd packages/db && npx drizzle-kit migrate"
+    environment:
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - tepian-network
+
+  # ---- API Server ----
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Docker-specific overrides (these take precedence over .env)
+      NODE_ENV: production
+      SERVER_HOSTNAME: "0.0.0.0"
+      SERVER_PORT: 3000
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+      MEMURAI_HOST: redis
+      MEMURAI_PORT: "6379"
+      MEMURAI_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
+      BASE_URL: ${BASE_URL:-http://localhost:3001}
+      STORAGE_PATH: /app/uploads
+      UPLOADS_DIR: /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    ports:
+      - "${SERVER_PORT:-3000}:3000"
+    networks:
+      - tepian-network
+
+volumes:
+  uploads_data:
+  logs_data:
+
+networks:
+  tepian-network:
+    driver: bridge

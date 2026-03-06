@@ -41,7 +41,7 @@ function RouteComponent() {
 
   // Public tRPC query - no auth required
   const verificationQuery = useQuery(
-    trpc.document.verifyDocument.queryOptions({
+    trpc.pengujian.document.verifyDocument.queryOptions({
       token,
       checkFileIntegrity: true,
     }),

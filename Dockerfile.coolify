@@ -60,6 +60,8 @@ COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
 # Copy built server + assets
 COPY --from=build /app/apps/server/dist ./dist
 COPY --from=build /app/apps/server/assets ./assets
+COPY --from=build /app/apps/server/assets ./public/assets
+COPY --from=build /app/apps/server/public ./public
 
 # Copy migration files + drizzle config
 COPY --from=build /app/packages/db/src/migrations ./packages/db/src/migrations

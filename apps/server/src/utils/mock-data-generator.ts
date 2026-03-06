@@ -120,8 +120,6 @@ export class MockDataGenerator {
       createdAt: this.faker.date.past().toISOString(),
       updatedAt: null,
       provinceId: this.generateId("province"),
-      oldId: this.faker.number.int({ min: 1000, max: 9999 }),
-      oldProvinceId: this.faker.number.int({ min: 1000, max: 9999 }),
     };
   }
 
@@ -132,8 +130,6 @@ export class MockDataGenerator {
       deletedAt: null,
       createdAt: this.faker.date.past().toISOString(),
       updatedAt: null,
-      oldId: this.faker.number.int({ min: 1000, max: 9999 }),
-      oldRegencyId: this.faker.number.int({ min: 1000, max: 9999 }),
       regencyId: regency.id,
     };
   }

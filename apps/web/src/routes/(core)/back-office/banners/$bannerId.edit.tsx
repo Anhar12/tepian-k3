@@ -6,7 +6,7 @@ import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/utils/trpc";
 import { Controller, useForm } from "react-hook-form";
-import bannerSchema from "@tepian-k3/schema/banner.schema";
+import bannerSchema from "@tepian-k3/schema/platform/banner.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { toFormData } from "@/utils/form-data-mapper";
@@ -51,7 +51,7 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: banner, isLoading } = useQuery(
-    trpc.banner.getBannerById.queryOptions({ id: bannerId }),
+    trpc.platform.banner.getBannerById.queryOptions({ id: bannerId }),
   );
 
   const form = useForm<z.infer<typeof bannerSchema.updateBannerSchema>>({
@@ -65,10 +65,10 @@ function RouteComponent() {
   });
 
   const updateBannerMutation = useMutation(
-    trpc.banner.updateBanner.mutationOptions({
+    trpc.platform.banner.updateBanner.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.banner.getBannerById.queryOptions({ id: bannerId }),
+          trpc.platform.banner.getBannerById.queryOptions({ id: bannerId }),
         );
         globalSuccessToast("Banner berhasil diperbarui");
         await redirectBack();

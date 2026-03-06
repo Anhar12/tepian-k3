@@ -1,0 +1,263 @@
+import { Effect } from "effect";
+import {
+  createTRPCRouter,
+  formDataInput,
+  formDataProcedure,
+  withPermission,
+} from "../../index";
+import testingQueries from "@tepian-k3/queries/pengujian/testing.queries";
+import documentQueries from "@tepian-k3/queries/platform/document.queries";
+import {
+  storageService,
+  assertValidFileBuffer,
+  ALLOWED_MIME_TYPES,
+  FILE_SIZE_LIMITS,
+} from "@tepian-k3/services/storage";
+import { z } from "zod";
+import { runEffect } from "../../utils/run-effect";
+import { TESTING_STATUSES, type DocumentType } from "@tepian-k3/constants";
+import { TRPCError } from "@trpc/server";
+import { db } from "@tepian-k3/db/client";
+import { tools, worksheetTools } from "@tepian-k3/db/schema";
+import { eq, inArray } from "@tepian-k3/db";
+import { logError } from "@tepian-k3/services/logger";
+
+const testingDocumentTypes = [
+  "testing_report",
+  "lab_certificate",
+  "sample_analysis",
+  "calibration_certificate",
+] as const;
+
+export const testingRouter = createTRPCRouter({
+  /**
+   * Get all testings with pagination (Admin)
+   */
+  getAllTestings: withPermission("testing.view")
+    .input(
+      z.object({
+        page: z.number().min(1).default(1),
+        perPage: z.number().min(1).max(100).default(10),
+        search: z.string().optional(),
+      }),
+    )
+    .query(
+      async ({ input }) =>
+        await runEffect(
+          testingQueries.getAllTestings(
+            input.page,
+            input.perPage,
+            input.search,
+          ),
+        ),
+    ),
+
+  /**
+   * Get testing by ID with all relations
+   */
+  getTestingById: withPermission("testing.read")
+    .input(
+      z.object({
+        testingId: z.uuidv7(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const testing = await runEffect(
+        testingQueries.getTestingById(input.testingId),
+      );
+
+      if (!testing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Testing tidak ditemukan",
+        });
+      }
+
+      return testing;
+    }),
+
+  /**
+   * Get testing with documents
+   */
+  getTestingWithDocuments: withPermission("testing.read")
+    .input(
+      z.object({
+        testingId: z.uuidv7(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const [testing, documents] = await Promise.all([
+        runEffect(testingQueries.getTestingById(input.testingId)),
+        runEffect(documentQueries.getTestingDocuments(input.testingId)),
+      ]);
+
+      if (!testing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Testing tidak ditemukan",
+        });
+      }
+
+      return {
+        ...testing,
+        documents,
+      };
+    }),
+
+  /**
+   * Update testing status
+   */
+  updateStatus: withPermission("testing.update")
+    .input(
+      z.object({
+        testingId: z.uuidv7(),
+        status: z.enum(TESTING_STATUSES),
+        note: z.string().optional(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const updatedTesting = yield* testingQueries.updateTestingStatus(
+              input.testingId,
+              input.status,
+              input.note,
+            );
+
+            // When testing is completed, return all borrowed tools back to ready
+            if (input.status === "completed") {
+              const toolRows = yield* Effect.tryPromise({
+                try: () =>
+                  db
+                    .select({ toolId: worksheetTools.toolId })
+                    .from(worksheetTools)
+                    .where(
+                      eq(
+                        worksheetTools.worksheetId,
+                        updatedTesting.worksheetId,
+                      ),
+                    ),
+                catch: (error) => {
+                  logError(
+                    "testingRouter.updateStatus",
+                    "Failed to fetch worksheet tools for return",
+                    { error, testingId: input.testingId },
+                  );
+                  return new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Gagal mengambil data alat worksheet",
+                  });
+                },
+              });
+
+              const uniqueToolIds = [...new Set(toolRows.map((r) => r.toolId))];
+
+              if (uniqueToolIds.length > 0) {
+                yield* Effect.tryPromise({
+                  try: () =>
+                    db
+                      .update(tools)
+                      .set({ availability: "ready" })
+                      .where(inArray(tools.id, uniqueToolIds)),
+                  catch: (error) => {
+                    logError(
+                      "testingRouter.updateStatus",
+                      "Failed to return tool availability",
+                      { error, uniqueToolIds },
+                    );
+                    return new TRPCError({
+                      code: "INTERNAL_SERVER_ERROR",
+                      message: "Gagal mengembalikan ketersediaan alat",
+                    });
+                  },
+                });
+              }
+            }
+
+            return updatedTesting;
+          }),
+        ),
+    ),
+
+  /**
+   * Upload testing document
+   */
+  uploadDocument: withPermission("testing.update")
+    .input(formDataInput)
+    .use(
+      formDataProcedure(
+        z.object({
+          testingId: z.uuidv7(),
+          documentType: z.enum(testingDocumentTypes),
+          title: z.string().min(1).max(255),
+          file: z.instanceof(File),
+        }),
+      ),
+    )
+    .mutation(
+      async ({ ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const { testingId, documentType, title, file } = ctx.input.data;
+
+            // Verify testing exists
+            const testing = yield* testingQueries.getTestingById(testingId);
+
+            if (!testing) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Testing tidak ditemukan",
+                }),
+              );
+            }
+
+            // Convert file to buffer
+            const arrayBuffer = yield* Effect.tryPromise(() =>
+              file.arrayBuffer(),
+            );
+            const buffer = Buffer.from(arrayBuffer);
+
+            // Validate file (testing documents should be PDF)
+            yield* Effect.tryPromise(() =>
+              assertValidFileBuffer(buffer, file.name, file.type, {
+                maxSize: FILE_SIZE_LIMITS.DOCUMENT,
+                allowedMimeTypes: ALLOWED_MIME_TYPES.DOCUMENT,
+              }),
+            );
+
+            // Upload file to storage
+            const filename = `${documentType}-${testing.testingNumber}-${Date.now()}.${file.name.split(".").pop()}`;
+            const uploadedFile = yield* storageService.upload(buffer, {
+              filename,
+              folder: `documents/testing/${documentType}`,
+              contentType: file.type,
+            });
+
+            // Generate document number
+            const documentNumber = `${documentType.toUpperCase().replace(/_/g, "-")}-${testing.testingNumber}-${Date.now()}`;
+
+            // Create document record
+            const document = yield* documentQueries.createDocument({
+              documentNumber,
+              type: documentType as DocumentType,
+              title,
+              description: `${title} untuk Testing ${testing.testingNumber}`,
+              entityType: "testing",
+              entityId: testingId,
+              fileUrl: uploadedFile.key,
+              fileName: file.name,
+              fileSize: file.size,
+              mimeType: file.type,
+              uploadedByUserId: ctx.user.id,
+            });
+
+            return {
+              documentId: document.id,
+              url: storageService.getPublicUrl(uploadedFile.key),
+            };
+          }),
+        ),
+    ),
+});

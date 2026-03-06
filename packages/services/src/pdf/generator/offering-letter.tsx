@@ -1,12 +1,15 @@
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
 import { OfferingLetter } from "../templates/offering-letter";
-import type { WorksheetTransactionDetail } from "@tepian-k3/types/worksheet.types";
+import type { WorksheetTransactionDetail } from "@tepian-k3/types/pengujian/worksheet.types";
 
 interface GenerateOfferingLetterOptions {
   worksheet: WorksheetTransactionDetail;
   companyName: string;
   letterNumber: string;
+  companyBankName: string;
+  companyBankAccount: string;
+  companyBankAccountName: string;
 }
 /**
  * Generates an Offering Letter PDF buffer

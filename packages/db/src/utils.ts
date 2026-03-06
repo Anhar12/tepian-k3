@@ -1,11 +1,13 @@
 import { sql } from "drizzle-orm";
-import { text, timestamp } from "drizzle-orm/pg-core";
+import { pgTableCreator, text, timestamp } from "drizzle-orm/pg-core";
 import { type AnyColumn } from "drizzle-orm";
 import type { DBType } from "./client";
 import {
   ORDER_SEQUENCE_NAME,
   TESTING_SEQUENCE_NAME,
 } from "@tepian-k3/constants";
+
+export const createTable = pgTableCreator((name) => `${name}`);
 
 export const timestamps = {
   deletedAt: timestamp("deleted_at", {
@@ -140,7 +142,7 @@ export function createRequiredFileUrlColumn<T extends string>(columnPrefix: T) {
   const snakeCase = toSnakeCase(columnPrefix);
   return {
     [`${columnPrefix}Url`]: text(`${snakeCase}_url`).notNull(),
-  } as Record<`${T}Url`, ReturnType<typeof text>>;
+  } as Record<`${T}Url`, ReturnType<ReturnType<typeof text>["notNull"]>>;
 }
 
 /**
@@ -165,5 +167,8 @@ export function createRequiredFileColumns<T extends string>(columnPrefix: T) {
   return {
     [`${columnPrefix}FileName`]: text(`${snakeCase}_file_name`).notNull(),
     [`${columnPrefix}Url`]: text(`${snakeCase}_url`).notNull(),
-  } as Record<`${T}FileName` | `${T}Url`, ReturnType<typeof text>>;
+  } as Record<
+    `${T}FileName` | `${T}Url`,
+    ReturnType<ReturnType<typeof text>["notNull"]>
+  >;
 }

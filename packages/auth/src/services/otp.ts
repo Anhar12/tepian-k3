@@ -1,14 +1,14 @@
 import type z from "zod";
-import otpSchema from "@tepian-k3/schema/otp.schema";
-import userQueries from "@tepian-k3/queries/users.queries";
-import otpQueries from "@tepian-k3/queries/otp.queries";
-import usersQueries from "@tepian-k3/queries/users.queries";
+import otpSchema from "@tepian-k3/schema/platform/otp.schema";
+import userQueries from "@tepian-k3/queries/platform/users.queries";
+import otpQueries from "@tepian-k3/queries/platform/otp.queries";
+import usersQueries from "@tepian-k3/queries/platform/users.queries";
 import { createAccessToken, createRefreshToken } from "..";
 import { logError, logInfo } from "@tepian-k3/services/logger";
 import { Data, Effect, Option } from "effect";
-import permissionQueries from "@tepian-k3/queries/permission.queries";
+import permissionQueries from "@tepian-k3/queries/platform/permission.queries";
 import { db } from "@tepian-k3/db/client";
-import refreshTokensQueries from "@tepian-k3/queries/refresh-tokens.queries";
+import refreshTokensQueries from "@tepian-k3/queries/platform/refresh-tokens.queries";
 import { v7 as uuidv7 } from "uuid";
 import { QueueName, queueService } from "@tepian-k3/services/queue";
 
@@ -217,7 +217,6 @@ export class OTPService {
               id: user.id,
               email: user.email,
               roles: user.roles.map((role) => role.name),
-              permissions: user.permissions,
               createdAt: user.createdAt,
               updatedAt: user.updatedAt,
             }),

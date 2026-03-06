@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import type { NotificationType } from "@tepian-k3/constants";
-import { useOnOrderStatusChangedSubscription } from "@/hooks/use-notification-subscription";
 
 const notificationTypeIcons: Record<NotificationType, string> = {
   order_status_changed: "📦",
@@ -36,11 +35,11 @@ export default function NavbarNotifications() {
   const navigate = useNavigate();
 
   const { data: unreadCount } = useQuery(
-    trpc.notifications.getUnreadCount.queryOptions(),
+    trpc.platform.notifications.getUnreadCount.queryOptions(),
   );
 
   const { data: notifications } = useQuery(
-    trpc.notifications.getAll.queryOptions({
+    trpc.platform.notifications.getAll.queryOptions({
       page: 1,
       limit: 5,
       isRead: false,
@@ -48,26 +47,26 @@ export default function NavbarNotifications() {
   );
 
   const markAsReadMutation = useMutation(
-    trpc.notifications.markAsRead.mutationOptions({
+    trpc.platform.notifications.markAsRead.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getUnreadCount.queryKey(),
+          queryKey: trpc.platform.notifications.getUnreadCount.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getAll.queryKey(),
+          queryKey: trpc.platform.notifications.getAll.queryKey(),
         });
       },
     }),
   );
 
   const markAllAsReadMutation = useMutation(
-    trpc.notifications.markAllAsRead.mutationOptions({
+    trpc.platform.notifications.markAllAsRead.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getUnreadCount.queryKey(),
+          queryKey: trpc.platform.notifications.getUnreadCount.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.notifications.getAll.queryKey(),
+          queryKey: trpc.platform.notifications.getAll.queryKey(),
         });
       },
     }),
@@ -82,21 +81,6 @@ export default function NavbarNotifications() {
   };
 
   const hasUnread = unreadCount && unreadCount > 0;
-
-  useOnOrderStatusChangedSubscription({
-    showToast: true,
-    onNotification: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.notifications.getUnreadCount.queryKey(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: trpc.notifications.getAll.queryKey(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: trpc.order.getAllOrders.queryKey(),
-      });
-    },
-  });
 
   return (
     <DropdownMenu>

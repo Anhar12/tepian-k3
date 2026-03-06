@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { pageHead } from "@/utils/page-head";
-import bannerSchema from "@tepian-k3/schema/banner.schema";
+import bannerSchema from "@tepian-k3/schema/platform/banner.schema";
 import { requirePermission } from "@/utils/require-permission";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { trpc } from "@/utils/trpc";
@@ -36,7 +36,7 @@ function RouteComponent() {
     isLoading,
     error,
   } = useQuery({
-    ...trpc.banner.getPaginatedBanners.queryOptions(params),
+    ...trpc.platform.banner.getPaginatedBanners.queryOptions(params),
     placeholderData: keepPreviousData,
   });
 

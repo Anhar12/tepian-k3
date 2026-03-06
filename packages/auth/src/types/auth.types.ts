@@ -11,7 +11,6 @@ export interface JWTPayload extends JoseJWTPayload {
   id: string;
   email: string;
   roles: string[];
-  permissions: string[];
   createdAt: string;
   updatedAt: string | null;
 }
@@ -20,7 +19,6 @@ export interface AccessTokenPayload extends JoseJWTPayload {
   id: string;
   email: string;
   roles: string[];
-  permissions: string[];
   createdAt: string;
   updatedAt: string | null;
 }

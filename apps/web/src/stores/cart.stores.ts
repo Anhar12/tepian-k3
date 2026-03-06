@@ -1,4 +1,4 @@
-import orderItemSchema from "@tepian-k3/schema/order-item.schema";
+import orderItemSchema from "@tepian-k3/schema/pengujian/order-item.schema";
 import z from "zod";
 import { create } from "zustand";
 

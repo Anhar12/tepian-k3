@@ -1,0 +1,7 @@
+{
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Generate exactly 1 commit message following Conventional Commits: format `<type>(<scope>): <subject>`, allowed types: feat, fix, chore, docs, style, refactor, perf, test, ci, build, wip, revert, improvement. Rules: lowercase, no period, imperative mood, subject under 72 chars, never generate multiple commit messages. If multiple files changed, summarize into 1 subject using dominant type and shared scope (omit scope if changes span multiple areas), then use body (blank line after subject, each line prefixed with `-`) to detail individual changes. For breaking changes append `!` after type and add `BREAKING CHANGE:` in footer."
+    }
+  ]
+}

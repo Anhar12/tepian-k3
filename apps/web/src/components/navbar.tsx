@@ -32,13 +32,13 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 mx-auto flex h-16 max-h-16 min-h-16 w-full items-center justify-between bg-white/80 px-4 backdrop-blur-sm md:px-5 dark:bg-neutral-950/80">
       {/* Logo */}
-      <a href="/" className="text-xl font-bold text-primary">
+      <Link to="/" className="text-xl font-bold text-primary">
         <ImageWithFallback
-          src="/assets/logo-tepiank3.png"
+          src="/assets/logo-tepiank3.webp"
           alt="Tepian K3 Logo"
           className="w-32 object-contain sm:w-44"
         />
-      </a>
+      </Link>
 
       {/* Desktop Navigation */}
       <div className="hidden items-center gap-4 md:flex">

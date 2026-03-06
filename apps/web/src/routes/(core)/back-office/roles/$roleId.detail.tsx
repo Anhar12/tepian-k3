@@ -34,13 +34,13 @@ export const Route = createFileRoute(
     await requirePermission(context, { permission: "roles.read" }),
   loader: async ({ context, params }) => {
     context.queryClient.ensureQueryData(
-      context.trpc.role.getRoleWithPermissionsById.queryOptions({
+      context.trpc.platform.role.getRoleWithPermissionsById.queryOptions({
         id: params.roleId,
       }),
     );
 
     context.queryClient.ensureQueryData(
-      context.trpc.permission.getAllPermissions.queryOptions(),
+      context.trpc.platform.permission.getAllPermissions.queryOptions(),
     );
   },
   head: () => pageHead("Detail Role"),
@@ -78,11 +78,11 @@ function RouteComponent() {
   const { roleId } = Route.useParams();
 
   const { data: role } = useSuspenseQuery(
-    trpc.role.getRoleWithPermissionsById.queryOptions({ id: roleId }),
+    trpc.platform.role.getRoleWithPermissionsById.queryOptions({ id: roleId }),
   );
 
   const { data: allPermissions } = useSuspenseQuery(
-    trpc.permission.getAllPermissions.queryOptions(),
+    trpc.platform.permission.getAllPermissions.queryOptions(),
   );
 
   // Store original permissions as a Set for O(1) lookups
@@ -112,14 +112,18 @@ function RouteComponent() {
   }, [selectedPermissions, originalPermissions]);
 
   const updateRolePermissionsMutation = useMutation(
-    trpc.permission.updateRolePermissions.mutationOptions({
+    trpc.platform.permission.updateRolePermissions.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.role.getRoleWithPermissionsById.queryOptions({ id: roleId }),
+          trpc.platform.role.getRoleWithPermissionsById.queryOptions({
+            id: roleId,
+          }),
         );
 
         await queryClient.refetchQueries(
-          trpc.role.getRoleWithPermissionsById.queryOptions({ id: roleId }),
+          trpc.platform.role.getRoleWithPermissionsById.queryOptions({
+            id: roleId,
+          }),
         );
 
         globalSuccessToast("Berhasil memperbarui izin role.");

@@ -153,45 +153,53 @@ export const Table = <T extends Record<string, unknown>>({
       </View>
 
       {/* Data Rows */}
-      {data.map((item, rowIndex) => (
-        <View
-          key={rowIndex}
-          style={tw(buildClassString("flex-row", rowClassName))}
-        >
-          {allColumns.map((column, colIndex) => {
-            const isIndexColumn = column.key === "__index__";
-            const content = isIndexColumn
-              ? rowIndex + 1
-              : renderCellValue(item, column, rowIndex);
+      {data.map((item, rowIndex) => {
+        const isLastRow = rowIndex === data.length - 1;
+        const rowBorderClass = bordered && !isLastRow ? borderBottomClass : "";
 
-            const borderRightClass =
-              bordered && colIndex < allColumns.length - 1
-                ? "border-r border-black"
-                : "";
+        return (
+          <View
+            key={rowIndex}
+            style={tw(
+              buildClassString("flex-row", rowBorderClass, rowClassName),
+            )}
+          >
+            {allColumns.map((column, colIndex) => {
+              const isIndexColumn = column.key === "__index__";
+              const content = isIndexColumn
+                ? rowIndex + 1
+                : renderCellValue(item, column, rowIndex);
 
-            return (
-              <View
-                key={`${column.key}-${colIndex}`}
-                style={tw(
-                  buildClassString(
-                    column.width,
-                    borderRightClass,
-                    "p-2",
-                    getAlignClass(column.align),
-                    cellClassName,
-                  ),
-                )}
-              >
-                {typeof content === "string" || typeof content === "number" ? (
-                  <Text>{content}</Text>
-                ) : (
-                  content
-                )}
-              </View>
-            );
-          })}
-        </View>
-      ))}
+              const borderRightClass =
+                bordered && colIndex < allColumns.length - 1
+                  ? "border-r border-black"
+                  : "";
+
+              return (
+                <View
+                  key={`${column.key}-${colIndex}`}
+                  style={tw(
+                    buildClassString(
+                      column.width,
+                      borderRightClass,
+                      "p-2",
+                      getAlignClass(column.align),
+                      cellClassName,
+                    ),
+                  )}
+                >
+                  {typeof content === "string" ||
+                  typeof content === "number" ? (
+                    <Text>{content}</Text>
+                  ) : (
+                    content
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        );
+      })}
     </View>
   );
 };

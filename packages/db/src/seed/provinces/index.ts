@@ -2,24 +2,31 @@ import { db } from "../../client";
 import { provinces } from "../../schema";
 import { getIndonesianProvinces } from "../utils/indonesian-countries/index";
 
-type InsertProvince = typeof provinces.$inferInsert;
+/**
+ * Seeds all Indonesian provinces and returns a BPS code → UUID map
+ * for use by the regency seeder.
+ *
+ * @returns Map of province BPS code (e.g. "11") to inserted UUID
+ */
+async function seedProvinces(): Promise<Map<string, string>> {
+  const provincesList = await getIndonesianProvinces();
 
-const generateProvinces = async (): Promise<InsertProvince[]> => {
-  const provinces = await getIndonesianProvinces();
+  await db.delete(provinces).execute();
 
-  return provinces.map((province) => ({
-    oldId: Number(province.id),
-    name: province.name,
-  }));
-};
+  await db
+    .insert(provinces)
+    .values(provincesList.map((p) => ({ name: p.name })))
+    .execute();
 
-async function seedProvinces() {
-  const provincesData = await generateProvinces();
+  const inserted = await db.query.provinces.findMany();
+  const nameToUuid = new Map(inserted.map((r) => [r.name, r.id]));
 
-  await db.delete(provinces).execute(); // Hapus semua data yang ada sebelum melakukan seed ulang
+  const codeToUuid = new Map(
+    provincesList.map((p) => [p.code, nameToUuid.get(p.name)!]),
+  );
 
-  await db.insert(provinces).values(provincesData).execute();
-  console.log("✅ Provinces have been seeded");
+  console.log(`✅ Seeded ${provincesList.length} provinces`);
+  return codeToUuid;
 }
 
 export default seedProvinces;

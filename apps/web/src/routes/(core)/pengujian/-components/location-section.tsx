@@ -46,11 +46,11 @@ export function LocationSection() {
   );
 
   const { data: company, isLoading: isCompanyLoading } = useQuery(
-    trpc.userCompany.getAllUserCompaniesByUserId.queryOptions(),
+    trpc.pengujian.userCompany.getAllUserCompaniesByUserId.queryOptions(),
   );
 
   const { data: testingLocation, isLoading } = useQuery({
-    ...trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
+    ...trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
       { companyId: selectedCompany || "" },
     ),
     enabled: !!selectedCompany,
@@ -159,7 +159,7 @@ export function LocationSection() {
           {[1, 2, 3].map((i) => (
             <Card
               key={i}
-              className="min-w-[260px] space-y-4 rounded-3xl border-none bg-white p-4 shadow-md shadow-slate-100 sm:min-w-[320px] sm:p-6"
+              className="min-w-65 space-y-4 rounded-3xl border-none bg-white p-4 shadow-md shadow-slate-100 sm:min-w-[320px] sm:p-6"
             >
               <Skeleton className="h-7 w-24" />
               <div className="grid grid-cols-1 gap-4">
@@ -182,7 +182,7 @@ export function LocationSection() {
               {selectedTestingLocations.map((area) => (
                 <CarouselItem
                   key={area.id}
-                  className="w-[280px] max-w-[320px] p-2 sm:w-auto"
+                  className="w-70 max-w-[320px] p-2 sm:w-auto"
                   onClick={() => {
                     const arrayOfObjects = [
                       { id: area.id, name: area.name, items: [] },
@@ -195,6 +195,7 @@ export function LocationSection() {
                         search: (old) => ({
                           ...old,
                           companyId: selectedCompany || "",
+                          locationId: undefined,
                         }),
                       });
                     } else {

@@ -37,7 +37,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient, trpc } from "@/utils/trpc";
 import { Spinner } from "@/components/ui/spinner";
-import chemicalMaterialSchema from "@tepian-k3/schema/chemical-material.schema";
+import chemicalMaterialSchema from "@tepian-k3/schema/pengujian/chemical-material.schema";
 import {
   BAHAN_STATUS,
   BAHAN_STATUS_LABELS,
@@ -73,7 +73,9 @@ function RouteComponent() {
   const redirectBack = useRedirectBackWithTimeout();
 
   const { data: chemicalMaterial, isLoading } = useQuery(
-    trpc.chemicalMaterial.getById.queryOptions({ id: chemicalMaterialId }),
+    trpc.pengujian.chemicalMaterial.getById.queryOptions({
+      id: chemicalMaterialId,
+    }),
   );
 
   const form = useForm<
@@ -84,10 +86,10 @@ function RouteComponent() {
   });
 
   const updateChemicalMaterialMutation = useMutation(
-    trpc.chemicalMaterial.update.mutationOptions({
+    trpc.pengujian.chemicalMaterial.update.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.chemicalMaterial.getById.queryOptions({
+          trpc.pengujian.chemicalMaterial.getById.queryOptions({
             id: chemicalMaterialId,
           }),
         );

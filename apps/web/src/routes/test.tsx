@@ -15,7 +15,7 @@ function RouteComponent() {
   const [message, setMessage] = useState("");
 
   const testMutation = useMutation(
-    trpc.test.broadcastTestEvent.mutationOptions({
+    trpc.pengujian.test.broadcastTestEvent.mutationOptions({
       onSuccess: () => {
         globalSuccessToast("Test event broadcasted successfully");
       },

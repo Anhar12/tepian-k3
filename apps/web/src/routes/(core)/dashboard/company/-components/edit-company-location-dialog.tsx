@@ -22,7 +22,7 @@ import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import userCompanyTestingLocationSchema from "@tepian-k3/schema/user-company-testing-location.schema";
+import userCompanyTestingLocationSchema from "@tepian-k3/schema/pengujian/user-company-testing-location.schema";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -52,7 +52,7 @@ export default function EditCompanyLocationDialog({
   const [districtOpen, setDistrictOpen] = useState(false);
 
   const { data: editingTestingLocation, isLoading } = useQuery({
-    ...trpc.userCompanyTestingLocation.getUserCompanyTestingLocationById.queryOptions(
+    ...trpc.pengujian.userCompanyTestingLocation.getUserCompanyTestingLocationById.queryOptions(
       {
         id: editingTestingLocationId!,
       },
@@ -92,18 +92,18 @@ export default function EditCompanyLocationDialog({
   }, [editingTestingLocation, form]);
 
   const updateCompanyTestingLocationMutation = useMutation(
-    trpc.userCompanyTestingLocation.userUpdateUserCompanyTestingLocation.mutationOptions(
+    trpc.pengujian.userCompanyTestingLocation.userUpdateUserCompanyTestingLocation.mutationOptions(
       {
         onSuccess: async (data) => {
           await queryClient.invalidateQueries(
-            trpc.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
+            trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
               {
                 companyId,
               },
             ),
           );
           await queryClient.invalidateQueries(
-            trpc.userCompanyTestingLocation.getUserCompanyTestingLocationById.queryOptions(
+            trpc.pengujian.userCompanyTestingLocation.getUserCompanyTestingLocationById.queryOptions(
               {
                 id: data.id,
               },
@@ -123,11 +123,11 @@ export default function EditCompanyLocationDialog({
   );
 
   const { data: regency } = useQuery(
-    trpc.regency.getAllRegencies.queryOptions(),
+    trpc.platform.regency.getAllRegencies.queryOptions(),
   );
 
   const { data: districts } = useQuery({
-    ...trpc.district.getAllDistrictsByRegencyId.queryOptions({
+    ...trpc.platform.district.getAllDistrictsByRegencyId.queryOptions({
       regencyId: regencyId!,
     }),
     enabled: !!regencyId,

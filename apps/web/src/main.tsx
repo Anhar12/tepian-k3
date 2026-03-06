@@ -19,6 +19,7 @@ const router = createRouter({
   routeMasks: [katalogMask, detailToolsMask],
   defaultPreload: "intent",
   defaultPendingComponent: () => <Loader />,
+  scrollRestoration: true,
   context: { trpc, queryClient },
   Wrap: function WrapComponent({ children }: { children: React.ReactNode }) {
     return (

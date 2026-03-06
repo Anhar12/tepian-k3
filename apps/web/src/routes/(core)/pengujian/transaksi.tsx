@@ -33,7 +33,7 @@ function RouteComponent() {
   const navigate = Route.useNavigate();
 
   const { data: orders, isLoading } = useQuery(
-    trpc.order.getAllOrders.queryOptions({
+    trpc.pengujian.order.getAllOrders.queryOptions({
       status: tabs,
     }),
   );

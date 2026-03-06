@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { ChemicalMaterial } from "@tepian-k3/types/chemical-material.types";
+import type { ChemicalMaterial } from "@tepian-k3/types/pengujian/chemical-material.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/chemical-materials";
 import {
@@ -22,10 +22,10 @@ const ActionCell = createCrudActionCell<
   resourceName: "chemical-material",
   resourcePath: "chemical-materials",
   permissionPrefix: "chemical-materials",
-  deleteMutation: trpc.chemicalMaterial.delete,
-  restoreMutation: trpc.chemicalMaterial.restore,
+  deleteMutation: trpc.pengujian.chemicalMaterial.delete,
+  restoreMutation: trpc.pengujian.chemicalMaterial.restore,
   getQueryOptions: (params) =>
-    trpc.chemicalMaterial.getPaginated.queryOptions(params),
+    trpc.pengujian.chemicalMaterial.getPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
 });
 

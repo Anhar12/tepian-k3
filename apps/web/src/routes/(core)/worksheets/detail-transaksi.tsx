@@ -30,11 +30,17 @@ import {
 import { usePagination } from "@/lib/pagination";
 import { WorksheetDataTable } from "@/components/ui/worksheet-data-table";
 import { trpc } from "@/utils/trpc";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { differenceInDays, format, parseISO } from "date-fns";
+import {
+  addBusinessDays,
+  differenceInBusinessDays,
+  format,
+  isWeekend,
+  nextMonday,
+  parseISO,
+} from "date-fns";
 import { id } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getPublicUrl } from "@/utils/url";
@@ -44,6 +50,7 @@ import { PermissionGate } from "@/components/permission-gate";
 import useDialogs from "@/hooks/use-dialog";
 import GenerateOfferingDialog from "./-components/generate-offering-dialog";
 import { pageHead } from "@/utils/page-head";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 
 const searchParamsSchema = z.object({
   worksheetId: z.uuidv7().optional(),
@@ -79,7 +86,7 @@ function calculateDuration(
   if (!startDate || !endDate) return 0;
   const start = parseISO(startDate);
   const end = parseISO(endDate);
-  return Math.abs(differenceInDays(end, start)) + 1;
+  return Math.abs(differenceInBusinessDays(end, start)) + 1;
 }
 
 function formatDateRange(
@@ -91,6 +98,25 @@ function formatDateRange(
   const end = parseISO(endDate);
   const dateFormat = "dd MMMM yyyy";
   return `${format(start, dateFormat, { locale: id })} - ${format(end, dateFormat, { locale: id })}`;
+}
+
+function InfoCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col overflow-hidden rounded-xl border border-muted/50">
+      <div className="border-b bg-primary/40 p-4 sm:px-6">
+        <h2 className="text-base font-semibold text-primary sm:text-lg">
+          {title}
+        </h2>
+      </div>
+      {children}
+    </div>
+  );
 }
 
 function RouteComponent() {
@@ -116,27 +142,38 @@ function RouteComponent() {
     error,
     refetch,
   } = useQuery(
-    trpc.worksheet.getTransactionDetail.queryOptions(
+    trpc.pengujian.worksheet.getTransactionDetail.queryOptions(
       { worksheetId: worksheetId! },
       { enabled: !!worksheetId },
     ),
   );
 
   const saveOperationalCostsMutation = useMutation(
-    trpc.worksheet.saveOperationalCosts.mutationOptions({
+    trpc.pengujian.worksheet.saveOperationalCosts.mutationOptions({
       onSuccess: () => {
-        toast.success("Biaya operasional berhasil disimpan");
+        globalSuccessToast("Biaya operasional berhasil disimpan");
         setIsDirty(false);
         refetch();
       },
       onError: (error: { message?: string }) => {
-        toast.error(error.message || "Gagal menyimpan biaya operasional");
+        globalErrorToast(
+          `Gagal menyimpan biaya operasional: ${error.message ?? "Silahkan coba lagi."}`,
+        );
       },
     }),
   );
 
+  // Reset state when switching worksheets so stale data doesn't linger during loading
   useEffect(() => {
-    if (worksheet?.operationalCosts) {
+    setOperationalCosts([]);
+    setIsDirty(false);
+  }, [worksheetId]);
+
+  useEffect(() => {
+    // Don't overwrite unsaved edits from background refetches
+    if (isDirty) return;
+
+    if (worksheet && worksheet.operationalCosts.length > 0) {
       setOperationalCosts(
         worksheet.operationalCosts.map((cost) => ({
           id: cost.id,
@@ -160,18 +197,9 @@ function RouteComponent() {
         },
       ];
 
-      if (worksheet.coverTransportationIncluded === false) {
+      if (worksheet.coverFlightIncluded) {
         defaultCosts.push({
-          item: "Transportasi",
-          unitCount: 1,
-          days: 1,
-          unitCost: null,
-          note: "Disediakan Perusahaan",
-          sortOrder: 1,
-        });
-      } else {
-        defaultCosts.push({
-          item: "Transportasi",
+          item: "Pesawat PP",
           unitCount: 1,
           days: 1,
           unitCost: 0,
@@ -180,29 +208,42 @@ function RouteComponent() {
         });
       }
 
-      if (worksheet.coverAccommodationIncluded === false) {
+      if (worksheet.coverGroundTransportationIncluded) {
         defaultCosts.push({
-          item: "Penginapan",
+          item: "Transportasi Darat",
           unitCount: 1,
           days: 1,
-          unitCost: null,
-          note: "Disediakan Perusahaan",
+          unitCost: 0,
+          note: null,
           sortOrder: 2,
         });
-      } else {
+      }
+
+      if (worksheet.coverLodgingIncluded) {
         defaultCosts.push({
           item: "Penginapan",
           unitCount: 1,
           days: 1,
           unitCost: 0,
           note: null,
-          sortOrder: 2,
+          sortOrder: 3,
+        });
+      }
+
+      if (worksheet.coverAccommodationIncluded) {
+        defaultCosts.push({
+          item: "Akomodasi",
+          unitCount: 1,
+          days: 1,
+          unitCost: 0,
+          note: null,
+          sortOrder: 4,
         });
       }
 
       setOperationalCosts(defaultCosts);
     }
-  }, [worksheet]);
+  }, [worksheet, isDirty]);
 
   const readyItems = useMemo(() => {
     if (!worksheet?.items) return [];
@@ -225,7 +266,9 @@ function RouteComponent() {
   const showOperationalCosts = useMemo(() => {
     if (!worksheet) return false;
     return (
-      worksheet.coverTransportationIncluded === true ||
+      worksheet.coverFlightIncluded === true ||
+      worksheet.coverGroundTransportationIncluded === true ||
+      worksheet.coverLodgingIncluded === true ||
       worksheet.coverAccommodationIncluded === true
     );
   }, [worksheet]);
@@ -496,30 +539,31 @@ function RouteComponent() {
     );
   }
 
-  const duration = calculateDuration(worksheet.startDate, worksheet.endDate);
-  const dateRange = formatDateRange(worksheet.startDate, worksheet.endDate);
+  const hasStartDate = !!worksheet.startDate;
+  const hasEstimate = worksheet.estimatedAmountOfDays > 0;
+
+  const duration = hasStartDate
+    ? calculateDuration(worksheet.startDate, worksheet.endDate)
+    : worksheet.estimatedAmountOfDays;
+  const dateRange = hasStartDate
+    ? formatDateRange(worksheet.startDate, worksheet.endDate)
+    : hasEstimate
+      ? (() => {
+          const today = new Date();
+          const start = isWeekend(today) ? nextMonday(today) : today;
+          const end = addBusinessDays(
+            start,
+            worksheet.estimatedAmountOfDays - 1,
+          );
+          return formatDateRange(start.toISOString(), end.toISOString());
+        })()
+      : "Estimasi belum di set";
 
   return (
     <div className="space-y-4">
       <WorksheetHeaderCard
         title="Detail Transaksi"
         subtitle="Rincian biaya parameter dan operasional pengujian"
-        actionButton={[
-          {
-            label: "Simpan",
-            icon: <Save />,
-            variant: "default",
-            size: "default",
-            onClick: () => {},
-          },
-          {
-            label: "Cetak",
-            icon: <Printer />,
-            variant: "outline",
-            size: "default",
-            onClick: () => {},
-          },
-        ]}
       />
 
       <Card>
@@ -531,12 +575,7 @@ function RouteComponent() {
         </CardHeader>
         <CardContent className="px-3 sm:px-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
-            <div className="flex flex-col overflow-hidden rounded-xl border border-muted/50">
-              <div className="border-b bg-primary/40 p-4 sm:px-6">
-                <h2 className="text-base font-semibold text-primary sm:text-lg">
-                  List Personel
-                </h2>
-              </div>
+            <InfoCard title="List Personel">
               <ScrollArea className="h-50 sm:h-60">
                 <div className="flex flex-col space-y-3 p-4 sm:p-6">
                   {assignedPersonnel.length > 0 ? (
@@ -576,16 +615,11 @@ function RouteComponent() {
                   )}
                 </div>
               </ScrollArea>
-            </div>
+            </InfoCard>
 
-            <div className="space-y-2 rounded-xl border border-muted/50">
-              <div className="flex flex-1 flex-col justify-center rounded-t-xl border-b bg-primary/40 p-3 sm:px-6 sm:pb-4">
-                <h2 className="text-xl font-semibold text-primary sm:text-base">
-                  Area Pengujian
-                </h2>
-              </div>
+            <InfoCard title="Area Pengujian">
               <ScrollArea className="h-50 sm:h-60">
-                <div className="flex flex-col space-y-1 p-3 sm:px-3 sm:pt-4">
+                <div className="flex flex-col space-y-1 p-4 sm:p-6">
                   {locations.length > 0 ? (
                     locations.map((loc, idx) => (
                       <div className="flex flex-row gap-4" key={idx}>
@@ -604,14 +638,9 @@ function RouteComponent() {
                   )}
                 </div>
               </ScrollArea>
-            </div>
+            </InfoCard>
 
-            <div className="flex flex-col overflow-hidden rounded-xl border border-muted/50">
-              <div className="border-b bg-primary/40 p-4 sm:px-6">
-                <h2 className="text-base font-semibold text-primary sm:text-lg">
-                  Durasi Pengujian
-                </h2>
-              </div>
+            <InfoCard title="Durasi Pengujian">
               <div className="flex flex-1 flex-col justify-between p-4 sm:p-6">
                 <p className="text-3xl font-bold sm:text-4xl">
                   {duration > 0 ? `${duration} Hari` : "-"}
@@ -625,22 +654,19 @@ function RouteComponent() {
                   </p>
                 </div>
               </div>
-            </div>
+            </InfoCard>
 
-            <div className="space-y-2 rounded-xl border border-muted/50">
-              <div className="flex flex-1 flex-col justify-center rounded-t-xl border-b bg-primary/40 p-3 sm:px-6 sm:pb-4">
-                <h2 className="text-xl font-semibold text-primary sm:text-base">
-                  Total Personel
-                </h2>
+            <InfoCard title="Total Personel">
+              <div className="flex flex-1 flex-col justify-between p-4 sm:p-6">
+                <p className="text-3xl font-bold sm:text-4xl">
+                  {assignedPersonnel.length > 0
+                    ? `${assignedPersonnel.length} Orang`
+                    : worksheet.estimatedAmountOfMembers > 0
+                      ? `${worksheet.estimatedAmountOfMembers} Orang`
+                      : "-"}
+                </p>
               </div>
-              <div className="flex flex-col space-y-1 p-3 sm:px-3 sm:pt-4">
-                <div className="flex items-center gap-2">
-                  <p className="text-3xl font-bold sm:text-4xl">
-                    {assignedPersonnel.length} Orang
-                  </p>
-                </div>
-              </div>
-            </div>
+            </InfoCard>
           </div>
         </CardContent>
       </Card>
@@ -913,10 +939,10 @@ function RouteComponent() {
                       Item
                     </TableHead>
                     <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                      Orang/Unit
+                      Orang/Unit/Trip
                     </TableHead>
                     <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                      Hari
+                      Hari/Perjalanan
                     </TableHead>
                     <TableHead className="hidden text-center text-xs font-semibold sm:text-sm md:table-cell">
                       Keterangan
@@ -1075,35 +1101,20 @@ function RouteComponent() {
 
       <div className="flex flex-col items-stretch justify-between gap-3 rounded-xl border bg-card p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
         <div className="flex items-center justify-center gap-2 sm:justify-start">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 bg-transparent"
-            onClick={() => {
-              dialogs.open("generateOfferingLetter");
-            }}
-          >
-            <Printer className="h-4 w-4" />
-          </Button>
+          <PermissionGate permission="documents-admin.create">
+            <Button
+              variant="outline"
+              className="flex-1 gap-2 sm:flex-initial"
+              onClick={() => {
+                dialogs.open("generateOfferingLetter");
+              }}
+            >
+              <Printer className="h-4 w-4" />
+              Cetak Penawaran
+            </Button>
+          </PermissionGate>
           {showOperationalCosts && (
             <PermissionGate permission="worksheets.update">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 bg-transparent"
-                onClick={handleSave}
-                disabled={
-                  !isEditable ||
-                  !isDirty ||
-                  saveOperationalCostsMutation.isPending
-                }
-              >
-                {saveOperationalCostsMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-              </Button>
               <Button
                 className="flex-1 gap-2 sm:flex-initial"
                 onClick={handleSave}
@@ -1118,7 +1129,7 @@ function RouteComponent() {
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                SIMPAN
+                Simpan
               </Button>
             </PermissionGate>
           )}

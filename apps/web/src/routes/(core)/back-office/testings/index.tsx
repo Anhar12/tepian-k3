@@ -66,7 +66,7 @@ function RouteComponent() {
   const [searchInput, setSearchInput] = useState(params.search || "");
 
   const { data, isLoading } = useQuery(
-    trpc.testing.getAllTestings.queryOptions({
+    trpc.pengujian.testing.getAllTestings.queryOptions({
       page: params.page,
       perPage: params.perPage,
       search: params.search,

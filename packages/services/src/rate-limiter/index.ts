@@ -107,11 +107,6 @@ export class RateLimiterService {
     name: string,
     preset: keyof typeof RateLimiterPresets,
   ): RateLimiter {
-    const isDev = env.NODE_ENV === "development";
-    if (isDev) {
-      // In development, use a more lenient config for STRICT preset
-      return this.create(name, RateLimiterPresets["DEV_MODE"]);
-    }
     return this.create(name, RateLimiterPresets[preset]);
   }
 

@@ -2,26 +2,37 @@ import { Activity } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { PermissionGate } from "@/components/permission-gate";
 import type { VariantProps } from "class-variance-authority";
+import type { Permission } from "@tepian-k3/constants";
 import { cn } from "@/lib/utils";
+
+interface ButtonProps extends React.ComponentPropsWithoutRef<typeof Button> {
+  showButton?: boolean;
+  variant: VariantProps<typeof buttonVariants>["variant"];
+  size: VariantProps<typeof buttonVariants>["size"];
+  label: string;
+  icon: React.ReactNode;
+  isLoading?: boolean;
+  className?: string;
+  labelClassName?: string;
+  onClick: () => void;
+  /** Optional permission required to show this button */
+  permission?: Permission | Permission[];
+}
 
 interface HeaderCardProps {
   title: string;
   subtitle: string;
-  actionButton: {
-    label: string;
-    icon: React.ReactNode;
-    className?: string;
-    labelClassName?: string;
-    variant: VariantProps<typeof buttonVariants>["variant"];
-    size: VariantProps<typeof buttonVariants>["size"];
-    onClick: () => void;
-  }[];
+  shouldShowActionButtons?: boolean;
+  actionButton?: ButtonProps[];
 }
 
 export function WorksheetHeaderCard({
   title,
   subtitle,
+  shouldShowActionButtons = true,
   actionButton,
 }: HeaderCardProps) {
   return (
@@ -42,20 +53,35 @@ export function WorksheetHeaderCard({
             </div>
           </div>
           <div className="flex gap-2 sm:gap-3">
-            {actionButton.map((button, index) => (
-              <Button
-                key={index}
-                variant={button.variant}
-                size={button.size}
-                className={cn("flex items-center gap-2", button.className)}
-                onClick={button.onClick}
-              >
-                {button.icon}
-                <span className={cn("hidden sm:inline", button.labelClassName)}>
-                  {button.label}
-                </span>
-              </Button>
-            ))}
+            {shouldShowActionButtons &&
+              actionButton?.map((button, index) => {
+                if (button.showButton === false) return null;
+                const btn = (
+                  <Button
+                    key={index}
+                    {...button}
+                    variant={button.variant}
+                    size={button.size}
+                    className={cn("flex items-center gap-2", button.className)}
+                    onClick={button.onClick}
+                    disabled={button.isLoading || button.disabled}
+                  >
+                    {button.isLoading ? <Spinner /> : button.icon}
+                    <span
+                      className={cn("hidden sm:inline", button.labelClassName)}
+                    >
+                      {button.label}
+                    </span>
+                  </Button>
+                );
+                return button.permission ? (
+                  <PermissionGate key={index} permission={button.permission}>
+                    {btn}
+                  </PermissionGate>
+                ) : (
+                  btn
+                );
+              })}
           </div>
         </div>
       </CardContent>

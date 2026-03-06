@@ -20,7 +20,7 @@ import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import parameterChemicalMaterialSchema from "@tepian-k3/schema/parameter-chemical-material.schema";
+import parameterChemicalMaterialSchema from "@tepian-k3/schema/pengujian/parameter-chemical-material.schema";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
@@ -52,11 +52,11 @@ export default function CreateParameterChemicalDialog({
   });
 
   const createParameterChemicalMutation = useMutation(
-    trpc.parameterChemicalMaterial.assignChemicalMaterialToParameter.mutationOptions(
+    trpc.pengujian.parameterChemicalMaterial.assignChemicalMaterialToParameter.mutationOptions(
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(
-            trpc.parameterChemicalMaterial.getAllChemicalMaterialsByParameterId.queryOptions(
+            trpc.pengujian.parameterChemicalMaterial.getAllChemicalMaterialsByParameterId.queryOptions(
               {
                 parameterId,
               },
@@ -77,7 +77,7 @@ export default function CreateParameterChemicalDialog({
   );
 
   const { data: chemicalMaterials, isLoading } = useQuery(
-    trpc.chemicalMaterial.getAll.queryOptions(),
+    trpc.pengujian.chemicalMaterial.getAll.queryOptions(),
   );
 
   function handleSubmit(

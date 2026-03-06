@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToStream } from "@react-pdf/renderer";
 import { Invoice } from "../templates/invoice";
-import type { OrderWithCompanyAndItems } from "@tepian-k3/types/order.types";
+import type { OrderWithCompanyAndItems } from "@tepian-k3/types/pengujian/order.types";
 
 interface GenerateInvoiceOptions {
   order: OrderWithCompanyAndItems;

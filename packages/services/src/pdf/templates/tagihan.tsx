@@ -18,11 +18,7 @@ interface TagihanProps {
   billingCode: string;
   billingAmount: number;
   operationalAmount: number;
-  operationalBankAccount: string;
-  operationalBankAccountName: string;
   billingExpiryDate: string;
-  adminEmail: string;
-  adminContact: string;
 }
 
 const formatCurrency = (amount: number) =>
@@ -41,11 +37,7 @@ export const Tagihan: React.FC<TagihanProps> = ({
   billingCode,
   billingAmount,
   operationalAmount,
-  operationalBankAccount,
-  operationalBankAccountName,
   billingExpiryDate,
-  adminEmail: _adminEmail,
-  adminContact: _adminContact,
 }) => {
   const today = format(new Date(), "dd MMMM yyyy", { locale: id });
   const refDateFormatted = format(new Date(referenceDate), "dd MMMM yyyy", {
@@ -103,9 +95,9 @@ export const Tagihan: React.FC<TagihanProps> = ({
           sampaikan Tagihan Biaya Pengujian dengan Kode Billing{" "}
           <Text style={tw("font-bold")}>{billingCode}</Text> sebesar{" "}
           {formatCurrency(billingAmount)},-. dan untuk biaya operasional ke
-          nomor rekening{" "}
-          <Text style={tw("font-bold")}>{operationalBankAccount}</Text> an.{" "}
-          <Text style={tw("font-bold")}>{operationalBankAccountName}</Text>{" "}
+          nomor rekening <Text style={tw("font-bold")}>148-00-2495411-0</Text>{" "}
+          an.{" "}
+          <Text style={tw("font-bold")}>RPL 046 PS Balai K3SMD Utk Ops</Text>{" "}
           sebesar {formatCurrency(operationalAmount)},-. Pembayaran agar
           dilakukan sebelum masa kadaluarsa kode billing yaitu pada tanggal{" "}
           {expiryFormatted} (Terlampir)

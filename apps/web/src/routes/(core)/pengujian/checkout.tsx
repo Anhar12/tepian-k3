@@ -1,9 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -14,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useCartFilters } from "@/hooks/use-cart-filters";
 import { useCartMutations } from "@/hooks/use-cart-mutations";
 import { getClusterColor } from "@/lib/cluster-colors";
@@ -23,13 +30,82 @@ import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import {
+  Car,
+  CheckCircle2,
+  Home,
+  Hotel,
+  Info,
+  Loader2,
+  Minus,
+  Plane,
+  Plus,
+  ShoppingCart,
+  Trash2,
+  Wallet,
+  Wrench,
+} from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/(core)/pengujian/checkout")({
   head: () => pageHead("Pengujian - Checkout"),
   component: RouteComponent,
 });
+
+const checkboxItems = [
+  {
+    id: "pesawat",
+    icon: <Plane className="h-4 w-4 text-blue-500" />,
+    label: "Pesawat PP",
+    badge: "Opsional",
+    descUnchecked:
+      "Tiket pesawat pulang-pergi ditanggung mandiri atau disediakan oleh perusahaan pemohon.",
+    descChecked:
+      "Biaya tiket pesawat PP akan dimasukkan ke dokumen penawaran oleh admin.",
+  },
+  {
+    id: "darat",
+    icon: <Car className="h-4 w-4 text-blue-500" />,
+    label: "Transportasi Darat",
+    descUnchecked:
+      "Perjalanan darat dari bandara/kota ke lokasi perusahaan disediakan oleh perusahaan pemohon.",
+    descChecked:
+      "Biaya transportasi darat ke lokasi perusahaan akan dimasukkan ke dokumen penawaran.",
+  },
+  {
+    id: "penginapan",
+    icon: <Hotel className="h-4 w-4 text-blue-500" />,
+    label: "Penginapan",
+    descUnchecked:
+      "Biaya hotel atau tempat menginap selama pengujian ditanggung mandiri atau oleh perusahaan pemohon.",
+    descChecked:
+      "Biaya penginapan (hotel/guest house) selama pengujian berlangsung akan masuk ke penawaran.",
+  },
+  {
+    id: "akomodasi",
+    icon: <Home className="h-4 w-4 text-blue-500" />,
+    label: "Akomodasi",
+    descUnchecked:
+      "Kebutuhan akomodasi harian (makan, konsumsi, dll) ditanggung mandiri atau perusahaan pemohon.",
+    descChecked:
+      "Biaya akomodasi harian seperti konsumsi & kebutuhan lapangan akan masuk ke penawaran.",
+  },
+];
+
+const autoItems = [
+  {
+    id: "uang-harian",
+    icon: <Wallet className="h-4 w-4 text-white" />,
+    label: "Uang Harian",
+    desc: "Biaya uang saku harian petugas selama pengujian berlangsung. Dihitung per hari kerja di lapangan.",
+  },
+  {
+    id: "operasional",
+    icon: <Wrench className="h-4 w-4 text-white" />,
+    label: "Operasional Lapangan",
+    desc: "Biaya operasional di lokasi seperti transportasi lokal & logistik alat. Disediakan oleh perusahaan pemohon.",
+  },
+];
 
 function RouteComponent() {
   const {
@@ -52,31 +128,28 @@ function RouteComponent() {
     deleteLoadingItems,
   } = useCartMutations();
 
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [coverTransportationIncluded, setCoverTransportationIncluded] =
-    useState(false);
-  const [coverAccommodationIncluded, setCoverAccommodationIncluded] =
-    useState(false);
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [note, setNote] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
 
   const createOrderMutation = useMutation(
-    trpc.order.createOrder.mutationOptions({
+    trpc.pengujian.order.createOrder.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.cart.getAllCartItems.queryOptions(),
+          trpc.pengujian.cart.getAllCartItems.queryOptions(),
         );
         await queryClient.invalidateQueries(
-          trpc.order.getAllOrders.queryOptions({}),
+          trpc.pengujian.order.getAllOrders.queryOptions({}),
         );
         await queryClient.invalidateQueries(
-          trpc.cart.getCartItemCount.queryOptions(),
+          trpc.pengujian.cart.getCartItemCount.queryOptions(),
         );
         globalSuccessToast("Order berhasil dibuat");
 
         setCurrentCompany(null);
         setCurrentLocation(null);
-        setIsConfirmed(false);
-        setCoverTransportationIncluded(false);
-        setCoverAccommodationIncluded(false);
+        setConfirmed(false);
+        checked.clear();
       },
       onError: (error) => {
         globalErrorToast(`Gagal membuat order: ${error.message}`);
@@ -84,8 +157,19 @@ function RouteComponent() {
     }),
   );
 
+  const toggle = (id: string) =>
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (prev.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
   const handleOrderCreate = () => {
-    if (!isConfirmed) {
+    if (!confirmed) {
       globalErrorToast(
         "Silakan konfirmasi bahwa data yang dimasukkan sudah benar sebelum melakukan order.",
       );
@@ -163,8 +247,11 @@ function RouteComponent() {
     );
 
     createOrderMutation.mutate({
-      coverTransportationIncluded,
-      coverAccommodationIncluded,
+      coverFlightIncluded: checked.has("pesawat"),
+      coverGroundTransportationIncluded: checked.has("darat"),
+      coverLodgingIncluded: checked.has("penginapan"),
+      coverAccommodationIncluded: checked.has("akomodasi"),
+      customerNote: note,
       data: orderItems,
     });
   };
@@ -348,153 +435,157 @@ function RouteComponent() {
         </Card>
         <div className="w-full lg:w-96 lg:shrink-0">
           <Card className="border-0 p-4 shadow-sm sm:p-6 lg:sticky lg:top-4">
-            {/* Transportasi Section */}
-            <div>
-              <div className="mb-4 flex items-start gap-2">
-                <div>
-                  <h3 className="mb-1 font-semibold text-gray-900">
-                    Transportasi
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Pilih opsi transportasi selama pengujian berlangsung.
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex cursor-pointer items-center gap-3">
-                  <RadioGroup
-                    defaultValue="false"
-                    value={String(coverTransportationIncluded)}
-                    onValueChange={(value) =>
-                      setCoverTransportationIncluded(value === "true")
-                    }
-                    className="flex w-full flex-col gap-4"
+            <CardHeader className="p-0">
+              <CardTitle>Transportasi & Akomodasi</CardTitle>
+              <CardDescription>
+                Pilih kebutuhan transportasi dan akomodasi selama pengujian
+                berlangsung. Biaya akan dihitung dalam penawaran.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[calc(75vh-250px)] space-y-4">
+                <div className="flex flex-col gap-6 px-2">
+                  {/* Transportasi Section */}
+                  <div className="space-y-2">
+                    {checkboxItems.map((item) => {
+                      const isChecked = checked.has(item.id);
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => toggle(item.id)}
+                          className={`cursor-pointer rounded-xl border p-3 transition-all ${
+                            isChecked
+                              ? "border-blue-300 bg-blue-50"
+                              : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={() => toggle(item.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="mt-0.5 shrink-0 data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-500"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <span className="mb-1 block text-sm font-semibold text-gray-800">
+                                {item.label}
+                              </span>
+                              <div className="flex min-h-10 items-start gap-1">
+                                {isChecked ? (
+                                  <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-blue-500" />
+                                ) : (
+                                  <Info className="mt-0.5 h-3 w-3 shrink-0 text-gray-400" />
+                                )}
+                                <p
+                                  className={`text-xs leading-relaxed ${isChecked ? "text-blue-600" : "text-gray-400"}`}
+                                >
+                                  {isChecked
+                                    ? item.descChecked
+                                    : item.descUnchecked}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Auto-billed items */}
+                  <div className="mt-3 space-y-2">
+                    <p className="px-1 text-xs font-medium text-gray-500">
+                      Otomatis ditagihkan
+                    </p>
+                    {autoItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-xl border border-blue-200 bg-blue-600 p-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/20">
+                            {item.icon}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-white">
+                              {item.label}
+                            </p>
+                            <p className="mt-0.5 text-xs leading-relaxed text-blue-100">
+                              {item.desc}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Catatan */}
+                  <div>
+                    <p className="mb-2 text-sm font-bold text-gray-800">
+                      Catatan
+                    </p>
+                    <Textarea
+                      rows={3}
+                      placeholder="Tambahkan catatan atau informasi tambahan untuk admin..."
+                      className="resize-none rounded-xl border-gray-200 text-sm"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  {/* Checkbox Confirmation */}
+                  <div
+                    className="flex cursor-pointer items-start gap-3"
+                    onClick={() => setConfirmed(!confirmed)}
                   >
-                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
-                      <RadioGroupItem
-                        value="false"
-                        id="cover-transportation-false"
-                      />
-                      <Label
-                        htmlFor="cover-transportation-false"
-                        className="cursor-pointer font-normal"
-                      >
-                        Transportasi ditanggung pemohon pengujian
-                      </Label>
-                    </div>
-                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
-                      <RadioGroupItem
-                        value="true"
-                        id="cover-transportation-true"
-                      />
-                      <Label
-                        htmlFor="cover-transportation-true"
-                        className="cursor-pointer font-normal"
-                      >
-                        Transportasi di tanggung Balai K3
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                    <Checkbox
+                      checked={confirmed}
+                      onCheckedChange={(checked) =>
+                        setConfirmed(checked === true)
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-0.5 shrink-0 data-[state=checked]:border-blue-500 data-[state=checked]:bg-blue-500"
+                    />
+                    <p className="text-xs leading-relaxed text-gray-500">
+                      Saya memastikan bahwa data yang dimasukkan sudah benar dan
+                      sesuai dengan kebutuhan pengujian.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </ScrollArea>
+            </CardContent>
 
-            <Separator />
-
-            {/* Akomodasi Section */}
-            <div>
-              <div className="mb-4 flex items-start gap-2">
-                <div>
-                  <h3 className="mb-1 font-semibold text-gray-900">
-                    Akomodasi
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Pilih opsi akomodasi selama pengujian berlangsung.
-                  </p>
-                </div>
-              </div>
+            <CardFooter className="flex-col items-stretch gap-4 p-0">
+              {/* Total and CTA */}
               <div className="space-y-4">
-                <div className="flex cursor-pointer items-center gap-3">
-                  <RadioGroup
-                    defaultValue="false"
-                    value={String(coverAccommodationIncluded)}
-                    onValueChange={(value) =>
-                      setCoverAccommodationIncluded(value === "true")
-                    }
-                    className="flex w-full flex-col gap-4"
-                  >
-                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
-                      <RadioGroupItem
-                        value="false"
-                        id="cover-accommodation-false"
-                      />
-                      <Label
-                        htmlFor="cover-accommodation-false"
-                        className="cursor-pointer font-normal"
-                      >
-                        Akomodasi ditanggung pemohon pengujian
-                      </Label>
-                    </div>
-                    <div className="flex flex-1 flex-row items-center gap-3 rounded-lg bg-blue-50 p-3">
-                      <RadioGroupItem
-                        value="true"
-                        id="cover-accommodation-true"
-                      />
-                      <Label
-                        htmlFor="cover-accommodation-true"
-                        className="cursor-pointer font-normal"
-                      >
-                        Akomodasi di tanggung Balai K3
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Checkbox Confirmation */}
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="confirmation"
-                checked={isConfirmed}
-                onCheckedChange={(checked) => setIsConfirmed(checked === true)}
-              />
-              <Label htmlFor="confirmation" className="text-sm/5 font-normal">
-                Anda telah memastikan bahwa data yang dimasukkan sudah benar dan
-                sesuai dengan kebutuhan pengujian.
-              </Label>
-            </div>
-
-            {/* Total and CTA */}
-            <div className="space-y-4">
-              {coverTransportationIncluded || coverAccommodationIncluded ? (
-                <div className="text-sm text-gray-600">
-                  * Total biaya akan diupdate pada saat penawaran dikirimkan
-                </div>
-              ) : null}
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-600">Total :</span>
-                <span className="text-lg font-semibold text-gray-900">
-                  Rp {totalPrice.toLocaleString("id-ID")}
-                </span>
-              </div>
-              <Button
-                className="h-auto w-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
-                disabled={
-                  mappedItems.length === 0 ||
-                  !isConfirmed ||
-                  createOrderMutation.isPending
-                }
-                onClick={handleOrderCreate}
-              >
-                {createOrderMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {checked.size > 0 ? (
+                  <div className="text-sm text-gray-600">
+                    * Total biaya akan diupdate pada saat penawaran dikirimkan
+                  </div>
                 ) : null}
-                Order
-              </Button>
-            </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-600">Total :</span>
+                  <span className="text-lg font-semibold text-gray-900">
+                    Rp {totalPrice.toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <Button
+                  className="h-auto w-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
+                  disabled={
+                    mappedItems.length === 0 ||
+                    !confirmed ||
+                    createOrderMutation.isPending
+                  }
+                  onClick={handleOrderCreate}
+                >
+                  {createOrderMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Order
+                </Button>
+              </div>
+            </CardFooter>
           </Card>
         </div>
       </div>

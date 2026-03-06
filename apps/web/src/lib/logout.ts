@@ -16,7 +16,7 @@ export async function logout() {
     if (refreshToken) {
       try {
         // Call the logout endpoint to revoke the refresh token
-        await trpcClient.auth.logout.mutate({
+        await trpcClient.platform.auth.logout.mutate({
           refreshToken,
         });
       } catch (error) {

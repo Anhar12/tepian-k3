@@ -29,7 +29,7 @@ import { trpc } from "@/utils/trpc";
 import { openBase64InNewTab } from "@/utils/download";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import generateDocumentSchema from "@tepian-k3/schema/generate-document.schema";
+import generateDocumentSchema from "@tepian-k3/schema/pengujian/generate-document.schema";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useEffect } from "react";
@@ -59,7 +59,7 @@ export default function GenerateOfferingDialog({
   });
 
   const generateOfferingMutation = useMutation(
-    trpc.generateDocument.generateOfferingLetter.mutationOptions({
+    trpc.pengujian.generateDocument.generateOfferingLetter.mutationOptions({
       onSuccess: (data) => {
         globalSuccessToast("Surat penawaran berhasil dibuat");
         // window.open(getPublicUrl(data.offeringLetterUrl), "_blank");
