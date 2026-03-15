@@ -10,9 +10,12 @@ import { withCache, withCacheInvalidation } from "../../utils/cache-helper";
 
 export const regencyRouter = createTRPCRouter({
   getAllRegencies: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.REGENCIES_ALL, CACHE_TTL.LONG, () =>
-        runEffect(regencyQueries.getAllRegencies()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.REGENCIES_ALL,
+        CACHE_TTL.LONG,
+        () => runEffect(regencyQueries.getAllRegencies()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 

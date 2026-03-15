@@ -1,5 +1,17 @@
 # @tepian-k3/server
 
+## 1.4.0
+
+### Minor Changes
+
+- feat(api,server): add X-Data-Source header to cache responses
+  - add X-Data-Source header to cache responses
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/api@1.12.0
+
 ## 1.3.3
 
 ### Patch Changes

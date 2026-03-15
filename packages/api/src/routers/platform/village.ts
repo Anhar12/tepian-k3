@@ -10,9 +10,12 @@ import { withCache, withCacheInvalidation } from "../../utils/cache-helper";
 
 export const villageRouter = createTRPCRouter({
   getAllVillages: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.VILLAGES_ALL, CACHE_TTL.LONG, () =>
-        runEffect(villageQueries.getAllVillages()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.VILLAGES_ALL,
+        CACHE_TTL.LONG,
+        () => runEffect(villageQueries.getAllVillages()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 

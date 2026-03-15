@@ -113,6 +113,7 @@ app.use(
       "X-Idempotency-Key",
     ],
     credentials: true,
+    exposeHeaders: ["X-Data-Source"],
   }),
 );
 

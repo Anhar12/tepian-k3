@@ -10,9 +10,12 @@ import { withCache, withCacheInvalidation } from "../../utils/cache-helper";
 
 export const parameterCategoriesRouter = createTRPCRouter({
   getAllParameterCategories: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.PARAMETER_CATEGORIES_ALL, CACHE_TTL.LONG, () =>
-        runEffect(parameterCategoriesQueries.getAllParameterCategories()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.PARAMETER_CATEGORIES_ALL,
+        CACHE_TTL.LONG,
+        () => runEffect(parameterCategoriesQueries.getAllParameterCategories()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 

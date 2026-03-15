@@ -10,9 +10,12 @@ import { withCache, withCacheInvalidation } from "../../utils/cache-helper";
 
 export const districtRouter = createTRPCRouter({
   getAllDistricts: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.DISTRICTS_ALL, CACHE_TTL.LONG, () =>
-        runEffect(districtQueries.getAllDistricts()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.DISTRICTS_ALL,
+        CACHE_TTL.LONG,
+        () => runEffect(districtQueries.getAllDistricts()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 

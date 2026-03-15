@@ -21,9 +21,12 @@ import {
 
 export const bannerRouter = createTRPCRouter({
   getAllBanners: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.BANNERS_ALL, CACHE_TTL.LONG, () =>
-        runEffect(bannerQueries.getAllActiveBanners()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.BANNERS_ALL,
+        CACHE_TTL.LONG,
+        () => runEffect(bannerQueries.getAllActiveBanners()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 
