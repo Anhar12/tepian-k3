@@ -3,8 +3,6 @@ name: CI
 on:
   pull_request:
     branches: [main, beta]
-  push:
-    branches: [main, beta]
 
 # NOTE: To block merges without passing CI, configure branch protection rules
 # in GitHub repo settings (Settings → Branches → Add rule for "main" and "beta"):
