@@ -21,9 +21,12 @@ import {
 
 export const newsRouter = createTRPCRouter({
   getFirst5News: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.NEWS_FIRST_5, CACHE_TTL.LONG, () =>
-        runEffect(newsQueries.getFirst5PublishedNews()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.NEWS_FIRST_5,
+        CACHE_TTL.LONG,
+        () => runEffect(newsQueries.getFirst5PublishedNews()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 
@@ -34,7 +37,7 @@ export const newsRouter = createTRPCRouter({
       }),
     )
     .query(
-      async ({ input }) =>
+      async ({ ctx, input }) =>
         await withCache(
           `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
           CACHE_TTL.MEDIUM,
@@ -52,6 +55,7 @@ export const newsRouter = createTRPCRouter({
 
             return newsItem;
           },
+          () => ctx.c.header("X-Data-Source", "cache"),
         ),
     ),
 

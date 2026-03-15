@@ -10,9 +10,12 @@ import { withCache, withCacheInvalidation } from "../../utils/cache-helper";
 
 export const kbliRouter = createTRPCRouter({
   getAllKblis: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.KBLIS_ALL, CACHE_TTL.LONG, () =>
-        runEffect(kbliQueries.getAllKblis()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.KBLIS_ALL,
+        CACHE_TTL.LONG,
+        () => runEffect(kbliQueries.getAllKblis()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 

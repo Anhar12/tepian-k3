@@ -100,6 +100,7 @@ export const createTRPCContext = async (context: HonoContext) => {
     osVersion,
     eventBus,
     idempotencyKey,
+    c: context,
   };
 };
 

@@ -1,5 +1,12 @@
 # @tepian-k3/web
 
+## 1.11.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/api@1.12.0
+
 ## 1.11.0
 
 ### Minor Changes

@@ -10,9 +10,12 @@ import { withCache, withCacheInvalidation } from "../../utils/cache-helper";
 
 export const clusterRouter = createTRPCRouter({
   getAllClusters: withRateLimit(rateLimiters.moderate()).query(
-    async () =>
-      await withCache(CACHE_KEYS.CLUSTERS_ALL, CACHE_TTL.LONG, () =>
-        runEffect(clustersQueries.getAllClusters()),
+    async ({ ctx }) =>
+      await withCache(
+        CACHE_KEYS.CLUSTERS_ALL,
+        CACHE_TTL.LONG,
+        () => runEffect(clustersQueries.getAllClusters()),
+        () => ctx.c.header("X-Data-Source", "cache"),
       ),
   ),
 

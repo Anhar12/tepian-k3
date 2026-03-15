@@ -4,9 +4,13 @@ export async function withCache<T>(
   cacheKey: string,
   ttl: number,
   fetcher: () => Promise<T>,
+  onCacheHit?: () => void,
 ): Promise<T> {
   const cached = await cacheService.get<T>(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    onCacheHit?.();
+    return cached;
+  }
 
   const result = await fetcher();
   await cacheService.set(cacheKey, result, ttl);
