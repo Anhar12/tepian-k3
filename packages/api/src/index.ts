@@ -12,7 +12,6 @@ import superjson from "superjson";
 import { ZodError, z } from "zod";
 import type { Context as HonoContext } from "hono";
 import permissionQueries from "@tepian-k3/queries/platform/permission.queries";
-import permissionQueries from "@tepian-k3/queries/platform/permission.queries";
 import { Effect } from "effect";
 import { parseAndValidateSafe } from "./utils/form-data-parser";
 import { getEventBus } from "@tepian-k3/services/notifications";
@@ -22,8 +21,6 @@ import { createRateLimiter } from "@tepian-k3/services/rate-limiter";
 import type { RateLimiter } from "@tepian-k3/services/rate-limiter";
 import { UAParser } from "ua-parser-js";
 import { logWarn } from "@tepian-k3/services/logger";
-import { getIdempotencyService } from "@tepian-k3/services/idempotency";
-import { createHash } from "crypto";
 import { getIdempotencyService } from "@tepian-k3/services/idempotency";
 import { createHash } from "crypto";
 
