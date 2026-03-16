@@ -16,14 +16,16 @@ This document defines the Git branch naming convention for the tepian-k3 monorep
 
 ## Branch Types
 
-| Type        | SemVer Impact | Merges Into      | Use When                               |
-| ----------- | ------------- | ---------------- | -------------------------------------- |
-| `feat/`     | MINOR / MAJOR | `beta` or parent | New feature or module                  |
-| `fix/`      | PATCH         | `beta`           | Non-critical bug fix                   |
-| `hotfix/`   | PATCH         | `main` + `beta`  | Critical production fix                |
-| `chore/`    | PATCH         | `beta`           | Dependencies, config, CI/CD, tooling   |
-| `refactor/` | PATCH         | `beta`           | Code restructuring, no behavior change |
-| `docs/`     | None          | `beta`           | Documentation only                     |
+| Type        | SemVer Impact | Checkout From | Merges Into      | Use When                                          |
+| ----------- | ------------- | ------------- | ---------------- | ------------------------------------------------- |
+| `feat/`     | MINOR / MAJOR | `beta`        | `beta` or parent | New feature or module                             |
+| `fix/`      | PATCH         | `beta`        | `beta`           | Non-critical bug fix (ships with next beta cycle) |
+| `hotfix/`   | PATCH         | **`main`**    | `main` + `beta`  | Any isolated change that needs its own release    |
+| `chore/`    | PATCH         | `beta`        | `beta`           | Dependencies, config, CI/CD, tooling              |
+| `refactor/` | PATCH         | `beta`        | `beta`           | Code restructuring, no behavior change            |
+| `docs/`     | None          | `beta`        | `beta`           | Documentation only                                |
+
+> **Golden rule:** If you need to release a change **independently** of everything currently in `beta`, use `hotfix/` branched from `main` — not `chore/` or `fix/`. Otherwise you will drag all unreleased `beta` commits into `main`.
 
 ## Long-Lived Branches
 
@@ -31,6 +33,12 @@ This document defines the Git branch naming convention for the tepian-k3 monorep
 | ------ | ----------------------------- |
 | `main` | Production (tagged releases)  |
 | `beta` | Staging / pre-release testing |
+
+> **Keep `beta` in sync with `main`** — after every merge to `main` (hotfix or release), immediately run:
+>
+> ```bash
+> git checkout beta && git merge main && git push origin beta
+> ```
 
 ## Layer Prefixes
 
@@ -109,11 +117,13 @@ main
 ### Bug Fix & Hotfix
 
 ```
-main
-├── beta
-├── fix/order-total-calculation           ← non-critical, merges into beta
-├── hotfix/auth-token-expiry              ← critical, merges into main + beta
+main (v1.11.0)
+├── beta                                  ← has unreleased feat/pengujian-v2 etc.
+├── fix/order-total-calculation           ← non-critical, branches from beta, ships with next beta release
+└── hotfix/auth-token-expiry              ← branches from main, ships immediately as v1.11.1
 ```
+
+> **Why does this matter?** If you branch `fix/` or `chore/` from `beta` and merge it into `main` directly, every unreleased commit on `beta` (e.g. `feat/pengujian-v2`) gets pulled into the release too.
 
 ### Maintenance
 
@@ -128,12 +138,13 @@ main
 ## Merge Flow
 
 ```
-feat/pelatihan-db-schema ──→ feat/pelatihan ──→ beta ──→ main
-feat/pelatihan-api-routers ─┘                    ↑
-                                                  │
-fix/order-total-calculation ──────────────────────┘
-                                                  │
-hotfix/auth-token-expiry ─────────────────────────┴──→ main
+feat/pelatihan-db-schema ──→ feat/pelatihan ──→ beta ──→ main (release)
+feat/pelatihan-api-routers ─┘                    ↑            │
+                                                  │            ↓
+fix/order-total-calculation ──────────────────────┘     sync beta ← main
+                                                               ↑
+hotfix/auth-token-expiry (from main) ──────────────────→ main (patch release)
+                                     └─────────────────→ beta (sync)
 ```
 
 | Branch              | Merges Into     | When                                 |
@@ -211,11 +222,16 @@ git checkout -b feat/pengujian-v2-api-routers
 git checkout beta
 git checkout -b fix/cart-quantity-validation
 
-# Hotfix from production
+# Hotfix / isolated patch release (MUST branch from main, not beta)
 git checkout main
+git pull origin main
 git checkout -b hotfix/auth-token-expiry
+# ... fix ...
+git checkout main && git merge hotfix/auth-token-expiry
+git tag v1.x.y
+git checkout beta && git merge main && git push origin beta  # keep beta in sync
 
-# Maintenance
+# Maintenance (ships with next beta release, safe to branch from beta)
 git checkout beta
 git checkout -b chore/upgrade-tanstack-v5
 ```

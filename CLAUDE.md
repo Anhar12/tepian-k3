@@ -304,7 +304,10 @@ See [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md) and [docs/VERSION_PLANNING.md
 
 - Never put version numbers in branch names — use git tags (`v2.0.0-alpha.1`)
 - Always use kebab-case, keep names under 50 characters
-- `hotfix/*` merges into both `main` and `beta`
+- `hotfix/*` branches from `main`, merges into `main` + `beta`
+- All other types (`feat/`, `fix/`, `chore/`, etc.) branch from `beta`, merge into `beta`
+- **Never branch `fix/` or `chore/` from `beta` and merge directly to `main`** — this drags all unreleased `beta` commits into the release
+- After every merge to `main`, sync `beta`: `git checkout beta && git merge main && git push origin beta`
 
 ---
 
