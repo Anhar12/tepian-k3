@@ -46,26 +46,36 @@ const pusatLayananItems: {
   imageSrc: string;
   title: string;
   to: LinkProps["to"];
+  bgColor: string;
+  textColor: string;
 }[] = [
   {
     imageSrc: "/assets/pengujian.webp",
     title: "Pengujian",
     to: "/pengujian",
+    bgColor: "#7e64fc",
+    textColor: "#7e64fc",
   },
   {
     imageSrc: "/assets/pelatihan.webp",
     title: "Pelatihan",
     to: "/pelatihan",
+    bgColor: "#efa106",
+    textColor: "#efa106",
   },
   {
     imageSrc: "/assets/uji-kompetensi.webp",
     title: "Uji Kompetensi",
     to: "/uji-kompetensi",
+    bgColor: "#5399fc",
+    textColor: "#5399fc",
   },
   {
     imageSrc: "/assets/konsultasi.webp",
     title: "Konsultasi",
     to: "/konsultasi",
+    bgColor: "#44a86b",
+    textColor: "#44a86b",
   },
 ];
 
@@ -225,26 +235,43 @@ function HomeComponent() {
         <div className="relative z-10 my-auto flex flex-row flex-wrap items-center justify-center gap-6">
           {/* Service Cards */}
           {pusatLayananItems.map((item) => (
-            <Card
+            <div
               key={item.title}
-              className="w-64 cursor-pointer overflow-hidden rounded-4xl transition-shadow hover:shadow-lg"
+              className="relative h-80 w-70 cursor-pointer overflow-hidden rounded-[40px] border-4 border-white bg-white shadow-[0px_0px_100px_-2px_rgba(16,97,214,0.14)] transition-transform hover:scale-105 hover:shadow-xl"
               onClick={() => navigate({ to: item.to })}
             >
-              <CardHeader>
-                <div className="flex flex-row items-center justify-center overflow-hidden">
-                  <ImageWithFallback
-                    src={item.imageSrc}
-                    alt={item.title}
-                    className="size-40 object-contain"
-                  />
-                </div>
-              </CardHeader>
-              <CardFooter className="flex flex-row items-center">
-                <a className="w-full text-center text-2xl font-semibold text-primary">
-                  {item.title}
-                </a>
-              </CardFooter>
-            </Card>
+              {/* Colored top background — badge/shield shape */}
+              <svg
+                className="absolute top-0 left-0 z-10"
+                xmlns="http://www.w3.org/2000/svg"
+                width="280"
+                height="201"
+                viewBox="0 0 280 201"
+                fill="none"
+              >
+                <path
+                  d="M0 35C0 15.67 15.67 0 35 0H245C264.33 0 280 15.67 280 35V105.382C280 117.918 273.295 129.497 262.422 135.738L157.422 196.001C146.633 202.193 133.367 202.193 122.578 196.001L17.5778 135.738C6.70496 129.497 0 117.918 0 105.382V35Z"
+                  fill={item.bgColor}
+                />
+              </svg>
+
+              {/* 3D Illustration */}
+              <div className="absolute inset-x-0 top-0 z-20 flex h-66.25 items-end justify-center">
+                <ImageWithFallback
+                  src={item.imageSrc}
+                  alt={item.title}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+
+              {/* Label */}
+              <p
+                className="absolute inset-x-0 bottom-5 text-center text-2xl font-semibold tracking-wide"
+                style={{ color: item.textColor }}
+              >
+                {item.title}
+              </p>
+            </div>
           ))}
         </div>
       </section>
@@ -311,6 +338,18 @@ function HomeComponent() {
         className="relative flex flex-col bg-accent/10 px-10 py-16"
         id="informasi"
       >
+        {/* Decorative glow orbs */}
+        <div
+          className="pointer-events-none absolute top-20 right-0 size-36.75 rounded-[1000px] blur-[138.25px]"
+          style={{ background: "#F28D00" }}
+        />
+        <div
+          className="pointer-events-none absolute bottom-20 left-0 size-36.75 rounded-[1000px] blur-[138.25px]"
+          style={{
+            background:
+              "linear-gradient(120deg, rgba(16, 185, 129, 0.80) 9.47%, rgba(5, 150, 105, 0.80) 63.82%)",
+          }}
+        />
         {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
           <span className="flex items-center gap-1.5 text-sm font-medium tracking-wider text-primary">

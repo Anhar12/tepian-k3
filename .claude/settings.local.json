@@ -86,7 +86,8 @@
       "Bash(sed -i 's/trpc\\\\.platform\\\\.document\\\\./trpc.pengujian.document./g' \"$f\")",
       "Bash(echo \"OK: $f\")",
       "Bash(echo \"FAIL: $f\")",
-      "Bash(grep -rl '\"\"./utils.types\"\"' platform/ pengujian/)"
+      "Bash(grep -rl '\"\"./utils.types\"\"' platform/ pengujian/)",
+      "mcp__figma-remote-mcp__get_metadata"
     ]
   }
 }
