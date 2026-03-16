@@ -1,5 +1,11 @@
 # @tepian-k3/web
 
+## 1.11.2
+
+### Patch Changes
+
+- update pengujian landing page UI
+
 ## 1.11.1
 
 ### Patch Changes
