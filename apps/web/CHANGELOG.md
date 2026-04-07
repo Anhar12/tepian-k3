@@ -1,5 +1,13 @@
 # @tepian-k3/web
 
+## 1.11.3
+
+### Patch Changes
+
+- fix(web): update version and reorganize changelog entries
+  - update version and reorganize changelog entries
+  - reorganize imports and remove detail button option
+
 ## 1.11.2
 
 ### Patch Changes
@@ -10,6 +18,8 @@
 
 ### Patch Changes
 
+- fix(web): reorganize imports and remove detail button option
+  - reorganize imports and remove detail button option
 - Updated dependencies
   - @tepian-k3/api@1.12.0
 
