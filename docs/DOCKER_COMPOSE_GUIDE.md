@@ -381,6 +381,47 @@ jobs:
           EOF
 ```
 
+## LAN Access (Office / Local Network)
+
+To allow other devices on the same network to access the app, the web container is already bound to `0.0.0.0:3001`. You only need to open the port in Windows Firewall.
+
+**Run once in PowerShell as Administrator:**
+
+```powershell
+netsh advfirewall firewall add rule name="Tepian Web" dir=in action=allow protocol=TCP localport=3001
+```
+
+**Find your machine's LAN IP:**
+
+```powershell
+ipconfig
+# Look for IPv4 Address under WiFi or Ethernet (e.g. 192.168.1.50)
+```
+
+Other devices on the same network can then open:
+
+```
+http://<your-ip>:3001
+```
+
+> No rebuild needed — the app uses relative API URLs so it works on any IP automatically.
+
+**GHCR image pulling (for other machines):**
+
+Other machines need to login to GHCR with a shared read-only token before pulling images:
+
+```bash
+# Token only needs read:packages scope
+echo SHARED_READ_TOKEN | docker login ghcr.io -u rizrmdhn --password-stdin
+```
+
+Then in their `.env`:
+
+```env
+GHCR_USER=rizrmdhn                     # always the image owner's username
+GHCR_TOKEN=ghp_shared_readonly_token   # read:packages PAT
+```
+
 ## Additional Resources
 
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
