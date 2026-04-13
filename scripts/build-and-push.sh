@@ -38,9 +38,7 @@ fi
 # ---- Config (edit these or export as env vars before running) ----
 GHCR_USER="${GHCR_USER:-}"
 GHCR_TOKEN="${GHCR_TOKEN:-}"
-LAPTOP_IP="${LAPTOP_IP:-}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
-WEB_PORT="${WEB_PORT:-3001}"
 
 # ---- Validate ----
 if [[ -z "$GHCR_USER" ]]; then
@@ -51,24 +49,17 @@ if [[ -z "$GHCR_TOKEN" ]]; then
   echo "ERROR: GHCR_TOKEN is required (GitHub PAT with write:packages)"
   exit 1
 fi
-if [[ -z "$LAPTOP_IP" ]]; then
-  echo "ERROR: LAPTOP_IP is required (LAN IP of the office laptop, e.g. 192.168.1.100)"
-  exit 1
-fi
 
 REGISTRY="ghcr.io/${GHCR_USER}"
 SERVER_IMAGE="${REGISTRY}/tepian-k3-server:${IMAGE_TAG}"
 MIGRATE_IMAGE="${REGISTRY}/tepian-k3-migrate:${IMAGE_TAG}"
 WEB_IMAGE="${REGISTRY}/tepian-k3-web:${IMAGE_TAG}"
-VITE_SERVER_URL="http://${LAPTOP_IP}:${WEB_PORT}"
 
 echo "============================================="
 echo " Tepian K3 — Build & Push to GHCR"
 echo "============================================="
-echo " Registry  : ${REGISTRY}"
-echo " Laptop IP : ${LAPTOP_IP}"
-echo " Web URL   : ${VITE_SERVER_URL}"
-echo " Tag       : ${IMAGE_TAG}"
+echo " Registry : ${REGISTRY}"
+echo " Tag      : ${IMAGE_TAG}"
 echo "============================================="
 echo ""
 
@@ -95,11 +86,10 @@ docker build \
 echo ""
 
 # ---- Build web ----
-echo "[4/5] Building web image (VITE_SERVER_URL=${VITE_SERVER_URL})..."
+echo "[4/5] Building web image..."
 docker build \
   --platform linux/amd64 \
   -f Dockerfile.web \
-  --build-arg VITE_SERVER_URL="${VITE_SERVER_URL}" \
   -t "${WEB_IMAGE}" \
   .
 echo ""

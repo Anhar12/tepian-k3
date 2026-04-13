@@ -13,6 +13,9 @@ build
 .env*.local
 .env.test
 .env.production
+.env.development
+.env.prod
+.env.dev
 .env.docker
 .env.build
 
