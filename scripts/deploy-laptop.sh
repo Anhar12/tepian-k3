@@ -14,6 +14,23 @@
 
 set -euo pipefail
 
+# ---- Load .env.build for any var not already set in the shell ----
+ENV_FILE="$(dirname "$0")/../.env.build"
+if [[ -f "$ENV_FILE" ]]; then
+  echo "Loading $ENV_FILE..."
+  while IFS='=' read -r key value; do
+    [[ "$key" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "$key" ]] && continue
+    value="${value%%#*}"
+    value="${value%"${value##*[![:space:]]}"}"
+    value="${value#\"}" value="${value%\"}"
+    value="${value#\'}" value="${value%\'}"
+    if [[ -z "${!key+x}" ]]; then
+      export "$key=$value"
+    fi
+  done < "$ENV_FILE"
+fi
+
 # ---- Config ----
 GHCR_USER="${GHCR_USER:-}"
 GHCR_TOKEN="${GHCR_TOKEN:-}"
