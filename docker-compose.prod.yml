@@ -52,9 +52,10 @@ services:
 
   # ---- Migrations (runs once, exits) ----
   migrate:
-    image: ghcr.io/${GHCR_USER:?GHCR_USER is required}/tepian-k3-server:${IMAGE_TAG:-latest}
+    image: ghcr.io/${GHCR_USER:?GHCR_USER is required}/tepian-k3-migrate:${IMAGE_TAG:-latest}
     working_dir: /app
-    command: sh -c "cd packages/db && npx drizzle-kit migrate"
+    entrypoint: ["sh", "-c"]
+    command: "cd packages/db && npx drizzle-kit migrate"
     environment:
       POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-tepian_k3}
     depends_on:

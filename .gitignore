@@ -14,6 +14,7 @@ build
 .env.test
 .env.production
 .env.docker
+.env.build
 
 # IDEs and editors
 .vscode/*

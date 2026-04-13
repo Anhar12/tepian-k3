@@ -72,9 +72,10 @@ COPY --from=build /app/packages/db/src/migrations ./packages/db/src/migrations
 COPY --from=build /app/packages/db/drizzle.config.ts ./packages/db/drizzle.config.ts
 COPY --from=build /app/packages/db/package.json ./packages/db/package.json
 
-# Copy entrypoint
+# Copy entrypoint (strip Windows CRLF line endings)
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER server
 
