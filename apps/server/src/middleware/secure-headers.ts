@@ -14,8 +14,14 @@ export const secureHeaders = (): MiddlewareHandler => {
 
     // Additional security headers
     c.header("X-Permitted-Cross-Domain-Policies", "none");
-    c.header("Cross-Origin-Embedder-Policy", "require-corp");
-    c.header("Cross-Origin-Opener-Policy", "same-origin");
+    // COEP + COOP together create a cross-origin isolated context, which severs
+    // shared browsing context state (e.g. localStorage visibility) with other pages
+    // on the same origin. Only needed for SharedArrayBuffer — skip for log viewer.
+    const isLogsRoute = c.req.path.startsWith("/api/logs");
+    if (!isLogsRoute) {
+      c.header("Cross-Origin-Embedder-Policy", "require-corp");
+      c.header("Cross-Origin-Opener-Policy", "same-origin");
+    }
     // Only set CORP if not already set by route handler (allows per-route override)
     if (!c.res.headers.get("Cross-Origin-Resource-Policy")) {
       c.header("Cross-Origin-Resource-Policy", "same-origin");
