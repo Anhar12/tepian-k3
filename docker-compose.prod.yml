@@ -20,7 +20,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tepian} -d ${POSTGRES_DB:-tepian_k3}"]
       interval: 10s
@@ -37,7 +37,7 @@ services:
       redis-server
       --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
+      --maxmemory-policy noeviction
     volumes:
       - redis_data:/data
     ports:
@@ -47,21 +47,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - tepian-network
-
-  # ---- Migrations (runs once, exits) ----
-  migrate:
-    image: ghcr.io/${GHCR_USER:?GHCR_USER is required}/tepian-k3-migrate:${IMAGE_TAG:-latest}
-    working_dir: /app
-    entrypoint: ["sh", "-c"]
-    command: "cd packages/db && pnpm exec drizzle-kit migrate"
-    environment:
-      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-tepian_k3}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: "no"
     networks:
       - tepian-network
 
@@ -86,8 +71,8 @@ services:
       - uploads_data:/app/uploads
       - logs_data:/app/logs
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:

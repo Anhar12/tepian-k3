@@ -1,0 +1,8 @@
+node_modules/
+.turbo/
+dist/
+build/
+.cache/
+*.js.map
+*.d.ts
+pnpm-lock.yaml

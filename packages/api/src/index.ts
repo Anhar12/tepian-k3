@@ -17,7 +17,10 @@ import { parseAndValidateSafe } from "./utils/form-data-parser";
 import { getEventBus } from "@tepian-k3/services/notifications";
 import type { Permission, Role } from "@tepian-k3/constants";
 import { getRateLimitConfig } from "@tepian-k3/constants";
-import { createRateLimiter } from "@tepian-k3/services/rate-limiter";
+import {
+  createRateLimiter,
+  isRateLimiterEnabled,
+} from "@tepian-k3/services/rate-limiter";
 import type { RateLimiter } from "@tepian-k3/services/rate-limiter";
 import { UAParser } from "ua-parser-js";
 import { logWarn } from "@tepian-k3/services/logger";
@@ -418,8 +421,13 @@ export const withRateLimit = <TInput = unknown>(
       ? getKey(ctx, rawInput as TInput)
       : `ip:${ctx.ip || "unknown"}`;
 
-    // should skip rate limiting for localhost IPs or dev mode
-    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+    // should skip rate limiting for localhost IPs, dev mode, or when disabled via env
+    if (
+      !isRateLimiterEnabled ||
+      ctx.ip === "127.0.0.1" ||
+      ctx.ip === "::1" ||
+      t._config.isDev
+    ) {
       return next({ ctx });
     }
 
@@ -490,8 +498,13 @@ export const withProtectedRateLimit = <TInput = unknown>(
       ? getKey(ctx, rawInput as TInput)
       : `user:${ctx.user.id}`;
 
-    // should skip rate limiting for localhost IPs or dev mode
-    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+    // should skip rate limiting for localhost IPs, dev mode, or when disabled via env
+    if (
+      !isRateLimiterEnabled ||
+      ctx.ip === "127.0.0.1" ||
+      ctx.ip === "::1" ||
+      t._config.isDev
+    ) {
       return next({ ctx });
     }
 
@@ -574,8 +587,13 @@ export const withRoleBasedRateLimit = <TInput = unknown>(
       ? getKey(ctx, rawInput as TInput)
       : `${operation}:${ctx.user.id}`;
 
-    // should skip rate limiting for localhost IPs or dev mode
-    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+    // should skip rate limiting for localhost IPs, dev mode, or when disabled via env
+    if (
+      !isRateLimiterEnabled ||
+      ctx.ip === "127.0.0.1" ||
+      ctx.ip === "::1" ||
+      t._config.isDev
+    ) {
       return next({ ctx });
     }
 
@@ -678,8 +696,13 @@ export const withPermissionAndRateLimit = <TInput = unknown>(
       ? getKey(ctx, rawInput as TInput)
       : `${operation}:${ctx.user.id}`;
 
-    // should skip rate limiting for localhost IPs or dev mode
-    if (ctx.ip === "127.0.0.1" || ctx.ip === "::1" || t._config.isDev) {
+    // should skip rate limiting for localhost IPs, dev mode, or when disabled via env
+    if (
+      !isRateLimiterEnabled ||
+      ctx.ip === "127.0.0.1" ||
+      ctx.ip === "::1" ||
+      t._config.isDev
+    ) {
       return next({ ctx });
     }
 

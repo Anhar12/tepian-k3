@@ -1,0 +1,46 @@
+# Dockerfile.drizzle — lightweight image for running @tepian-k3/db tools
+# (drizzle-kit studio / migrate / generate, tsx seed / reset)
+#
+# Source files are mounted as volumes in docker-compose.db.yml so that
+# schema and seed changes are picked up without rebuilding the image.
+
+# ---- Base ----
+FROM node:22-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@10.5.2 --activate
+WORKDIR /app
+
+# ---- Install dependencies ----
+FROM base AS deps
+# Copy workspace manifest files for full workspace resolution
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Copy every package.json so pnpm can resolve the whole workspace graph
+COPY apps/server/package.json ./apps/server/package.json
+COPY apps/web/package.json    ./apps/web/package.json
+COPY packages/api/package.json              ./packages/api/package.json
+COPY packages/auth/package.json             ./packages/auth/package.json
+COPY packages/config/package.json           ./packages/config/package.json
+COPY packages/constants/package.json        ./packages/constants/package.json
+COPY packages/db/package.json               ./packages/db/package.json
+COPY packages/queries/package.json          ./packages/queries/package.json
+COPY packages/schema/package.json           ./packages/schema/package.json
+COPY packages/services/package.json         ./packages/services/package.json
+COPY packages/shared/package.json           ./packages/shared/package.json
+COPY packages/types/package.json            ./packages/types/package.json
+COPY packages/utils/package.json            ./packages/utils/package.json
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# ---- DB Tools image ----
+FROM deps AS db-tools
+# Copy source for packages that @tepian-k3/db depends on at runtime
+COPY packages/constants ./packages/constants
+COPY packages/config    ./packages/config
+# Copy the db package (src/ will be overridden by the volume mount in compose,
+# but we still copy it here so the image works standalone if needed)
+COPY packages/db ./packages/db
+
+# All drizzle-kit / tsx commands run from the db package root
+WORKDIR /app/packages/db
+
+# Default: Drizzle Studio (override CMD in compose for migrate / seed / reset)
+CMD ["pnpm", "exec", "drizzle-kit", "studio", "--host", "0.0.0.0", "--port", "4983"]

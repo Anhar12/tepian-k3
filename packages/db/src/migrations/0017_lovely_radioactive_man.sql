@@ -1,1 +1,0 @@
-ALTER TABLE "worksheets" ADD COLUMN "is_personnel_date_set" boolean DEFAULT false NOT NULL;

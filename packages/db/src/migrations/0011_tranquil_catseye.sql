@@ -1,1 +1,0 @@
-ALTER TABLE "user_companies" ALTER COLUMN "wlkp" DROP NOT NULL;

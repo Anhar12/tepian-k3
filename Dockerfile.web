@@ -25,9 +25,11 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # ---- Build ----
 FROM deps AS build
 # VITE_SERVER_URL is baked into the JS bundle at build time.
-# Since nginx proxies /trpc and /api to the backend server,
-# set this to the public-facing URL where the web app is served.
-ARG VITE_SERVER_URL="http://localhost:3001"
+# Leave empty so tRPC uses relative URLs (/trpc, /api) — nginx
+# proxies them to the backend container regardless of host IP.
+# Only set this explicitly when the frontend and backend are on
+# different hosts/ports with no nginx proxy in between.
+ARG VITE_SERVER_URL=""
 ENV VITE_SERVER_URL=${VITE_SERVER_URL}
 COPY . .
 RUN pnpm turbo run build --filter=@tepian-k3/web

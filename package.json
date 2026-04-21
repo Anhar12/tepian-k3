@@ -33,6 +33,7 @@
     "db:migrate": "turbo run db:migrate -F @tepian-k3/db",
     "db:seed": "turbo run db:seed -F @tepian-k3/db",
     "db:reset": "turbo run db:reset -F @tepian-k3/db",
+    "db:purge": "turbo run db:purge -F @tepian-k3/db",
     "db:snapshot": "turbo run db:snapshot -F @tepian-k3/db",
     "db:restore": "turbo run db:restore -F @tepian-k3/db --",
     "email:dev": "turbo run email:dev -F @tepian-k3/services",

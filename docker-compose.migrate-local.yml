@@ -1,0 +1,37 @@
+# Local migration runner — no image push needed.
+#
+# Builds the migrate container once from the local source (uses the `build`
+# stage which has drizzle-kit). The migrations folder is mounted as a volume
+# so any SQL file edits take effect immediately without rebuilding.
+#
+# Usage (combined with main compose — recommended):
+#   docker compose -f docker-compose.yml -f docker-compose.migrate-local.yml run --rm migrate
+#
+# Usage (standalone — requires tepian-k3_tepian-network to already exist):
+#   docker compose -f docker-compose.migrate-local.yml run --rm migrate
+
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    working_dir: /app
+    entrypoint: ["sh", "-c"]
+    command: "cd packages/db && pnpm exec drizzle-kit migrate"
+    volumes:
+      # Mount local migration files so SQL edits are picked up instantly
+      - ./packages/db/src/migrations:/app/packages/db/src/migrations
+    environment:
+      POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - tepian-network
+
+networks:
+  tepian-network:
+    external: true
+    name: tepian-k3_tepian-network

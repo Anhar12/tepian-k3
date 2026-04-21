@@ -175,6 +175,9 @@ export function createRateLimiterFromPreset(
 // Export the main classes
 export { RateLimiter } from "./rate-limiter";
 
+/** Whether rate limiting is enabled globally. Set RATE_LIMITER_ENABLED=false to disable. */
+export const isRateLimiterEnabled = env.RATE_LIMITER_ENABLED !== "false";
+
 // Convenience exports for presets
 export const rateLimiters = {
   auth: () => createRateLimiterFromPreset("AUTH", "auth"),

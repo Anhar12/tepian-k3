@@ -1,6 +1,7 @@
+import type { AppRouter } from "@tepian-k3/api/root";
 import type { TRPCLink } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
-import type { AppRouter } from "@tepian-k3/api/root";
+import { v4 } from "uuid";
 
 /**
  * Per-operation idempotency keys keyed by tRPC operation id.
@@ -19,7 +20,7 @@ export const idempotencyLink: TRPCLink<AppRouter> =
 
     let key = idempotencyKeyByOp.get(op.id);
     if (!key) {
-      key = crypto.randomUUID();
+      key = v4();
       idempotencyKeyByOp.set(op.id, key);
     }
 
