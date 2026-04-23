@@ -1,2 +1,0 @@
-ALTER TABLE "worksheets" ADD COLUMN "estimated_amount_of_members" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
-ALTER TABLE "worksheets" ADD COLUMN "estimated_amount_of_days" integer DEFAULT 0 NOT NULL;

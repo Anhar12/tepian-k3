@@ -52,7 +52,6 @@ fi
 
 REGISTRY="ghcr.io/${GHCR_USER}"
 SERVER_IMAGE="${REGISTRY}/tepian-k3-server:${IMAGE_TAG}"
-MIGRATE_IMAGE="${REGISTRY}/tepian-k3-migrate:${IMAGE_TAG}"
 WEB_IMAGE="${REGISTRY}/tepian-k3-web:${IMAGE_TAG}"
 
 echo "============================================="
@@ -64,29 +63,20 @@ echo "============================================="
 echo ""
 
 # ---- Login ----
-echo "[1/5] Logging in to ghcr.io..."
+echo "[1/4] Logging in to ghcr.io..."
 echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
 echo ""
 
 # ---- Build server ----
-echo "[2/5] Building server image..."
+echo "[2/4] Building server image..."
 docker build \
   --platform linux/amd64 \
   -t "${SERVER_IMAGE}" \
   .
 echo ""
 
-# ---- Build migrate (build stage — has drizzle-kit + all devDeps) ----
-echo "[3/5] Building migrate image..."
-docker build \
-  --platform linux/amd64 \
-  --target build \
-  -t "${MIGRATE_IMAGE}" \
-  .
-echo ""
-
 # ---- Build web ----
-echo "[4/5] Building web image..."
+echo "[3/4] Building web image..."
 docker build \
   --platform linux/amd64 \
   -f Dockerfile.web \
@@ -95,16 +85,14 @@ docker build \
 echo ""
 
 # ---- Push ----
-echo "[5/5] Pushing images to GHCR..."
+echo "[4/4] Pushing images to GHCR..."
 docker push "${SERVER_IMAGE}"
-docker push "${MIGRATE_IMAGE}"
 docker push "${WEB_IMAGE}"
 echo ""
 
 echo "============================================="
 echo " Done! Images pushed:"
 echo "   ${SERVER_IMAGE}"
-echo "   ${MIGRATE_IMAGE}"
 echo "   ${WEB_IMAGE}"
 echo ""
 echo " Next: copy docker-compose.prod.yml + .env"

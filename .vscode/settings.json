@@ -1,4 +1,45 @@
 {
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.turbo/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true,
+    "**/.cache/**": true,
+    "**/build/**": true
+  },
+  "search.exclude": {
+    "**/node_modules/**": true,
+    "**/.turbo/**": true,
+    "**/dist/**": true,
+    "**/.cache/**": true,
+    "**/build/**": true,
+    "pnpm-lock.yaml": true,
+    "**/.pnpm-store/**": true,
+    "**/node_modules/.pnpm/**": true,
+    "**/*.js.map": true,
+    "**/*.d.ts": true
+  },
+  "search.useIgnoreFiles": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.followSymlinks": false,
+  "files.exclude": {
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.cache": true
+  },
+  "js/ts.tsserver.maxMemory": 4096,
+  "js/ts.preferences.includePackageJsonAutoImports": "off",
+  "js/ts.tsserver.watchOptions": {
+    "watchFile": "useFsEventsOnParentDirectory",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriorityPolling"
+  },
+  "eslint.workingDirectories": [
+    { "pattern": "apps/*/" },
+    { "pattern": "packages/*/" }
+  ],
+  "eslint.probe": ["typescript", "typescriptreact"],
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {
       "text": "Generate exactly 1 commit message following Conventional Commits: format `<type>(<scope>): <subject>`, allowed types: feat, fix, chore, docs, style, refactor, perf, test, ci, build, wip, revert, improvement. Rules: lowercase, no period, imperative mood, subject under 72 chars, never generate multiple commit messages. If multiple files changed, summarize into 1 subject using dominant type and shared scope (omit scope if changes span multiple areas), then use body (blank line after subject, each line prefixed with `-`) to detail individual changes. For breaking changes append `!` after type and add `BREAKING CHANGE:` in footer."

@@ -1,0 +1,52 @@
+# Cloudflare Tunnel — web frontend only
+# Overlay this on top of docker-compose.web.yml (or docker-compose.prod.yml).
+# Both services share tepian-network so cloudflared reaches web:80 directly.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage
+# ─────────────────────────────────────────────────────────────────────────────
+#
+#   # Named tunnel (permanent subdomain — recommended for production)
+#   # 1. Create a tunnel in Cloudflare Zero Trust dashboard
+#   # 2. Set the tunnel's public hostname to route to http://web:80
+#   # 3. Copy the tunnel token into .env as CLOUDFLARE_TUNNEL_TOKEN
+#   docker compose -f docker-compose.web.yml -f docker-compose.cloudflared.yml --profile tunnel up -d
+#
+#   # Quick tunnel (temporary public URL — no Cloudflare account needed)
+#   # Public URL is printed in logs — run after starting:
+#   #   docker compose -f docker-compose.web.yml -f docker-compose.cloudflared.yml logs cloudflared-quick
+#   docker compose -f docker-compose.web.yml -f docker-compose.cloudflared.yml --profile tunnel-quick up -d
+#
+#   # Works with prod compose too:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.cloudflared.yml --profile tunnel up -d
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ---- Named tunnel (permanent subdomain) ----
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN is required}
+    restart: unless-stopped
+    depends_on:
+      - web
+    networks:
+      - tepian-network
+    profiles: [tunnel]
+
+  # ---- Quick tunnel (temporary URL, no account needed) ----
+  cloudflared-quick:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://web:80
+    restart: unless-stopped
+    depends_on:
+      - web
+    networks:
+      - tepian-network
+    profiles: [tunnel-quick]
+
+networks:
+  tepian-network:
+    external: true
+    name: tepian-k3_tepian-network

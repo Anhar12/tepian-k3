@@ -211,8 +211,9 @@ export function sanitizeError(error: unknown): Record<string, unknown> {
       name: error.name,
       message: maskTokensInString(error.message),
       stack:
-        process.env.NODE_ENV === "development"
-          ? error.stack
+        process.env.NODE_ENV === "development" ||
+        process.env.SHOW_STACK === "true"
+          ? maskTokensInString(error.stack ?? "")
           : "***STACK_HIDDEN***",
     };
   }

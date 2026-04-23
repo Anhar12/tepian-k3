@@ -1,0 +1,103 @@
+# DB Tools Compose — Drizzle kit operations
+#
+# Requires docker-compose.yml to be running first (postgres + tepian-network).
+# Requires a .env file (or env vars) with at minimum:
+#   POSTGRES_PASSWORD=<your-password>
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage
+# ─────────────────────────────────────────────────────────────────────────────
+#
+#   # Build the db-tools image once (or after dependency changes)
+#   docker compose -f docker-compose.db.yml build
+#
+#   # Start Drizzle Studio  →  open http://localhost:4983
+#   docker compose -f docker-compose.db.yml --profile studio up -d
+#
+#   # Stop Studio
+#   docker compose -f docker-compose.db.yml --profile studio down
+#
+#   # Run pending migrations (one-shot)
+#   docker compose -f docker-compose.db.yml --profile migrate run --rm migrate
+#
+#   # Generate new migration files from schema changes (writes SQL to host)
+#   docker compose -f docker-compose.db.yml --profile generate run --rm generate
+#
+#   # Seed the database (one-shot)
+#   docker compose -f docker-compose.db.yml --profile seed run --rm seed
+#
+#   # Reset the database (one-shot — destructive!)
+#   docker compose -f docker-compose.db.yml --profile reset run --rm reset
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# Notes
+# ─────────────────────────────────────────────────────────────────────────────
+#   • Postgres is NOT started here — it must already be running via
+#     docker-compose.yml. All tools join tepian-network and reach postgres
+#     by its service hostname.
+#
+#   • The db package source (packages/db/src) is mounted as a writable volume
+#     so schema edits and newly generated migration files appear on the host
+#     immediately — no image rebuild needed.
+#
+#   • POSTGRES_URL inside the containers always points to the 'postgres' service
+#     on the internal network (not localhost / the host-mapped port).
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db-tools: &db-tools
+  build:
+    context: .
+    dockerfile: Dockerfile.drizzle
+  environment:
+    POSTGRES_URL: postgresql://${POSTGRES_USER:-tepian}:${POSTGRES_PASSWORD:-tepian_secret}@postgres:5432/${POSTGRES_DB:-tepian_k3}
+  volumes:
+    # Live-mount source so schema / seed / reset changes need no rebuild
+    - ./packages/db/src:/app/packages/db/src
+    - ./packages/constants/src:/app/packages/constants/src
+  networks:
+    - tepian-network
+  restart: "no"
+
+services:
+  # ── Drizzle Studio (long-running, web UI) ───────────────────────────────────
+  studio:
+    <<: *db-tools
+    profiles: [studio]
+    command: pnpm exec drizzle-kit studio --host 0.0.0.0 --port 4983
+    ports:
+      - "${STUDIO_PORT:-4983}:4983"
+    restart: unless-stopped # keep running until explicitly stopped
+
+  # ── One-shot DB operations ──────────────────────────────────────────────────
+  migrate:
+    <<: *db-tools
+    profiles: [migrate]
+    command: pnpm exec drizzle-kit migrate
+
+  # Writes new .sql migration files back to packages/db/src/migrations on host
+  generate:
+    <<: *db-tools
+    profiles: [generate]
+    command: pnpm exec drizzle-kit generate
+
+  seed:
+    <<: *db-tools
+    profiles: [seed]
+    command: pnpm exec tsx ./src/seed/index.ts
+
+  reset:
+    <<: *db-tools
+    profiles: [reset]
+    command: pnpm exec tsx ./src/reset/index.ts
+
+  # Drops the entire public schema + all enums/sequences (nuclear option)
+  # Follow up with: docker compose ... --profile migrate run --rm migrate
+  purge:
+    <<: *db-tools
+    profiles: [purge]
+    command: pnpm exec tsx ./src/purge/index.ts
+
+networks:
+  tepian-network:
+    external: true
+    name: tepian-k3_tepian-network

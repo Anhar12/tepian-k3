@@ -1,1 +1,0 @@
-ALTER TABLE "worksheets" ADD COLUMN "revision_notes" text;

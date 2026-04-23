@@ -51,6 +51,9 @@ export const env = createEnv({
     MEMURAI_PORT: z.string().default("6379"),
     MEMURAI_PASSWORD: z.string().default(""),
 
+    // Rate limiter toggle
+    RATE_LIMITER_ENABLED: z.enum(["true", "false"]).default("true"),
+
     // Main document secret
     JWT_DOCUMENT_SECRET: z.string().min(32),
 

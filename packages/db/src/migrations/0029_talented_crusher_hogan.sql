@@ -1,3 +1,0 @@
-ALTER TABLE "worksheet_tools" ADD COLUMN "borrowed_by" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "worksheet_tools" ADD CONSTRAINT "worksheet_tools_borrowed_by_employees_id_fk" FOREIGN KEY ("borrowed_by") REFERENCES "public"."employees"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "worksheet_tool_borrowed_by_idx" ON "worksheet_tools" USING btree ("borrowed_by");
