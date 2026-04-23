@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import { db } from "../../client";
-import { tools, toolCodes, parameters, parameterTools } from "../../schema";
+import { parameters, parameterTools, toolCodes, tools } from "../../schema";
 import { getTools } from "../utils/tools";
 
 type InsertToolCode = typeof toolCodes.$inferInsert;
@@ -110,7 +110,6 @@ async function seedTools() {
   const insertedTools = await db
     .insert(tools)
     .values(toolsInsertData)
-    .onConflictDoNothing({ target: tools.toolUniqueCode })
     .returning();
 
   // Also fetch any pre-existing tools that were skipped

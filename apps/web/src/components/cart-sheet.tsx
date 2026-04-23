@@ -60,62 +60,45 @@ export default function CartSheet() {
         <div className="flex flex-col gap-4 p-4">
           <div className="flex gap-4">
             <Select
-              value={currentCompany ?? undefined}
+              value={currentCompany ?? "all"}
               onValueChange={(value) => {
-                if (value === currentCompany) {
-                  setCurrentCompany(null);
-                } else {
-                  setCurrentCompany(value);
-                }
+                setCurrentLocation(null);
+                setCurrentCompany(value === "all" ? null : value);
               }}
             >
               <SelectTrigger className="w-1/2">
-                <SelectValue placeholder="Pilih perusahaan" />
+                <SelectValue placeholder="Semua Perusahaan" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Area</SelectLabel>
-                  {mappedCompanyFromCartItem.length > 0 ? (
-                    mappedCompanyFromCartItem.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="empty" disabled>
-                      Tidak ada perusahaan
+                  <SelectLabel>Perusahaan</SelectLabel>
+                  <SelectItem value="all">Semua Perusahaan</SelectItem>
+                  {mappedCompanyFromCartItem.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
                     </SelectItem>
-                  )}
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
             <Select
-              value={currentLocation ?? undefined}
+              value={currentLocation ?? "all"}
               onValueChange={(value) => {
-                if (value === currentLocation) {
-                  setCurrentLocation(null);
-                } else {
-                  setCurrentLocation(value);
-                }
+                setCurrentLocation(value === "all" ? null : value);
               }}
             >
               <SelectTrigger className="w-1/2">
-                <SelectValue placeholder="Pilih area" />
+                <SelectValue placeholder="Semua Lokasi" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Area</SelectLabel>
-                  {mappedLocationFromCartItem.length > 0 ? (
-                    mappedLocationFromCartItem.map((location) => (
-                      <SelectItem key={location.id} value={location.id}>
-                        {location.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="empty" disabled>
-                      Tidak ada area
+                  <SelectLabel>Lokasi</SelectLabel>
+                  <SelectItem value="all">Semua Lokasi</SelectItem>
+                  {mappedLocationFromCartItem.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
                     </SelectItem>
-                  )}
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>

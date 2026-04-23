@@ -1,10 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Agent Changelog
-
-> After any significant change to this file or the codebase, append an entry to [AGENT_CHANGELOG.md](AGENT_CHANGELOG.md).
+This file provides guidance to Codex (and other AI agents) when working with code in this repository.
 
 ---
 
@@ -57,27 +53,7 @@ pnpm db:migrate       # Run migrations (prod)
 pnpm db:studio        # Drizzle Studio GUI
 pnpm db:seed          # Seed database
 pnpm db:reset         # Reset + re-migrate
-
-# Email testing
-pnpm email:dev        # Start Ethereal test server
-pnpm email:verify     # Send test verification email
-
-# Docker
-docker compose up -d                              # All services
-docker compose -f docker-compose.infra.yml up -d  # Infrastructure only
-docker compose -f docker-compose.server.yml up -d # API server only
-docker compose -f docker-compose.web.yml up -d    # Web frontend only
-docker compose exec postgres psql -U tepian -d tepian_k3
-
-# pnpm workspace
-pnpm add <pkg> -w                          # Root
-pnpm add <pkg> --filter @tepian-k3/web     # Web app
-pnpm add <pkg> --filter @tepian-k3/server  # Server
-turbo -F @tepian-k3/web dev                # Run in specific package
-rm -rf .turbo && pnpm turbo run build --force  # Clear cache + rebuild
 ```
-
-See [Docker Compose Guide](docs/DOCKER_COMPOSE_GUIDE.md) for full Docker details.
 
 ---
 
@@ -141,44 +117,9 @@ tepian-k3/
 | Content           | `banners`, `news`, `surveyQuestions`, `surveyResponses`, `surveyFeedback`                                                                             |
 | Audit             | `audits`                                                                                                                                              |
 
-### Frontend Routes (`apps/web/src/routes/`)
-
-- `(auth)/` — login, register, verify-email (public)
-- `(core)/` — protected routes:
-  - `dashboard/`, `back-office/`, `pengujian/`, `worksheets/`, `employee/`, `display-board/`
-  - `konsultasi/`, `pelatihan/`, `uji-kompetensi/`
-  - `document.tsx`, `notifications.tsx`, `pdf-editor.tsx`, `profile.tsx`, `settings.tsx`
-- `verify.$token.tsx`, `unauthorized.tsx`
-
-### Services (`packages/services/src/`)
-
-| Service                      | Description                                                |
-| ---------------------------- | ---------------------------------------------------------- |
-| `storage/`                   | Filesystem / MinIO / S3 — via `STORAGE_PROVIDER`           |
-| `email/`                     | Nodemailer / Resend — via `EMAIL_PROVIDER`                 |
-| `logger/`                    | Winston — console + rotating file                          |
-| `image/`                     | Image optimization and format conversion                   |
-| `pdf/`                       | PDF generation + QR embedding via pdf-lib                  |
-| `document-signing/`          | JWT-based signatures + QR verification                     |
-| `rate-limiter/`              | Sliding-window / token-bucket / fixed-window, Redis-backed |
-| `notifications/event-bus.ts` | SSE for real-time updates                                  |
-
 ---
 
 ## Key Patterns
-
-See [docs/PATTERNS.md](docs/PATTERNS.md) for full code examples covering:
-
-- Effect-based query functions
-- Standard CRUD router structure
-- Soft delete / restore
-- Pagination
-- Audit logging
-- File upload
-- Rate limiting
-- Document verification flow
-- Frontend route protection
-- tRPC client usage (classic, modern, direct)
 
 ### Schema conventions
 
@@ -204,54 +145,6 @@ uniqueIndex("name_idx").on(table.name).where(sql`${table.deletedAt} IS NULL`)
 | `withRateLimit` / `withProtectedRateLimit` / `withRoleBasedRateLimit` | Rate limiting                |
 | `formDataProcedure(schema)`                                           | File uploads                 |
 
-### JWT token payload
-
-```typescript
-{ id, email, roles: string[], permissions: string[], createdAt, updatedAt, exp, iat, jti }
-```
-
----
-
-## Testing Workflow (Business Logic)
-
-1. Parameter Selection → 2. Add to Cart → 3. Checkout → 4. Order Approval → 5. Payment Upload → 6. Lab Testing → 7. Worksheet (tools, materials, costs) → 8. Document Generation → 9. Document Signing (QR) → 10. Completion
-
----
-
-## Environment Variables
-
-```env
-# Required
-POSTGRES_URL=postgresql://user:password@localhost:5432/db_name
-SERVER_HOSTNAME=localhost
-SERVER_PORT=3000
-NODE_ENV=development
-JWT_SECRET=...                          # min 32 chars
-JWT_RESET_PASSWORD_SECRET=...
-JWT_DOCUMENT_SECRET=...
-JWT_LEGAL_DOCUMENT_SECRET=...
-JWT_TESTING_DOCUMENT_SECRET=...
-JWT_COMPANY_DOCUMENT_SECRET=...
-DOCUMENT_QR_EXPIRATION=7d
-DOCUMENT_VERIFICATION_BASE_URL=http://localhost:3001/verify
-VITE_API_URL=http://localhost:3000
-CORS_ORIGIN=http://localhost:3001
-
-# Optional
-EMAIL_PROVIDER=ethereal                 # or 'resend'
-EMAIL_FROM=noreply@example.com
-SMTP_HOST=smtp.ethereal.email
-SMTP_PORT=587
-SMTP_USER=...
-SMTP_PASSWORD=...
-STORAGE_PROVIDER=filesystem             # or 'minio', 's3'
-STORAGE_PATH=./uploads
-MEMURAI_HOST=localhost
-MEMURAI_PORT=6379
-```
-
-Env vars are validated with `@t3-oss/env-core` in each package and passed through Turborepo via `globalPassThroughEnv`.
-
 ---
 
 ## Important Rules
@@ -263,14 +156,13 @@ Env vars are validated with `@t3-oss/env-core` in each package and passed throug
 - **Cascade deletes** are enabled — be careful with deletions
 - **File uploads** must go through `storageService`
 - **Permission checks** are runtime — cached in JWT, re-validated on sensitive ops
-- **TanStack Router issues** — check https://tanstack.com/router/latest/docs first, not generic React docs
 - **Multi-file changes** — present a full checklist to the user before starting, get confirmation
 - **New docs** go in the relevant package's `docs/` folder
 - **Cross-module or generated code** — add an authorship comment at the top of the file or section:
 
   ```typescript
   ##################
-  # authored (generated by claude, Apr 24 2026 22:00 WITA)
+  # authored (generated by codex, Apr 24 2026 22:00 WITA)
   ##################
 
   // ... generated code here ...
@@ -284,61 +176,23 @@ Env vars are validated with `@t3-oss/env-core` in each package and passed throug
 
 ---
 
-## Branch Naming & Versioning
+## Testing Workflow (Business Logic)
 
-See [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md) and [docs/VERSION_PLANNING.md](docs/VERSION_PLANNING.md) for full details.
-
-### Branch Format
-
-```
-<type>/<scope>[-<description>]
-```
-
-| Type        | SemVer Impact | Merges Into      | Use When                               |
-| ----------- | ------------- | ---------------- | -------------------------------------- |
-| `feat/`     | MINOR / MAJOR | `beta` or parent | New feature or module                  |
-| `fix/`      | PATCH         | `beta`           | Non-critical bug fix                   |
-| `hotfix/`   | PATCH         | `main` + `beta`  | Critical production fix                |
-| `chore/`    | PATCH         | `beta`           | Dependencies, config, CI/CD, tooling   |
-| `refactor/` | PATCH         | `beta`           | Code restructuring, no behavior change |
-| `docs/`     | None          | `beta`           | Documentation only                     |
-
-**Layer prefixes** for sub-branches: `db-`, `api-`, `svc-`, `ui-` (e.g. `feat/pelatihan-ui-browse`)
-
-**Long-lived branches:** `main` (production, tagged releases) and `beta` (staging / pre-release)
-
-### Versioning (SemVer)
-
-| Bump    | When                                                        |
-| ------- | ----------------------------------------------------------- |
-| `PATCH` | Bug fixes, small tweaks, column changes on existing tables  |
-| `MINOR` | New API endpoints, new UI pages, new tables                 |
-| `MAJOR` | New business domain modules (e.g. entirely new feature set) |
-
-**Rules:**
-
-- Never put version numbers in branch names — use git tags (`v2.0.0-alpha.1`)
-- Always use kebab-case, keep names under 50 characters
-- `hotfix/*` branches from `main`, merges into `main` + `beta`
-- All other types (`feat/`, `fix/`, `chore/`, etc.) branch from `beta`, merge into `beta`
-- **Never branch `fix/` or `chore/` from `beta` and merge directly to `main`** — this drags all unreleased `beta` commits into the release
-- After every merge to `main`, sync `beta`: `git checkout beta && git merge main && git push origin beta`
+1. Parameter Selection → 2. Add to Cart → 3. Checkout → 4. Order Approval → 5. Payment Upload → 6. Lab Testing → 7. Worksheet (tools, materials, costs) → 8. Document Generation → 9. Document Signing (QR) → 10. Completion
 
 ---
 
 ## Documentation Index
 
-| File                                                                                           | Topic                            |
-| ---------------------------------------------------------------------------------------------- | -------------------------------- |
-| [docs/PATTERNS.md](docs/PATTERNS.md)                                                           | Code patterns and examples       |
-| [docs/JSDOC_CONVENTION.md](docs/JSDOC_CONVENTION.md)                                           | JSDoc rules and examples         |
-| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md)                                   | Docker setup and troubleshooting |
-| [docs/EMPLOYEE_AUTH_GUIDE.md](docs/EMPLOYEE_AUTH_GUIDE.md)                                     | Employee authentication          |
-| [docs/POLYMORPHIC_RELATIONS_GUIDE.md](docs/POLYMORPHIC_RELATIONS_GUIDE.md)                     | Document polymorphic relations   |
-| [docs/DOCUMENT_VERIFICATION.md](docs/DOCUMENT_VERIFICATION.md)                                 | Document verification system     |
-| [docs/PDF_EDITOR_USER_GUIDE.md](docs/PDF_EDITOR_USER_GUIDE.md)                                 | PDF signing and QR embedding     |
-| [packages/api/docs/RATE_LIMITING_MIDDLEWARE.md](packages/api/docs/RATE_LIMITING_MIDDLEWARE.md) | Rate limiting middleware         |
-| [apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md)       | tRPC + TanStack Query patterns   |
-| [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md)                                                 | Git branch naming conventions    |
-| [docs/VERSION_PLANNING.md](docs/VERSION_PLANNING.md)                                           | SemVer strategy and release plan |
-| [AGENT_CHANGELOG.md](AGENT_CHANGELOG.md)                                                       | Agent change history             |
+| File                                                                                     | Topic                            |
+| ---------------------------------------------------------------------------------------- | -------------------------------- |
+| [docs/PATTERNS.md](docs/PATTERNS.md)                                                     | Code patterns and examples       |
+| [docs/JSDOC_CONVENTION.md](docs/JSDOC_CONVENTION.md)                                     | JSDoc rules and examples         |
+| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md)                             | Docker setup and troubleshooting |
+| [docs/EMPLOYEE_AUTH_GUIDE.md](docs/EMPLOYEE_AUTH_GUIDE.md)                               | Employee authentication          |
+| [docs/POLYMORPHIC_RELATIONS_GUIDE.md](docs/POLYMORPHIC_RELATIONS_GUIDE.md)               | Document polymorphic relations   |
+| [docs/DOCUMENT_VERIFICATION.md](docs/DOCUMENT_VERIFICATION.md)                           | Document verification system     |
+| [apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md) | tRPC + TanStack Query patterns   |
+| [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md)                                           | Git branch naming conventions    |
+| [docs/VERSION_PLANNING.md](docs/VERSION_PLANNING.md)                                     | SemVer strategy and release plan |
+| [AGENT_CHANGELOG.md](AGENT_CHANGELOG.md)                                                 | Agent change history             |

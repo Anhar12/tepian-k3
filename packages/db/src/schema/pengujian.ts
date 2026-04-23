@@ -1,3 +1,17 @@
+import {
+  BAHAN_STATUS,
+  BAHAN_UNITS,
+  ORDER_APPROVAL_STATUSES,
+  ORDER_PAYMENT_STATUSES,
+  ORDER_SEQUENCE_NAME,
+  ORDER_STATUS,
+  TESTING_SEQUENCE_NAME,
+  TESTING_STATUSES,
+  TOOLS_AVAILABILITY,
+  TOOLS_CONDITIONS,
+  WORKSHEET_NOTE_STATUS,
+  WORKSHEET_STATUS,
+} from "@tepian-k3/constants";
 import { sql } from "drizzle-orm";
 import {
   boolean,
@@ -19,20 +33,6 @@ import {
   createTable,
   timestamps,
 } from "../utils";
-import {
-  ORDER_APPROVAL_STATUSES,
-  ORDER_PAYMENT_STATUSES,
-  ORDER_SEQUENCE_NAME,
-  ORDER_STATUS,
-  TESTING_SEQUENCE_NAME,
-  TESTING_STATUSES,
-  TOOLS_AVAILABILITY,
-  TOOLS_CONDITIONS,
-  WORKSHEET_NOTE_STATUS,
-  WORKSHEET_STATUS,
-  BAHAN_UNITS,
-  BAHAN_STATUS,
-} from "@tepian-k3/constants";
 import {
   districts,
   employees,
@@ -207,9 +207,7 @@ export const tools = createTable(
     toolCodeId: uuid("tool_code_id")
       .notNull()
       .references(() => toolCodes.id, { onDelete: "cascade" }),
-    toolUniqueCode: varchar("tool_unique_code", { length: 256 })
-      .notNull()
-      .unique(),
+    toolUniqueCode: varchar("tool_unique_code", { length: 256 }).notNull(),
     toolName: varchar("tool_name", { length: 256 }).notNull(),
     function: text("function"),
     location: text("location"),

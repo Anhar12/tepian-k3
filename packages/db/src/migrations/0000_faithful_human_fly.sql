@@ -598,8 +598,7 @@ CREATE TABLE "tools" (
 	"information" text,
 	"deleted_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone,
-	CONSTRAINT "tools_tool_unique_code_unique" UNIQUE("tool_unique_code")
+	"updated_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "user_companies" (

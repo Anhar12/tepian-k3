@@ -1,9 +1,4 @@
-import { TRPCError } from "@trpc/server";
-import { db, type DBorTx } from "@tepian-k3/db/client";
-import { z } from "zod";
-import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
-import { Cause, Effect, Exit } from "effect";
-import { logError } from "@tepian-k3/services/logger";
+import type { OrderPaymentStatus, OrderStatus } from "@tepian-k3/constants";
 import {
   and,
   asc,
@@ -19,8 +14,7 @@ import {
   sql,
   type SQL,
 } from "@tepian-k3/db";
-import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
-import { filterColumns } from "@tepian-k3/utils/filter-column";
+import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
   cart,
   documents,
@@ -29,12 +23,18 @@ import {
   userCompanyTestingLocation,
   worksheets,
 } from "@tepian-k3/db/schema";
-import orderItemSchema from "@tepian-k3/schema/pengujian/order-item.schema";
 import { generateOrderNumberWithSequence } from "@tepian-k3/db/utils";
+import orderItemSchema from "@tepian-k3/schema/pengujian/order-item.schema";
+import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
+import { logError } from "@tepian-k3/services/logger";
+import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
+import { filterColumns } from "@tepian-k3/utils/filter-column";
+import { TRPCError } from "@trpc/server";
+import { Cause, Effect, Exit } from "effect";
+import { z } from "zod";
+import { logCreate } from "../helpers/audit.helpers";
 import orderItemQueries from "./order-item.queries";
 import orderStatusHistoryQueries from "./order-status-history.queries";
-import { logCreate } from "../helpers/audit.helpers";
-import type { OrderPaymentStatus, OrderStatus } from "@tepian-k3/constants";
 import testingQueries from "./testing.queries";
 
 const orderQueries = {
@@ -1156,6 +1156,7 @@ const orderQueries = {
             ),
             with: {
               user: true,
+              worksheet: true,
             },
           }),
         catch: (error) => {
@@ -1175,6 +1176,16 @@ const orderQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Pesanan tidak ditemukan atau bukan dalam status pending",
+          }),
+        );
+      }
+
+      if (!orderToApprove.worksheet) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Order belum melewati tahapan kaji ulang, worksheet belum dibuat, tidak dapat menyetujui order",
           }),
         );
       }
@@ -1227,6 +1238,7 @@ const orderQueries = {
             ),
             with: {
               user: true,
+              worksheet: true,
             },
           }),
         catch: (error) => {
@@ -1250,6 +1262,16 @@ const orderQueries = {
           new TRPCError({
             code: "BAD_REQUEST",
             message: "Pesanan tidak ditemukan atau bukan dalam status pending",
+          }),
+        );
+      }
+
+      if (!orderToReject.worksheet) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Order belum melewati tahapan kaji ulang, worksheet belum dibuat, tidak dapat menolak order",
           }),
         );
       }

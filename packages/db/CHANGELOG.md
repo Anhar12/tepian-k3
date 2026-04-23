@@ -1,5 +1,25 @@
 # @tepian-k3/db
 
+## 1.10.0
+
+### Minor Changes
+
+- feat(api,db,server,services,web): add rate limiter toggle to environment configuration
+  - add rate limiter toggle to environment configuration
+  - ensure shared network exists for cloudflared compose
+  - enhance deployment script with tunnel support
+  - add migration service and update VITE_SERVER_URL handling
+  - add purge command and update documentation
+  - add Cloudflare Tunnel setup guide and configuration files
+  - add Dockerfile and docker-compose for DB tools
+  - update Dockerfile and compose for improved deployment
+  - update migration command to use pnpm exec
+  - update environment configuration and improve build script
+  - load environment variables from .env.build file
+  - add example environment configuration for build process
+  - update Docker setup for migration and build process
+  - add deployment scripts and configuration files
+
 ## 1.9.0
 
 ### Minor Changes

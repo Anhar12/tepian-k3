@@ -44,56 +44,45 @@ export function useCartFilters() {
       : [];
   }, [cartItems, currentCompany]);
 
-  const mappedItems = useMemo(() => {
-    if (cartItems) {
-      let filteredItems = cartItems;
-      if (currentCompany) {
-        filteredItems = filteredItems.filter(
-          (company) => company.id === currentCompany,
-        );
-      }
-      if (currentLocation) {
-        filteredItems = filteredItems
-          .map((company) => ({
-            ...company,
-            locations: company.locations.filter(
-              (location) => location.id === currentLocation,
-            ),
-          }))
-          .filter((company) => company.locations.length > 0);
-      }
-      return filteredItems.flatMap((company) =>
-        company.locations.flatMap((location) => location.clusters),
-      );
+  const filteredCartItems = useMemo(() => {
+    if (!cartItems) return [];
+    let filtered = cartItems;
+    if (currentCompany) {
+      filtered = filtered.filter((company) => company.id === currentCompany);
     }
-    return [];
+    if (currentLocation) {
+      filtered = filtered
+        .map((company) => ({
+          ...company,
+          locations: company.locations.filter(
+            (location) => location.id === currentLocation,
+          ),
+        }))
+        .filter((company) => company.locations.length > 0);
+    }
+    return filtered;
   }, [cartItems, currentCompany, currentLocation]);
 
-  const totalPrice = useMemo(() => {
-    if (!cartItems) return 0;
+  const mappedItems = useMemo(() => {
+    return filteredCartItems.flatMap((company) =>
+      company.locations.flatMap((location) => location.clusters),
+    );
+  }, [filteredCartItems]);
 
-    return cartItems.reduce((companyAcc, company) => {
+  const totalPrice = useMemo(() => {
+    return mappedItems.reduce((clusterAcc, cluster) => {
       return (
-        companyAcc +
-        company.locations.reduce((locationAcc, location) => {
-          return (
-            locationAcc +
-            location.clusters.reduce((clusterAcc, cluster) => {
-              return (
-                clusterAcc +
-                cluster.items.reduce((itemAcc, item) => {
-                  return itemAcc + item.price * item.quantity;
-                }, 0)
-              );
-            }, 0)
-          );
+        clusterAcc +
+        cluster.items.reduce((itemAcc, item) => {
+          return itemAcc + item.price * item.quantity;
         }, 0)
       );
     }, 0);
-  }, [cartItems]);
+  }, [mappedItems]);
 
   return {
     cartItems,
+    filteredCartItems,
     currentCompany,
     setCurrentCompany,
     currentLocation,

@@ -110,6 +110,7 @@ const autoItems = [
 function RouteComponent() {
   const {
     cartItems,
+    filteredCartItems,
     currentCompany,
     setCurrentCompany,
     currentLocation,
@@ -176,18 +177,7 @@ function RouteComponent() {
       return;
     }
 
-    if (!cartItems) return;
-
-    /**
-     * Prepare order items payload
-     * the end payload shoulbd be like this:
-     * [
-     *    { companyId: string, items: [ { parameterId: string, quantity: number, price: number } ] }
-     * ]
-     * grouped by locationId and companyId
-     * what if there was mulitple companies in cart?
-     * then we need to group items by companyId
-     */
+    if (!cartItems || filteredCartItems.length === 0) return;
 
     const groupedItemsByCompany: Record<
       string,
@@ -204,7 +194,7 @@ function RouteComponent() {
       }[]
     > = {};
 
-    cartItems.forEach((company) => {
+    filteredCartItems.forEach((company) => {
       company.locations.forEach((location) => {
         location.clusters.forEach((cluster) => {
           cluster.items.forEach((item) => {
@@ -260,62 +250,45 @@ function RouteComponent() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row">
         <Select
-          value={currentCompany ?? undefined}
+          value={currentCompany ?? "all"}
           onValueChange={(value) => {
-            if (value === currentCompany) {
-              setCurrentCompany(null);
-            } else {
-              setCurrentCompany(value);
-            }
+            setCurrentLocation(null);
+            setCurrentCompany(value === "all" ? null : value);
           }}
         >
           <SelectTrigger className="w-full sm:w-1/2">
-            <SelectValue placeholder="Pilih perusahaan" />
+            <SelectValue placeholder="Semua Perusahaan" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Area</SelectLabel>
-              {mappedCompanyFromCartItem.length > 0 ? (
-                mappedCompanyFromCartItem.map((company) => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {company.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="empty" disabled>
-                  Tidak ada perusahaan
+              <SelectLabel>Perusahaan</SelectLabel>
+              <SelectItem value="all">Semua Perusahaan</SelectItem>
+              {mappedCompanyFromCartItem.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
                 </SelectItem>
-              )}
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
         <Select
-          value={currentLocation ?? undefined}
+          value={currentLocation ?? "all"}
           onValueChange={(value) => {
-            if (value === currentLocation) {
-              setCurrentLocation(null);
-            } else {
-              setCurrentLocation(value);
-            }
+            setCurrentLocation(value === "all" ? null : value);
           }}
         >
           <SelectTrigger className="w-full sm:w-1/2">
-            <SelectValue placeholder="Pilih area" />
+            <SelectValue placeholder="Semua Lokasi" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Area</SelectLabel>
-              {mappedLocationFromCartItem.length > 0 ? (
-                mappedLocationFromCartItem.map((location) => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {location.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="empty" disabled>
-                  Tidak ada area
+              <SelectLabel>Lokasi</SelectLabel>
+              <SelectItem value="all">Semua Lokasi</SelectItem>
+              {mappedLocationFromCartItem.map((location) => (
+                <SelectItem key={location.id} value={location.id}>
+                  {location.name}
                 </SelectItem>
-              )}
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>

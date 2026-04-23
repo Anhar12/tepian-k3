@@ -1,5 +1,3 @@
-import { TRPCError } from "@trpc/server";
-import { db } from "@tepian-k3/db/client";
 import {
   and,
   asc,
@@ -14,6 +12,7 @@ import {
   isNull,
   sql,
 } from "@tepian-k3/db";
+import { db } from "@tepian-k3/db/client";
 import {
   parameterTools,
   parameters,
@@ -22,12 +21,13 @@ import {
   worksheetToolNeeded,
   worksheetTools,
 } from "@tepian-k3/db/schema";
-import { z } from "zod";
 import toolsSchema from "@tepian-k3/schema/pengujian/tools.schema";
-import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
+import { TRPCError } from "@trpc/server";
+import { Effect } from "effect";
+import { z } from "zod";
 import toolCodeQueries from "./tool-code.queries";
 
 const toolsQueries = {
@@ -136,19 +136,21 @@ const toolsQueries = {
     );
   },
 
-  getToolByCode(toolCode: string) {
+  getToolByCode(toolCodeId: string, toolUniqueCode: string) {
     return Effect.tryPromise({
       try: () =>
         db.query.tools.findFirst({
           where: and(
-            eq(tools.toolUniqueCode, toolCode),
+            eq(tools.toolCodeId, toolCodeId),
+            eq(tools.toolUniqueCode, toolUniqueCode),
             isNull(tools.deletedAt),
           ),
         }),
       catch: (error) => {
         logError("toolsQueries.getToolByCode", "Error fetching tool by code", {
           error,
-          toolCode,
+          toolCodeId,
+          toolUniqueCode,
         });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -343,7 +345,10 @@ const toolsQueries = {
     return Effect.gen(this, function* () {
       yield* toolCodeQueries.getToolCodeById(data.toolCodeId);
 
-      const tool = yield* this.getToolByCode(data.toolUniqueCode);
+      const tool = yield* this.getToolByCode(
+        data.toolCodeId,
+        data.toolUniqueCode,
+      );
 
       if (tool) {
         throw new TRPCError({
@@ -390,6 +395,18 @@ const toolsQueries = {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Alat tidak ditemukan.",
+        });
+      }
+
+      const toolWithSameCode = yield* this.getToolByCode(
+        data.toolCodeId,
+        data.toolUniqueCode,
+      );
+
+      if (toolWithSameCode && toolWithSameCode.id !== data.id) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Alat dengan kode tersebut sudah ada.",
         });
       }
 

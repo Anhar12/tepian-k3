@@ -1,19 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import ImageWithFallback from "@/components/image-with-fallback";
+import { PermissionGate } from "@/components/permission-gate";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,40 +12,52 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { trpc } from "@/utils/trpc";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import useDialogs from "@/hooks/use-dialog";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation";
+import { getClusterColor } from "@/lib/cluster-colors";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
+import { requirePermission } from "@/utils/require-permission";
+import { queryClient, trpc } from "@/utils/trpc";
+import { getPublicUrl } from "@/utils/url";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { format } from "date-fns";
 import {
   Download,
+  Eye,
   FileText,
   Loader2,
   Mail,
   Plus,
-  Eye,
   Upload,
   X,
 } from "lucide-react";
-import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { queryClient } from "@/utils/trpc";
-import { format } from "date-fns";
-import { pageHead } from "@/utils/page-head";
-import { requirePermission } from "@/utils/require-permission";
-import { PermissionGate } from "@/components/permission-gate";
-import { getClusterColor } from "@/lib/cluster-colors";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useFileUpload } from "@/hooks/use-file-upload";
-import { getPublicUrl } from "@/utils/url";
-import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation";
-import useDialogs from "@/hooks/use-dialog";
 import z from "zod";
-import ImageWithFallback from "@/components/image-with-fallback";
-import { ConfirmationDialog } from "@/components/confirmation-dialog";
-import GenerateSPKDialog from "./-components/generate-spk-dialog";
 import GenerateInvoiceDialog from "./-components/generate-invoice-dialog";
+import GenerateSPKDialog from "./-components/generate-spk-dialog";
 
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
@@ -334,6 +333,11 @@ function RouteComponent() {
 
   // Handlers
   const handleApprove = () => {
+    if (!order?.worksheet)
+      return globalErrorToast(
+        "Order belum melewati tahapan kaji ulang, worksheet belum dibuat, tidak dapat menyetujui order",
+      );
+
     approveMutation.mutate({ orderId });
   };
 
@@ -346,6 +350,11 @@ function RouteComponent() {
       );
       return;
     }
+
+    if (!order?.worksheet)
+      return globalErrorToast(
+        "Order belum melewati tahapan kaji ulang, worksheet belum dibuat, tidak dapat menolak order",
+      );
 
     const { reason } = result.data;
 
