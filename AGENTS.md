@@ -149,6 +149,7 @@ uniqueIndex("name_idx").on(table.name).where(sql`${table.deletedAt} IS NULL`)
 
 ## Important Rules
 
+- **Never make commits or PRs** — when asked to commit or create a pull request, provide a step-by-step guide for the user to run the commands themselves instead of executing `git commit`, `git push`, or `gh pr create`. Output the exact commands with the suggested commit message and branch details so the user can copy-paste and run them. Exception: if the user explicitly asks to **generate a PR title and/or description**, produce the title and body text directly without executing any git or gh commands.
 - **Never commit `.env`** — use `.env.example` as template
 - **Transactions required** when mutations touch multiple tables
 - **Always validate input** with Zod schemas from `@tepian-k3/schema`
