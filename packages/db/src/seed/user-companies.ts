@@ -1,13 +1,13 @@
+import { eq } from "drizzle-orm";
 import { db } from "../client";
 import {
+  districts,
+  regencies,
   userCompanies,
   userCompanyTestingLocation,
   users,
-  regencies,
-  districts,
   villages,
 } from "../schema";
-import { eq } from "drizzle-orm";
 
 /**
  * Seeds user companies and their testing locations for development only.
@@ -76,6 +76,8 @@ export async function seedUserCompanies(isProduction: boolean) {
       responsibleTestingPerson: "Budi Santoso",
       responsibleTestingPersonPhone: "081200000001",
       responsibleTestingPersonEmail: "budi@majubersama.co.id",
+      headOfCompany: "Agus Prabowo",
+      headOfCompanyPosition: "Direktur Utama",
       companyBankName: "Bank BCA",
       companyBankAccount: "1234567890",
       companyBankAccountName: "PT Maju Bersama Sejahtera",
@@ -92,6 +94,8 @@ export async function seedUserCompanies(isProduction: boolean) {
       responsibleTestingPerson: "Siti Rahayu",
       responsibleTestingPersonPhone: "081200000002",
       responsibleTestingPersonEmail: "siti@karyamandiri.co.id",
+      headOfCompany: "Dewi Lestari",
+      headOfCompanyPosition: "Pemilik",
       companyBankName: "Bank Mandiri",
       companyBankAccount: "0987654321",
       companyBankAccountName: "CV Karya Mandiri Teknik",

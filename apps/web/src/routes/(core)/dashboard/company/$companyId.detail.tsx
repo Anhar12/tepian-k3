@@ -1,3 +1,4 @@
+import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { pageHead } from "@/utils/page-head";
 import { createFileRoute } from "@tanstack/react-router";
@@ -18,8 +19,17 @@ export const Route = createFileRoute(
     companyId: z.uuidv7(),
   }),
   component: RouteComponent,
+  pendingComponent: LoaderComponent,
   head: () => pageHead("Detail Perusahaan"),
 });
+
+function LoaderComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <SkeletonGenerator variant="tabs" tabs={2} />
+    </div>
+  );
+}
 
 function RouteComponent() {
   const { companyId } = Route.useParams();

@@ -13,8 +13,6 @@ const generateSpkDocumentSchema = z.object({
   worksheetId: z.uuidv7(),
   letterNumber: z.string().min(1).max(250),
   agreementDate: z.string().min(1),
-  companyRepName: z.string().min(1).max(250),
-  companyRepPosition: z.string().min(1).max(250),
   companyRepAddress: z.string().min(1).max(500),
 });
 

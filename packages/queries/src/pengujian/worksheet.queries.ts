@@ -1,31 +1,31 @@
-import { TRPCError } from "@trpc/server";
-import { db, type DBorTx } from "@tepian-k3/db/client";
-import { Effect } from "effect";
-import { logError } from "@tepian-k3/services/logger";
-import { and, eq, inArray, isNull, sql } from "@tepian-k3/db";
-import {
-  worksheets,
-  worksheetItems,
-  worksheetTools,
-  worksheetToolNeeded,
-  worksheetChemicalMaterials,
-  worksheetAssignments,
-  worksheetNotes,
-  worksheetOperationalCosts,
-  testingItem,
-  order,
-  parameterTools,
-  employees,
-  documents,
-  chemicalMaterials,
-} from "@tepian-k3/db/schema";
 import type {
   BahanUnit,
-  WorksheetStatus,
   DocumentType,
+  WorksheetNoteStatus,
+  WorksheetStatus,
 } from "@tepian-k3/constants";
+import { and, eq, inArray, isNull, sql } from "@tepian-k3/db";
+import { db, type DBorTx } from "@tepian-k3/db/client";
+import {
+  chemicalMaterials,
+  documents,
+  employees,
+  order,
+  parameterTools,
+  testingItem,
+  worksheetAssignments,
+  worksheetChemicalMaterials,
+  worksheetItems,
+  worksheetNotes,
+  worksheetOperationalCosts,
+  worksheets,
+  worksheetToolNeeded,
+  worksheetTools,
+} from "@tepian-k3/db/schema";
+import { logError } from "@tepian-k3/services/logger";
+import { TRPCError } from "@trpc/server";
+import { Effect } from "effect";
 import { logCreate, logUpdate } from "../helpers/audit.helpers";
-import type { WorksheetNoteStatus } from "@tepian-k3/constants";
 import orderQueries from "./order.queries";
 
 const worksheetQueries = {
@@ -1802,6 +1802,8 @@ const worksheetQueries = {
                     companyBankAccount: true,
                     companyBankAccountName: true,
                     companyBankName: true,
+                    headOfCompany: true,
+                    headOfCompanyPosition: true,
                   },
                   with: {
                     regency: {

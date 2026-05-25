@@ -1,3 +1,4 @@
+import ImageWithFallback from "@/components/image-with-fallback";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { RadioGroup } from "@/components/ui/radio-group";
 import SingleImageUpload from "@/components/ui/single-image-upload";
+import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -36,7 +38,6 @@ import { CreditCard, LoaderCircle, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
-import ImageWithFallback from "@/components/image-with-fallback";
 
 export const Route = createFileRoute(
   "/(core)/dashboard/company/$companyId/edit",
@@ -60,8 +61,27 @@ export const Route = createFileRoute(
     );
   },
   component: RouteComponent,
+  pendingComponent: LoaderComponent,
   head: () => pageHead("Edit Perusahaan"),
 });
+
+function LoaderComponent() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Perbarui Perusahaan</CardTitle>
+          <CardDescription>
+            Isi form di bawah untuk memperbarui perusahaan.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SkeletonGenerator variant="companyForm" />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function RouteComponent() {
   const { companyId } = Route.useParams();
@@ -101,6 +121,8 @@ function RouteComponent() {
       responsibleTestingPerson: company.responsibleTestingPerson,
       responsibleTestingPersonEmail: company.responsibleTestingPersonEmail,
       responsibleTestingPersonPhone: company.responsibleTestingPersonPhone,
+      headOfCompany: company.headOfCompany,
+      headOfCompanyPosition: company.headOfCompanyPosition,
     },
   });
 
@@ -175,14 +197,12 @@ function RouteComponent() {
             <FieldGroup>
               <div className="flex justify-start">
                 {company.companyPictureUrl ? (
-                  // If company has a logo, display it
                   <ImageWithFallback
                     src={company.companyPictureUrl}
                     alt="Logo Perusahaan"
                     className="h-32 w-32 rounded-lg object-cover"
                   />
                 ) : (
-                  // Placeholder for companies without a logo
                   <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gray-200">
                     <span className="text-gray-500">No Logo</span>
                   </div>
@@ -193,10 +213,18 @@ function RouteComponent() {
                 control={form.control}
                 name="picture"
                 render={({ field, fieldState }) => (
-                  <SingleImageUpload
-                    {...field}
-                    error={fieldState.error?.message}
-                  />
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Logo Perusahaan
+                    </FieldLabel>
+                    <SingleImageUpload
+                      {...field}
+                      error={fieldState.error?.message}
+                    />
+                  </Field>
                 )}
               />
 
@@ -398,6 +426,135 @@ function RouteComponent() {
                 />
               </div>
 
+              <div className="flex flex-row flex-wrap gap-2">
+                <Controller
+                  control={form.control}
+                  name="responsibleTestingPerson"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="w-[49%] space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Penanggung Jawab Pengujian *
+                      </FieldLabel>
+                      <Input
+                        type="text"
+                        placeholder="Masukkan penanggung jawab pengujian"
+                        className="h-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  control={form.control}
+                  name="responsibleTestingPersonEmail"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="w-[49%] space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Email Penanggung Jawab Pengujian *
+                      </FieldLabel>
+                      <Input
+                        type="email"
+                        placeholder="Masukkan email penanggung jawab pengujian"
+                        className="h-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  control={form.control}
+                  name="responsibleTestingPersonPhone"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="w-[49%] space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Telepon Penanggung Jawab Pengujian *
+                      </FieldLabel>
+                      <Input
+                        type="tel"
+                        placeholder="Masukkan telepon penanggung jawab pengujian"
+                        className="h-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
+
+              <div className="flex flex-row flex-wrap gap-2">
+                <Controller
+                  control={form.control}
+                  name="headOfCompany"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="w-[49%] space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Nama Pimpinan Perusahaan *
+                      </FieldLabel>
+                      <Input
+                        type="text"
+                        placeholder="Masukkan nama pimpinan perusahaan"
+                        className="h-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  control={form.control}
+                  name="headOfCompanyPosition"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="w-[49%] space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Posisi Pimpinan Perusahaan *
+                      </FieldLabel>
+                      <Input
+                        type="text"
+                        placeholder="Masukkan posisi pimpinan perusahaan"
+                        className="h-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
+
               <Controller
                 control={form.control}
                 name="kbliId"
@@ -479,7 +636,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <FieldLabel htmlFor={`form-wlkp-radiogroup-yes`}>
                         <Field
-                          orientation="vertical"
+                          orientation="horizontal"
                           data-invalid={fieldState.invalid}
                         >
                           <FieldContent>
@@ -635,7 +792,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <FieldLabel htmlFor={`form-rhf-radiogroup-yes`}>
                         <Field
-                          orientation="vertical"
+                          orientation="horizontal"
                           data-invalid={fieldState.invalid}
                         >
                           <FieldContent>
@@ -659,83 +816,6 @@ function RouteComponent() {
                 )}
               />
 
-              <div className="flex flex-row flex-wrap gap-2">
-                <Controller
-                  control={form.control}
-                  name="responsibleTestingPerson"
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="w-[49%] space-y-1"
-                    >
-                      <FieldLabel className="ml-1 text-sm font-bold">
-                        Penanggung Jawab Pengujian *
-                      </FieldLabel>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan penanggung jawab pengujian"
-                        className="h-10 text-sm"
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="responsibleTestingPersonEmail"
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="w-[49%] space-y-1"
-                    >
-                      <FieldLabel className="ml-1 text-sm font-bold">
-                        Email Penanggung Jawab Pengujian *
-                      </FieldLabel>
-                      <Input
-                        type="email"
-                        placeholder="Masukkan email penanggung jawab pengujian"
-                        className="h-10 text-sm"
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="responsibleTestingPersonPhone"
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="w-[49%] space-y-1"
-                    >
-                      <FieldLabel className="ml-1 text-sm font-bold">
-                        Telepon Penanggung Jawab Pengujian *
-                      </FieldLabel>
-                      <Input
-                        type="tel"
-                        placeholder="Masukkan telepon penanggung jawab pengujian"
-                        className="h-10 text-sm"
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </div>
-
               <div className="flex w-full flex-row gap-4">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-primary/30">
                   <CreditCard className="text-primary" />
@@ -745,8 +825,9 @@ function RouteComponent() {
                     Informasi Bank Perusahaan
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Lengkapi data bank perusahaan untuk keperluan administrasi
-                    dan pembayaran.
+                    Lengkapi data Rekening Bank untuk pengembalian kelebihan
+                    dana operasional apabila terdapat sisa dana dari pelaksanaan
+                    kegiatan.
                   </p>
                 </div>
               </div>

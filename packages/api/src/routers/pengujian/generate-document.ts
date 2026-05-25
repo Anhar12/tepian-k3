@@ -1,9 +1,10 @@
+import {
+  OPERATIONAL_BANK_ACCOUNT,
+  OPERATIONAL_BANK_ACCOUNT_NAME,
+  OPERATIONAL_BANK_NAME,
+} from "@tepian-k3/constants";
+import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
 import generateDocumentSchema from "@tepian-k3/schema/pengujian/generate-document.schema";
-import { createTRPCRouter, withPermission } from "../..";
-import { TRPCError } from "@trpc/server";
-import { runEffect } from "../../utils/run-effect";
-import { tryPromise } from "../../utils/try-promise";
-import { Effect } from "effect";
 import {
   addCoverPage,
   generateAssignmentLetterPdf,
@@ -12,12 +13,11 @@ import {
   generateSpkPdf,
   generateTagihanPdf,
 } from "@tepian-k3/services/pdf";
-import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
-import {
-  OPERATIONAL_BANK_ACCOUNT,
-  OPERATIONAL_BANK_ACCOUNT_NAME,
-  OPERATIONAL_BANK_NAME,
-} from "@tepian-k3/constants";
+import { TRPCError } from "@trpc/server";
+import { Effect } from "effect";
+import { createTRPCRouter, withPermission } from "../..";
+import { runEffect } from "../../utils/run-effect";
+import { tryPromise } from "../../utils/try-promise";
 // import { storageService } from "@tepian-k3/services/storage";
 
 export const generateDocumentRouter = createTRPCRouter({
@@ -115,8 +115,9 @@ export const generateDocumentRouter = createTRPCRouter({
                 generateSpkPdf({
                   worksheet,
                   agreementDate: input.agreementDate,
-                  companyRepName: input.companyRepName,
-                  companyRepPosition: input.companyRepPosition,
+                  companyRepName: worksheet.order.company.headOfCompany,
+                  companyRepPosition:
+                    worksheet.order.company.headOfCompanyPosition,
                   companyRepAddress: input.companyRepAddress,
                   companyBankName: worksheet.order.company.companyBankName,
                   companyBankAccount:

@@ -8,6 +8,13 @@
       "when": 1776980713419,
       "tag": "0000_faithful_human_fly",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779708519822,
+      "tag": "0001_exotic_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }

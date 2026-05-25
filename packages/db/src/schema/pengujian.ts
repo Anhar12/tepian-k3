@@ -128,6 +128,10 @@ export const userCompanies = createTable(
     responsibleTestingPersonEmail: varchar("responsible_testing_person_email", {
       length: 250,
     }).notNull(),
+    headOfCompany: varchar("head_of_company", { length: 250 }).notNull(),
+    headOfCompanyPosition: varchar("head_of_company_position", {
+      length: 250,
+    }).notNull(),
     email: varchar("email", { length: 250 }).notNull(),
     wlkpStatus: boolean("wlkp_status").notNull().default(false),
     wlkp: text("wlkp"),

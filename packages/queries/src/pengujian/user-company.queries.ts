@@ -1,5 +1,3 @@
-import { TRPCError } from "@trpc/server";
-import { db } from "@tepian-k3/db/client";
 import {
   and,
   asc,
@@ -12,6 +10,7 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
+import { db } from "@tepian-k3/db/client";
 import {
   districts,
   kblis,
@@ -20,13 +19,14 @@ import {
   userCompanies,
   villages,
 } from "@tepian-k3/db/schema";
-import { z } from "zod";
 import userCompanySchema from "@tepian-k3/schema/pengujian/user-company.schema";
-import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
+import { storageService } from "@tepian-k3/services/storage";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
-import { storageService } from "@tepian-k3/services/storage";
+import { TRPCError } from "@trpc/server";
+import { Effect } from "effect";
+import { z } from "zod";
 import { replaceStorageFile } from "../helpers/storage.helpers";
 
 const userCompanyQueries = {
@@ -510,6 +510,8 @@ const userCompanyQueries = {
               responsibleTestingPerson: data.responsibleTestingPerson,
               responsibleTestingPersonEmail: data.responsibleTestingPersonEmail,
               responsibleTestingPersonPhone: data.responsibleTestingPersonPhone,
+              headOfCompany: data.headOfCompany,
+              headOfCompanyPosition: data.headOfCompanyPosition,
               companyBankName: data.companyBankName,
               companyBankAccount: data.companyBankAccount,
               companyBankAccountName: data.companyBankAccountName,
@@ -632,6 +634,11 @@ const userCompanyQueries = {
                 data.companyBankAccountName ??
                 existingUserCompany.companyBankAccountName,
               companyPictureUrl: url ?? existingUserCompany.companyPictureUrl,
+              headOfCompany:
+                data.headOfCompany ?? existingUserCompany.headOfCompany,
+              headOfCompanyPosition:
+                data.headOfCompanyPosition ??
+                existingUserCompany.headOfCompanyPosition,
             })
             .where(eq(userCompanies.id, data.id))
             .returning()
