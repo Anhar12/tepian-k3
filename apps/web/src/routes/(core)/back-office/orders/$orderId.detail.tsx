@@ -1978,10 +1978,48 @@ function RouteComponent() {
                     <dd className="font-medium">{order.user.email}</dd>
                   </div>
                   <div>
+                    <dt className="text-sm text-muted-foreground">Pimpinan</dt>
+                    <dd className="font-medium">
+                      {order.company.headOfCompany}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      Jabatan Pimpinan
+                    </dt>
+                    <dd className="font-medium">
+                      {order.company.headOfCompanyPosition}
+                    </dd>
+                  </div>
+                  <div>
                     <dt className="text-sm text-muted-foreground">
                       Perusahaan
                     </dt>
                     <dd className="font-medium">{order.company.name}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      Kontak Person
+                    </dt>
+                    <dd className="font-medium">
+                      {order.company.responsibleTestingPerson}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      Email Kontak Person
+                    </dt>
+                    <dd className="font-medium">
+                      {order.company.responsibleTestingPersonEmail}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      No. Telepon Kontak Person
+                    </dt>
+                    <dd className="font-medium">
+                      {order.company.responsibleTestingPersonPhone}
+                    </dd>
                   </div>
                 </dl>
               </CardContent>

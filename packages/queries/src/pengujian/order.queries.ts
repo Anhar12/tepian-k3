@@ -373,6 +373,11 @@ const orderQueries = {
               columns: {
                 id: true,
                 name: true,
+                headOfCompany: true,
+                headOfCompanyPosition: true,
+                responsibleTestingPersonPhone: true,
+                responsibleTestingPersonEmail: true,
+                responsibleTestingPerson: true,
               },
             },
             user: true,
