@@ -3,10 +3,12 @@ import { OrderTimeline } from "@/components/order-timeline";
 import {
   StatusStateAwaitingInvoice,
   StatusStateAwaitingSchedule,
+  StatusStateCancelled,
   StatusStateCompleted,
   StatusStateOfferPublished,
   StatusStatePendingPaymentVerification,
   StatusStatePendingReview,
+  StatusStateRejected,
   StatusStateTestingInProgress,
   StatusStateUploadApproval,
   StatusStateUploadPayment,
@@ -233,17 +235,20 @@ function RouteComponent() {
     return <OrderDetailSkeleton />;
   }
 
-  // Status flags
+  // Order status flags
+  const isCompleted = orderDetail.status === "completed";
+  const isRejected = orderDetail.status === "rejected";
+  const isCancelled = orderDetail.status === "cancelled";
   const isRevisionStatus = orderDetail.status === "revision";
   const isApproved = !!orderDetail.approvedAt;
   const hasApprovalLetter = !!approvalLetterUserDoc;
   const hasInvoice = !!invoiceDoc;
   const hasCooperationAgreement = !!cooperationAgreementDoc;
   const hasPaymentProof = !!paymentProofDoc;
+  const isPaymentRejected = orderDetail.paymentStatus === "rejected";
   const isPendingPaymentVerification =
     orderDetail.paymentStatus === "pending_verification";
   const isPaymentVerified = orderDetail.paymentStatus === "paid";
-  // Check if order is in testing/sampling phase (any of the testing-related statuses)
   const isInProgress =
     orderDetail.status === "menunggu_penerbitan_spt_jadwal" ||
     orderDetail.status === "proses_pengambilan_sampel" ||
@@ -251,29 +256,17 @@ function RouteComponent() {
     orderDetail.status === "sampel_telah_dianalisis" ||
     orderDetail.status === "sampel_selesai_dianalisis" ||
     orderDetail.status === "laporan_diterbitkan";
-  const isCompleted = orderDetail.status === "completed";
   const freshlySubmitted = orderDetail.status === "pending" && !offeringDoc;
 
-  // Worksheet status flags (new flow: worksheet created BEFORE offering)
+  // Worksheet status flags
   const hasWorksheet = !!orderDetail.worksheet;
   const worksheetStatus = orderDetail.worksheet?.status;
   const isWorksheetInReview =
     hasWorksheet &&
     (worksheetStatus === "draft" || worksheetStatus === "pending_verification");
+  const isWorksheetRevision = hasWorksheet && worksheetStatus === "revision";
+  const isWorksheetRejected = hasWorksheet && worksheetStatus === "rejected";
   const isWorksheetVerified = hasWorksheet && worksheetStatus === "verified";
-
-  // Determine the current workflow state (updated for new flow)
-  // 0. Freshly submitted - no worksheet yet, waiting for kaji ulang
-  // 0a. Worksheet in review (draft/pending_verification)
-  // 0b. Worksheet verified, waiting for offering document
-  // 1. Offer sent, waiting for customer to approve
-  // 2. Customer approved, needs to upload approval letter
-  // 3. Approval letter uploaded, waiting for invoice & cooperation agreement
-  // 4. Invoice ready, user uploads payment proof & signed cooperation agreement
-  // 5. Payment pending verification
-  // 6. Payment verified, waiting for SPT & schedule
-  // 7. Testing in progress
-  // 8. Completed
 
   // Get revision notes from the latest revision status history
   const revisionHistory = orderDetail.statusHistory
@@ -282,6 +275,125 @@ function RouteComponent() {
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )[0];
+
+  function renderStatusContent() {
+    if (!orderDetail) return null;
+    if (isCompleted) {
+      return <StatusStateCompleted orderDetail={orderDetail} />;
+    }
+    if (isRejected) {
+      return <StatusStateRejected orderDetail={orderDetail} />;
+    }
+    if (isCancelled) {
+      return <StatusStateCancelled orderDetail={orderDetail} />;
+    }
+    if (isInProgress) {
+      return <StatusStateTestingInProgress orderDetail={orderDetail} />;
+    }
+    if (isPaymentVerified) {
+      return <StatusStateAwaitingSchedule />;
+    }
+    if (isPaymentRejected) {
+      return (
+        <StatusStateUploadPayment
+          invoiceDoc={invoiceDoc}
+          cooperationAgreementDoc={cooperationAgreementDoc}
+          paymentProofFile={paymentProofFile.file}
+          setPaymentProofFile={paymentProofFile.setFile}
+          cooperationAgreementFile={cooperationAgreementFile.file}
+          setCooperationAgreementFile={cooperationAgreementFile.setFile}
+          uploadingPaymentDocs={
+            paymentProofFile.uploading || cooperationAgreementFile.uploading
+          }
+          handleUploadPaymentDocs={handleUploadPaymentDocs}
+          rejectionReason={orderDetail.paymentRejectedReason}
+        />
+      );
+    }
+    if (isPendingPaymentVerification) {
+      return (
+        <StatusStatePendingPaymentVerification
+          cooperationAgreementUserDoc={cooperationAgreementUserDoc}
+          paymentProofDoc={paymentProofDoc}
+        />
+      );
+    }
+    if (
+      isApproved &&
+      hasApprovalLetter &&
+      hasInvoice &&
+      hasCooperationAgreement &&
+      !hasPaymentProof
+    ) {
+      return (
+        <StatusStateUploadPayment
+          invoiceDoc={invoiceDoc}
+          cooperationAgreementDoc={cooperationAgreementDoc}
+          paymentProofFile={paymentProofFile.file}
+          setPaymentProofFile={paymentProofFile.setFile}
+          cooperationAgreementFile={cooperationAgreementFile.file}
+          setCooperationAgreementFile={cooperationAgreementFile.setFile}
+          uploadingPaymentDocs={
+            paymentProofFile.uploading || cooperationAgreementFile.uploading
+          }
+          handleUploadPaymentDocs={handleUploadPaymentDocs}
+        />
+      );
+    }
+    if (isRevisionStatus && revisionHistory) {
+      return (
+        <StatusStateWaitingForRevision
+          orderDetail={orderDetail}
+          revisionHistory={revisionHistory}
+        />
+      );
+    }
+    if (isApproved && !hasApprovalLetter) {
+      return (
+        <StatusStateUploadApproval
+          approvalLetterFile={approvalLetterFile.file}
+          setApprovalLetterFile={approvalLetterFile.setFile}
+          uploadingApprovalLetter={approvalLetterFile.uploading}
+          handleUploadApprovalLetter={handleUploadApprovalLetter}
+        />
+      );
+    }
+    if (
+      isApproved &&
+      hasApprovalLetter &&
+      (!hasInvoice || !hasCooperationAgreement)
+    ) {
+      return <StatusStateAwaitingInvoice />;
+    }
+    if (isWorksheetRevision || isWorksheetRejected) {
+      return (
+        <StatusStateWorksheetInReview
+          orderDetail={orderDetail}
+          worksheetStatus={worksheetStatus ?? "revision"}
+        />
+      );
+    }
+    if (isWorksheetInReview) {
+      return (
+        <StatusStateWorksheetInReview
+          orderDetail={orderDetail}
+          worksheetStatus={worksheetStatus ?? "draft"}
+        />
+      );
+    }
+    if (isWorksheetVerified && !offeringDoc) {
+      return <StatusStateWorksheetVerified orderDetail={orderDetail} />;
+    }
+    if (freshlySubmitted || !hasWorksheet) {
+      return <StatusStatePendingReview orderDetail={orderDetail} />;
+    }
+    return (
+      <StatusStateOfferPublished
+        orderDetail={orderDetail}
+        offeringDoc={offeringDoc}
+      />
+    );
+  }
 
   return (
     <Card className="container min-h-[calc(100vh-8rem)] pt-0">
@@ -307,70 +419,13 @@ function RouteComponent() {
           <div className="flex h-full flex-col">
             {/* Card Content */}
             <div className="flex h-full flex-1 overflow-auto">
-              {isCompleted ? (
-                <StatusStateCompleted orderDetail={orderDetail} />
-              ) : isInProgress ? (
-                <StatusStateTestingInProgress orderDetail={orderDetail} />
-              ) : isPaymentVerified && !isInProgress ? (
-                <StatusStateAwaitingSchedule />
-              ) : isPendingPaymentVerification ? (
-                <StatusStatePendingPaymentVerification
-                  cooperationAgreementUserDoc={cooperationAgreementUserDoc}
-                  paymentProofDoc={paymentProofDoc}
-                />
-              ) : isApproved &&
-                hasApprovalLetter &&
-                hasInvoice &&
-                hasCooperationAgreement &&
-                !hasPaymentProof ? (
-                <StatusStateUploadPayment
-                  invoiceDoc={invoiceDoc}
-                  cooperationAgreementDoc={cooperationAgreementDoc}
-                  paymentProofFile={paymentProofFile.file}
-                  setPaymentProofFile={paymentProofFile.setFile}
-                  cooperationAgreementFile={cooperationAgreementFile.file}
-                  setCooperationAgreementFile={cooperationAgreementFile.setFile}
-                  uploadingPaymentDocs={
-                    paymentProofFile.uploading ||
-                    cooperationAgreementFile.uploading
-                  }
-                  handleUploadPaymentDocs={handleUploadPaymentDocs}
-                />
-              ) : isRevisionStatus && revisionHistory ? (
-                <StatusStateWaitingForRevision
-                  orderDetail={orderDetail}
-                  revisionHistory={revisionHistory}
-                />
-              ) : isApproved && !hasApprovalLetter ? (
-                <StatusStateUploadApproval
-                  approvalLetterFile={approvalLetterFile.file}
-                  setApprovalLetterFile={approvalLetterFile.setFile}
-                  uploadingApprovalLetter={approvalLetterFile.uploading}
-                  handleUploadApprovalLetter={handleUploadApprovalLetter}
-                />
-              ) : isApproved &&
-                hasApprovalLetter &&
-                (!hasInvoice || !hasCooperationAgreement) ? (
-                <StatusStateAwaitingInvoice />
-              ) : isWorksheetInReview ? (
-                <StatusStateWorksheetInReview
-                  orderDetail={orderDetail}
-                  worksheetStatus={worksheetStatus || "draft"}
-                />
-              ) : isWorksheetVerified && !offeringDoc ? (
-                <StatusStateWorksheetVerified orderDetail={orderDetail} />
-              ) : freshlySubmitted && !hasWorksheet ? (
-                <StatusStatePendingReview orderDetail={orderDetail} />
-              ) : (
-                <StatusStateOfferPublished
-                  orderDetail={orderDetail}
-                  offeringDoc={offeringDoc}
-                />
-              )}
+              {renderStatusContent()}
             </div>
 
-            {/* Action Buttons - Bottom Right (only show when offer is available and not approved yet) */}
-            {!isRevisionStatus &&
+            {/* Action Buttons — only when offer is active and user can still respond */}
+            {!isRejected &&
+              !isCancelled &&
+              !isRevisionStatus &&
               !isApproved &&
               !freshlySubmitted &&
               !isWorksheetInReview &&

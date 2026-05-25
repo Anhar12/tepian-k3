@@ -4,6 +4,8 @@ import type { Document } from "@tepian-k3/types/platform/document.types";
 import type { OrderStatus } from "@tepian-k3/constants";
 import type { VariantProps } from "class-variance-authority";
 import {
+  AlertCircle,
+  Ban,
   CheckCircle2,
   Clock,
   CreditCard,
@@ -13,6 +15,7 @@ import {
   FileText,
   Loader2,
   Upload,
+  XCircle,
 } from "lucide-react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
@@ -568,12 +571,18 @@ export function StatusStateWorksheetInReview({
   orderDetail,
   worksheetStatus,
 }: StatusStateWorksheetInReviewProps) {
-  const statusText =
-    worksheetStatus === "draft"
-      ? "Worksheet sedang dibuat"
-      : worksheetStatus === "pending_verification"
-        ? "Worksheet menunggu verifikasi koordinator"
-        : "Worksheet dalam proses kaji ulang";
+  const statusText: Record<string, string> = {
+    draft: "Worksheet sedang dibuat",
+    pending_verification: "Worksheet menunggu verifikasi koordinator",
+    revision: "Worksheet perlu direvisi",
+    rejected: "Worksheet ditolak oleh koordinator",
+  };
+  const displayText =
+    statusText[worksheetStatus] ?? "Worksheet dalam proses kaji ulang";
+  const colorScheme =
+    worksheetStatus === "revision" || worksheetStatus === "rejected"
+      ? "amber"
+      : "blue";
 
   return (
     <StateLayout>
@@ -587,10 +596,10 @@ export function StatusStateWorksheetInReview({
       <StatusIllustration
         icon={FileText}
         overlayIcon={Clock}
-        heading={statusText}
+        heading={displayText}
         headingAs="h3"
         description="Koordinator akan memverifikasi kelayakan teknis, menentukan tim pengujian, dan menyiapkan dokumen penawaran."
-        colorScheme="blue"
+        colorScheme={colorScheme}
         className="h-full w-full self-center"
       />
     </StateLayout>
@@ -734,6 +743,8 @@ interface StatusStateUploadPaymentProps {
   setCooperationAgreementFile: (file: File | null) => void;
   uploadingPaymentDocs: boolean;
   handleUploadPaymentDocs: () => void;
+  /** When set, shows a rejection banner above the upload form. */
+  rejectionReason?: string | null;
 }
 
 export function StatusStateUploadPayment({
@@ -745,16 +756,30 @@ export function StatusStateUploadPayment({
   setCooperationAgreementFile,
   uploadingPaymentDocs,
   handleUploadPaymentDocs,
+  rejectionReason,
 }: StatusStateUploadPaymentProps) {
   return (
     <StateLayout>
-      <StatusIllustration
-        icon={CreditCard}
-        overlayIcon={Upload}
-        heading="Upload Bukti Pembayaran"
-        description="Silakan unduh invoice dan surat perjanjian kerjasama, lakukan pembayaran, dan unggah bukti pembayaran beserta surat perjanjian yang telah ditandatangani."
-        colorScheme="blue"
-      />
+      {rejectionReason != null ? (
+        <StatusInfoBanner
+          icon={AlertCircle}
+          title="Pembayaran Ditolak"
+          description={
+            rejectionReason ||
+            "Bukti pembayaran Anda ditolak. Silakan unggah ulang dokumen yang benar."
+          }
+          colorScheme="amber"
+          className="mb-6"
+        />
+      ) : (
+        <StatusIllustration
+          icon={CreditCard}
+          overlayIcon={Upload}
+          heading="Upload Bukti Pembayaran"
+          description="Silakan unduh invoice dan surat perjanjian kerjasama, lakukan pembayaran, dan unggah bukti pembayaran beserta surat perjanjian yang telah ditandatangani."
+          colorScheme="blue"
+        />
+      )}
 
       {/* Download Documents Section */}
       <div className="mb-6 space-y-3">
@@ -1153,6 +1178,46 @@ export function StatusStateCompleted({ orderDetail }: SharedStatusStateProps) {
             />
           ))}
       </div>
+    </StateLayout>
+  );
+}
+
+export function StatusStateRejected({ orderDetail }: SharedStatusStateProps) {
+  return (
+    <StateLayout>
+      <StatusIllustration
+        icon={XCircle}
+        heading="Order Ditolak"
+        description="Order pengujian ini telah ditolak oleh admin."
+        colorScheme="slate"
+        dashed={false}
+        iconSize="lg"
+        className="h-full w-full self-center"
+      />
+      {orderDetail.approvalRejectReason && (
+        <StatusInfoBanner
+          icon={AlertCircle}
+          title="Alasan Penolakan"
+          description={orderDetail.approvalRejectReason}
+          colorScheme="amber"
+        />
+      )}
+    </StateLayout>
+  );
+}
+
+export function StatusStateCancelled({ orderDetail }: SharedStatusStateProps) {
+  return (
+    <StateLayout>
+      <StatusIllustration
+        icon={Ban}
+        heading={`Order #${orderDetail.orderNumber} Dibatalkan`}
+        description="Order pengujian ini telah dibatalkan."
+        colorScheme="slate"
+        dashed={false}
+        iconSize="lg"
+        className="h-full w-full self-center"
+      />
     </StateLayout>
   );
 }
