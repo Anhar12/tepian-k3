@@ -1,11 +1,15 @@
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import type { Row } from "@tanstack/react-table";
-import type { ColumnDef, ColumnMeta, RowData } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
+import type {
+  ColumnDef,
+  ColumnMeta,
+  Row,
+  RowData,
+} from "@tanstack/react-table";
 import type { FilterVariant } from "@tepian-k3/types/data-table.types";
 import { format } from "date-fns";
 import type { LucideIcon } from "lucide-react";
 import { Text } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "./utils";
 
 type NestedKeyOf<T> = {
@@ -42,7 +46,7 @@ export function createNumberColumn<T>(
   };
 }
 
-interface TextColumnOptions {
+interface TextColumnOptions<T> {
   /** Width class (e.g., 'w-48', 'max-w-64') */
   width?: string;
   /** Enable column filtering */
@@ -55,6 +59,11 @@ interface TextColumnOptions {
   icon?: LucideIcon;
   /** Whether the text value is nullable */
   nullable?: boolean;
+  /** Custom cell content renderer */
+  cellRenderer?: (
+    value: string | null | undefined,
+    row: Row<T>,
+  ) => React.ReactNode;
 }
 
 /**
@@ -63,7 +72,7 @@ interface TextColumnOptions {
 export function createTextColumn<T extends RowData>(
   id: Extract<NestedKeyOf<T>, string>,
   label: string,
-  options: TextColumnOptions = {},
+  options: TextColumnOptions<T> = {},
 ): ColumnDef<T> {
   const {
     width = "w-48",
@@ -72,6 +81,7 @@ export function createTextColumn<T extends RowData>(
     variant = "text",
     icon = Text,
     nullable = false,
+    cellRenderer,
   } = options;
 
   const meta: ColumnMeta<T, unknown> = enableFilter
@@ -89,11 +99,18 @@ export function createTextColumn<T extends RowData>(
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={label} label={label} />
     ),
-    cell: ({ row }) => (
-      <div className={`${width} truncate`} title={row.getValue(id)}>
-        {row.getValue(id) ?? (nullable ? "-" : "")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const value = row.getValue(id) as string | null | undefined;
+      if (cellRenderer) {
+        return cellRenderer(value, row);
+      }
+      const displayValue = value ?? (nullable ? "-" : "");
+      return (
+        <div className={`${width} truncate`} title={displayValue}>
+          {displayValue}
+        </div>
+      );
+    },
     meta,
     enableColumnFilter: enableFilter,
   };
@@ -269,7 +286,7 @@ export function createStatusColumn<T extends RowData>(
 export function createPriceColumn<T extends RowData>(
   id: Extract<NestedKeyOf<T>, string>,
   label: string,
-  options: TextColumnOptions = {},
+  options: TextColumnOptions<T> = {},
 ): ColumnDef<T> {
   const {
     width = "w-48",

@@ -1,17 +1,17 @@
-import type { ColumnDef } from "@tanstack/react-table";
+import { PermissionGate } from "@/components/permission-gate";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   createActionColumn,
   createDateColumn,
   createNumberColumn,
   createTextColumn,
 } from "@/lib/column-helpers";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
+import type { ColumnDef } from "@tanstack/react-table";
 import type { PaginatedOrder } from "@tepian-k3/types/pengujian/order.types";
-import { PermissionGate } from "@/components/permission-gate";
+import { Eye } from "lucide-react";
 
 interface OrdersColumnsProps {
   currentPage: number;
@@ -75,6 +75,21 @@ export default function getOrdersColumns({
       width: "w-40",
       enableFilter: true,
       placeholder: "Cari nomor order...",
+      cellRenderer: (_, row) => (
+        <Link
+          className="hover:underline"
+          to="/back-office/orders/$orderId/detail"
+          params={{ orderId: row.original.id }}
+        >
+          <Button
+            variant="link"
+            size="sm"
+            className="p-0 text-primary hover:cursor-pointer"
+          >
+            {row.original.orderNumber}
+          </Button>
+        </Link>
+      ),
     }),
     {
       accessorKey: "company.name",
