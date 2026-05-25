@@ -16,7 +16,7 @@ import {
 } from "../../utils/image-upload";
 
 export const employeeCertificationRouter = createTRPCRouter({
-  getMyCertifications: withAnyRole(["employee", "sample_collector"]).query(
+  getMyCertifications: withAnyRole(["employee", "petugas_sampling"]).query(
     async ({ ctx }) =>
       await runEffect(
         employeeCertificationQueries.getMyCertifications(ctx.user.id),
@@ -34,7 +34,7 @@ export const employeeCertificationRouter = createTRPCRouter({
         ),
     ),
 
-  create: withAnyRole(["employee", "sample_collector"])
+  create: withAnyRole(["employee", "petugas_sampling"])
     .input(formDataInput)
     .use(
       formDataProcedure(
@@ -63,7 +63,7 @@ export const employeeCertificationRouter = createTRPCRouter({
       ),
     ),
 
-  update: withAnyRole(["employee", "sample_collector"])
+  update: withAnyRole(["employee", "petugas_sampling"])
     .input(formDataInput)
     .use(
       formDataProcedure(
@@ -93,7 +93,7 @@ export const employeeCertificationRouter = createTRPCRouter({
       ),
     ),
 
-  delete: withAnyRole(["employee", "sample_collector"])
+  delete: withAnyRole(["employee", "petugas_sampling"])
     .input(z.object({ certificationId: z.uuidv7() }))
     .mutation(async ({ ctx, input }) =>
       runEffect(

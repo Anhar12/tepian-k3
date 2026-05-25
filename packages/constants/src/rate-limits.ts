@@ -41,18 +41,20 @@ export const ROLE_RATE_LIMIT_TIERS: Record<Role, RateLimitTier> = {
   // Admin tiers - highest limits
   super_admin: "unlimited",
   admin: "unlimited",
-  lab_manager: "premium",
+  koordinator_pengujian: "premium",
 
   // Staff tiers - moderate limits
-  lab_technician: "premium",
-  head_of_institution: "premium",
-  admin_manager: "premium",
-  treasurer: "premium",
+  petugas_laboratorium: "premium",
+  kepala_balai: "premium",
+  koordinator_administrasi: "premium",
+  bendahara: "premium",
+  penyelia: "premium",
+  koordinator_mutu: "premium",
   employee: "standard",
-  sample_collector: "standard",
-  equipment_officer: "standard",
+  petugas_sampling: "standard",
+  tim_peralatan: "standard",
   kaji_ulang: "standard",
-  penjadwalan: "standard",
+  tim_penjadwalan: "standard",
   petugas_koding: "standard",
 
   // User tiers - standard limits

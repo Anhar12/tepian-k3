@@ -1,5 +1,5 @@
 import type { Permission } from "./permissions";
-import { getResourcePermissions, getAllPermissions } from "./permissions";
+import { getAllPermissions } from "./permissions";
 
 /**
  * Semua peran sistem yang tersedia.
@@ -11,46 +11,46 @@ import { getResourcePermissions, getAllPermissions } from "./permissions";
 export const ROLES = [
   "super_admin", // Super Administrator
   "admin", // Administrator Back Office
-  "user", // Pengguna Layanan
-  "employee", // Karyawan
-  "sample_collector", // Petugas Sampling
-  "lab_technician", // Laboratorium
-  "lab_manager", // Manajer Mutu / Manajer Teknis (sama)
+  "user", // Pengguna Layanan / Perusahaan
+  "employee", // Karyawan dasar
+  "petugas_sampling", // Petugas Sampling
+  "petugas_laboratorium", // Petugas Laboratorium
+  "koordinator_pengujian", // Koordinator Pengujian
+  "penyelia", // Penyelia
+  "koordinator_mutu", // Koordinator Mutu
   "kaji_ulang", // Kaji Ulang
-  "head_of_institution", // Kepala Balai
-  "admin_manager", // Manajer Admin
-  "treasurer", // Bendahara Penerimaan
-  "penjadwalan", // Penjadwalan
-  "equipment_officer", // Peralatan
+  "kepala_balai", // Kepala Balai
+  "koordinator_administrasi", // Koordinator Administrasi
+  "bendahara", // Bendahara Penerimaan
+  "tim_penjadwalan", // Tim Penjadwalan
+  "tim_peralatan", // Tim Peralatan
   "petugas_koding", // Petugas Koding
-  "viewer", // Penampil (Hanya Baca)
+  "viewer", // Viewer / Monitoring
 ] as const;
 
 export type Role = (typeof ROLES)[number];
 
 /**
  * Peran yang termasuk dalam sisi karyawan/internal sistem.
- * Digunakan untuk menentukan menu atau sidebar yang ditampilkan bagi pengguna tertentu.
- * Karyawan dengan peran ini mengakses alur back office (Tahap 1–4) dalam proses bisnis.
  */
 export const EMPLOYEE_ROLES = [
   "employee",
-  "sample_collector",
-  "lab_technician",
-  "lab_manager",
+  "petugas_sampling",
+  "petugas_laboratorium",
+  "koordinator_pengujian",
+  "penyelia",
+  "koordinator_mutu",
   "kaji_ulang",
-  "head_of_institution",
-  "admin_manager",
-  "treasurer",
-  "penjadwalan",
-  "equipment_officer",
+  "kepala_balai",
+  "koordinator_administrasi",
+  "bendahara",
+  "tim_penjadwalan",
+  "tim_peralatan",
   "petugas_koding",
 ] as const satisfies readonly Role[];
 
 /**
  * Peran yang termasuk dalam sisi back office / administrasi sistem.
- * Pengguna dengan peran ini memiliki akses pengelolaan sistem secara keseluruhan
- * dan tidak terlibat langsung dalam alur pengujian lapangan.
  */
 export const BACK_OFFICE_ROLES = [
   "admin",
@@ -68,161 +68,125 @@ export interface RoleMetadata {
 }
 
 /**
- * Deskripsi setiap peran dalam sistem, digunakan untuk tampilan UI dan dokumentasi.
- *
- * Deskripsi mencerminkan tanggung jawab masing-masing aktor dalam alur bisnis
- * layanan digital Tepian K3, mulai dari pengguna layanan hingga proses back office.
- *
- * Alur back office terbagi menjadi 4 tahap:
- * - **Tahap 1** – Admin: menerima dan mendistribusikan permintaan pengujian.
- * - **Tahap 2** – Manajer Teknis/Mutu: mengkaji ulang dan menyetujui/merevisi.
- * - **Tahap 3** – Manajer Adm. & Bendahara: penawaran, kode billing, verifikasi pembayaran.
- * - **Tahap 4** – Kepala Balai: persetujuan final dan penandatanganan SPT.
+ * Deskripsi setiap peran dalam sistem.
  */
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
-  /** Super Administrator dengan seluruh izin sistem tanpa pembatasan. */
   super_admin: "Super Administrator dengan semua izin sistem",
 
-  /**
-   * Administrator back office yang mengelola permintaan pengujian masuk (Proses Back Office Tahap 1).
-   * Bertugas menerima, meninjau, dan meneruskan permintaan ke Manajer Teknis/Mutu,
-   * serta mengirimkan format penawaran awal.
-   */
   admin:
-    "Administrator yang mengelola permintaan pengujian dan proses back office",
+    "Administrator back office yang menerima, memverifikasi kelengkapan data order, dan meneruskan ke alur kaji ulang",
 
-  /**
-   * Pengguna layanan yang mengakses tepian3.id untuk melakukan transaksi pengujian.
-   * Dapat memilih parameter pengujian, melakukan checkout, memantau status pesanan,
-   * dan mengunggah bukti pembayaran.
-   */
-  user: "Pengguna layanan yang dapat membuat pesanan dan memantau status pengujian",
+  user: "Pengguna layanan yang dapat membuat pesanan, memantau status pengujian, dan mengunggah dokumen pembayaran",
 
-  /** Karyawan internal dengan akses dasar ke alur pengujian. */
   employee: "Karyawan dengan akses dasar ke alur pengujian",
 
-  /**
-   * Petugas Sampling yang bertugas di lapangan untuk memastikan ketersediaan alat
-   * yang dipinjam dan mengumpulkan sampel di lokasi pengujian sesuai SPT.
-   */
-  sample_collector:
-    "Petugas Sampling yang bertanggung jawab memastikan alat yang dipinjam dan pengumpulan sampel",
+  petugas_sampling:
+    "Petugas Sampling yang bertanggung jawab menerima SPT, memastikan alat yang dipinjam, dan mengumpulkan sampel di lapangan",
 
-  /**
-   * Analis Laboratorium yang melakukan pengujian dan analisa laboratorium.
-   * Menerima daftar bahan secara otomatis dan menginput hasil pengujian.
-   */
-  lab_technician:
-    "Analis Laboratorium yang melakukan pengujian dan menginput hasil analisa",
+  petugas_laboratorium:
+    "Petugas Laboratorium yang melakukan pengujian di laboratorium dan menginput hasil analisa ke worksheet",
 
-  /**
-   * Manajer Teknis/Mutu yang mengkaji ulang permintaan pengujian (Proses Back Office Tahap 2).
-   * Berwenang menyetujui atau merevisi permintaan, serta merekomendasikan jadwal
-   * dan personel pelaksanaan pengujian.
-   */
-  lab_manager:
-    "Manajer Teknis/Mutu yang mengkaji dan menyetujui permintaan pengujian serta merekomendasikan jadwal",
+  koordinator_pengujian:
+    "Koordinator Pengujian yang memverifikasi hasil kaji ulang dan meneruskan order ke Koordinator Administrasi",
 
-  /**
-   * Petugas Kaji Ulang yang bertugas meninjau worksheet dan parameter pengujian
-   * yang sedang berjalan. Memiliki akses penuh ke semua sumber daya worksheet,
-   * termasuk item, alat, bahan kimia, catatan, penugasan, dan detail transaksi.
-   */
+  penyelia:
+    "Penyelia yang mengawasi dan memverifikasi proses pengujian serta hasil worksheet analis laboratorium",
+
+  koordinator_mutu:
+    "Koordinator Mutu yang memastikan mutu proses pengujian, memverifikasi dokumen, dan menyetujui hasil akhir",
+
   kaji_ulang:
-    "Petugas Kaji Ulang dengan akses penuh ke semua sumber daya worksheet dan parameter pengujian",
+    "Kaji Ulang yang mengisi worksheet pengujian, mengecek kesiapan alat dan bahan, serta mengestimasi hari dan personel",
 
-  /**
-   * Kepala Balai dengan otoritas persetujuan final (Proses Back Office Tahap 4).
-   * Bertanggung jawab menandatangani SPT (Surat Perintah Tugas), mengirimkan SPT
-   * secara otomatis ke petugas, serta memverifikasi SPT akhir.
-   */
-  head_of_institution:
-    "Kepala Balai dengan otoritas persetujuan final dan penandatanganan SPT",
+  kepala_balai:
+    "Kepala Balai dengan otoritas persetujuan final atas penawaran, SPK/tagihan, dan SPT",
 
-  /**
-   * Manajer Administrasi yang menangani sisi administrasi keuangan (Proses Back Office Tahap 3).
-   * Bertugas menyusun surat penawaran, menerbitkan kode billing, memverifikasi
-   * pembayaran, dan memberikan rekomendasi personel.
-   */
-  admin_manager:
-    "Manajer Administrasi yang menangani surat penawaran, kode billing, dan verifikasi pembayaran",
+  koordinator_administrasi:
+    "Koordinator Administrasi yang menangani penawaran, SPK/tagihan, biaya operasional, dan verifikasi dokumen administrasi",
 
-  /**
-   * Bendahara Penerimaan yang bertanggung jawab atas pemrosesan keuangan (Proses Back Office Tahap 3).
-   * Menerima penawaran fix, memverifikasi status pembayaran, dan mengelola
-   * dokumen keuangan terkait pesanan pengujian.
-   */
-  treasurer:
-    "Bendahara Penerimaan yang bertanggung jawab atas pemrosesan keuangan dan verifikasi pembayaran",
+  bendahara:
+    "Bendahara Penerimaan yang menerbitkan kode billing SIMPONI, memvalidasi pembayaran, dan mengelola dokumen keuangan",
 
-  /**
-   * Petugas Peralatan yang mengelola ketersediaan dan peminjaman alat laboratorium.
-   * Memastikan alat yang dipinjam sesuai kebutuhan dan daftar alat terkirim secara otomatis.
-   */
-  equipment_officer:
-    "Petugas Peralatan yang mengelola ketersediaan alat dan memastikan bahan yang diminta",
+  tim_penjadwalan:
+    "Tim Penjadwalan yang menginput jadwal pengujian, menugaskan personel, dan membuat SPT",
 
-  /**
-   * Petugas Penjadwalan yang bertanggung jawab mengatur jadwal dan penugasan personel
-   * pada worksheet pengujian. Dapat menetapkan tanggal pelaksanaan, menugaskan karyawan
-   * ke worksheet, serta mengunduh dokumen jadwal yang telah ditetapkan.
-   */
-  penjadwalan:
-    "Petugas Penjadwalan yang mengatur jadwal dan penugasan personel pada worksheet pengujian",
+  tim_peralatan:
+    "Tim Peralatan yang mengelola ketersediaan alat, kalibrasi, dan serah terima alat ke Petugas Sampling",
 
-  /**
-   * Petugas Koding yang bertanggung jawab menginput kode billing pada pesanan pengujian.
-   * Bertugas di Proses Back Office Tahap 3 bersama Manajer Admin dan Bendahara,
-   * dengan akses untuk melihat dan memperbarui data pesanan terkait kode billing.
-   */
   petugas_koding:
     "Petugas Koding yang menginput kode billing pada pesanan pengujian",
 
-  /** Akses hanya baca untuk melihat data sistem tanpa melakukan modifikasi apapun. */
-  viewer: "Akses hanya baca untuk melihat data tanpa modifikasi",
+  viewer:
+    "Akses hanya baca untuk memantau data sistem tanpa melakukan modifikasi apapun",
 };
 
 /**
- * Izin default untuk setiap peran.
- * Ini adalah izin dasar yang diberikan saat sebuah peran dibuat atau ditetapkan ke pengguna.
+ * Izin default untuk setiap peran berdasarkan dokumen Workflow & Permission Final v1.0.
  */
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  // Super Admin: Semua izin sistem
+  // Super Admin: semua izin sistem
   super_admin: getAllPermissions(),
 
-  // Admin: Semua izin (pengelola back office utama)
-  admin: getAllPermissions(),
-
-  // Pengguna Layanan: Manajemen perusahaan, pesanan, dan operasi dasar
-  user: [
-    // Pengguna dapat mengelola profil sendiri
-    "users.view",
-    "users.read",
-    "users.update",
-
-    // Manajemen perusahaan
-    ...getResourcePermissions("user-company"),
-    ...getResourcePermissions("user-company-testing-location"),
-
-    // Belanja dan pesanan pengujian
-    ...getResourcePermissions("cart"),
+  // Admin: 79 izin — verifikasi data order, teruskan ke kaji ulang, kelola dokumen
+  admin: [
     "orders.view",
-    "orders.create",
     "orders.read",
-
-    // Melihat parameter pengujian
+    "orders.update",
+    "orders.review",
+    "orders.verify",
+    "order-items.view",
+    "order-items.read",
+    "order-status-history.view",
+    "order-status-history.create",
+    "order-status-history.read",
+    "orders-approval.view",
+    "orders-approval.create",
+    "orders-approval.read",
+    "orders-approval.update",
+    "orders-approval.review",
+    "orders-approval.verify",
+    "user-company.view",
+    "user-company.read",
+    "user-company.review",
+    "user-company.verify",
+    "user-company-testing-location.view",
+    "user-company-testing-location.read",
+    "user-company-testing-location.review",
+    "user-company-testing-location.verify",
+    "testing.view",
+    "testing.read",
+    "testing-item.view",
+    "testing-item.read",
+    "worksheets.view",
+    "worksheets.read",
+    "worksheets.update",
+    "worksheets.review",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheet-items.view",
+    "worksheet-items.read",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "documents.view",
+    "documents.create",
+    "documents.read",
+    "documents.update",
+    "documents.review",
+    "documents.verify",
+    "documents-admin.view",
+    "documents-admin.read",
+    "documents-admin.update",
+    "document-verifications.view",
+    "document-verifications.read",
     "parameters.view",
     "parameters.read",
     "parameter-categories.view",
     "parameter-categories.read",
     "clusters.view",
     "clusters.read",
-
-    // Melihat dokumen
-    "documents.view",
-    "documents.read",
-
-    // Data geografi untuk pemilihan lokasi pengujian
     "provinces.view",
     "provinces.read",
     "regency.view",
@@ -233,9 +197,96 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "village.read",
     "kbli.view",
     "kbli.read",
+    "employees.view",
+    "employees.read",
+    "positions.view",
+    "positions.read",
+    "audits.view",
+    "audits.read",
+    "logs.view",
+    "logs.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
   ],
 
-  // Karyawan: Akses dasar ke alur pengujian
+  // Pengguna Layanan: 72 izin — buat order, bayar, pantau status
+  user: [
+    "user-company.view",
+    "user-company.create",
+    "user-company.read",
+    "user-company.update",
+    "user-company-testing-location.view",
+    "user-company-testing-location.create",
+    "user-company-testing-location.read",
+    "user-company-testing-location.update",
+    "clusters.view",
+    "clusters.read",
+    "parameter-categories.view",
+    "parameter-categories.read",
+    "parameters.view",
+    "parameters.read",
+    "kbli.view",
+    "kbli.read",
+    "provinces.view",
+    "provinces.read",
+    "regency.view",
+    "regency.read",
+    "district.view",
+    "district.read",
+    "village.view",
+    "village.read",
+    "cart.view",
+    "cart.create",
+    "cart.read",
+    "cart.update",
+    "cart.delete",
+    "orders.view",
+    "orders.create",
+    "orders.read",
+    "orders.update",
+    "order-items.view",
+    "order-items.create",
+    "order-items.read",
+    "order-items.update",
+    "order-items.delete",
+    "order-status-history.view",
+    "order-status-history.read",
+    "documents.view",
+    "documents.create",
+    "documents.read",
+    "documents.update",
+    "documents-admin.view",
+    "documents-admin.read",
+    "document-signature.view",
+    "document-signature.create",
+    "document-signature.read",
+    "document-signature.update",
+    "orders-payment.view",
+    "orders-payment.create",
+    "orders-payment.read",
+    "orders-payment.update",
+    "testing.view",
+    "testing.read",
+    "testing-item.view",
+    "testing-item.read",
+    "documents-spt.view",
+    "documents-spt.read",
+    "survey-questions.view",
+    "survey-questions.read",
+    "survey-responses.view",
+    "survey-responses.create",
+    "survey-responses.read",
+    "survey-responses.update",
+    "survey-feedback.view",
+    "survey-feedback.create",
+    "survey-feedback.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+  ],
+
+  // Karyawan: akses dasar
   employee: [
     "users.view",
     "users.read",
@@ -244,327 +295,669 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "documents.view",
   ],
 
-  // Petugas Sampling: Fokus pada pengumpulan sampel dan data terkait
-  sample_collector: [
-    // Dapat melihat dan memperbarui profil sendiri
-    "users.view",
-    "users.read",
-    "users.update",
-    // Dapat mengelola lokasi pengujian yang ditugaskan
-    ...getResourcePermissions("user-company-testing-location"),
-    // Dapat melihat pesanan dan pengujian yang terkait dengan lokasinya
+  // Petugas Sampling: 35 izin — terima SPT, kelola alat di lapangan
+  petugas_sampling: [
     "orders.view",
     "orders.read",
     "testing.view",
     "testing.read",
-    // Dapat melihat dokumen terkait pekerjaannya
-    "documents.view",
-    "documents.read",
+    "testing-item.view",
+    "testing-item.read",
+    "documents-spt.view",
+    "documents-spt.read",
+    "worksheets.view",
+    "worksheets.read",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheet-assignments.view",
+    "worksheet-assignments.read",
+    "worksheet-assignments.update",
+    "worksheets-personnel-assignments.view",
+    "worksheets-personnel-assignments.read",
+    "worksheet-tools.view",
+    "worksheet-tools.read",
+    "worksheet-tools.update",
+    "worksheet-tools.verify",
+    "tools.view",
+    "tools.read",
+    "tool-codes.view",
+    "tool-codes.read",
+    "tool-calibrations.view",
+    "tool-calibrations.read",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
   ],
 
-  // Analis Laboratorium: Operasional pengujian di laboratorium
-  lab_technician: [
-    // Dapat melihat dan memperbarui data pengujian
+  // Petugas Laboratorium: 44 izin — pengujian di lab, input hasil analisa
+  petugas_laboratorium: [
+    "orders.view",
+    "orders.read",
     "testing.view",
     "testing.read",
     "testing.update",
+    "testing.review",
     "testing-item.view",
     "testing-item.read",
     "testing-item.update",
-
-    // Dapat mengelola lembar kerja (worksheet)
     "worksheets.view",
     "worksheets.read",
     "worksheets.update",
-    ...getResourcePermissions("worksheet-items"),
-    ...getResourcePermissions("worksheet-tools"),
-    ...getResourcePermissions("worksheet-notes"),
-
-    // Dapat melihat peralatan dan parameter
-    "tools.view",
-    "tools.read",
-    "parameters.view",
-    "parameters.read",
-    "parameter-categories.view",
-    "parameter-categories.read",
-
-    // Dapat melihat pesanan
-    "orders.view",
-    "orders.read",
-
-    // Dapat melihat dokumen
-    "documents.view",
-    "documents.read",
-  ],
-
-  // Petugas Kaji Ulang: Mengisi worksheet dan mengajukan verifikasi
-  // Tidak memiliki hak untuk memverifikasi atau merevisi worksheet (itu tugas lab_manager)
-  kaji_ulang: [
-    // Akses worksheet tanpa hak verifikasi/review/approve
-    "worksheets.view",
-    "worksheets.read",
-    "worksheets.create",
-    "worksheets.update", // untuk ajukan verifikasi (submitForVerification)
-    "worksheets.delete",
-    // Hanya baca status worksheet, tidak bisa mengubah status secara langsung
+    "worksheets.review",
     "worksheets-status.view",
     "worksheets-status.read",
-    ...getResourcePermissions("worksheets-parameters"),
-    ...getResourcePermissions("worksheet-items"),
-    ...getResourcePermissions("worksheet-tools"),
-    ...getResourcePermissions("worksheet-notes"),
-    ...getResourcePermissions("worksheet-assignments"),
-    ...getResourcePermissions("worksheet-chemical-materials"),
-
-    // Membuat estimasi pps dan hari kerja
-    "worksheets-transaction-details.create",
-
-    // Akses baca ke sumber daya pendukung
-    "parameters.view",
-    "parameters.read",
-    "parameter-categories.view",
-    "parameter-categories.read",
+    "worksheets-status.update",
+    "worksheet-items.view",
+    "worksheet-items.read",
+    "worksheet-items.update",
+    "worksheet-items.review",
+    "worksheets-parameters.view",
+    "worksheets-parameters.read",
+    "worksheets-parameters.update",
+    "worksheets-parameters.review",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
     "tools.view",
     "tools.read",
     "chemical-materials.view",
     "chemical-materials.read",
-
-    // Akses baca pesanan untuk membuka halaman detail order (diperlukan untuk ajukan verifikasi worksheet)
-    "orders.view",
-    "orders.read",
+    "parameters.view",
+    "parameters.read",
+    "documents.view",
+    "documents.create",
+    "documents.read",
+    "documents.update",
+    "documents.review",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
   ],
 
-  // Manajer Teknis/Mutu: Pengelolaan pengujian secara penuh (Back Office Tahap 2)
-  lab_manager: [
-    // Akses penuh ke data pengujian
-    ...getResourcePermissions("testing"),
-    ...getResourcePermissions("testing-item"),
+  // Koordinator Pengujian: 64 izin — verifikasi hasil kaji ulang, teruskan ke Koordinator Administrasi
+  koordinator_pengujian: [
+    "orders.view",
+    "orders.read",
+    "orders.update",
+    "orders.review",
+    "orders.verify",
+    "order-items.view",
+    "order-items.read",
+    "order-status-history.view",
+    "order-status-history.create",
+    "order-status-history.read",
+    "worksheets.view",
+    "worksheets.read",
+    "worksheets.update",
+    "worksheets.review",
+    "worksheets.verify",
+    "worksheets.approve",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheets-status.verify",
+    "worksheets-status.approve",
+    "worksheets-parameters.view",
+    "worksheets-parameters.read",
+    "worksheets-parameters.review",
+    "worksheets-parameters.verify",
+    "worksheet-items.view",
+    "worksheet-items.read",
+    "worksheet-items.review",
+    "worksheet-items.verify",
+    "worksheet-tools.view",
+    "worksheet-tools.read",
+    "worksheet-tools.review",
+    "worksheet-tools.verify",
+    "worksheet-chemical-materials.view",
+    "worksheet-chemical-materials.read",
+    "worksheet-chemical-materials.review",
+    "worksheet-chemical-materials.verify",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "worksheets-personnel-assignments.view",
+    "worksheets-personnel-assignments.create",
+    "worksheets-personnel-assignments.read",
+    "worksheets-personnel-assignments.update",
+    "worksheets-personnel-assignments.verify",
+    "worksheet-assignments.view",
+    "worksheet-assignments.create",
+    "worksheet-assignments.read",
+    "worksheet-assignments.update",
+    "worksheet-assignments.verify",
+    "employees.view",
+    "employees.read",
+    "positions.view",
+    "positions.read",
+    "tools.view",
+    "tools.read",
+    "tool-calibrations.view",
+    "tool-calibrations.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
+  ],
 
-    // Akses penuh ke lembar kerja
-    ...getResourcePermissions("worksheets"),
-    ...getResourcePermissions("worksheet-items"),
-    ...getResourcePermissions("worksheet-tools"),
-    ...getResourcePermissions("worksheet-notes"),
-    ...getResourcePermissions("worksheet-assignments"),
-    ...getResourcePermissions("worksheet-chemical-materials"),
-    ...getResourcePermissions("worksheets-transaction-details"),
-    ...getResourcePermissions("worksheets-personnel-assignments"),
+  // Penyelia: 43 izin — supervisi proses pengujian dan verifikasi worksheet analis
+  penyelia: [
+    "orders.view",
+    "orders.read",
+    "testing.view",
+    "testing.read",
+    "testing.review",
+    "testing.verify",
+    "testing-item.view",
+    "testing-item.read",
+    "testing-item.review",
+    "testing-item.verify",
+    "worksheets.view",
+    "worksheets.read",
+    "worksheets.review",
+    "worksheets.verify",
+    "worksheets.approve",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheets-status.verify",
+    "worksheets-status.approve",
+    "worksheet-items.view",
+    "worksheet-items.read",
+    "worksheet-items.review",
+    "worksheet-items.verify",
+    "worksheet-items.approve",
+    "worksheets-parameters.view",
+    "worksheets-parameters.read",
+    "worksheets-parameters.review",
+    "worksheets-parameters.verify",
+    "worksheets-parameters.approve",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "documents.view",
+    "documents.read",
+    "documents.review",
+    "documents.verify",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
+  ],
 
-    // Manajemen karyawan
-    ...getResourcePermissions("employees"),
+  // Koordinator Mutu: 59 izin — memastikan mutu pengujian dan menyetujui dokumen hasil
+  koordinator_mutu: [
+    "orders.view",
+    "orders.read",
+    "testing.view",
+    "testing.read",
+    "testing.review",
+    "testing.verify",
+    "testing-item.view",
+    "testing-item.read",
+    "testing-item.review",
+    "testing-item.verify",
+    "worksheets.view",
+    "worksheets.read",
+    "worksheets.review",
+    "worksheets.verify",
+    "worksheets.approve",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheets-status.review",
+    "worksheets-status.verify",
+    "worksheets-status.approve",
+    "worksheet-items.view",
+    "worksheet-items.read",
+    "worksheet-items.review",
+    "worksheet-items.verify",
+    "worksheet-items.approve",
+    "worksheets-parameters.view",
+    "worksheets-parameters.read",
+    "worksheets-parameters.review",
+    "worksheets-parameters.verify",
+    "worksheets-parameters.approve",
+    "worksheet-tools.view",
+    "worksheet-tools.read",
+    "worksheet-tools.review",
+    "worksheet-tools.verify",
+    "worksheet-chemical-materials.view",
+    "worksheet-chemical-materials.read",
+    "worksheet-chemical-materials.review",
+    "worksheet-chemical-materials.verify",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "documents.view",
+    "documents.read",
+    "documents.review",
+    "documents.verify",
+    "documents.approve",
+    "document-verifications.view",
+    "document-verifications.read",
+    "document-verifications.review",
+    "document-verifications.verify",
+    "audits.view",
+    "audits.read",
+    "logs.view",
+    "logs.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+  ],
 
-    // Manajemen peralatan
-    ...getResourcePermissions("tools"),
-
-    // Akses parameter pengujian
+  // Kaji Ulang: 73 izin — isi worksheet, cek alat/bahan, estimasi hari/personel
+  kaji_ulang: [
+    "orders.view",
+    "orders.read",
+    "order-items.view",
+    "order-items.read",
+    "order-status-history.view",
+    "order-status-history.create",
+    "order-status-history.read",
+    "worksheets.view",
+    "worksheets.create",
+    "worksheets.read",
+    "worksheets.update",
+    "worksheets.review",
+    "worksheets.verify",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheets-parameters.view",
+    "worksheets-parameters.create",
+    "worksheets-parameters.read",
+    "worksheets-parameters.update",
+    "worksheets-parameters.review",
+    "worksheets-parameters.verify",
+    "worksheet-items.view",
+    "worksheet-items.read",
+    "worksheet-items.update",
+    "worksheet-items.review",
+    "worksheet-items.verify",
+    "worksheet-tools.view",
+    "worksheet-tools.create",
+    "worksheet-tools.read",
+    "worksheet-tools.update",
+    "worksheet-tools.review",
+    "worksheet-tools.verify",
+    "worksheet-chemical-materials.view",
+    "worksheet-chemical-materials.create",
+    "worksheet-chemical-materials.read",
+    "worksheet-chemical-materials.update",
+    "worksheet-chemical-materials.review",
+    "worksheet-chemical-materials.verify",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "worksheets-transaction-details.view",
+    "worksheets-transaction-details.read",
+    "worksheets-transaction-details.update",
     "parameters.view",
     "parameters.read",
     "parameter-categories.view",
     "parameter-categories.read",
     "clusters.view",
     "clusters.read",
-
-    // Manajemen pesanan dan persetujuan
-    ...getResourcePermissions("orders"),
-    ...getResourcePermissions("order-items"),
-    "order-status-history.view",
-    "order-status-history.read",
-    "orders-approval.view",
-    "orders-approval.update", // approve / reject order
-
-    // Manajemen status worksheet (verify, revisi, complete, sync)
-    "worksheets-status.update",
-
-    // Manajemen dokumen
-    "documents.view",
-    "documents.read",
-    "documents.create",
-    "documents.update",
-    ...getResourcePermissions("document-signature"),
-
-    // Dapat melihat data pengguna
-    "users.view",
-    "users.read",
+    "tools.view",
+    "tools.read",
+    "tool-calibrations.view",
+    "tool-calibrations.read",
+    "tool-checks.view",
+    "tool-checks.read",
+    "tool-certifications.view",
+    "tool-certifications.read",
+    "tool-documentations.view",
+    "tool-documentations.read",
+    "chemical-materials.view",
+    "chemical-materials.read",
+    "parameter-tool.view",
+    "parameter-tool.read",
+    "parameter-chemical-material.view",
+    "parameter-chemical-material.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
   ],
 
-  // Kepala Balai: Otoritas persetujuan final dan penandatanganan SPT (Back Office Tahap 4)
-  head_of_institution: [
-    // Dapat melihat data pengguna
-    "users.view",
-    "users.read",
-
-    // Pengawasan dan persetujuan final atas pesanan (Tahap 4)
+  // Kepala Balai: 39 izin — persetujuan final penawaran, SPK/tagihan, dan SPT
+  kepala_balai: [
     "orders.view",
     "orders.read",
+    "orders.review",
+    "orders.approve",
     "order-items.view",
     "order-items.read",
     "order-status-history.view",
+    "order-status-history.create",
     "order-status-history.read",
-    "orders-approval.view",
-    "orders-approval.update", // persetujuan final kepala balai
-
-    // Pengawasan pengujian
-    "testing.view",
-    "testing.read",
-    "testing.update",
-    "testing-item.view",
-    "testing-item.read",
-
-    // Manajemen dan penandatanganan dokumen (SPT, dll.)
     "documents.view",
     "documents.read",
-    "documents.create",
-    "documents.update",
-    "documents-spt.create", // Generate surat tugas / SPT
-    ...getResourcePermissions("document-signature"),
-
-    // Pengawasan karyawan
-    "employees.view",
-    "employees.read",
-
-    // Pengawasan lembar kerja
+    "documents.review",
+    "documents.approve",
+    "documents-admin.view",
+    "documents-admin.read",
+    "documents-admin.review",
+    "documents-admin.approve",
+    "document-verifications.view",
+    "document-verifications.read",
+    "documents-spt.view",
+    "documents-spt.read",
+    "documents-spt.review",
+    "documents-spt.approve",
     "worksheets.view",
     "worksheets.read",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-transaction-details.view",
+    "worksheets-transaction-details.read",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "audits.view",
+    "audits.read",
+    "logs.view",
+    "logs.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
   ],
 
-  // Manajer Administrasi: Surat penawaran, kode billing, verifikasi pembayaran (Back Office Tahap 3)
-  admin_manager: [
-    // Dapat melihat data pengguna
-    "users.view",
-    "users.read",
-
-    // Administrasi pesanan (surat penawaran, kode billing) — hanya baca, tidak ada approval
+  // Koordinator Administrasi: 66 izin — penawaran, SPK/tagihan, biaya operasional
+  koordinator_administrasi: [
     "orders.view",
     "orders.read",
+    "orders.update",
+    "orders.review",
+    "orders.verify",
     "order-items.view",
     "order-items.read",
     "order-status-history.view",
+    "order-status-history.create",
     "order-status-history.read",
-
-    // Tinjauan pengujian
-    "testing.view",
-    "testing.read",
-
-    // Manajemen dokumen (surat penawaran, dll.)
+    "worksheets.view",
+    "worksheets.read",
+    "worksheets.update",
+    "worksheets.review",
+    "worksheets.verify",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheets-status.verify",
+    "worksheets-transaction-details.view",
+    "worksheets-transaction-details.create",
+    "worksheets-transaction-details.read",
+    "worksheets-transaction-details.update",
+    "worksheets-transaction-details.review",
+    "worksheets-transaction-details.verify",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
     "documents.view",
-    "documents.read",
     "documents.create",
+    "documents.read",
     "documents.update",
-    "documents-admin.create", // Generate surat penawaran, SPK, tagihan
+    "documents.review",
+    "documents.verify",
+    "documents-admin.view",
+    "documents-admin.create",
+    "documents-admin.read",
+    "documents-admin.update",
+    "documents-admin.review",
+    "documents-admin.verify",
+    "document-verifications.view",
+    "document-verifications.create",
+    "document-verifications.read",
+    "document-verifications.update",
+    "document-verifications.review",
+    "document-verifications.verify",
+    "documents-spt.view",
+    "documents-spt.create",
+    "documents-spt.read",
+    "documents-spt.update",
+    "documents-spt.review",
+    "documents-spt.verify",
+    "employees.view",
+    "employees.read",
+    "positions.view",
+    "positions.read",
+    "parameters.view",
+    "parameters.read",
+    "tools.view",
+    "tools.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
+  ],
 
-    // Estimasi dan biaya operasional worksheet
+  // Bendahara Penerimaan: 48 izin — billing SIMPONI, validasi pembayaran, dokumen keuangan
+  bendahara: [
+    "orders.view",
+    "orders.read",
+    "orders.update",
+    "orders.review",
+    "orders.verify",
+    "order-items.view",
+    "order-items.read",
+    "order-status-history.view",
+    "order-status-history.create",
+    "order-status-history.read",
+    "documents.view",
+    "documents.create",
+    "documents.read",
+    "documents.update",
+    "documents.review",
+    "documents.verify",
+    "documents-admin.view",
+    "documents-admin.create",
+    "documents-admin.read",
+    "documents-admin.update",
+    "documents-admin.review",
+    "documents-admin.verify",
+    "document-verifications.view",
+    "document-verifications.read",
+    "orders-payment.view",
+    "orders-payment.create",
+    "orders-payment.read",
+    "orders-payment.update",
+    "orders-payment.review",
+    "orders-payment.verify",
+    "orders-payment.approve",
     "worksheets.view",
     "worksheets.read",
     "worksheets-transaction-details.view",
     "worksheets-transaction-details.read",
-    "worksheets-transaction-details.create",
     "worksheets-transaction-details.update",
-
-    // Info perusahaan untuk keperluan penawaran
-    "user-company.view",
-    "user-company.read",
+    "worksheets-transaction-details.verify",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
+    "logs.view",
+    "logs.read",
   ],
 
-  // Bendahara: Pemrosesan keuangan dan verifikasi pembayaran (Back Office Tahap 3)
-  treasurer: [
-    // Manajemen keuangan pesanan
+  // Tim Penjadwalan: 55 izin — input jadwal, penugasan personel, buat SPT
+  tim_penjadwalan: [
     "orders.view",
     "orders.read",
+    "orders.update",
+    "orders.review",
+    "orders.verify",
+    "order-items.view",
+    "order-items.read",
     "order-status-history.view",
+    "order-status-history.create",
     "order-status-history.read",
-    "orders-payment.view",
-    "orders-payment.update", // verifikasi / tolak pembayaran
-
-    // Dokumen keuangan
-    "documents.view",
-    "documents.read",
-    "documents.update",
-
-    // Tinjauan pengujian
     "testing.view",
-  ],
-
-  // Petugas Peralatan: Manajemen ketersediaan alat dan bahan laboratorium
-  equipment_officer: [
-    // Manajemen peralatan
-    ...getResourcePermissions("tools"),
-    ...getResourcePermissions("tool-checks"),
-    ...getResourcePermissions("tool-calibrations"),
-    ...getResourcePermissions("tool-certifications"),
-    ...getResourcePermissions("tool-documentations"),
-
-    // Manajemen alat worksheet (memilih alat untuk worksheet yang terverifikasi)
+    "testing.create",
+    "testing.read",
+    "testing.update",
+    "testing.review",
+    "testing.verify",
+    "testing-item.view",
+    "testing-item.create",
+    "testing-item.read",
+    "testing-item.update",
     "worksheets.view",
     "worksheets.read",
-    "worksheet-tools.update",
-
-    // Tinjauan pesanan (untuk melihat kebutuhan peralatan)
-    "orders.view",
-
-    // Tinjauan pengujian
-    "testing.view",
-  ],
-
-  // Penjadwalan: Penjadwalan dan penugasan personel pada worksheet (jadwal-personel)
-  penjadwalan: [
-    // Akses worksheet untuk penjadwalan (hanya baca, update melalui sub-resource spesifik)
-    "worksheets.view",
-    "worksheets.read",
-
-    // Manajemen penugasan personel pada worksheet
-    ...getResourcePermissions("worksheet-assignments"),
+    "worksheets.update",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
     "worksheets-personnel-assignments.view",
-    "worksheets-personnel-assignments.read",
     "worksheets-personnel-assignments.create",
+    "worksheets-personnel-assignments.read",
     "worksheets-personnel-assignments.update",
-
-    // Data karyawan untuk pemilihan personel
+    "worksheets-personnel-assignments.verify",
+    "worksheet-assignments.view",
+    "worksheet-assignments.create",
+    "worksheet-assignments.read",
+    "worksheet-assignments.update",
+    "worksheet-assignments.verify",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "documents-spt.view",
+    "documents-spt.create",
+    "documents-spt.read",
+    "documents-spt.update",
+    "documents-spt.review",
+    "documents-spt.verify",
     "employees.view",
     "employees.read",
-
-    // Dokumen jadwal (generate SPT dan unduh)
-    "documents.view",
-    "documents.read",
-    "documents-spt.create",
+    "positions.view",
+    "positions.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
   ],
 
-  // Petugas Koding: Menginput kode billing pada pesanan (Back Office Tahap 3)
+  // Tim Peralatan: 41 izin — kelola alat, kalibrasi, serah terima ke Petugas Sampling
+  tim_peralatan: [
+    "orders.view",
+    "orders.read",
+    "worksheets.view",
+    "worksheets.read",
+    "worksheet-tools.view",
+    "worksheet-tools.create",
+    "worksheet-tools.read",
+    "worksheet-tools.update",
+    "worksheet-tools.review",
+    "worksheet-tools.verify",
+    "worksheet-tools.approve",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "tools.view",
+    "tools.read",
+    "tools.update",
+    "tool-codes.view",
+    "tool-codes.read",
+    "tool-codes.update",
+    "tool-calibrations.view",
+    "tool-calibrations.read",
+    "tool-calibrations.update",
+    "tool-calibrations.verify",
+    "tool-checks.view",
+    "tool-checks.create",
+    "tool-checks.read",
+    "tool-checks.update",
+    "tool-checks.verify",
+    "tool-certifications.view",
+    "tool-certifications.read",
+    "tool-documentations.view",
+    "tool-documentations.create",
+    "tool-documentations.read",
+    "tool-documentations.update",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
+  ],
+
+  // Petugas Koding: 8 izin — input kode billing
   petugas_koding: [
-    // Melihat pesanan untuk keperluan kode billing (hanya baca, tidak ada approval/payment)
     "orders.view",
     "orders.read",
     "order-items.view",
     "order-items.read",
     "order-status-history.view",
     "order-status-history.read",
-
-    // Tinjauan dokumen pesanan
     "documents.view",
     "documents.read",
   ],
 
-  // Viewer: Akses hanya baca ke sebagian besar sumber daya
+  // Viewer / Monitoring: 38 izin — hanya baca, tidak bisa modifikasi
   viewer: [
-    "users.view",
-    "roles.view",
-    "permissions.view",
-    "tools.view",
-    "clusters.view",
-    "parameter-categories.view",
-    "parameters.view",
-    "provinces.view",
-    "regency.view",
-    "district.view",
-    "village.view",
-    "kbli.view",
-    "user-company.view",
-    "cart.view",
     "orders.view",
+    "orders.read",
+    "order-items.view",
+    "order-items.read",
+    "order-status-history.view",
+    "order-status-history.read",
     "testing.view",
-    "documents.view",
-    "audits.view",
-    "employees.view",
+    "testing.read",
+    "testing-item.view",
+    "testing-item.read",
     "worksheets.view",
+    "worksheets.read",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheet-items.view",
+    "worksheet-items.read",
+    "worksheets-parameters.view",
+    "worksheets-parameters.read",
+    "worksheet-tools.view",
+    "worksheet-tools.read",
+    "worksheet-notes.view",
+    "worksheet-notes.read",
+    "documents.view",
+    "documents.read",
+    "documents-admin.view",
+    "documents-admin.read",
+    "documents-spt.view",
+    "documents-spt.read",
+    "user-company.view",
+    "user-company.read",
+    "user-company-testing-location.view",
+    "user-company-testing-location.read",
+    "audits.view",
+    "audits.read",
+    "logs.view",
+    "logs.read",
+    "notifications.view",
+    "notifications.read",
   ],
 };
 
@@ -615,7 +1008,6 @@ export function generateRolesList() {
 
 /**
  * Memeriksa apakah pengguna dengan peran tertentu memiliki izin yang dibutuhkan.
- * Berguna untuk pemeriksaan izin yang mempertimbangkan hierarki peran.
  *
  * @param userRoles - Array peran yang dimiliki pengguna
  * @param requiredPermission - Izin yang perlu diperiksa
