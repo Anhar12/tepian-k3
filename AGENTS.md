@@ -156,7 +156,9 @@ uniqueIndex("name_idx").on(table.name).where(sql`${table.deletedAt} IS NULL`)
 - **UUIDs are v7** — use `uuidv7()` from the `uuid` package
 - **Cascade deletes** are enabled — be careful with deletions
 - **File uploads** must go through `storageService`
-- **Permission checks** are runtime — cached in JWT, re-validated on sensitive ops
+- **Permission checks & JWT Caching** — roles and permissions are cached in the Stateless JWT access token at login. Changing role permissions in the database **requires the user to logout and log back in** to refresh their access token and apply the changes.
+- **Dynamic Role Verification** — base routes `/back-office`, `/employee`, and `/display-board` use `requireRoles` to block customers (who only have the `"user"` role). Any internal user having at least one role other than `"user"` passes the base guard. Fine-grained permissions are checked dynamically on specific pages.
+- **Dynamic Sidebar Menu Rendering** — the main sidebar `app-sidebar.tsx` checks permissions dynamically. It supports dynamic roles by treating any role other than `"user"` as an internal role, loading employee/back-office items matching the user's specific permissions.
 - **Multi-file changes** — present a full checklist to the user before starting, get confirmation
 - **New docs** go in the relevant package's `docs/` folder
 - **Cross-module or generated code** — add an authorship comment at the top of the file or section:

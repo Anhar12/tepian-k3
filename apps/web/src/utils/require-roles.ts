@@ -54,11 +54,22 @@ export async function requireRoles(
     gcTime: 1000 * 60 * 30,
   });
 
+  const profileRoles = profile.roles.map((r) => r.name);
+  const isSuperAdmin = profileRoles.includes("super_admin");
+
   const roles = Array.isArray(role) ? role : [role];
 
-  const hasRole = requireAll
-    ? roles.every((r) => profile.roles.some((pr) => pr.name === r))
-    : roles.some((r) => profile.roles.some((pr) => pr.name === r));
+  // If the check requires any internal role (e.g. any role other than 'user')
+  // and the user has at least one role that is not 'user', they are allowed.
+  const requiresInternal = roles.some((r) => r !== "user");
+  const isInternal = profileRoles.some((r) => r !== "user");
+
+  const hasRole =
+    isSuperAdmin ||
+    (requireAll
+      ? roles.every((r) => profileRoles.includes(r))
+      : roles.some((r) => profileRoles.includes(r)) ||
+        (requiresInternal && isInternal));
 
   if (!hasRole) {
     throw redirect({ to: redirectTo });

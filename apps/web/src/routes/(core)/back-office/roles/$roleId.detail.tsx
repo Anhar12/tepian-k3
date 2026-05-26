@@ -20,9 +20,203 @@ import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Search, Shield, Check, Info } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
+
+// Dictionary to map permission resource keys to friendly Indonesian terms and categories
+const RESOURCE_LABELS: Record<string, { title: string; category: string }> = {
+  users: { title: "Akun Pengguna", category: "Pengguna & Keamanan" },
+  roles: { title: "Peran / Hak Akses (Role)", category: "Pengguna & Keamanan" },
+  permissions: {
+    title: "Izin Detail (Permission)",
+    category: "Pengguna & Keamanan",
+  },
+  "role-permissions": {
+    title: "Pemetaan Izin Role",
+    category: "Pengguna & Keamanan",
+  },
+  "user-permissions": {
+    title: "Izin Spesifik Pengguna",
+    category: "Pengguna & Keamanan",
+  },
+
+  tools: { title: "Alat Laboratorium", category: "Inventaris & Alat Lab" },
+  "tool-codes": { title: "Kode Alat Lab", category: "Inventaris & Alat Lab" },
+  "tool-calibrations": {
+    title: "Kalibrasi Alat",
+    category: "Inventaris & Alat Lab",
+  },
+  "tool-checks": {
+    title: "Pemeriksaan Alat",
+    category: "Inventaris & Alat Lab",
+  },
+  "tool-certifications": {
+    title: "Sertifikasi Alat",
+    category: "Inventaris & Alat Lab",
+  },
+  "tool-documentations": {
+    title: "Dokumen Alat",
+    category: "Inventaris & Alat Lab",
+  },
+  "chemical-materials": {
+    title: "Bahan Kimia",
+    category: "Inventaris & Alat Lab",
+  },
+  clusters: {
+    title: "Klaster Alat & Parameter",
+    category: "Inventaris & Alat Lab",
+  },
+
+  "parameter-categories": {
+    title: "Kategori Parameter",
+    category: "Parameter Pengujian",
+  },
+  parameters: { title: "Parameter Uji K3", category: "Parameter Pengujian" },
+  "parameter-tool": {
+    title: "Hubungan Parameter & Alat",
+    category: "Parameter Pengujian",
+  },
+  "parameter-chemical-material": {
+    title: "Hubungan Parameter & Bahan Kimia",
+    category: "Parameter Pengujian",
+  },
+
+  provinces: { title: "Provinsi", category: "Wilayah Geografis" },
+  regency: { title: "Kabupaten / Kota", category: "Wilayah Geografis" },
+  district: { title: "Kecamatan", category: "Wilayah Geografis" },
+  village: { title: "Kelurahan / Desa", category: "Wilayah Geografis" },
+  kbli: { title: "Klasifikasi Industri (KBLI)", category: "Wilayah Geografis" },
+
+  "user-company": {
+    title: "Profil Perusahaan Mitra",
+    category: "Manajemen Perusahaan",
+  },
+  "user-company-testing-location": {
+    title: "Lokasi Pengujian Perusahaan",
+    category: "Manajemen Perusahaan",
+  },
+
+  banners: { title: "Banner Informasi", category: "Konten & Informasi Web" },
+  news: { title: "Berita & Pengumuman", category: "Konten & Informasi Web" },
+
+  cart: { title: "Keranjang Belanja", category: "Pemesanan & Keuangan" },
+  orders: { title: "Daftar Pesanan", category: "Pemesanan & Keuangan" },
+  "orders-approval": {
+    title: "Persetujuan Pesanan",
+    category: "Pemesanan & Keuangan",
+  },
+  "orders-payment": {
+    title: "Verifikasi Pembayaran",
+    category: "Pemesanan & Keuangan",
+  },
+  "order-items": {
+    title: "Detail Item Pesanan",
+    category: "Pemesanan & Keuangan",
+  },
+  "order-status-history": {
+    title: "Riwayat Status Pesanan",
+    category: "Pemesanan & Keuangan",
+  },
+
+  testing: { title: "Proses Pengujian Lab", category: "Proses Lab K3" },
+  "testing-item": { title: "Item Pengujian Lab", category: "Proses Lab K3" },
+
+  documents: { title: "Semua Dokumen K3", category: "Dokumen & Verifikasi" },
+  "document-signature": {
+    title: "Tanda Tangan Dokumen",
+    category: "Dokumen & Verifikasi",
+  },
+  "document-verifications": {
+    title: "Verifikasi Dokumen (QR Scan)",
+    category: "Dokumen & Verifikasi",
+  },
+  "documents-spt": {
+    title: "Surat Perintah Tugas (SPT)",
+    category: "Dokumen & Verifikasi",
+  },
+  "documents-admin": {
+    title: "Dokumen Admin (SPK, Penawaran, Tagihan)",
+    category: "Dokumen & Verifikasi",
+  },
+
+  audits: {
+    title: "Catatan Aktivitas (Audit Logs)",
+    category: "Sistem & Keamanan",
+  },
+  notifications: { title: "Sistem Notifikasi", category: "Sistem & Keamanan" },
+  logs: { title: "Log Server", category: "Sistem & Keamanan" },
+
+  positions: { title: "Jabatan Karyawan", category: "Kepegawaian" },
+  employees: { title: "Profil Karyawan K3", category: "Kepegawaian" },
+
+  worksheets: {
+    title: "Lembar Kerja (Worksheet)",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheets-status": {
+    title: "Perubahan Status Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheets-parameters": {
+    title: "Parameter Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheets-personnel-assignments": {
+    title: "Penugasan Personel Lab",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheets-transaction-details": {
+    title: "Detail Transaksi Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheet-items": {
+    title: "Item Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheet-tools": {
+    title: "Alat dalam Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheet-notes": {
+    title: "Catatan Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheet-assignments": {
+    title: "Riwayat Penugasan Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+  "worksheet-chemical-materials": {
+    title: "Bahan Kimia Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
+
+  "survey-questions": {
+    title: "Pertanyaan Survei Kepuasan",
+    category: "Survei & Kepuasan",
+  },
+  "survey-responses": {
+    title: "Jawaban Survei Kepuasan",
+    category: "Survei & Kepuasan",
+  },
+  "survey-feedback": {
+    title: "Umpan Balik Survei",
+    category: "Survei & Kepuasan",
+  },
+};
+
+const ACTION_LABELS: Record<string, string> = {
+  view: "Melihat",
+  read: "Membaca Detail",
+  create: "Membuat Baru",
+  update: "Mengubah (Edit)",
+  delete: "Menghapus",
+  approve: "Menyetujui",
+  verify: "Memverifikasi",
+  review: "Meninjau",
+  sign: "Tanda Tangan",
+  restore: "Memulihkan",
+};
 
 export const Route = createFileRoute(
   "/(core)/back-office/roles/$roleId/detail",
@@ -74,8 +268,9 @@ function LoaderComponent() {
   );
 }
 
-function RouteComponent() {
+export function RouteComponent() {
   const { roleId } = Route.useParams();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: role } = useSuspenseQuery(
     trpc.platform.role.getRoleWithPermissionsById.queryOptions({ id: roleId }),
@@ -96,9 +291,64 @@ function RouteComponent() {
     () => new Set(role?.permissions || []),
   );
 
-  const [search, setSearch] = useState("");
+  // Group and search permissions in a nested structure
+  const groupedPermissions = useMemo(() => {
+    const categories: Record<
+      string,
+      Record<
+        string,
+        Array<{
+          id: string;
+          name: string;
+          rawAction: string;
+          friendlyAction: string;
+        }>
+      >
+    > = {};
 
-  // Derive added/removed permissions when needed (e.g., for save button or dirty check)
+    allPermissions.forEach((p) => {
+      const parts = p.name.split(".");
+      const resource = parts[0] || "";
+      const rawAction = parts[1] || "";
+
+      const resourceMeta = RESOURCE_LABELS[resource] || {
+        title: resource,
+        category: "Kategori Lainnya",
+      };
+
+      const category = resourceMeta.category;
+      const resourceTitle = resourceMeta.title;
+      const friendlyAction = ACTION_LABELS[rawAction] || rawAction;
+
+      // Filter based on search query (matches raw keys, translated keys, categories, or actions)
+      const matchesSearch =
+        !searchQuery ||
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resourceTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        friendlyAction.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (!matchesSearch) return;
+
+      if (!categories[category]) {
+        categories[category] = {};
+      }
+      if (!categories[category][resource]) {
+        categories[category][resource] = [];
+      }
+
+      categories[category][resource].push({
+        id: p.id,
+        name: p.name,
+        rawAction,
+        friendlyAction,
+      });
+    });
+
+    return categories;
+  }, [allPermissions, searchQuery]);
+
+  // Derive added/removed permissions when needed
   const { addedPermissions, removedPermissions, hasChanges } = useMemo(() => {
     const added = [...selectedPermissions].filter(
       (perm) => !originalPermissions.has(perm),
@@ -121,13 +371,11 @@ function RouteComponent() {
             id: roleId,
           }),
         );
-
         await queryClient.refetchQueries(
           trpc.platform.role.getRoleWithPermissionsById.queryOptions({
             id: roleId,
           }),
         );
-
         globalSuccessToast("Berhasil memperbarui izin role.");
       },
       onError: (error) => {
@@ -162,6 +410,47 @@ function RouteComponent() {
     }
   }
 
+  // Toggles all permissions in a specific resource
+  function handleToggleResourcePermissions(
+    resourceName: string,
+    permissions: Array<{ name: string }>,
+  ) {
+    const allOfResourceSelected = permissions.every((p) =>
+      selectedPermissions.has(p.name),
+    );
+    setSelectedPermissions((prev) => {
+      const next = new Set(prev);
+      permissions.forEach((p) => {
+        if (allOfResourceSelected) {
+          next.delete(p.name);
+        } else {
+          next.add(p.name);
+        }
+      });
+      return next;
+    });
+  }
+
+  // Toggles all permissions in a specific business category
+  function handleToggleCategoryPermissions(
+    categoryPermissions: Array<{ name: string }>,
+  ) {
+    const allOfCategorySelected = categoryPermissions.every((p) =>
+      selectedPermissions.has(p.name),
+    );
+    setSelectedPermissions((prev) => {
+      const next = new Set(prev);
+      categoryPermissions.forEach((p) => {
+        if (allOfCategorySelected) {
+          next.delete(p.name);
+        } else {
+          next.add(p.name);
+        }
+      });
+      return next;
+    });
+  }
+
   function handleOnPermissionChange(
     permissionName: string,
     isChecked: boolean,
@@ -187,76 +476,212 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Detail Role & Izin: {role.name}</CardTitle>
-          <CardDescription>
-            Kelola izin yang dimiliki oleh role ini.
-          </CardDescription>
+      <Card className="border border-neutral-100 shadow-xl shadow-neutral-100/30">
+        <CardHeader className="rounded-t-xl bg-gradient-to-r from-blue-50/50 to-indigo-50/20 pb-6">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-blue-600 p-2 text-white">
+              <Shield className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-bold tracking-tight text-neutral-800">
+                Pengaturan Izin & Hak Akses:{" "}
+                <span className="font-extrabold text-blue-600">
+                  {role.name}
+                </span>
+              </CardTitle>
+              <CardDescription className="mt-1 text-neutral-500">
+                Kelola hak akses detail karyawan non-IT dengan tampilan yang
+                ramah dan mudah dipahami.
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-4">
-              <Label className="ml-1 text-sm font-bold">Nama Role</Label>
-              <Input
-                type="text"
-                placeholder="Masukkan nama role"
-                className="h-10 text-sm"
-                value={role.name}
-                disabled
-                readOnly
-              />
+        <CardContent className="pt-6">
+          <div className="flex flex-col gap-6">
+            {/* Form Input Detail Role */}
+            <div className="grid grid-cols-1 items-center gap-4 rounded-xl border border-neutral-100 bg-neutral-50 p-4 md:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label className="ml-0.5 text-xs font-extrabold tracking-wider text-neutral-600 uppercase">
+                  Nama Peran Karyawan (Role Key)
+                </Label>
+                <Input
+                  type="text"
+                  className="h-10 border-neutral-200 bg-white font-mono text-sm font-semibold text-neutral-700"
+                  value={role.name}
+                  disabled
+                  readOnly
+                />
+              </div>
+              <div className="mt-4 flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50/50 p-3 text-xs text-neutral-500 md:mt-0">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                <p>
+                  Peran ini menentukan hak kerja untuk divisi{" "}
+                  <strong>{role.name}</strong>. Anda dapat menyaring fungsi dan
+                  mencentang izin spesifik di bawah ini.
+                </p>
+              </div>
             </div>
 
-            <Input
-              type="text"
-              placeholder="Cari izin..."
-              className="h-10 text-sm"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            {/* Bilah Pencarian & Tombol Global */}
+            <div className="flex flex-col items-center justify-between gap-3 rounded-lg border border-neutral-100 bg-white p-3 sm:flex-row">
+              <div className="relative w-full sm:max-w-md">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                <Input
+                  type="text"
+                  placeholder="Cari modul atau hak akses (misal: 'User', 'Kalibrasi', 'Hapus')..."
+                  className="h-10 border-neutral-200 pl-9 text-sm focus-visible:ring-blue-600"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Button
+                variant={allSelected ? "destructive" : "outline"}
+                size="sm"
+                className="h-10 w-full text-xs font-bold transition-all sm:w-auto"
+                onClick={handleToggleAllPermissions}
+              >
+                {allSelected
+                  ? "Batalkan Semua Pilihan"
+                  : "Pilih Semua Hak Akses"}
+              </Button>
+            </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleToggleAllPermissions}
-            >
-              {allSelected ? "Hapus Semua" : "Pilih Semua"}
-            </Button>
+            {/* Kontainer Utama Permissions */}
+            <div className="custom-scrollbar max-h-[550px] space-y-6 overflow-y-auto pr-2">
+              {Object.keys(groupedPermissions).length > 0 ? (
+                Object.entries(groupedPermissions).map(
+                  ([category, resources]) => {
+                    // Collect all permission items in this category for category-level select-all
+                    const categoryPermissionList =
+                      Object.values(resources).flat();
+                    const isAllOfCategorySelected =
+                      categoryPermissionList.every((p) =>
+                        selectedPermissions.has(p.name),
+                      );
 
-            <div className="flex max-h-78 flex-col gap-4 overflow-y-auto">
-              {filteredPermissions.length > 0 ? (
-                filteredPermissions.map((permission) => (
-                  <div key={permission.id} className="flex flex-row gap-2">
-                    <Checkbox
-                      checked={selectedPermissions.has(permission.name)}
-                      onCheckedChange={(isChecked) =>
-                        handleOnPermissionChange(
-                          permission.name,
-                          isChecked as boolean,
-                        )
-                      }
-                    />
-                    <Label>{permission.name}</Label>
-                  </div>
-                ))
+                    return (
+                      <div
+                        key={category}
+                        className="block overflow-hidden rounded-xl border border-neutral-200/80 bg-white shadow-sm transition-all hover:shadow-md"
+                      >
+                        {/* Header Kategori Bisnis */}
+                        <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50 px-4 py-3">
+                          <h3 className="text-sm font-extrabold tracking-wide text-neutral-700">
+                            🛡️ {category}
+                          </h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-[10px] font-bold text-blue-600 hover:bg-blue-50/50 hover:text-blue-700"
+                            onClick={() =>
+                              handleToggleCategoryPermissions(
+                                categoryPermissionList,
+                              )
+                            }
+                          >
+                            {isAllOfCategorySelected
+                              ? "Batal Kategori"
+                              : "Pilih Semua Kategori"}
+                          </Button>
+                        </div>
+
+                        {/* Konten Kategori (Daftar Modul / Resource) */}
+                        <div className="divide-y divide-neutral-100">
+                          {Object.entries(resources).map(
+                            ([resource, permissions]) => {
+                              const isAllOfResourceSelected = permissions.every(
+                                (p) => selectedPermissions.has(p.name),
+                              );
+                              const friendlyTitle =
+                                RESOURCE_LABELS[resource]?.title || resource;
+
+                              return (
+                                <div
+                                  key={resource}
+                                  className="flex flex-col justify-between gap-3 px-4 py-4 transition-colors hover:bg-neutral-50/30 lg:flex-row lg:items-center"
+                                >
+                                  {/* Kolom Judul Modul */}
+                                  <div className="min-w-[200px]">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-bold text-neutral-800">
+                                        {friendlyTitle}
+                                      </span>
+                                      <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-neutral-400">
+                                        {resource}
+                                      </span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleToggleResourcePermissions(
+                                          resource,
+                                          permissions,
+                                        )
+                                      }
+                                      className="mt-0.5 block text-left text-[10px] font-semibold text-blue-500 transition-all hover:underline"
+                                    >
+                                      {isAllOfResourceSelected
+                                        ? "Uncheck Modul"
+                                        : "Pilih Semua Modul"}
+                                    </button>
+                                  </div>
+
+                                  {/* Kolom Checkboxes Hak Akses (Indonesian action labels) */}
+                                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 lg:justify-end">
+                                    {permissions.map((permission) => (
+                                      <label
+                                        key={permission.id}
+                                        className="group flex cursor-pointer items-center gap-2 py-1 text-xs text-neutral-600 select-none hover:text-neutral-900"
+                                      >
+                                        <Checkbox
+                                          checked={selectedPermissions.has(
+                                            permission.name,
+                                          )}
+                                          onCheckedChange={(isChecked) =>
+                                            handleOnPermissionChange(
+                                              permission.name,
+                                              isChecked as boolean,
+                                            )
+                                          }
+                                          className="border-neutral-300 transition-all focus-visible:ring-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
+                                        />
+                                        <span className="transition-transform duration-150 group-hover:translate-x-0.5">
+                                          {permission.friendlyAction}
+                                        </span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                      </div>
+                    );
+                  },
+                )
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  {search.trim()
-                    ? "Tidak ada izin yang cocok."
-                    : "Tidak ada izin yang tersedia."}
-                </p>
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-neutral-50 py-10">
+                  <Search className="mb-2 h-8 w-8 text-neutral-300" />
+                  <p className="text-sm font-medium text-neutral-500">
+                    Tidak ada hak akses yang cocok dengan pencarian Anda.
+                  </p>
+                </div>
               )}
             </div>
 
+            {/* Tombol Simpan Aksi */}
             <Button
               disabled={!hasChanges || updateRolePermissionsMutation.isPending}
               onClick={() => handleUpdatePermissions()}
+              className="mt-2 h-11 w-full rounded-xl bg-blue-600 font-bold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 active:scale-[0.99] disabled:bg-neutral-200 disabled:text-neutral-400 disabled:shadow-none"
             >
               {updateRolePermissionsMutation.isPending ? (
-                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Simpan Perubahan
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin text-white" />
+              ) : (
+                <Check className="mr-2 h-4 w-4 text-white" />
+              )}
+              Simpan Perubahan Hak Akses
             </Button>
           </div>
         </CardContent>

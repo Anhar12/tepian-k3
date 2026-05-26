@@ -22,8 +22,13 @@ function RouteComponent() {
     trpc.platform.auth.profile.queryOptions(),
   );
 
-  const isEmployee = profile.roles.some((r) =>
-    (EMPLOYEE_ROLES as readonly string[]).includes(r.name),
+  const isEmployee = profile.roles.some(
+    (r) =>
+      (EMPLOYEE_ROLES as readonly string[]).includes(r.name) ||
+      (r.name !== "user" &&
+        r.name !== "admin" &&
+        r.name !== "super_admin" &&
+        r.name !== "viewer"),
   );
 
   return (

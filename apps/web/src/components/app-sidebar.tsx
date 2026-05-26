@@ -29,14 +29,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const roleNames = profile.roles.map((role) => role.name);
   const hasUserRole = roleNames.includes("user");
-  const hasEmployeeRole = roleNames.some((name) =>
-    (EMPLOYEE_ROLES as readonly string[]).includes(name),
-  );
+  const hasEmployeeRole =
+    roleNames.some((name) =>
+      (EMPLOYEE_ROLES as readonly string[]).includes(name),
+    ) || roleNames.some((name) => name !== "user");
   const hasBackOfficeRole =
     isOnBackOffice ||
     roleNames.some((name) =>
       (BACK_OFFICE_ROLES as readonly string[]).includes(name),
-    );
+    ) ||
+    roleNames.some((name) => name !== "user");
 
   // A user may have multiple roles — collect items from all applicable menus
   // and deduplicate by URL so overlapping items don't appear twice.
