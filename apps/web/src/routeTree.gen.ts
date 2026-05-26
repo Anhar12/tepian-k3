@@ -80,7 +80,6 @@ import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/b
 import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
 import { Route as coreBackOfficeToolCodesCreateRouteImport } from './routes/(core)/back-office/tool-codes/create'
 import { Route as coreBackOfficeSurveyQuestionsCreateRouteImport } from './routes/(core)/back-office/survey-questions/create'
-import { Route as coreBackOfficeRolesCreateRouteImport } from './routes/(core)/back-office/roles/create'
 import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
 import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(core)/back-office/parameters/create'
 import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from './routes/(core)/back-office/parameter-categories/create'
@@ -504,12 +503,6 @@ const coreBackOfficeSurveyQuestionsCreateRoute =
     path: '/survey-questions/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeRolesCreateRoute =
-  coreBackOfficeRolesCreateRouteImport.update({
-    id: '/roles/create',
-    path: '/roles/create',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
 const coreBackOfficePositionsCreateRoute =
   coreBackOfficePositionsCreateRouteImport.update({
     id: '/positions/create',
@@ -802,7 +795,6 @@ export interface FileRoutesByFullPath {
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
-  '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
   '/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
@@ -908,7 +900,6 @@ export interface FileRoutesByTo {
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
-  '/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
   '/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
@@ -1023,7 +1014,6 @@ export interface FileRoutesById {
   '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
   '/(core)/back-office/parameters/create': typeof coreBackOfficeParametersCreateRoute
   '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
-  '/(core)/back-office/roles/create': typeof coreBackOfficeRolesCreateRoute
   '/(core)/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
   '/(core)/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
@@ -1137,7 +1127,6 @@ export interface FileRouteTypes {
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
-    | '/back-office/roles/create'
     | '/back-office/survey-questions/create'
     | '/back-office/tool-codes/create'
     | '/back-office/tools/create'
@@ -1243,7 +1232,6 @@ export interface FileRouteTypes {
     | '/back-office/parameter-categories/create'
     | '/back-office/parameters/create'
     | '/back-office/positions/create'
-    | '/back-office/roles/create'
     | '/back-office/survey-questions/create'
     | '/back-office/tool-codes/create'
     | '/back-office/tools/create'
@@ -1357,7 +1345,6 @@ export interface FileRouteTypes {
     | '/(core)/back-office/parameter-categories/create'
     | '/(core)/back-office/parameters/create'
     | '/(core)/back-office/positions/create'
-    | '/(core)/back-office/roles/create'
     | '/(core)/back-office/survey-questions/create'
     | '/(core)/back-office/tool-codes/create'
     | '/(core)/back-office/tools/create'
@@ -1931,13 +1918,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeSurveyQuestionsCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/roles/create': {
-      id: '/(core)/back-office/roles/create'
-      path: '/roles/create'
-      fullPath: '/back-office/roles/create'
-      preLoaderRoute: typeof coreBackOfficeRolesCreateRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
     '/(core)/back-office/positions/create': {
       id: '/(core)/back-office/positions/create'
       path: '/positions/create'
@@ -2253,7 +2233,6 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
   coreBackOfficeParametersCreateRoute: typeof coreBackOfficeParametersCreateRoute
   coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
-  coreBackOfficeRolesCreateRoute: typeof coreBackOfficeRolesCreateRoute
   coreBackOfficeSurveyQuestionsCreateRoute: typeof coreBackOfficeSurveyQuestionsCreateRoute
   coreBackOfficeToolCodesCreateRoute: typeof coreBackOfficeToolCodesCreateRoute
   coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
@@ -2318,7 +2297,6 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeParameterCategoriesCreateRoute,
   coreBackOfficeParametersCreateRoute: coreBackOfficeParametersCreateRoute,
   coreBackOfficePositionsCreateRoute: coreBackOfficePositionsCreateRoute,
-  coreBackOfficeRolesCreateRoute: coreBackOfficeRolesCreateRoute,
   coreBackOfficeSurveyQuestionsCreateRoute:
     coreBackOfficeSurveyQuestionsCreateRoute,
   coreBackOfficeToolCodesCreateRoute: coreBackOfficeToolCodesCreateRoute,

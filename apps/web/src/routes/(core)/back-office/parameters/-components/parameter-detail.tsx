@@ -9,6 +9,7 @@ import { SkeletonInput } from "@/components/ui/skeleton-generator";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -116,11 +117,10 @@ export default function ParameterDetail({ parameterId }: ParameterDetailProps) {
                 <FieldLabel className="ml-1 text-sm font-bold">
                   Unit Parameter
                 </FieldLabel>
-                <Input
-                  type="number"
+                <NumberInput
                   placeholder="Masukkan unit parameter"
                   className="h-10 text-sm"
-                  value={parameter.unit}
+                  value={parameter.unit ?? 0}
                   disabled
                   readOnly
                 />

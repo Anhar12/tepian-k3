@@ -442,6 +442,27 @@ const parameterCategoriesQueries = {
       return restoredParameterCategory;
     });
   },
+
+  hardDeleteParameterCategory(id: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .delete(parameterCategories)
+          .where(eq(parameterCategories.id, id))
+          .returning(),
+      catch: (error) => {
+        logError(
+          "parameterCategoriesQueries.hardDeleteParameterCategory",
+          "Failed to hard delete parameter category",
+          { id, error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen kategori parameter",
+        });
+      },
+    });
+  },
 };
 
 export default parameterCategoriesQueries;

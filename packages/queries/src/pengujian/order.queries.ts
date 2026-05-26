@@ -373,6 +373,8 @@ const orderQueries = {
               columns: {
                 id: true,
                 name: true,
+                address: true,
+                email: true,
                 headOfCompany: true,
                 headOfCompanyPosition: true,
                 responsibleTestingPersonPhone: true,
@@ -441,8 +443,9 @@ const orderQueries = {
     userId: string,
     coverFlightIncluded: boolean,
     coverGroundTransportationIncluded: boolean,
+    coverGroundTransportationToAirportOrHarbour: boolean,
     coverLodgingIncluded: boolean,
-    coverAccommodationIncluded: boolean,
+    coverWaterTransportationIncluded: boolean,
     customerNote: string | undefined,
     orderData: z.infer<typeof orderSchema.createOrderSchema>,
     orderItems: z.infer<typeof orderItemSchema.createOrderItem>[],
@@ -557,8 +560,9 @@ const orderQueries = {
                 paymentStatus: "unpaid",
                 coverFlightIncluded,
                 coverGroundTransportationIncluded,
+                coverGroundTransportationToAirportOrHarbour,
                 coverLodgingIncluded,
-                coverAccommodationIncluded,
+                coverWaterTransportationIncluded,
                 customerNote,
               })
               .returning();
@@ -1151,13 +1155,13 @@ const orderQueries = {
 
   approveOrder(orderId: string) {
     return Effect.gen(function* () {
-      // check if order exists and is pending approval
+      // check if order exists and is pending or revision approval status
       const orderToApprove = yield* Effect.tryPromise({
         try: () =>
           db.query.order.findFirst({
             where: and(
               eq(order.id, orderId),
-              eq(order.approvalStatus, "pending"),
+              inArray(order.approvalStatus, ["pending", "revision"]),
             ),
             with: {
               user: true,
@@ -1180,7 +1184,8 @@ const orderQueries = {
         return yield* Effect.fail(
           new TRPCError({
             code: "BAD_REQUEST",
-            message: "Pesanan tidak ditemukan atau bukan dalam status pending",
+            message:
+              "Pesanan tidak ditemukan atau tidak dapat disetujui dari status saat ini",
           }),
         );
       }
@@ -1324,6 +1329,253 @@ const orderQueries = {
       );
 
       return { ...updatedOrder, user: orderToReject.user };
+    });
+  },
+
+  requestApprovalRevision(
+    orderId: string,
+    adminId: string,
+    revisionNote: string,
+  ) {
+    return Effect.gen(function* () {
+      const orderToRevise = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              inArray(order.approvalStatus, ["pending", "request_review"]),
+            ),
+            with: { user: true },
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.requestApprovalRevision",
+            "Failed to fetch order",
+            { error, orderId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToRevise) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Pesanan tidak ditemukan atau bukan dalam status pending persetujuan",
+          }),
+        );
+      }
+
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({
+              approvalStatus: "revision",
+              revisionNotes: revisionNote,
+              revisionCount: sql`revision_count + 1`,
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.requestApprovalRevision",
+            "Failed to update order",
+            { error, orderId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal meminta revisi data pesanan",
+          }),
+        );
+      }
+
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "pending",
+        adminId,
+        `Admin meminta koreksi data kontak. Catatan: ${revisionNote}`,
+      );
+
+      return { ...updatedOrder, user: orderToRevise.user };
+    });
+  },
+
+  resubmitForApproval(orderId: string, userId: string) {
+    return Effect.gen(function* () {
+      const orderToResubmit = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.userId, userId),
+              eq(order.approvalStatus, "revision"),
+            ),
+            with: { user: true },
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.resubmitForApproval",
+            "Failed to fetch order",
+            { error, orderId, userId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToResubmit) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Pesanan tidak ditemukan atau tidak dalam status menunggu koreksi",
+          }),
+        );
+      }
+
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({
+              approvalStatus: "request_review",
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.resubmitForApproval",
+            "Failed to update order",
+            { error, orderId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengirim ulang pesanan untuk persetujuan",
+          }),
+        );
+      }
+
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "pending",
+        userId,
+        "Pelanggan telah memperbaiki data kontak dan meminta konfirmasi admin",
+      );
+
+      return updatedOrder;
+    });
+  },
+
+  /**
+   * Admin: accept a customer's revision and return the order to "pending".
+   * Works from both "revision" (admin bypass) and "request_review" (customer submitted).
+   */
+  adminRevertRevisionToPending(orderId: string, adminId: string) {
+    return Effect.gen(function* () {
+      const orderToRevert = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              inArray(order.approvalStatus, ["revision", "request_review"]),
+            ),
+            with: { user: true },
+          }),
+        catch: (error) => {
+          logError(
+            "orderQueries.adminRevertRevisionToPending",
+            "Failed to fetch order",
+            { error, orderId, adminId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToRevert) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Pesanan tidak ditemukan atau tidak dalam status menunggu koreksi",
+          }),
+        );
+      }
+
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({
+              approvalStatus: "pending",
+              revisionNotes: null,
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "orderQueries.adminRevertRevisionToPending",
+            "Failed to update order",
+            { error, orderId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              "Gagal mengembalikan pesanan ke status menunggu persetujuan",
+          }),
+        );
+      }
+
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "pending",
+        adminId,
+        "Admin mengembalikan pesanan ke status menunggu persetujuan",
+      );
+
+      return { ...updatedOrder, user: orderToRevert.user };
     });
   },
 

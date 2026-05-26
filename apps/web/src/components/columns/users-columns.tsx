@@ -24,6 +24,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "users",
   deleteMutation: trpc.platform.user.deleteUser,
   restoreMutation: trpc.platform.user.restoreUser,
+  hardDeleteMutation: trpc.platform.user.hardDeleteUser,
   getQueryOptions: (params) =>
     trpc.platform.user.getUserPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

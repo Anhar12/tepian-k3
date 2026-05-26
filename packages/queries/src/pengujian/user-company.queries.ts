@@ -863,6 +863,28 @@ const userCompanyQueries = {
       return restoredUserCompany;
     });
   },
+
+  hardDeleteUserCompany(id: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .delete(userCompanies)
+          .where(eq(userCompanies.id, id))
+          .returning()
+          .execute(),
+      catch: (error) => {
+        logError(
+          "userCompanyQueries.hardDeleteUserCompany",
+          "Error hard deleting userCompany",
+          { error, id },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen data perusahaan",
+        });
+      },
+    });
+  },
 };
 
 export default userCompanyQueries;

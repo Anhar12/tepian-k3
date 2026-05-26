@@ -27,6 +27,7 @@ function ActionCell(row: Row<ToolCalibration>) {
     permissionPrefix: "tool-calibrations",
     deleteMutation: trpc.pengujian.tool.deleteToolCalibration,
     restoreMutation: trpc.pengujian.tool.restoreToolCalibration,
+    hardDeleteMutation: trpc.pengujian.tool.hardDeleteToolCalibration,
     getQueryOptions: (params) =>
       trpc.pengujian.tool.getPaginatedCalibrations.queryOptions({
         toolId,

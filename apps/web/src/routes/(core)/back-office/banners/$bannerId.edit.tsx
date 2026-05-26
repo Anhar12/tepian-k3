@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/field";
 import SingleImageUpload from "@/components/ui/single-image-upload";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
@@ -166,13 +167,13 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel>Urutan Banner</FieldLabel>
-                    <Input
+                    <NumberInput
                       placeholder="Masukkan urutan banner"
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        field.onChange(Number(e.target.value));
-                      }}
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />

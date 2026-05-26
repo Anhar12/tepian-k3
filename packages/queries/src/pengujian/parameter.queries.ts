@@ -465,6 +465,23 @@ const parameterQueries = {
       return restoredParameter;
     });
   },
+
+  hardDeleteParameter(id: string) {
+    return Effect.tryPromise({
+      try: () => db.delete(parameters).where(eq(parameters.id, id)).returning(),
+      catch: (error) => {
+        logError(
+          "parameterQueries.hardDeleteParameter",
+          "Failed to hard delete parameter",
+          { id, error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen parameter",
+        });
+      },
+    });
+  },
 };
 
 export default parameterQueries;

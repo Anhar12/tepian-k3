@@ -91,4 +91,17 @@ export const kbliRouter = createTRPCRouter({
           runEffect(kbliQueries.restoreKbli(input.id)),
         ),
     ),
+
+  hardDeleteKbli: withPermission("kbli.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.KBLIS_PREFIX, () =>
+          runEffect(kbliQueries.hardDeleteKbli(input.id)),
+        ),
+    ),
 });

@@ -25,6 +25,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "news",
   deleteMutation: trpc.platform.news.deleteNews,
   restoreMutation: trpc.platform.news.restoreNews,
+  hardDeleteMutation: trpc.platform.news.hardDeleteNews,
   getQueryOptions: (params) =>
     trpc.platform.news.getPaginatedNews.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

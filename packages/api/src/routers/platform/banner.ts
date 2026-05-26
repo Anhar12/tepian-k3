@@ -134,4 +134,17 @@ export const bannerRouter = createTRPCRouter({
           runEffect(bannerQueries.restoreBanner(input.id)),
         ),
     ),
+
+  hardDeleteBanner: withPermission("banners.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.BANNERS_PREFIX, () =>
+          runEffect(bannerQueries.hardDeleteBanner(input.id)),
+        ),
+    ),
 });

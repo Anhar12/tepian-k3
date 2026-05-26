@@ -519,6 +519,23 @@ const toolsQueries = {
       return restoredTool;
     });
   },
+
+  hardDeleteTool(toolId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db.delete(tools).where(eq(tools.id, toolId)).returning().execute(),
+      catch: (error) => {
+        logError("toolsQueries.hardDeleteTool", "Error hard deleting tool", {
+          error,
+          toolId,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen alat",
+        });
+      },
+    });
+  },
 };
 
 export default toolsQueries;

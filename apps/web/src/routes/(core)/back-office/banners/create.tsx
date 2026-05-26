@@ -22,6 +22,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toFormData } from "@/utils/form-data-mapper";
@@ -114,13 +115,13 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel>Urutan Banner</FieldLabel>
-                    <Input
+                    <NumberInput
                       placeholder="Masukkan urutan banner"
-                      {...field}
-                      type="number"
-                      onChange={(e) => {
-                        field.onChange(Number(e.target.value));
-                      }}
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />

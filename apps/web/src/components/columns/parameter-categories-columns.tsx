@@ -24,6 +24,8 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "parameter-categories",
   deleteMutation: trpc.pengujian.parameterCategories.deleteParameterCategory,
   restoreMutation: trpc.pengujian.parameterCategories.restoreParameterCategory,
+  hardDeleteMutation:
+    trpc.pengujian.parameterCategories.hardDeleteParameterCategory,
   getQueryOptions: (params) =>
     trpc.pengujian.parameterCategories.getPaginatedParameterCategories.queryOptions(
       params,

@@ -528,6 +528,30 @@ const chemicalMaterialQueries = {
       return restoredMaterial;
     });
   },
+
+  /**
+   * Hard delete chemical material
+   */
+  hardDeleteChemicalMaterial(id: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .delete(chemicalMaterials)
+          .where(eq(chemicalMaterials.id, id))
+          .returning(),
+      catch: (error) => {
+        logError(
+          "chemicalMaterialQueries.hardDeleteChemicalMaterial",
+          "Error hard deleting chemical material",
+          { error, id },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen bahan kimia",
+        });
+      },
+    });
+  },
 };
 
 export default chemicalMaterialQueries;

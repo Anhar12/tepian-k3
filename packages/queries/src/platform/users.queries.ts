@@ -971,6 +971,22 @@ const usersQueries = {
       return user;
     });
   },
+
+  hardDeleteUser(userId: string) {
+    return Effect.tryPromise({
+      try: () => db.delete(users).where(eq(users.id, userId)).returning(),
+      catch: (error) => {
+        logError("usersQueries.hardDeleteUser", "Failed to hard delete user", {
+          userId,
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen pengguna",
+        });
+      },
+    });
+  },
 };
 
 export default usersQueries;

@@ -88,6 +88,7 @@ function getApprovalStatusBadge(status: string) {
     pending: "bg-amber-100 text-amber-800",
     approved: "bg-green-100 text-green-800",
     rejected: "bg-red-100 text-red-800",
+    revision: "bg-orange-100 text-orange-800",
   };
   return styles[status] || "bg-gray-100 text-gray-800";
 }
@@ -128,6 +129,13 @@ function RouteComponent() {
         .min(20, "Revision notes must be at least 20 characters")
         .max(1000, "Revision notes must not exceed 1000 characters"),
     }),
+    requestContactRevision: z.object({
+      revisionNote: z
+        .string()
+        .min(1, "Catatan revisi wajib diisi")
+        .min(10, "Catatan revisi minimal 10 karakter")
+        .max(500, "Catatan revisi maksimal 500 karakter"),
+    }),
     generateSPK: null,
     generateInvoice: null,
   } as const);
@@ -167,6 +175,22 @@ function RouteComponent() {
     }),
   );
 
+  const revertRevisionMutation = useMutation(
+    trpc.pengujian.order.adminRevertRevisionToPending.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
+        );
+        globalSuccessToast("Order dikembalikan ke antrean persetujuan");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal mengembalikan order: " + error.message);
+      },
+    }),
+  );
+
   const rejectApprovalMutation = useMutation(
     trpc.pengujian.order.rejectOrderApproval.mutationOptions({
       onSuccess: async () => {
@@ -181,6 +205,24 @@ function RouteComponent() {
       },
       onError: (error) => {
         globalErrorToast("Gagal menolak order: " + error.message);
+      },
+    }),
+  );
+
+  const requestContactRevisionMutation = useMutation(
+    trpc.pengujian.order.requestApprovalRevision.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
+        );
+        dialogs.close("requestContactRevision");
+        dialogs.reset("requestContactRevision");
+        globalSuccessToast("Permintaan koreksi data berhasil dikirim");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal mengirim permintaan koreksi: " + error.message);
       },
     }),
   );
@@ -359,6 +401,23 @@ function RouteComponent() {
     const { reason } = result.data;
 
     rejectApprovalMutation.mutate({ orderId, reason });
+  };
+
+  const handleRequestContactRevision = () => {
+    const result = dialogs.validate("requestContactRevision");
+
+    if (!result.success) {
+      globalErrorToast(
+        dialogs.getErrors("requestContactRevision").revisionNote ||
+          "Catatan revisi tidak valid",
+      );
+      return;
+    }
+
+    requestContactRevisionMutation.mutate({
+      orderId,
+      revisionNote: result.data.revisionNote,
+    });
   };
 
   const handleVerifyPayment = () => {
@@ -582,6 +641,8 @@ function RouteComponent() {
 
   // Determine current workflow state
   const isPendingApproval = order.approvalStatus === "pending";
+  const isApprovalRevisionRequested = order.approvalStatus === "revision";
+  const isApprovalRequestReview = order.approvalStatus === "request_review";
   const isRevisionRequested = order.status === "revision";
   const isApprovedNeedsDocs =
     order.approvalStatus === "approved" &&
@@ -726,7 +787,7 @@ function RouteComponent() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex justify-end gap-3">
-                    <PermissionGate permission="orders.update">
+                    <PermissionGate permission="orders-approval.update">
                       <Button
                         variant="outline"
                         className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
@@ -735,7 +796,16 @@ function RouteComponent() {
                         Tolak Order
                       </Button>
                     </PermissionGate>
-                    <PermissionGate permission="orders.approve">
+                    <PermissionGate permission="orders-approval.update">
+                      <Button
+                        variant="outline"
+                        className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
+                        onClick={() => dialogs.open("requestContactRevision")}
+                      >
+                        Minta Koreksi Data
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate permission="orders-approval.update">
                       <Button
                         className="bg-green-500 hover:bg-green-600"
                         onClick={handleApprove}
@@ -745,6 +815,102 @@ function RouteComponent() {
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
                         Setujui Order
+                      </Button>
+                    </PermissionGate>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Customer Submitted Review Request Card */}
+            {isApprovalRequestReview && (
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader>
+                  <CardTitle className="text-blue-800">
+                    Pelanggan Telah Mengirimkan Koreksi
+                  </CardTitle>
+                  <CardDescription className="text-blue-700">
+                    Pelanggan telah memperbaiki data kontak dan meminta
+                    konfirmasi. Periksa dan terima koreksi untuk melanjutkan
+                    proses persetujuan.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {order.revisionNotes && (
+                    <div className="rounded-lg border border-blue-200 bg-white p-3">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Catatan koreksi sebelumnya:
+                      </p>
+                      <p className="mt-1 text-sm text-foreground">
+                        {order.revisionNotes}
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex justify-end gap-2">
+                    <PermissionGate permission="orders-approval.update">
+                      <Button
+                        variant="outline"
+                        className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
+                        onClick={() => dialogs.open("requestContactRevision")}
+                      >
+                        Kirim Ulang Koreksi
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate permission="orders-approval.update">
+                      <Button
+                        className="bg-green-500 hover:bg-green-600"
+                        onClick={() =>
+                          revertRevisionMutation.mutate({ orderId })
+                        }
+                        disabled={revertRevisionMutation.isPending}
+                      >
+                        {revertRevisionMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Terima & Kembalikan ke Antrean
+                      </Button>
+                    </PermissionGate>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Approval Revision Requested Card */}
+            {isApprovalRevisionRequested && (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardHeader>
+                  <CardTitle className="text-orange-800">
+                    Menunggu Koreksi Data dari Pelanggan
+                  </CardTitle>
+                  <CardDescription className="text-orange-700">
+                    Permintaan koreksi data kontak telah dikirim. Menunggu
+                    pelanggan memperbaiki dan mengirim ulang order.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {order.revisionNotes && (
+                    <div className="rounded-lg border border-orange-200 bg-white p-3">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Catatan yang dikirim ke pelanggan:
+                      </p>
+                      <p className="mt-1 text-sm text-foreground">
+                        {order.revisionNotes}
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex justify-end">
+                    <PermissionGate permission="orders-approval.update">
+                      <Button
+                        className="bg-green-500 hover:bg-green-600"
+                        onClick={() =>
+                          revertRevisionMutation.mutate({ orderId })
+                        }
+                        disabled={revertRevisionMutation.isPending}
+                      >
+                        {revertRevisionMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Kembalikan ke Antrean
                       </Button>
                     </PermissionGate>
                   </div>
@@ -1970,15 +2136,28 @@ function RouteComponent() {
               <CardContent>
                 <dl className="space-y-3">
                   <div>
-                    <dt className="text-sm text-muted-foreground">Nama</dt>
-                    <dd className="font-medium">{order.user.name}</dd>
+                    <dt className="text-sm text-muted-foreground">
+                      Perusahaan
+                    </dt>
+                    <dd className="font-medium">{order.company.name}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-muted-foreground">Email</dt>
-                    <dd className="font-medium">{order.user.email}</dd>
+                    <dt className="text-sm text-muted-foreground">
+                      Alamat Perusahaan
+                    </dt>
+                    <dd className="font-medium">{order.company.address}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-muted-foreground">Pimpinan</dt>
+                    <dt className="text-sm text-muted-foreground">
+                      Email Perusahaan
+                    </dt>
+                    <dd className="font-medium">{order.company.email}</dd>
+                  </div>
+
+                  <div>
+                    <dt className="text-sm text-muted-foreground">
+                      Nama Pimpinan
+                    </dt>
                     <dd className="font-medium">
                       {order.company.headOfCompany}
                     </dd>
@@ -1992,31 +2171,19 @@ function RouteComponent() {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-muted-foreground">
-                      Perusahaan
-                    </dt>
-                    <dd className="font-medium">{order.company.name}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-muted-foreground">
-                      Kontak Person
-                    </dt>
+                    <dt className="text-sm text-muted-foreground">Nama PIC</dt>
                     <dd className="font-medium">
                       {order.company.responsibleTestingPerson}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-muted-foreground">
-                      Email Kontak Person
-                    </dt>
+                    <dt className="text-sm text-muted-foreground">Email PIC</dt>
                     <dd className="font-medium">
                       {order.company.responsibleTestingPersonEmail}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-muted-foreground">
-                      No. Telepon Kontak Person
-                    </dt>
+                    <dt className="text-sm text-muted-foreground">No WA PIC</dt>
                     <dd className="font-medium">
                       {order.company.responsibleTestingPersonPhone}
                     </dd>
@@ -2083,6 +2250,54 @@ function RouteComponent() {
           </div>
         </div>
       </div>
+
+      {/* Request Contact Revision Dialog */}
+      <AlertDialog
+        open={dialogs.isOpen("requestContactRevision")}
+        onOpenChange={(open) =>
+          open
+            ? dialogs.open("requestContactRevision")
+            : dialogs.close("requestContactRevision")
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Minta Koreksi Data Kontak</AlertDialogTitle>
+            <AlertDialogDescription>
+              Beritahu pelanggan data kontak mana yang perlu diperbaiki (mis.
+              typo pada email atau nama contact person). Pelanggan akan
+              memperbaiki profil perusahaan mereka lalu mengirim ulang order.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Textarea
+              value={
+                dialogs.getData("requestContactRevision")?.revisionNote ?? ""
+              }
+              onChange={(e) =>
+                dialogs.updateData("requestContactRevision", {
+                  revisionNote: e.target.value,
+                })
+              }
+              placeholder="Contoh: Email contact person sepertinya salah, mohon diperbaiki (minimal 10 karakter)"
+              rows={4}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRequestContactRevision}
+              className="border-orange-400 bg-orange-500 hover:bg-orange-600"
+              disabled={requestContactRevisionMutation.isPending}
+            >
+              {requestContactRevisionMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Kirim Permintaan Koreksi
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Reject Approval Dialog */}
       <AlertDialog

@@ -1,6 +1,6 @@
 {
   "name": "@tepian-k3/web",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,6 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "generate-pwa-assets": "pwa-assets-generator",
     "with-env:local": "dotenv -e ../../.env.local -e ../../.env --",
     "with-env:prod": "dotenv -e ../../.env.production -e ../../.env --"
   },
@@ -95,10 +94,9 @@
     "sonner": "^2.0.7",
     "superjson": "^2.2.6",
     "tailwind-merge": "^3.3.1",
-    "uuid": "catalog:",
     "tw-animate-css": "^1.2.5",
+    "uuid": "catalog:",
     "vaul": "^1.1.2",
-    "vite-plugin-pwa": "^1.0.1",
     "zod": "catalog:",
     "zod-form-data": "catalog:",
     "zustand": "^5.0.9"
@@ -113,7 +111,6 @@
     "@types/node": "^22.13.13",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
-    "@vite-pwa/assets-generator": "^1.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "dotenv-cli": "^11.0.0",
     "postcss": "^8.5.3",

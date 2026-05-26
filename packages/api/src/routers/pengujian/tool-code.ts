@@ -48,4 +48,10 @@ export const toolCodeRouter = createTRPCRouter({
     .mutation(async ({ input }) =>
       runEffect(toolCodeQueries.restoreToolCode(input.id)),
     ),
+
+  hardDeleteToolCode: withPermission("tool-codes.delete")
+    .input(z.object({ id: z.uuidv7() }))
+    .mutation(async ({ input }) =>
+      runEffect(toolCodeQueries.hardDeleteToolCode(input.id)),
+    ),
 });

@@ -19,6 +19,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { RadioGroup } from "@/components/ui/radio-group";
 import SingleImageUpload from "@/components/ui/single-image-upload";
 import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
@@ -377,11 +378,11 @@ function RouteComponent() {
                       className="w-[49%] space-y-1"
                     >
                       <FieldLabel className="ml-1 text-sm font-bold">
-                        Penanggung Jawab Pengujian *
+                        PIC *
                       </FieldLabel>
                       <Input
                         type="text"
-                        placeholder="Masukkan penanggung jawab pengujian"
+                        placeholder="Masukkan nama PIC"
                         className="h-10 text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
@@ -402,11 +403,11 @@ function RouteComponent() {
                       className="w-[49%] space-y-1"
                     >
                       <FieldLabel className="ml-1 text-sm font-bold">
-                        Email Penanggung Jawab Pengujian *
+                        Email PIC *
                       </FieldLabel>
                       <Input
                         type="email"
-                        placeholder="Masukkan email penanggung jawab pengujian"
+                        placeholder="Masukkan email PIC"
                         className="h-10 text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
@@ -427,11 +428,11 @@ function RouteComponent() {
                       className="w-[49%] space-y-1"
                     >
                       <FieldLabel className="ml-1 text-sm font-bold">
-                        Telepon Penanggung Jawab Pengujian *
+                        No WA PIC *
                       </FieldLabel>
                       <Input
                         type="tel"
-                        placeholder="Masukkan telepon penanggung jawab pengujian"
+                        placeholder="Masukkan nomor WhatsApp PIC"
                         className="h-10 text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
@@ -482,8 +483,8 @@ function RouteComponent() {
                         Posisi Pimpinan Perusahaan *
                       </FieldLabel>
                       <Input
-                        type="email"
-                        placeholder="Masukkan email pimpinan perusahaan"
+                        type="text"
+                        placeholder="Masukkan posisi pimpinan perusahaan"
                         className="h-10 text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
@@ -612,11 +613,14 @@ function RouteComponent() {
                     <FieldLabel className="ml-1 text-sm font-bold">
                       Nomor WLKP Online *
                     </FieldLabel>
-                    <Input
-                      type="number"
+                    <NumberInput
                       placeholder="Masukkan nomor WLKP perusahaan"
                       className="h-10 text-sm"
-                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(value) => field.onChange(String(value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                       aria-invalid={fieldState.invalid}
                       disabled={!wlkpStatus}
                     />
@@ -651,11 +655,14 @@ function RouteComponent() {
                       <FieldLabel className="ml-1 text-sm font-bold">
                         Jumlah Pekerja Laki-laki *
                       </FieldLabel>
-                      <Input
-                        type="number"
+                      <NumberInput
                         placeholder="Masukkan jumlah pekerja laki-laki"
                         className="h-10 text-sm"
-                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(value) => field.onChange(String(value))}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                         aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (
@@ -676,11 +683,14 @@ function RouteComponent() {
                       <FieldLabel className="ml-1 text-sm font-bold">
                         Jumlah Pekerja Perempuan *
                       </FieldLabel>
-                      <Input
-                        type="number"
+                      <NumberInput
                         placeholder="Masukkan jumlah pekerja perempuan"
                         className="h-10 text-sm"
-                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(value) => field.onChange(String(value))}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                         aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (

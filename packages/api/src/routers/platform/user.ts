@@ -138,4 +138,15 @@ export const userRouter = createTRPCRouter({
     .mutation(
       async ({ input }) => await runEffect(usersQueries.restoreUser(input.id)),
     ),
+
+  hardDeleteUser: withPermission("users.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(usersQueries.hardDeleteUser(input.id)),
+    ),
 });

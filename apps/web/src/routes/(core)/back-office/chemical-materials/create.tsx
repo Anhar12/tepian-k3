@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import {
   Select,
   SelectContent,
@@ -201,12 +202,13 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel>Stok Terpakai</FieldLabel>
-                    <Input
+                    <NumberInput
                       placeholder="Masukkan stok terpakai"
-                      type="number"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value || 0}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -261,12 +263,13 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel>Stok Segel</FieldLabel>
-                    <Input
+                    <NumberInput
                       placeholder="Masukkan stok segel"
-                      type="number"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value || 0}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -321,12 +324,13 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel>Penggunaan Bulanan</FieldLabel>
-                    <Input
+                    <NumberInput
                       placeholder="Masukkan penggunaan bulanan"
-                      type="number"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value || 0}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -381,12 +385,13 @@ function RouteComponent() {
                     className="space-y-1"
                   >
                     <FieldLabel>Penggunaan Sisa Bahan</FieldLabel>
-                    <Input
+                    <NumberInput
                       placeholder="Masukkan penggunaan sisa bahan"
-                      type="number"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value || 0}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />

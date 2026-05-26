@@ -466,6 +466,22 @@ const employeeQueries = {
         });
       },
     }),
+
+  hardDeleteEmployee: (id: string) =>
+    Effect.tryPromise({
+      try: () => db.delete(employees).where(eq(employees.id, id)).returning(),
+      catch: (error) => {
+        logError(
+          "employeeQueries.hardDeleteEmployee",
+          "Failed to hard delete employee",
+          { id, error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen karyawan",
+        });
+      },
+    }),
 };
 
 export default employeeQueries;

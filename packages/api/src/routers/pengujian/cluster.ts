@@ -91,4 +91,17 @@ export const clusterRouter = createTRPCRouter({
           runEffect(clustersQueries.restoreCluster(input.id)),
         ),
     ),
+
+  hardDeleteCluster: withPermission("clusters.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.CLUSTERS_PREFIX, () =>
+          runEffect(clustersQueries.hardDeleteCluster(input.id)),
+        ),
+    ),
 });

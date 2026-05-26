@@ -117,8 +117,9 @@ export const orderRouter = createTRPCRouter({
       z.object({
         coverFlightIncluded: z.boolean(),
         coverGroundTransportationIncluded: z.boolean(),
+        coverGroundTransportationToAirportOrHarbour: z.boolean(),
         coverLodgingIncluded: z.boolean(),
-        coverAccommodationIncluded: z.boolean(),
+        coverWaterTransportationIncluded: z.boolean(),
         customerNote: z.string().optional(),
         data: z.array(
           z.object({
@@ -139,8 +140,9 @@ export const orderRouter = createTRPCRouter({
                   ctx.user.id,
                   input.coverFlightIncluded,
                   input.coverGroundTransportationIncluded,
+                  input.coverGroundTransportationToAirportOrHarbour,
                   input.coverLodgingIncluded,
-                  input.coverAccommodationIncluded,
+                  input.coverWaterTransportationIncluded,
                   input.customerNote,
                   orderPayload.orderData,
                   orderPayload.orderItems,
@@ -601,6 +603,130 @@ export const orderRouter = createTRPCRouter({
                 triggeredBy: ctx.user.id,
               }),
             );
+
+            return order;
+          }),
+        ),
+    ),
+
+  requestApprovalRevision: withPermission("orders-approval.update")
+    .input(
+      z.object({
+        orderId: z.uuidv7(),
+        revisionNote: z
+          .string()
+          .min(10, "Catatan revisi minimal 10 karakter")
+          .max(500, "Catatan revisi maksimal 500 karakter"),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const order = yield* orderQueries.requestApprovalRevision(
+              input.orderId,
+              ctx.user.id,
+              input.revisionNote,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
+
+            yield* notificationsQueries.create({
+              userId: order.userId,
+              title: "Order Memerlukan Koreksi Data",
+              message: `Order #${order.orderNumber} memerlukan koreksi data kontak. Catatan admin: ${input.revisionNote}`,
+              type: "order_status_changed",
+              orderId: order.id,
+              metadata: { approvalStatus: "revision" },
+            });
+
+            yield* Effect.tryPromise(() =>
+              ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                userId: order.userId,
+                newStatus: "pending",
+                oldStatus: "pending",
+                triggeredBy: ctx.user.id,
+              }),
+            );
+
+            return order;
+          }),
+        ),
+    ),
+
+  adminRevertRevisionToPending: withPermission("orders-approval.update")
+    .input(z.object({ orderId: z.uuidv7() }))
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const order = yield* orderQueries.adminRevertRevisionToPending(
+              input.orderId,
+              ctx.user.id,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
+
+            yield* notificationsQueries.create({
+              userId: order.userId,
+              title: "Order Dikembalikan ke Antrean Persetujuan",
+              message: `Order #${order.orderNumber} telah dikembalikan ke status menunggu persetujuan oleh admin.`,
+              type: "order_status_changed",
+              orderId: order.id,
+              metadata: { approvalStatus: "pending" },
+            });
+
+            yield* Effect.tryPromise(() =>
+              ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                userId: order.userId,
+                newStatus: "pending",
+                oldStatus: "revision",
+                triggeredBy: ctx.user.id,
+              }),
+            );
+
+            return order;
+          }),
+        ),
+    ),
+
+  resubmitForApproval: protectedProcedure
+    .input(z.object({ orderId: z.uuidv7() }))
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const order = yield* orderQueries.resubmitForApproval(
+              input.orderId,
+              ctx.user.id,
+            );
+
+            if (!order) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Order tidak ditemukan",
+                }),
+              );
+            }
 
             return order;
           }),

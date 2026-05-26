@@ -551,10 +551,13 @@ export const order = createTable(
     coverGroundTransportationIncluded: boolean(
       "cover_ground_transportation_included",
     ).default(false),
+    coverGroundTransportationToAirportOrHarbour: boolean(
+      "cover_ground_transportation_to_airport_or_harbour",
+    ).default(false),
     coverLodgingIncluded: boolean("cover_lodging_included").default(false),
-    coverAccommodationIncluded: boolean("cover_accommodation_included").default(
-      false,
-    ),
+    coverWaterTransportationIncluded: boolean(
+      "cover_water_transportation_included",
+    ).default(false),
 
     // Note from customer for order
     customerNote: text("customer_note"),
@@ -666,10 +669,13 @@ export const worksheets = createTable(
     coverGroundTransportationIncluded: boolean(
       "cover_ground_transportation_included",
     ).default(false),
+    coverGroundTransportationToAirportOrHarbour: boolean(
+      "cover_ground_transportation_to_airport_or_harbour",
+    ).default(false),
     coverLodgingIncluded: boolean("cover_lodging_included").default(false),
-    coverAccommodationIncluded: boolean("cover_accommodation_included").default(
-      false,
-    ),
+    coverWaterTransportationIncluded: boolean(
+      "cover_water_transportation_included",
+    ).default(false),
 
     note: text("note"),
     createdBy: uuid("created_by")

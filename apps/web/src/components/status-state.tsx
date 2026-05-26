@@ -541,6 +541,102 @@ export function StatusStateWaitingForRevision({
   );
 }
 
+export function StatusStateContactRevisionRequested({
+  orderDetail,
+}: SharedStatusStateProps) {
+  const resubmitMutation = useMutation(
+    trpc.pengujian.order.resubmitForApproval.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.order.getOrderWithDocuments.queryOptions({
+            orderId: orderDetail.id,
+          }),
+        );
+        globalSuccessToast("Order berhasil dikirim ulang untuk persetujuan");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal mengirim ulang order: " + error.message);
+      },
+    }),
+  );
+
+  return (
+    <StateLayout>
+      <h2 className="mb-2 text-xl font-semibold text-foreground">
+        {`Order #${orderDetail.orderNumber} - Perlu Koreksi Data`}
+      </h2>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Admin meminta Anda memperbaiki data kontak perusahaan sebelum order
+        dapat diproses lebih lanjut.
+      </p>
+
+      <StatusInfoBanner
+        icon={AlertCircle}
+        title="Koreksi Data Kontak Diperlukan"
+        description="Perbaiki data kontak perusahaan Anda (email atau nama contact person), lalu kirim ulang order ini."
+        colorScheme="amber"
+      >
+        {orderDetail.revisionNotes && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-white p-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              Catatan dari Admin:
+            </p>
+            <p className="mt-1 text-sm text-foreground">
+              {orderDetail.revisionNotes}
+            </p>
+          </div>
+        )}
+        <div className="mt-4">
+          <Button
+            onClick={() => resubmitMutation.mutate({ orderId: orderDetail.id })}
+            disabled={resubmitMutation.isPending}
+            className="bg-amber-500 text-white hover:bg-amber-600"
+          >
+            {resubmitMutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Sudah Diperbaiki, Kirim Ulang
+          </Button>
+        </div>
+      </StatusInfoBanner>
+    </StateLayout>
+  );
+}
+
+export function StatusStateRequestReview({
+  orderDetail,
+}: SharedStatusStateProps) {
+  return (
+    <StateLayout>
+      <h2 className="mb-2 text-xl font-semibold text-foreground">
+        {`Order #${orderDetail.orderNumber} - Menunggu Konfirmasi Admin`}
+      </h2>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Koreksi data telah dikirim. Menunggu admin memeriksa dan mengkonfirmasi
+        perbaikan Anda.
+      </p>
+
+      <StatusInfoBanner
+        icon={AlertCircle}
+        title="Koreksi Sedang Diperiksa"
+        description="Admin akan memeriksa perbaikan data Anda dan mengembalikan order ke antrean jika sudah sesuai."
+        colorScheme="amber"
+      >
+        {orderDetail.revisionNotes && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-white p-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              Catatan dari Admin:
+            </p>
+            <p className="mt-1 text-sm text-foreground">
+              {orderDetail.revisionNotes}
+            </p>
+          </div>
+        )}
+      </StatusInfoBanner>
+    </StateLayout>
+  );
+}
+
 export function StatusStatePendingReview({
   orderDetail,
 }: SharedStatusStateProps) {

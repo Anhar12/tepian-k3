@@ -96,6 +96,8 @@ function RouteComponent() {
     () => new Set(role?.permissions || []),
   );
 
+  const [search, setSearch] = useState("");
+
   // Derive added/removed permissions when needed (e.g., for save button or dirty check)
   const { addedPermissions, removedPermissions, hasChanges } = useMemo(() => {
     const added = [...selectedPermissions].filter(
@@ -132,6 +134,16 @@ function RouteComponent() {
         globalErrorToast("Gagal memperbarui izin role: " + error.message);
       },
     }),
+  );
+
+  const filteredPermissions = useMemo(
+    () =>
+      search.trim()
+        ? allPermissions.filter((p) =>
+            p.name.toLowerCase().includes(search.toLowerCase()),
+          )
+        : allPermissions,
+    [allPermissions, search],
   );
 
   // Check if all permissions are selected
@@ -196,6 +208,14 @@ function RouteComponent() {
               />
             </div>
 
+            <Input
+              type="text"
+              placeholder="Cari izin..."
+              className="h-10 text-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
             <Button
               variant="outline"
               size="sm"
@@ -205,9 +225,8 @@ function RouteComponent() {
             </Button>
 
             <div className="flex max-h-78 flex-col gap-4 overflow-y-auto">
-              {/* Permissions List */}
-              {allPermissions.length > 0 ? (
-                allPermissions.map((permission) => (
+              {filteredPermissions.length > 0 ? (
+                filteredPermissions.map((permission) => (
                   <div key={permission.id} className="flex flex-row gap-2">
                     <Checkbox
                       checked={selectedPermissions.has(permission.name)}
@@ -222,7 +241,11 @@ function RouteComponent() {
                   </div>
                 ))
               ) : (
-                <p>Tidak ada izin yang tersedia.</p>
+                <p className="text-sm text-muted-foreground">
+                  {search.trim()
+                    ? "Tidak ada izin yang cocok."
+                    : "Tidak ada izin yang tersedia."}
+                </p>
               )}
             </div>
 

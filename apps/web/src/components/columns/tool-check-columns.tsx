@@ -31,6 +31,7 @@ function ActionCell(row: Row<ToolCheck>) {
     permissionPrefix: "tool-checks",
     deleteMutation: trpc.pengujian.tool.deleteToolCheck,
     restoreMutation: trpc.pengujian.tool.restoreToolCheck,
+    hardDeleteMutation: trpc.pengujian.tool.hardDeleteToolCheck,
     getQueryOptions: (params) =>
       trpc.pengujian.tool.getPaginatedChecks.queryOptions({
         toolId,

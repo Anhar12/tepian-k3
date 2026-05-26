@@ -697,6 +697,29 @@ const toolCalibrationQueries = {
 
       return restoredToolCalibration;
     }),
+
+  /**
+   * Hard delete tool calibration permanently
+   */
+  hardDeleteToolCalibration: (id: string) =>
+    Effect.tryPromise({
+      try: () =>
+        db
+          .delete(toolCalibrations)
+          .where(eq(toolCalibrations.id, id))
+          .returning(),
+      catch: (error) => {
+        logError(
+          "toolCalibrationQueries.hardDeleteToolCalibration",
+          "Error hard deleting tool calibration",
+          { error, id },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen kalibrasi alat",
+        });
+      },
+    }),
 };
 
 export default toolCalibrationQueries;

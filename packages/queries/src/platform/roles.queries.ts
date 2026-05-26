@@ -316,43 +316,43 @@ const rolesQueries = {
     });
   },
 
-  createRole(data: z.infer<typeof rolesSchema.createRoleSchema>) {
-    return Effect.gen(function* () {
-      const isExistingRole = yield* rolesQueries.getRoleByName(data.name);
-
-      if (isExistingRole) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "CONFLICT",
-            message: `Peran dengan nama ${data.name} sudah ada.`,
-          }),
-        );
-      }
-
-      const [newRole] = yield* Effect.tryPromise({
-        try: () => db.insert(roles).values(data).returning(),
-        catch: (error) => {
-          logError("rolesQueries.createRole", "Error creating role", { error });
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat peran.",
-            cause: error,
-          });
-        },
-      });
-
-      if (!newRole) {
-        return yield* Effect.fail(
-          new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal membuat peran.",
-          }),
-        );
-      }
-
-      return newRole;
-    });
-  },
+  // createRole(data: z.infer<typeof rolesSchema.createRoleSchema>) {
+  //   return Effect.gen(function* () {
+  //     const isExistingRole = yield* rolesQueries.getRoleByName(data.name);
+  //
+  //     if (isExistingRole) {
+  //       return yield* Effect.fail(
+  //         new TRPCError({
+  //           code: "CONFLICT",
+  //           message: `Peran dengan nama ${data.name} sudah ada.`,
+  //         }),
+  //       );
+  //     }
+  //
+  //     const [newRole] = yield* Effect.tryPromise({
+  //       try: () => db.insert(roles).values(data).returning(),
+  //       catch: (error) => {
+  //         logError("rolesQueries.createRole", "Error creating role", { error });
+  //         throw new TRPCError({
+  //           code: "INTERNAL_SERVER_ERROR",
+  //           message: "Gagal membuat peran.",
+  //           cause: error,
+  //         });
+  //       },
+  //     });
+  //
+  //     if (!newRole) {
+  //       return yield* Effect.fail(
+  //         new TRPCError({
+  //           code: "INTERNAL_SERVER_ERROR",
+  //           message: "Gagal membuat peran.",
+  //         }),
+  //       );
+  //     }
+  //
+  //     return newRole;
+  //   });
+  // },
 
   updateRole(data: z.infer<typeof rolesSchema.updateRoleSchema>) {
     return Effect.gen(function* () {

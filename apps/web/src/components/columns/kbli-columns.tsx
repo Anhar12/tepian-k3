@@ -24,6 +24,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "kbli",
   deleteMutation: trpc.pengujian.kbli.deleteKbli,
   restoreMutation: trpc.pengujian.kbli.restoreKbli,
+  hardDeleteMutation: trpc.pengujian.kbli.hardDeleteKbli,
   getQueryOptions: (params) =>
     trpc.pengujian.kbli.getPaginatedKblis.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

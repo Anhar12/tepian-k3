@@ -24,6 +24,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "chemical-materials",
   deleteMutation: trpc.pengujian.chemicalMaterial.delete,
   restoreMutation: trpc.pengujian.chemicalMaterial.restore,
+  hardDeleteMutation: trpc.pengujian.chemicalMaterial.hardDelete,
   getQueryOptions: (params) =>
     trpc.pengujian.chemicalMaterial.getPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

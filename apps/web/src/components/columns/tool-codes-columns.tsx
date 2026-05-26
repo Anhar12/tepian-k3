@@ -25,6 +25,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "tool-codes",
   deleteMutation: trpc.pengujian.toolCode.deleteToolCode,
   restoreMutation: trpc.pengujian.toolCode.restoreToolCode,
+  hardDeleteMutation: trpc.pengujian.toolCode.hardDeleteToolCode,
   getQueryOptions: (params) =>
     trpc.pengujian.toolCode.getPaginatedToolCodes.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

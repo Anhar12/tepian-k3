@@ -369,6 +369,22 @@ const kbliQueries = {
       return restoredKbli;
     });
   },
+
+  hardDeleteKbli(id: string) {
+    return Effect.tryPromise({
+      try: () => db.delete(kblis).where(eq(kblis.id, id)).returning(),
+      catch: (error) => {
+        logError("kbliQueries.hardDeleteKbli", "Error hard deleting kbli", {
+          error,
+          id,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen data kbli",
+        });
+      },
+    });
+  },
 };
 
 export default kbliQueries;

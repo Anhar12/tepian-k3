@@ -191,4 +191,22 @@ export const newsRouter = createTRPCRouter({
           () => runEffect(newsQueries.restoreDeletedNews(input.id)),
         ),
     ),
+
+  hardDeleteNews: withPermission("news.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(
+          [
+            CACHE_KEYS.NEWS_ALL,
+            CACHE_KEYS.NEWS_FIRST_5,
+            `${CACHE_KEYS.NEWS_PREFIX}${input.id}`,
+          ],
+          () => runEffect(newsQueries.hardDeleteNews(input.id)),
+        ),
+    ),
 });

@@ -419,6 +419,23 @@ const clustersQueries = {
       return restoredCluster;
     });
   },
+
+  hardDeleteCluster(id: string) {
+    return Effect.tryPromise({
+      try: () => db.delete(clusters).where(eq(clusters.id, id)).returning(),
+      catch: (error) => {
+        logError(
+          "clustersQueries.hardDeleteCluster",
+          "Error hard deleting cluster",
+          { error, id },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen cluster",
+        });
+      },
+    });
+  },
 };
 
 export default clustersQueries;

@@ -1,5 +1,25 @@
 # @tepian-k3/services
 
+## 1.5.0
+
+### Minor Changes
+
+- feat(api,auth,constants,db,queries,schema,server,services,types,utils,web): replace Input with NumberInput for numeric fields
+  - replace Input with NumberInput for numeric fields
+  - add NumberInput component and enhance Clusters and TestingTable
+  - add hard delete functionality for various entities
+  - add order approval revision and resubmission functionality
+  - revamp testing flow UI with operational cost defaults (#57)
+  - update employee roles and names to Indonesian equivalents
+  - add handling for order rejection and cancellation states
+  - add company contact details to order detail view
+  - add head of company fields to user companies
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/constants@1.11.0
+
 ## 1.4.1
 
 ### Patch Changes

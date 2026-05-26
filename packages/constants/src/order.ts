@@ -94,6 +94,8 @@ export const ORDER_APPROVAL_STATUSES = [
   "pending",
   "approved",
   "rejected",
+  "revision",
+  "request_review",
 ] as const;
 
 export type OrderApprovalStatus = (typeof ORDER_APPROVAL_STATUSES)[number];
@@ -101,8 +103,10 @@ export type OrderApprovalStatus = (typeof ORDER_APPROVAL_STATUSES)[number];
 export const ORDER_APPROVAL_STATUS_LABELS: Record<OrderApprovalStatus, string> =
   {
     pending: "Pending",
-    approved: "Approved",
-    rejected: "Rejected",
+    approved: "Disetujui",
+    rejected: "Ditolak",
+    revision: "Perlu Koreksi Data",
+    request_review: "Menunggu Konfirmasi Admin",
   };
 
 export const ORDER_PAYMENT_STATUSES = [

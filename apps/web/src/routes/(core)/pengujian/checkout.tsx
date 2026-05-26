@@ -1,3 +1,4 @@
+import { CartItemsList } from "@/components/cart-items-list";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { CartItemsList } from "@/components/cart-items-list";
 import { useCartFilters } from "@/hooks/use-cart-filters";
 import { useCartMutations } from "@/hooks/use-cart-mutations";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -209,11 +209,11 @@ function RouteComponent() {
 
     createOrderMutation.mutate({
       coverFlightIncluded: optionalSelections.has("udara"),
-      coverGroundTransportationIncluded:
-        optionalSelections.has("darat") ||
+      coverGroundTransportationIncluded: optionalSelections.has("darat"),
+      coverGroundTransportationToAirportOrHarbour:
         optionalSelections.has("darat-bandara"),
       coverLodgingIncluded: optionalSelections.has("penginapan"),
-      coverAccommodationIncluded: optionalSelections.has("laut"),
+      coverWaterTransportationIncluded: optionalSelections.has("laut"),
       customerNote: note,
       data: orderItems,
     });
@@ -332,10 +332,37 @@ function RouteComponent() {
                         Item Biaya Tagihan Opsional
                       </p>
                       <p className="text-xs text-gray-400">
-                        Menyesuaikan kondisi lapangan/lokasi pengujian. Centang
-                        item yang perlu ditagihkan — item yang tidak dicentang
-                        dianggap disediakan oleh perusahaan pemohon.
+                        Menyesuaikan kondisi lapangan/lokasi pengujian.
                       </p>
+                    </div>
+                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-gray-600">
+                      <p className="mb-2 font-semibold text-blue-700">
+                        Cara pengisian:
+                      </p>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-start gap-2">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-blue-500 bg-blue-500 text-white">
+                            ✓
+                          </span>
+                          <span>
+                            <span className="font-semibold text-gray-700">
+                              Dicentang
+                            </span>{" "}
+                            — biaya ditanggung &amp; ditagihkan ke perusahaan
+                            pemohon melalui invoice.
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-gray-300 bg-white" />
+                          <span>
+                            <span className="font-semibold text-gray-700">
+                              Tidak dicentang
+                            </span>{" "}
+                            — dianggap sudah disediakan sendiri oleh perusahaan
+                            pemohon, tidak masuk invoice.
+                          </span>
+                        </div>
+                      </div>
                     </div>
                     {optionalItems.map((item) => {
                       const isChecked = optionalSelections.has(item.id);

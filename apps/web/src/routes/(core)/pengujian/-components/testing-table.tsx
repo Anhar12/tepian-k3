@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import {
   Select,
   SelectContent,
@@ -30,6 +31,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Info,
   LoaderCircle,
   Search,
   ShoppingCart,
@@ -86,6 +88,9 @@ export function TestingTable({
         page: params?.page ?? 1,
         perPage: params?.perPage ?? 10,
         name: params.name,
+      },
+      {
+        enabled: !!params.clusterId,
       },
     ),
   );
@@ -239,279 +244,297 @@ export function TestingTable({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-100">
-        <Table>
-          <TableHeader className="bg-slate-50/50">
-            <TableRow className="border-slate-100 hover:bg-transparent">
-              <TableHead className="font-bold text-slate-600">
-                Kategori Parameter
-              </TableHead>
-              <TableHead className="font-bold text-slate-600">
-                Parameter
-              </TableHead>
-              <TableHead className="font-bold text-slate-600">
-                Acuan Standar
-              </TableHead>
-              <TableHead className="font-bold text-slate-600">Biaya</TableHead>
-              {showCart && (
-                <>
+      {!params.clusterId && (
+        <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+          <Info className="h-5 w-5 shrink-0 text-blue-600" />
+          <p className="text-sm text-blue-700">
+            Silakan pilih kategori terlebih dahulu untuk melihat daftar
+            parameter pengujian.
+          </p>
+        </div>
+      )}
+
+      {params.clusterId && (
+        <>
+          <div className="overflow-hidden rounded-2xl border border-slate-100">
+            <Table>
+              <TableHeader className="bg-slate-50/50">
+                <TableRow className="border-slate-100 hover:bg-transparent">
                   <TableHead className="font-bold text-slate-600">
-                    Jumlah
+                    Kategori Parameter
                   </TableHead>
                   <TableHead className="font-bold text-slate-600">
-                    Subtotal
+                    Parameter
                   </TableHead>
-                  <TableHead className="text-right"></TableHead>
-                </>
-              )}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading
-              ? Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={index} className="border-slate-100">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                        <div className="flex flex-col gap-2">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-3 w-24" />
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-28 rounded-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="mb-2 h-4 w-40" />
-                      <Skeleton className="h-3 w-32" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-24" />
-                    </TableCell>
-                    {showCart && (
-                      <>
+                  <TableHead className="font-bold text-slate-600">
+                    Acuan Standar
+                  </TableHead>
+                  <TableHead className="font-bold text-slate-600">
+                    Biaya
+                  </TableHead>
+                  {showCart && (
+                    <>
+                      <TableHead className="font-bold text-slate-600">
+                        Jumlah
+                      </TableHead>
+                      <TableHead className="font-bold text-slate-600">
+                        Subtotal
+                      </TableHead>
+                      <TableHead className="text-right"></TableHead>
+                    </>
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={index} className="border-slate-100">
                         <TableCell>
-                          <Skeleton className="h-10 w-16 rounded-xl" />
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-8 w-8 rounded-lg" />
+                            <div className="flex flex-col gap-2">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-3 w-24" />
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-6 w-28 rounded-full" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="mb-2 h-4 w-40" />
+                          <Skeleton className="h-3 w-32" />
                         </TableCell>
                         <TableCell>
                           <Skeleton className="h-4 w-24" />
                         </TableCell>
-                        <TableCell className="text-right">
-                          <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
-                        </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                ))
-              : parameters?.data.map((row) => (
-                  <TableRow key={row.id} className="group border-slate-100">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
-                          )}
-                        >
-                          <TestTube2 className="h-4 w-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-slate-700">
-                            {row.category.name}
-                          </span>
-                          <span className="text-[10px] font-medium text-slate-400">
-                            {row.cluster.name}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
-                      >
-                        {row.name}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
-                      <div className="font-bold text-slate-700">
-                        {row.reference?.split(" ")[0]}{" "}
-                        {row.reference?.split(" ")[1]}
-                      </div>
-                      <div>{row.reference?.split(" ").slice(2).join(" ")}</div>
-                    </TableCell>
-                    <TableCell className="text-sm font-bold text-slate-800 tabular-nums">
-                      Rp {row.price.toLocaleString("id-ID")}
-                    </TableCell>
-                    {showCart && (
-                      <>
+                        {showCart && (
+                          <>
+                            <TableCell>
+                              <Skeleton className="h-10 w-16 rounded-xl" />
+                            </TableCell>
+                            <TableCell>
+                              <Skeleton className="h-4 w-24" />
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
+                            </TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    ))
+                  : parameters?.data.map((row) => (
+                      <TableRow key={row.id} className="group border-slate-100">
                         <TableCell>
-                          <Input
-                            type="number"
-                            value={cart.get(row.id)?.quantity ?? 0}
-                            className={cn(
-                              "h-10 w-16 rounded-xl border-slate-200 text-center font-bold tabular-nums transition-colors",
-                              (cart.get(row.id)?.quantity ?? 0) > 0
-                                ? "bg-blue-50/50 text-slate-800"
-                                : "bg-slate-100 text-slate-400",
-                            )}
-                            min={0}
-                            onChange={(e) => {
-                              const quantity = parseInt(e.target.value, 10);
-                              setCart((oldCart) => {
-                                const newCart = new Map(oldCart);
-                                if (isNaN(quantity) || quantity <= 0) {
-                                  newCart.delete(row.id);
-                                } else {
-                                  newCart.set(row.id, {
-                                    quantity,
-                                    price: row.price,
-                                  });
-                                }
-                                return newCart;
-                              });
-                            }}
-                          />
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={cn(
+                                `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
+                              )}
+                            >
+                              <TestTube2 className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-slate-700">
+                                {row.category.name}
+                              </span>
+                              <span className="text-[10px] font-medium text-slate-400">
+                                {row.cluster.name}
+                              </span>
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell className="text-sm font-bold text-[#0056B3] tabular-nums">
-                          Rp{" "}
-                          {(
-                            (cart.get(row.id)?.quantity ?? 0) * row.price
-                          ).toLocaleString("id-ID")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            className={cn(
-                              "h-10 gap-2 rounded-xl px-4 text-[10px] font-bold text-white transition-all",
-                              (cart.get(row.id)?.quantity ?? 0) > 0 &&
-                                !addingToCart.get(row.id)
-                                ? "bg-[#4285F4] hover:bg-blue-600 hover:shadow-lg"
-                                : "cursor-not-allowed bg-slate-300",
-                            )}
-                            disabled={
-                              !me ||
-                              addingToCart.get(row.id) ||
-                              !(cart.get(row.id)?.quantity ?? 0) ||
-                              !params.companyId ||
-                              !params.locationId
-                            }
-                            onClick={() =>
-                              handleAddToCart(
-                                row.id,
-                                cart.get(row.id)?.quantity ?? 1,
-                                row.price,
-                              )
-                            }
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
                           >
-                            {addingToCart.get(row.id) ? (
-                              <>
-                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                Adding...
-                              </>
-                            ) : (
-                              <>
-                                <ShoppingCart className="h-4 w-4" />
-                                Add to Cart
-                              </>
-                            )}
-                          </Button>
+                            {row.name}
+                          </Badge>
                         </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                ))}
-          </TableBody>
-        </Table>
-      </div>
+                        <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
+                          <div className="font-bold text-slate-700">
+                            {row.reference?.split(" ")[0]}{" "}
+                            {row.reference?.split(" ")[1]}
+                          </div>
+                          <div>
+                            {row.reference?.split(" ").slice(2).join(" ")}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm font-bold text-slate-800 tabular-nums">
+                          Rp {row.price.toLocaleString("id-ID")}
+                        </TableCell>
+                        {showCart && (
+                          <>
+                            <TableCell>
+                              <NumberInput
+                                value={cart.get(row.id)?.quantity ?? 0}
+                                className={cn(
+                                  "h-10 w-16 rounded-xl border-slate-200 text-center font-bold tabular-nums transition-colors",
+                                  (cart.get(row.id)?.quantity ?? 0) > 0
+                                    ? "bg-blue-50/50 text-slate-800"
+                                    : "bg-slate-100 text-slate-400",
+                                )}
+                                min={0}
+                                onChange={(quantity) => {
+                                  setCart((oldCart) => {
+                                    const newCart = new Map(oldCart);
+                                    if (quantity <= 0) {
+                                      newCart.delete(row.id);
+                                    } else {
+                                      newCart.set(row.id, {
+                                        quantity,
+                                        price: row.price,
+                                      });
+                                    }
+                                    return newCart;
+                                  });
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell className="text-sm font-bold text-[#0056B3] tabular-nums">
+                              Rp{" "}
+                              {(
+                                (cart.get(row.id)?.quantity ?? 0) * row.price
+                              ).toLocaleString("id-ID")}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                className={cn(
+                                  "h-10 gap-2 rounded-xl px-4 text-[10px] font-bold text-white transition-all",
+                                  (cart.get(row.id)?.quantity ?? 0) > 0 &&
+                                    !addingToCart.get(row.id)
+                                    ? "bg-[#4285F4] hover:bg-blue-600 hover:shadow-lg"
+                                    : "cursor-not-allowed bg-slate-300",
+                                )}
+                                disabled={
+                                  !me ||
+                                  addingToCart.get(row.id) ||
+                                  !(cart.get(row.id)?.quantity ?? 0) ||
+                                  !params.companyId ||
+                                  !params.locationId
+                                }
+                                onClick={() =>
+                                  handleAddToCart(
+                                    row.id,
+                                    cart.get(row.id)?.quantity ?? 1,
+                                    row.price,
+                                  )
+                                }
+                              >
+                                {addingToCart.get(row.id) ? (
+                                  <>
+                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                    Adding...
+                                  </>
+                                ) : (
+                                  <>
+                                    <ShoppingCart className="h-4 w-4" />
+                                    Add to Cart
+                                  </>
+                                )}
+                              </Button>
+                            </TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </div>
 
-      <div className="flex items-center justify-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-lg text-slate-400"
-          disabled={currentPage === 1 || isLoading}
-          onClick={() => goToPage(currentPage - 1)}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-slate-400"
+              disabled={currentPage === 1 || isLoading}
+              onClick={() => goToPage(currentPage - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
 
-        {/* First page */}
-        {currentPage > 2 && (
-          <Button
-            variant="ghost"
-            className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
-            onClick={() => goToPage(1)}
-          >
-            1
-          </Button>
-        )}
+            {/* First page */}
+            {currentPage > 2 && (
+              <Button
+                variant="ghost"
+                className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
+                onClick={() => goToPage(1)}
+              >
+                1
+              </Button>
+            )}
 
-        {/* Ellipsis before current page */}
-        {currentPage > 3 && (
-          <span className="px-2 text-xs text-slate-400">...</span>
-        )}
+            {/* Ellipsis before current page */}
+            {currentPage > 3 && (
+              <span className="px-2 text-xs text-slate-400">...</span>
+            )}
 
-        {/* Previous page */}
-        {currentPage > 1 && (
-          <Button
-            variant="ghost"
-            className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
-            onClick={() => goToPage(currentPage - 1)}
-          >
-            {currentPage - 1}
-          </Button>
-        )}
+            {/* Previous page */}
+            {currentPage > 1 && (
+              <Button
+                variant="ghost"
+                className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
+                onClick={() => goToPage(currentPage - 1)}
+              >
+                {currentPage - 1}
+              </Button>
+            )}
 
-        {/* Current page */}
-        <Button
-          variant="secondary"
-          className="h-8 w-8 rounded-lg bg-[#333] p-0 text-xs font-bold text-white hover:bg-slate-800"
-        >
-          {currentPage}
-        </Button>
+            {/* Current page */}
+            <Button
+              variant="secondary"
+              className="h-8 w-8 rounded-lg bg-[#333] p-0 text-xs font-bold text-white hover:bg-slate-800"
+            >
+              {currentPage}
+            </Button>
 
-        {/* Next page */}
-        {parameters?.pageCount && currentPage < parameters.pageCount && (
-          <Button
-            variant="ghost"
-            className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
-            onClick={() => goToPage(currentPage + 1)}
-          >
-            {currentPage + 1}
-          </Button>
-        )}
+            {/* Next page */}
+            {parameters?.pageCount && currentPage < parameters.pageCount && (
+              <Button
+                variant="ghost"
+                className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
+                onClick={() => goToPage(currentPage + 1)}
+              >
+                {currentPage + 1}
+              </Button>
+            )}
 
-        {/* Ellipsis after current page */}
-        {parameters?.pageCount && currentPage < parameters.pageCount - 2 && (
-          <span className="px-2 text-xs text-slate-400">...</span>
-        )}
+            {/* Ellipsis after current page */}
+            {parameters?.pageCount &&
+              currentPage < parameters.pageCount - 2 && (
+                <span className="px-2 text-xs text-slate-400">...</span>
+              )}
 
-        {/* Last page */}
-        {parameters?.pageCount && currentPage < parameters.pageCount - 1 && (
-          <Button
-            variant="ghost"
-            className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
-            onClick={() => goToPage(parameters.pageCount)}
-          >
-            {parameters.pageCount}
-          </Button>
-        )}
+            {/* Last page */}
+            {parameters?.pageCount &&
+              currentPage < parameters.pageCount - 1 && (
+                <Button
+                  variant="ghost"
+                  className="h-8 w-8 rounded-lg p-0 text-xs font-bold text-slate-500"
+                  onClick={() => goToPage(parameters.pageCount)}
+                >
+                  {parameters.pageCount}
+                </Button>
+              )}
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1 text-slate-500 transition-colors hover:text-slate-900"
-          disabled={
-            !parameters?.pageCount ||
-            currentPage === parameters.pageCount ||
-            isLoading
-          }
-          onClick={() => goToPage(currentPage + 1)}
-        >
-          <span className="text-xs font-bold">Next</span>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 text-slate-500 transition-colors hover:text-slate-900"
+              disabled={
+                !parameters?.pageCount ||
+                currentPage === parameters.pageCount ||
+                isLoading
+              }
+              onClick={() => goToPage(currentPage + 1)}
+            >
+              <span className="text-xs font-bold">Next</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -409,6 +409,25 @@ const toolCheckQueries = {
 
       return restored;
     }),
+
+  /**
+   * Hard delete a tool check record permanently.
+   */
+  hardDeleteToolCheck: (id: string) =>
+    Effect.tryPromise({
+      try: () => db.delete(toolChecks).where(eq(toolChecks.id, id)).returning(),
+      catch: (error) => {
+        logError(
+          "toolCheckQueries.hardDeleteToolCheck",
+          "Failed to hard delete tool check",
+          { error, id },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen pemeriksaan alat",
+        });
+      },
+    }),
 };
 
 export default toolCheckQueries;

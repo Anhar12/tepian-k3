@@ -577,9 +577,11 @@ const worksheetQueries = {
                 coverFlightIncluded: orderData.coverFlightIncluded,
                 coverGroundTransportationIncluded:
                   orderData.coverGroundTransportationIncluded,
+                coverGroundTransportationToAirportOrHarbour:
+                  orderData.coverGroundTransportationToAirportOrHarbour,
                 coverLodgingIncluded: orderData.coverLodgingIncluded,
-                coverAccommodationIncluded:
-                  orderData.coverAccommodationIncluded,
+                coverWaterTransportationIncluded:
+                  orderData.coverWaterTransportationIncluded,
               })
               .returning();
 
@@ -1947,8 +1949,9 @@ const worksheetQueries = {
             const canHaveOperationalCosts =
               worksheet.coverFlightIncluded === true ||
               worksheet.coverGroundTransportationIncluded === true ||
+              worksheet.coverGroundTransportationToAirportOrHarbour === true ||
               worksheet.coverLodgingIncluded === true ||
-              worksheet.coverAccommodationIncluded === true;
+              worksheet.coverWaterTransportationIncluded === true;
 
             if (!canHaveOperationalCosts && costs.length > 0) {
               throw new TRPCError({

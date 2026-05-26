@@ -12,7 +12,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRedirectBackWithTimeout } from "@/lib/redirect-back-with-timeout";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -120,13 +120,15 @@ function RouteComponent() {
                     <FieldLabel className="ml-1 text-sm font-bold">
                       Urutan
                     </FieldLabel>
-                    <Input
-                      type="number"
+                    <NumberInput
                       min={0}
                       placeholder="Masukkan urutan pertanyaan"
                       className="h-10 text-sm"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                       aria-invalid={fieldState.invalid}
                     />
                     {fieldState.invalid && (

@@ -12,6 +12,8 @@ import {
   StatusStateTestingInProgress,
   StatusStateUploadApproval,
   StatusStateUploadPayment,
+  StatusStateContactRevisionRequested,
+  StatusStateRequestReview,
   StatusStateWaitingForRevision,
   StatusStateWorksheetInReview,
   StatusStateWorksheetVerified,
@@ -240,6 +242,9 @@ function RouteComponent() {
   const isRejected = orderDetail.status === "rejected";
   const isCancelled = orderDetail.status === "cancelled";
   const isRevisionStatus = orderDetail.status === "revision";
+  const isApprovalRevision = orderDetail.approvalStatus === "revision";
+  const isApprovalRequestReview =
+    orderDetail.approvalStatus === "request_review";
   const isApproved = !!orderDetail.approvedAt;
   const hasApprovalLetter = !!approvalLetterUserDoc;
   const hasInvoice = !!invoiceDoc;
@@ -339,6 +344,12 @@ function RouteComponent() {
           handleUploadPaymentDocs={handleUploadPaymentDocs}
         />
       );
+    }
+    if (isApprovalRequestReview) {
+      return <StatusStateRequestReview orderDetail={orderDetail} />;
+    }
+    if (isApprovalRevision) {
+      return <StatusStateContactRevisionRequested orderDetail={orderDetail} />;
     }
     if (isRevisionStatus && revisionHistory) {
       return (

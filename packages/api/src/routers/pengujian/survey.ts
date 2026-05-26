@@ -79,6 +79,13 @@ export const surveyRouter = createTRPCRouter({
         await runEffect(surveyQueries.restoreSurveyQuestion(input.id)),
     ),
 
+  hardDeleteQuestion: withPermission("survey-questions.delete")
+    .input(z.object({ id: z.uuidv7() }))
+    .mutation(
+      async ({ input }) =>
+        await runEffect(surveyQueries.hardDeleteSurveyQuestion(input.id)),
+    ),
+
   // ==================== SURVEY SUBMISSION (USER) ====================
 
   // Get active questions for survey form (for authenticated users)

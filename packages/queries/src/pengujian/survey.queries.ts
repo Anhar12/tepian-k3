@@ -412,6 +412,27 @@ const surveyQueries = {
     });
   },
 
+  hardDeleteSurveyQuestion(id: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .delete(surveyQuestions)
+          .where(eq(surveyQuestions.id, id))
+          .returning(),
+      catch: (error) => {
+        logError(
+          "surveyQueries.hardDeleteSurveyQuestion",
+          "Error hard deleting survey question",
+          { error, id },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen pertanyaan survey",
+        });
+      },
+    });
+  },
+
   // ==================== SURVEY SUBMISSION (USER) ====================
 
   checkSurveyExists(orderId: string) {

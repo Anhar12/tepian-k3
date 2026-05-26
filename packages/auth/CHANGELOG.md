@@ -1,5 +1,15 @@
 # @tepian-k3/auth
 
+## 1.2.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/services@1.5.0
+  - @tepian-k3/queries@1.12.0
+  - @tepian-k3/schema@1.11.0
+  - @tepian-k3/db@1.12.0
+
 ## 1.2.2
 
 ### Patch Changes

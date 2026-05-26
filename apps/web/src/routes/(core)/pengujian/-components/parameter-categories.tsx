@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { AlertCircle, Globe2 } from "lucide-react";
+import { AlertCircle, Globe2, Info } from "lucide-react";
 import { createElement } from "react";
 
 interface ClustersProps {
@@ -42,6 +42,16 @@ export function Clusters({ route }: ClustersProps) {
         </div>
       )}
 
+      {!search.clusterId && !isLoading && (
+        <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+          <Info className="h-5 w-5 shrink-0 text-blue-600" />
+          <p className="text-sm text-blue-700">
+            Silakan pilih kategori terlebih dahulu untuk melihat daftar
+            parameter pengujian.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-6 md:grid-cols-5">
         {isLoading
           ? Array.from({ length: 5 }).map((_, index) => (
@@ -52,62 +62,36 @@ export function Clusters({ route }: ClustersProps) {
                 <Skeleton className="h-full w-full" />
               </div>
             ))
-          : [
+          : (clusters ?? []).map((cluster) => (
               <button
-                key="all"
+                key={cluster.id}
                 className={cn(
-                  "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br from-slate-400 to-slate-600 p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
-                  !search.clusterId && "scale-110 ring-4 ring-white",
+                  "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
+                  getClusterColor(cluster.name),
+                  search.clusterId === cluster.id &&
+                    "scale-110 ring-4 ring-white",
                 )}
                 onClick={() => {
                   navigate({
                     to: route,
                     search: (old) => ({
                       ...old,
-                      clusterId: undefined,
+                      clusterId: cluster.id,
                     }),
                   });
                 }}
               >
                 <div className="mb-4 transform transition-transform group-hover:scale-110">
-                  <Globe2 className="size-8" />
+                  {createElement(getClusterIcon(cluster.name) || Globe2, {
+                    className: "size-8",
+                  })}
                 </div>
                 <span className="max-w-20 text-center text-sm leading-tight font-bold uppercase">
-                  Semua
+                  {cluster.name}
                 </span>
                 <div className="absolute inset-0 rounded-3xl bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
-              </button>,
-              ...(clusters ?? []).map((cluster) => (
-                <button
-                  key={cluster.id}
-                  className={cn(
-                    "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
-                    getClusterColor(cluster.name),
-                    search.clusterId === cluster.id &&
-                      "scale-110 ring-4 ring-white",
-                  )}
-                  onClick={() => {
-                    navigate({
-                      to: route,
-                      search: (old) => ({
-                        ...old,
-                        clusterId: cluster.id,
-                      }),
-                    });
-                  }}
-                >
-                  <div className="mb-4 transform transition-transform group-hover:scale-110">
-                    {createElement(getClusterIcon(cluster.name) || Globe2, {
-                      className: "size-8",
-                    })}
-                  </div>
-                  <span className="max-w-20 text-center text-sm leading-tight font-bold uppercase">
-                    {cluster.name}
-                  </span>
-                  <div className="absolute inset-0 rounded-3xl bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
-                </button>
-              )),
-            ]}
+              </button>
+            ))}
       </div>
     </div>
   );

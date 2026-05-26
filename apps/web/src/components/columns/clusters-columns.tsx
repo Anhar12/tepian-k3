@@ -24,6 +24,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "clusters",
   deleteMutation: trpc.pengujian.cluster.deleteCluster,
   restoreMutation: trpc.pengujian.cluster.restoreCluster,
+  hardDeleteMutation: trpc.pengujian.cluster.hardDeleteCluster,
   getQueryOptions: (params) =>
     trpc.pengujian.cluster.getPaginatedClusters.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

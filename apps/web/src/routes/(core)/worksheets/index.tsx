@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -723,11 +724,10 @@ function RouteComponent() {
     addNoteMutation.mutate(data);
   };
 
-  const handleRequiredChange = (materialId: string, value: string) => {
-    const numValue = parseFloat(value) || 0;
+  const handleRequiredChange = (materialId: string, value: number) => {
     setLocalRequiredUpdates((prev) => {
       const newMap = new Map(prev);
-      newMap.set(materialId, numValue);
+      newMap.set(materialId, value);
       return newMap;
     });
   };
@@ -1406,19 +1406,16 @@ function RouteComponent() {
                             </TableCell>
                             <TableCell className="text-center text-xs sm:text-sm">
                               {isEditable ? (
-                                <Input
-                                  onChange={(e) =>
+                                <NumberInput
+                                  onChange={(value) =>
                                     handleToolChange(
                                       tool.id,
                                       "toolNeeded",
-                                      parseInt(e.target.value) || 0,
+                                      value,
                                     )
                                   }
-                                  type="number"
                                   min={0}
-                                  value={
-                                    getToolState(tool.id).toolNeeded || "0"
-                                  }
+                                  value={getToolState(tool.id).toolNeeded || 0}
                                   className="mx-auto h-8 w-20 text-center text-xs sm:text-sm"
                                   placeholder="0"
                                 />
@@ -1661,14 +1658,10 @@ function RouteComponent() {
                                 }
                               >
                                 {isEditable ? (
-                                  <Input
-                                    type="number"
+                                  <NumberInput
                                     value={item.required}
-                                    onChange={(e) =>
-                                      handleRequiredChange(
-                                        item.id,
-                                        e.target.value,
-                                      )
+                                    onChange={(value) =>
+                                      handleRequiredChange(item.id, value)
                                     }
                                     className="mx-auto h-8 w-16 text-center text-xs sm:text-sm"
                                     min={0}

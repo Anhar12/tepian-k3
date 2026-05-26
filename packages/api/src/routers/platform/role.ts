@@ -42,14 +42,14 @@ export const roleRouters = createTRPCRouter({
         await runEffect(rolesQueries.getOffsetPaginatedRoles(input)),
     ),
 
-  createRole: withPermission("roles.create")
-    .input(rolesSchema.createRoleSchema)
-    .mutation(
-      async ({ input }) =>
-        await withCacheInvalidation(CACHE_KEYS.ROLES_PREFIX, () =>
-          runEffect(rolesQueries.createRole(input)),
-        ),
-    ),
+  // createRole: withPermission("roles.create")
+  //   .input(rolesSchema.createRoleSchema)
+  //   .mutation(
+  //     async ({ input }) =>
+  //       await withCacheInvalidation(CACHE_KEYS.ROLES_PREFIX, () =>
+  //         runEffect(rolesQueries.createRole(input)),
+  //       ),
+  //   ),
 
   updateRole: withPermission("roles.update")
     .input(rolesSchema.updateRoleSchema)

@@ -380,6 +380,24 @@ const toolCodeQueries = {
 
       return restoredToolCode;
     }),
+
+  /**
+   * Hard delete a tool code permanently
+   */
+  hardDeleteToolCode: (id: string) =>
+    Effect.tryPromise({
+      try: () => db.delete(toolCodes).where(eq(toolCodes.id, id)).returning(),
+      catch: (error) => {
+        logError("hardDeleteToolCode", "Error hard deleting tool code", {
+          id,
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen kode alat",
+        });
+      },
+    }),
 };
 
 export default toolCodeQueries;

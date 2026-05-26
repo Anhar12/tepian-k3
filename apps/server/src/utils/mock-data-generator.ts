@@ -379,7 +379,7 @@ export class MockDataGenerator {
       paymentRejectedReason: null,
       revisionCount: this.faker.number.int({ min: 0, max: 5 }),
       coverTransportationIncluded: this.faker.datatype.boolean(),
-      coverAccommodationIncluded: this.faker.datatype.boolean(),
+      coverWaterTransportationIncluded: this.faker.datatype.boolean(),
       paidAt: null,
       completedAt: null,
     };
@@ -440,7 +440,7 @@ export class MockDataGenerator {
         this.options.worksheetStatus ||
         this.faker.helpers.arrayElement(["draft", "in_progress", "completed"]),
       coverTransportationIncluded: this.faker.datatype.boolean(),
-      coverAccommodationIncluded: this.faker.datatype.boolean(),
+      coverWaterTransportationIncluded: this.faker.datatype.boolean(),
       orderId: order.id,
       startDate: this.faker.date.future().toISOString(),
       endDate: this.faker.date.future().toISOString(),

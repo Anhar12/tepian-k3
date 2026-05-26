@@ -109,4 +109,21 @@ export const parameterCategoriesRouter = createTRPCRouter({
             ),
         ),
     ),
+
+  hardDeleteParameterCategory: withPermission("parameter-categories.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(
+          CACHE_KEYS.PARAMETER_CATEGORIES_PREFIX,
+          () =>
+            runEffect(
+              parameterCategoriesQueries.hardDeleteParameterCategory(input.id),
+            ),
+        ),
+    ),
 });

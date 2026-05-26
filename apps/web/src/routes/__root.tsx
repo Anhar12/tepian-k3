@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/theme-provider";
-import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
+import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { pageHead } from "@/utils/page-head";
 import type { trpc } from "@/utils/trpc";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -13,8 +13,8 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { AlertTriangle, FileQuestion } from "lucide-react";
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import { z } from "zod";
-import { pageHead } from "@/utils/page-head";
 import "../index.css";
 
 export interface RouterAppContext {

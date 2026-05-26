@@ -17,6 +17,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
 import { Textarea } from "@/components/ui/textarea";
@@ -136,8 +137,7 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                 <FieldLabel className="ml-1 text-sm font-bold">
                   Jumlah Pekerja Perempuan
                 </FieldLabel>
-                <Input
-                  type="number"
+                <NumberInput
                   placeholder="Masukkan jumlah pekerja perempuan"
                   className="h-10 text-sm"
                   value={company.femaleWorkers}
@@ -150,8 +150,7 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                 <FieldLabel className="ml-1 text-sm font-bold">
                   Jumlah Pekerja Laki-laki
                 </FieldLabel>
-                <Input
-                  type="number"
+                <NumberInput
                   placeholder="Masukkan jumlah pekerja laki-laki"
                   className="h-10 text-sm"
                   value={company.maleWorkers}
@@ -165,7 +164,7 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                   Jenis KBLI Perusahaan
                 </FieldLabel>
                 <Input
-                  type="number"
+                  type="text"
                   placeholder="Masukkan jenis KBLI perusahaan"
                   className="h-10 text-sm"
                   value={company.kbli.name}
@@ -333,11 +332,10 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                 <FieldLabel className="ml-1 text-sm font-bold">
                   Nomor WLKP Perusahaan
                 </FieldLabel>
-                <Input
-                  type="number"
+                <NumberInput
                   placeholder="Masukkan nomor WLKP perusahaan"
                   className="h-10 text-sm"
-                  value={company.wlkp || "-"}
+                  value={Number(company.wlkp) || 0}
                   disabled
                   readOnly
                 />

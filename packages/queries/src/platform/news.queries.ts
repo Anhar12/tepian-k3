@@ -354,6 +354,21 @@ const newsQueries = {
 
       return restoredNews;
     }),
+
+  /**
+   * Hard delete news permanently
+   */
+  hardDeleteNews: (id: string) =>
+    Effect.tryPromise({
+      try: () => db.delete(news).where(eq(news.id, id)).returning(),
+      catch: (error) => {
+        logError("news.queries", "hardDeleteNews", { error, id });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen berita",
+        });
+      },
+    }),
 };
 
 export default newsQueries;

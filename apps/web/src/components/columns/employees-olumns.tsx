@@ -24,6 +24,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "employees",
   deleteMutation: trpc.platform.employee.deleteEmployee,
   restoreMutation: trpc.platform.employee.restoreEmployee,
+  hardDeleteMutation: trpc.platform.employee.hardDeleteEmployee,
   getQueryOptions: (params) =>
     trpc.platform.employee.getEmployeePaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

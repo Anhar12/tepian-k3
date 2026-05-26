@@ -26,6 +26,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "survey-questions",
   deleteMutation: trpc.pengujian.survey.deleteQuestion,
   restoreMutation: trpc.pengujian.survey.restoreQuestion,
+  hardDeleteMutation: trpc.pengujian.survey.hardDeleteQuestion,
   getQueryOptions: (params) =>
     trpc.pengujian.survey.getPaginatedQuestions.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

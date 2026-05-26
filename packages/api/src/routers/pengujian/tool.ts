@@ -288,6 +288,17 @@ export const toolRouter = createTRPCRouter({
       async ({ input }) => await runEffect(toolsQureies.restoreTool(input.id)),
     ),
 
+  hardDeleteTool: withPermission("tools.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(toolsQureies.hardDeleteTool(input.id)),
+    ),
+
   restoreToolCalibration: withPermission("tool-calibrations.delete")
     .input(
       z.object({
@@ -298,6 +309,19 @@ export const toolRouter = createTRPCRouter({
       async ({ input }) =>
         await runEffect(
           toolCalibrationQueries.restoreToolCalibration(input.id),
+        ),
+    ),
+
+  hardDeleteToolCalibration: withPermission("tool-calibrations.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          toolCalibrationQueries.hardDeleteToolCalibration(input.id),
         ),
     ),
 
@@ -363,5 +387,12 @@ export const toolRouter = createTRPCRouter({
     .mutation(
       async ({ input }) =>
         await runEffect(toolCheckQueries.restoreToolCheck(input.id)),
+    ),
+
+  hardDeleteToolCheck: withPermission("tool-checks.delete")
+    .input(z.object({ id: z.uuidv7() }))
+    .mutation(
+      async ({ input }) =>
+        await runEffect(toolCheckQueries.hardDeleteToolCheck(input.id)),
     ),
 });

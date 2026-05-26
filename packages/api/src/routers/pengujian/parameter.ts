@@ -87,4 +87,15 @@ export const parameterRouter = createTRPCRouter({
       async ({ input }) =>
         await runEffect(parameterQueries.restoreParameter(input.id)),
     ),
+
+  hardDeleteParameter: withPermission("parameters.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(parameterQueries.hardDeleteParameter(input.id)),
+    ),
 });

@@ -400,6 +400,25 @@ const positionQueries = {
 
       return result;
     }),
+
+  /**
+   * Hard delete a position permanently
+   */
+  hardDeletePosition: (id: string) =>
+    Effect.tryPromise({
+      try: () => db.delete(positions).where(eq(positions.id, id)).returning(),
+      catch: (error) => {
+        logError(
+          "positionQueries.hardDeletePosition",
+          `Failed to hard delete position with ID: ${id}`,
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen jabatan",
+        });
+      },
+    }),
 };
 
 export default positionQueries;

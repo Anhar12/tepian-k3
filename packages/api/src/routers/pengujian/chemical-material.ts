@@ -122,4 +122,20 @@ export const chemicalMaterialRouter = createTRPCRouter({
           chemicalMaterialQueries.restoreChemicalMaterial(input.id),
         ),
     ),
+
+  /**
+   * Hard delete chemical material
+   */
+  hardDelete: withPermission("chemical-materials.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          chemicalMaterialQueries.hardDeleteChemicalMaterial(input.id),
+        ),
+    ),
 });

@@ -65,4 +65,15 @@ export const positionRouter = createTRPCRouter({
       async ({ input }) =>
         await runEffect(positionQueries.restorePosition(input.id)),
     ),
+
+  hardDeletePosition: withPermission("positions.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(positionQueries.hardDeletePosition(input.id)),
+    ),
 });

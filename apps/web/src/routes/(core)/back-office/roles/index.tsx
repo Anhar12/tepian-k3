@@ -3,8 +3,6 @@ import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
-import { PermissionGate } from "@/components/permission-gate";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { pageHead } from "@/utils/page-head";
@@ -13,7 +11,6 @@ import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import rolesSchema from "@tepian-k3/schema/platform/role.schema";
-import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
 
@@ -80,12 +77,6 @@ function RouteComponent() {
           />
           <Label>Deleted Roles</Label>
         </div>
-        <PermissionGate permission="roles.create">
-          <Button onClick={() => navigate({ to: "/back-office/roles/create" })}>
-            <PlusCircle className="size-4" />
-            Tambah Role
-          </Button>
-        </PermissionGate>
       </div>
       <DataTable
         table={table}

@@ -25,6 +25,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "banners",
   deleteMutation: trpc.platform.banner.deleteBanner,
   restoreMutation: trpc.platform.banner.restoreBanner,
+  hardDeleteMutation: trpc.platform.banner.hardDeleteBanner,
   getQueryOptions: (params) =>
     trpc.platform.banner.getPaginatedBanners.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

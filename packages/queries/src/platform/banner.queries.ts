@@ -327,6 +327,22 @@ const bannerQueries = {
 
       return restored;
     }),
+
+  /**
+   * Hard delete banner
+   * @param {string} id
+   */
+  hardDeleteBanner: (id: string) =>
+    Effect.tryPromise({
+      try: () => db.delete(banners).where(eq(banners.id, id)).returning(),
+      catch: (error) => {
+        logError("banner.queries", "hardDeleteBanner", { error, id });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menghapus permanen banner.",
+        });
+      },
+    }),
 };
 
 export default bannerQueries;

@@ -113,4 +113,15 @@ export const employeeRouter = createTRPCRouter({
 
       return restoredEmployee;
     }),
+
+  hardDeleteEmployee: withPermission("employees.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(employeeQueries.hardDeleteEmployee(input.id)),
+    ),
 });

@@ -174,4 +174,15 @@ export const userCompanyRouter = createTRPCRouter({
           userCompanyQueries.userRestoreUserCompany(user.id, input.id),
         ),
     ),
+
+  hardDeleteUserCompany: withPermission("user-company.delete")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(userCompanyQueries.hardDeleteUserCompany(input.id)),
+    ),
 });

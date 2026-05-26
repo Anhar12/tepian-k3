@@ -1,24 +1,12 @@
-import {
-  WorksheetHeaderCard,
-  WorksheetHeaderCardSkeleton,
-} from "@/components/worksheet-header-card";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  Users,
-  MapPin,
-  Calendar,
-  Printer,
-  Save,
-  Plus,
-  Trash2,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { PermissionGate } from "@/components/permission-gate";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -27,12 +15,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { usePagination } from "@/lib/pagination";
 import { WorksheetDataTable } from "@/components/ui/worksheet-data-table";
+import {
+  WorksheetHeaderCard,
+  WorksheetHeaderCardSkeleton,
+} from "@/components/worksheet-header-card";
+import useDialogs from "@/hooks/use-dialog";
+import { usePagination } from "@/lib/pagination";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { pageHead } from "@/utils/page-head";
+import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { z } from "zod";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { getPublicUrl } from "@/utils/url";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   addBusinessDays,
   differenceInBusinessDays,
@@ -42,15 +38,20 @@ import {
   parseISO,
 } from "date-fns";
 import { id } from "date-fns/locale";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getPublicUrl } from "@/utils/url";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { requirePermission } from "@/utils/require-permission";
-import { PermissionGate } from "@/components/permission-gate";
-import useDialogs from "@/hooks/use-dialog";
+import {
+  AlertCircle,
+  Calendar,
+  Loader2,
+  MapPin,
+  Plus,
+  Printer,
+  Save,
+  Trash2,
+  Users,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import GenerateOfferingDialog from "./-components/generate-offering-dialog";
-import { pageHead } from "@/utils/page-head";
-import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 
 const searchParamsSchema = z.object({
   worksheetId: z.uuidv7().optional(),
@@ -216,9 +217,20 @@ function RouteComponent() {
         });
       }
 
-      if (worksheet.coverAccommodationIncluded) {
+      if (worksheet.coverWaterTransportationIncluded) {
         defaultCosts.push({
           item: "Transportasi Laut/Sungai (PP)",
+          unitCount: 1,
+          days: 1,
+          unitCost: 0,
+          note: null,
+          sortOrder: defaultCosts.length,
+        });
+      }
+
+      if (worksheet.coverGroundTransportationToAirportOrHarbour) {
+        defaultCosts.push({
+          item: "Transportasi Darat ke Bandara/Pelabuhan (PP)",
           unitCount: 1,
           days: 1,
           unitCost: 0,
@@ -979,15 +991,14 @@ function RouteComponent() {
                           />
                         </TableCell>
                         <TableCell className="text-center">
-                          <Input
-                            type="number"
+                          <NumberInput
                             min={0}
                             value={item.unitCount}
-                            onChange={(e) =>
+                            onChange={(value) =>
                               handleUpdateOperationalCost(
                                 index,
                                 "unitCount",
-                                parseInt(e.target.value) || 0,
+                                value,
                               )
                             }
                             className="h-8 w-16 text-center text-xs sm:text-sm"
@@ -995,16 +1006,11 @@ function RouteComponent() {
                           />
                         </TableCell>
                         <TableCell className="text-center">
-                          <Input
-                            type="number"
+                          <NumberInput
                             min={0}
                             value={item.days}
-                            onChange={(e) =>
-                              handleUpdateOperationalCost(
-                                index,
-                                "days",
-                                parseInt(e.target.value) || 0,
-                              )
+                            onChange={(value) =>
+                              handleUpdateOperationalCost(index, "days", value)
                             }
                             className="h-8 w-16 text-center text-xs sm:text-sm"
                             disabled={!isEditable}
@@ -1026,17 +1032,14 @@ function RouteComponent() {
                           />
                         </TableCell>
                         <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
-                          <Input
-                            type="number"
+                          <NumberInput
                             min={0}
-                            value={item.unitCost ?? ""}
-                            onChange={(e) =>
+                            value={item.unitCost ?? 0}
+                            onChange={(value) =>
                               handleUpdateOperationalCost(
                                 index,
                                 "unitCost",
-                                e.target.value === ""
-                                  ? null
-                                  : parseInt(e.target.value) || 0,
+                                value,
                               )
                             }
                             placeholder="-"

@@ -1,6 +1,10 @@
 export default {
   "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}": (files) => {
-    const filtered = files.filter((f) => !f.endsWith("routeTree.gen.ts"));
+    const filtered = files.filter(
+      (f) =>
+        !f.endsWith("routeTree.gen.ts") &&
+        !/routes[/\\].*[/\\]-[^/\\]+\.tsx$/.test(f),
+    );
     if (filtered.length === 0) return [];
     const paths = filtered.join(" ");
     return [`npx eslint --fix ${paths}`, `npx prettier --write ${paths}`];

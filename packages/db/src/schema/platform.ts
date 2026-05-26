@@ -553,8 +553,10 @@ export const documents = createTable(
     // User relationships
     uploadedByUserId: uuid("uploaded_by_user_id")
       .notNull()
-      .references(() => users.id),
-    signedByUserId: uuid("signed_by_user_id").references(() => users.id),
+      .references(() => users.id, { onDelete: "set null" }),
+    signedByUserId: uuid("signed_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
 
     // Timestamps
     signedAt: timestamp("signed_at", { withTimezone: true, mode: "string" }),
@@ -599,7 +601,7 @@ export const documentSignatures = createTable(
     // Signer information
     signedByUserId: uuid("signed_by_user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "set null" }),
     signerName: varchar("signer_name", { length: 255 }).notNull(), // Cached for display
     signerEmail: varchar("signer_email", { length: 255 }), // Optional, cached from user
 

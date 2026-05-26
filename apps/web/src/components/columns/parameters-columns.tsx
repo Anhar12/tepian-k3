@@ -25,6 +25,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "parameters",
   deleteMutation: trpc.pengujian.parameter.deleteParameter,
   restoreMutation: trpc.pengujian.parameter.restoreParameter,
+  hardDeleteMutation: trpc.pengujian.parameter.hardDeleteParameter,
   getQueryOptions: (params) =>
     trpc.pengujian.parameter.getPaginatedParameters.queryOptions(params),
   useSearchParams: () => Route.useSearch(),

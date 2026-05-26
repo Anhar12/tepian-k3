@@ -204,7 +204,7 @@ export default function DataTableActionCell({
 
           {/* Delete Action */}
           {showDelete && (
-            <DropdownMenuItem className="focus:text-destructive-foreground focus:bg-destructive">
+            <DropdownMenuItem className="focus:text-destructive-foreground hover:bg-destructive hover:text-white focus:bg-destructive">
               <AlertDialogTrigger asChild onClick={() => setIsOpen(true)}>
                 <div className="flex flex-row items-center gap-2">
                   {deleteIcon}

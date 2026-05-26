@@ -24,6 +24,7 @@ const ActionCell = createCrudActionCell<
   permissionPrefix: "user-company",
   deleteMutation: trpc.pengujian.userCompany.userDeleteUserCompany,
   restoreMutation: trpc.pengujian.userCompany.userRestoreUserCompany,
+  hardDeleteMutation: trpc.pengujian.userCompany.hardDeleteUserCompany,
   getQueryOptions: (params) =>
     trpc.pengujian.userCompany.getPaginatedUserCompaniesByUserId.queryOptions(
       params,
