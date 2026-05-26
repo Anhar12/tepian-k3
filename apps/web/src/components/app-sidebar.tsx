@@ -1,4 +1,3 @@
-import * as React from "react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -10,13 +9,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { trpc } from "@/utils/trpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { backOfficeMenu } from "@/lib/back-office-menu";
 import { employeeMenu } from "@/lib/employee-menu";
 import { userMenu } from "@/lib/user-menu";
-import { EMPLOYEE_ROLES, BACK_OFFICE_ROLES } from "@tepian-k3/constants";
-import { useRouterState } from "@tanstack/react-router";
+import { trpc } from "@/utils/trpc";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { BACK_OFFICE_ROLES, EMPLOYEE_ROLES } from "@tepian-k3/constants";
+import * as React from "react";
 import ImageWithFallback from "./image-with-fallback";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -92,14 +92,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#" className="flex flex-row items-center justify-start">
+              <Link to="/" className="flex flex-row items-center justify-start">
                 <ImageWithFallback
                   src="/assets/tepian-k3.webp"
                   alt="Tepian K3 Icon"
                   className="size-6"
                 />
                 <span className="text-base font-semibold">Tepian K3</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

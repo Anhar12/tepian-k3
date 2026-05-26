@@ -195,27 +195,46 @@ function RouteComponent() {
           note: null,
           sortOrder: 0,
         },
-      ];
-
-      if (worksheet.coverFlightIncluded) {
-        defaultCosts.push({
-          item: "Pesawat PP",
+        {
+          item: "Operasional Lapangan",
           unitCount: 1,
           days: 1,
           unitCost: 0,
           note: null,
           sortOrder: 1,
+        },
+      ];
+
+      if (worksheet.coverFlightIncluded) {
+        defaultCosts.push({
+          item: "Transportasi Udara (PP)",
+          unitCount: 1,
+          days: 1,
+          unitCost: 0,
+          note: null,
+          sortOrder: defaultCosts.length,
+        });
+      }
+
+      if (worksheet.coverAccommodationIncluded) {
+        defaultCosts.push({
+          item: "Transportasi Laut/Sungai (PP)",
+          unitCount: 1,
+          days: 1,
+          unitCost: 0,
+          note: null,
+          sortOrder: defaultCosts.length,
         });
       }
 
       if (worksheet.coverGroundTransportationIncluded) {
         defaultCosts.push({
-          item: "Transportasi Darat",
+          item: "Transportasi Darat (PP)",
           unitCount: 1,
           days: 1,
           unitCost: 0,
           note: null,
-          sortOrder: 2,
+          sortOrder: defaultCosts.length,
         });
       }
 
@@ -226,18 +245,7 @@ function RouteComponent() {
           days: 1,
           unitCost: 0,
           note: null,
-          sortOrder: 3,
-        });
-      }
-
-      if (worksheet.coverAccommodationIncluded) {
-        defaultCosts.push({
-          item: "Akomodasi",
-          unitCount: 1,
-          days: 1,
-          unitCost: 0,
-          note: null,
-          sortOrder: 4,
+          sortOrder: defaultCosts.length,
         });
       }
 
@@ -261,17 +269,7 @@ function RouteComponent() {
     return ["draft", "revision"].includes(worksheet.status);
   }, [worksheet?.status]);
 
-  // Check if operational costs should be shown
-  // Only show if at least one of transportation or accommodation is covered by K3 Lab (value = true)
-  const showOperationalCosts = useMemo(() => {
-    if (!worksheet) return false;
-    return (
-      worksheet.coverFlightIncluded === true ||
-      worksheet.coverGroundTransportationIncluded === true ||
-      worksheet.coverLodgingIncluded === true ||
-      worksheet.coverAccommodationIncluded === true
-    );
-  }, [worksheet]);
+  const showOperationalCosts = !!worksheet;
 
   const locations: {
     regencyName: string;

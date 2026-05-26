@@ -1,5 +1,26 @@
 # @tepian-k3/web
 
+## 1.13.0
+
+### Minor Changes
+
+- feat(api,constants,db,queries,schema,web): implement shared cart items list component
+  - implement shared cart items list component
+  - update employee roles and names to Indonesian equivalents
+  - add handling for order rejection and cancellation states
+  - add company contact details to order detail view
+  - add head of company fields to user companies
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/api@1.14.0
+  - @tepian-k3/constants@1.10.0
+  - @tepian-k3/schema@1.10.0
+  - @tepian-k3/services@1.4.1
+  - @tepian-k3/types@1.5.2
+  - @tepian-k3/utils@1.2.2
+
 ## 1.12.0
 
 ### Minor Changes

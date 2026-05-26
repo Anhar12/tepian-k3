@@ -1,15 +1,6 @@
-import {
-  ClipboardList,
-  Search,
-  ShoppingCart,
-  ChevronLeft,
-  ChevronRight,
-  TestTube2,
-  AlertCircle,
-  LoaderCircle,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -19,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -27,16 +19,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { authMeQueryOptions } from "@/utils/auth-query";
-import { queryClient, trpc } from "@/utils/trpc";
-import { cn } from "@/lib/utils";
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import useDebounced from "@/hooks/use-debounced";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import { authMeQueryOptions } from "@/utils/auth-query";
+import { queryClient, trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  LoaderCircle,
+  Search,
+  ShoppingCart,
+  TestTube2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface TestingTableProps extends React.HTMLAttributes<HTMLDivElement> {
   route: "/pengujian" | "/katalog";
@@ -79,11 +78,8 @@ export function TestingTable({
 
   const { data: me } = useQuery(authMeQueryOptions());
 
-  const hasClusterId =
-    params.clusterId !== undefined && params.clusterId !== null;
-
-  const { data: parameters, isLoading } = useQuery({
-    ...trpc.pengujian.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
+  const { data: parameters, isLoading } = useQuery(
+    trpc.pengujian.parameter.getOffsetPaginatedParametersByClusterIdAndCategoryId.queryOptions(
       {
         clusterId: params.clusterId,
         parameterCategoryId: params.parameterCategoryId,
@@ -92,8 +88,7 @@ export function TestingTable({
         name: params.name,
       },
     ),
-    enabled: hasClusterId,
-  });
+  );
 
   const { data: categories, isLoading: isLoadingCategories } = useQuery(
     trpc.pengujian.parameterCategories.getAllParameterCategories.queryOptions(),
@@ -109,7 +104,7 @@ export function TestingTable({
           trpc.pengujian.cart.getCartItemCount.queryOptions(),
         );
         globalSuccessToast(
-          `Parameter ${data.parameter.name} berhasil ditambahkan ke keranjang`,
+          `${data.parameter.name} ditambahkan ke keranjang — Cek keranjang untuk melanjutkan pesanan`,
         );
 
         // Remove loading state for this specific parameter
@@ -204,13 +199,13 @@ export function TestingTable({
           <Skeleton className="h-10 w-48 rounded-full" />
         ) : (
           <Select
-            value={params.parameterCategoryId || undefined}
+            value={params.parameterCategoryId || "all"}
             onValueChange={(value) => {
               navigate({
                 to: route,
                 search: (old) => ({
                   ...old,
-                  parameterCategoryId: value || undefined,
+                  parameterCategoryId: value === "all" ? undefined : value,
                   page: 1,
                 }),
               });
@@ -222,6 +217,7 @@ export function TestingTable({
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Kategori Parameter</SelectLabel>
+                <SelectItem value="all">Semua Kategori</SelectItem>
                 {categories?.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
@@ -271,161 +267,159 @@ export function TestingTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!hasClusterId ? (
-              <TableRow className="border-slate-100">
-                <TableCell
-                  colSpan={showCart ? 7 : 4}
-                  className="h-32 text-center"
-                >
-                  <div className="flex flex-col items-center gap-3">
-                    <AlertCircle className="h-8 w-8 text-amber-500" />
-                    <div>
-                      <p className="font-bold text-slate-700">
-                        Pilih Kategori Parameter
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        Silakan pilih salah satu kategori parameter pengujian di
-                        atas untuk melihat daftar parameter
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : isLoading ? (
-              Array.from({ length: 5 }).map((_, index) => (
-                <TableRow key={index} className="border-slate-100">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-8 w-8 rounded-lg" />
-                      <div className="flex flex-col gap-2">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-3 w-24" />
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index} className="border-slate-100">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <div className="flex flex-col gap-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-28 rounded-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="mb-2 h-4 w-40" />
-                    <Skeleton className="h-3 w-32" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
-                  {showCart && (
-                    <>
-                      <TableCell>
-                        <Skeleton className="h-10 w-16 rounded-xl" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-4 w-24" />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))
-            ) : (
-              parameters?.data.map((row) => (
-                <TableRow key={row.id} className="group border-slate-100">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
-                        )}
-                      >
-                        <TestTube2 className="h-4 w-4" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-700">
-                          {row.category.name}
-                        </span>
-                        <span className="text-[10px] font-medium text-slate-400">
-                          {row.cluster.name}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
-                    >
-                      {row.name}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
-                    <div className="font-bold text-slate-700">
-                      {row.reference?.split(" ")[0]}{" "}
-                      {row.reference?.split(" ")[1]}
-                    </div>
-                    <div>{row.reference?.split(" ").slice(2).join(" ")}</div>
-                  </TableCell>
-                  <TableCell className="text-sm font-bold text-slate-800">
-                    Rp {row.price.toLocaleString("id-ID")}
-                  </TableCell>
-                  {showCart && (
-                    <>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          defaultValue={1}
-                          className="h-10 w-16 rounded-xl border-slate-200 bg-slate-50/50 text-center font-bold"
-                          min={1}
-                          onChange={(e) => {
-                            const quantity = parseInt(e.target.value, 10);
-                            if (quantity < 1) return;
-                            setCart((oldCart) => {
-                              const newCart = new Map(oldCart);
-                              newCart.set(row.id, {
-                                quantity,
-                                price: row.price,
-                              });
-                              return newCart;
-                            });
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell className="text-sm font-bold text-[#0056B3]">
-                        Rp{" "}
-                        {(
-                          (cart.get(row.id)?.quantity || 1) * row.price
-                        ).toLocaleString("id-ID")}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          className="h-10 gap-2 rounded-xl bg-[#4285F4] px-4 text-[10px] font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg"
-                          disabled={!me || addingToCart.get(row.id)}
-                          onClick={() =>
-                            handleAddToCart(
-                              row.id,
-                              cart.get(row.id)?.quantity || 1,
-                              row.price,
-                            )
-                          }
-                        >
-                          {addingToCart.get(row.id) ? (
-                            <>
-                              <LoaderCircle className="h-4 w-4 animate-spin" />
-                              Adding...
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingCart className="h-4 w-4" />
-                              Add to Cart
-                            </>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-28 rounded-full" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="mb-2 h-4 w-40" />
+                      <Skeleton className="h-3 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    {showCart && (
+                      <>
+                        <TableCell>
+                          <Skeleton className="h-10 w-16 rounded-xl" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="ml-auto h-10 w-32 rounded-xl" />
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))
+              : parameters?.data.map((row) => (
+                  <TableRow key={row.id} className="group border-slate-100">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={cn(
+                            `flex h-8 w-8 shrink-0 items-center justify-center rounded-lg`,
                           )}
-                        </Button>
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))
-            )}
+                        >
+                          <TestTube2 className="h-4 w-4" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-700">
+                            {row.category.name}
+                          </span>
+                          <span className="text-[10px] font-medium text-slate-400">
+                            {row.cluster.name}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
+                      >
+                        {row.name}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
+                      <div className="font-bold text-slate-700">
+                        {row.reference?.split(" ")[0]}{" "}
+                        {row.reference?.split(" ")[1]}
+                      </div>
+                      <div>{row.reference?.split(" ").slice(2).join(" ")}</div>
+                    </TableCell>
+                    <TableCell className="text-sm font-bold text-slate-800 tabular-nums">
+                      Rp {row.price.toLocaleString("id-ID")}
+                    </TableCell>
+                    {showCart && (
+                      <>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            value={cart.get(row.id)?.quantity ?? 0}
+                            className={cn(
+                              "h-10 w-16 rounded-xl border-slate-200 text-center font-bold tabular-nums transition-colors",
+                              (cart.get(row.id)?.quantity ?? 0) > 0
+                                ? "bg-blue-50/50 text-slate-800"
+                                : "bg-slate-100 text-slate-400",
+                            )}
+                            min={0}
+                            onChange={(e) => {
+                              const quantity = parseInt(e.target.value, 10);
+                              setCart((oldCart) => {
+                                const newCart = new Map(oldCart);
+                                if (isNaN(quantity) || quantity <= 0) {
+                                  newCart.delete(row.id);
+                                } else {
+                                  newCart.set(row.id, {
+                                    quantity,
+                                    price: row.price,
+                                  });
+                                }
+                                return newCart;
+                              });
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell className="text-sm font-bold text-[#0056B3] tabular-nums">
+                          Rp{" "}
+                          {(
+                            (cart.get(row.id)?.quantity ?? 0) * row.price
+                          ).toLocaleString("id-ID")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            className={cn(
+                              "h-10 gap-2 rounded-xl px-4 text-[10px] font-bold text-white transition-all",
+                              (cart.get(row.id)?.quantity ?? 0) > 0 &&
+                                !addingToCart.get(row.id)
+                                ? "bg-[#4285F4] hover:bg-blue-600 hover:shadow-lg"
+                                : "cursor-not-allowed bg-slate-300",
+                            )}
+                            disabled={
+                              !me ||
+                              addingToCart.get(row.id) ||
+                              !(cart.get(row.id)?.quantity ?? 0) ||
+                              !params.companyId ||
+                              !params.locationId
+                            }
+                            onClick={() =>
+                              handleAddToCart(
+                                row.id,
+                                cart.get(row.id)?.quantity ?? 1,
+                                row.price,
+                              )
+                            }
+                          >
+                            {addingToCart.get(row.id) ? (
+                              <>
+                                <LoaderCircle className="h-4 w-4 animate-spin" />
+                                Adding...
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingCart className="h-4 w-4" />
+                                Add to Cart
+                              </>
+                            )}
+                          </Button>
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </div>

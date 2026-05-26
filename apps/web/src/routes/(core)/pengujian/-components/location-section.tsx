@@ -1,16 +1,5 @@
-import { MapPin, Plus, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "@/utils/trpc";
-import { cn } from "@/lib/utils";
-import ComboBox from "@/components/ui/combobox";
-import { useState } from "react";
-import { getRouteApi } from "@tanstack/react-router";
-import CreateCompanyLocationDialog from "../../dashboard/company/-components/create-company-location-dialog";
-import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
-import { globalWarningToast } from "@/lib/toast";
 import {
   Carousel,
   CarouselContent,
@@ -18,9 +7,20 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import MultiComboBox from "@/components/ui/multi-combobox";
-import { useCartStore } from "@/stores/cart.stores";
+import ComboBox from "@/components/ui/combobox";
 import { EmptyState } from "@/components/ui/empty-state";
+import MultiComboBox from "@/components/ui/multi-combobox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { globalWarningToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import { useCartStore } from "@/stores/cart.stores";
+import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
+import { Building2, MapPin } from "lucide-react";
+import { useState } from "react";
+import CreateCompanyLocationDialog from "../../dashboard/company/-components/create-company-location-dialog";
 
 const routeApi = getRouteApi("/(core)/pengujian/");
 
@@ -70,7 +70,7 @@ export function LocationSection() {
           <div>
             <h3 className="font-bold text-slate-800">Pilih Perushaan</h3>
             <p className="text-sm text-slate-500">
-              Pilih perusahaan tempat lokasi pengujian berada
+              Pilih perusahaan yang akan dilakukan pengujian
             </p>
           </div>
         </div>
@@ -104,7 +104,6 @@ export function LocationSection() {
             })
           }
         >
-          <Plus className="size-6" />
           Tambah Perusahaan
         </Button>
       </div>
@@ -115,9 +114,9 @@ export function LocationSection() {
             <MapPin className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Area lokasi pengujian</h3>
+            <h3 className="font-bold text-slate-800">Lokasi pengujian</h3>
             <p className="text-sm text-slate-500">
-              Masukkan data lokasi pengujian
+              Masukkan lokasi pengujian sebelum menentukan parameter pengujian
             </p>
           </div>
         </div>
@@ -149,7 +148,6 @@ export function LocationSection() {
             setIsCreateDialogOpen(true);
           }}
         >
-          <Plus className="size-6" />
           Tambah Lokasi Pengujian
         </Button>
       </div>
@@ -178,11 +176,19 @@ export function LocationSection() {
       ) : selectedTestingLocations && selectedTestingLocations.length > 0 ? (
         <div className="flex flex-col items-center justify-center">
           <Carousel className="w-full px-8 sm:w-[calc(100%-6rem)] sm:px-0">
-            <CarouselContent className="-ml-1">
+            <CarouselContent
+              className="-ml-1"
+              wrapperClassName="overflow-visible"
+            >
               {selectedTestingLocations.map((area) => (
                 <CarouselItem
                   key={area.id}
-                  className="w-70 max-w-[320px] p-2 sm:w-auto"
+                  className={cn(
+                    "w-70 max-w-[320px] p-2 transition-all duration-250 sm:w-auto",
+                    currentLocation === area.id
+                      ? "scale-105"
+                      : "scale-95 opacity-70",
+                  )}
                   onClick={() => {
                     const arrayOfObjects = [
                       { id: area.id, name: area.name, items: [] },
@@ -218,7 +224,7 @@ export function LocationSection() {
                     className={cn(
                       "space-y-4 rounded-3xl border-none bg-white p-6 shadow-md shadow-slate-100",
                       currentLocation === area.id &&
-                        "ring-2 ring-blue-500 *:ring-offset-2",
+                        "shadow-lg ring-3 shadow-blue-100 ring-blue-500",
                     )}
                   >
                     <h4 className="border-b border-slate-100 pb-3 text-xl font-bold text-slate-800">

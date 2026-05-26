@@ -184,11 +184,11 @@ export default function EditCompanyLocationDialog({
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nama Perusahaan
+                      Nama Lokasi Pengujian
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nama perusahaan"
+                      placeholder="Masukkan nama lokasi pengujian..."
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}

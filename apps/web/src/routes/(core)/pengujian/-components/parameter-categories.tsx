@@ -1,11 +1,11 @@
+import { Skeleton } from "@/components/ui/skeleton";
+import { getClusterColor, getClusterIcon } from "@/lib/cluster-colors";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Globe2, AlertCircle } from "lucide-react";
+import { AlertCircle, Globe2 } from "lucide-react";
 import { createElement } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getClusterColor, getClusterIcon } from "@/lib/cluster-colors";
 
 interface ClustersProps {
   route: "/pengujian" | "/katalog";
@@ -24,11 +24,9 @@ export function Clusters({ route }: ClustersProps) {
   return (
     <div className="space-y-8 rounded-4xl border border-slate-100 bg-white p-10 shadow-sm">
       <div className="space-y-1">
-        <h2 className="text-2xl font-bold text-[#0056B3]">
-          Parameter Pengujian
-        </h2>
-        <p className="font-medium text-slate-500">
-          Pilih kategori parameter yang akan diuji
+        <h2 className="font-bold text-slate-800">Pilih Parameter Pengujian</h2>
+        <p className="text-sm text-slate-500">
+          Pilih Parameter Pengujian Berdasarkan Lokasi
         </p>
       </div>
 
@@ -54,36 +52,62 @@ export function Clusters({ route }: ClustersProps) {
                 <Skeleton className="h-full w-full" />
               </div>
             ))
-          : clusters?.map((cluster) => (
+          : [
               <button
-                key={cluster.id}
+                key="all"
                 className={cn(
-                  "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
-                  getClusterColor(cluster.name),
-                  search.clusterId === cluster.id &&
-                    "scale-110 ring-4 ring-white",
+                  "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br from-slate-400 to-slate-600 p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
+                  !search.clusterId && "scale-110 ring-4 ring-white",
                 )}
                 onClick={() => {
                   navigate({
                     to: route,
                     search: (old) => ({
                       ...old,
-                      clusterId: cluster.id,
+                      clusterId: undefined,
                     }),
                   });
                 }}
               >
                 <div className="mb-4 transform transition-transform group-hover:scale-110">
-                  {createElement(getClusterIcon(cluster.name) || Globe2, {
-                    className: "size-8",
-                  })}
+                  <Globe2 className="size-8" />
                 </div>
                 <span className="max-w-20 text-center text-sm leading-tight font-bold uppercase">
-                  {cluster.name}
+                  Semua
                 </span>
                 <div className="absolute inset-0 rounded-3xl bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
-              </button>
-            ))}
+              </button>,
+              ...(clusters ?? []).map((cluster) => (
+                <button
+                  key={cluster.id}
+                  className={cn(
+                    "group relative flex aspect-square flex-col items-center justify-center rounded-3xl bg-linear-to-br p-6 text-white shadow-lg transition-transform hover:-translate-y-2 hover:shadow-xl",
+                    getClusterColor(cluster.name),
+                    search.clusterId === cluster.id &&
+                      "scale-110 ring-4 ring-white",
+                  )}
+                  onClick={() => {
+                    navigate({
+                      to: route,
+                      search: (old) => ({
+                        ...old,
+                        clusterId: cluster.id,
+                      }),
+                    });
+                  }}
+                >
+                  <div className="mb-4 transform transition-transform group-hover:scale-110">
+                    {createElement(getClusterIcon(cluster.name) || Globe2, {
+                      className: "size-8",
+                    })}
+                  </div>
+                  <span className="max-w-20 text-center text-sm leading-tight font-bold uppercase">
+                    {cluster.name}
+                  </span>
+                  <div className="absolute inset-0 rounded-3xl bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
+                </button>
+              )),
+            ]}
       </div>
     </div>
   );
