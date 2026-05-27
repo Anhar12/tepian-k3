@@ -271,6 +271,8 @@ function LoaderComponent() {
 export function RouteComponent() {
   const { roleId } = Route.useParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 3;
 
   const { data: role } = useSuspenseQuery(
     trpc.platform.role.getRoleWithPermissionsById.queryOptions({ id: roleId }),
@@ -348,6 +350,40 @@ export function RouteComponent() {
     return categories;
   }, [allPermissions, searchQuery]);
 
+  // Derive pagination and selection stats
+  const totalPages = useMemo(() => {
+    return Math.ceil(Object.keys(groupedPermissions).length / ITEMS_PER_PAGE);
+  }, [groupedPermissions]);
+
+  const activePage = useMemo(() => {
+    return Math.min(Math.max(1, currentPage), totalPages || 1);
+  }, [currentPage, totalPages]);
+
+  const paginatedCategories = useMemo(() => {
+    return Object.entries(groupedPermissions).slice(
+      (activePage - 1) * ITEMS_PER_PAGE,
+      activePage * ITEMS_PER_PAGE,
+    );
+  }, [groupedPermissions, activePage]);
+
+  const selectionStats = useMemo(() => {
+    let total = 0;
+    let selected = 0;
+
+    allPermissions.forEach((p) => {
+      total++;
+      if (selectedPermissions.has(p.name)) {
+        selected++;
+      }
+    });
+
+    return {
+      total,
+      selected,
+      percentage: total > 0 ? Math.round((selected / total) * 100) : 0,
+    };
+  }, [allPermissions, selectedPermissions]);
+
   // Derive added/removed permissions when needed
   const { addedPermissions, removedPermissions, hasChanges } = useMemo(() => {
     const added = [...selectedPermissions].filter(
@@ -384,16 +420,6 @@ export function RouteComponent() {
     }),
   );
 
-  const filteredPermissions = useMemo(
-    () =>
-      search.trim()
-        ? allPermissions.filter((p) =>
-            p.name.toLowerCase().includes(search.toLowerCase()),
-          )
-        : allPermissions,
-    [allPermissions, search],
-  );
-
   // Check if all permissions are selected
   const allSelected = useMemo(
     () =>
@@ -412,7 +438,7 @@ export function RouteComponent() {
 
   // Toggles all permissions in a specific resource
   function handleToggleResourcePermissions(
-    resourceName: string,
+    _resourceName: string,
     permissions: Array<{ name: string }>,
   ) {
     const allOfResourceSelected = permissions.every((p) =>
@@ -490,8 +516,7 @@ export function RouteComponent() {
                 </span>
               </CardTitle>
               <CardDescription className="mt-1 text-neutral-500">
-                Kelola hak akses detail karyawan non-IT dengan tampilan yang
-                ramah dan mudah dipahami.
+                Kelola hak akses detail karyawan.
               </CardDescription>
             </div>
           </div>
@@ -522,6 +547,56 @@ export function RouteComponent() {
               </div>
             </div>
 
+            {/* Visual Selection Stats Card */}
+            <div className="rounded-xl border border-neutral-200/60 bg-gradient-to-br from-white to-neutral-50/50 p-4 shadow-sm">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="space-y-1">
+                  <span className="text-xs font-extrabold tracking-wider text-neutral-500 uppercase">
+                    Statistik Hak Akses Terpilih
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-neutral-800">
+                      {selectionStats.selected}
+                    </span>
+                    <span className="text-sm font-semibold text-neutral-500">
+                      dari {selectionStats.total} izin aktif
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <span className="text-xs font-extrabold text-blue-600">
+                      {selectionStats.percentage}%
+                    </span>
+                    <span className="block text-[10px] font-semibold text-neutral-400">
+                      Cakupan Izin
+                    </span>
+                  </div>
+                  <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+                    <Shield className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
+                  style={{ width: `${selectionStats.percentage}%` }}
+                />
+              </div>
+
+              {/* Security Warning Alert for JWT Caching */}
+              <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-amber-100 bg-amber-50/40 p-3 text-[11px] leading-relaxed font-medium text-amber-700">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                <p>
+                  <strong>Catatan Keamanan:</strong> Karyawan yang sedang login{" "}
+                  <strong>wajib logout dan login kembali</strong> untuk
+                  mengaktifkan perubahan hak akses baru ini.
+                </p>
+              </div>
+            </div>
+
             {/* Bilah Pencarian & Tombol Global */}
             <div className="flex flex-col items-center justify-between gap-3 rounded-lg border border-neutral-100 bg-white p-3 sm:flex-row">
               <div className="relative w-full sm:max-w-md">
@@ -531,7 +606,10 @@ export function RouteComponent() {
                   placeholder="Cari modul atau hak akses (misal: 'User', 'Kalibrasi', 'Hapus')..."
                   className="h-10 border-neutral-200 pl-9 text-sm focus-visible:ring-blue-600"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
               </div>
               <Button
@@ -548,118 +626,115 @@ export function RouteComponent() {
 
             {/* Kontainer Utama Permissions */}
             <div className="custom-scrollbar max-h-[550px] space-y-6 overflow-y-auto pr-2">
-              {Object.keys(groupedPermissions).length > 0 ? (
-                Object.entries(groupedPermissions).map(
-                  ([category, resources]) => {
-                    // Collect all permission items in this category for category-level select-all
-                    const categoryPermissionList =
-                      Object.values(resources).flat();
-                    const isAllOfCategorySelected =
-                      categoryPermissionList.every((p) =>
-                        selectedPermissions.has(p.name),
-                      );
+              {paginatedCategories.length > 0 ? (
+                paginatedCategories.map(([category, resources]) => {
+                  // Collect all permission items in this category for category-level select-all
+                  const categoryPermissionList =
+                    Object.values(resources).flat();
+                  const isAllOfCategorySelected = categoryPermissionList.every(
+                    (p) => selectedPermissions.has(p.name),
+                  );
 
-                    return (
-                      <div
-                        key={category}
-                        className="block overflow-hidden rounded-xl border border-neutral-200/80 bg-white shadow-sm transition-all hover:shadow-md"
-                      >
-                        {/* Header Kategori Bisnis */}
-                        <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50 px-4 py-3">
-                          <h3 className="text-sm font-extrabold tracking-wide text-neutral-700">
-                            🛡️ {category}
-                          </h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-[10px] font-bold text-blue-600 hover:bg-blue-50/50 hover:text-blue-700"
-                            onClick={() =>
-                              handleToggleCategoryPermissions(
-                                categoryPermissionList,
-                              )
-                            }
-                          >
-                            {isAllOfCategorySelected
-                              ? "Batal Kategori"
-                              : "Pilih Semua Kategori"}
-                          </Button>
-                        </div>
-
-                        {/* Konten Kategori (Daftar Modul / Resource) */}
-                        <div className="divide-y divide-neutral-100">
-                          {Object.entries(resources).map(
-                            ([resource, permissions]) => {
-                              const isAllOfResourceSelected = permissions.every(
-                                (p) => selectedPermissions.has(p.name),
-                              );
-                              const friendlyTitle =
-                                RESOURCE_LABELS[resource]?.title || resource;
-
-                              return (
-                                <div
-                                  key={resource}
-                                  className="flex flex-col justify-between gap-3 px-4 py-4 transition-colors hover:bg-neutral-50/30 lg:flex-row lg:items-center"
-                                >
-                                  {/* Kolom Judul Modul */}
-                                  <div className="min-w-[200px]">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-sm font-bold text-neutral-800">
-                                        {friendlyTitle}
-                                      </span>
-                                      <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-neutral-400">
-                                        {resource}
-                                      </span>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleToggleResourcePermissions(
-                                          resource,
-                                          permissions,
-                                        )
-                                      }
-                                      className="mt-0.5 block text-left text-[10px] font-semibold text-blue-500 transition-all hover:underline"
-                                    >
-                                      {isAllOfResourceSelected
-                                        ? "Uncheck Modul"
-                                        : "Pilih Semua Modul"}
-                                    </button>
-                                  </div>
-
-                                  {/* Kolom Checkboxes Hak Akses (Indonesian action labels) */}
-                                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 lg:justify-end">
-                                    {permissions.map((permission) => (
-                                      <label
-                                        key={permission.id}
-                                        className="group flex cursor-pointer items-center gap-2 py-1 text-xs text-neutral-600 select-none hover:text-neutral-900"
-                                      >
-                                        <Checkbox
-                                          checked={selectedPermissions.has(
-                                            permission.name,
-                                          )}
-                                          onCheckedChange={(isChecked) =>
-                                            handleOnPermissionChange(
-                                              permission.name,
-                                              isChecked as boolean,
-                                            )
-                                          }
-                                          className="border-neutral-300 transition-all focus-visible:ring-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
-                                        />
-                                        <span className="transition-transform duration-150 group-hover:translate-x-0.5">
-                                          {permission.friendlyAction}
-                                        </span>
-                                      </label>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            },
-                          )}
-                        </div>
+                  return (
+                    <div
+                      key={category}
+                      className="block overflow-hidden rounded-xl border border-neutral-200/80 bg-white shadow-sm transition-all hover:shadow-md"
+                    >
+                      {/* Header Kategori Bisnis */}
+                      <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50 px-4 py-3">
+                        <h3 className="text-sm font-extrabold tracking-wide text-neutral-700">
+                          🛡️ {category}
+                        </h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-[10px] font-bold text-blue-600 hover:bg-blue-50/50 hover:text-blue-700"
+                          onClick={() =>
+                            handleToggleCategoryPermissions(
+                              categoryPermissionList,
+                            )
+                          }
+                        >
+                          {isAllOfCategorySelected
+                            ? "Batal Kategori"
+                            : "Pilih Semua Kategori"}
+                        </Button>
                       </div>
-                    );
-                  },
-                )
+
+                      {/* Konten Kategori (Daftar Modul / Resource) */}
+                      <div className="divide-y divide-neutral-100">
+                        {Object.entries(resources).map(
+                          ([resource, permissions]) => {
+                            const isAllOfResourceSelected = permissions.every(
+                              (p) => selectedPermissions.has(p.name),
+                            );
+                            const friendlyTitle =
+                              RESOURCE_LABELS[resource]?.title || resource;
+
+                            return (
+                              <div
+                                key={resource}
+                                className="flex flex-col justify-between gap-3 px-4 py-4 transition-colors hover:bg-neutral-50/30 lg:flex-row lg:items-center"
+                              >
+                                {/* Kolom Judul Modul */}
+                                <div className="min-w-[200px]">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-bold text-neutral-800">
+                                      {friendlyTitle}
+                                    </span>
+                                    <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-neutral-400">
+                                      {resource}
+                                    </span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleToggleResourcePermissions(
+                                        resource,
+                                        permissions,
+                                      )
+                                    }
+                                    className="mt-0.5 block text-left text-[10px] font-semibold text-blue-500 transition-all hover:underline"
+                                  >
+                                    {isAllOfResourceSelected
+                                      ? "Uncheck Modul"
+                                      : "Pilih Semua Modul"}
+                                  </button>
+                                </div>
+
+                                {/* Kolom Checkboxes Hak Akses (Indonesian action labels) */}
+                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 lg:justify-end">
+                                  {permissions.map((permission) => (
+                                    <label
+                                      key={permission.id}
+                                      className="group flex cursor-pointer items-center gap-2 py-1 text-xs text-neutral-600 select-none hover:text-neutral-900"
+                                    >
+                                      <Checkbox
+                                        checked={selectedPermissions.has(
+                                          permission.name,
+                                        )}
+                                        onCheckedChange={(isChecked) =>
+                                          handleOnPermissionChange(
+                                            permission.name,
+                                            isChecked as boolean,
+                                          )
+                                        }
+                                        className="border-neutral-300 transition-all focus-visible:ring-blue-600 data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
+                                      />
+                                      <span className="transition-transform duration-150 group-hover:translate-x-0.5">
+                                        {permission.friendlyAction}
+                                      </span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          },
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-neutral-50 py-10">
                   <Search className="mb-2 h-8 w-8 text-neutral-300" />
@@ -669,6 +744,86 @@ export function RouteComponent() {
                 </div>
               )}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-neutral-100 pt-4 sm:flex-row">
+                <div className="text-xs font-semibold text-neutral-500">
+                  Menampilkan halaman{" "}
+                  <span className="font-extrabold text-blue-600">
+                    {activePage}
+                  </span>{" "}
+                  dari{" "}
+                  <span className="font-extrabold text-neutral-700">
+                    {totalPages}
+                  </span>{" "}
+                  kategori ({Object.keys(groupedPermissions).length} kategori
+                  ditemukan)
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-lg border-neutral-200 px-3 font-bold text-neutral-600 transition-all hover:bg-neutral-50"
+                    disabled={activePage === 1}
+                    onClick={() => setCurrentPage(activePage - 1)}
+                  >
+                    Sebelumnya
+                  </Button>
+
+                  {/* Page numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => {
+                      // Show maximum of 5 page buttons to prevent layout overflow
+                      if (
+                        totalPages > 5 &&
+                        Math.abs(page - activePage) > 1 &&
+                        page !== 1 &&
+                        page !== totalPages
+                      ) {
+                        if (page === 2 || page === totalPages - 1) {
+                          return (
+                            <span
+                              key={page}
+                              className="px-1 text-xs text-neutral-400 select-none"
+                            >
+                              ...
+                            </span>
+                          );
+                        }
+                        return null;
+                      }
+
+                      return (
+                        <Button
+                          key={page}
+                          variant={page === activePage ? "default" : "outline"}
+                          size="sm"
+                          className={`h-8 w-8 rounded-lg p-0 text-xs font-bold transition-all ${
+                            page === activePage
+                              ? "bg-blue-600 text-white shadow-md shadow-blue-600/10 hover:bg-blue-700"
+                              : "border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                          }`}
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      );
+                    },
+                  )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-lg border-neutral-200 px-3 font-bold text-neutral-600 transition-all hover:bg-neutral-50"
+                    disabled={activePage === totalPages}
+                    onClick={() => setCurrentPage(activePage + 1)}
+                  >
+                    Selanjutnya
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Tombol Simpan Aksi */}
             <Button

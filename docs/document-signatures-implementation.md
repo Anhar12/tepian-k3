@@ -96,6 +96,7 @@ Updated `signDocumentWithQRCodes` endpoint to:
 ### Endpoint: `signDocumentWithQRCodes`
 
 **Input:**
+
 ```typescript
 {
   entityId: string (UUID v7),
@@ -119,6 +120,7 @@ Updated `signDocumentWithQRCodes` endpoint to:
 ```
 
 **Output:**
+
 ```typescript
 {
   document: {
@@ -147,7 +149,7 @@ Updated `signDocumentWithQRCodes` endpoint to:
 ### 1. Client Prepares Data
 
 ```typescript
-const qrCodes = qrElements.map(qr => ({
+const qrCodes = qrElements.map((qr) => ({
   userId: qr.userId,
   userName: qr.userName,
   purpose: qr.purpose,
@@ -243,7 +245,7 @@ if (signature) {
 To apply the database changes:
 
 ```bash
-npm run db:migrate
+pnpm db:migrate
 ```
 
 This will create the `document_signatures` table in your database.
@@ -295,15 +297,15 @@ const testData = {
       userId: "01JQJR3X8K2HDYQ0MHW6N5ZP4A",
       userName: "John Doe",
       purpose: "Approved by Finance Manager",
-      position: { x: 50, y: 50, width: 100, height: 100, page: 0 }
+      position: { x: 50, y: 50, width: 100, height: 100, page: 0 },
     },
     {
       userId: "01JQJR3X8K2HDYQ0MHW6N5ZP4B",
       userName: "Jane Smith",
       purpose: "Reviewed by CEO",
-      position: { x: 400, y: 50, width: 100, height: 100, page: 0 }
-    }
-  ]
+      position: { x: 400, y: 50, width: 100, height: 100, page: 0 },
+    },
+  ],
 };
 ```
 

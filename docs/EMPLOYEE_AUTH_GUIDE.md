@@ -1,12 +1,15 @@
 # Employee Authentication Implementation Guide
 
 ## Overview
+
 This guide explains how to implement employee login using the unified authentication system that links employees to the users table.
 
 ## Database Schema Changes
 
 ### Updated Employees Table
+
 The `employees` table now includes:
+
 - `userId`: Foreign key linking to `users.id` (unique, cascade on delete)
 - `email`: Employee email address (unique)
 - Indexes for efficient lookups on `userId` and `email`
@@ -19,13 +22,14 @@ You'll need to create a migration to update your existing employees table. If yo
 
 ```bash
 # Generate migration
-npm run db:generate
+pnpm db:generate
 
 # Review the migration file, then apply it
-npm run db:migrate
+pnpm db:migrate
 ```
 
 **Important**: If you have existing employees in the database, you'll need to:
+
 1. Create user accounts for each existing employee first
 2. Update the employees table to link to those user accounts
 3. Then apply the schema changes
@@ -38,17 +42,17 @@ Create specific roles for employees in your database:
 // Example seed or migration script
 const employeeRoles = [
   {
-    name: 'Lab Technician',
-    description: 'Performs testing and lab work'
+    name: "Lab Technician",
+    description: "Performs testing and lab work",
   },
   {
-    name: 'Lab Manager',
-    description: 'Manages lab operations and staff'
+    name: "Lab Manager",
+    description: "Manages lab operations and staff",
   },
   {
-    name: 'Admin Staff',
-    description: 'Administrative support staff'
-  }
+    name: "Admin Staff",
+    description: "Administrative support staff",
+  },
 ];
 
 // Insert these roles and assign appropriate permissions
@@ -68,19 +72,23 @@ async function createEmployee(data: {
   status: string;
 }) {
   // 1. Create user account
-  const user = await db.insert(users).values({
-    email: data.email,
-    password: await hashPassword(data.password),
-    name: data.name,
-    address: '', // Or collect from employee
-    phone: '', // Or collect from employee
-    emailVerified: false,
-  }).returning();
+  const user = await db
+    .insert(users)
+    .values({
+      email: data.email,
+      password: await hashPassword(data.password),
+      name: data.name,
+      address: "", // Or collect from employee
+      phone: "", // Or collect from employee
+      emailVerified: false,
+    })
+    .returning();
 
   // 2. Assign employee role
-  const employeeRole = await db.select()
+  const employeeRole = await db
+    .select()
     .from(roles)
-    .where(eq(roles.name, 'Employee'))
+    .where(eq(roles.name, "Employee"))
     .limit(1);
 
   await db.insert(userRoles).values({
@@ -89,13 +97,16 @@ async function createEmployee(data: {
   });
 
   // 3. Create employee record
-  const employee = await db.insert(employees).values({
-    userId: user.id,
-    name: data.name,
-    email: data.email,
-    position: data.position,
-    status: data.status || 'siap',
-  }).returning();
+  const employee = await db
+    .insert(employees)
+    .values({
+      userId: user.id,
+      name: data.name,
+      email: data.email,
+      position: data.position,
+      status: data.status || "siap",
+    })
+    .returning();
 
   return { user, employee };
 }
@@ -138,19 +149,21 @@ Use your existing permission system to control employee access:
 ```typescript
 // Example middleware
 async function requireEmployeeRole(userId: string) {
-  const userRoles = await db.select()
+  const userRoles = await db
+    .select()
     .from(userRoles)
     .innerJoin(roles, eq(userRoles.roleId, roles.id))
     .where(eq(userRoles.userId, userId));
 
-  const hasEmployeeRole = userRoles.some(ur =>
-    ur.roles.name.includes('Employee') ||
-    ur.roles.name.includes('Lab') ||
-    ur.roles.name.includes('Admin Staff')
+  const hasEmployeeRole = userRoles.some(
+    (ur) =>
+      ur.roles.name.includes("Employee") ||
+      ur.roles.name.includes("Lab") ||
+      ur.roles.name.includes("Admin Staff"),
   );
 
   if (!hasEmployeeRole) {
-    throw new Error('Access denied: Employee role required');
+    throw new Error("Access denied: Employee role required");
   }
 }
 ```
@@ -163,35 +176,35 @@ Create permissions for employee actions:
 // Example permissions to seed
 const employeePermissions = [
   {
-    name: 'testing.perform',
-    description: 'Perform laboratory testing',
-    resource: 'testing',
-    action: 'create'
+    name: "testing.perform",
+    description: "Perform laboratory testing",
+    resource: "testing",
+    action: "create",
   },
   {
-    name: 'testing.view',
-    description: 'View testing records',
-    resource: 'testing',
-    action: 'read'
+    name: "testing.view",
+    description: "View testing records",
+    resource: "testing",
+    action: "read",
   },
   {
-    name: 'testing.update',
-    description: 'Update testing results',
-    resource: 'testing',
-    action: 'update'
+    name: "testing.update",
+    description: "Update testing results",
+    resource: "testing",
+    action: "update",
   },
   {
-    name: 'tools.view',
-    description: 'View laboratory tools',
-    resource: 'tools',
-    action: 'read'
+    name: "tools.view",
+    description: "View laboratory tools",
+    resource: "tools",
+    action: "read",
   },
   {
-    name: 'tools.manage',
-    description: 'Manage laboratory tools',
-    resource: 'tools',
-    action: 'update'
-  }
+    name: "tools.manage",
+    description: "Manage laboratory tools",
+    resource: "tools",
+    action: "update",
+  },
 ];
 ```
 
@@ -204,21 +217,21 @@ Use one login page for both users and employees:
 ```typescript
 // components/LoginForm.tsx
 async function handleLogin(email: string, password: string) {
-  const response = await fetch('/api/auth/login', {
-    method: 'POST',
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
     body: JSON.stringify({ email, password }),
   });
 
   const { user, token } = await response.json();
 
   // Store token
-  localStorage.setItem('authToken', token);
+  localStorage.setItem("authToken", token);
 
   // Redirect based on user type
   if (user.isEmployee) {
-    router.push('/employee/dashboard');
+    router.push("/employee/dashboard");
   } else {
-    router.push('/dashboard');
+    router.push("/dashboard");
   }
 }
 ```
@@ -231,7 +244,7 @@ Protect employee routes:
 // middleware.ts or route guard
 function employeeRouteGuard(user: User) {
   if (!user.isEmployee) {
-    redirect('/access-denied');
+    redirect("/access-denied");
   }
 }
 ```
@@ -252,7 +265,8 @@ Create employee-specific views:
 ### Get Employee with User Data
 
 ```typescript
-const employeeWithUser = await db.select()
+const employeeWithUser = await db
+  .select()
   .from(employees)
   .innerJoin(users, eq(employees.userId, users.id))
   .where(eq(employees.id, employeeId));
@@ -261,17 +275,19 @@ const employeeWithUser = await db.select()
 ### Get All Active Employees
 
 ```typescript
-const activeEmployees = await db.select()
+const activeEmployees = await db
+  .select()
   .from(employees)
   .innerJoin(users, eq(employees.userId, users.id))
-  .where(eq(employees.status, 'siap'))
+  .where(eq(employees.status, "siap"))
   .orderBy(employees.name);
 ```
 
 ### Check if User is Employee
 
 ```typescript
-const isEmployee = await db.select()
+const isEmployee = await db
+  .select()
   .from(employees)
   .where(eq(employees.userId, userId))
   .limit(1);
