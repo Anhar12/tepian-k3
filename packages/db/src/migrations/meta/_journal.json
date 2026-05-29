@@ -36,6 +36,13 @@
       "when": 1779772740720,
       "tag": "0004_fat_sprite",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780056157772,
+      "tag": "0005_mushy_maddog",
+      "breakpoints": true
     }
   ]
 }

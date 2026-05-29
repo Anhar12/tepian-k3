@@ -1,0 +1,9 @@
+ALTER TABLE "document_signatures" DROP CONSTRAINT "document_signatures_signed_by_user_id_users_id_fk";
+--> statement-breakpoint
+ALTER TABLE "documents" DROP CONSTRAINT "documents_uploaded_by_user_id_users_id_fk";
+--> statement-breakpoint
+ALTER TABLE "documents" DROP CONSTRAINT "documents_signed_by_user_id_users_id_fk";
+--> statement-breakpoint
+ALTER TABLE "document_signatures" ADD CONSTRAINT "document_signatures_signed_by_user_id_users_id_fk" FOREIGN KEY ("signed_by_user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "documents" ADD CONSTRAINT "documents_uploaded_by_user_id_users_id_fk" FOREIGN KEY ("uploaded_by_user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "documents" ADD CONSTRAINT "documents_signed_by_user_id_users_id_fk" FOREIGN KEY ("signed_by_user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
