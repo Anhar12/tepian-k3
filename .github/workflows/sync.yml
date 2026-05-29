@@ -23,5 +23,4 @@ jobs:
         env:
           SYNC_PAT: ${{ secrets.SYNC_PAT }}
         run: |
-          git remote add mirror "https://x-access-token:${SYNC_PAT}@github.com/rizrmdhn-developer/tepian-k3.git"
-          git push mirror main --force
+          git push "https://x-access-token:${SYNC_PAT}@github.com/rizrmdhn-developer/tepian-k3.git" HEAD:main --force
