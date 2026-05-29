@@ -1,0 +1,28 @@
+name: Sync to Coolify Repo
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Mirror main → rizrmdhn-developer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to mirror repo
+        env:
+          SYNC_PAT: ${{ secrets.SYNC_PAT }}
+          MIRROR_REPO: ${{ secrets.MIRROR_REPO_URL }}
+        run: |
+          git remote add mirror "https://rizrmdhn-developer:${SYNC_PAT}@${MIRROR_REPO#https://}"
+          git push mirror main --force
