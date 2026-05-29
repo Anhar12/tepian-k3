@@ -22,7 +22,7 @@ jobs:
       - name: Push to mirror repo
         env:
           SYNC_PAT: ${{ secrets.SYNC_PAT }}
-          MIRROR_REPO: ${{ secrets.MIRROR_REPO_URL }}
+          MIRROR_REPO_PATH: ${{ secrets.MIRROR_REPO_PATH }}
         run: |
-          git remote add mirror "https://rizrmdhn-developer:${SYNC_PAT}@${MIRROR_REPO#https://}"
+          git remote add mirror "https://rizrmdhn-developer:${SYNC_PAT}@github.com/${MIRROR_REPO_PATH}.git"
           git push mirror main --force
