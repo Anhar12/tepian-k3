@@ -5,6 +5,37 @@
 
 ---
 
+### 2026-05-30 — Per-resource approval actions
+
+- Split permission actions in `packages/constants/src/permissions.ts` into
+  `PERMISSION_BASE_ACTION` (`view`, `create`, `read`, `update`, `delete`) and
+  `PERMISSION_APPROVAL_ACTION` (`review`, `verify`, `approve`, `reject`).
+  `PERMISSION_ACTION` is now their union, so the DB `action` pgEnum and the
+  `PermissionAction` type are unchanged.
+- Added types `PermissionBaseAction` / `PermissionApprovalAction` and helpers
+  `getResourceApprovalActions()` / `getResourceActions()`.
+- Changed `RESOURCES` in `packages/constants/src/resources.ts` from a string
+  array to an array of `ResourceConfig` objects: `{ key, approvalActions? }`,
+  where `approvalActions` is an array, the literal `"all"`, or omitted (none).
+  `Resource` is now `(typeof RESOURCES)[number]["key"]` — same string union as
+  before. Added `RESOURCE_KEYS`.
+- Base CRUD actions are generated for every resource; approval actions only for
+  resources that opt in. `getResourcePermissions`, `getAllPermissions`,
+  `isValidPermission`, and `generatePermissionsList` updated accordingly.
+- Seeder (`packages/db/src/seed/index.ts`):
+  - Wrapped the structural permission/role/role-permission sync in a single
+    `db.transaction` so authorization can't end up half-applied on failure.
+  - Added an orphan-permission prune: permissions no longer produced by
+    `generatePermissionsList()` (e.g. `logs.approve`) are deleted in every
+    environment, mirroring the existing stale role-permission reconcile.
+    Cascades to `role_permissions` / `user_permissions` (both `onDelete:
+"cascade"`). This also stops orphans leaking into the role-management UI,
+    which lists permissions from the DB, not the constants.
+- Verified: full monorepo `check-types` passes; every permission referenced in
+  `ROLE_PERMISSIONS` still exists in `generatePermissionsList()` (no role loses
+  access). Current total: 363 permissions.
+- Updated `packages/constants/README.md` (action model, hierarchy, counts).
+
 ### 2026-02-26 — Granular document generation permissions
 
 - Added 2 new resources to `packages/constants/src/resources.ts`: `documents-spt`, `documents-admin`

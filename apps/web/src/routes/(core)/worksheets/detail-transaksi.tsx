@@ -927,7 +927,7 @@ function RouteComponent() {
                 <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
                 Rincian Operasional
               </CardTitle>
-              <PermissionGate permission="worksheets.update">
+              <PermissionGate permission="worksheets-transaction-details.update">
                 <Button
                   variant="outline"
                   size="sm"
@@ -1051,7 +1051,7 @@ function RouteComponent() {
                           {itemTotal !== null ? formatCurrency(itemTotal) : "-"}
                         </TableCell>
                         <TableCell className="text-center">
-                          <PermissionGate permission="worksheets.update">
+                          <PermissionGate permission="worksheets-transaction-details.update">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -1115,7 +1115,7 @@ function RouteComponent() {
             </Button>
           </PermissionGate>
           {showOperationalCosts && (
-            <PermissionGate permission="worksheets.update">
+            <PermissionGate permission="worksheets-transaction-details.update">
               <Button
                 className="flex-1 gap-2 sm:flex-initial"
                 onClick={handleSave}

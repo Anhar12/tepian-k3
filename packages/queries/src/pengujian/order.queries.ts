@@ -331,6 +331,12 @@ const orderQueries = {
                     },
                   },
                 },
+                location: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
               },
             },
             testing: true,

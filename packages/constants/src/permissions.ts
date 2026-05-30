@@ -1,19 +1,75 @@
-import type { Resource } from "./resources";
+import type { Resource, ResourceConfig } from "./resources";
 import { RESOURCES } from "./resources";
 
-// Define PERMISSION_ACTION locally to avoid circular imports
-export const PERMISSION_ACTION = [
+/**
+ * Base actions available on every resource (standard CRUD).
+ */
+export const PERMISSION_BASE_ACTION = [
   "view",
   "create",
   "read",
   "update",
   "delete",
+] as const;
+
+/**
+ * Approval / workflow actions. These are opt-in per resource via the
+ * `approvalActions` field on each entry in {@link RESOURCES} — a resource only
+ * receives these permissions when it explicitly enables them.
+ */
+export const PERMISSION_APPROVAL_ACTION = [
   "review",
   "verify",
   "approve",
+  "reject",
+] as const;
+
+/**
+ * Full, flat list of every permission action (base + approval).
+ *
+ * Kept as a single tuple so the database `action` pgEnum and the
+ * {@link PermissionAction} type continue to cover all possible actions,
+ * regardless of which resources actually enable each approval action.
+ */
+export const PERMISSION_ACTION = [
+  ...PERMISSION_BASE_ACTION,
+  ...PERMISSION_APPROVAL_ACTION,
 ] as const;
 
 export type PermissionAction = (typeof PERMISSION_ACTION)[number];
+export type PermissionBaseAction = (typeof PERMISSION_BASE_ACTION)[number];
+export type PermissionApprovalAction =
+  (typeof PERMISSION_APPROVAL_ACTION)[number];
+
+/**
+ * Resolve the approval actions enabled for a given resource.
+ *
+ * @param resource - The resource key
+ * @returns The approval actions enabled for that resource (empty when none,
+ *   the full approval list when the resource is configured with `"all"`)
+ */
+export function getResourceApprovalActions(
+  resource: Resource,
+): readonly PermissionApprovalAction[] {
+  const config: ResourceConfig | undefined = RESOURCES.find(
+    (r) => r.key === resource,
+  );
+  if (!config || !config.approvalActions) return [];
+  return config.approvalActions === "all"
+    ? PERMISSION_APPROVAL_ACTION
+    : config.approvalActions;
+}
+
+/**
+ * Get every action enabled for a resource: the base CRUD actions plus any
+ * approval actions the resource opts into.
+ *
+ * @param resource - The resource key
+ * @returns The actions enabled for that resource
+ */
+export function getResourceActions(resource: Resource): PermissionAction[] {
+  return [...PERMISSION_BASE_ACTION, ...getResourceApprovalActions(resource)];
+}
 
 /**
  * Type-safe permission string in the format "resource.action"
@@ -22,22 +78,27 @@ export type PermissionAction = (typeof PERMISSION_ACTION)[number];
 export type Permission = `${Resource}.${PermissionAction}`;
 
 /**
- * Generate all possible permissions for a given resource
+ * Generate all permissions enabled for a given resource (base actions plus any
+ * approval actions the resource opts into).
  * @param resource - The resource name
  * @returns Array of all permissions for that resource
  */
 export function getResourcePermissions(resource: Resource): Permission[] {
-  return PERMISSION_ACTION.map(
+  return getResourceActions(resource).map(
     (action) => `${resource}.${action}` as Permission,
   );
 }
 
 /**
- * Generate all possible permissions for all resources
- * @returns Array of all 165 permissions (33 resources × 5 actions)
+ * Generate all permissions for every resource.
+ *
+ * Each resource contributes its base CRUD actions plus the approval actions it
+ * enables via {@link RESOURCES}, so the total count depends on per-resource
+ * configuration rather than a fixed multiplier.
+ * @returns Array of all permissions across every resource
  */
 export function getAllPermissions(): Permission[] {
-  return RESOURCES.flatMap((resource) => getResourcePermissions(resource));
+  return RESOURCES.flatMap((resource) => getResourcePermissions(resource.key));
 }
 
 /**
@@ -49,9 +110,10 @@ export function isValidPermission(
   permission: string,
 ): permission is Permission {
   const [resource, action] = permission.split(".") as [string, string];
-  return (
-    RESOURCES.includes(resource as Resource) &&
-    PERMISSION_ACTION.includes(action as PermissionAction)
+  const config = RESOURCES.find((r) => r.key === resource);
+  if (!config) return false;
+  return getResourceActions(resource as Resource).includes(
+    action as PermissionAction,
   );
 }
 
@@ -88,8 +150,9 @@ export function createPermission(
 }
 
 /**
- * Type-safe permission list for seeding (lazy-loaded to avoid initialization issues)
- * Each resource has: view, create, read, update, delete
+ * Type-safe permission list for seeding (lazy-loaded to avoid initialization issues).
+ * Each resource contributes its base CRUD actions plus the approval actions it
+ * enables via {@link RESOURCES}.
  *
  * Note: Use getAllPermissions() function instead of importing this constant
  * to avoid circular dependency issues during module initialization.
@@ -101,9 +164,9 @@ export function createPermission(
  */
 export function generatePermissionsList() {
   return RESOURCES.flatMap((resource) =>
-    PERMISSION_ACTION.map((action) => ({
-      name: `${resource}.${action}` as Permission,
-      resource,
+    getResourceActions(resource.key).map((action) => ({
+      name: `${resource.key}.${action}` as Permission,
+      resource: resource.key,
       action,
     })),
   );

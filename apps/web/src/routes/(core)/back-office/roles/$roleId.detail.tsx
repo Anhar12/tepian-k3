@@ -20,12 +20,13 @@ import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { LoaderCircle, Search, Shield, Check, Info } from "lucide-react";
+import { type PermissionAction, type Resource } from "@tepian-k3/constants";
+import { Check, Info, LoaderCircle, Search, Shield } from "lucide-react";
 import { useMemo, useState } from "react";
 import z from "zod";
 
-// Dictionary to map permission resource keys to friendly Indonesian terms and categories
-const RESOURCE_LABELS: Record<string, { title: string; category: string }> = {
+// Keyed by `Resource` from @tepian-k3/constants — TypeScript enforces all resources have labels.
+const RESOURCE_LABELS: Record<Resource, { title: string; category: string }> = {
   users: { title: "Akun Pengguna", category: "Pengguna & Keamanan" },
   roles: { title: "Peran / Hak Akses (Role)", category: "Pengguna & Keamanan" },
   permissions: {
@@ -205,7 +206,7 @@ const RESOURCE_LABELS: Record<string, { title: string; category: string }> = {
   },
 };
 
-const ACTION_LABELS: Record<string, string> = {
+const ACTION_LABELS: Record<PermissionAction, string> = {
   view: "Melihat",
   read: "Membaca Detail",
   create: "Membuat Baru",
@@ -214,8 +215,7 @@ const ACTION_LABELS: Record<string, string> = {
   approve: "Menyetujui",
   verify: "Memverifikasi",
   review: "Meninjau",
-  sign: "Tanda Tangan",
-  restore: "Memulihkan",
+  reject: "Menolak",
 };
 
 export const Route = createFileRoute(
@@ -313,14 +313,15 @@ export function RouteComponent() {
       const resource = parts[0] || "";
       const rawAction = parts[1] || "";
 
-      const resourceMeta = RESOURCE_LABELS[resource] || {
+      const resourceMeta = RESOURCE_LABELS[resource as Resource] || {
         title: resource,
         category: "Kategori Lainnya",
       };
 
       const category = resourceMeta.category;
       const resourceTitle = resourceMeta.title;
-      const friendlyAction = ACTION_LABELS[rawAction] || rawAction;
+      const friendlyAction =
+        ACTION_LABELS[rawAction as PermissionAction] || rawAction;
 
       // Filter based on search query (matches raw keys, translated keys, categories, or actions)
       const matchesSearch =
@@ -503,7 +504,7 @@ export function RouteComponent() {
   return (
     <div className="flex flex-col gap-6">
       <Card className="border border-neutral-100 shadow-xl shadow-neutral-100/30">
-        <CardHeader className="rounded-t-xl bg-gradient-to-r from-blue-50/50 to-indigo-50/20 pb-6">
+        <CardHeader className="rounded-t-xl bg-linear-to-r from-blue-50/50 to-indigo-50/20 pb-6">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-blue-600 p-2 text-white">
               <Shield className="h-5 w-5" />
@@ -548,7 +549,7 @@ export function RouteComponent() {
             </div>
 
             {/* Visual Selection Stats Card */}
-            <div className="rounded-xl border border-neutral-200/60 bg-gradient-to-br from-white to-neutral-50/50 p-4 shadow-sm">
+            <div className="rounded-xl border border-neutral-200/60 bg-linear-to-br from-white to-neutral-50/50 p-4 shadow-sm">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="space-y-1">
                   <span className="text-xs font-extrabold tracking-wider text-neutral-500 uppercase">
@@ -568,7 +569,7 @@ export function RouteComponent() {
                     <span className="text-xs font-extrabold text-blue-600">
                       {selectionStats.percentage}%
                     </span>
-                    <span className="block text-[10px] font-semibold text-neutral-400">
+                    <span className="block text-xs font-semibold text-neutral-400">
                       Cakupan Izin
                     </span>
                   </div>
@@ -581,7 +582,7 @@ export function RouteComponent() {
               {/* Progress Bar */}
               <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
+                  className="h-full rounded-full bg-linear-to-r from-blue-500 to-indigo-600 transition-all duration-500"
                   style={{ width: `${selectionStats.percentage}%` }}
                 />
               </div>
@@ -612,20 +613,33 @@ export function RouteComponent() {
                   }}
                 />
               </div>
-              <Button
-                variant={allSelected ? "destructive" : "outline"}
-                size="sm"
-                className="h-10 w-full text-xs font-bold transition-all sm:w-auto"
-                onClick={handleToggleAllPermissions}
-              >
-                {allSelected
-                  ? "Batalkan Semua Pilihan"
-                  : "Pilih Semua Hak Akses"}
-              </Button>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 w-full text-xs font-bold transition-all sm:w-auto"
+                  disabled={!hasChanges}
+                  onClick={() =>
+                    setSelectedPermissions(new Set(role?.permissions || []))
+                  }
+                >
+                  Kembalikan ke Semula
+                </Button>
+                <Button
+                  variant={allSelected ? "destructive" : "outline"}
+                  size="sm"
+                  className="h-10 w-full text-xs font-bold transition-all sm:w-auto"
+                  onClick={handleToggleAllPermissions}
+                >
+                  {allSelected
+                    ? "Batalkan Semua Pilihan"
+                    : "Pilih Semua Hak Akses"}
+                </Button>
+              </div>
             </div>
 
             {/* Kontainer Utama Permissions */}
-            <div className="custom-scrollbar max-h-[550px] space-y-6 overflow-y-auto pr-2">
+            <div className="custom-scrollbar max-h-80 space-y-6 overflow-y-auto pr-2 sm:max-h-105 md:max-h-137.5">
               {paginatedCategories.length > 0 ? (
                 paginatedCategories.map(([category, resources]) => {
                   // Collect all permission items in this category for category-level select-all
@@ -648,7 +662,7 @@ export function RouteComponent() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 px-2 text-[10px] font-bold text-blue-600 hover:bg-blue-50/50 hover:text-blue-700"
+                          className="h-7 px-2 text-xs font-bold text-blue-600 hover:bg-blue-50/50 hover:text-blue-700"
                           onClick={() =>
                             handleToggleCategoryPermissions(
                               categoryPermissionList,
@@ -656,8 +670,8 @@ export function RouteComponent() {
                           }
                         >
                           {isAllOfCategorySelected
-                            ? "Batal Kategori"
-                            : "Pilih Semua Kategori"}
+                            ? "Batalkan Semua"
+                            : "Pilih Semua"}
                         </Button>
                       </div>
 
@@ -669,7 +683,8 @@ export function RouteComponent() {
                               (p) => selectedPermissions.has(p.name),
                             );
                             const friendlyTitle =
-                              RESOURCE_LABELS[resource]?.title || resource;
+                              RESOURCE_LABELS[resource as Resource]?.title ||
+                              resource;
 
                             return (
                               <div
@@ -677,12 +692,12 @@ export function RouteComponent() {
                                 className="flex flex-col justify-between gap-3 px-4 py-4 transition-colors hover:bg-neutral-50/30 lg:flex-row lg:items-center"
                               >
                                 {/* Kolom Judul Modul */}
-                                <div className="min-w-[200px]">
+                                <div className="min-w-50">
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm font-bold text-neutral-800">
                                       {friendlyTitle}
                                     </span>
-                                    <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-neutral-400">
+                                    <span className="hidden rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-neutral-400 sm:inline">
                                       {resource}
                                     </span>
                                   </div>
@@ -694,16 +709,16 @@ export function RouteComponent() {
                                         permissions,
                                       )
                                     }
-                                    className="mt-0.5 block text-left text-[10px] font-semibold text-blue-500 transition-all hover:underline"
+                                    className="mt-0.5 block text-left text-xs font-semibold text-blue-500 transition-all hover:underline"
                                   >
                                     {isAllOfResourceSelected
-                                      ? "Uncheck Modul"
-                                      : "Pilih Semua Modul"}
+                                      ? "Batalkan Pilihan"
+                                      : "Pilih Semua"}
                                   </button>
                                 </div>
 
                                 {/* Kolom Checkboxes Hak Akses (Indonesian action labels) */}
-                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 lg:justify-end">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6 lg:justify-end">
                                   {permissions.map((permission) => (
                                     <label
                                       key={permission.id}
@@ -747,7 +762,7 @@ export function RouteComponent() {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-neutral-100 pt-4 sm:flex-row">
+              <div className="mt-4 flex flex-col gap-4 border-t border-neutral-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-xs font-semibold text-neutral-500">
                   Menampilkan halaman{" "}
                   <span className="font-extrabold text-blue-600">

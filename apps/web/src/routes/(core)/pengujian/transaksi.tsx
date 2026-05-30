@@ -67,7 +67,7 @@ function RouteComponent() {
               <TabsTrigger
                 key={s.value}
                 value={s.value}
-                className="text-xs whitespace-nowrap sm:text-sm"
+                className="text-xs whitespace-nowrap data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm sm:text-sm"
               >
                 {s.label}
               </TabsTrigger>

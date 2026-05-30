@@ -56,6 +56,7 @@ import {
   ClipboardList,
   Lock,
   Loader2,
+  MapPin,
   MessageSquare,
   Package,
   Search,
@@ -184,6 +185,16 @@ function RouteComponent() {
     if (!worksheet?.status) return false;
     return ["draft", "revision"].includes(worksheet.status);
   }, [worksheet?.status]);
+
+  // Whether the current user has any worksheet edit permission
+  const canEditWorksheet = useMemo(() => {
+    const editPermissions = [
+      "worksheet-items.update",
+      "worksheet-tools.update",
+      "worksheet-chemical-materials.update",
+    ];
+    return editPermissions.some((p) => profile.permissions.includes(p));
+  }, [profile.permissions]);
 
   // Forms
   const noteForm = useForm<
@@ -347,6 +358,10 @@ function RouteComponent() {
       reference: item.parameter?.reference ?? null,
     }));
   }, [worksheet?.items]);
+
+  const uniqueLocations = useMemo(() => {
+    return [...new Set(worksheetItems.map((item) => item.locationName))];
+  }, [worksheetItems]);
 
   // Get unique clusters for filter
   const clusters = useMemo(() => {
@@ -817,17 +832,23 @@ function RouteComponent() {
         subtitle={`Worksheet untuk ${worksheet?.order?.company?.name ?? "Unknown"}`}
       />
 
-      {/* Show readonly alert when worksheet is not editable */}
-      {!isEditable && worksheet && (
+      {/* Show readonly alert when worksheet is not editable or user has no edit permission */}
+      {worksheet && (!isEditable || !canEditWorksheet) && (
         <Alert className="border-blue-200 bg-blue-50">
           <Lock className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-sm text-blue-800">
-            Worksheet ini dalam status{" "}
-            <strong>
-              {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
-            </strong>{" "}
-            dan tidak dapat diedit. Worksheet hanya dapat diedit saat status{" "}
-            <strong>Draft</strong> atau <strong>Revision</strong>.
+            {!canEditWorksheet ? (
+              "Anda hanya memiliki akses baca pada worksheet ini."
+            ) : (
+              <>
+                Worksheet ini dalam status{" "}
+                <strong>
+                  {WORKSHEET_STATUS_LABELS[worksheet.status as WorksheetStatus]}
+                </strong>{" "}
+                dan tidak dapat diedit. Worksheet hanya dapat diedit saat status{" "}
+                <strong>Draft</strong> atau <strong>Revision</strong>.
+              </>
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -1097,35 +1118,63 @@ function RouteComponent() {
 
           {/* Estimated Tab */}
           <TabsContent value="estimated" className="p-3 pt-4 sm:p-4 sm:pt-6">
-            <AutoForm
-              schema={worksheetSchema.createWorksheetEstimatedSchema}
-              onSubmit={(data) => createEstimateMutation.mutate(data)}
-              isPending={createEstimateMutation.isPending}
-              submitLabel="Simpan Perkiraan"
-              defaultValues={{
-                worksheetId,
-                estimatedAmountOfMembers:
-                  worksheet?.estimatedAmountOfMembers ?? 0,
-                estimatedAmountOfDays: worksheet?.estimatedAmountOfDays ?? 0,
-              }}
-              fieldOverrides={{
-                worksheetId: false,
-                estimatedAmountOfMembers: {
-                  label: "Perkiraan Jumlah PPS",
-                  component: "number",
-                  placeholder: "Masukkan jumlah PPS...",
-                  description:
-                    "Perkiraan jumlah PPS yang akan terlibat dalam worksheet ini.",
-                },
-                estimatedAmountOfDays: {
-                  label: "Perkiraan Jumlah Hari",
-                  component: "number",
-                  placeholder: "Masukkan jumlah hari...",
-                  description:
-                    "Perkiraan jumlah hari yang dibutuhkan untuk menyelesaikan worksheet ini.",
-                },
-              }}
-            />
+            <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
+              <div className="flex-1">
+                <AutoForm
+                  schema={worksheetSchema.createWorksheetEstimatedSchema}
+                  onSubmit={(data) => createEstimateMutation.mutate(data)}
+                  isPending={createEstimateMutation.isPending}
+                  submitLabel="Simpan Perkiraan"
+                  defaultValues={{
+                    worksheetId,
+                    estimatedAmountOfMembers:
+                      worksheet?.estimatedAmountOfMembers ?? 0,
+                    estimatedAmountOfDays:
+                      worksheet?.estimatedAmountOfDays ?? 0,
+                  }}
+                  fieldOverrides={{
+                    worksheetId: false,
+                    estimatedAmountOfMembers: {
+                      label: "Perkiraan Jumlah PPS",
+                      component: "number",
+                      placeholder: "Masukkan jumlah PPS...",
+                      description:
+                        "Perkiraan jumlah PPS yang akan terlibat dalam worksheet ini.",
+                    },
+                    estimatedAmountOfDays: {
+                      label: "Perkiraan Jumlah Hari",
+                      component: "number",
+                      placeholder: "Masukkan jumlah hari...",
+                      description:
+                        "Perkiraan jumlah hari yang dibutuhkan untuk menyelesaikan worksheet ini.",
+                    },
+                  }}
+                />
+              </div>
+
+              <div className="sm:w-72 sm:shrink-0">
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  Lokasi Pengujian
+                </h3>
+                {uniqueLocations.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Belum ada lokasi
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {uniqueLocations.map((loc, idx) => (
+                      <div key={loc} className="flex items-center gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                          {idx + 1}
+                        </span>
+                        <span className="text-sm">{loc}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
 
           {/* Alat Tab */}

@@ -29,8 +29,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
@@ -428,10 +430,202 @@ function RouteComponent() {
         {/* Content Card - Right Side */}
         <Card className="flex flex-1 flex-col rounded-2xl p-6 shadow-sm">
           <div className="flex h-full flex-col">
-            {/* Card Content */}
-            <div className="flex h-full flex-1 overflow-auto">
-              {renderStatusContent()}
-            </div>
+            <Tabs
+              defaultValue="status"
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <TabsList className="mb-4 w-fit">
+                <TabsTrigger
+                  value="status"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm"
+                >
+                  Status
+                </TabsTrigger>
+                <TabsTrigger
+                  value="ringkasan"
+                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-sm"
+                >
+                  Ringkasan Pesanan
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Status Tab */}
+              <TabsContent
+                value="status"
+                className="min-h-0 flex-1 overflow-auto"
+              >
+                {renderStatusContent()}
+              </TabsContent>
+
+              {/* Ringkasan Tab */}
+              <TabsContent
+                value="ringkasan"
+                className="min-h-0 flex-1 overflow-auto"
+              >
+                <div className="space-y-5">
+                  {/* Company & Location */}
+                  <div className="flex flex-wrap gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-50 text-blue-700"
+                    >
+                      {orderDetail.company?.name ?? "—"}
+                    </Badge>
+                  </div>
+
+                  {/* Order Items grouped by location */}
+                  {(() => {
+                    const byLocation = orderDetail.items.reduce<
+                      Record<
+                        string,
+                        {
+                          name: string;
+                          items: (typeof orderDetail.items)[number][];
+                        }
+                      >
+                    >((acc, item) => {
+                      const locId = item.locationId;
+                      if (!acc[locId]) {
+                        acc[locId] = {
+                          name: item.location?.name ?? locId,
+                          items: [],
+                        };
+                      }
+                      acc[locId]!.items.push(item);
+                      return acc;
+                    }, {});
+
+                    return Object.entries(byLocation).map(
+                      ([locId, { name, items }]) => (
+                        <div key={locId} className="space-y-2">
+                          <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                            Lokasi: {name}
+                          </p>
+                          <div className="overflow-hidden rounded-xl border border-slate-100">
+                            <table className="w-full text-sm">
+                              <thead className="bg-slate-50 text-xs text-slate-500">
+                                <tr>
+                                  <th className="px-4 py-2 text-left font-semibold">
+                                    Parameter
+                                  </th>
+                                  <th className="px-4 py-2 text-left font-semibold">
+                                    Kategori
+                                  </th>
+                                  <th className="px-4 py-2 text-center font-semibold">
+                                    Qty
+                                  </th>
+                                  <th className="px-4 py-2 text-right font-semibold">
+                                    Subtotal
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {items.map((item) => (
+                                  <tr
+                                    key={item.id}
+                                    className="border-t border-slate-100"
+                                  >
+                                    <td className="px-4 py-2.5 font-medium text-slate-800">
+                                      {item.parameter.name}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-xs text-slate-500">
+                                      {item.parameter.category.name}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-center text-slate-600">
+                                      {item.quantity}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-right font-semibold text-slate-800 tabular-nums">
+                                      Rp {item.subTotal.toLocaleString("id-ID")}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ),
+                    );
+                  })()}
+
+                  {/* Optional cost checklist */}
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                      Biaya Tambahan
+                    </p>
+                    {[
+                      {
+                        label: "Transportasi Udara (PP)",
+                        checked: orderDetail.coverFlightIncluded,
+                      },
+                      {
+                        label: "Transportasi Laut/Sungai (PP)",
+                        checked: orderDetail.coverWaterTransportationIncluded,
+                      },
+                      {
+                        label:
+                          "Transportasi Darat menuju Bandara/Pelabuhan (PP)",
+                        checked:
+                          orderDetail.coverGroundTransportationToAirportOrHarbour,
+                      },
+                      {
+                        label: "Transportasi Darat (PP)",
+                        checked: orderDetail.coverGroundTransportationIncluded,
+                      },
+                      {
+                        label: "Penginapan",
+                        checked: orderDetail.coverLodgingIncluded,
+                      },
+                    ].map(({ label, checked }) => (
+                      <div
+                        key={label}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <span
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 text-[10px] font-bold ${
+                            checked
+                              ? "border-blue-500 bg-blue-500 text-white"
+                              : "border-slate-300 bg-white text-transparent"
+                          }`}
+                        >
+                          ✓
+                        </span>
+                        <span
+                          className={
+                            checked
+                              ? "font-medium text-slate-800"
+                              : "text-slate-400"
+                          }
+                        >
+                          {label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Customer note */}
+                  {orderDetail.customerNote && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                        Catatan
+                      </p>
+                      <p className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                        {orderDetail.customerNote}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Total */}
+                  <div className="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                    <span className="text-sm font-semibold text-slate-600">
+                      Total
+                    </span>
+                    <span className="text-base font-bold text-blue-700 tabular-nums">
+                      Rp {orderDetail.totalAmount.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
 
             {/* Action Buttons — only when offer is active and user can still respond */}
             {!isRejected &&

@@ -81,6 +81,8 @@ const optionalItems = [
 ];
 
 function RouteComponent() {
+  const navigate = Route.useNavigate();
+
   const {
     cartItems,
     filteredCartItems,
@@ -126,6 +128,10 @@ function RouteComponent() {
         setCurrentLocation(null);
         setConfirmed(false);
         setOptionalSelections(new Set());
+
+        navigate({
+          to: "/pengujian/transaksi",
+        });
       },
       onError: (error) => {
         globalErrorToast(`Gagal membuat order: ${error.message}`);
@@ -335,13 +341,13 @@ function RouteComponent() {
                         Menyesuaikan kondisi lapangan/lokasi pengujian.
                       </p>
                     </div>
-                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-gray-600">
-                      <p className="mb-2 font-semibold text-blue-700">
-                        Cara pengisian:
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-gray-600">
+                      <p className="mb-2 font-semibold text-amber-700">
+                        ⚠ Perhatian — Cara pengisian:
                       </p>
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-start gap-2">
-                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-blue-500 bg-blue-500 text-white">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-amber-500 bg-amber-500 text-white">
                             ✓
                           </span>
                           <span>

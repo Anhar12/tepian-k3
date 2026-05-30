@@ -787,7 +787,7 @@ function RouteComponent() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex justify-end gap-3">
-                    <PermissionGate permission="orders-approval.update">
+                    <PermissionGate permission="orders-approval.reject">
                       <Button
                         variant="outline"
                         className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
@@ -796,7 +796,7 @@ function RouteComponent() {
                         Tolak Order
                       </Button>
                     </PermissionGate>
-                    <PermissionGate permission="orders-approval.update">
+                    <PermissionGate permission="orders-approval.review">
                       <Button
                         variant="outline"
                         className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
@@ -805,7 +805,7 @@ function RouteComponent() {
                         Minta Koreksi Data
                       </Button>
                     </PermissionGate>
-                    <PermissionGate permission="orders-approval.update">
+                    <PermissionGate permission="orders-approval.approve">
                       <Button
                         className="bg-green-500 hover:bg-green-600"
                         onClick={handleApprove}
@@ -847,7 +847,7 @@ function RouteComponent() {
                     </div>
                   )}
                   <div className="flex justify-end gap-2">
-                    <PermissionGate permission="orders-approval.update">
+                    <PermissionGate permission="orders-approval.review">
                       <Button
                         variant="outline"
                         className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
@@ -856,7 +856,7 @@ function RouteComponent() {
                         Kirim Ulang Koreksi
                       </Button>
                     </PermissionGate>
-                    <PermissionGate permission="orders-approval.update">
+                    <PermissionGate permission="orders-approval.review">
                       <Button
                         className="bg-green-500 hover:bg-green-600"
                         onClick={() =>
@@ -899,7 +899,7 @@ function RouteComponent() {
                     </div>
                   )}
                   <div className="flex justify-end">
-                    <PermissionGate permission="orders-approval.update">
+                    <PermissionGate permission="orders-approval.review">
                       <Button
                         className="bg-green-500 hover:bg-green-600"
                         onClick={() =>
@@ -1316,7 +1316,7 @@ function RouteComponent() {
                   </div>
 
                   <div className="flex justify-end pt-4">
-                    <PermissionGate permission="notifications.create">
+                    <PermissionGate permission="notifications.update">
                       <Button
                         className="bg-blue-500 hover:bg-blue-600"
                         onClick={() =>
@@ -1337,153 +1337,49 @@ function RouteComponent() {
               </Card>
             )}
 
-            {isApprovedNeedsDocs && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upload Surat Penawaran</CardTitle>
-                  <CardDescription>
-                    Unggah surat penawaran untuk melanjutkan ke tahap
-                    selanjutnya.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Offering Letter Upload */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                          <FileText className="h-5 w-5 text-blue-500" />
-                        </div>
-                        <div>
-                          <Label className="text-base font-medium">
-                            Surat Penawaran
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Format: PDF
-                          </p>
-                        </div>
-                      </div>
-                      {hasOfferingLetter ? (
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-100 text-green-800">
-                            Sudah Diunggah
-                          </Badge>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() =>
-                              window.open(
-                                getPublicUrl(
-                                  order.documents.find(
-                                    (doc) => doc.type === "offering_document",
-                                  )!.fileUrl,
-                                ),
-                                "_blank",
-                              )
-                            }
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Badge className="bg-yellow-100 text-yellow-800">
-                          Belum Diunggah
-                        </Badge>
-                      )}
+            <PermissionGate permission="orders-approval.approve">
+              {(isApprovedNeedsDocs || isAcceptingDocuments) && worksheet && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Order Disetujui</CardTitle>
+                    <CardDescription>
+                      Order telah disetujui. Tim administrasi sedang menyiapkan
+                      dokumen penawaran dan invoice.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          navigate({
+                            to: "/worksheets",
+                            search: { worksheetId: worksheet.id },
+                          })
+                        }
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Lihat Detail Transaksi
+                      </Button>
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
 
-                    {!hasOfferingLetter && (
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <Input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                if (file.type !== "application/pdf") {
-                                  globalErrorToast("Format file harus PDF");
-                                  return;
-                                }
-                                offeringLetter.setFile(file);
-                              }
-                            }}
-                            className="flex-1"
-                          />
-                          {offeringLetter.file && (
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => offeringLetter.setFile(null)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                        {offeringLetter.file && (
-                          <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                            <span className="text-sm">
-                              {offeringLetter.file.name}
-                            </span>
-                            <PermissionGate permission="documents.create">
-                              <Button
-                                size="sm"
-                                onClick={handleUploadOfferingLetter}
-                                disabled={offeringLetter.uploading}
-                              >
-                                {offeringLetter.uploading ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Upload className="mr-2 h-4 w-4" />
-                                )}
-                                Upload
-                              </Button>
-                            </PermissionGate>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {hasOfferingLetter && (
-                    <div className="flex justify-end pt-4">
-                      <PermissionGate permission="notifications.create">
-                        <Button
-                          className="bg-blue-500 hover:bg-blue-600"
-                          onClick={() =>
-                            handleNotifyCustomer("offering_document")
-                          }
-                          disabled={notifyCustomerMutation.isPending}
-                        >
-                          {notifyCustomerMutation.isPending ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <Mail className="mr-2 h-4 w-4" />
-                          )}
-                          Kirim Notifikasi ke Pelanggan
-                        </Button>
-                      </PermissionGate>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {isAcceptingDocuments && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    Upload Invoice dan Surat Perjanjian Kerjasama
-                  </CardTitle>
-                  <CardDescription>
-                    Unggah dokumen invoice dan perjanjian kerjasama untuk
-                    melanjutkan ke tahap selanjutnya.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* cooperation agreement upload */}
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-3">
+            <PermissionGate permission="documents.create">
+              {isApprovedNeedsDocs && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Upload Surat Penawaran</CardTitle>
+                    <CardDescription>
+                      Unggah surat penawaran untuk melanjutkan ke tahap
+                      selanjutnya.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Offering Letter Upload */}
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
@@ -1491,14 +1387,14 @@ function RouteComponent() {
                           </div>
                           <div>
                             <Label className="text-base font-medium">
-                              Invoice
+                              Surat Penawaran
                             </Label>
                             <p className="text-sm text-muted-foreground">
                               Format: PDF
                             </p>
                           </div>
                         </div>
-                        {hasInvoice ? (
+                        {hasOfferingLetter ? (
                           <div className="flex items-center gap-2">
                             <Badge className="bg-green-100 text-green-800">
                               Sudah Diunggah
@@ -1510,8 +1406,7 @@ function RouteComponent() {
                                 window.open(
                                   getPublicUrl(
                                     order.documents.find(
-                                      (doc) =>
-                                        doc.type === "cooperation_agreement",
+                                      (doc) => doc.type === "offering_document",
                                     )!.fileUrl,
                                   ),
                                   "_blank",
@@ -1527,7 +1422,8 @@ function RouteComponent() {
                           </Badge>
                         )}
                       </div>
-                      {!hasInvoice && (
+
+                      {!hasOfferingLetter && (
                         <div className="space-y-2">
                           <div className="flex gap-2">
                             <Input
@@ -1540,143 +1436,279 @@ function RouteComponent() {
                                     globalErrorToast("Format file harus PDF");
                                     return;
                                   }
-                                  invoice.setFile(file);
+                                  offeringLetter.setFile(file);
                                 }
                               }}
                               className="flex-1"
                             />
-                            {invoice.file && (
+                            {offeringLetter.file && (
                               <Button
                                 size="icon"
                                 variant="outline"
-                                onClick={() => invoice.setFile(null)}
+                                onClick={() => offeringLetter.setFile(null)}
                               >
                                 <X className="h-4 w-4" />
                               </Button>
                             )}
                           </div>
-                          {invoice.file && (
+                          {offeringLetter.file && (
                             <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
                               <span className="text-sm">
-                                {invoice.file.name}
+                                {offeringLetter.file.name}
                               </span>
-                              <Button
-                                size="sm"
-                                onClick={handleUploadInvoice}
-                                disabled={invoice.uploading}
-                              >
-                                {invoice.uploading ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Upload className="mr-2 h-4 w-4" />
-                                )}
-                                Upload
-                              </Button>
+                              <PermissionGate permission="documents.create">
+                                <Button
+                                  size="sm"
+                                  onClick={handleUploadOfferingLetter}
+                                  disabled={offeringLetter.uploading}
+                                >
+                                  {offeringLetter.uploading ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Upload className="mr-2 h-4 w-4" />
+                                  )}
+                                  Upload
+                                </Button>
+                              </PermissionGate>
                             </div>
                           )}
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                            <FileText className="h-5 w-5 text-blue-500" />
-                          </div>
-                          <div>
-                            <Label className="text-base font-medium">
-                              Surat Perjanjian Kerjasama
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Format: PDF
-                            </p>
-                          </div>
-                        </div>
-                        {hasCooperationAgreement ? (
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-green-100 text-green-800">
-                              Sudah Diunggah
-                            </Badge>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() =>
-                                window.open(
-                                  getPublicUrl(
-                                    order.documents.find(
-                                      (doc) =>
-                                        doc.type === "cooperation_agreement",
-                                    )!.fileUrl,
-                                  ),
-                                  "_blank",
-                                )
-                              }
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Badge className="bg-yellow-100 text-yellow-800">
-                            Belum Diunggah
-                          </Badge>
-                        )}
+
+                    {hasOfferingLetter && (
+                      <div className="flex justify-end pt-4">
+                        <PermissionGate permission="notifications.update">
+                          <Button
+                            className="bg-blue-500 hover:bg-blue-600"
+                            onClick={() =>
+                              handleNotifyCustomer("offering_document")
+                            }
+                            disabled={notifyCustomerMutation.isPending}
+                          >
+                            {notifyCustomerMutation.isPending ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Mail className="mr-2 h-4 w-4" />
+                            )}
+                            Kirim Notifikasi ke Pelanggan
+                          </Button>
+                        </PermissionGate>
                       </div>
-                      {!hasCooperationAgreement && (
-                        <div className="space-y-2">
-                          <div className="flex gap-2">
-                            <Input
-                              type="file"
-                              accept=".pdf"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  if (file.type !== "application/pdf") {
-                                    globalErrorToast("Format file harus PDF");
-                                    return;
-                                  }
-                                  cooperationAgreement.setFile(file);
-                                }
-                              }}
-                              className="flex-1"
-                            />
-                            {cooperationAgreement.file && (
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {isAcceptingDocuments && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      Upload Invoice dan Surat Perjanjian Kerjasama
+                    </CardTitle>
+                    <CardDescription>
+                      Unggah dokumen invoice dan perjanjian kerjasama untuk
+                      melanjutkan ke tahap selanjutnya.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* cooperation agreement upload */}
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                              <FileText className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">
+                                Invoice
+                              </Label>
+                              <p className="text-sm text-muted-foreground">
+                                Format: PDF
+                              </p>
+                            </div>
+                          </div>
+                          {hasInvoice ? (
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-green-100 text-green-800">
+                                Sudah Diunggah
+                              </Badge>
                               <Button
                                 size="icon"
                                 variant="outline"
                                 onClick={() =>
-                                  cooperationAgreement.setFile(null)
+                                  window.open(
+                                    getPublicUrl(
+                                      order.documents.find(
+                                        (doc) =>
+                                          doc.type === "cooperation_agreement",
+                                      )!.fileUrl,
+                                    ),
+                                    "_blank",
+                                  )
                                 }
                               >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                          {cooperationAgreement.file && (
-                            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                              <span className="text-sm">
-                                {cooperationAgreement.file.name}
-                              </span>
-                              <Button
-                                size="sm"
-                                onClick={handleUploadCooperationAgreement}
-                                disabled={cooperationAgreement.uploading}
-                              >
-                                {cooperationAgreement.uploading ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Upload className="mr-2 h-4 w-4" />
-                                )}
-                                Upload
+                                <Download className="h-4 w-4" />
                               </Button>
                             </div>
+                          ) : (
+                            <Badge className="bg-yellow-100 text-yellow-800">
+                              Belum Diunggah
+                            </Badge>
                           )}
                         </div>
-                      )}
+                        {!hasInvoice && (
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                type="file"
+                                accept=".pdf"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    if (file.type !== "application/pdf") {
+                                      globalErrorToast("Format file harus PDF");
+                                      return;
+                                    }
+                                    invoice.setFile(file);
+                                  }
+                                }}
+                                className="flex-1"
+                              />
+                              {invoice.file && (
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() => invoice.setFile(null)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                            {invoice.file && (
+                              <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                                <span className="text-sm">
+                                  {invoice.file.name}
+                                </span>
+                                <Button
+                                  size="sm"
+                                  onClick={handleUploadInvoice}
+                                  disabled={invoice.uploading}
+                                >
+                                  {invoice.uploading ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Upload className="mr-2 h-4 w-4" />
+                                  )}
+                                  Upload
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                              <FileText className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <div>
+                              <Label className="text-base font-medium">
+                                Surat Perjanjian Kerjasama
+                              </Label>
+                              <p className="text-sm text-muted-foreground">
+                                Format: PDF
+                              </p>
+                            </div>
+                          </div>
+                          {hasCooperationAgreement ? (
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-green-100 text-green-800">
+                                Sudah Diunggah
+                              </Badge>
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() =>
+                                  window.open(
+                                    getPublicUrl(
+                                      order.documents.find(
+                                        (doc) =>
+                                          doc.type === "cooperation_agreement",
+                                      )!.fileUrl,
+                                    ),
+                                    "_blank",
+                                  )
+                                }
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Badge className="bg-yellow-100 text-yellow-800">
+                              Belum Diunggah
+                            </Badge>
+                          )}
+                        </div>
+                        {!hasCooperationAgreement && (
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                type="file"
+                                accept=".pdf"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    if (file.type !== "application/pdf") {
+                                      globalErrorToast("Format file harus PDF");
+                                      return;
+                                    }
+                                    cooperationAgreement.setFile(file);
+                                  }
+                                }}
+                                className="flex-1"
+                              />
+                              {cooperationAgreement.file && (
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() =>
+                                    cooperationAgreement.setFile(null)
+                                  }
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                            {cooperationAgreement.file && (
+                              <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                                <span className="text-sm">
+                                  {cooperationAgreement.file.name}
+                                </span>
+                                <Button
+                                  size="sm"
+                                  onClick={handleUploadCooperationAgreement}
+                                  disabled={cooperationAgreement.uploading}
+                                >
+                                  {cooperationAgreement.uploading ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Upload className="mr-2 h-4 w-4" />
+                                  )}
+                                  Upload
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
 
             {isAwaitingPayment && (
               <Card>
@@ -1880,23 +1912,27 @@ function RouteComponent() {
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">
-                      <Button
-                        variant="outline"
-                        className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                        onClick={() => dialogs.open("rejectPayment")}
-                      >
-                        Tolak Pembayaran
-                      </Button>
-                      <Button
-                        className="bg-green-500 hover:bg-green-600"
-                        onClick={handleVerifyPayment}
-                        disabled={verifyPaymentMutation.isPending}
-                      >
-                        {verifyPaymentMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Verifikasi Pembayaran
-                      </Button>
+                      <PermissionGate permission="orders-payment.reject">
+                        <Button
+                          variant="outline"
+                          className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
+                          onClick={() => dialogs.open("rejectPayment")}
+                        >
+                          Tolak Pembayaran
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="orders-payment.verify">
+                        <Button
+                          className="bg-green-500 hover:bg-green-600"
+                          onClick={handleVerifyPayment}
+                          disabled={verifyPaymentMutation.isPending}
+                        >
+                          {verifyPaymentMutation.isPending && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Verifikasi Pembayaran
+                        </Button>
+                      </PermissionGate>
                     </div>
                   </div>
                 </CardContent>

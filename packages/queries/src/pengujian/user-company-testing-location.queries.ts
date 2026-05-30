@@ -1,5 +1,3 @@
-import { TRPCError } from "@trpc/server";
-import { db } from "@tepian-k3/db/client";
 import {
   and,
   asc,
@@ -11,13 +9,15 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
+import { db } from "@tepian-k3/db/client";
 import { userCompanyTestingLocation } from "@tepian-k3/db/schema";
-import { z } from "zod";
 import userCompanyTestingLocationSchema from "@tepian-k3/schema/pengujian/user-company-testing-location.schema";
-import { Effect } from "effect";
 import { logError } from "@tepian-k3/services/logger";
 import type { ExtendedColumnFilter } from "@tepian-k3/types/data-table.types";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
+import { TRPCError } from "@trpc/server";
+import { Effect } from "effect";
+import { z } from "zod";
 
 const userCompanyTestingLocationQueries = {
   getAllUserCompanyTestingLocations() {
@@ -249,6 +249,41 @@ const userCompanyTestingLocationQueries = {
           code: "INTERNAL_SERVER_ERROR",
           message:
             "Gagal mengambil data Lokasi Pengujian Perusahaan berdasarkan User ID dan nama",
+        });
+      },
+    }).pipe(
+      Effect.flatMap((userCompanyTestingLocation) =>
+        userCompanyTestingLocation
+          ? Effect.succeed(userCompanyTestingLocation)
+          : Effect.succeed(null),
+      ),
+    );
+  },
+
+  getUserCompanyTestingLocationsNameByUserIdAndCompanyId(
+    userId: string,
+    companyId: string,
+    name: string,
+  ) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.userCompanyTestingLocation.findFirst({
+          where: and(
+            eq(userCompanyTestingLocation.userId, userId),
+            eq(userCompanyTestingLocation.userCompanyId, companyId),
+            eq(userCompanyTestingLocation.name, name),
+          ),
+        }),
+      catch: (error) => {
+        logError(
+          "userCompanyTestingLocationQueries.getUserCompanyTestingLocationsNameByUserIdAndCompanyId",
+          "Error fetching user company testing location by user ID, company ID, and name",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Gagal mengambil data Lokasi Pengujian Perusahaan berdasarkan User ID, Company ID, dan nama",
         });
       },
     }).pipe(
@@ -502,8 +537,9 @@ const userCompanyTestingLocationQueries = {
   ) {
     return Effect.gen(this, function* () {
       const isExisting =
-        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationsNameByUserId(
+        yield* userCompanyTestingLocationQueries.getUserCompanyTestingLocationsNameByUserIdAndCompanyId(
           userId,
+          data.userCompanyId,
           data.name,
         );
 

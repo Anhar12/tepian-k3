@@ -329,17 +329,19 @@ See [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md) and [docs/VERSION_PLANNING.md
 
 ## Documentation Index
 
-| File                                                                                           | Topic                            |
-| ---------------------------------------------------------------------------------------------- | -------------------------------- |
-| [docs/PATTERNS.md](docs/PATTERNS.md)                                                           | Code patterns and examples       |
-| [docs/JSDOC_CONVENTION.md](docs/JSDOC_CONVENTION.md)                                           | JSDoc rules and examples         |
-| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md)                                   | Docker setup and troubleshooting |
-| [docs/EMPLOYEE_AUTH_GUIDE.md](docs/EMPLOYEE_AUTH_GUIDE.md)                                     | Employee authentication          |
-| [docs/POLYMORPHIC_RELATIONS_GUIDE.md](docs/POLYMORPHIC_RELATIONS_GUIDE.md)                     | Document polymorphic relations   |
-| [docs/DOCUMENT_VERIFICATION.md](docs/DOCUMENT_VERIFICATION.md)                                 | Document verification system     |
-| [docs/PDF_EDITOR_USER_GUIDE.md](docs/PDF_EDITOR_USER_GUIDE.md)                                 | PDF signing and QR embedding     |
-| [packages/api/docs/RATE_LIMITING_MIDDLEWARE.md](packages/api/docs/RATE_LIMITING_MIDDLEWARE.md) | Rate limiting middleware         |
-| [apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md)       | tRPC + TanStack Query patterns   |
-| [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md)                                                 | Git branch naming conventions    |
-| [docs/VERSION_PLANNING.md](docs/VERSION_PLANNING.md)                                           | SemVer strategy and release plan |
-| [AGENT_CHANGELOG.md](AGENT_CHANGELOG.md)                                                       | Agent change history             |
+| File                                                                                           | Topic                                                |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [docs/PATTERNS.md](docs/PATTERNS.md)                                                           | Code patterns and examples                           |
+| [docs/JSDOC_CONVENTION.md](docs/JSDOC_CONVENTION.md)                                           | JSDoc rules and examples                             |
+| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md)                                   | Docker setup and troubleshooting                     |
+| [docs/EMPLOYEE_AUTH_GUIDE.md](docs/EMPLOYEE_AUTH_GUIDE.md)                                     | Employee authentication                              |
+| [docs/POLYMORPHIC_RELATIONS_GUIDE.md](docs/POLYMORPHIC_RELATIONS_GUIDE.md)                     | Document polymorphic relations                       |
+| [docs/DOCUMENT_VERIFICATION.md](docs/DOCUMENT_VERIFICATION.md)                                 | Document verification system                         |
+| [docs/PDF_EDITOR_USER_GUIDE.md](docs/PDF_EDITOR_USER_GUIDE.md)                                 | PDF signing and QR embedding                         |
+| [packages/api/docs/RATE_LIMITING_MIDDLEWARE.md](packages/api/docs/RATE_LIMITING_MIDDLEWARE.md) | Rate limiting middleware                             |
+| [apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md)       | tRPC + TanStack Query patterns                       |
+| [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md)                                                 | Git branch naming conventions                        |
+| [docs/VERSION_PLANNING.md](docs/VERSION_PLANNING.md)                                           | SemVer strategy and release plan                     |
+| [docs/PERMISSIONS_GUIDE.md](docs/PERMISSIONS_GUIDE.md)                                         | Permission system — roles, resources, workflow gates |
+| [docs/ROLES_GUIDE.md](docs/ROLES_GUIDE.md)                                                     | Role definitions — what each role can and cannot do  |
+| [AGENT_CHANGELOG.md](AGENT_CHANGELOG.md)                                                       | Agent change history                                 |

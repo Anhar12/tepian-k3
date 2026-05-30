@@ -127,7 +127,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   // Super Admin: semua izin sistem
   super_admin: getAllPermissions(),
 
-  // Admin: 79 izin — verifikasi data order, teruskan ke kaji ulang, kelola dokumen
+  // Admin: verifikasi data order, teruskan ke kaji ulang, kelola dokumen — tidak dapat setujui/tolak order
   admin: [
     "orders.view",
     "orders.read",
@@ -142,7 +142,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "orders-approval.view",
     "orders-approval.create",
     "orders-approval.read",
-    "orders-approval.update",
     "orders-approval.review",
     "orders-approval.verify",
     "user-company.view",
@@ -159,7 +158,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "testing-item.read",
     "worksheets.view",
     "worksheets.read",
-    "worksheets.update",
     "worksheets.review",
     "worksheets-status.view",
     "worksheets-status.read",
@@ -347,7 +345,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "testing-item.update",
     "worksheets.view",
     "worksheets.read",
-    "worksheets.update",
     "worksheets.review",
     "worksheets-status.view",
     "worksheets-status.read",
@@ -382,13 +379,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "audits.read",
   ],
 
-  // Koordinator Pengujian: 64 izin — verifikasi hasil kaji ulang, teruskan ke Koordinator Administrasi
+  // Koordinator Pengujian: verifikasi hasil kaji ulang, teruskan ke Koordinator Administrasi — tidak dapat mengajukan verifikasi
   koordinator_pengujian: [
     "orders.view",
     "orders.read",
     "orders.update",
     "orders.review",
     "orders.verify",
+    "orders-approval.view",
+    "orders-approval.read",
+    "orders-approval.reject",
     "order-items.view",
     "order-items.read",
     "order-status-history.view",
@@ -396,7 +396,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "order-status-history.read",
     "worksheets.view",
     "worksheets.read",
-    "worksheets.update",
     "worksheets.review",
     "worksheets.verify",
     "worksheets.approve",
@@ -497,10 +496,13 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "audits.read",
   ],
 
-  // Koordinator Mutu: 59 izin — memastikan mutu pengujian dan menyetujui dokumen hasil
+  // Koordinator Mutu: memastikan mutu pengujian dan menyetujui dokumen hasil — dapat tolak order
   koordinator_mutu: [
     "orders.view",
     "orders.read",
+    "orders-approval.view",
+    "orders-approval.read",
+    "orders-approval.reject",
     "testing.view",
     "testing.read",
     "testing.review",
@@ -606,6 +608,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "worksheet-notes.read",
     "worksheet-notes.update",
     "worksheets-transaction-details.view",
+    "worksheets-transaction-details.create",
     "worksheets-transaction-details.read",
     "worksheets-transaction-details.update",
     "parameters.view",
@@ -637,12 +640,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "audits.read",
   ],
 
-  // Kepala Balai: 39 izin — persetujuan final penawaran, SPK/tagihan, dan SPT
+  // Kepala Balai: persetujuan final order, worksheet, SPK/tagihan, dan SPT
   kepala_balai: [
     "orders.view",
     "orders.read",
     "orders.review",
     "orders.approve",
+    "orders-approval.view",
+    "orders-approval.read",
+    "orders-approval.approve",
+    "orders-approval.reject",
     "order-items.view",
     "order-items.read",
     "order-status-history.view",
@@ -664,8 +671,12 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "documents-spt.approve",
     "worksheets.view",
     "worksheets.read",
+    "worksheets.verify",
+    "worksheets.approve",
     "worksheets-status.view",
     "worksheets-status.read",
+    "worksheets-status.verify",
+    "worksheets-status.approve",
     "worksheets-transaction-details.view",
     "worksheets-transaction-details.read",
     "worksheet-notes.view",
@@ -680,13 +691,16 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "notifications.update",
   ],
 
-  // Koordinator Administrasi: 66 izin — penawaran, SPK/tagihan, biaya operasional
+  // Koordinator Administrasi: penawaran, SPK/tagihan, biaya operasional — dapat tolak order sebelum disetujui
   koordinator_administrasi: [
     "orders.view",
     "orders.read",
     "orders.update",
     "orders.review",
     "orders.verify",
+    "orders-approval.view",
+    "orders-approval.read",
+    "orders-approval.reject",
     "order-items.view",
     "order-items.read",
     "order-status-history.view",
@@ -694,7 +708,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "order-status-history.read",
     "worksheets.view",
     "worksheets.read",
-    "worksheets.update",
     "worksheets.review",
     "worksheets.verify",
     "worksheets-status.view",
@@ -782,6 +795,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "orders-payment.update",
     "orders-payment.review",
     "orders-payment.verify",
+    "orders-payment.reject",
     "orders-payment.approve",
     "worksheets.view",
     "worksheets.read",
@@ -826,7 +840,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "testing-item.update",
     "worksheets.view",
     "worksheets.read",
-    "worksheets.update",
     "worksheets-status.view",
     "worksheets-status.read",
     "worksheets-status.update",

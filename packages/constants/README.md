@@ -21,18 +21,32 @@ This package provides a fully type-safe permission system that prevents typos an
 
 ### Available Actions
 
+Actions are split into two groups: **base** actions that every resource has, and
+**approval** actions that each resource opts into (see [Resources](#resources)).
+
 ```typescript
-type PermissionAction =
+// Base CRUD actions — available on EVERY resource
+type PermissionBaseAction =
   | "view" // List/dashboard access (no details)
   | "create" // Create new records
   | "read" // Read full record details
   | "update" // Modify records
   | "delete"; // Delete records
+
+// Approval / workflow actions — opt-in PER resource via RESOURCES config
+type PermissionApprovalAction =
+  | "review" // Review a submission
+  | "verify" // Verify a submission
+  | "approve" // Approve / finalise
+  | "reject"; // Reject
+
+// PermissionAction is the union of both (covers the DB `action` enum)
+type PermissionAction = PermissionBaseAction | PermissionApprovalAction;
 ```
 
 ### Action Hierarchy
 
-Permissions follow a hierarchy from least to most privileged:
+Base permissions follow a hierarchy from least to most privileged:
 
 ```
 view < create/read < update < delete
@@ -43,6 +57,17 @@ view < create/read < update < delete
 - **create**: Create new records (includes view)
 - **update**: Modify existing records (includes view + read)
 - **delete**: Delete records (includes view + read)
+
+Approval actions (`review`, `verify`, `approve`, `reject`) sit outside this
+hierarchy and are only generated for resources that enable them in
+`RESOURCES`. A resource enables them with an explicit array, the literal
+`"all"`, or omits `approvalActions` to have none:
+
+```typescript
+{ key: "users" }                                   // base actions only
+{ key: "orders", approvalActions: ["review", "verify", "approve"] }
+{ key: "orders-approval", approvalActions: "all" } // all four approval actions
+```
 
 ### Resources (33 Total)
 
@@ -86,7 +111,10 @@ The system supports permissions for these resources:
 
 ### Total Permissions
 
-**33 resources × 5 actions = 165 permissions**
+Every resource contributes its 5 base actions; resources that opt into approval
+actions contribute those on top. The total therefore depends on the per-resource
+config rather than a fixed multiplier (currently **363 permissions**). Use
+`getAllPermissions()` as the source of truth rather than a hard-coded number.
 
 ## Usage Examples
 
@@ -134,7 +162,7 @@ const userPermissions = getResourcePermissions("users");
 import { getAllPermissions } from "@tepian-k3/constants";
 
 const allPermissions = getAllPermissions();
-// Returns all 165 permissions
+// Returns all permissions
 ```
 
 ### 5. Validate Permission Strings
@@ -157,7 +185,7 @@ const parsed = parsePermission("users.read");
 ```typescript
 import { getResourcePermissions, type Permission } from "@tepian-k3/constants";
 
-const ADMIN_PERMISSIONS = getAllPermissions(); // All 165 permissions
+const ADMIN_PERMISSIONS = getAllPermissions(); // All permissions
 
 const USER_PERMISSIONS: Permission[] = [
   ...getResourcePermissions("user-company"),
@@ -262,8 +290,8 @@ type Role =
 
 Each role has a predefined set of permissions:
 
-- **super_admin**: All 165 permissions - complete system access
-- **admin**: All 165 permissions - administrative access
+- **super_admin**: All permissions - complete system access
+- **admin**: All permissions - administrative access
 - **user**: Company management, cart, orders, view parameters/documents (54 permissions)
 - **employee**: Basic viewing permissions for orders, testing, documents (5 permissions)
 - **lab_technician**: Testing operations, worksheet management, tool/parameter viewing (44 permissions)
@@ -325,7 +353,7 @@ import {
   ROLE_PERMISSIONS,
 } from "@tepian-k3/constants";
 
-// Generate all 165 permissions
+// Generate all permissions
 const permissionsList = generatePermissionsList();
 
 // Generate all 7 roles with descriptions

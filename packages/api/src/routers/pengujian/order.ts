@@ -505,7 +505,7 @@ export const orderRouter = createTRPCRouter({
     ),
 
   // Admin procedures
-  approveOrder: withPermission("orders-approval.update")
+  approveOrder: withPermission("orders-approval.approve")
     .input(
       z.object({
         orderId: z.uuidv7(),
@@ -555,7 +555,7 @@ export const orderRouter = createTRPCRouter({
         ),
     ),
 
-  rejectOrderApproval: withPermission("orders-approval.update")
+  rejectOrderApproval: withPermission("orders-approval.reject")
     .input(
       z.object({
         orderId: z.uuidv7(),
@@ -609,7 +609,7 @@ export const orderRouter = createTRPCRouter({
         ),
     ),
 
-  requestApprovalRevision: withPermission("orders-approval.update")
+  requestApprovalRevision: withPermission("orders-approval.review")
     .input(
       z.object({
         orderId: z.uuidv7(),
@@ -663,7 +663,7 @@ export const orderRouter = createTRPCRouter({
         ),
     ),
 
-  adminRevertRevisionToPending: withPermission("orders-approval.update")
+  adminRevertRevisionToPending: withPermission("orders-approval.review")
     .input(z.object({ orderId: z.uuidv7() }))
     .mutation(
       async ({ input, ctx }) =>
@@ -733,7 +733,7 @@ export const orderRouter = createTRPCRouter({
         ),
     ),
 
-  verifyPayment: withPermission("orders-payment.update")
+  verifyPayment: withPermission("orders-payment.verify")
     .input(
       z.object({
         orderId: z.uuidv7(),
@@ -795,7 +795,7 @@ export const orderRouter = createTRPCRouter({
         ),
     ),
 
-  rejectPayment: withPermission("orders-payment.update")
+  rejectPayment: withPermission("orders-payment.reject")
     .input(
       z.object({
         orderId: z.uuidv7(),

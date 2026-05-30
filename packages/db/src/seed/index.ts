@@ -116,133 +116,165 @@ async function seed() {
     );
   }
 
-  // Generate all permissions using type-safe utility
-  // This generates 165 permissions (33 resources × 5 actions)
-  // Each resource has: view, create, read, update, delete
+  // Generate all permissions using type-safe utility.
+  // Each resource contributes its base CRUD actions (view, create, read,
+  // update, delete) plus any approval actions it opts into (review, verify,
+  // approve, reject) via the RESOURCES config in @tepian-k3/constants.
   const permissionsList = generatePermissionsList();
-
-  // Create or get all permissions
-  console.log("📋 Syncing permissions...");
-  const existingPerms = await db.query.permission.findMany();
-  const existingPermNames = new Set(existingPerms.map((p) => p.name));
-
-  const newPermissions = permissionsList.filter(
-    (p) => !existingPermNames.has(p.name),
+  const generatedPermNames = new Set<string>(
+    permissionsList.map((p) => p.name),
   );
 
-  let allPerms = [...existingPerms];
+  // Permissions, roles, and role-permission assignments form the structural
+  // authorization state. They are reconciled declaratively (add missing +
+  // remove stale) inside a single transaction so a mid-sync failure can never
+  // leave authorization half-applied. This runs in every environment.
+  const allRoles = await db.transaction(async (tx) => {
+    // ---- Permissions ----
+    console.log("📋 Syncing permissions...");
+    const existingPerms = await tx.query.permission.findMany();
+    const existingPermNames = new Set(existingPerms.map((p) => p.name));
 
-  if (newPermissions.length > 0) {
-    console.log(`   ➕ Adding ${newPermissions.length} new permissions...`);
-    const insertedPerms = await db
-      .insert(permission)
-      .values(newPermissions)
-      .returning();
-    allPerms = [...allPerms, ...insertedPerms];
-  }
+    const newPermissions = permissionsList.filter(
+      (p) => !existingPermNames.has(p.name),
+    );
 
-  console.log(`✅ ${allPerms.length} permissions in database`);
-
-  // Create or get roles using type-safe role definitions
-  console.log("👥 Syncing roles...");
-
-  const rolesList = generateRolesList();
-  const existingRoles = await db.query.roles.findMany();
-  const existingRoleNames = new Set(existingRoles.map((r) => r.name));
-
-  const newRoles = rolesList.filter((r) => !existingRoleNames.has(r.name));
-
-  let allRoles = [...existingRoles];
-
-  if (newRoles.length > 0) {
-    console.log(`   ➕ Adding ${newRoles.length} new roles...`);
-    const insertedRoles = await db.insert(roles).values(newRoles).returning();
-    allRoles = [...allRoles, ...insertedRoles];
-  }
-
-  console.log(`✅ ${allRoles.length} roles in database`);
-
-  // Create a map for easy role lookup
-  const roleMap = new Map(allRoles.map((r) => [r.name as Role, r]));
-
-  // Sync permissions to roles using type-safe definitions
-  console.log("🔐 Syncing permissions to roles...");
-
-  // Get existing role permissions
-  const existingRolePerms = await db.query.rolePermissions.findMany();
-  const existingRolePermSet = new Set(
-    existingRolePerms.map((rp) => `${rp.roleId}-${rp.permissionId}`),
-  );
-
-  // Create a permission name to ID map for easy lookup
-  const permissionMap = new Map(allPerms.map((p) => [p.name, p.id]));
-
-  const rolePermissionsToAdd = [];
-
-  // Build the full set of role-permission pairs that SHOULD exist
-  const expectedRolePermSet = new Set<string>();
-
-  // Assign permissions to each role based on ROLE_PERMISSIONS
-  for (const [roleName, permissionNames] of Object.entries(ROLE_PERMISSIONS)) {
-    const role = roleMap.get(roleName as Role);
-    if (!role) {
-      console.warn(`⚠️  Role '${roleName}' not found in database, skipping...`);
-      continue;
+    if (newPermissions.length > 0) {
+      console.log(`   ➕ Adding ${newPermissions.length} new permissions...`);
+      await tx.insert(permission).values(newPermissions);
     }
 
-    for (const permissionName of permissionNames) {
-      const permissionId = permissionMap.get(permissionName);
-      if (!permissionId) {
+    // Prune permissions no longer produced by generatePermissionsList()
+    // (e.g. nonsensical approval actions like `logs.approve` after a resource's
+    // approvalActions config changes). Cascades to role_permissions and
+    // user_permissions. Mirrors the stale role-permission reconcile below.
+    const orphanPerms = existingPerms.filter(
+      (p) => !generatedPermNames.has(p.name),
+    );
+    if (orphanPerms.length > 0) {
+      console.log(
+        `   🗑️  Removing ${orphanPerms.length} orphaned permissions...`,
+      );
+      await tx.delete(permission).where(
+        inArray(
+          permission.id,
+          orphanPerms.map((p) => p.id),
+        ),
+      );
+    }
+
+    // Re-read the reconciled permission set for id lookups
+    const allPerms = await tx.query.permission.findMany();
+    console.log(`✅ ${allPerms.length} permissions in database`);
+
+    // ---- Roles ----
+    console.log("👥 Syncing roles...");
+
+    const rolesList = generateRolesList();
+    const existingRoles = await tx.query.roles.findMany();
+    const existingRoleNames = new Set(existingRoles.map((r) => r.name));
+
+    const newRoles = rolesList.filter((r) => !existingRoleNames.has(r.name));
+
+    let rolesInDb = [...existingRoles];
+
+    if (newRoles.length > 0) {
+      console.log(`   ➕ Adding ${newRoles.length} new roles...`);
+      const insertedRoles = await tx.insert(roles).values(newRoles).returning();
+      rolesInDb = [...rolesInDb, ...insertedRoles];
+    }
+
+    console.log(`✅ ${rolesInDb.length} roles in database`);
+
+    // ---- Role permissions ----
+    console.log("🔐 Syncing permissions to roles...");
+
+    const txRoleMap = new Map(rolesInDb.map((r) => [r.name as Role, r]));
+    const permissionMap = new Map(allPerms.map((p) => [p.name, p.id]));
+
+    // Read existing assignments AFTER the orphan prune (cascade already removed
+    // assignments for pruned permissions).
+    const existingRolePerms = await tx.query.rolePermissions.findMany();
+    const existingRolePermSet = new Set(
+      existingRolePerms.map((rp) => `${rp.roleId}-${rp.permissionId}`),
+    );
+
+    const rolePermissionsToAdd = [];
+
+    // Build the full set of role-permission pairs that SHOULD exist
+    const expectedRolePermSet = new Set<string>();
+
+    // Assign permissions to each role based on ROLE_PERMISSIONS
+    for (const [roleName, permissionNames] of Object.entries(
+      ROLE_PERMISSIONS,
+    )) {
+      const role = txRoleMap.get(roleName as Role);
+      if (!role) {
         console.warn(
-          `⚠️  Permission '${permissionName}' not found for role '${roleName}', skipping...`,
+          `⚠️  Role '${roleName}' not found in database, skipping...`,
         );
         continue;
       }
 
-      const key = `${role.id}-${permissionId}`;
-      expectedRolePermSet.add(key);
+      for (const permissionName of permissionNames) {
+        const permissionId = permissionMap.get(permissionName);
+        if (!permissionId) {
+          console.warn(
+            `⚠️  Permission '${permissionName}' not found for role '${roleName}', skipping...`,
+          );
+          continue;
+        }
 
-      if (!existingRolePermSet.has(key)) {
-        rolePermissionsToAdd.push({
-          roleId: role.id,
-          permissionId: permissionId,
-        });
+        const key = `${role.id}-${permissionId}`;
+        expectedRolePermSet.add(key);
+
+        if (!existingRolePermSet.has(key)) {
+          rolePermissionsToAdd.push({
+            roleId: role.id,
+            permissionId: permissionId,
+          });
+        }
       }
     }
-  }
 
-  // Remove stale role-permission assignments no longer in ROLE_PERMISSIONS
-  const staleRolePerms = existingRolePerms.filter(
-    (rp) => !expectedRolePermSet.has(`${rp.roleId}-${rp.permissionId}`),
-  );
-
-  if (staleRolePerms.length > 0) {
-    console.log(
-      `   🗑️  Removing ${staleRolePerms.length} stale role-permission assignments...`,
+    // Remove stale role-permission assignments no longer in ROLE_PERMISSIONS
+    const staleRolePerms = existingRolePerms.filter(
+      (rp) => !expectedRolePermSet.has(`${rp.roleId}-${rp.permissionId}`),
     );
-    // Group by roleId so we can batch-delete per role
-    const staleByRole = Map.groupBy(staleRolePerms, (rp) => rp.roleId);
-    for (const [roleId, entries] of staleByRole) {
-      const permIds = entries.map((rp) => rp.permissionId);
-      await db
-        .delete(rolePermissions)
-        .where(
-          and(
-            eq(rolePermissions.roleId, roleId),
-            inArray(rolePermissions.permissionId, permIds),
-          ),
-        );
+
+    if (staleRolePerms.length > 0) {
+      console.log(
+        `   🗑️  Removing ${staleRolePerms.length} stale role-permission assignments...`,
+      );
+      // Group by roleId so we can batch-delete per role
+      const staleByRole = Map.groupBy(staleRolePerms, (rp) => rp.roleId);
+      for (const [roleId, entries] of staleByRole) {
+        const permIds = entries.map((rp) => rp.permissionId);
+        await tx
+          .delete(rolePermissions)
+          .where(
+            and(
+              eq(rolePermissions.roleId, roleId),
+              inArray(rolePermissions.permissionId, permIds),
+            ),
+          );
+      }
     }
-  }
 
-  if (rolePermissionsToAdd.length > 0) {
-    console.log(
-      `   ➕ Adding ${rolePermissionsToAdd.length} new role-permission assignments...`,
-    );
-    await db.insert(rolePermissions).values(rolePermissionsToAdd);
-  }
+    if (rolePermissionsToAdd.length > 0) {
+      console.log(
+        `   ➕ Adding ${rolePermissionsToAdd.length} new role-permission assignments...`,
+      );
+      await tx.insert(rolePermissions).values(rolePermissionsToAdd);
+    }
 
-  console.log("✅ Role permissions synced");
+    console.log("✅ Role permissions synced");
+
+    return rolesInDb;
+  });
+
+  // Create a map for easy role lookup (used by the seed-user step below)
+  const roleMap = new Map(allRoles.map((r) => [r.name as Role, r]));
 
   // seeding other data can go here...
   await seedClusters();

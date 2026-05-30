@@ -165,6 +165,10 @@ export function TestingTable({
     });
   };
 
+  useEffect(() => {
+    setCart(new Map());
+  }, [params.locationId]);
+
   // set parameters data to filtered data based on debouncedSearchTerm
   useEffect(() => {
     navigate({
