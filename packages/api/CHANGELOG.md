@@ -1,5 +1,26 @@
 # @tepian-k3/api
 
+## 1.16.0
+
+### Minor Changes
+
+- feat(api,auth,constants,db,queries,schema,services,shared,types,utils,web): add location columns to order queries (#73)
+  - add location columns to order queries (#73)
+  - per-resource approval actions + permission/role refinementsFeat/revision 3 (#72)
+  - add new journal entry for mushy maddog version 7
+  - add sync workflow for mirroring to Coolify repo (#67)
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/auth@1.3.0
+  - @tepian-k3/constants@1.12.0
+  - @tepian-k3/db@1.13.0
+  - @tepian-k3/queries@1.13.0
+  - @tepian-k3/schema@1.12.0
+  - @tepian-k3/services@1.6.0
+  - @tepian-k3/utils@1.3.0
+
 ## 1.15.0
 
 ### Minor Changes
