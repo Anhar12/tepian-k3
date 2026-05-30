@@ -776,566 +776,593 @@ function RouteComponent() {
             </Card>
 
             {/* Workflow State Content */}
-            {isPendingApproval && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order Pending Approval</CardTitle>
-                  <CardDescription>
-                    Tinjau detail order dan setujui untuk melanjutkan ke tahap
-                    penerbitan dokumen penawaran.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-end gap-3">
-                    <PermissionGate permission="orders-approval.reject">
-                      <Button
-                        variant="outline"
-                        className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                        onClick={() => dialogs.open("reject")}
-                      >
-                        Tolak Order
-                      </Button>
-                    </PermissionGate>
-                    <PermissionGate permission="orders-approval.review">
-                      <Button
-                        variant="outline"
-                        className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
-                        onClick={() => dialogs.open("requestContactRevision")}
-                      >
-                        Minta Koreksi Data
-                      </Button>
-                    </PermissionGate>
-                    <PermissionGate permission="orders-approval.approve">
-                      <Button
-                        className="bg-green-500 hover:bg-green-600"
-                        onClick={handleApprove}
-                        disabled={approveMutation.isPending}
-                      >
-                        {approveMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Setujui Order
-                      </Button>
-                    </PermissionGate>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Card shows only if the user holds at least one of its actions */}
+            <PermissionGate
+              permission={[
+                "orders-approval.reject",
+                "orders-approval.review",
+                "orders-approval.approve",
+              ]}
+            >
+              {isPendingApproval && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Order Pending Approval</CardTitle>
+                    <CardDescription>
+                      Tinjau detail order dan setujui untuk melanjutkan ke tahap
+                      penerbitan dokumen penawaran.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-end gap-3">
+                      <PermissionGate permission="orders-approval.reject">
+                        <Button
+                          variant="outline"
+                          className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
+                          onClick={() => dialogs.open("reject")}
+                        >
+                          Tolak Order
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="orders-approval.review">
+                        <Button
+                          variant="outline"
+                          className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
+                          onClick={() => dialogs.open("requestContactRevision")}
+                        >
+                          Minta Koreksi Data
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="orders-approval.approve">
+                        <Button
+                          className="bg-green-500 hover:bg-green-600"
+                          onClick={handleApprove}
+                          disabled={approveMutation.isPending}
+                        >
+                          {approveMutation.isPending && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Setujui Order
+                        </Button>
+                      </PermissionGate>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
 
             {/* Customer Submitted Review Request Card */}
-            {isApprovalRequestReview && (
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader>
-                  <CardTitle className="text-blue-800">
-                    Pelanggan Telah Mengirimkan Koreksi
-                  </CardTitle>
-                  <CardDescription className="text-blue-700">
-                    Pelanggan telah memperbaiki data kontak dan meminta
-                    konfirmasi. Periksa dan terima koreksi untuk melanjutkan
-                    proses persetujuan.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {order.revisionNotes && (
-                    <div className="rounded-lg border border-blue-200 bg-white p-3">
-                      <p className="text-xs font-medium text-muted-foreground">
-                        Catatan koreksi sebelumnya:
-                      </p>
-                      <p className="mt-1 text-sm text-foreground">
-                        {order.revisionNotes}
-                      </p>
+            <PermissionGate permission="orders-approval.review">
+              {isApprovalRequestReview && (
+                <Card className="border-blue-200 bg-blue-50">
+                  <CardHeader>
+                    <CardTitle className="text-blue-800">
+                      Pelanggan Telah Mengirimkan Koreksi
+                    </CardTitle>
+                    <CardDescription className="text-blue-700">
+                      Pelanggan telah memperbaiki data kontak dan meminta
+                      konfirmasi. Periksa dan terima koreksi untuk melanjutkan
+                      proses persetujuan.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {order.revisionNotes && (
+                      <div className="rounded-lg border border-blue-200 bg-white p-3">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Catatan koreksi sebelumnya:
+                        </p>
+                        <p className="mt-1 text-sm text-foreground">
+                          {order.revisionNotes}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex justify-end gap-2">
+                      <PermissionGate permission="orders-approval.review">
+                        <Button
+                          variant="outline"
+                          className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
+                          onClick={() => dialogs.open("requestContactRevision")}
+                        >
+                          Kirim Ulang Koreksi
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="orders-approval.review">
+                        <Button
+                          className="bg-green-500 hover:bg-green-600"
+                          onClick={() =>
+                            revertRevisionMutation.mutate({ orderId })
+                          }
+                          disabled={revertRevisionMutation.isPending}
+                        >
+                          {revertRevisionMutation.isPending && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Terima & Kembalikan ke Antrean
+                        </Button>
+                      </PermissionGate>
                     </div>
-                  )}
-                  <div className="flex justify-end gap-2">
-                    <PermissionGate permission="orders-approval.review">
-                      <Button
-                        variant="outline"
-                        className="border-orange-400 bg-orange-50 text-orange-600 hover:bg-orange-100"
-                        onClick={() => dialogs.open("requestContactRevision")}
-                      >
-                        Kirim Ulang Koreksi
-                      </Button>
-                    </PermissionGate>
-                    <PermissionGate permission="orders-approval.review">
-                      <Button
-                        className="bg-green-500 hover:bg-green-600"
-                        onClick={() =>
-                          revertRevisionMutation.mutate({ orderId })
-                        }
-                        disabled={revertRevisionMutation.isPending}
-                      >
-                        {revertRevisionMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Terima & Kembalikan ke Antrean
-                      </Button>
-                    </PermissionGate>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
 
             {/* Approval Revision Requested Card */}
-            {isApprovalRevisionRequested && (
-              <Card className="border-orange-200 bg-orange-50">
-                <CardHeader>
-                  <CardTitle className="text-orange-800">
-                    Menunggu Koreksi Data dari Pelanggan
-                  </CardTitle>
-                  <CardDescription className="text-orange-700">
-                    Permintaan koreksi data kontak telah dikirim. Menunggu
-                    pelanggan memperbaiki dan mengirim ulang order.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {order.revisionNotes && (
-                    <div className="rounded-lg border border-orange-200 bg-white p-3">
-                      <p className="text-xs font-medium text-muted-foreground">
-                        Catatan yang dikirim ke pelanggan:
-                      </p>
-                      <p className="mt-1 text-sm text-foreground">
-                        {order.revisionNotes}
-                      </p>
+            <PermissionGate permission="orders-approval.review">
+              {isApprovalRevisionRequested && (
+                <Card className="border-orange-200 bg-orange-50">
+                  <CardHeader>
+                    <CardTitle className="text-orange-800">
+                      Menunggu Koreksi Data dari Pelanggan
+                    </CardTitle>
+                    <CardDescription className="text-orange-700">
+                      Permintaan koreksi data kontak telah dikirim. Menunggu
+                      pelanggan memperbaiki dan mengirim ulang order.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {order.revisionNotes && (
+                      <div className="rounded-lg border border-orange-200 bg-white p-3">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Catatan yang dikirim ke pelanggan:
+                        </p>
+                        <p className="mt-1 text-sm text-foreground">
+                          {order.revisionNotes}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex justify-end">
+                      <PermissionGate permission="orders-approval.review">
+                        <Button
+                          className="bg-green-500 hover:bg-green-600"
+                          onClick={() =>
+                            revertRevisionMutation.mutate({ orderId })
+                          }
+                          disabled={revertRevisionMutation.isPending}
+                        >
+                          {revertRevisionMutation.isPending && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Kembalikan ke Antrean
+                        </Button>
+                      </PermissionGate>
                     </div>
-                  )}
-                  <div className="flex justify-end">
-                    <PermissionGate permission="orders-approval.review">
-                      <Button
-                        className="bg-green-500 hover:bg-green-600"
-                        onClick={() =>
-                          revertRevisionMutation.mutate({ orderId })
-                        }
-                        disabled={revertRevisionMutation.isPending}
-                      >
-                        {revertRevisionMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Kembalikan ke Antrean
-                      </Button>
-                    </PermissionGate>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
 
             {/* Worksheet Management Card - Kaji Ulang Phase */}
-            {(needsWorksheet ||
-              worksheetInDraft ||
-              worksheetInRevision ||
-              worksheetPendingVerification ||
-              worksheetVerified) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {needsWorksheet && "Buat Worksheet untuk Kaji Ulang"}
-                    {worksheetInDraft && "Worksheet dalam Draft"}
-                    {worksheetInRevision && "Worksheet dalam Revisi"}
-                    {worksheetPendingVerification &&
-                      "Worksheet Menunggu Verifikasi"}
-                    {worksheetVerified && "Worksheet Terverifikasi"}
-                  </CardTitle>
-                  <CardDescription>
-                    {needsWorksheet &&
-                      "Buat worksheet untuk melakukan kaji ulang sebelum menerbitkan surat penawaran."}
-                    {worksheetInDraft &&
-                      "Worksheet sedang diisi. Ajukan untuk verifikasi setelah selesai."}
-                    {worksheetInRevision &&
-                      "Worksheet direvisi oleh koordinator. Perbaiki sesuai catatan revisi dan ajukan kembali."}
-                    {worksheetPendingVerification &&
-                      "Worksheet telah diajukan dan menunggu verifikasi dari koordinator."}
-                    {worksheetVerified &&
-                      "Worksheet telah diverifikasi. Lanjutkan ke tahap penerbitan surat penawaran."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* Worksheet Info */}
-                    {hasWorksheet && worksheet && (
-                      <div className="rounded-lg border bg-muted/50 p-4">
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <div>
-                            <Label className="text-muted-foreground">
-                              ID Worksheet
-                            </Label>
-                            <p className="font-medium">
-                              {worksheet.id.slice(0, 8).toUpperCase()}
+            <PermissionGate
+              permission={[
+                "worksheets.create",
+                "worksheets.update",
+                "worksheets.verify",
+                "documents-admin.create",
+              ]}
+            >
+              {(needsWorksheet ||
+                worksheetInDraft ||
+                worksheetInRevision ||
+                worksheetPendingVerification ||
+                worksheetVerified) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      {needsWorksheet && "Buat Worksheet untuk Kaji Ulang"}
+                      {worksheetInDraft && "Worksheet dalam Draft"}
+                      {worksheetInRevision && "Worksheet dalam Revisi"}
+                      {worksheetPendingVerification &&
+                        "Worksheet Menunggu Verifikasi"}
+                      {worksheetVerified && "Worksheet Terverifikasi"}
+                    </CardTitle>
+                    <CardDescription>
+                      {needsWorksheet &&
+                        "Buat worksheet untuk melakukan kaji ulang sebelum menerbitkan surat penawaran."}
+                      {worksheetInDraft &&
+                        "Worksheet sedang diisi. Ajukan untuk verifikasi setelah selesai."}
+                      {worksheetInRevision &&
+                        "Worksheet direvisi oleh koordinator. Perbaiki sesuai catatan revisi dan ajukan kembali."}
+                      {worksheetPendingVerification &&
+                        "Worksheet telah diajukan dan menunggu verifikasi dari koordinator."}
+                      {worksheetVerified &&
+                        "Worksheet telah diverifikasi. Lanjutkan ke tahap penerbitan surat penawaran."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Worksheet Info */}
+                      {hasWorksheet && worksheet && (
+                        <div className="rounded-lg border bg-muted/50 p-4">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div>
+                              <Label className="text-muted-foreground">
+                                ID Worksheet
+                              </Label>
+                              <p className="font-medium">
+                                {worksheet.id.slice(0, 8).toUpperCase()}
+                              </p>
+                            </div>
+                            <div>
+                              <Label className="text-muted-foreground">
+                                Status
+                              </Label>
+                              <div className="mt-1">
+                                <Badge
+                                  className={
+                                    worksheetStatus === "draft"
+                                      ? "bg-gray-100 text-gray-800"
+                                      : worksheetStatus ===
+                                          "pending_verification"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : worksheetStatus === "verified"
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-blue-100 text-blue-800"
+                                  }
+                                >
+                                  {worksheetStatus}
+                                </Badge>
+                              </div>
+                            </div>
+                            {worksheet.startDate && (
+                              <div>
+                                <Label className="text-muted-foreground">
+                                  Tanggal Mulai
+                                </Label>
+                                <p className="font-medium">
+                                  {format(new Date(worksheet.startDate), "PPP")}
+                                </p>
+                              </div>
+                            )}
+                            {worksheet.mainSupervisor && (
+                              <div>
+                                <Label className="text-muted-foreground">
+                                  Pengawas Utama
+                                </Label>
+                                <p className="font-medium">
+                                  {worksheet.mainSupervisor.name}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex justify-end gap-3">
+                        {needsWorksheet && (
+                          <PermissionGate permission="worksheets.create">
+                            <Button
+                              className="bg-blue-500 hover:bg-blue-600"
+                              onClick={handleCreateWorksheet}
+                              disabled={createWorksheetMutation.isPending}
+                            >
+                              {createWorksheetMutation.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Plus className="mr-2 h-4 w-4" />
+                              )}
+                              Buat Worksheet
+                            </Button>
+                          </PermissionGate>
+                        )}
+
+                        {worksheetInRevision && (
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                navigate({
+                                  to: "/worksheets",
+                                  search: { worksheetId: worksheet!.id },
+                                })
+                              }
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </Button>
+                            <PermissionGate permission="worksheets.update">
+                              <Button
+                                className="bg-yellow-500 hover:bg-yellow-600"
+                                onClick={handleSubmitWorksheetForVerification}
+                                disabled={submitWorksheetMutation.isPending}
+                              >
+                                {submitWorksheetMutation.isPending ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <FileText className="mr-2 h-4 w-4" />
+                                )}
+                                Ajukan Verifikasi
+                              </Button>
+                            </PermissionGate>
+                          </>
+                        )}
+
+                        {worksheetInDraft && (
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                navigate({
+                                  to: "/worksheets",
+                                  search: { worksheetId: worksheet!.id },
+                                })
+                              }
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </Button>
+                            <PermissionGate permission="worksheets.update">
+                              <Button
+                                className="bg-yellow-500 hover:bg-yellow-600"
+                                onClick={handleSubmitWorksheetForVerification}
+                                disabled={submitWorksheetMutation.isPending}
+                              >
+                                {submitWorksheetMutation.isPending ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <FileText className="mr-2 h-4 w-4" />
+                                )}
+                                Ajukan Verifikasi
+                              </Button>
+                            </PermissionGate>
+                          </>
+                        )}
+
+                        {worksheetPendingVerification && (
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                navigate({
+                                  to: "/worksheets",
+                                  search: { worksheetId: worksheet!.id },
+                                })
+                              }
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </Button>
+                            <PermissionGate permission="worksheets.verify">
+                              <ConfirmationDialog
+                                open={dialogs.isOpen("reviseWorksheet")}
+                                onOpenChange={(isOpen) =>
+                                  isOpen
+                                    ? dialogs.open("reviseWorksheet")
+                                    : dialogs.close("reviseWorksheet")
+                                }
+                                title="Revisi Worksheet"
+                                description="Apakah Anda yakin ingin merevisi worksheet ini? Berikan catatan revisi untuk pelanggan."
+                                isLoading={reviseWorksheetMutation.isPending}
+                                onConfirm={handleReviseWorksheet}
+                                trigger={
+                                  <Button className="bg-yellow-500 hover:bg-yellow-600">
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    Revisi Worksheet
+                                  </Button>
+                                }
+                                children={
+                                  <div className="space-y-2">
+                                    <Label>Catatan Revisi</Label>
+                                    <Textarea
+                                      placeholder="Jelaskan apa yang perlu direvisi oleh pelanggan..."
+                                      value={
+                                        dialogs.getData("reviseWorksheet")
+                                          ?.revisionNotes ?? ""
+                                      }
+                                      onChange={(e) =>
+                                        dialogs.updateData("reviseWorksheet", {
+                                          revisionNotes: e.target.value,
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                }
+                              />
+                            </PermissionGate>
+                            <PermissionGate permission="worksheets.verify">
+                              <Button
+                                className="bg-green-500 hover:bg-green-600"
+                                onClick={handleVerifyWorksheet}
+                                disabled={verifyWorksheetMutation.isPending}
+                              >
+                                {verifyWorksheetMutation.isPending ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <FileText className="mr-2 h-4 w-4" />
+                                )}
+                                Verifikasi Worksheet
+                              </Button>
+                            </PermissionGate>
+                          </>
+                        )}
+
+                        {worksheetVerified && (
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              navigate({
+                                to: "/worksheets",
+                                search: { worksheetId: worksheet!.id },
+                              })
+                            }
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Worksheet
+                          </Button>
+                        )}
+
+                        {worksheetVerified && (
+                          <PermissionGate permission="documents-admin.create">
+                            <Button
+                              onClick={() => dialogs.open("generateInvoice")}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Buat Invoice
+                            </Button>
+                          </PermissionGate>
+                        )}
+
+                        {worksheetVerified && (
+                          <PermissionGate permission="documents-admin.create">
+                            <Button onClick={() => dialogs.open("generateSPK")}>
+                              <Download className="mr-2 h-4 w-4" />
+                              Buat SPK
+                            </Button>
+                          </PermissionGate>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
+
+            <PermissionGate
+              permission={["documents.create", "notifications.update"]}
+            >
+              {isRevisionRequested && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Permintaan Revisi Dokumen</CardTitle>
+                    <CardDescription>
+                      Pelanggan meminta revisi dokumen penawaran. Upload dokumen
+                      yang sudah direvisi.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Revision Notes from Customer */}
+                    {revisionHistory?.note && (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                            <FileText className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-amber-800">
+                              Catatan Revisi dari Pelanggan
+                            </h3>
+                            <p className="mt-2 text-sm text-amber-700">
+                              {revisionHistory.note}
                             </p>
                           </div>
-                          <div>
-                            <Label className="text-muted-foreground">
-                              Status
-                            </Label>
-                            <div className="mt-1">
-                              <Badge
-                                className={
-                                  worksheetStatus === "draft"
-                                    ? "bg-gray-100 text-gray-800"
-                                    : worksheetStatus === "pending_verification"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : worksheetStatus === "verified"
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-blue-100 text-blue-800"
-                                }
-                              >
-                                {worksheetStatus}
-                              </Badge>
-                            </div>
-                          </div>
-                          {worksheet.startDate && (
-                            <div>
-                              <Label className="text-muted-foreground">
-                                Tanggal Mulai
-                              </Label>
-                              <p className="font-medium">
-                                {format(new Date(worksheet.startDate), "PPP")}
-                              </p>
-                            </div>
-                          )}
-                          {worksheet.mainSupervisor && (
-                            <div>
-                              <Label className="text-muted-foreground">
-                                Pengawas Utama
-                              </Label>
-                              <p className="font-medium">
-                                {worksheet.mainSupervisor.name}
-                              </p>
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-3">
-                      {needsWorksheet && (
-                        <PermissionGate permission="worksheets.create">
-                          <Button
-                            className="bg-blue-500 hover:bg-blue-600"
-                            onClick={handleCreateWorksheet}
-                            disabled={createWorksheetMutation.isPending}
-                          >
-                            {createWorksheetMutation.isPending ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <Plus className="mr-2 h-4 w-4" />
-                            )}
-                            Buat Worksheet
-                          </Button>
-                        </PermissionGate>
-                      )}
-
-                      {worksheetInRevision && (
-                        <>
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              navigate({
-                                to: "/worksheets",
-                                search: { worksheetId: worksheet!.id },
-                              })
-                            }
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Detail
-                          </Button>
-                          <PermissionGate permission="worksheets.update">
-                            <Button
-                              className="bg-yellow-500 hover:bg-yellow-600"
-                              onClick={handleSubmitWorksheetForVerification}
-                              disabled={submitWorksheetMutation.isPending}
-                            >
-                              {submitWorksheetMutation.isPending ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <FileText className="mr-2 h-4 w-4" />
-                              )}
-                              Ajukan Verifikasi
-                            </Button>
-                          </PermissionGate>
-                        </>
-                      )}
-
-                      {worksheetInDraft && (
-                        <>
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              navigate({
-                                to: "/worksheets",
-                                search: { worksheetId: worksheet!.id },
-                              })
-                            }
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Detail
-                          </Button>
-                          <PermissionGate permission="worksheets.update">
-                            <Button
-                              className="bg-yellow-500 hover:bg-yellow-600"
-                              onClick={handleSubmitWorksheetForVerification}
-                              disabled={submitWorksheetMutation.isPending}
-                            >
-                              {submitWorksheetMutation.isPending ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <FileText className="mr-2 h-4 w-4" />
-                              )}
-                              Ajukan Verifikasi
-                            </Button>
-                          </PermissionGate>
-                        </>
-                      )}
-
-                      {worksheetPendingVerification && (
-                        <>
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              navigate({
-                                to: "/worksheets",
-                                search: { worksheetId: worksheet!.id },
-                              })
-                            }
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Detail
-                          </Button>
-                          <PermissionGate permission="worksheets.verify">
-                            <ConfirmationDialog
-                              open={dialogs.isOpen("reviseWorksheet")}
-                              onOpenChange={(isOpen) =>
-                                isOpen
-                                  ? dialogs.open("reviseWorksheet")
-                                  : dialogs.close("reviseWorksheet")
-                              }
-                              title="Revisi Worksheet"
-                              description="Apakah Anda yakin ingin merevisi worksheet ini? Berikan catatan revisi untuk pelanggan."
-                              isLoading={reviseWorksheetMutation.isPending}
-                              onConfirm={handleReviseWorksheet}
-                              trigger={
-                                <Button className="bg-yellow-500 hover:bg-yellow-600">
-                                  <FileText className="mr-2 h-4 w-4" />
-                                  Revisi Worksheet
-                                </Button>
-                              }
-                              children={
-                                <div className="space-y-2">
-                                  <Label>Catatan Revisi</Label>
-                                  <Textarea
-                                    placeholder="Jelaskan apa yang perlu direvisi oleh pelanggan..."
-                                    value={
-                                      dialogs.getData("reviseWorksheet")
-                                        ?.revisionNotes ?? ""
-                                    }
-                                    onChange={(e) =>
-                                      dialogs.updateData("reviseWorksheet", {
-                                        revisionNotes: e.target.value,
-                                      })
-                                    }
-                                  />
-                                </div>
-                              }
-                            />
-                          </PermissionGate>
-                          <PermissionGate permission="worksheets.verify">
-                            <Button
-                              className="bg-green-500 hover:bg-green-600"
-                              onClick={handleVerifyWorksheet}
-                              disabled={verifyWorksheetMutation.isPending}
-                            >
-                              {verifyWorksheetMutation.isPending ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <FileText className="mr-2 h-4 w-4" />
-                              )}
-                              Verifikasi Worksheet
-                            </Button>
-                          </PermissionGate>
-                        </>
-                      )}
-
-                      {worksheetVerified && (
-                        <Button
-                          variant="outline"
-                          onClick={() =>
-                            navigate({
-                              to: "/worksheets",
-                              search: { worksheetId: worksheet!.id },
-                            })
-                          }
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Worksheet
-                        </Button>
-                      )}
-
-                      {worksheetVerified && (
-                        <PermissionGate permission="documents-admin.create">
-                          <Button
-                            onClick={() => dialogs.open("generateInvoice")}
-                          >
-                            <Download className="mr-2 h-4 w-4" />
-                            Buat Invoice
-                          </Button>
-                        </PermissionGate>
-                      )}
-
-                      {worksheetVerified && (
-                        <PermissionGate permission="documents-admin.create">
-                          <Button onClick={() => dialogs.open("generateSPK")}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Buat SPK
-                          </Button>
-                        </PermissionGate>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {isRevisionRequested && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Permintaan Revisi Dokumen</CardTitle>
-                  <CardDescription>
-                    Pelanggan meminta revisi dokumen penawaran. Upload dokumen
-                    yang sudah direvisi.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Revision Notes from Customer */}
-                  {revisionHistory?.note && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100">
-                          <FileText className="h-5 w-5 text-amber-600" />
+                    {/* Offering Letter Upload */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                          </div>
+                          <div>
+                            <Label className="text-base font-medium">
+                              Surat Penawaran (Revisi)
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Format: PDF
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium text-amber-800">
-                            Catatan Revisi dari Pelanggan
-                          </h3>
-                          <p className="mt-2 text-sm text-amber-700">
-                            {revisionHistory.note}
-                          </p>
-                        </div>
+                        {hasOfferingLetter && !offeringLetter.file && (
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-blue-100 text-blue-800">
+                              Dokumen Lama
+                            </Badge>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() =>
+                                window.open(
+                                  getPublicUrl(
+                                    order.documents.find(
+                                      (doc) => doc.type === "offering_document",
+                                    )!.fileUrl,
+                                  ),
+                                  "_blank",
+                                )
+                              }
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
 
-                  {/* Offering Letter Upload */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                          <FileText className="h-5 w-5 text-blue-500" />
-                        </div>
-                        <div>
-                          <Label className="text-base font-medium">
-                            Surat Penawaran (Revisi)
-                          </Label>
-                          <p className="text-sm text-muted-foreground">
-                            Format: PDF
-                          </p>
-                        </div>
-                      </div>
-                      {hasOfferingLetter && !offeringLetter.file && (
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-blue-100 text-blue-800">
-                            Dokumen Lama
-                          </Badge>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() =>
-                              window.open(
-                                getPublicUrl(
-                                  order.documents.find(
-                                    (doc) => doc.type === "offering_document",
-                                  )!.fileUrl,
-                                ),
-                                "_blank",
-                              )
-                            }
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        <Input
-                          type="file"
-                          accept=".pdf"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              if (file.type !== "application/pdf") {
-                                globalErrorToast("Format file harus PDF");
-                                return;
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            type="file"
+                            accept=".pdf"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.type !== "application/pdf") {
+                                  globalErrorToast("Format file harus PDF");
+                                  return;
+                                }
+                                offeringLetter.setFile(file);
                               }
-                              offeringLetter.setFile(file);
-                            }
-                          }}
-                          className="flex-1"
-                        />
+                            }}
+                            className="flex-1"
+                          />
+                          {offeringLetter.file && (
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => offeringLetter.setFile(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                         {offeringLetter.file && (
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => offeringLetter.setFile(null)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
+                            <span className="text-sm">
+                              {offeringLetter.file.name}
+                            </span>
+                            <PermissionGate permission="documents.create">
+                              <Button
+                                size="sm"
+                                onClick={handleUploadOfferingLetter}
+                                disabled={offeringLetter.uploading}
+                              >
+                                {offeringLetter.uploading ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Upload className="mr-2 h-4 w-4" />
+                                )}
+                                Upload
+                              </Button>
+                            </PermissionGate>
+                          </div>
                         )}
                       </div>
-                      {offeringLetter.file && (
-                        <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                          <span className="text-sm">
-                            {offeringLetter.file.name}
-                          </span>
-                          <PermissionGate permission="documents.create">
-                            <Button
-                              size="sm"
-                              onClick={handleUploadOfferingLetter}
-                              disabled={offeringLetter.uploading}
-                            >
-                              {offeringLetter.uploading ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Upload className="mr-2 h-4 w-4" />
-                              )}
-                              Upload
-                            </Button>
-                          </PermissionGate>
-                        </div>
-                      )}
                     </div>
-                  </div>
 
-                  <div className="flex justify-end pt-4">
-                    <PermissionGate permission="notifications.update">
-                      <Button
-                        className="bg-blue-500 hover:bg-blue-600"
-                        onClick={() =>
-                          handleNotifyCustomer("offering_document")
-                        }
-                        disabled={notifyCustomerMutation.isPending}
-                      >
-                        {notifyCustomerMutation.isPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Mail className="mr-2 h-4 w-4" />
-                        )}
-                        Kirim Dokumen Revisi ke Pelanggan
-                      </Button>
-                    </PermissionGate>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                    <div className="flex justify-end pt-4">
+                      <PermissionGate permission="notifications.update">
+                        <Button
+                          className="bg-blue-500 hover:bg-blue-600"
+                          onClick={() =>
+                            handleNotifyCustomer("offering_document")
+                          }
+                          disabled={notifyCustomerMutation.isPending}
+                        >
+                          {notifyCustomerMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Mail className="mr-2 h-4 w-4" />
+                          )}
+                          Kirim Dokumen Revisi ke Pelanggan
+                        </Button>
+                      </PermissionGate>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
 
             <PermissionGate permission="orders-approval.approve">
               {(isApprovedNeedsDocs || isAcceptingDocuments) && worksheet && (
@@ -1815,129 +1842,133 @@ function RouteComponent() {
               </Card>
             )}
 
-            {isPendingPaymentVerification && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Verifikasi Pembayaran</CardTitle>
-                  <CardDescription>
-                    Pelanggan telah mengunggah bukti pembayaran. Silakan
-                    verifikasi pembayaran.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-muted-foreground">
-                        Diunggah pada
-                      </Label>
-                      <p className="font-medium">
-                        {order.documents.find(
-                          (doc) => doc.type === "proof_of_payment",
-                        )
-                          ? format(
-                              new Date(
-                                order.documents.find(
-                                  (doc) => doc.type === "proof_of_payment",
-                                )!.createdAt,
-                              ),
-                              "PPpp",
-                            )
-                          : "-"}
-                      </p>
-                    </div>
-
-                    {order.documents.find(
-                      (doc) => doc.type === "proof_of_payment",
-                    ) && (
-                      <div className="rounded-lg border p-4">
-                        {order.documents
-                          .find((doc) => doc.type === "proof_of_payment")!
-                          .fileUrl.endsWith(".pdf") ? (
-                          <div className="flex items-center gap-4">
-                            <FileText className="h-12 w-12 text-blue-500" />
-                            <div>
-                              <p className="font-medium">
-                                Bukti Pembayaran (PDF)
-                              </p>
-                              <Button
-                                variant="link"
-                                className="h-auto p-0"
-                                onClick={() =>
-                                  window.open(
-                                    getPublicUrl(
-                                      order.documents.find(
-                                        (doc) =>
-                                          doc.type === "proof_of_payment",
-                                      )!.fileUrl,
-                                    ),
-                                    "_blank",
-                                  )
-                                }
-                              >
-                                Lihat Dokumen
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <ImageWithFallback
-                            src={getPublicUrl(
-                              order.documents.find(
-                                (doc) => doc.type === "proof_of_payment",
-                              )!.fileUrl,
-                            )}
-                            alt="Bukti pembayaran"
-                            className="size-64 cursor-pointer rounded object-contain"
-                            onClick={() =>
-                              window.open(
-                                getPublicUrl(
+            <PermissionGate
+              permission={["orders-payment.reject", "orders-payment.verify"]}
+            >
+              {isPendingPaymentVerification && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Verifikasi Pembayaran</CardTitle>
+                    <CardDescription>
+                      Pelanggan telah mengunggah bukti pembayaran. Silakan
+                      verifikasi pembayaran.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-muted-foreground">
+                          Diunggah pada
+                        </Label>
+                        <p className="font-medium">
+                          {order.documents.find(
+                            (doc) => doc.type === "proof_of_payment",
+                          )
+                            ? format(
+                                new Date(
                                   order.documents.find(
                                     (doc) => doc.type === "proof_of_payment",
-                                  )!.fileUrl,
+                                  )!.createdAt,
                                 ),
-                                "_blank",
+                                "PPpp",
                               )
-                            }
-                          />
-                        )}
+                            : "-"}
+                        </p>
                       </div>
-                    )}
 
-                    <div>
-                      <Label className="text-muted-foreground">
-                        Jumlah yang Harus Dibayar
-                      </Label>
-                      <p className="text-2xl font-bold">
-                        Rp {order.totalAmount.toLocaleString("id-ID")}
-                      </p>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4">
-                      <PermissionGate permission="orders-payment.reject">
-                        <Button
-                          variant="outline"
-                          className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                          onClick={() => dialogs.open("rejectPayment")}
-                        >
-                          Tolak Pembayaran
-                        </Button>
-                      </PermissionGate>
-                      <PermissionGate permission="orders-payment.verify">
-                        <Button
-                          className="bg-green-500 hover:bg-green-600"
-                          onClick={handleVerifyPayment}
-                          disabled={verifyPaymentMutation.isPending}
-                        >
-                          {verifyPaymentMutation.isPending && (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {order.documents.find(
+                        (doc) => doc.type === "proof_of_payment",
+                      ) && (
+                        <div className="rounded-lg border p-4">
+                          {order.documents
+                            .find((doc) => doc.type === "proof_of_payment")!
+                            .fileUrl.endsWith(".pdf") ? (
+                            <div className="flex items-center gap-4">
+                              <FileText className="h-12 w-12 text-blue-500" />
+                              <div>
+                                <p className="font-medium">
+                                  Bukti Pembayaran (PDF)
+                                </p>
+                                <Button
+                                  variant="link"
+                                  className="h-auto p-0"
+                                  onClick={() =>
+                                    window.open(
+                                      getPublicUrl(
+                                        order.documents.find(
+                                          (doc) =>
+                                            doc.type === "proof_of_payment",
+                                        )!.fileUrl,
+                                      ),
+                                      "_blank",
+                                    )
+                                  }
+                                >
+                                  Lihat Dokumen
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <ImageWithFallback
+                              src={getPublicUrl(
+                                order.documents.find(
+                                  (doc) => doc.type === "proof_of_payment",
+                                )!.fileUrl,
+                              )}
+                              alt="Bukti pembayaran"
+                              className="size-64 cursor-pointer rounded object-contain"
+                              onClick={() =>
+                                window.open(
+                                  getPublicUrl(
+                                    order.documents.find(
+                                      (doc) => doc.type === "proof_of_payment",
+                                    )!.fileUrl,
+                                  ),
+                                  "_blank",
+                                )
+                              }
+                            />
                           )}
-                          Verifikasi Pembayaran
-                        </Button>
-                      </PermissionGate>
+                        </div>
+                      )}
+
+                      <div>
+                        <Label className="text-muted-foreground">
+                          Jumlah yang Harus Dibayar
+                        </Label>
+                        <p className="text-2xl font-bold">
+                          Rp {order.totalAmount.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+
+                      <div className="flex justify-end gap-3 pt-4">
+                        <PermissionGate permission="orders-payment.reject">
+                          <Button
+                            variant="outline"
+                            className="border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
+                            onClick={() => dialogs.open("rejectPayment")}
+                          >
+                            Tolak Pembayaran
+                          </Button>
+                        </PermissionGate>
+                        <PermissionGate permission="orders-payment.verify">
+                          <Button
+                            className="bg-green-500 hover:bg-green-600"
+                            onClick={handleVerifyPayment}
+                            disabled={verifyPaymentMutation.isPending}
+                          >
+                            {verifyPaymentMutation.isPending && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            Verifikasi Pembayaran
+                          </Button>
+                        </PermissionGate>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
+            </PermissionGate>
 
             {isPaymentVerified && hasWorksheet && (
               <Card>
