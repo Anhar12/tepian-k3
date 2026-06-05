@@ -1,53 +1,41 @@
-import { useState, useMemo, useEffect } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  MapPin,
-  Building2,
-  Calendar,
-  Clock,
-  Check,
-  Loader2,
-  AlertCircle,
-  Save,
-  Download,
-  Lock,
-  CalendarDays,
-  CalendarClock,
-  Upload,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { PermissionGate } from "@/components/permission-gate";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import {
   WorksheetHeaderCard,
   WorksheetHeaderCardSkeleton,
 } from "@/components/worksheet-header-card";
-import { createFileRoute, getRouteApi } from "@tanstack/react-router";
+import useDialogs from "@/hooks/use-dialog";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import { pageHead } from "@/utils/page-head";
+import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getPublicUrl } from "@/utils/url";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import {
   EMPLOYEE_STATUS_COLORS,
   EMPLOYEE_STATUS_LABELS,
@@ -56,36 +44,45 @@ import {
   type WorksheetStatus,
 } from "@tepian-k3/constants";
 import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  isSameMonth,
-  isSameDay,
-  addMonths,
-  subMonths,
-  addWeeks,
-  subWeeks,
-  addDays,
-  subDays,
-  isWithinInterval,
   addBusinessDays,
+  addDays,
+  addMonths,
+  addWeeks,
   differenceInBusinessDays,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameDay,
+  isSameMonth,
   isWeekend,
+  isWithinInterval,
   nextMonday,
+  startOfMonth,
+  startOfWeek,
+  subDays,
+  subMonths,
+  subWeeks,
 } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { requirePermission } from "@/utils/require-permission";
-import { PermissionGate } from "@/components/permission-gate";
-import { getPublicUrl } from "@/utils/url";
-import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
-import { pageHead } from "@/utils/page-head";
-import useDialogs from "@/hooks/use-dialog";
-import { ConfirmationDialog } from "@/components/confirmation-dialog";
-import GenerateSPTDialog from "./-components/generate-spt-dialog";
-import UploadSPTDialog from "./-components/upload-spt-dialog";
+import {
+  AlertCircle,
+  Building2,
+  Calendar,
+  CalendarClock,
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  FileCheck,
+  Loader2,
+  Lock,
+  MapPin,
+  Save,
+  Users,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
@@ -156,8 +153,6 @@ function JadwalPersonilPage() {
 
   const dialogs = useDialogs({
     saveDate: null,
-    generateSPT: null,
-    uploadSPT: null,
   });
 
   // Fetch worksheet data
@@ -167,14 +162,6 @@ function JadwalPersonilPage() {
     error: worksheetError,
   } = useQuery(
     trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
-  );
-
-  // Fetch worksheet spt
-  const { data: spt, isLoading: sptLoading } = useQuery(
-    trpc.pengujian.worksheet.getWorksheetDocument.queryOptions({
-      worksheetId,
-      documentType: "assignment_letter",
-    }),
   );
 
   // Fetch all employees
@@ -299,6 +286,24 @@ function JadwalPersonilPage() {
       worksheet?.assignments?.map((a) => a.employee?.id).filter(Boolean) ?? []
     );
   }, [worksheet]);
+
+  const publishSPTMutation = useMutation(
+    trpc.pengujian.worksheet.publishSPT.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.worksheet.getWorksheetById.queryOptions({
+            worksheetId,
+          }),
+        );
+        globalSuccessToast(
+          "SPT berhasil diterbitkan. Admin dapat mencetak dokumen SPT.",
+        );
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal menerbitkan SPT: " + error.message);
+      },
+    }),
+  );
 
   // Check if worksheet is editable (status is 'verified') or personnel dates are not set yet
   const isEditable = useMemo(() => {
@@ -820,22 +825,23 @@ function JadwalPersonilPage() {
             onClick: () => dialogs.open("saveDate"),
           },
           {
-            label: "Buat SPT",
-            icon: <Download className="h-4 w-4" />,
+            label: publishSPTMutation.isPending ? "Memproses..." : "Buat SPT",
+            icon: publishSPTMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileCheck className="h-4 w-4" />
+            ),
             variant: "default",
             size: "sm",
-            permission: "documents-spt.create",
-            onClick: () => dialogs.open("generateSPT"),
-          },
-          {
-            label: "Upload SPT",
-            icon: <Upload className="h-4 w-4" />,
-            variant: "outline",
-            size: "sm",
-            permission: "documents-spt.create",
-            disabled: sptLoading || !!spt,
-            showButton: !sptLoading && !spt,
-            onClick: () => dialogs.open("uploadSPT"),
+            showButton: !!(
+              worksheet?.isPersonnelDateSet &&
+              (worksheet?.assignments?.length ?? 0) > 0
+            ),
+            permission: "worksheets-personnel-assignments.update",
+            disabled: publishSPTMutation.isPending,
+            onClick: () => {
+              if (worksheetId) publishSPTMutation.mutate({ worksheetId });
+            },
           },
         ]}
       />
@@ -1486,20 +1492,7 @@ function JadwalPersonilPage() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-      <GenerateSPTDialog
-        worksheetId={worksheetId}
-        isOpen={dialogs.isOpen("generateSPT")}
-        setIsOpen={(isOpen) =>
-          isOpen ? dialogs.open("generateSPT") : dialogs.close("generateSPT")
-        }
-      />
-      <UploadSPTDialog
-        worksheetId={worksheetId}
-        isOpen={dialogs.isOpen("uploadSPT")}
-        setIsOpen={(isOpen) =>
-          isOpen ? dialogs.open("uploadSPT") : dialogs.close("uploadSPT")
-        }
-      />
+
       <ConfirmationDialog
         open={dialogs.isOpen("saveDate")}
         onOpenChange={(isOpen) =>

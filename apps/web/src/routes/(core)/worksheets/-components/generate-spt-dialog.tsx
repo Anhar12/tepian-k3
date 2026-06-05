@@ -29,12 +29,15 @@ import type z from "zod";
 
 interface GenerateSPTDialogProps {
   worksheetId: string;
+  /** Pre-fill Nomor Surat Penawaran from the previously generated offering */
+  offeringLetterNumber?: string;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
 export default function GenerateSPTDialog({
   worksheetId,
+  offeringLetterNumber,
   isOpen,
   setIsOpen,
 }: GenerateSPTDialogProps) {
@@ -51,7 +54,6 @@ export default function GenerateSPTDialog({
     trpc.pengujian.generateDocument.generateAssignmentLetter.mutationOptions({
       onSuccess: (data) => {
         globalSuccessToast("Surat SPT berhasil dibuat");
-        // window.open(getPublicUrl(data.offeringLetterUrl), "_blank");
         openBase64InNewTab(data.base64, data.contentType);
         setIsOpen(false);
       },
@@ -68,10 +70,13 @@ export default function GenerateSPTDialog({
   }
 
   useEffect(() => {
-    if (!isOpen) {
-      form.reset();
+    if (isOpen) {
+      if (offeringLetterNumber)
+        form.setValue("letterNumber", offeringLetterNumber);
+    } else {
+      form.reset({ worksheetId });
     }
-  }, [isOpen, form]);
+  }, [isOpen, offeringLetterNumber, worksheetId, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

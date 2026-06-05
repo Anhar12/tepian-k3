@@ -87,7 +87,9 @@
       "Bash(echo \"OK: $f\")",
       "Bash(echo \"FAIL: $f\")",
       "Bash(grep -rl '\"\"./utils.types\"\"' platform/ pengujian/)",
-      "mcp__figma-remote-mcp__get_metadata"
+      "mcp__figma-remote-mcp__get_metadata",
+      "Bash(pnpm --filter @tepian-k3/api check-types)",
+      "Bash(pnpm --filter @tepian-k3/web check-types)"
     ]
   }
 }

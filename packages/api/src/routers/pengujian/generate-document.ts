@@ -2,7 +2,12 @@ import {
   OPERATIONAL_BANK_ACCOUNT,
   OPERATIONAL_BANK_ACCOUNT_NAME,
   OPERATIONAL_BANK_NAME,
+  ORDER_STATUS,
+  type OrderStatus,
 } from "@tepian-k3/constants";
+import { eq, sql } from "@tepian-k3/db";
+import { db } from "@tepian-k3/db/client";
+import { worksheets } from "@tepian-k3/db/schema";
 import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
 import generateDocumentSchema from "@tepian-k3/schema/pengujian/generate-document.schema";
 import {
@@ -21,7 +26,7 @@ import { tryPromise } from "../../utils/try-promise";
 // import { storageService } from "@tepian-k3/services/storage";
 
 export const generateDocumentRouter = createTRPCRouter({
-  generateOfferingLetter: withPermission("documents-admin.create")
+  generateOfferingLetter: withPermission("documents-penawaran.create")
     .input(generateDocumentSchema.generateOfferingLetterDocumentSchema)
     .mutation(
       async ({ input }) =>
@@ -36,6 +41,17 @@ export const generateDocumentRouter = createTRPCRouter({
               throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            if (
+              ORDER_STATUS.indexOf(worksheet.order.status as OrderStatus) <
+              ORDER_STATUS.indexOf("penawaran_diterbitkan")
+            ) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Koor. Admin harus menerbitkan penawaran terlebih dahulu sebelum mencetak surat penawaran",
               });
             }
 
@@ -74,14 +90,19 @@ export const generateDocumentRouter = createTRPCRouter({
               offeringLetter as Buffer,
             );
 
-            // const uploadedOfferingLetter = yield* storageService.upload(
-            //   mergedPdf as Buffer,
-            //   {
-            //     filename: `offering-letter-${input.letterNumber}.pdf`,
-            //     contentType: "application/pdf",
-            //     folder: "generated-documents/offering-letters",
-            //   },
-            // );
+            // Save letter number + date so Invoice can reference them
+            yield* tryPromise(
+              () =>
+                db
+                  .update(worksheets)
+                  .set({
+                    offeringLetterNumber: input.letterNumber,
+                    offeringLetterDate: new Date().toISOString(),
+                    updatedAt: sql`CURRENT_TIMESTAMP`,
+                  })
+                  .where(eq(worksheets.id, input.worksheetId)),
+              "Gagal menyimpan nomor surat penawaran",
+            );
 
             return {
               base64: Buffer.from(mergedPdf as Buffer).toString("base64"),
@@ -92,7 +113,7 @@ export const generateDocumentRouter = createTRPCRouter({
         ),
     ),
 
-  generateSpkDocument: withPermission("documents-admin.create")
+  generateSpkDocument: withPermission("documents-spk.create")
     .input(generateDocumentSchema.generateSpkDocumentSchema)
     .mutation(
       async ({ input }) =>
@@ -110,6 +131,25 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
+            if (!worksheet.offeringLetterNumber) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Surat penawaran harus dicetak terlebih dahulu sebelum mencetak SPK",
+              });
+            }
+
+            if (
+              ORDER_STATUS.indexOf(worksheet.order.status as OrderStatus) <
+              ORDER_STATUS.indexOf("tagihan_diterbitkan")
+            ) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Bendahara harus menerbitkan tagihan terlebih dahulu sebelum mencetak SPK",
+              });
+            }
+
             const spk = yield* tryPromise(
               () =>
                 generateSpkPdf({
@@ -118,7 +158,7 @@ export const generateDocumentRouter = createTRPCRouter({
                   companyRepName: worksheet.order.company.headOfCompany,
                   companyRepPosition:
                     worksheet.order.company.headOfCompanyPosition,
-                  companyRepAddress: input.companyRepAddress,
+                  companyRepAddress: worksheet.order.company.address,
                   companyBankName: worksheet.order.company.companyBankName,
                   companyBankAccount:
                     worksheet.order.company.companyBankAccount,
@@ -148,7 +188,7 @@ export const generateDocumentRouter = createTRPCRouter({
         ),
     ),
 
-  generateTagihanDocument: withPermission("documents-admin.create")
+  generateTagihanDocument: withPermission("documents-invoice.create")
     .input(generateDocumentSchema.generateTagihanDocumentSchema)
     .mutation(
       async ({ input }) =>
@@ -163,6 +203,25 @@ export const generateDocumentRouter = createTRPCRouter({
               throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            if (!worksheet.offeringLetterNumber) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Surat penawaran harus dicetak terlebih dahulu sebelum mencetak tagihan",
+              });
+            }
+
+            if (
+              ORDER_STATUS.indexOf(worksheet.order.status as OrderStatus) <
+              ORDER_STATUS.indexOf("tagihan_diterbitkan")
+            ) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Bendahara harus menerbitkan tagihan terlebih dahulu sebelum mencetak tagihan",
               });
             }
 
@@ -236,6 +295,25 @@ export const generateDocumentRouter = createTRPCRouter({
               throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            if (!worksheet.offeringLetterNumber) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Surat penawaran harus dicetak terlebih dahulu sebelum mencetak SPT",
+              });
+            }
+
+            if (
+              ORDER_STATUS.indexOf(worksheet.order.status as OrderStatus) <
+              ORDER_STATUS.indexOf("menunggu_penerbitan_spt_jadwal")
+            ) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Jadwal harus ditetapkan terlebih dahulu sebelum mencetak SPT",
               });
             }
 

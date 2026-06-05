@@ -1,5 +1,13 @@
 # @tepian-k3/types
 
+## 1.6.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/constants@1.13.0
+  - @tepian-k3/db@1.14.0
+
 ## 1.6.0
 
 ### Minor Changes

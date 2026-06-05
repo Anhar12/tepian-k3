@@ -25,7 +25,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
-// import { getPublicUrl } from "@/utils/url";
 import { openBase64InNewTab } from "@/utils/download";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -38,12 +37,22 @@ import type z from "zod";
 
 interface GenerateInvoiceDialogProps {
   worksheetId: string;
+  /** Pre-filled from the previously generated offering letter */
+  offeringLetterNumber?: string;
+  offeringLetterDate?: string;
+  /** Pre-filled from Bendahara's publishInvoice action */
+  billingCode?: string;
+  billingExpiryDate?: string;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
 export default function GenerateInvoiceDialog({
   worksheetId,
+  offeringLetterNumber,
+  offeringLetterDate,
+  billingCode,
+  billingExpiryDate,
   isOpen,
   setIsOpen,
 }: GenerateInvoiceDialogProps) {
@@ -51,16 +60,35 @@ export default function GenerateInvoiceDialog({
     z.infer<typeof generateDocumentSchema.generateTagihanDocumentSchema>
   >({
     resolver: zodResolver(generateDocumentSchema.generateTagihanDocumentSchema),
-    defaultValues: {
-      worksheetId,
-    },
+    defaultValues: { worksheetId },
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      if (offeringLetterNumber)
+        form.setValue("referenceNumber", offeringLetterNumber);
+      if (offeringLetterDate)
+        form.setValue("referenceDate", offeringLetterDate);
+      if (billingCode) form.setValue("billingCode", billingCode);
+      if (billingExpiryDate)
+        form.setValue("billingExpiryDate", billingExpiryDate);
+    } else {
+      form.reset({ worksheetId });
+    }
+  }, [
+    isOpen,
+    offeringLetterNumber,
+    offeringLetterDate,
+    billingCode,
+    billingExpiryDate,
+    worksheetId,
+    form,
+  ]);
 
   const generateInvoiceMutation = useMutation(
     trpc.pengujian.generateDocument.generateTagihanDocument.mutationOptions({
       onSuccess: (data) => {
         globalSuccessToast("Tagihan berhasil dibuat");
-        // window.open(getPublicUrl(data.offeringLetterUrl), "_blank");
         openBase64InNewTab(data.base64, data.contentType);
         setIsOpen(false);
       },
@@ -76,20 +104,15 @@ export default function GenerateInvoiceDialog({
     generateInvoiceMutation.mutate(data);
   }
 
-  useEffect(() => {
-    if (!isOpen) {
-      form.reset();
-    }
-  }, [isOpen, form]);
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <form>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Buat Tagihan</DialogTitle>
+            <DialogTitle>Cetak Tagihan</DialogTitle>
             <DialogDescription>
-              Isi form berikut untuk membuat tagihan.
+              Isi nomor surat untuk mencetak tagihan. Data referensi dan billing
+              telah terisi otomatis.
             </DialogDescription>
           </DialogHeader>
           <form
@@ -131,11 +154,14 @@ export default function GenerateInvoiceDialog({
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nomor Referensi
+                      Nomor Referensi{" "}
+                      <span className="font-normal text-muted-foreground">
+                        (dari penawaran)
+                      </span>
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nomor referensi"
+                      placeholder="Nomor surat penawaran"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -156,7 +182,10 @@ export default function GenerateInvoiceDialog({
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Tanggal Referensi
+                      Tanggal Referensi{" "}
+                      <span className="font-normal text-muted-foreground">
+                        (dari penawaran)
+                      </span>
                     </FieldLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -169,14 +198,16 @@ export default function GenerateInvoiceDialog({
                         >
                           {field.value
                             ? format(new Date(field.value), "PPP")
-                            : "Pick a date"}
+                            : "Pilih tanggal"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={new Date(field.value ?? "")}
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           onSelect={(value) => {
                             field.onChange(value?.toISOString() ?? null);
                           }}
@@ -204,7 +235,7 @@ export default function GenerateInvoiceDialog({
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan kode billing"
+                      placeholder="Kode billing"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -238,14 +269,16 @@ export default function GenerateInvoiceDialog({
                         >
                           {field.value
                             ? format(new Date(field.value), "PPP")
-                            : "Pick a date"}
+                            : "Pilih tanggal"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={new Date(field.value ?? "")}
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           onSelect={(value) => {
                             field.onChange(value?.toISOString() ?? null);
                           }}
@@ -267,7 +300,7 @@ export default function GenerateInvoiceDialog({
                 disabled={generateInvoiceMutation.isPending}
               >
                 {generateInvoiceMutation.isPending ? <Spinner /> : null}
-                Buat Tagihan
+                Cetak Tagihan
               </Button>
             </DialogFooter>
           </form>

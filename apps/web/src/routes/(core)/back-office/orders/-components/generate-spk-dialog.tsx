@@ -99,6 +99,31 @@ export default function GenerateSPKDialog({
             <FieldGroup>
               <Controller
                 control={form.control}
+                name="letterNumber"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Nomor Surat
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nomor surat"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
                 name="agreementDate"
                 render={({ field, fieldState }) => (
                   <Field
@@ -134,56 +159,6 @@ export default function GenerateSPKDialog({
                         />
                       </PopoverContent>
                     </Popover>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                control={form.control}
-                name="companyRepAddress"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="space-y-1"
-                  >
-                    <FieldLabel className="ml-1 text-sm font-bold">
-                      Alamat Perwakilan Perusahaan
-                    </FieldLabel>
-                    <Input
-                      type="text"
-                      placeholder="Masukkan alamat perwakilan perusahaan"
-                      className="h-10 text-sm"
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                control={form.control}
-                name="letterNumber"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="space-y-1"
-                  >
-                    <FieldLabel className="ml-1 text-sm font-bold">
-                      Nomor Surat
-                    </FieldLabel>
-                    <Input
-                      type="text"
-                      placeholder="Masukkan nomor surat"
-                      className="h-10 text-sm"
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                    />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}

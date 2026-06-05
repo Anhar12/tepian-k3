@@ -1,5 +1,16 @@
 # @tepian-k3/server
 
+## 1.6.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/services@1.7.0
+  - @tepian-k3/queries@1.14.0
+  - @tepian-k3/api@1.17.0
+  - @tepian-k3/db@1.14.0
+  - @tepian-k3/auth@1.3.1
+
 ## 1.6.1
 
 ### Patch Changes

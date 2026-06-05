@@ -158,23 +158,34 @@ export const PricingTable: React.FC<PricingTableProps> = ({
               <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
                 {index + 1}
               </Text>
-              <Text style={tw("w-3/12 border-r border-black p-2")}>
-                {cost.item}
-              </Text>
-              <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
-                {cost.unitCost != null ? formatCurrency(cost.unitCost) : "-"}
-              </Text>
-              <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
-                {cost.unitCount}
-              </Text>
-              <Text style={tw("w-2/12 border-r border-black p-2 text-center")}>
-                {cost.days}
-              </Text>
-              <Text style={tw("w-2/12 p-2 text-center")}>
-                {cost.unitCost != null
-                  ? formatCurrency(cost.unitCount * cost.unitCost * cost.days)
-                  : "-"}
-              </Text>
+              {cost.unitCost == null ? (
+                // Descriptive-only row (no cost) — spans remaining columns
+                <Text style={tw("w-11/12 p-2 italic")}>{cost.item}</Text>
+              ) : (
+                <>
+                  <Text style={tw("w-3/12 border-r border-black p-2")}>
+                    {cost.item}
+                  </Text>
+                  <Text
+                    style={tw("w-2/12 border-r border-black p-2 text-center")}
+                  >
+                    {formatCurrency(cost.unitCost)}
+                  </Text>
+                  <Text
+                    style={tw("w-2/12 border-r border-black p-2 text-center")}
+                  >
+                    {cost.unitCount}
+                  </Text>
+                  <Text
+                    style={tw("w-2/12 border-r border-black p-2 text-center")}
+                  >
+                    {cost.days}
+                  </Text>
+                  <Text style={tw("w-2/12 p-2 text-center")}>
+                    {formatCurrency(cost.unitCount * cost.unitCost * cost.days)}
+                  </Text>
+                </>
+              )}
             </View>
           ))}
           <View style={tw("flex-row border-t border-black")}>

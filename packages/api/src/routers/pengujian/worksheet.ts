@@ -218,8 +218,8 @@ export const worksheetRouter = createTRPCRouter({
         await runEffect(
           worksheetQueries.reviseWorksheet(
             input.worksheetId,
-            input.revisionNotes,
             ctx.user.id,
+            input.revisionNotes,
           ),
         ),
     ),
@@ -408,8 +408,8 @@ export const worksheetRouter = createTRPCRouter({
         await runEffect(
           worksheetQueries.createWorksheetEstimates(
             input.worksheetId,
-            input.estimatedAmountOfDays,
             input.estimatedAmountOfMembers,
+            input.estimatedAmountOfDays,
             ctx.user.id,
           ),
         ),
@@ -1056,6 +1056,56 @@ export const worksheetRouter = createTRPCRouter({
         }),
       );
     }),
+
+  /**
+   * Koor. Admin marks the offering as ready for Admin to print.
+   * Transitions order to `penawaran_diterbitkan`.
+   */
+  publishOffering: withPermission("worksheets-transaction-details.update")
+    .input(z.object({ worksheetId: z.uuidv7() }))
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.publishOffering(input.worksheetId, ctx.user.id),
+        ),
+    ),
+
+  /**
+   * Bendahara Penerimaan issues the invoice/SPK.
+   * Stores billing data and transitions order to `tagihan_diterbitkan`.
+   */
+  publishInvoice: withPermission("orders-payment.verify")
+    .input(
+      z.object({
+        worksheetId: z.uuidv7(),
+        billingCode: z.string().min(1).max(100),
+        billingExpiryDate: z.string().min(1),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.publishInvoice(
+            input.worksheetId,
+            ctx.user.id,
+            input.billingCode,
+            input.billingExpiryDate,
+          ),
+        ),
+    ),
+
+  /**
+   * Tim Penjadwalan confirms personnel and dates are ready.
+   * Transitions order to `menunggu_penerbitan_spt_jadwal` so Admin can print the SPT.
+   */
+  publishSPT: withPermission("worksheets-personnel-assignments.update")
+    .input(z.object({ worksheetId: z.uuidv7() }))
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.publishSPT(input.worksheetId, ctx.user.id),
+        ),
+    ),
 
   /**
    * Sync worksheet values to testing items manually

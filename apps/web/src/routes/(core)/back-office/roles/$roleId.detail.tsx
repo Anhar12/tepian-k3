@@ -132,12 +132,20 @@ const RESOURCE_LABELS: Record<Resource, { title: string; category: string }> = {
     title: "Verifikasi Dokumen (QR Scan)",
     category: "Dokumen & Verifikasi",
   },
-  "documents-spt": {
-    title: "Surat Perintah Tugas (SPT)",
+  "documents-penawaran": {
+    title: "Surat Penawaran",
     category: "Dokumen & Verifikasi",
   },
-  "documents-admin": {
-    title: "Dokumen Admin (SPK, Penawaran, Tagihan)",
+  "documents-spk": {
+    title: "SPK (Surat Perintah Kerja)",
+    category: "Dokumen & Verifikasi",
+  },
+  "documents-invoice": {
+    title: "Invoice / Tagihan",
+    category: "Dokumen & Verifikasi",
+  },
+  "documents-spt": {
+    title: "SPT (Surat Perintah Tugas)",
     category: "Dokumen & Verifikasi",
   },
 

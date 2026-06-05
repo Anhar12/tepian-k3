@@ -43,6 +43,7 @@ import {
   Calendar,
   Loader2,
   MapPin,
+  Pencil,
   Plus,
   Printer,
   Save,
@@ -51,7 +52,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import GenerateOfferingDialog from "./-components/generate-offering-dialog";
+import EditEstimateDialog from "./-components/edit-estimate-dialog";
 
 const searchParamsSchema = z.object({
   worksheetId: z.uuidv7().optional(),
@@ -64,6 +65,9 @@ export const Route = createFileRoute("/(core)/worksheets/detail-transaksi")({
   component: RouteComponent,
   head: () => pageHead("Lembar Kerja - Detail Transaksi"),
 });
+
+const FIELD_OPERATIONAL_ITEM =
+  "Transportasi dan operasional lapangan selama kegiatan pengujian disediakan oleh perusahaan";
 
 interface OperationalCostItem {
   id?: string;
@@ -104,16 +108,20 @@ function formatDateRange(
 function InfoCard({
   title,
   children,
+  action,
 }: {
   title: string;
   children: React.ReactNode;
+  /** Optional control rendered on the right of the header (e.g. an edit button). */
+  action?: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-muted/50">
-      <div className="border-b bg-primary/40 p-4 sm:px-6">
+      <div className="flex items-center justify-between gap-2 border-b bg-primary/40 p-4 sm:px-6">
         <h2 className="text-base font-semibold text-primary sm:text-lg">
           {title}
         </h2>
+        {action}
       </div>
       {children}
     </div>
@@ -125,7 +133,7 @@ function RouteComponent() {
   const { worksheetId } = Route.useSearch();
 
   const dialogs = useDialogs({
-    generateOfferingLetter: null,
+    editEstimate: null,
   });
 
   const [paramPage, setParamPage] = useState(1);
@@ -164,6 +172,22 @@ function RouteComponent() {
     }),
   );
 
+  const publishOfferingMutation = useMutation(
+    trpc.pengujian.worksheet.publishOffering.mutationOptions({
+      onSuccess: () => {
+        globalSuccessToast(
+          "Penawaran berhasil diterbitkan. Admin dapat mencetak dokumen penawaran.",
+        );
+        refetch();
+      },
+      onError: (error: { message?: string }) => {
+        globalErrorToast(
+          `Gagal menerbitkan penawaran: ${error.message ?? "Silahkan coba lagi."}`,
+        );
+      },
+    }),
+  );
+
   // Reset state when switching worksheets so stale data doesn't linger during loading
   useEffect(() => {
     setOperationalCosts([]);
@@ -195,14 +219,6 @@ function RouteComponent() {
           unitCost: 0,
           note: null,
           sortOrder: 0,
-        },
-        {
-          item: "Operasional Lapangan",
-          unitCount: 1,
-          days: 1,
-          unitCost: 0,
-          note: null,
-          sortOrder: 1,
         },
       ];
 
@@ -261,6 +277,18 @@ function RouteComponent() {
         });
       }
 
+      // Field operational statement — always the last row. This is a fixed note
+      // (no charge) indicating transport/field operations are covered by the
+      // company, not a priced line item.
+      defaultCosts.push({
+        item: FIELD_OPERATIONAL_ITEM,
+        unitCount: 1,
+        days: 1,
+        unitCost: 0,
+        note: null,
+        sortOrder: defaultCosts.length,
+      });
+
       setOperationalCosts(defaultCosts);
     }
   }, [worksheet, isDirty]);
@@ -275,13 +303,19 @@ function RouteComponent() {
     return worksheet.items.filter((item) => !item.isReady);
   }, [worksheet?.items]);
 
-  // Check if worksheet is editable (only draft or revision status)
+  // Check if worksheet is editable (only allow edits in "verified" status for now, since that's the only time operational costs are shown and editable in this view, but this can be expanded in the future if needed)
   const isEditable = useMemo(() => {
     if (!worksheet?.status) return false;
-    return ["draft", "revision"].includes(worksheet.status);
+    return ["verified"].includes(worksheet.status);
   }, [worksheet?.status]);
 
   const showOperationalCosts = !!worksheet;
+
+  // "Buat Penawaran" only becomes available once operational costs have been
+  // saved (persisted rows, no pending edits) — the offering is generated from
+  // the saved worksheet data, so it shouldn't be offered before that.
+  const hasSavedOperationalCosts =
+    (worksheet?.operationalCosts?.length ?? 0) > 0 && !isDirty;
 
   const locations: {
     regencyName: string;
@@ -569,6 +603,24 @@ function RouteComponent() {
         })()
       : "Estimasi belum di set";
 
+  // Edit control for the Durasi Pengujian / Total Personel cards. Only shown
+  // while the worksheet is editable (draft/revision) and to users who can update
+  // transaction details (e.g. Koordinator Administrasi).
+  const estimateEditAction = isEditable ? (
+    <PermissionGate permission="worksheets-transaction-details.update">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-7 text-primary hover:bg-primary/20"
+        onClick={() => dialogs.open("editEstimate")}
+        aria-label="Edit durasi dan personel"
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+    </PermissionGate>
+  ) : null;
+
   return (
     <div className="space-y-4">
       <WorksheetHeaderCard
@@ -650,7 +702,7 @@ function RouteComponent() {
               </ScrollArea>
             </InfoCard>
 
-            <InfoCard title="Durasi Pengujian">
+            <InfoCard title="Durasi Pengujian" action={estimateEditAction}>
               <div className="flex flex-1 flex-col justify-between p-4 sm:p-6">
                 <p className="text-3xl font-bold sm:text-4xl">
                   {duration > 0 ? `${duration} Hari` : "-"}
@@ -666,7 +718,7 @@ function RouteComponent() {
               </div>
             </InfoCard>
 
-            <InfoCard title="Total Personel">
+            <InfoCard title="Total Personel" action={estimateEditAction}>
               <div className="flex flex-1 flex-col justify-between p-4 sm:p-6">
                 <p className="text-3xl font-bold sm:text-4xl">
                   {assignedPersonnel.length > 0
@@ -972,6 +1024,27 @@ function RouteComponent() {
                       item.unitCost !== null && item.unitCost > 0
                         ? item.unitCount * item.days * item.unitCost
                         : null;
+                    const isFixed = item.item === FIELD_OPERATIONAL_ITEM;
+
+                    if (isFixed) {
+                      return (
+                        <TableRow
+                          key={index}
+                          className="bg-muted/20 hover:bg-muted/30"
+                        >
+                          <TableCell
+                            colSpan={5}
+                            className="text-xs text-muted-foreground italic sm:text-sm"
+                          >
+                            {item.item}
+                          </TableCell>
+                          <TableCell className="text-right text-xs font-medium sm:text-sm">
+                            -
+                          </TableCell>
+                          <TableCell />
+                        </TableRow>
+                      );
+                    }
 
                     return (
                       <TableRow key={index} className="hover:bg-muted/30">
@@ -1102,18 +1175,29 @@ function RouteComponent() {
 
       <div className="flex flex-col items-stretch justify-between gap-3 rounded-xl border bg-card p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
         <div className="flex items-center justify-center gap-2 sm:justify-start">
-          <PermissionGate permission="documents-admin.create">
-            <Button
-              variant="outline"
-              className="flex-1 gap-2 sm:flex-initial"
-              onClick={() => {
-                dialogs.open("generateOfferingLetter");
-              }}
-            >
-              <Printer className="h-4 w-4" />
-              Cetak Penawaran
-            </Button>
-          </PermissionGate>
+          {hasSavedOperationalCosts && isEditable && (
+            <PermissionGate permission="worksheets-transaction-details.update">
+              <Button
+                variant="outline"
+                className="flex-1 gap-2 sm:flex-initial"
+                disabled={
+                  publishOfferingMutation.isPending ||
+                  saveOperationalCostsMutation.isPending ||
+                  worksheet.order.status === "penawaran_diterbitkan"
+                }
+                onClick={() =>
+                  publishOfferingMutation.mutate({ worksheetId: worksheet.id })
+                }
+              >
+                {publishOfferingMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Printer className="h-4 w-4" />
+                )}
+                Buat Penawaran
+              </Button>
+            </PermissionGate>
+          )}
           {showOperationalCosts && (
             <PermissionGate permission="worksheets-transaction-details.update">
               <Button
@@ -1146,13 +1230,13 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      <GenerateOfferingDialog
-        worksheetId={worksheetId}
-        isOpen={dialogs.isOpen("generateOfferingLetter")}
+      <EditEstimateDialog
+        worksheetId={worksheet.id}
+        currentDays={worksheet.estimatedAmountOfDays}
+        currentMembers={worksheet.estimatedAmountOfMembers}
+        isOpen={dialogs.isOpen("editEstimate")}
         setIsOpen={(isOpen) =>
-          isOpen
-            ? dialogs.open("generateOfferingLetter")
-            : dialogs.close("generateOfferingLetter")
+          isOpen ? dialogs.open("editEstimate") : dialogs.close("editEstimate")
         }
       />
     </div>

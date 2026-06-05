@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from "@tepian-k3/constants";
+import { ORDER_STATUS, WORKSHEET_STATUS } from "@tepian-k3/constants";
 import { order } from "@tepian-k3/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
@@ -51,6 +51,13 @@ const getAllOrdersSchema = createPaginationSchema(SORTABLE_ORDER_FIELDS, {
   desc: true,
 }).extend({
   status: z.enum(ORDER_STATUS).optional(),
+  // Filter by multiple statuses at once (e.g. role-locked views that span
+  // several statuses). Applied with an IN clause alongside `status`.
+  statuses: z.array(z.enum(ORDER_STATUS)).optional(),
+  // Filter orders by the status of their associated worksheet (e.g. coordinator
+  // views that should only surface orders whose worksheet is pending
+  // verification). Applied as an EXISTS/IN subquery on the worksheets table.
+  worksheetStatuses: z.array(z.enum(WORKSHEET_STATUS)).optional(),
   search: z.string().default(""),
 });
 

@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -20,15 +21,15 @@ import {
 } from "@/components/ui/table";
 import { WorksheetDataTable } from "@/components/ui/worksheet-data-table";
 import { WorksheetHeaderCard } from "@/components/worksheet-header-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { usePermissions } from "@/hooks/use-permissions";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
-  WORKSHEET_STATUS_COLORS,
   WORKSHEET_STATUS,
+  WORKSHEET_STATUS_COLORS,
   WORKSHEET_STATUS_LABELS,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
@@ -62,6 +63,7 @@ export const Route = createFileRoute("/(core)/back-office/worksheets/")({
 function RouteComponent() {
   const params = Route.useSearch();
   const navigate = Route.useNavigate();
+  const { hasPermission } = usePermissions();
   const [searchInput, setSearchInput] = useState("");
 
   const { data, isLoading } = useQuery(
@@ -314,14 +316,38 @@ function RouteComponent() {
                               </Badge>
                             }
                           >
-                            <Button asChild size="sm" variant="outline">
-                              <Link
-                                to="/worksheets"
-                                search={{ worksheetId: worksheet.id }}
-                              >
-                                <Eye className="mr-1 h-4 w-4" />
-                                <span className="hidden sm:inline">Detail</span>
-                              </Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (
+                                  hasPermission(
+                                    "worksheets-transaction-details.read",
+                                  )
+                                ) {
+                                  navigate({
+                                    to: "/worksheets/detail-transaksi",
+                                    search: { worksheetId: worksheet.id },
+                                  });
+                                } else if (
+                                  hasPermission(
+                                    "worksheets-personnel-assignments.read",
+                                  )
+                                ) {
+                                  navigate({
+                                    to: "/worksheets/jadwal-personel",
+                                    search: { worksheetId: worksheet.id },
+                                  });
+                                } else {
+                                  navigate({
+                                    to: "/worksheets",
+                                    search: { worksheetId: worksheet.id },
+                                  });
+                                }
+                              }}
+                            >
+                              <Eye className="mr-1 h-4 w-4" />
+                              <span className="hidden sm:inline">Detail</span>
                             </Button>
                           </PermissionGate>
                         </TableCell>

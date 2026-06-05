@@ -1,5 +1,36 @@
 # @tepian-k3/schema
 
+## 1.13.0
+
+### Minor Changes
+
+- feat(orders): add document workflow gates, offering/billing refs, and admin documents card
+
+  ## Summary
+  - Extends the worksheet schema with `offeringLetterNumber`, `offeringLetterDate`, `billingCode`, and `billingExpiryDate` so each document generation step can reference the previous one as a prerequisite.
+  - Enforces status-based permission gates on document generation (Penawaran → Invoice/SPK → SPT), preventing out-of-order printing with meaningful Bahasa Indonesia error messages.
+  - Adds a unified `AdminDocumentsCard` component that consolidates all four document Cetak + Upload actions for back-office order detail, replacing scattered inline buttons.
+
+  ## Changes
+  - `packages/db/src/schema/pengujian.ts` + migrations 0006–0008: add `offeringLetterNumber`, `offeringLetterDate`, `billingCode`, `billingExpiryDate` to `worksheets`.
+  - `packages/constants/src/order.ts`: add `ORDER_STATUS_FLOW_MILESTONE` map and `resolveOrderStatusFlowIndex()` to resolve granular in-between statuses to their visible timeline milestone.
+  - `apps/web/src/components/order-timeline.tsx`: use `resolveOrderStatusFlowIndex()` so the active step renders correctly for statuses not directly listed in the flow (e.g. `kaji_ulang_disetujui`).
+  - `packages/api/src/routers/pengujian/generate-document.ts`: tighten permissions from `documents-admin.create` to role-specific ones; add status guards and save offering letter number on generation.
+  - `packages/api/src/routers/pengujian/document.ts`: migrate SPT document entity from `worksheet` to `order` for consistency; use `orderQueries.getOrderDocument` for duplicate check.
+  - `packages/queries/src/pengujian/order.queries.ts`: add `statuses`/`worksheetStatuses` list filters, `getOrderDocument` helper, and include `changedByUser` in status history.
+  - `apps/web/src/routes/(core)/back-office/orders/-components/admin-documents-card.tsx`: new unified document card with per-role Cetak/Upload gating.
+  - `apps/web/src/routes/(core)/back-office/orders/-components/publish-invoice-dialog.tsx`: new dialog for Bendahara to publish invoice and set billing code/expiry.
+  - `apps/web/src/routes/(core)/worksheets/-components/edit-estimate-dialog.tsx`: new dialog for editing worksheet cost estimates.
+  - `apps/web/src/hooks/use-permissions.ts`: new hook exposing the current user's permission set.
+  - `packages/services/src/pdf/components/pricing-table.tsx`: fix operational cost display logic.
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/constants@1.13.0
+  - @tepian-k3/db@1.14.0
+  - @tepian-k3/types@1.6.1
+
 ## 1.12.0
 
 ### Minor Changes

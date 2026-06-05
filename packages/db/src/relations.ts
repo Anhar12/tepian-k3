@@ -534,6 +534,11 @@ export const orderStatusHistoryRelations = relations(
       fields: [orderStatusHistory.orderId],
       references: [order.id],
     }),
+    changedByUser: one(users, {
+      fields: [orderStatusHistory.changedBy],
+      references: [users.id],
+      relationName: "orderStatusHistoryChangedBy",
+    }),
   }),
 );
 

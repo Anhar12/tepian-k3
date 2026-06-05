@@ -20,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -32,9 +31,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import useDialogs from "@/hooks/use-dialog";
-import { useFileUpload } from "@/hooks/use-file-upload";
-import { useUploadDocumentMutation } from "@/hooks/use-upload-document-mutation";
+import { usePermissions } from "@/hooks/use-permissions";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
@@ -44,20 +43,13 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { getPublicUrl } from "@/utils/url";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ORDER_STATUS_LABELS } from "@tepian-k3/constants";
 import { format } from "date-fns";
-import {
-  Download,
-  Eye,
-  FileText,
-  Loader2,
-  Mail,
-  Plus,
-  Upload,
-  X,
-} from "lucide-react";
+import { Download, Eye, FileText, Loader2, Mail, Plus } from "lucide-react";
+import { useState } from "react";
 import z from "zod";
-import GenerateInvoiceDialog from "./-components/generate-invoice-dialog";
-import GenerateSPKDialog from "./-components/generate-spk-dialog";
+import AdminDocumentsCard from "./-components/admin-documents-card";
+import PublishInvoiceDialog from "./-components/publish-invoice-dialog";
 
 export const Route = createFileRoute(
   "/(core)/back-office/orders/$orderId/detail",
@@ -136,14 +128,11 @@ function RouteComponent() {
         .min(10, "Catatan revisi minimal 10 karakter")
         .max(500, "Catatan revisi maksimal 500 karakter"),
     }),
-    generateSPK: null,
-    generateInvoice: null,
   } as const);
 
-  // Document upload states
-  const offeringLetter = useFileUpload();
-  const cooperationAgreement = useFileUpload();
-  const invoice = useFileUpload();
+  const [publishInvoiceOpen, setPublishInvoiceOpen] = useState(false);
+
+  const { hasPermission } = usePermissions();
 
   const { data: order, isLoading } = useQuery(
     trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
@@ -261,9 +250,6 @@ function RouteComponent() {
       },
     }),
   );
-
-  // Document upload mutation
-  const { uploadDocument } = useUploadDocumentMutation({ orderId });
 
   // Notify customer mutation — documentType selects which document's notification to send.
   // To support a new document type, add an entry to order.notification-config.ts on the API.
@@ -464,63 +450,6 @@ function RouteComponent() {
     });
   };
 
-  const handleUploadOfferingLetter = async () => {
-    if (!offeringLetter.file) return;
-
-    await uploadDocument({
-      title: "Surat Penawaran",
-      type: "offering_document",
-      file: offeringLetter.file,
-      onMutate: () => {
-        offeringLetter.setUploading(true);
-      },
-      onSuccess: () => {
-        offeringLetter.reset();
-      },
-      onSettled: () => {
-        offeringLetter.setUploading(false);
-      },
-    });
-  };
-
-  const handleUploadCooperationAgreement = async () => {
-    if (!cooperationAgreement.file) return;
-
-    await uploadDocument({
-      title: "Perjanjian Kerjasama",
-      type: "cooperation_agreement",
-      file: cooperationAgreement.file,
-      onMutate: () => {
-        cooperationAgreement.setUploading(true);
-      },
-      onSuccess: () => {
-        cooperationAgreement.reset();
-      },
-      onSettled: () => {
-        cooperationAgreement.setUploading(false);
-      },
-    });
-  };
-
-  const handleUploadInvoice = async () => {
-    if (!invoice.file) return;
-
-    await uploadDocument({
-      title: "Invoice",
-      type: "invoice",
-      file: invoice.file,
-      onMutate: () => {
-        invoice.setUploading(true);
-      },
-      onSuccess: () => {
-        invoice.reset();
-      },
-      onSettled: () => {
-        invoice.setUploading(false);
-      },
-    });
-  };
-
   const handleNotifyCustomer = (
     documentType: Parameters<
       typeof notifyCustomerMutation.mutate
@@ -626,35 +555,17 @@ function RouteComponent() {
   const hasApprovalLetterUserDocument = order.documents.some(
     (doc) => doc.type === "approval_letter_user",
   );
-  const hasCooperationAgreement = order.documents.some(
-    (doc) => doc.type === "cooperation_agreement",
-  );
-  const hasCooperationAgreementDocument = order.documents.some(
-    (doc) => doc.type === "cooperation_agreement",
-  );
   const hasInvoice = order.documents.some((doc) => doc.type === "invoice");
-  const hasBothDocuments =
-    hasOfferingLetter &&
-    hasInvoice &&
-    hasApprovalLetterUserDocument &&
-    hasCooperationAgreementDocument;
 
   // Determine current workflow state
   const isPendingApproval = order.approvalStatus === "pending";
   const isApprovalRevisionRequested = order.approvalStatus === "revision";
   const isApprovalRequestReview = order.approvalStatus === "request_review";
   const isRevisionRequested = order.status === "revision";
-  const isApprovedNeedsDocs =
-    order.approvalStatus === "approved" &&
-    !hasBothDocuments &&
-    !isRevisionRequested;
-  const isAcceptingDocuments =
-    order.approvalStatus === "approved" &&
-    order.status === "persetujuan_disetujui" &&
-    !isRevisionRequested;
   const isAwaitingPayment =
     order.approvalStatus === "approved" &&
-    hasBothDocuments &&
+    hasOfferingLetter &&
+    hasInvoice &&
     order.paymentStatus === "unpaid" &&
     !isRevisionRequested;
   const isPendingPaymentVerification =
@@ -774,6 +685,20 @@ function RouteComponent() {
                 </Table>
               </CardContent>
             </Card>
+
+            {/* Admin document hub: Cetak + Upload for Penawaran/Invoice/SPK/SPT */}
+            <AdminDocumentsCard
+              orderId={orderId}
+              orderStatus={order.status}
+              orderNumber={order.orderNumber}
+              orderDate={order.createdAt}
+              documents={order.documents}
+              worksheetId={worksheet?.id}
+              offeringLetterNumber={worksheet?.offeringLetterNumber}
+              offeringLetterDate={worksheet?.offeringLetterDate}
+              billingCode={worksheet?.billingCode}
+              billingExpiryDate={worksheet?.billingExpiryDate}
+            />
 
             {/* Workflow State Content */}
             {/* Card shows only if the user holds at least one of its actions */}
@@ -934,10 +859,10 @@ function RouteComponent() {
             {/* Worksheet Management Card - Kaji Ulang Phase */}
             <PermissionGate
               permission={[
+                "worksheets.read",
                 "worksheets.create",
                 "worksheets.update",
                 "worksheets.verify",
-                "documents-admin.create",
               ]}
             >
               {(needsWorksheet ||
@@ -970,6 +895,18 @@ function RouteComponent() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
+                      {/* Revision Notes from coordinator */}
+                      {worksheetInRevision && worksheet?.revisionNotes && (
+                        <div className="rounded-lg border border-orange-200 bg-orange-50 p-3">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Catatan revisi dari koordinator:
+                          </p>
+                          <p className="mt-1 text-sm text-foreground">
+                            {worksheet.revisionNotes}
+                          </p>
+                        </div>
+                      )}
+
                       {/* Worksheet Info */}
                       {hasWorksheet && worksheet && (
                         <div className="rounded-lg border bg-muted/50 p-4">
@@ -996,7 +933,9 @@ function RouteComponent() {
                                         ? "bg-yellow-100 text-yellow-800"
                                         : worksheetStatus === "verified"
                                           ? "bg-green-100 text-green-800"
-                                          : "bg-blue-100 text-blue-800"
+                                          : worksheetStatus === "revision"
+                                            ? "bg-orange-100 text-orange-800"
+                                            : "bg-blue-100 text-blue-800"
                                   }
                                 >
                                   {worksheetStatus}
@@ -1061,18 +1000,28 @@ function RouteComponent() {
                               Lihat Detail
                             </Button>
                             <PermissionGate permission="worksheets.update">
-                              <Button
-                                className="bg-yellow-500 hover:bg-yellow-600"
-                                onClick={handleSubmitWorksheetForVerification}
-                                disabled={submitWorksheetMutation.isPending}
-                              >
-                                {submitWorksheetMutation.isPending ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <FileText className="mr-2 h-4 w-4" />
-                                )}
-                                Ajukan Verifikasi
-                              </Button>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span tabIndex={0}>
+                                    <Button
+                                      className="bg-yellow-500 hover:bg-yellow-600"
+                                      onClick={
+                                        handleSubmitWorksheetForVerification
+                                      }
+                                      disabled={
+                                        submitWorksheetMutation.isPending
+                                      }
+                                    >
+                                      {submitWorksheetMutation.isPending ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <FileText className="mr-2 h-4 w-4" />
+                                      )}
+                                      Ajukan Verifikasi
+                                    </Button>
+                                  </span>
+                                </TooltipTrigger>
+                              </Tooltip>
                             </PermissionGate>
                           </>
                         )}
@@ -1092,18 +1041,28 @@ function RouteComponent() {
                               Lihat Detail
                             </Button>
                             <PermissionGate permission="worksheets.update">
-                              <Button
-                                className="bg-yellow-500 hover:bg-yellow-600"
-                                onClick={handleSubmitWorksheetForVerification}
-                                disabled={submitWorksheetMutation.isPending}
-                              >
-                                {submitWorksheetMutation.isPending ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <FileText className="mr-2 h-4 w-4" />
-                                )}
-                                Ajukan Verifikasi
-                              </Button>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span tabIndex={0}>
+                                    <Button
+                                      className="bg-yellow-500 hover:bg-yellow-600"
+                                      onClick={
+                                        handleSubmitWorksheetForVerification
+                                      }
+                                      disabled={
+                                        submitWorksheetMutation.isPending
+                                      }
+                                    >
+                                      {submitWorksheetMutation.isPending ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <FileText className="mr-2 h-4 w-4" />
+                                      )}
+                                      Ajukan Verifikasi
+                                    </Button>
+                                  </span>
+                                </TooltipTrigger>
+                              </Tooltip>
                             </PermissionGate>
                           </>
                         )}
@@ -1112,12 +1071,32 @@ function RouteComponent() {
                           <>
                             <Button
                               variant="outline"
-                              onClick={() =>
-                                navigate({
-                                  to: "/worksheets",
-                                  search: { worksheetId: worksheet!.id },
-                                })
-                              }
+                              onClick={() => {
+                                if (
+                                  hasPermission(
+                                    "worksheets-transaction-details.read",
+                                  )
+                                ) {
+                                  navigate({
+                                    to: "/worksheets/detail-transaksi",
+                                    search: { worksheetId: worksheet.id },
+                                  });
+                                } else if (
+                                  hasPermission(
+                                    "worksheets-personnel-assignments.read",
+                                  )
+                                ) {
+                                  navigate({
+                                    to: "/worksheets/jadwal-personel",
+                                    search: { worksheetId: worksheet.id },
+                                  });
+                                } else if (hasPermission("worksheets.read")) {
+                                  navigate({
+                                    to: "/worksheets",
+                                    search: { worksheetId: worksheet.id },
+                                  });
+                                }
+                              }}
                             >
                               <Eye className="mr-2 h-4 w-4" />
                               Lihat Detail
@@ -1179,36 +1158,36 @@ function RouteComponent() {
                         {worksheetVerified && (
                           <Button
                             variant="outline"
-                            onClick={() =>
-                              navigate({
-                                to: "/worksheets",
-                                search: { worksheetId: worksheet!.id },
-                              })
-                            }
+                            onClick={() => {
+                              if (
+                                hasPermission(
+                                  "worksheets-transaction-details.read",
+                                )
+                              ) {
+                                navigate({
+                                  to: "/worksheets/detail-transaksi",
+                                  search: { worksheetId: worksheet.id },
+                                });
+                              } else if (
+                                hasPermission(
+                                  "worksheets-personnel-assignments.read",
+                                )
+                              ) {
+                                navigate({
+                                  to: "/worksheets/jadwal-personel",
+                                  search: { worksheetId: worksheet.id },
+                                });
+                              } else if (hasPermission("worksheets.read")) {
+                                navigate({
+                                  to: "/worksheets",
+                                  search: { worksheetId: worksheet.id },
+                                });
+                              }
+                            }}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Lihat Worksheet
                           </Button>
-                        )}
-
-                        {worksheetVerified && (
-                          <PermissionGate permission="documents-admin.create">
-                            <Button
-                              onClick={() => dialogs.open("generateInvoice")}
-                            >
-                              <Download className="mr-2 h-4 w-4" />
-                              Buat Invoice
-                            </Button>
-                          </PermissionGate>
-                        )}
-
-                        {worksheetVerified && (
-                          <PermissionGate permission="documents-admin.create">
-                            <Button onClick={() => dialogs.open("generateSPK")}>
-                              <Download className="mr-2 h-4 w-4" />
-                              Buat SPK
-                            </Button>
-                          </PermissionGate>
                         )}
                       </div>
                     </div>
@@ -1217,20 +1196,18 @@ function RouteComponent() {
               )}
             </PermissionGate>
 
-            <PermissionGate
-              permission={["documents.create", "notifications.update"]}
-            >
+            <PermissionGate permission="notifications.update">
               {isRevisionRequested && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Permintaan Revisi Dokumen</CardTitle>
                     <CardDescription>
-                      Pelanggan meminta revisi dokumen penawaran. Upload dokumen
-                      yang sudah direvisi.
+                      Pelanggan meminta revisi dokumen penawaran. Cetak ulang
+                      penawaran melalui panel dokumen di atas, lalu kirim
+                      notifikasi ke pelanggan.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Revision Notes from Customer */}
                     {revisionHistory?.note && (
                       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
                         <div className="flex items-start gap-3">
@@ -1249,144 +1226,20 @@ function RouteComponent() {
                       </div>
                     )}
 
-                    {/* Offering Letter Upload */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                            <FileText className="h-5 w-5 text-blue-500" />
-                          </div>
-                          <div>
-                            <Label className="text-base font-medium">
-                              Surat Penawaran (Revisi)
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Format: PDF
-                            </p>
-                          </div>
-                        </div>
-                        {hasOfferingLetter && !offeringLetter.file && (
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-blue-100 text-blue-800">
-                              Dokumen Lama
-                            </Badge>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() =>
-                                window.open(
-                                  getPublicUrl(
-                                    order.documents.find(
-                                      (doc) => doc.type === "offering_document",
-                                    )!.fileUrl,
-                                  ),
-                                  "_blank",
-                                )
-                              }
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <Input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                if (file.type !== "application/pdf") {
-                                  globalErrorToast("Format file harus PDF");
-                                  return;
-                                }
-                                offeringLetter.setFile(file);
-                              }
-                            }}
-                            className="flex-1"
-                          />
-                          {offeringLetter.file && (
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => offeringLetter.setFile(null)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                        {offeringLetter.file && (
-                          <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                            <span className="text-sm">
-                              {offeringLetter.file.name}
-                            </span>
-                            <PermissionGate permission="documents.create">
-                              <Button
-                                size="sm"
-                                onClick={handleUploadOfferingLetter}
-                                disabled={offeringLetter.uploading}
-                              >
-                                {offeringLetter.uploading ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Upload className="mr-2 h-4 w-4" />
-                                )}
-                                Upload
-                              </Button>
-                            </PermissionGate>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-4">
-                      <PermissionGate permission="notifications.update">
-                        <Button
-                          className="bg-blue-500 hover:bg-blue-600"
-                          onClick={() =>
-                            handleNotifyCustomer("offering_document")
-                          }
-                          disabled={notifyCustomerMutation.isPending}
-                        >
-                          {notifyCustomerMutation.isPending ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <Mail className="mr-2 h-4 w-4" />
-                          )}
-                          Kirim Dokumen Revisi ke Pelanggan
-                        </Button>
-                      </PermissionGate>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </PermissionGate>
-
-            <PermissionGate permission="orders-approval.approve">
-              {(isApprovedNeedsDocs || isAcceptingDocuments) && worksheet && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Order Disetujui</CardTitle>
-                    <CardDescription>
-                      Order telah disetujui. Tim administrasi sedang menyiapkan
-                      dokumen penawaran dan invoice.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
                     <div className="flex justify-end">
                       <Button
-                        variant="outline"
+                        className="bg-blue-500 hover:bg-blue-600"
                         onClick={() =>
-                          navigate({
-                            to: "/worksheets",
-                            search: { worksheetId: worksheet.id },
-                          })
+                          handleNotifyCustomer("offering_document")
                         }
+                        disabled={notifyCustomerMutation.isPending}
                       >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Lihat Detail Transaksi
+                        {notifyCustomerMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Mail className="mr-2 h-4 w-4" />
+                        )}
+                        Kirim Dokumen Revisi ke Pelanggan
                       </Button>
                     </div>
                   </CardContent>
@@ -1394,348 +1247,66 @@ function RouteComponent() {
               )}
             </PermissionGate>
 
-            <PermissionGate permission="documents.create">
-              {isApprovedNeedsDocs && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upload Surat Penawaran</CardTitle>
-                    <CardDescription>
-                      Unggah surat penawaran untuk melanjutkan ke tahap
-                      selanjutnya.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Offering Letter Upload */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                            <FileText className="h-5 w-5 text-blue-500" />
-                          </div>
-                          <div>
-                            <Label className="text-base font-medium">
-                              Surat Penawaran
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Format: PDF
-                            </p>
-                          </div>
-                        </div>
-                        {hasOfferingLetter ? (
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-green-100 text-green-800">
-                              Sudah Diunggah
-                            </Badge>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() =>
-                                window.open(
-                                  getPublicUrl(
-                                    order.documents.find(
-                                      (doc) => doc.type === "offering_document",
-                                    )!.fileUrl,
-                                  ),
-                                  "_blank",
-                                )
-                              }
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Badge className="bg-yellow-100 text-yellow-800">
-                            Belum Diunggah
-                          </Badge>
-                        )}
+            <PermissionGate permission="orders-approval.approve">
+              {order.approvalStatus === "approved" &&
+                !isRevisionRequested &&
+                worksheet && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Order Disetujui</CardTitle>
+                      <CardDescription>
+                        Order telah disetujui. Tim administrasi sedang
+                        menyiapkan dokumen penawaran dan invoice.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-end">
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            navigate({
+                              to: "/worksheets",
+                              search: { worksheetId: worksheet.id },
+                            })
+                          }
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Lihat Detail Transaksi
+                        </Button>
                       </div>
-
-                      {!hasOfferingLetter && (
-                        <div className="space-y-2">
-                          <div className="flex gap-2">
-                            <Input
-                              type="file"
-                              accept=".pdf"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  if (file.type !== "application/pdf") {
-                                    globalErrorToast("Format file harus PDF");
-                                    return;
-                                  }
-                                  offeringLetter.setFile(file);
-                                }
-                              }}
-                              className="flex-1"
-                            />
-                            {offeringLetter.file && (
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                onClick={() => offeringLetter.setFile(null)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                          {offeringLetter.file && (
-                            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                              <span className="text-sm">
-                                {offeringLetter.file.name}
-                              </span>
-                              <PermissionGate permission="documents.create">
-                                <Button
-                                  size="sm"
-                                  onClick={handleUploadOfferingLetter}
-                                  disabled={offeringLetter.uploading}
-                                >
-                                  {offeringLetter.uploading ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <Upload className="mr-2 h-4 w-4" />
-                                  )}
-                                  Upload
-                                </Button>
-                              </PermissionGate>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {hasOfferingLetter && (
-                      <div className="flex justify-end pt-4">
-                        <PermissionGate permission="notifications.update">
-                          <Button
-                            className="bg-blue-500 hover:bg-blue-600"
-                            onClick={() =>
-                              handleNotifyCustomer("offering_document")
-                            }
-                            disabled={notifyCustomerMutation.isPending}
-                          >
-                            {notifyCustomerMutation.isPending ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <Mail className="mr-2 h-4 w-4" />
-                            )}
-                            Kirim Notifikasi ke Pelanggan
-                          </Button>
-                        </PermissionGate>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {isAcceptingDocuments && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>
-                      Upload Invoice dan Surat Perjanjian Kerjasama
-                    </CardTitle>
-                    <CardDescription>
-                      Unggah dokumen invoice dan perjanjian kerjasama untuk
-                      melanjutkan ke tahap selanjutnya.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* cooperation agreement upload */}
-                    <div className="space-y-4">
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                              <FileText className="h-5 w-5 text-blue-500" />
-                            </div>
-                            <div>
-                              <Label className="text-base font-medium">
-                                Invoice
-                              </Label>
-                              <p className="text-sm text-muted-foreground">
-                                Format: PDF
-                              </p>
-                            </div>
-                          </div>
-                          {hasInvoice ? (
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-green-100 text-green-800">
-                                Sudah Diunggah
-                              </Badge>
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                onClick={() =>
-                                  window.open(
-                                    getPublicUrl(
-                                      order.documents.find(
-                                        (doc) =>
-                                          doc.type === "cooperation_agreement",
-                                      )!.fileUrl,
-                                    ),
-                                    "_blank",
-                                  )
-                                }
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <Badge className="bg-yellow-100 text-yellow-800">
-                              Belum Diunggah
-                            </Badge>
-                          )}
-                        </div>
-                        {!hasInvoice && (
-                          <div className="space-y-2">
-                            <div className="flex gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    if (file.type !== "application/pdf") {
-                                      globalErrorToast("Format file harus PDF");
-                                      return;
-                                    }
-                                    invoice.setFile(file);
-                                  }
-                                }}
-                                className="flex-1"
-                              />
-                              {invoice.file && (
-                                <Button
-                                  size="icon"
-                                  variant="outline"
-                                  onClick={() => invoice.setFile(null)}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                            {invoice.file && (
-                              <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                                <span className="text-sm">
-                                  {invoice.file.name}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  onClick={handleUploadInvoice}
-                                  disabled={invoice.uploading}
-                                >
-                                  {invoice.uploading ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <Upload className="mr-2 h-4 w-4" />
-                                  )}
-                                  Upload
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                              <FileText className="h-5 w-5 text-blue-500" />
-                            </div>
-                            <div>
-                              <Label className="text-base font-medium">
-                                Surat Perjanjian Kerjasama
-                              </Label>
-                              <p className="text-sm text-muted-foreground">
-                                Format: PDF
-                              </p>
-                            </div>
-                          </div>
-                          {hasCooperationAgreement ? (
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-green-100 text-green-800">
-                                Sudah Diunggah
-                              </Badge>
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                onClick={() =>
-                                  window.open(
-                                    getPublicUrl(
-                                      order.documents.find(
-                                        (doc) =>
-                                          doc.type === "cooperation_agreement",
-                                      )!.fileUrl,
-                                    ),
-                                    "_blank",
-                                  )
-                                }
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <Badge className="bg-yellow-100 text-yellow-800">
-                              Belum Diunggah
-                            </Badge>
-                          )}
-                        </div>
-                        {!hasCooperationAgreement && (
-                          <div className="space-y-2">
-                            <div className="flex gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    if (file.type !== "application/pdf") {
-                                      globalErrorToast("Format file harus PDF");
-                                      return;
-                                    }
-                                    cooperationAgreement.setFile(file);
-                                  }
-                                }}
-                                className="flex-1"
-                              />
-                              {cooperationAgreement.file && (
-                                <Button
-                                  size="icon"
-                                  variant="outline"
-                                  onClick={() =>
-                                    cooperationAgreement.setFile(null)
-                                  }
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                            {cooperationAgreement.file && (
-                              <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-3">
-                                <span className="text-sm">
-                                  {cooperationAgreement.file.name}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  onClick={handleUploadCooperationAgreement}
-                                  disabled={cooperationAgreement.uploading}
-                                >
-                                  {cooperationAgreement.uploading ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <Upload className="mr-2 h-4 w-4" />
-                                  )}
-                                  Upload
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </CardContent>
+                  </Card>
+                )}
             </PermissionGate>
+
+            {/* Bendahara Penerimaan: issue invoice & SPK */}
+            {order.status === "persetujuan_disetujui" && worksheet && (
+              <PermissionGate permission="orders-payment.verify">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Invoice &amp; SPK</CardTitle>
+                    <CardDescription>
+                      Klik tombol di bawah untuk memasukkan kode billing dan
+                      tanggal kadaluarsa agar Admin dapat mencetak dokumen.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button onClick={() => setPublishInvoiceOpen(true)}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Buat Invoice &amp; SPK
+                    </Button>
+                  </CardContent>
+                </Card>
+              </PermissionGate>
+            )}
+            {worksheet && (
+              <PublishInvoiceDialog
+                worksheetId={worksheet.id}
+                orderId={orderId}
+                isOpen={publishInvoiceOpen}
+                setIsOpen={setPublishInvoiceOpen}
+              />
+            )}
 
             {isAwaitingPayment && (
               <Card>
@@ -2004,12 +1575,30 @@ function RouteComponent() {
                     <div className="flex justify-end gap-2 pt-4">
                       <Button
                         variant="outline"
-                        onClick={() =>
-                          navigate({
-                            to: "/worksheets/jadwal-personel",
-                            search: { worksheetId: worksheet!.id },
-                          })
-                        }
+                        onClick={() => {
+                          if (
+                            hasPermission("worksheets-transaction-details.read")
+                          ) {
+                            navigate({
+                              to: "/worksheets/detail-transaksi",
+                              search: { worksheetId: worksheet.id },
+                            });
+                          } else if (
+                            hasPermission(
+                              "worksheets-personnel-assignments.read",
+                            )
+                          ) {
+                            navigate({
+                              to: "/worksheets/jadwal-personel",
+                              search: { worksheetId: worksheet.id },
+                            });
+                          } else {
+                            navigate({
+                              to: "/worksheets",
+                              search: { worksheetId: worksheet.id },
+                            });
+                          }
+                        }}
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         Lihat Worksheet
@@ -2284,34 +1873,34 @@ function RouteComponent() {
                 <CardTitle>Timeline</CardTitle>
               </CardHeader>
               <CardContent>
-                <dl className="space-y-3 text-sm">
-                  <div>
-                    <dt className="text-muted-foreground">Dibuat</dt>
-                    <dd>
-                      {order.createdAt
-                        ? format(new Date(order.createdAt), "PPpp")
-                        : "-"}
-                    </dd>
-                  </div>
-                  {order.approvedAt && (
-                    <div>
-                      <dt className="text-muted-foreground">Disetujui</dt>
-                      <dd>{format(new Date(order.approvedAt), "PPpp")}</dd>
-                    </div>
-                  )}
-                  {order.paidAt && (
-                    <div>
-                      <dt className="text-muted-foreground">Dibayar</dt>
-                      <dd>{format(new Date(order.paidAt), "PPpp")}</dd>
-                    </div>
-                  )}
-                  {order.completedAt && (
-                    <div>
-                      <dt className="text-muted-foreground">Selesai</dt>
-                      <dd>{format(new Date(order.completedAt), "PPpp")}</dd>
-                    </div>
-                  )}
-                </dl>
+                {order.statusHistory && order.statusHistory.length > 0 ? (
+                  <ol className="relative border-l border-muted-foreground/20">
+                    {order.statusHistory.map((entry) => (
+                      <li key={entry.id} className="mb-6 ml-4 last:mb-0">
+                        <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-background bg-muted-foreground/40" />
+                        <p className="text-sm font-medium">
+                          {ORDER_STATUS_LABELS[
+                            entry.status as keyof typeof ORDER_STATUS_LABELS
+                          ] ?? entry.status}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(entry.createdAt), "dd MMM yyyy")}
+                          {" · "}
+                          {format(new Date(entry.createdAt), "HH:mm")}
+                        </p>
+                        {entry.changedByUser?.name && (
+                          <p className="text-xs text-muted-foreground">
+                            {entry.changedByUser.name}
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Belum ada riwayat status.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -2448,22 +2037,6 @@ function RouteComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <GenerateSPKDialog
-        worksheetId={worksheet?.id ?? ""}
-        isOpen={dialogs.isOpen("generateSPK")}
-        setIsOpen={(isOpen) =>
-          isOpen ? dialogs.open("generateSPK") : dialogs.close("generateSPK")
-        }
-      />
-      <GenerateInvoiceDialog
-        worksheetId={worksheet?.id ?? ""}
-        isOpen={dialogs.isOpen("generateInvoice")}
-        setIsOpen={(isOpen) =>
-          isOpen
-            ? dialogs.open("generateInvoice")
-            : dialogs.close("generateInvoice")
-        }
-      />
     </Card>
   );
 }

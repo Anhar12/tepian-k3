@@ -1,4 +1,8 @@
-import type { OrderPaymentStatus, OrderStatus } from "@tepian-k3/constants";
+import type {
+  DocumentType,
+  OrderPaymentStatus,
+  OrderStatus,
+} from "@tepian-k3/constants";
 import {
   and,
   asc,
@@ -82,6 +86,23 @@ const orderQueries = {
               ? ilike(order.orderNumber, `%${input.search}%`)
               : undefined,
             input.status ? eq(order.status, input.status) : undefined,
+            input.statuses && input.statuses.length > 0
+              ? inArray(order.status, input.statuses)
+              : undefined,
+            input.worksheetStatuses && input.worksheetStatuses.length > 0
+              ? inArray(
+                  order.id,
+                  db
+                    .select({ orderId: worksheets.orderId })
+                    .from(worksheets)
+                    .where(
+                      and(
+                        inArray(worksheets.status, input.worksheetStatuses),
+                        isNull(worksheets.deletedAt),
+                      ),
+                    ),
+                )
+              : undefined,
             input.createdAt.length > 0
               ? and(
                   input.createdAt[0]
@@ -425,8 +446,11 @@ const orderQueries = {
             testing: true,
             worksheet: true,
             statusHistory: {
-              orderBy: (statusHistory, { desc }) => [
-                desc(statusHistory.createdAt),
+              with: {
+                changedByUser: true,
+              },
+              orderBy: (statusHistory, { asc }) => [
+                asc(statusHistory.createdAt),
               ],
             },
             documents: {
@@ -446,6 +470,34 @@ const orderQueries = {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil pesanan beserta dokumennya",
+        });
+      },
+    });
+  },
+
+  getOrderDocument(orderId: string, documentType: DocumentType) {
+    return Effect.tryPromise({
+      try: () =>
+        db.query.documents.findFirst({
+          where: and(
+            eq(documents.entityId, orderId),
+            eq(documents.entityType, "order"),
+            eq(documents.type, documentType),
+          ),
+        }),
+      catch: (error) => {
+        logError(
+          "orderQueries.getOrderDocument",
+          "Failed to fetch order document",
+          {
+            error,
+            orderId,
+            documentType,
+          },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil dokumen pesanan",
         });
       },
     });

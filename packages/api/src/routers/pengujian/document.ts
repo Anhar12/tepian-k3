@@ -1,31 +1,31 @@
-import { Effect } from "effect";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  formDataProcedure,
-  withIdempotency,
-  withPermission,
-  formDataInput,
-  protectedProcedure,
-} from "../../index";
+import orderQueries from "@tepian-k3/queries/pengujian/order.queries";
+import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
 import documentQueries from "@tepian-k3/queries/platform/document.queries";
 import documentSchema from "@tepian-k3/schema/platform/document.schema";
-import {
-  storageService,
-  assertValidFileBuffer,
-  FILE_SIZE_LIMITS,
-} from "@tepian-k3/services/storage";
-import { z } from "zod";
-import { runEffect } from "../../utils/run-effect";
 import { createDocumentSignature } from "@tepian-k3/services/document-signing";
 import {
   pdfSigningService,
   type QRCodePosition,
 } from "@tepian-k3/services/pdf";
-import orderQueries from "@tepian-k3/queries/pengujian/order.queries";
-import { processAndUploadFile } from "../../utils/image-upload";
-import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
+import {
+  assertValidFileBuffer,
+  FILE_SIZE_LIMITS,
+  storageService,
+} from "@tepian-k3/services/storage";
 import { TRPCError } from "@trpc/server";
+import { Effect } from "effect";
+import { z } from "zod";
+import {
+  createTRPCRouter,
+  formDataInput,
+  formDataProcedure,
+  protectedProcedure,
+  publicProcedure,
+  withIdempotency,
+  withPermission,
+} from "../../index";
+import { processAndUploadFile } from "../../utils/image-upload";
+import { runEffect } from "../../utils/run-effect";
 
 export const documentRouter = createTRPCRouter({
   /**
@@ -62,12 +62,17 @@ export const documentRouter = createTRPCRouter({
                 });
               }
 
-              const spt = yield* worksheetQueries.getWorksheetDocument(
-                ctx.input.data.worksheetId,
+              const orderSpt = yield* orderQueries.getOrderDocument(
+                worksheet.orderId,
                 "assignment_letter",
               );
 
-              if (spt) {
+              // const spt = yield* worksheetQueries.getWorksheetDocument(
+              //   ctx.input.data.worksheetId,
+              //   "assignment_letter",
+              // );
+
+              if (orderSpt) {
                 throw new TRPCError({
                   code: "CONFLICT",
                   message: "Surat SPT sudah diupload untuk worksheet ini",
@@ -81,12 +86,12 @@ export const documentRouter = createTRPCRouter({
 
               const documentNumber = `SPT-${Date.now()}-${ctx.input.data.worksheetId.slice(0, 8)}`;
 
-              const res = yield* documentQueries.createDocument({
+              yield* documentQueries.createDocument({
                 documentNumber,
                 type: "assignment_letter",
                 title: ctx.input.data.title,
-                entityType: "worksheet",
-                entityId: ctx.input.data.worksheetId,
+                entityType: "order",
+                entityId: worksheet.orderId,
                 fileUrl: uploadedFile.key,
                 fileName: uploadedFile.filename,
                 fileSize: uploadedFile.size,
@@ -94,12 +99,25 @@ export const documentRouter = createTRPCRouter({
                 uploadedByUserId: ctx.user.id,
               });
 
+              // yield* documentQueries.createDocument({
+              //   documentNumber,
+              //   type: "assignment_letter",
+              //   title: ctx.input.data.title,
+              //   entityType: "worksheet",
+              //   entityId: ctx.input.data.worksheetId,
+              //   fileUrl: uploadedFile.key,
+              //   fileName: uploadedFile.filename,
+              //   fileSize: uploadedFile.size,
+              //   mimeType: uploadedFile.contentType,
+              //   uploadedByUserId: ctx.user.id,
+              // });
+
               yield* orderQueries.updateOrderStatus(
                 worksheet.orderId,
                 "proses_pengambilan_sampel",
               );
 
-              return res;
+              return true;
             }),
           ),
         { ttl: 43200 },

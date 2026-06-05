@@ -15,6 +15,7 @@ import { Fragment } from "react";
 import {
   ORDER_STATUS_FLOW,
   ORDER_STATUS_LABELS,
+  resolveOrderStatusFlowIndex,
   type OrderStatus,
 } from "@tepian-k3/constants";
 import { type OrderStatusHistory } from "@tepian-k3/types/pengujian/order-status-history.types";
@@ -75,8 +76,14 @@ export function OrderTimeline({
   const currentStatus = sortedHistory[0]?.status;
   const isRevisionStatus = currentStatus === "revision";
 
-  // Determine which statuses are completed (appear before current in the flow)
-  let currentIndex = currentStatus ? statusFlow.indexOf(currentStatus) : -1;
+  // Determine which statuses are completed (appear before current in the flow).
+  // Granular in-between statuses (e.g. kaji_ulang_disetujui) are resolved to the
+  // milestone they currently sit on so the active step renders blue and the
+  // prior steps render as completed green checks.
+  let currentIndex =
+    currentStatus && !isRevisionStatus
+      ? resolveOrderStatusFlowIndex(currentStatus, statusFlow)
+      : -1;
 
   // If current status is "revision" (not in flow), find the last completed status in the flow
   if (currentIndex < 0 && isRevisionStatus) {

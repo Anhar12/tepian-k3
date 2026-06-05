@@ -5,15 +5,15 @@ import {
   StatusStateAwaitingSchedule,
   StatusStateCancelled,
   StatusStateCompleted,
+  StatusStateContactRevisionRequested,
   StatusStateOfferPublished,
   StatusStatePendingPaymentVerification,
   StatusStatePendingReview,
   StatusStateRejected,
+  StatusStateRequestReview,
   StatusStateTestingInProgress,
   StatusStateUploadApproval,
   StatusStateUploadPayment,
-  StatusStateContactRevisionRequested,
-  StatusStateRequestReview,
   StatusStateWaitingForRevision,
   StatusStateWorksheetInReview,
   StatusStateWorksheetVerified,
@@ -473,6 +473,11 @@ function RouteComponent() {
                     </Badge>
                   </div>
 
+                  {/* A. Biaya Parameter */}
+                  <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                    A. Biaya Parameter
+                  </p>
+
                   {/* Order Items grouped by location */}
                   {(() => {
                     const byLocation = orderDetail.items.reduce<
@@ -547,12 +552,13 @@ function RouteComponent() {
                     );
                   })()}
 
-                  {/* Optional cost checklist */}
+                  {/* B. Biaya Operasional */}
                   <div className="space-y-1.5">
                     <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-                      Biaya Tambahan
+                      B. Biaya Operasional
                     </p>
                     {[
+                      { label: "Uang Harian", checked: true },
                       {
                         label: "Transportasi Udara (PP)",
                         checked: orderDetail.coverFlightIncluded,
@@ -600,6 +606,12 @@ function RouteComponent() {
                         </span>
                       </div>
                     ))}
+                    {!offeringDoc && (
+                      <p className="pt-1 text-xs text-slate-400 italic">
+                        Subtotal biaya operasional tersedia setelah penawaran
+                        diterbitkan.
+                      </p>
+                    )}
                   </div>
 
                   {/* Customer note */}

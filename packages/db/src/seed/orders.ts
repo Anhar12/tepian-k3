@@ -15,6 +15,11 @@ import {
   parameterChemicalMaterials,
 } from "../schema";
 import { eq, inArray } from "drizzle-orm";
+import {
+  ORDER_STATUS_FLOW,
+  ORDER_STATUS_LABELS,
+  type OrderStatus,
+} from "@tepian-k3/constants";
 
 /**
  * Seeds 3 test orders in different workflow stages for development only.
@@ -25,6 +30,11 @@ import { eq, inArray } from "drizzle-orm";
  *
  * Orders 2 & 3 are populated with worksheetItems, worksheetTools, and
  * worksheetChemicalMaterials drawn from the seeded parameters/tools/chemical-materials.
+ *
+ * Each order also gets a full `orderStatusHistory` backfill — one entry per
+ * status in `ORDER_STATUS_FLOW` up to and including the current status, with
+ * timestamps spaced one day apart — so the web order timeline renders a date
+ * for every completed step instead of "-".
  *
  * @param isProduction - When true, this function is a no-op
  */
@@ -203,13 +213,33 @@ export async function seedOrders(isProduction: boolean) {
       if (item) orderItemRecords.push(item);
     }
 
-    // Status history entry
-    await db.insert(orderStatusHistory).values({
-      orderId: newOrder.id,
-      status: seedOrder.status,
-      changedBy,
-      note: `[seed] ${seedOrder.label}`,
-    });
+    // Status history — backfill an entry for every status in the flow up to and
+    // including the current one, so the web timeline shows dates for each
+    // completed step instead of "-".
+    const currentFlowIndex = ORDER_STATUS_FLOW.indexOf(
+      seedOrder.status as OrderStatus,
+    );
+    const timelineStatuses: OrderStatus[] =
+      currentFlowIndex >= 0
+        ? ORDER_STATUS_FLOW.slice(0, currentFlowIndex + 1)
+        : [seedOrder.status as OrderStatus];
+
+    // Space each step one day apart, ending "now" for the current status.
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const baseTime = Date.now() - (timelineStatuses.length - 1) * DAY_MS;
+
+    for (const [stepIndex, stepStatus] of timelineStatuses.entries()) {
+      const isCurrent = stepIndex === timelineStatuses.length - 1;
+      await db.insert(orderStatusHistory).values({
+        orderId: newOrder.id,
+        status: stepStatus,
+        changedBy,
+        note: isCurrent
+          ? `[seed] ${seedOrder.label}`
+          : `[seed] ${ORDER_STATUS_LABELS[stepStatus]}`,
+        createdAt: new Date(baseTime + stepIndex * DAY_MS).toISOString(),
+      });
+    }
 
     console.log(
       `   ➕ Created order: ${seedOrder.orderNumber} — ${seedOrder.status}`,

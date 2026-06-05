@@ -25,8 +25,8 @@ export const DOCUMENT_TYPES = [
   "approval_letter",
   "approval_letter_user",
   "invoice",
-  "cooperation_agreement",
-  "cooperation_agreement_user",
+  "cooperation_agreement", // SPK
+  "cooperation_agreement_user", // SPK user version
   "proof_of_payment",
   "assignment_letter",
 
@@ -57,6 +57,7 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   cooperation_agreement: "Cooperation Agreement",
   cooperation_agreement_user: "Cooperation Agreement (User)",
   assignment_letter: "Assignment Letter",
+  spk: "Surat SPK",
 
   // Testing documents
   testing_report: "Testing Report",

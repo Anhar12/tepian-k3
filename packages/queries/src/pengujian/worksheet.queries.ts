@@ -4,7 +4,7 @@ import type {
   WorksheetNoteStatus,
   WorksheetStatus,
 } from "@tepian-k3/constants";
-import { and, eq, inArray, isNull, sql } from "@tepian-k3/db";
+import { and, count, eq, inArray, isNull, sql } from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
   chemicalMaterials,
@@ -27,6 +27,33 @@ import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import { logCreate, logUpdate } from "../helpers/audit.helpers";
 import orderQueries from "./order.queries";
+
+/**
+ * Throws a BAD_REQUEST if the worksheet has no saved operational cost rows.
+ *
+ * Operational costs (Rincian Operasional) can only be edited while the worksheet
+ * is in 'draft'/'revision'. Any transition that locks the worksheet (submit for
+ * verification, verify) must call this first so users can't lock themselves out
+ * before filling them in. Counts persisted rows only — the UI shows default
+ * cost rows that aren't saved until explicitly submitted.
+ *
+ * @param tx - Active transaction (or db) handle
+ * @param worksheetId - The worksheet to check
+ */
+async function assertOperationalCostsSaved(tx: DBorTx, worksheetId: string) {
+  const [opCost] = await tx
+    .select({ value: count() })
+    .from(worksheetOperationalCosts)
+    .where(eq(worksheetOperationalCosts.worksheetId, worksheetId));
+
+  if (!opCost || opCost.value === 0) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message:
+        "Harap isi dan simpan Rincian Operasional terlebih dahulu sebelum mengajukan atau memverifikasi worksheet.",
+    });
+  }
+}
 
 const worksheetQueries = {
   /**
@@ -487,6 +514,11 @@ const worksheetQueries = {
               },
             },
             createdBy: true,
+            // Lightweight presence check so the UI can gate "Ajukan Verifikasi"
+            // on operational costs being filled in.
+            operationalCosts: {
+              columns: { id: true },
+            },
           },
         }),
       catch: (error) => {
@@ -1580,6 +1612,7 @@ const worksheetQueries = {
               .update(worksheets)
               .set({
                 status: "revision",
+                revisionNotes: revisionNote,
                 updatedAt: sql`CURRENT_TIMESTAMP`,
               })
               .where(eq(worksheets.id, worksheetId))
@@ -1633,7 +1666,9 @@ const worksheetQueries = {
 
   /**
    * Verify worksheet (coordinator action)
-   * Changes status from 'pending_verification' to 'verified'
+   * Changes status from 'draft'/'pending_verification' to 'verified', and
+   * advances the associated order to 'kaji_ulang_disetujui' since verifying the
+   * worksheet approves the technical review (kaji ulang).
    */
   verifyWorksheet(
     worksheetId: string,
@@ -1689,6 +1724,19 @@ const worksheetQueries = {
                 message: "Gagal memverifikasi worksheet",
               });
             }
+
+            // Verifying the worksheet means the technical review (kaji ulang)
+            // is approved, so advance the order to 'kaji_ulang_disetujui'.
+            // This marks Kaji Ulang complete and makes Penawaran Diterbitkan the
+            // active step on the customer timeline. Applies whether verifying
+            // from 'draft' or 'pending_verification'.
+            await Effect.runPromise(
+              orderQueries.updateOrderStatus(
+                worksheet.orderId,
+                "kaji_ulang_disetujui",
+                tx,
+              ),
+            );
 
             return updatedWorksheet;
           }),
@@ -1804,6 +1852,7 @@ const worksheetQueries = {
                     companyBankAccount: true,
                     companyBankAccountName: true,
                     companyBankName: true,
+                    address: true,
                     headOfCompany: true,
                     headOfCompanyPosition: true,
                   },
@@ -1934,7 +1983,7 @@ const worksheetQueries = {
             }
 
             // 2. Check if worksheet status allows editing
-            const editableStatuses = ["draft", "revision"];
+            const editableStatuses = ["verified"];
             if (!editableStatuses.includes(worksheet.status)) {
               throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -2315,6 +2364,213 @@ const worksheetQueries = {
             "Gagal mendapatkan daftar alat yang dipinjam untuk worksheet",
         });
       },
+    });
+  },
+
+  /**
+   * Koor. Admin signals that the offering is ready for Admin to print.
+   * Transitions the order from `kaji_ulang_disetujui` → `penawaran_diterbitkan`.
+   * Requires the worksheet to be `verified` and to have saved operational costs.
+   */
+  publishOffering(worksheetId: string, userId: string) {
+    return Effect.gen(function* () {
+      yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
+            });
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            if (worksheet.status !== "verified") {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Worksheet harus berstatus 'verified' sebelum menerbitkan penawaran",
+              });
+            }
+
+            await assertOperationalCostsSaved(tx, worksheetId);
+
+            await Effect.runPromise(
+              orderQueries.updateOrderStatus(
+                worksheet.orderId,
+                "penawaran_diterbitkan",
+                tx,
+              ),
+            );
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.publishOffering",
+            "Failed to publish offering",
+            { error, worksheetId },
+          );
+          if (error instanceof TRPCError) throw error;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menerbitkan penawaran",
+          });
+        },
+      });
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          {},
+          { action: "publish_offering" } as Record<string, unknown>,
+          userId,
+          "publish_offering",
+        ),
+      );
+    });
+  },
+
+  /**
+   * Bendahara Penerimaan issues the invoice/SPK.
+   * Stores billing data on the worksheet and transitions the order to `tagihan_diterbitkan`.
+   */
+  publishInvoice(
+    worksheetId: string,
+    userId: string,
+    billingCode: string,
+    billingExpiryDate: string,
+  ) {
+    return Effect.gen(function* () {
+      yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
+            });
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            await tx
+              .update(worksheets)
+              .set({
+                billingCode,
+                billingExpiryDate,
+                updatedAt: sql`CURRENT_TIMESTAMP`,
+              })
+              .where(eq(worksheets.id, worksheetId));
+
+            await Effect.runPromise(
+              orderQueries.updateOrderStatus(
+                worksheet.orderId,
+                "tagihan_diterbitkan",
+                tx,
+              ),
+            );
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.publishInvoice",
+            "Failed to publish invoice",
+            { error, worksheetId },
+          );
+          if (error instanceof TRPCError) throw error;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menerbitkan tagihan",
+          });
+        },
+      });
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          {},
+          { billingCode, action: "publish_invoice" } as Record<string, unknown>,
+          userId,
+          "publish_invoice",
+        ),
+      );
+    });
+  },
+
+  /**
+   * Tim Penjadwalan signals that personnel and dates are confirmed.
+   * Transitions the order to `menunggu_penerbitan_spt_jadwal` so Admin can print the SPT.
+   */
+  publishSPT(worksheetId: string, userId: string) {
+    return Effect.gen(function* () {
+      yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
+              with: {
+                assignments: { columns: { id: true }, limit: 1 },
+              },
+            });
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            if (!worksheet.startDate || !worksheet.endDate) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Tanggal pengujian harus diisi sebelum menerbitkan SPT",
+              });
+            }
+
+            if (!worksheet.assignments?.length) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Personel harus ditugaskan sebelum menerbitkan SPT",
+              });
+            }
+
+            await Effect.runPromise(
+              orderQueries.updateOrderStatus(
+                worksheet.orderId,
+                "menunggu_penerbitan_spt_jadwal",
+                tx,
+              ),
+            );
+          }),
+        catch: (error) => {
+          logError("worksheetQueries.publishSPT", "Failed to publish SPT", {
+            error,
+            worksheetId,
+          });
+          if (error instanceof TRPCError) throw error;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menerbitkan SPT",
+          });
+        },
+      });
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          {},
+          { action: "publish_spt" } as Record<string, unknown>,
+          userId,
+          "publish_spt",
+        ),
+      );
     });
   },
 };

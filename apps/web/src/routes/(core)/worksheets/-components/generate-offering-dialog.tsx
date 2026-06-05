@@ -24,11 +24,11 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { trpc } from "@/utils/trpc";
-// import { getPublicUrl } from "@/utils/url";
 import { openBase64InNewTab } from "@/utils/download";
+import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { ADMIN_EMAIL, ADMIN_PHONE } from "@tepian-k3/constants";
 import generateDocumentSchema from "@tepian-k3/schema/pengujian/generate-document.schema";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -38,12 +38,18 @@ import type z from "zod";
 
 interface GenerateOfferingDialogProps {
   worksheetId: string;
+  /** Pre-fill Nomor Acuan from the order number */
+  orderNumber?: string;
+  /** Pre-fill Tanggal Acuan from the order creation date (ISO string) */
+  orderDate?: string;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
 export default function GenerateOfferingDialog({
   worksheetId,
+  orderNumber,
+  orderDate,
   isOpen,
   setIsOpen,
 }: GenerateOfferingDialogProps) {
@@ -55,14 +61,25 @@ export default function GenerateOfferingDialog({
     ),
     defaultValues: {
       worksheetId,
+      adminContact: ADMIN_PHONE,
+      adminEmail: ADMIN_EMAIL,
     },
   });
+
+  // Pre-fill reference fields from order when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      if (orderNumber) form.setValue("referenceNumber", orderNumber);
+      if (orderDate) form.setValue("referenceDate", orderDate);
+    } else {
+      form.reset();
+    }
+  }, [isOpen, orderNumber, orderDate, form]);
 
   const generateOfferingMutation = useMutation(
     trpc.pengujian.generateDocument.generateOfferingLetter.mutationOptions({
       onSuccess: (data) => {
         globalSuccessToast("Surat penawaran berhasil dibuat");
-        // window.open(getPublicUrl(data.offeringLetterUrl), "_blank");
         openBase64InNewTab(data.base64, data.contentType);
         setIsOpen(false);
       },
@@ -82,20 +99,14 @@ export default function GenerateOfferingDialog({
     generateOfferingMutation.mutate(data);
   }
 
-  useEffect(() => {
-    if (!isOpen) {
-      form.reset();
-    }
-  }, [isOpen, form]);
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <form>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Buat Surat Penawaran</DialogTitle>
+            <DialogTitle>Cetak Surat Penawaran</DialogTitle>
             <DialogDescription>
-              Isi form berikut untuk membuat surat penawaran.
+              Isi nomor surat dan data dokumen untuk mencetak surat penawaran.
             </DialogDescription>
           </DialogHeader>
           <form
@@ -103,6 +114,31 @@ export default function GenerateOfferingDialog({
             className="grid gap-4"
           >
             <FieldGroup>
+              <Controller
+                control={form.control}
+                name="letterNumber"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Nomor Surat
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan nomor surat"
+                      className="h-10 text-sm"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
               <Controller
                 control={form.control}
                 name="adminContact"
@@ -155,31 +191,6 @@ export default function GenerateOfferingDialog({
 
               <Controller
                 control={form.control}
-                name="letterNumber"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="space-y-1"
-                  >
-                    <FieldLabel className="ml-1 text-sm font-bold">
-                      Nomor Surat
-                    </FieldLabel>
-                    <Input
-                      type="text"
-                      placeholder="Masukkan nomor surat"
-                      className="h-10 text-sm"
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-
-              <Controller
-                control={form.control}
                 name="referenceNumber"
                 render={({ field, fieldState }) => (
                   <Field
@@ -191,7 +202,7 @@ export default function GenerateOfferingDialog({
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Masukkan nomor acuan"
+                      placeholder="Nomor order"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -225,14 +236,16 @@ export default function GenerateOfferingDialog({
                         >
                           {field.value
                             ? format(new Date(field.value), "PPP")
-                            : "Pick a date"}
+                            : "Pilih tanggal"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={new Date(field.value ?? "")}
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           onSelect={(value) => {
                             field.onChange(value?.toISOString() ?? null);
                           }}
@@ -254,7 +267,7 @@ export default function GenerateOfferingDialog({
                 disabled={generateOfferingMutation.isPending}
               >
                 {generateOfferingMutation.isPending ? <Spinner /> : null}
-                Buat Surat Penawaran
+                Cetak Surat Penawaran
               </Button>
             </DialogFooter>
           </form>

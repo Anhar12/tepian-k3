@@ -86,10 +86,11 @@ export const RESOURCES = [
   { key: "documents", approvalActions: "all" },
   { key: "document-signature" },
   { key: "document-verifications", approvalActions: "all" },
-  // SPT / Assignment Letter generation & upload (penjadwalan, head_of_institution)
+  // Per-document-type permissions (koordinator_administrasi creates; kepala_balai reviews/approves)
+  { key: "documents-penawaran", approvalActions: "all" },
+  { key: "documents-spk", approvalActions: "all" },
+  { key: "documents-invoice", approvalActions: "all" },
   { key: "documents-spt", approvalActions: "all" },
-  // Admin documents: offering letter, SPK, tagihan (admin_manager)
-  { key: "documents-admin", approvalActions: "all" },
 
   // ==================== AUDITS ====================
   { key: "audits" },

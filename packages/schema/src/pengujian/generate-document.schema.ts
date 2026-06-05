@@ -13,7 +13,6 @@ const generateSpkDocumentSchema = z.object({
   worksheetId: z.uuidv7(),
   letterNumber: z.string().min(1).max(250),
   agreementDate: z.string().min(1),
-  companyRepAddress: z.string().min(1).max(500),
 });
 
 const generateTagihanDocumentSchema = z.object({

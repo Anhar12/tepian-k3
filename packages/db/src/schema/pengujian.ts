@@ -685,6 +685,18 @@ export const worksheets = createTable(
       .notNull()
       .default(false),
     revisionNotes: text("revision_notes"),
+    // Set when Admin generates (Cetak) the offering PDF; Invoice uses these as reference
+    offeringLetterNumber: varchar("offering_letter_number", { length: 250 }),
+    offeringLetterDate: timestamp("offering_letter_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    // Set by Bendahara Penerimaan when issuing the invoice/SPK
+    billingCode: varchar("billing_code", { length: 100 }),
+    billingExpiryDate: timestamp("billing_expiry_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
     ...timestamps,
   },
   (table) => [
