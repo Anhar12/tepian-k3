@@ -288,8 +288,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "testing.read",
     "testing-item.view",
     "testing-item.read",
-    "documents-spt.view",
-    "documents-spt.read",
     "survey-questions.view",
     "survey-questions.read",
     "survey-responses.view",

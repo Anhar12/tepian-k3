@@ -261,11 +261,21 @@ async function seed() {
       }
     }
 
-    if (rolePermissionsToAdd.length > 0) {
+    // Deduplicate within the to-insert list (guards against duplicate permission
+    // names in a role's ROLE_PERMISSIONS array hitting the PK constraint).
+    const dedupedRolePermissionsToAdd = rolePermissionsToAdd.filter(
+      (item, idx, arr) =>
+        arr.findIndex(
+          (x) =>
+            x.roleId === item.roleId && x.permissionId === item.permissionId,
+        ) === idx,
+    );
+
+    if (dedupedRolePermissionsToAdd.length > 0) {
       console.log(
-        `   ➕ Adding ${rolePermissionsToAdd.length} new role-permission assignments...`,
+        `   ➕ Adding ${dedupedRolePermissionsToAdd.length} new role-permission assignments...`,
       );
-      await tx.insert(rolePermissions).values(rolePermissionsToAdd);
+      await tx.insert(rolePermissions).values(dedupedRolePermissionsToAdd);
     }
 
     console.log("✅ Role permissions synced");
