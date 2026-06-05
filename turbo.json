@@ -47,6 +47,10 @@
     "db:seed": {
       "cache": false
     },
+    "db:purge": {
+      "cache": false,
+      "interactive": true
+    },
     "db:reset": {
       "cache": false
     },
