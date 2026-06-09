@@ -43,13 +43,16 @@ interface RoleLock {
  * Tim Penjadwalan only sees orders once Bendahara Penerimaan has validated the
  * payment (verifyPayment → `menunggu_penerbitan_spt_jadwal`), i.e. the orders
  * now awaiting SPT issuance and scheduling.
+ *
+ * Kepala Balai reviews the offering after Admin Manager submits it
+ * (publishOffering → `penawaran_review`), approving or returning it for revision.
  */
 const ROLE_STATUS_LOCK: Partial<Record<Role, RoleLock>> = {
   kaji_ulang: { statuses: ["kaji_ulang", "revision"] },
   koordinator_administrasi: { worksheetStatuses: ["verified"] },
   koordinator_pengujian: { worksheetStatuses: ["pending_verification"] },
   tim_penjadwalan: { statuses: ["menunggu_penerbitan_spt_jadwal"] },
-  kepala_balai: { statuses: ["kaji_ulang_disetujui"] },
+  kepala_balai: { statuses: ["penawaran_review"] },
 };
 
 export const Route = createFileRoute("/(core)/back-office/orders/")({
@@ -171,6 +174,9 @@ function RouteComponent() {
                 <SelectItem value="kaji_ulang">Kaji Ulang</SelectItem>
                 <SelectItem value="kaji_ulang_disetujui">
                   Kaji Ulang Disetujui
+                </SelectItem>
+                <SelectItem value="penawaran_review">
+                  Menunggu Persetujuan Penawaran
                 </SelectItem>
                 <SelectItem value="penawaran_diterbitkan">
                   Penawaran Diterbitkan

@@ -1,5 +1,29 @@
 # @tepian-k3/db
 
+## 1.15.0
+
+### Minor Changes
+
+- feat(pengujian): refine worksheet and order flows
+
+  ## Summary
+  - Tighten worksheet staffing so date selection and personnel assignment follow the worksheet estimate.
+  - Keep order/document actions and query invalidation aligned with the latest order and worksheet state.
+  - Include backend cleanup and migration work to support the updated workflow safely.
+
+  ## Changes
+  - `apps/web/src/routes/(core)/worksheets/jadwal-personel.tsx`: improve worksheet scheduling UI, enforce personnel limits from `estimatedAmountOfMembers`, and refine assignment/date selection behavior.
+  - `packages/api/src/routers/pengujian/worksheet.ts` and `packages/queries/src/pengujian/worksheet.queries.ts`: adjust worksheet validation and schedule/document access paths.
+  - `apps/web/src/components/order-timeline.tsx` and related order/document components: support status-aware document reopening/reprint behavior and keep invoice/SPT flows in sync.
+  - `packages/api/src/routers/pengujian/order.ts`, `packages/queries/src/pengujian/order.queries.ts`, and `packages/queries/src/platform/document.queries.ts`: update order revision/approval/document retrieval logic and query invalidation.
+  - `packages/db/scripts/dedupe-order-status-history.sql` and the new migration snapshot: add data cleanup and migration support for order status history consistency.
+  - `packages/constants/src/roles.ts`: remove unused role permission entries.
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/constants@1.14.0
+
 ## 1.14.0
 
 ### Minor Changes

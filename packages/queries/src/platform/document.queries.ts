@@ -6,6 +6,7 @@ import {
   documentVerifications,
   employees,
   worksheetAssignments,
+  worksheets,
 } from "@tepian-k3/db/schema";
 import { eq, and, desc, inArray, ilike, count } from "@tepian-k3/db";
 import { TRPCError } from "@trpc/server";
@@ -976,11 +977,23 @@ const documentQueries = {
         if (!assignments.length) return { data: [], pageCount: 0 };
 
         const worksheetIds = assignments.map((a) => a.worksheetId);
+
+        // SPT documents are stored on the ORDER entity (entityType "order",
+        // type "assignment_letter"), so resolve the orders backing the
+        // worksheets this employee is assigned to.
+        const assignedWorksheets = await db.query.worksheets.findMany({
+          where: inArray(worksheets.id, worksheetIds),
+          columns: { orderId: true },
+        });
+        const orderIds = assignedWorksheets.map((w) => w.orderId);
+        if (!orderIds.length) return { data: [], pageCount: 0 };
+
         const offset = (input.page - 1) * input.perPage;
 
         const baseWhere = and(
-          eq(documents.entityType, "worksheet"),
-          inArray(documents.entityId, worksheetIds),
+          eq(documents.entityType, "order"),
+          inArray(documents.entityId, orderIds),
+          eq(documents.type, "assignment_letter"),
           input.title ? ilike(documents.title, `%${input.title}%`) : undefined,
           input.status ? eq(documents.status, input.status) : undefined,
         );

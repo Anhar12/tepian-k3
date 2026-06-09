@@ -15,26 +15,28 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import SingleFileUpload from "@/components/ui/single-file-upload";
 import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { toFormData } from "@/utils/form-data-mapper";
 import { queryClient, trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import documentSchema from "@tepian-k3/schema/platform/document.schema";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
-import documentSchema from "@tepian-k3/schema/platform/document.schema";
-import { toFormData } from "@/utils/form-data-mapper";
-import SingleFileUpload from "@/components/ui/single-file-upload";
 
 interface UploadSPTDialogProps {
   worksheetId: string;
+  orderId: string;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
 export default function UploadSPTDialog({
   worksheetId,
+  orderId,
   isOpen,
   setIsOpen,
 }: UploadSPTDialogProps) {
@@ -48,6 +50,11 @@ export default function UploadSPTDialog({
   const uploadSPTMutation = useMutation(
     trpc.pengujian.document.uploadSPT.mutationOptions({
       onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
+        );
         await queryClient.invalidateQueries(
           trpc.pengujian.worksheet.getWorksheetDocument.queryOptions({
             worksheetId,

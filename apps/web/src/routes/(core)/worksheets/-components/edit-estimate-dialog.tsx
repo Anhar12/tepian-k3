@@ -37,8 +37,8 @@ interface EditEstimateDialogProps {
 
 /**
  * Dialog for editing a worksheet's testing duration (Durasi Pengujian) and
- * total personnel (Total Personel) estimates. Only usable while the worksheet is
- * in draft/revision — the backend enforces the same restriction.
+ * total personnel (Total Personel) estimates. Usable in draft, revision, or
+ * verified status — the backend enforces the same restriction.
  *
  * @param worksheetId - The worksheet being edited
  * @param currentDays - Pre-filled testing duration in days
@@ -76,22 +76,24 @@ export default function EditEstimateDialog({
   }, [isOpen, worksheetId, currentDays, currentMembers, form]);
 
   const updateEstimateMutation = useMutation(
-    trpc.pengujian.worksheet.createEstimate.mutationOptions({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries(
-          trpc.pengujian.worksheet.getTransactionDetail.queryOptions({
-            worksheetId,
-          }),
-        );
-        globalSuccessToast("Estimasi worksheet berhasil diperbarui");
-        setIsOpen(false);
+    trpc.pengujian.worksheet.createWorksheetEstimateForDetailTransaksi.mutationOptions(
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries(
+            trpc.pengujian.worksheet.getTransactionDetail.queryOptions({
+              worksheetId,
+            }),
+          );
+          globalSuccessToast("Estimasi worksheet berhasil diperbarui");
+          setIsOpen(false);
+        },
+        onError: (error) => {
+          globalErrorToast(
+            "Gagal memperbarui estimasi : " + (error?.message || ""),
+          );
+        },
       },
-      onError: (error) => {
-        globalErrorToast(
-          "Gagal memperbarui estimasi : " + (error?.message || ""),
-        );
-      },
-    }),
+    ),
   );
 
   function handleSubmit(

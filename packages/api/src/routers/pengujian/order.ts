@@ -555,6 +555,68 @@ export const orderRouter = createTRPCRouter({
         ),
     ),
 
+  // Kepala Balai: approve the offering under review → admin can Cetak Penawaran
+  approveOffering: withPermission("documents-penawaran.approve")
+    .input(z.object({ orderId: z.uuidv7() }))
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const order = yield* orderQueries.approveOffering(
+              input.orderId,
+              ctx.user.id,
+            );
+
+            yield* Effect.tryPromise(() =>
+              ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                userId: order.userId,
+                newStatus: order.status,
+                oldStatus: "penawaran_review",
+                triggeredBy: ctx.user.id,
+              }),
+            );
+
+            return order;
+          }),
+        ),
+    ),
+
+  // Kepala Balai: send the offering back to the Admin Manager for revision
+  reviseOffering: withPermission("documents-penawaran.review")
+    .input(
+      z.object({
+        orderId: z.uuidv7(),
+        revisionNotes: z.string().min(10, "Catatan revisi minimal 10 karakter"),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const order = yield* orderQueries.reviseOffering(
+              input.orderId,
+              ctx.user.id,
+              input.revisionNotes,
+            );
+
+            yield* Effect.tryPromise(() =>
+              ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                userId: order.userId,
+                newStatus: order.status,
+                oldStatus: "penawaran_review",
+                triggeredBy: ctx.user.id,
+              }),
+            );
+
+            return order;
+          }),
+        ),
+    ),
+
   rejectOrderApproval: withPermission("orders-approval.reject")
     .input(
       z.object({

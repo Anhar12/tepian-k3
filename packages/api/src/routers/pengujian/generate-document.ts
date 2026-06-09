@@ -1,4 +1,6 @@
 import {
+  ADMIN_EMAIL,
+  ADMIN_PHONE,
   OPERATIONAL_BANK_ACCOUNT,
   OPERATIONAL_BANK_ACCOUNT_NAME,
   OPERATIONAL_BANK_NAME,
@@ -20,6 +22,7 @@ import {
 } from "@tepian-k3/services/pdf";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
+import { z } from "zod";
 import { createTRPCRouter, withPermission } from "../..";
 import { runEffect } from "../../utils/run-effect";
 import { tryPromise } from "../../utils/try-promise";
@@ -107,6 +110,88 @@ export const generateDocumentRouter = createTRPCRouter({
             return {
               base64: Buffer.from(mergedPdf as Buffer).toString("base64"),
               filename: `offering-letter-${input.letterNumber}.pdf`,
+              contentType: "application/pdf",
+            };
+          }),
+        ),
+    ),
+
+  /**
+   * Kepala Balai preview of the offering letter while it is under review.
+   * Builds the PDF in-memory with placeholder admin fields and persists
+   * nothing (no storage, no worksheet update) — purely for visual approval.
+   */
+  previewOfferingLetter: withPermission("documents-penawaran.review")
+    .input(z.object({ worksheetId: z.uuidv7() }))
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const worksheet =
+              yield* worksheetQueries.getWorksheetTransactionDetail(
+                input.worksheetId,
+              );
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            if (
+              ORDER_STATUS.indexOf(worksheet.order.status as OrderStatus) <
+              ORDER_STATUS.indexOf("penawaran_review")
+            ) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Penawaran belum diajukan untuk persetujuan, pratinjau belum tersedia",
+              });
+            }
+
+            // Placeholder values for the fields the admin fills in only at
+            // the real Cetak step — the head reviews layout & figures, not
+            // the final letter number.
+            const placeholderLetterNumber = "[NOMOR SURAT - DRAFT]";
+
+            const offeringLetterHeader = yield* tryPromise(
+              () =>
+                generateOfferingLetterHeaderPdf({
+                  companyName: worksheet.order.company.name,
+                  regencyName: worksheet.order.company.regency.name,
+                  letterNumber: placeholderLetterNumber,
+                  referenceNumber: worksheet.order.orderNumber ?? "",
+                  referenceDate: worksheet.order.createdAt ?? "",
+                  adminEmail: ADMIN_EMAIL,
+                  adminContact: ADMIN_PHONE,
+                }),
+              "Gagal menghasilkan header surat penawaran",
+            );
+
+            const offeringLetter = yield* tryPromise(
+              () =>
+                generateOfferingLetterPdf({
+                  worksheet,
+                  companyName: worksheet.order.company.name,
+                  letterNumber: placeholderLetterNumber,
+                  companyBankName: worksheet.order.company.companyBankName,
+                  companyBankAccount:
+                    worksheet.order.company.companyBankAccount,
+                  companyBankAccountName:
+                    worksheet.order.company.companyBankAccountName,
+                }),
+              "Gagal menghasilkan surat penawaran",
+            );
+
+            const mergedPdf = yield* addCoverPage(
+              offeringLetterHeader as Buffer,
+              offeringLetter as Buffer,
+            );
+
+            return {
+              base64: Buffer.from(mergedPdf as Buffer).toString("base64"),
+              filename: `preview-penawaran-${input.worksheetId}.pdf`,
               contentType: "application/pdf",
             };
           }),

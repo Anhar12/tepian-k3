@@ -1,0 +1,1 @@
+ALTER TYPE "public"."order_status" ADD VALUE 'penawaran_review' BEFORE 'penawaran_diterbitkan';

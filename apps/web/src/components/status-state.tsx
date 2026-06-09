@@ -1,40 +1,41 @@
-import { CalendarIcon, type LucideIcon } from "lucide-react";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import { queryClient, trpc } from "@/utils/trpc";
+import { getPublicUrl } from "@/utils/url";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import type { OrderStatus } from "@tepian-k3/constants";
+import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
 import type { OrderDetailWithStatus } from "@tepian-k3/types/pengujian/order.types";
 import type { Document } from "@tepian-k3/types/platform/document.types";
-import type { OrderStatus } from "@tepian-k3/constants";
 import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
+import { format } from "date-fns";
 import {
   AlertCircle,
   Ban,
+  Calendar,
+  CalendarIcon,
   CheckCircle2,
   Clock,
   CreditCard,
-  Calendar,
   Download,
   FileCheckIcon,
   FileText,
   Loader2,
   Upload,
   XCircle,
+  type LucideIcon,
 } from "lucide-react";
-import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { getPublicUrl } from "@/utils/url";
-import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
-import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient, trpc } from "@/utils/trpc";
-import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { format } from "date-fns";
+import { Button } from "./ui/button";
 import { Calendar as CalendarComponent } from "./ui/calendar";
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
+import { Input } from "./ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Spinner } from "./ui/spinner";
-import { Link } from "@tanstack/react-router";
 
 // ---------------------------------------------------------------------------
 // CVA variant definitions
@@ -586,7 +587,15 @@ export function StatusStateContactRevisionRequested({
             </p>
           </div>
         )}
-        <div className="mt-4">
+        <div className="mt-4 flex flex-row justify-end gap-2">
+          <Link
+            to="/dashboard/company/$companyId/edit"
+            params={{ companyId: orderDetail.company.id }}
+            className={cn(Button({ variant: "outline", size: "sm" }))}
+          >
+            Edit Data Kontak
+          </Link>
+
           <Button
             onClick={() => resubmitMutation.mutate({ orderId: orderDetail.id })}
             disabled={resubmitMutation.isPending}

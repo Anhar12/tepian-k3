@@ -39,8 +39,10 @@ import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import {
   EMPLOYEE_STATUS_COLORS,
   EMPLOYEE_STATUS_LABELS,
+  ORDER_STATUS_FLOW,
   WORKSHEET_STATUS_LABELS,
   type EmployeeStatus,
+  type OrderStatus,
   type WorksheetStatus,
 } from "@tepian-k3/constants";
 import {
@@ -53,6 +55,7 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  isBefore,
   isSameDay,
   isSameMonth,
   isWeekend,
@@ -83,6 +86,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import type { DateRange } from "react-day-picker";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
@@ -313,6 +317,16 @@ function JadwalPersonilPage() {
     );
   }, [worksheet?.isPersonnelDateSet, worksheet?.status]);
 
+  // SPT is already published once the linked order has reached (or passed)
+  // the "menunggu_penerbitan_spt_jadwal" milestone in the status flow.
+  const isSPTPublished = useMemo(() => {
+    const orderStatus = worksheet?.order?.status as OrderStatus | undefined;
+    if (!orderStatus) return false;
+    const currentIdx = ORDER_STATUS_FLOW.indexOf(orderStatus);
+    const sptIdx = ORDER_STATUS_FLOW.indexOf("menunggu_penerbitan_spt_jadwal");
+    return currentIdx >= sptIdx && currentIdx !== -1;
+  }, [worksheet?.order?.status]);
+
   // Initialize selected personnel and dates when opening dialog
   useEffect(() => {
     if (showAssignDialog) {
@@ -321,15 +335,24 @@ function JadwalPersonilPage() {
       }
       // Initialize dates from worksheet
       if (worksheet?.startDate) {
-        setSelectedStartDate(new Date(worksheet.startDate));
-      }
-      if (worksheet?.endDate) {
+        const worksheetStartDate = new Date(worksheet.startDate);
+        setSelectedStartDate(worksheetStartDate);
+        setSelectedEndDate(
+          worksheet?.endDate
+            ? new Date(worksheet.endDate)
+            : addDays(
+                worksheetStartDate,
+                Math.max(worksheet.estimatedAmountOfDays - 1, 0),
+              ),
+        );
+      } else if (worksheet?.endDate) {
         setSelectedEndDate(new Date(worksheet.endDate));
       }
     }
   }, [
     showAssignDialog,
     assignedPersonnelIds,
+    worksheet?.estimatedAmountOfDays,
     worksheet?.startDate,
     worksheet?.endDate,
   ]);
@@ -397,17 +420,31 @@ function JadwalPersonilPage() {
       : p.status === "siap",
   );
 
+  const maxSelectedPersonnel = worksheet?.estimatedAmountOfMembers ?? 0;
+
   const togglePersonnel = (personId: string) => {
     setSelectedPersonnel((prev) =>
       prev.includes(personId)
         ? prev.filter((id) => id !== personId)
-        : [...prev, personId],
+        : prev.length >= maxSelectedPersonnel
+          ? prev
+          : [...prev, personId],
     );
   };
 
   const handleSaveAssignments = () => {
     if (selectedPersonnel.length === 0) {
       globalErrorToast("Pilih setidaknya satu personil untuk ditugaskan");
+      return;
+    }
+
+    if (
+      maxSelectedPersonnel > 0 &&
+      selectedPersonnel.length > maxSelectedPersonnel
+    ) {
+      globalErrorToast(
+        `Maksimal ${maxSelectedPersonnel} personil dapat dipilih untuk worksheet ini`,
+      );
       return;
     }
 
@@ -809,6 +846,21 @@ function JadwalPersonilPage() {
     businessStartDate,
     worksheet.estimatedAmountOfDays,
   );
+  const estimatedSelectedEndDate = selectedStartDate
+    ? addDays(
+        selectedStartDate,
+        Math.max(worksheet.estimatedAmountOfDays - 1, 0),
+      )
+    : undefined;
+  const maxSelectedDays = Math.max(worksheet.estimatedAmountOfDays, 1);
+  const maxSelectedDayOffset = maxSelectedDays - 1;
+  const activeSelectedEndDate = selectedEndDate ?? estimatedSelectedEndDate;
+  const selectedDateRange: DateRange | undefined = selectedStartDate
+    ? {
+        from: selectedStartDate,
+        to: activeSelectedEndDate,
+      }
+    : undefined;
 
   return (
     <div className="space-y-4">
@@ -825,7 +877,11 @@ function JadwalPersonilPage() {
             onClick: () => dialogs.open("saveDate"),
           },
           {
-            label: publishSPTMutation.isPending ? "Memproses..." : "Buat SPT",
+            label: publishSPTMutation.isPending
+              ? "Memproses..."
+              : isSPTPublished
+                ? "SPT Diterbitkan"
+                : "Buat SPT",
             icon: publishSPTMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -838,8 +894,9 @@ function JadwalPersonilPage() {
               (worksheet?.assignments?.length ?? 0) > 0
             ),
             permission: "worksheets-personnel-assignments.update",
-            disabled: publishSPTMutation.isPending,
+            disabled: publishSPTMutation.isPending || isSPTPublished,
             onClick: () => {
+              if (isSPTPublished) return;
               if (worksheetId) publishSPTMutation.mutate({ worksheetId });
             },
           },
@@ -1148,86 +1205,63 @@ function JadwalPersonilPage() {
             {/* Schedule Date Selection */}
             <div className="space-y-3">
               <Label className="text-sm font-medium">Jadwal Pengujian</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {/* Start Date */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    Tanggal Mulai
-                  </Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedStartDate && "text-muted-foreground",
-                        )}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {selectedStartDate
-                          ? format(selectedStartDate, "d MMM yyyy", {
-                              locale: localeId,
-                            })
-                          : "Pilih tanggal"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={selectedStartDate}
-                        onSelect={(date) => {
-                          setSelectedStartDate(date);
-                          // If end date is before start date, clear it
-                          if (
-                            date &&
-                            selectedEndDate &&
-                            selectedEndDate < date
-                          ) {
-                            setSelectedEndDate(undefined);
-                          }
-                        }}
-                        autoFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !selectedStartDate && "text-muted-foreground",
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {selectedStartDate && activeSelectedEndDate
+                      ? `${format(selectedStartDate, "d MMM yyyy", {
+                          locale: localeId,
+                        })} - ${format(activeSelectedEndDate, "d MMM yyyy", {
+                          locale: localeId,
+                        })}`
+                      : "Pilih rentang tanggal"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="range"
+                    selected={selectedDateRange}
+                    max={maxSelectedDayOffset}
+                    onSelect={(range) => {
+                      if (!range?.from) {
+                        setSelectedStartDate(undefined);
+                        setSelectedEndDate(undefined);
+                        return;
+                      }
 
-                {/* End Date */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    Tanggal Selesai
-                  </Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedEndDate && "text-muted-foreground",
-                        )}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {selectedEndDate
-                          ? format(selectedEndDate, "d MMM yyyy", {
-                              locale: localeId,
-                            })
-                          : "Pilih tanggal"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={selectedEndDate}
-                        onSelect={setSelectedEndDate}
-                        disabled={(date) =>
-                          selectedStartDate ? date < selectedStartDate : false
-                        }
-                        autoFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
+                      const maxEndDate = addDays(
+                        range.from,
+                        maxSelectedDayOffset,
+                      );
+
+                      if (range.to && isBefore(maxEndDate, range.to)) {
+                        setSelectedStartDate(range.to);
+                        setSelectedEndDate(
+                          addDays(range.to, maxSelectedDayOffset),
+                        );
+                        return;
+                      }
+
+                      setSelectedStartDate(range.from);
+                      setSelectedEndDate(
+                        range.to &&
+                          !isSameDay(range.from, range.to) &&
+                          isBefore(range.to, maxEndDate)
+                          ? range.to
+                          : maxEndDate,
+                      );
+                    }}
+                    autoFocus
+                  />
+                </PopoverContent>
+              </Popover>
               {selectedStartDate && selectedEndDate && (
                 <p className="text-xs text-muted-foreground">
                   Durasi:{" "}
@@ -1250,6 +1284,10 @@ function JadwalPersonilPage() {
                   ? 'Personel dengan status "Siap" atau "SPT" dapat dipilih karena pengujian belum dimulai'
                   : 'Hanya personel dengan status "Siap" yang dapat ditugaskan'}
               </p>
+              <p className="text-xs text-muted-foreground">
+                Maksimal {maxSelectedPersonnel} personil sesuai estimasi
+                worksheet
+              </p>
               <ScrollArea className="h-60 rounded-lg border p-2">
                 <div className="space-y-2">
                   {availablePersonnel.map((person) => (
@@ -1264,6 +1302,10 @@ function JadwalPersonilPage() {
                     >
                       <Checkbox
                         checked={selectedPersonnel.includes(person.id)}
+                        disabled={
+                          !selectedPersonnel.includes(person.id) &&
+                          selectedPersonnel.length >= maxSelectedPersonnel
+                        }
                         onCheckedChange={() => togglePersonnel(person.id)}
                       />
                       <Avatar className={`h-8 w-8 ${person.color}`}>
@@ -1294,7 +1336,8 @@ function JadwalPersonilPage() {
               </ScrollArea>
               {selectedPersonnel.length > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {selectedPersonnel.length} personel dipilih
+                  {selectedPersonnel.length}/{maxSelectedPersonnel} personel
+                  dipilih
                 </p>
               )}
             </div>

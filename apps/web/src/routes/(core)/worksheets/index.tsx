@@ -92,6 +92,28 @@ const tabs = [
 
 type TabsType = (typeof tabs)[number];
 
+/**
+ * Tab status indicator: amber `*` when the tab has unsaved edits, green `✓`
+ * after a successful save (until the next edit). Renders nothing otherwise.
+ */
+function TabStatusBadge({ dirty, saved }: { dirty: boolean; saved: boolean }) {
+  if (dirty) {
+    return (
+      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+        *
+      </Badge>
+    );
+  }
+  if (saved) {
+    return (
+      <Badge className="ml-1 h-5 bg-green-100 px-1.5 text-xs text-green-700 hover:bg-green-100">
+        ✓
+      </Badge>
+    );
+  }
+  return null;
+}
+
 export const Route = createFileRoute("/(core)/worksheets/")({
   validateSearch: z.object({
     tabs: z.enum(tabs).default("parameter"),
@@ -219,6 +241,7 @@ function RouteComponent() {
         );
         globalSuccessToast("Perubahan berhasil disimpan");
         setLocalItemUpdates(new Map());
+        setParameterSaved(true);
       },
       onError: (error) => {
         globalErrorToast("Gagal menyimpan perubahan : " + error.message);
@@ -251,6 +274,8 @@ function RouteComponent() {
           }),
         );
         globalSuccessToast("Alat berhasil disimpan");
+        setAlatDirty(false);
+        setAlatSaved(true);
       },
       onError: (error) => {
         globalErrorToast("Gagal menyimpan alat : " + error.message);
@@ -266,6 +291,7 @@ function RouteComponent() {
         );
         globalSuccessToast("Catatan berhasil ditambahkan");
         noteForm.reset();
+        setCatatanSaved(true);
       },
       onError: (error) => {
         globalErrorToast("Gagal menambahkan catatan : " + error.message);
@@ -283,6 +309,7 @@ function RouteComponent() {
         );
         globalSuccessToast("Bahan berhasil disimpan");
         setLocalRequiredUpdates(new Map());
+        setBahanSaved(true);
       },
       onError: (error) => {
         globalErrorToast("Gagal menyimpan bahan : " + error.message);
@@ -313,8 +340,21 @@ function RouteComponent() {
     Map<string, { note: string | null; isReady: boolean }>
   >(new Map());
 
+  // Tracks unsaved edits in the Alat tab. Tool selection/quantities are seeded
+  // from saved data, so map size isn't a reliable dirty signal — use an
+  // explicit flag set on user edits and cleared on save.
+  const [alatDirty, setAlatDirty] = useState(false);
+
+  // Per-tab "saved" indicators — turn the tab badge green after a successful
+  // save, until the user edits that tab again.
+  const [parameterSaved, setParameterSaved] = useState(false);
+  const [alatSaved, setAlatSaved] = useState(false);
+  const [bahanSaved, setBahanSaved] = useState(false);
+  const [catatanSaved, setCatatanSaved] = useState(false);
+
   const [parameterPage, setParameterPage] = useState(1);
-  const [parameterPageSize, setParameterPageSize] = useState(5);
+  // -1 = "Semua" (show all parameters). Default to showing all.
+  const [parameterPageSize, setParameterPageSize] = useState(-1);
   const [bahanSearch, setBahanSearch] = useState("");
   const [bahanStatusFilter, setBahanStatusFilter] = useState<string>("all");
   const [bahanPage, setBahanPage] = useState(1);
@@ -571,9 +611,14 @@ function RouteComponent() {
   }, [outOfStockMaterials, lowStockMaterials, expiredMaterials]);
 
   // Pagination
+  // When "Semua" (-1) is selected, page through the full list in one page.
+  const effectiveParameterPageSize =
+    parameterPageSize <= 0
+      ? Math.max(filteredItems.length, 1)
+      : parameterPageSize;
   const parameterPagination = usePagination(
     filteredItems,
-    parameterPageSize,
+    effectiveParameterPageSize,
     parameterPage,
   );
   const bahanPagination = usePagination(
@@ -597,6 +642,7 @@ function RouteComponent() {
     field: "note" | "isReady",
     value: string | boolean | null,
   ) => {
+    setParameterSaved(false);
     setLocalItemUpdates((prev) => {
       const newMap = new Map(prev);
       const current = getItemState(itemId);
@@ -642,6 +688,8 @@ function RouteComponent() {
     field: "toolNeeded" | "parameterId",
     value: number | string[],
   ) => {
+    setAlatDirty(true);
+    setAlatSaved(false);
     setLocalToolUpdates((prev) => {
       const newMap = new Map(prev);
       const current = getToolState(toolId);
@@ -654,6 +702,8 @@ function RouteComponent() {
   };
 
   const handleToolSelect = (toolId: string, checked: boolean) => {
+    setAlatDirty(true);
+    setAlatSaved(false);
     // Update local tool updates to ensure toolParameters is set
     const current = getToolState(toolId);
 
@@ -683,6 +733,8 @@ function RouteComponent() {
   };
 
   const handleSelectAllTools = (checked: boolean) => {
+    setAlatDirty(true);
+    setAlatSaved(false);
     const filteredIds = filteredTools.map((t) => t.id);
 
     setSelectedToolIds((prev) => {
@@ -740,6 +792,7 @@ function RouteComponent() {
   };
 
   const handleRequiredChange = (materialId: string, value: number) => {
+    setBahanSaved(false);
     setLocalRequiredUpdates((prev) => {
       const newMap = new Map(prev);
       newMap.set(materialId, value);
@@ -868,14 +921,10 @@ function RouteComponent() {
                 <ClipboardList className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="xs:inline hidden">Parameter</span>
                 <span className="xs:hidden">Param</span>
-                {hasLocalChanges && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 h-5 px-1.5 text-xs"
-                  >
-                    *
-                  </Badge>
-                )}
+                <TabStatusBadge
+                  dirty={hasLocalChanges}
+                  saved={parameterSaved}
+                />
               </TabsTrigger>
               <TabsTrigger
                 value="estimated"
@@ -899,6 +948,7 @@ function RouteComponent() {
                     {selectedToolsCount}
                   </Badge>
                 )}
+                <TabStatusBadge dirty={alatDirty} saved={alatSaved} />
               </TabsTrigger>
               <TabsTrigger
                 value="bahan"
@@ -906,6 +956,10 @@ function RouteComponent() {
               >
                 <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Bahan</span>
+                <TabStatusBadge
+                  dirty={hasLocalBahanChanges}
+                  saved={bahanSaved}
+                />
               </TabsTrigger>
               <TabsTrigger
                 value="stok-habis"
@@ -929,6 +983,10 @@ function RouteComponent() {
                     {notes.length}
                   </Badge>
                 )}
+                <TabStatusBadge
+                  dirty={noteForm.watch("note").trim() !== ""}
+                  saved={catatanSaved}
+                />
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1107,6 +1165,7 @@ function RouteComponent() {
                 totalPages={parameterPagination.totalPages}
                 pageSize={parameterPageSize}
                 totalItems={parameterPagination.totalItems}
+                showAllOption
                 onPageChange={setParameterPage}
                 onPageSizeChange={(size) => {
                   setParameterPageSize(size);

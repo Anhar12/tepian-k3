@@ -1,6 +1,5 @@
-import { Effect } from "effect";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { DOCUMENT_TYPES, WORKSHEET_STATUS } from "@tepian-k3/constants";
+import { and, eq, inArray, sql } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
 import {
   employees,
@@ -9,24 +8,25 @@ import {
   worksheetToolNeeded,
   worksheetTools,
 } from "@tepian-k3/db/schema";
-import { and, eq, inArray, sql } from "@tepian-k3/db";
+import { logCreate, logUpdate } from "@tepian-k3/queries/helpers/audit.helpers";
+import orderQueries from "@tepian-k3/queries/pengujian/order.queries";
+import worksheetNoteQueries from "@tepian-k3/queries/pengujian/worksheet-note.queries";
+import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
+import employeeQueries from "@tepian-k3/queries/platform/employee.queries";
+import { notificationsQueries } from "@tepian-k3/queries/platform/notifications.queries";
+import worksheetSchema from "@tepian-k3/schema/pengujian/worksheet.schema";
+import { EventTypes } from "@tepian-k3/schema/platform/event.schema";
+import { logError } from "@tepian-k3/services/logger";
+import { handleTRPCError } from "@tepian-k3/utils/handle-trpc-error";
+import { TRPCError } from "@trpc/server";
+import { Effect } from "effect";
+import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
   withPermission,
 } from "../../index";
-import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
-import worksheetSchema from "@tepian-k3/schema/pengujian/worksheet.schema";
 import { runEffect } from "../../utils/run-effect";
-import { DOCUMENT_TYPES, WORKSHEET_STATUS } from "@tepian-k3/constants";
-import { logError } from "@tepian-k3/services/logger";
-import { logCreate, logUpdate } from "@tepian-k3/queries/helpers/audit.helpers";
-import worksheetNoteQueries from "@tepian-k3/queries/pengujian/worksheet-note.queries";
-import { EventTypes } from "@tepian-k3/schema/platform/event.schema";
-import { handleTRPCError } from "@tepian-k3/utils/handle-trpc-error";
-import orderQueries from "@tepian-k3/queries/pengujian/order.queries";
-import { notificationsQueries } from "@tepian-k3/queries/platform/notifications.queries";
-import employeeQueries from "@tepian-k3/queries/platform/employee.queries";
 
 export const worksheetRouter = createTRPCRouter({
   /**
@@ -407,6 +407,25 @@ export const worksheetRouter = createTRPCRouter({
       async ({ input, ctx }) =>
         await runEffect(
           worksheetQueries.createWorksheetEstimates(
+            input.worksheetId,
+            input.estimatedAmountOfMembers,
+            input.estimatedAmountOfDays,
+            ctx.user.id,
+          ),
+        ),
+    ),
+
+  /**
+   * Create worksheet estimate for transaction details (used in transaction details page) - same as createEstimate but with different permission for finer control
+   */
+  createWorksheetEstimateForDetailTransaksi: withPermission(
+    "worksheets-transaction-details.create",
+  )
+    .input(worksheetSchema.createWorksheetEstimatedSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.createWorksheetEstimateForDetailTransaksi(
             input.worksheetId,
             input.estimatedAmountOfMembers,
             input.estimatedAmountOfDays,

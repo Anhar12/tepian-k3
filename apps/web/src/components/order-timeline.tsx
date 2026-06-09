@@ -11,15 +11,45 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Fragment } from "react";
+import { getPublicUrl } from "@/utils/url";
+import { Fragment, type KeyboardEvent } from "react";
 import {
   ORDER_STATUS_FLOW,
   ORDER_STATUS_LABELS,
   resolveOrderStatusFlowIndex,
+  type DocumentType,
   type OrderStatus,
 } from "@tepian-k3/constants";
 import { type OrderStatusHistory } from "@tepian-k3/types/pengujian/order-status-history.types";
 import { format } from "date-fns";
+import { Printer } from "lucide-react";
+
+/**
+ * Maps each milestone status to the document type(s) generated at that step.
+ * A milestone only becomes clickable (to re-open/re-print) when at least one of
+ * these documents already exists with a file URL.
+ */
+const STATUS_DOCUMENT_TYPES: Partial<Record<OrderStatus, DocumentType[]>> = {
+  penawaran_diterbitkan: ["offering_document"],
+  tagihan_diterbitkan: ["invoice", "cooperation_agreement"],
+  menunggu_penerbitan_spt_jadwal: ["assignment_letter"],
+  laporan_diterbitkan: ["testing_report"],
+};
+
+/** Human-readable (Bahasa Indonesia) labels for the re-printable documents. */
+const REPRINT_DOCUMENT_LABELS: Partial<Record<DocumentType, string>> = {
+  offering_document: "Surat Penawaran",
+  invoice: "Invoice",
+  cooperation_agreement: "SPK",
+  assignment_letter: "Surat SPT",
+  testing_report: "Laporan Hasil Uji",
+};
+
+/** Minimal shape of an order document needed to re-open it from the timeline. */
+export interface TimelineDocument {
+  type: string;
+  fileUrl: string | null;
+}
 
 /**
  * Formats a note string for display. If the note matches a known OrderStatus key,
@@ -42,6 +72,11 @@ interface OrderTimelineProps {
   history: OrderStatusHistory[];
   /** Optional: customize which statuses to show in the flow */
   statusFlow?: OrderStatus[];
+  /**
+   * Order documents. When provided, a reached milestone whose associated
+   * document already exists becomes clickable to re-open/re-print it.
+   */
+  documents?: TimelineDocument[];
   className?: string;
 }
 
@@ -55,8 +90,29 @@ function formatDate(dateString: string): { date: string; time: string } {
 export function OrderTimeline({
   history,
   statusFlow = ORDER_STATUS_FLOW,
+  documents = [],
   className,
 }: OrderTimelineProps) {
+  // Lookup of existing documents by type (only those with a usable file URL).
+  const documentByType = new Map<string, TimelineDocument>();
+  documents.forEach((doc) => {
+    if (doc.fileUrl) documentByType.set(doc.type, doc);
+  });
+
+  /** Resolves the re-printable documents available for a given milestone. */
+  const getMilestoneDocuments = (status: OrderStatus) =>
+    (STATUS_DOCUMENT_TYPES[status] ?? [])
+      .map((type) => {
+        const doc = documentByType.get(type);
+        return doc?.fileUrl
+          ? {
+              fileUrl: doc.fileUrl,
+              label: REPRINT_DOCUMENT_LABELS[type] ?? type,
+            }
+          : null;
+      })
+      .filter((d): d is { fileUrl: string; label: string } => d !== null);
+
   // Create a map of status -> history record for quick lookup
   const historyMap = new Map<OrderStatus, OrderStatusHistory>();
   history.forEach((h) => {
@@ -107,6 +163,7 @@ export function OrderTimeline({
     isLast: boolean,
     record?: OrderStatusHistory,
     overrideConnectorColor?: "blue" | "gray" | "green" | "yellow",
+    milestoneDocs: { fileUrl: string; label: string }[] = [],
   ) => {
     const { date, time } = record
       ? formatDate(record.createdAt)
@@ -120,8 +177,38 @@ export function OrderTimeline({
           ? "yellow"
           : "blue");
 
+    // A reached milestone with an existing document can be re-opened/re-printed.
+    const isClickable =
+      (variant === "completed" || variant === "current") &&
+      milestoneDocs.length > 0;
+    const openDocuments = () => {
+      milestoneDocs.forEach((doc) =>
+        window.open(getPublicUrl(doc.fileUrl), "_blank"),
+      );
+    };
+
     return (
-      <TimelineItem key={status}>
+      <TimelineItem
+        key={status}
+        {...(isClickable
+          ? {
+              role: "button",
+              tabIndex: 0,
+              onClick: openDocuments,
+              onKeyDown: (e: KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  openDocuments();
+                }
+              },
+              title: `Klik untuk membuka ulang: ${milestoneDocs
+                .map((d) => d.label)
+                .join(", ")}`,
+              className:
+                "-mx-1 cursor-pointer rounded-lg px-1 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none",
+            }
+          : {})}
+      >
         <TimelineHeader>
           <span>{date}</span>
           {time && <span>{time}</span>}
@@ -143,7 +230,10 @@ export function OrderTimeline({
           {record?.note && (
             <Popover>
               <PopoverTrigger asChild>
-                <p className="mt-0.5 line-clamp-2 max-w-24 cursor-pointer text-[10px] text-muted-foreground hover:text-foreground sm:max-w-40 sm:text-xs">
+                <p
+                  className="mt-0.5 line-clamp-2 max-w-24 cursor-pointer text-[10px] text-muted-foreground hover:text-foreground sm:max-w-40 sm:text-xs"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {formatNote(record.note)}
                 </p>
               </PopoverTrigger>
@@ -155,6 +245,12 @@ export function OrderTimeline({
                 <p className="text-sm">{formatNote(record.note)}</p>
               </PopoverContent>
             </Popover>
+          )}
+          {isClickable && (
+            <span className="mt-1 flex items-center gap-1 text-[10px] font-medium text-blue-600 sm:text-xs">
+              <Printer className="h-3 w-3" />
+              Cetak ulang
+            </span>
           )}
         </TimelineContent>
       </TimelineItem>
@@ -206,6 +302,7 @@ export function OrderTimeline({
               isLast,
               historyRecord,
               connectorColor,
+              getMilestoneDocuments(status),
             )}
             {shouldInsertRevision &&
               renderTimelineItem(

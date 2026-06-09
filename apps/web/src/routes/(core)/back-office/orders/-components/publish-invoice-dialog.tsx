@@ -70,6 +70,11 @@ export default function PublishInvoiceDialog({
             orderId,
           }),
         );
+        await queryClient.invalidateQueries(
+          trpc.pengujian.worksheet.getByOrderId.queryOptions({
+            orderId,
+          }),
+        );
         globalSuccessToast(
           "Invoice & SPK berhasil diterbitkan. Admin dapat mencetak dokumen.",
         );

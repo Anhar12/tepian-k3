@@ -21,6 +21,9 @@ interface WorksheetDataTableProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   pageSizeOptions?: number[];
+  /** When true, adds a "Semua" (show all) entry to the page-size selector.
+   * Selecting it calls `onPageSizeChange(-1)`. */
+  showAllOption?: boolean;
 }
 
 export function WorksheetDataTable({
@@ -31,9 +34,15 @@ export function WorksheetDataTable({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [5, 10, 20, 50],
+  showAllOption = false,
 }: WorksheetDataTableProps) {
-  const startItem = (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalItems);
+  // A non-positive pageSize (the -1 sentinel) means "show all".
+  const isShowingAll = pageSize <= 0;
+  const startItem =
+    totalItems === 0 ? 0 : isShowingAll ? 1 : (currentPage - 1) * pageSize + 1;
+  const endItem = isShowingAll
+    ? totalItems
+    : Math.min(currentPage * pageSize, totalItems);
 
   return (
     <div className="flex flex-col items-center justify-between gap-3 border-t bg-muted/20 px-2 py-3 sm:flex-row">
@@ -53,11 +62,13 @@ export function WorksheetDataTable({
             Baris per halaman
           </span>
           <Select
-            value={String(pageSize)}
-            onValueChange={(value) => onPageSizeChange(Number(value))}
+            value={isShowingAll ? "all" : String(pageSize)}
+            onValueChange={(value) =>
+              onPageSizeChange(value === "all" ? -1 : Number(value))
+            }
           >
-            <SelectTrigger className="h-8 w-16">
-              <SelectValue placeholder={pageSize} />
+            <SelectTrigger className="h-8 w-20">
+              <SelectValue placeholder={isShowingAll ? "Semua" : pageSize} />
             </SelectTrigger>
             <SelectContent>
               {pageSizeOptions.map((size) => (
@@ -65,6 +76,7 @@ export function WorksheetDataTable({
                   {size}
                 </SelectItem>
               ))}
+              {showAllOption && <SelectItem value="all">Semua</SelectItem>}
             </SelectContent>
           </Select>
         </div>

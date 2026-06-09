@@ -37,6 +37,7 @@ import { usePermissions } from "@/hooks/use-permissions";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { openBase64InNewTab } from "@/utils/download";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -45,7 +46,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ORDER_STATUS_LABELS } from "@tepian-k3/constants";
 import { format } from "date-fns";
-import { Download, Eye, FileText, Loader2, Mail, Plus } from "lucide-react";
+import {
+  Check,
+  Download,
+  Eye,
+  FileText,
+  Loader2,
+  Mail,
+  Plus,
+} from "lucide-react";
 import { useState } from "react";
 import z from "zod";
 import AdminDocumentsCard from "./-components/admin-documents-card";
@@ -212,6 +221,57 @@ function RouteComponent() {
       },
       onError: (error) => {
         globalErrorToast("Gagal mengirim permintaan koreksi: " + error.message);
+      },
+    }),
+  );
+
+  // Kepala Balai offering review (status === "penawaran_review")
+  const [reviseOfferingOpen, setReviseOfferingOpen] = useState(false);
+  const [reviseOfferingNote, setReviseOfferingNote] = useState("");
+
+  const previewOfferingMutation = useMutation(
+    trpc.pengujian.generateDocument.previewOfferingLetter.mutationOptions({
+      onSuccess: (data) => {
+        openBase64InNewTab(data.base64, data.contentType);
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal membuka pratinjau penawaran: " + error.message);
+      },
+    }),
+  );
+
+  const approveOfferingMutation = useMutation(
+    trpc.pengujian.order.approveOffering.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
+        );
+        globalSuccessToast(
+          "Penawaran disetujui. Admin dapat mencetak penawaran.",
+        );
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal menyetujui penawaran: " + error.message);
+      },
+    }),
+  );
+
+  const reviseOfferingMutation = useMutation(
+    trpc.pengujian.order.reviseOffering.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.order.getOrderWithDocumentsAdmin.queryOptions({
+            orderId,
+          }),
+        );
+        setReviseOfferingOpen(false);
+        setReviseOfferingNote("");
+        globalSuccessToast("Penawaran dikembalikan ke Admin untuk revisi.");
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal meminta revisi penawaran: " + error.message);
       },
     }),
   );
@@ -699,6 +759,126 @@ function RouteComponent() {
               billingCode={worksheet?.billingCode}
               billingExpiryDate={worksheet?.billingExpiryDate}
             />
+
+            {/* Kepala Balai: review the offering submitted by Admin Manager */}
+            {order.status === "penawaran_review" && (
+              <PermissionGate
+                permission={[
+                  "documents-penawaran.review",
+                  "documents-penawaran.approve",
+                ]}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-primary" />
+                      Persetujuan Penawaran
+                    </CardTitle>
+                    <CardDescription>
+                      Admin telah mengajukan penawaran. Tinjau pratinjau lalu
+                      setujui agar Admin dapat mencetak, atau kembalikan untuk
+                      revisi.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <Button
+                      variant="outline"
+                      disabled={
+                        !worksheet?.id || previewOfferingMutation.isPending
+                      }
+                      onClick={() => {
+                        if (worksheet?.id) {
+                          previewOfferingMutation.mutate({
+                            worksheetId: worksheet.id,
+                          });
+                        }
+                      }}
+                    >
+                      {previewOfferingMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Eye className="mr-2 h-4 w-4" />
+                      )}
+                      Lihat Pratinjau Penawaran
+                    </Button>
+
+                    <div className="flex gap-2">
+                      <PermissionGate permission="documents-penawaran.review">
+                        <Button
+                          variant="outline"
+                          className="border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                          onClick={() => setReviseOfferingOpen(true)}
+                        >
+                          Revisi
+                        </Button>
+                      </PermissionGate>
+                      <PermissionGate permission="documents-penawaran.approve">
+                        <Button
+                          className="bg-emerald-600 text-white hover:bg-emerald-700"
+                          disabled={approveOfferingMutation.isPending}
+                          onClick={() =>
+                            approveOfferingMutation.mutate({ orderId })
+                          }
+                        >
+                          {approveOfferingMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="mr-2 h-4 w-4" />
+                          )}
+                          Setujui Penawaran
+                        </Button>
+                      </PermissionGate>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Revise offering dialog */}
+                <AlertDialog open={reviseOfferingOpen}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Revisi Penawaran</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Penawaran akan dikembalikan ke Admin Manager untuk
+                        diperbaiki. Tuliskan catatan revisi (min. 10 karakter).
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="py-2">
+                      <Textarea
+                        value={reviseOfferingNote}
+                        onChange={(e) => setReviseOfferingNote(e.target.value)}
+                        placeholder="Tuliskan alasan revisi penawaran..."
+                        rows={4}
+                      />
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        onClick={() => setReviseOfferingOpen(false)}
+                      >
+                        Batal
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="border border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                        disabled={
+                          reviseOfferingMutation.isPending ||
+                          reviseOfferingNote.trim().length < 10
+                        }
+                        onClick={() =>
+                          reviseOfferingMutation.mutate({
+                            orderId,
+                            revisionNotes: reviseOfferingNote,
+                          })
+                        }
+                      >
+                        {reviseOfferingMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Kirim Revisi
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </PermissionGate>
+            )}
 
             {/* Workflow State Content */}
             {/* Card shows only if the user holds at least one of its actions */}
@@ -1891,6 +2071,11 @@ function RouteComponent() {
                         {entry.changedByUser?.name && (
                           <p className="text-xs text-muted-foreground">
                             {entry.changedByUser.name}
+                          </p>
+                        )}
+                        {entry.note && (
+                          <p className="mt-1 text-xs text-muted-foreground/80 italic">
+                            {entry.note}
                           </p>
                         )}
                       </li>

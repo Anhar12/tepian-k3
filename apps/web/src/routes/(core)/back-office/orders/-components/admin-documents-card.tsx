@@ -98,8 +98,9 @@ export default function AdminDocumentsCard({
     }
   }
 
-  // Status-based gates — each Cetak button only unlocks once the responsible
-  // role has taken the triggering action.
+  // Status-based gates — each document row only unlocks once the responsible
+  // role has taken the triggering action. The gate applies to BOTH the Cetak
+  // and the Upload button so neither can run ahead of the prior workflow step.
   const statusIdx = ORDER_STATUS.indexOf(orderStatus);
   const canPrintOffering =
     !!worksheetId && statusIdx >= ORDER_STATUS.indexOf("penawaran_diterbitkan");
@@ -111,6 +112,22 @@ export default function AdminDocumentsCard({
     !!worksheetId &&
     !!offeringLetterNumber &&
     statusIdx >= ORDER_STATUS.indexOf("menunggu_penerbitan_spt_jadwal");
+
+  // Shared lock reasons so the Cetak and Upload buttons of a row explain the
+  // gate identically.
+  const offeringLockReason =
+    orderStatus === "penawaran_review"
+      ? "Menunggu persetujuan Kepala Balai sebelum mencetak."
+      : "Tunggu Koor. Admin klik Buat Penawaran.";
+  const invoiceLockReason = !offeringLetterNumber
+    ? "Cetak Penawaran terlebih dahulu sebelum mencetak dokumen ini."
+    : "Tunggu Bendahara klik Buat Invoice.";
+  const spkLockReason = !offeringLetterNumber
+    ? "Cetak Penawaran terlebih dahulu sebelum mencetak dokumen ini."
+    : "Tunggu Bendahara klik Buat Invoice & SPK.";
+  const sptLockReason = !offeringLetterNumber
+    ? "Cetak Penawaran terlebih dahulu sebelum mencetak dokumen ini."
+    : "Tunggu Tim Penjadwalan mengatur jadwal dan personel.";
 
   return (
     <PermissionGate
@@ -139,12 +156,14 @@ export default function AdminDocumentsCard({
               cetak={{
                 enabled: canPrintOffering,
                 onClick: () => setOpenDialog("offering"),
-                lockReason: "Tunggu Koor. Admin klik Buat Penawaran.",
+                lockReason: offeringLockReason,
               }}
               upload={
                 <UploadButton
                   inputRef={offeringInputRef}
                   loading={uploadingType === "offering_document"}
+                  enabled={canPrintOffering}
+                  lockReason={offeringLockReason}
                   onPick={(file) =>
                     handleFileUpload(
                       "offering_document",
@@ -164,14 +183,14 @@ export default function AdminDocumentsCard({
               cetak={{
                 enabled: canPrintInvoice,
                 onClick: () => setOpenDialog("invoice"),
-                lockReason: !offeringLetterNumber
-                  ? "Cetak Penawaran terlebih dahulu sebelum mencetak dokumen ini."
-                  : "Tunggu Bendahara klik Buat Invoice.",
+                lockReason: invoiceLockReason,
               }}
               upload={
                 <UploadButton
                   inputRef={invoiceInputRef}
                   loading={uploadingType === "invoice"}
+                  enabled={canPrintInvoice}
+                  lockReason={invoiceLockReason}
                   onPick={(file) =>
                     handleFileUpload("invoice", "Invoice", file)
                   }
@@ -187,14 +206,14 @@ export default function AdminDocumentsCard({
               cetak={{
                 enabled: canPrintInvoice,
                 onClick: () => setOpenDialog("cooperation_agreement"),
-                lockReason: !offeringLetterNumber
-                  ? "Cetak Penawaran terlebih dahulu sebelum mencetak dokumen ini."
-                  : "Tunggu Bendahara klik Buat Invoice & SPK.",
+                lockReason: spkLockReason,
               }}
               upload={
                 <UploadButton
                   inputRef={spkInputRef}
                   loading={uploadingType === "cooperation_agreement"}
+                  enabled={canPrintInvoice}
+                  lockReason={spkLockReason}
                   onPick={(file) =>
                     handleFileUpload("cooperation_agreement", "Surat SPK", file)
                   }
@@ -210,20 +229,31 @@ export default function AdminDocumentsCard({
               cetak={{
                 enabled: canPrintSPT,
                 onClick: () => setOpenDialog("spt"),
-                lockReason: !offeringLetterNumber
-                  ? "Cetak Penawaran terlebih dahulu sebelum mencetak dokumen ini."
-                  : "Tunggu Tim Penjadwalan mengatur jadwal dan personel.",
+                lockReason: sptLockReason,
               }}
               upload={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!worksheetId}
-                  onClick={() => setOpenDialog("uploadSpt")}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload
-                </Button>
+                canPrintSPT ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOpenDialog("uploadSpt")}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload
+                  </Button>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span tabIndex={0}>
+                        <Button variant="outline" size="sm" disabled>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{sptLockReason}</TooltipContent>
+                  </Tooltip>
+                )
               }
             />
           </PermissionGate>
@@ -263,6 +293,7 @@ export default function AdminDocumentsCard({
           />
           <UploadSPTDialog
             worksheetId={worksheetId}
+            orderId={orderId}
             isOpen={openDialog === "uploadSpt"}
             setIsOpen={(open) => setOpenDialog(open ? "uploadSpt" : null)}
           />
@@ -320,9 +351,35 @@ interface UploadButtonProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
   loading: boolean;
   onPick: (file: File | null) => void;
+  /** When false the button is locked behind the workflow gate. */
+  enabled?: boolean;
+  /** Tooltip shown while the gate is locked. */
+  lockReason?: string;
 }
 
-function UploadButton({ inputRef, loading, onPick }: UploadButtonProps) {
+function UploadButton({
+  inputRef,
+  loading,
+  onPick,
+  enabled = true,
+  lockReason,
+}: UploadButtonProps) {
+  if (!enabled) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span tabIndex={0}>
+            <Button variant="outline" size="sm" disabled>
+              <Upload className="mr-2 h-4 w-4" />
+              Upload
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{lockReason}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <>
       <input

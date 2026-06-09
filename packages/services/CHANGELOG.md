@@ -1,5 +1,12 @@
 # @tepian-k3/services
 
+## 1.7.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @tepian-k3/constants@1.14.0
+
 ## 1.7.0
 
 ### Minor Changes

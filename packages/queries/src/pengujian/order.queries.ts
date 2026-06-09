@@ -1126,14 +1126,7 @@ const orderQueries = {
         },
       });
 
-      // create order status history - revision_offered
-      yield* orderStatusHistoryQueries.createOrderStatusHistory(
-        db,
-        orderId,
-        "revision",
-        userId,
-        `Revision offered to customer. Note: ${revisionNote}`,
-      );
+      // status history is written inside the transaction above; no second write here
 
       return updatedOrder;
     });
@@ -1842,6 +1835,164 @@ const orderQueries = {
         status,
         updatedOrder.userId,
         `Order status updated to ${status}`,
+      );
+
+      return updatedOrder;
+    });
+  },
+
+  /**
+   * Kepala Balai approves the offering currently under review, unlocking the
+   * admin's Cetak Penawaran action.
+   * Transition: `penawaran_review` → `penawaran_diterbitkan`.
+   */
+  approveOffering(orderId: string, userId: string) {
+    return Effect.gen(function* () {
+      const existing = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.status, "penawaran_review"),
+            ),
+          }),
+        catch: (error) => {
+          logError("orderQueries.approveOffering", "Failed to fetch order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!existing) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Pesanan tidak ditemukan atau bukan dalam status menunggu persetujuan penawaran",
+          }),
+        );
+      }
+
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({ status: "penawaran_diterbitkan" })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.approveOffering", "Failed to update order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menyetujui penawaran",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menyetujui penawaran",
+          }),
+        );
+      }
+
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "penawaran_diterbitkan",
+        userId,
+        "Penawaran disetujui oleh Kepala Balai",
+      );
+
+      return updatedOrder;
+    });
+  },
+
+  /**
+   * Kepala Balai sends the offering back to the Admin Manager for revision.
+   * Transition: `penawaran_review` → `kaji_ulang_disetujui` so the admin can
+   * edit the transaction details and re-submit via Buat Penawaran.
+   */
+  reviseOffering(orderId: string, userId: string, revisionNote: string) {
+    return Effect.gen(function* () {
+      const existing = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.status, "penawaran_review"),
+            ),
+          }),
+        catch: (error) => {
+          logError("orderQueries.reviseOffering", "Failed to fetch order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!existing) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Pesanan tidak ditemukan atau bukan dalam status menunggu persetujuan penawaran",
+          }),
+        );
+      }
+
+      const [updatedOrder] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(order)
+            .set({
+              status: "kaji_ulang_disetujui",
+              revisionNotes: revisionNote,
+              revisionCount: sql`revision_count + 1`,
+            })
+            .where(eq(order.id, orderId))
+            .returning(),
+        catch: (error) => {
+          logError("orderQueries.reviseOffering", "Failed to update order", {
+            error,
+            orderId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal meminta revisi penawaran",
+          });
+        },
+      });
+
+      if (!updatedOrder) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal meminta revisi penawaran",
+          }),
+        );
+      }
+
+      yield* orderStatusHistoryQueries.createOrderStatusHistory(
+        db,
+        orderId,
+        "kaji_ulang_disetujui",
+        userId,
+        `Penawaran dikembalikan oleh Kepala Balai untuk revisi. Catatan: ${revisionNote}`,
       );
 
       return updatedOrder;

@@ -5,6 +5,7 @@ export const ORDER_STATUS = [
   "kaji_ulang",
   "kaji_ulang_disetujui",
   // Penawaran phase
+  "penawaran_review", // Awaiting Kepala Balai approval before admin can cetak
   "penawaran_diterbitkan",
   "revision", // Can go back to kaji_ulang
   // Persetujuan phase
@@ -35,6 +36,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
   kaji_ulang: "Kaji Ulang",
   kaji_ulang_disetujui: "Kaji Ulang Disetujui",
+  penawaran_review: "Menunggu Persetujuan Penawaran",
   penawaran_diterbitkan: "Penawaran Diterbitkan",
   revision: "Revisi",
   upload_surat_persetujuan: "Upload Surat Persetujuan",
@@ -58,6 +60,7 @@ export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   pending: "bg-yellow-100 text-yellow-700",
   kaji_ulang: "bg-blue-100 text-blue-700",
   kaji_ulang_disetujui: "bg-cyan-100 text-cyan-700",
+  penawaran_review: "bg-amber-100 text-amber-700",
   penawaran_diterbitkan: "bg-indigo-100 text-indigo-700",
   revision: "bg-orange-100 text-orange-700",
   upload_surat_persetujuan: "bg-amber-100 text-amber-700",
@@ -111,6 +114,8 @@ export const ORDER_STATUS_FLOW_MILESTONE: Record<
   kaji_ulang: "kaji_ulang",
   // Kaji ulang approved → the offer is the next visible step.
   kaji_ulang_disetujui: "penawaran_diterbitkan",
+  // Awaiting head approval still works toward the offer being issued.
+  penawaran_review: "penawaran_diterbitkan",
   penawaran_diterbitkan: "penawaran_diterbitkan",
   revision: null,
   // Persetujuan phase works toward the invoice being issued.

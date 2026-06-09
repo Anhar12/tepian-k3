@@ -29,6 +29,7 @@ import { trpc } from "@/utils/trpc";
 import { getPublicUrl } from "@/utils/url";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ORDER_STATUS, type OrderStatus } from "@tepian-k3/constants";
 import {
   addBusinessDays,
   differenceInBusinessDays,
@@ -214,8 +215,14 @@ function RouteComponent() {
       const defaultCosts: OperationalCostItem[] = [
         {
           item: "Uang Harian",
-          unitCount: 1,
-          days: 1,
+          unitCount:
+            worksheet.estimatedAmountOfMembers > 0
+              ? worksheet.estimatedAmountOfMembers
+              : 1,
+          days:
+            worksheet.estimatedAmountOfDays > 0
+              ? worksheet.estimatedAmountOfDays
+              : 1,
           unitCost: 0,
           note: null,
           sortOrder: 0,
@@ -225,8 +232,14 @@ function RouteComponent() {
       if (worksheet.coverFlightIncluded) {
         defaultCosts.push({
           item: "Transportasi Udara (PP)",
-          unitCount: 1,
-          days: 1,
+          unitCount:
+            worksheet.estimatedAmountOfMembers > 0
+              ? worksheet.estimatedAmountOfMembers
+              : 1,
+          days:
+            worksheet.estimatedAmountOfDays > 0
+              ? worksheet.estimatedAmountOfDays
+              : 1,
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
@@ -236,8 +249,14 @@ function RouteComponent() {
       if (worksheet.coverWaterTransportationIncluded) {
         defaultCosts.push({
           item: "Transportasi Laut/Sungai (PP)",
-          unitCount: 1,
-          days: 1,
+          unitCount:
+            worksheet.estimatedAmountOfMembers > 0
+              ? worksheet.estimatedAmountOfMembers
+              : 1,
+          days:
+            worksheet.estimatedAmountOfDays > 0
+              ? worksheet.estimatedAmountOfDays
+              : 1,
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
@@ -247,8 +266,14 @@ function RouteComponent() {
       if (worksheet.coverGroundTransportationToAirportOrHarbour) {
         defaultCosts.push({
           item: "Transportasi Darat ke Bandara/Pelabuhan (PP)",
-          unitCount: 1,
-          days: 1,
+          unitCount:
+            worksheet.estimatedAmountOfMembers > 0
+              ? worksheet.estimatedAmountOfMembers
+              : 1,
+          days:
+            worksheet.estimatedAmountOfDays > 0
+              ? worksheet.estimatedAmountOfDays
+              : 1,
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
@@ -258,8 +283,14 @@ function RouteComponent() {
       if (worksheet.coverGroundTransportationIncluded) {
         defaultCosts.push({
           item: "Transportasi Darat (PP)",
-          unitCount: 1,
-          days: 1,
+          unitCount:
+            worksheet.estimatedAmountOfMembers > 0
+              ? worksheet.estimatedAmountOfMembers
+              : 1,
+          days:
+            worksheet.estimatedAmountOfDays > 0
+              ? worksheet.estimatedAmountOfDays
+              : 1,
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
@@ -269,8 +300,14 @@ function RouteComponent() {
       if (worksheet.coverLodgingIncluded) {
         defaultCosts.push({
           item: "Penginapan",
-          unitCount: 1,
-          days: 1,
+          unitCount:
+            worksheet.estimatedAmountOfMembers > 0
+              ? worksheet.estimatedAmountOfMembers
+              : 1,
+          days:
+            worksheet.estimatedAmountOfDays > 0
+              ? worksheet.estimatedAmountOfDays
+              : 1,
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
@@ -282,8 +319,14 @@ function RouteComponent() {
       // company, not a priced line item.
       defaultCosts.push({
         item: FIELD_OPERATIONAL_ITEM,
-        unitCount: 1,
-        days: 1,
+        unitCount:
+          worksheet.estimatedAmountOfMembers > 0
+            ? worksheet.estimatedAmountOfMembers
+            : 1,
+        days:
+          worksheet.estimatedAmountOfDays > 0
+            ? worksheet.estimatedAmountOfDays
+            : 1,
         unitCost: 0,
         note: null,
         sortOrder: defaultCosts.length,
@@ -316,6 +359,29 @@ function RouteComponent() {
   // the saved worksheet data, so it shouldn't be offered before that.
   const hasSavedOperationalCosts =
     (worksheet?.operationalCosts?.length ?? 0) > 0 && !isDirty;
+
+  // The offering has been submitted once the linked order reaches
+  // "penawaran_review" (awaiting Kepala Balai approval) or anything beyond it.
+  // The branch/terminal states (revision, rejected, cancelled) sit later in the
+  // enum but are NOT "submitted", so they are excluded explicitly.
+  const isOfferingSubmitted = useMemo(() => {
+    const orderStatus = worksheet?.order?.status as OrderStatus | undefined;
+    if (!orderStatus) return false;
+    if (
+      orderStatus === "revision" ||
+      orderStatus === "rejected" ||
+      orderStatus === "cancelled"
+    ) {
+      return false;
+    }
+    return (
+      ORDER_STATUS.indexOf(orderStatus) >=
+      ORDER_STATUS.indexOf("penawaran_review")
+    );
+  }, [worksheet?.order?.status]);
+
+  // Awaiting Kepala Balai approval — offering submitted but not yet issued.
+  const isOfferingUnderReview = worksheet?.order?.status === "penawaran_review";
 
   const locations: {
     regencyName: string;
@@ -1183,18 +1249,25 @@ function RouteComponent() {
                 disabled={
                   publishOfferingMutation.isPending ||
                   saveOperationalCostsMutation.isPending ||
-                  worksheet.order.status === "penawaran_diterbitkan"
+                  isOfferingSubmitted
                 }
-                onClick={() =>
-                  publishOfferingMutation.mutate({ worksheetId: worksheet.id })
-                }
+                onClick={() => {
+                  if (isOfferingSubmitted) return;
+                  publishOfferingMutation.mutate({ worksheetId: worksheet.id });
+                }}
               >
                 {publishOfferingMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Printer className="h-4 w-4" />
                 )}
-                Buat Penawaran
+                {publishOfferingMutation.isPending
+                  ? "Memproses..."
+                  : isOfferingUnderReview
+                    ? "Menunggu Persetujuan Kepala"
+                    : isOfferingSubmitted
+                      ? "Penawaran Diterbitkan"
+                      : "Buat Penawaran"}
               </Button>
             </PermissionGate>
           )}

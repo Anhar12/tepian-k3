@@ -280,14 +280,17 @@ const worksheetQueries = {
     return Effect.gen(function* () {
       const offset = (page - 1) * limit;
 
-      const worksheetIdsWithDoc = yield* Effect.tryPromise({
+      // SPT (assignment_letter) documents are stored on the ORDER entity, so
+      // collect the order IDs that already have an SPT, then match worksheets
+      // by their orderId.
+      const orderIdsWithSpt = yield* Effect.tryPromise({
         try: () =>
           db
-            .select({ id: documents.entityId })
+            .select({ orderId: documents.entityId })
             .from(documents)
             .where(
               and(
-                eq(documents.entityType, "worksheet"),
+                eq(documents.entityType, "order"),
                 eq(documents.type, "assignment_letter"),
               ),
             ),
@@ -304,7 +307,7 @@ const worksheetQueries = {
         },
       });
 
-      if (!worksheetIdsWithDoc.length) {
+      if (!orderIdsWithSpt.length) {
         return {
           data: [],
           pagination: {
@@ -316,10 +319,10 @@ const worksheetQueries = {
         };
       }
 
-      const ids = worksheetIdsWithDoc.map((d) => d.id);
+      const orderIds = orderIdsWithSpt.map((d) => d.orderId);
 
       const whereCondition = and(
-        inArray(worksheets.id, ids),
+        inArray(worksheets.orderId, orderIds),
         status ? eq(worksheets.status, status) : undefined,
       );
 
@@ -695,8 +698,8 @@ const worksheetQueries = {
   },
 
   /**
-   * Create worksheet estimated members and days
-   * This is a separate function to allow updating estimates later
+   * Create/update worksheet estimated members and days.
+   * Allowed in draft, revision, and verified status.
    */
   createWorksheetEstimates(
     worksheetId: string,
@@ -759,6 +762,94 @@ const worksheetQueries = {
           new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menambahkan estimasi worksheet",
+          }),
+        );
+      }
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          {},
+          { estimatedAmountOfMembers, estimatedAmountOfDays } as Record<
+            string,
+            unknown
+          >,
+          userId,
+        ),
+      );
+
+      return updated;
+    });
+  },
+
+  /**
+   * Create/update worksheet estimated members and days for detail transaksi.
+   * Allowed in draft, revision, and verified status.
+   */
+  createWorksheetEstimateForDetailTransaksi(
+    worksheetId: string,
+    estimatedAmountOfMembers: number,
+    estimatedAmountOfDays: number,
+    userId?: string,
+  ) {
+    return Effect.gen(this, function* () {
+      const isExisting = yield* this.getWorksheetById(worksheetId);
+
+      if (!isExisting) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Worksheet tidak ditemukan",
+          }),
+        );
+      }
+
+      if (["verified"].includes(isExisting.status) === false) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Estimasi hanya dapat ditambahkan pada worksheet dengan status 'verified'",
+          }),
+        );
+      }
+
+      const [updated] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(worksheets)
+            .set({
+              estimatedAmountOfDays,
+              estimatedAmountOfMembers,
+            })
+            .where(eq(worksheets.id, worksheetId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.createWorksheetEstimateForDetailTransaksi",
+            "Failed to create worksheet estimate for detail transaksi",
+            {
+              error,
+              worksheetId,
+              estimatedAmountOfMembers,
+              estimatedAmountOfDays,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              "Gagal menambahkan estimasi worksheet untuk detail transaksi",
+          });
+        },
+      });
+
+      if (!updated) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              "Gagal menambahkan estimasi worksheet untuk detail transaksi",
           }),
         );
       }
@@ -2398,10 +2489,13 @@ const worksheetQueries = {
 
             await assertOperationalCostsSaved(tx, worksheetId);
 
+            // Submit the offering for Kepala Balai review instead of issuing it
+            // directly. The admin can only Cetak once the head approves
+            // (→ penawaran_diterbitkan via orderQueries.approveOffering).
             await Effect.runPromise(
               orderQueries.updateOrderStatus(
                 worksheet.orderId,
-                "penawaran_diterbitkan",
+                "penawaran_review",
                 tx,
               ),
             );

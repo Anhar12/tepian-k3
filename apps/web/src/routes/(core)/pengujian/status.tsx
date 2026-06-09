@@ -423,6 +423,7 @@ function RouteComponent() {
         <div className="w-full overflow-x-auto md:w-auto md:overflow-visible">
           <OrderTimeline
             history={orderDetail?.statusHistory ?? []}
+            documents={orderDetail?.documents ?? []}
             className="min-w-max md:min-w-0"
           />
         </div>
