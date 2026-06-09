@@ -36,6 +36,7 @@
     "db:purge": "turbo run db:purge -F @tepian-k3/db",
     "db:snapshot": "turbo run db:snapshot -F @tepian-k3/db",
     "db:restore": "turbo run db:restore -F @tepian-k3/db --",
+    "db:clear-cache": "turbo run db:clear-cache -F @tepian-k3/db",
     "email:dev": "turbo run email:dev -F @tepian-k3/services",
     "email:verify": "turbo run email:verify -F @tepian-k3/services",
     "web:prettier": "turbo run prettier -F @tepian-k3/web",

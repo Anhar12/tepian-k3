@@ -60,6 +60,9 @@
     "db:restore": {
       "cache": false
     },
+    "db:clear-cache": {
+      "cache": false
+    },
     "email:dev": {
       "cache": false,
       "persistent": true

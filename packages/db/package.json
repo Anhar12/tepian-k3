@@ -31,6 +31,7 @@
     "db:purge": "pnpm with-env tsx ./src/purge/index.ts",
     "db:snapshot": "bash ./scripts/db-snapshot.sh",
     "db:restore": "bash ./scripts/db-restore.sh",
+    "db:clear-cache": "pnpm with-env tsx ./src/clear-cache.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "with-env": "dotenv -e ../../.env --"
