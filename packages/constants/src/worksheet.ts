@@ -33,6 +33,31 @@ export const WORKSHEET_STATUS_COLORS: Record<WorksheetStatus, string> = {
   rejected: "bg-red-100 text-red-700",
 };
 
+/**
+ * Daily-allowance operational cost line. Always seeded on the worksheet and
+ * always permitted — it applies even when the applicant covers all transport
+ * and accommodation (i.e. no `cover*` flag is set).
+ */
+export const WORKSHEET_DAILY_ALLOWANCE_ITEM = "Uang Harian";
+
+/**
+ * Fixed, no-charge operational cost statement shown as the last row. Declares
+ * that transport/field operations are provided by the applicant company, so it
+ * is always permitted regardless of the `cover*` flags.
+ */
+export const WORKSHEET_FIELD_OPERATIONAL_ITEM =
+  "Transportasi dan operasional lapangan selama kegiatan pengujian disediakan oleh perusahaan";
+
+/**
+ * Operational cost items that are always allowed on a worksheet even when the
+ * applicant bears all transport/accommodation. Used to gate the "biaya
+ * operasional tidak dapat ditambahkan" rejection.
+ */
+export const WORKSHEET_ALWAYS_ALLOWED_OPERATIONAL_ITEMS: readonly string[] = [
+  WORKSHEET_DAILY_ALLOWANCE_ITEM,
+  WORKSHEET_FIELD_OPERATIONAL_ITEM,
+];
+
 export const WORKSHEET_NOTE_STATUS = [
   "info",
   "warning",

@@ -31,7 +31,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useDialogs from "@/hooks/use-dialog";
 import { usePermissions } from "@/hooks/use-permissions";
 import { getClusterColor } from "@/lib/cluster-colors";
@@ -424,6 +428,11 @@ function RouteComponent() {
     if (!order?.worksheet)
       return globalErrorToast(
         "Order belum melewati tahapan kaji ulang, worksheet belum dibuat, tidak dapat menyetujui order",
+      );
+
+    if (order.worksheet.status !== "verified")
+      return globalErrorToast(
+        "Worksheet belum diverifikasi, tidak dapat menyetujui order",
       );
 
     approveMutation.mutate({ orderId });
@@ -922,16 +931,31 @@ function RouteComponent() {
                         </Button>
                       </PermissionGate>
                       <PermissionGate permission="orders-approval.approve">
-                        <Button
-                          className="bg-green-500 hover:bg-green-600"
-                          onClick={handleApprove}
-                          disabled={approveMutation.isPending}
-                        >
-                          {approveMutation.isPending && (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span tabIndex={0}>
+                              <Button
+                                className="bg-green-500 hover:bg-green-600"
+                                onClick={handleApprove}
+                                disabled={
+                                  approveMutation.isPending ||
+                                  !worksheetVerified
+                                }
+                              >
+                                {approveMutation.isPending && (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+                                Setujui Order
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {!worksheetVerified && (
+                            <TooltipContent>
+                              Worksheet harus diverifikasi terlebih dahulu
+                              sebelum menyetujui order.
+                            </TooltipContent>
                           )}
-                          Setujui Order
-                        </Button>
+                        </Tooltip>
                       </PermissionGate>
                     </div>
                   </CardContent>

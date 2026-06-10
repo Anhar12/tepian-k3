@@ -4,6 +4,7 @@ import type {
   WorksheetNoteStatus,
   WorksheetStatus,
 } from "@tepian-k3/constants";
+import { WORKSHEET_ALWAYS_ALLOWED_OPERATIONAL_ITEMS } from "@tepian-k3/constants";
 import { and, count, eq, inArray, isNull, sql } from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
@@ -2089,8 +2090,10 @@ const worksheetQueries = {
             }
 
             // 3. Check if operational costs are applicable
-            // Only allow operational costs when at least one of transportation or accommodation
-            // is covered by K3 Lab (value = true)
+            // Transport/accommodation cost lines are only allowed when at least
+            // one of those is covered by K3 Lab (a `cover*` flag is true). When
+            // the applicant bears everything, only the always-allowed items
+            // (daily allowance + the field-operational note) may be saved.
             const canHaveOperationalCosts =
               worksheet.coverFlightIncluded === true ||
               worksheet.coverGroundTransportationIncluded === true ||
@@ -2098,7 +2101,12 @@ const worksheetQueries = {
               worksheet.coverLodgingIncluded === true ||
               worksheet.coverWaterTransportationIncluded === true;
 
-            if (!canHaveOperationalCosts && costs.length > 0) {
+            const hasDisallowedCosts = costs.some(
+              (cost) =>
+                !WORKSHEET_ALWAYS_ALLOWED_OPERATIONAL_ITEMS.includes(cost.item),
+            );
+
+            if (!canHaveOperationalCosts && hasDisallowedCosts) {
               throw new TRPCError({
                 code: "BAD_REQUEST",
                 message:

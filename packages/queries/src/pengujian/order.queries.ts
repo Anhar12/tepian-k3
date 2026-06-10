@@ -1269,6 +1269,19 @@ const orderQueries = {
         );
       }
 
+      // Worksheet must be verified by the koordinator before the order can be
+      // approved into the penawaran phase. Existence alone is not enough — a
+      // draft/pending/revision worksheet means kaji ulang isn't finished.
+      if (orderToApprove.worksheet.status !== "verified") {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Worksheet belum diverifikasi, tidak dapat menyetujui order",
+          }),
+        );
+      }
+
       // update order approval status to approved
       const [updatedOrder] = yield* Effect.tryPromise({
         try: () =>
@@ -1716,11 +1729,11 @@ const orderQueries = {
       const autoEnrollQueries = yield* Effect.promise(() =>
         import("@tepian-k3/queries/pelatihan/auto-enroll.queries").then(
           (m) => m.default,
-        )
+        ),
       );
       yield* autoEnrollQueries.processPaidPelatihanOrder(
         orderId,
-        orderToVerify.user.id
+        orderToVerify.user.id,
       );
 
       // create order status history - pembayaran_diterima

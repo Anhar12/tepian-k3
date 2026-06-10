@@ -29,7 +29,12 @@ import { trpc } from "@/utils/trpc";
 import { getPublicUrl } from "@/utils/url";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ORDER_STATUS, type OrderStatus } from "@tepian-k3/constants";
+import {
+  ORDER_STATUS,
+  type OrderStatus,
+  WORKSHEET_DAILY_ALLOWANCE_ITEM,
+  WORKSHEET_FIELD_OPERATIONAL_ITEM,
+} from "@tepian-k3/constants";
 import {
   addBusinessDays,
   differenceInBusinessDays,
@@ -66,9 +71,6 @@ export const Route = createFileRoute("/(core)/worksheets/detail-transaksi")({
   component: RouteComponent,
   head: () => pageHead("Lembar Kerja - Detail Transaksi"),
 });
-
-const FIELD_OPERATIONAL_ITEM =
-  "Transportasi dan operasional lapangan selama kegiatan pengujian disediakan oleh perusahaan";
 
 interface OperationalCostItem {
   id?: string;
@@ -214,7 +216,7 @@ function RouteComponent() {
     } else if (worksheet && worksheet.operationalCosts?.length === 0) {
       const defaultCosts: OperationalCostItem[] = [
         {
-          item: "Uang Harian",
+          item: WORKSHEET_DAILY_ALLOWANCE_ITEM,
           unitCount:
             worksheet.estimatedAmountOfMembers > 0
               ? worksheet.estimatedAmountOfMembers
@@ -318,7 +320,7 @@ function RouteComponent() {
       // (no charge) indicating transport/field operations are covered by the
       // company, not a priced line item.
       defaultCosts.push({
-        item: FIELD_OPERATIONAL_ITEM,
+        item: WORKSHEET_FIELD_OPERATIONAL_ITEM,
         unitCount:
           worksheet.estimatedAmountOfMembers > 0
             ? worksheet.estimatedAmountOfMembers
@@ -1090,7 +1092,8 @@ function RouteComponent() {
                       item.unitCost !== null && item.unitCost > 0
                         ? item.unitCount * item.days * item.unitCost
                         : null;
-                    const isFixed = item.item === FIELD_OPERATIONAL_ITEM;
+                    const isFixed =
+                      item.item === WORKSHEET_FIELD_OPERATIONAL_ITEM;
 
                     if (isFixed) {
                       return (
