@@ -7,12 +7,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 // Sub-components
-import { ProfilTab } from "./_components/profil-tab";
-import { ElearningTab } from "./_components/elearning-tab";
-import { BimtekTab } from "./_components/bimtek-tab";
-import { WebinarTab } from "./_components/webinar-tab";
-import { SertifikatTab } from "./_components/sertifikat-tab";
-import { TransaksiTab } from "./_components/transaksi-tab";
+import { BimtekTab } from "./-components/bimtek-tab";
+import { ElearningTab } from "./-components/elearning-tab";
+import { ProfilTab } from "./-components/profil-tab";
+import { SertifikatTab } from "./-components/sertifikat-tab";
+import { TransaksiTab } from "./-components/transaksi-tab";
+import { WebinarTab } from "./-components/webinar-tab";
 
 const dashboardSearchSchema = z.object({
   tab: z
