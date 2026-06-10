@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, type DefaultValues, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -34,6 +34,7 @@ export function AutoForm<T extends z.ZodObject<z.ZodRawShape>>({
   fieldOrder,
   hideFields,
   className,
+  onDirtyChange,
 }: AutoFormProps<T>) {
   const defaultHiddenFields: (keyof z.infer<T>)[] = [
     "id",
@@ -94,6 +95,14 @@ export function AutoForm<T extends z.ZodObject<z.ZodRawShape>>({
     resolver: zodResolver(schema) as unknown as ReturnType<typeof zodResolver>,
     defaultValues: computedDefaults,
   });
+
+  // Surface the form's dirty state to the parent so it can render an
+  // "unsaved edits" indicator. Reading `isDirty` here subscribes the
+  // component to formState updates from react-hook-form.
+  const { isDirty } = form.formState;
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   return (
     <form

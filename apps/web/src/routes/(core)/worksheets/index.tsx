@@ -64,7 +64,7 @@ import {
   Wrench,
   CalendarClock,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import z from "zod";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -258,6 +258,7 @@ function RouteComponent() {
           }),
         );
         globalSuccessToast("Estimasi berhasil dibuat");
+        setEstimatedSaved(true);
       },
       onError: (error) => {
         globalErrorToast("Gagal membuat estimasi : " + error.message);
@@ -348,6 +349,8 @@ function RouteComponent() {
   // Per-tab "saved" indicators — turn the tab badge green after a successful
   // save, until the user edits that tab again.
   const [parameterSaved, setParameterSaved] = useState(false);
+  const [estimatedSaved, setEstimatedSaved] = useState(false);
+  const [estimatedDirty, setEstimatedDirty] = useState(false);
   const [alatSaved, setAlatSaved] = useState(false);
   const [bahanSaved, setBahanSaved] = useState(false);
   const [catatanSaved, setCatatanSaved] = useState(false);
@@ -791,6 +794,13 @@ function RouteComponent() {
     addNoteMutation.mutate(data);
   };
 
+  // Reflect the estimate AutoForm's dirty state into the tab badge. Clear the
+  // green "saved" badge as soon as the user starts editing again.
+  const handleEstimatedDirtyChange = useCallback((dirty: boolean) => {
+    setEstimatedDirty(dirty);
+    if (dirty) setEstimatedSaved(false);
+  }, []);
+
   const handleRequiredChange = (materialId: string, value: number) => {
     setBahanSaved(false);
     setLocalRequiredUpdates((prev) => {
@@ -933,6 +943,7 @@ function RouteComponent() {
                 <CalendarClock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="xs:inline hidden">Estimated</span>
                 <span className="xs:hidden">Est</span>
+                <TabStatusBadge dirty={estimatedDirty} saved={estimatedSaved} />
               </TabsTrigger>
               <TabsTrigger
                 value="alat"
@@ -1180,8 +1191,13 @@ function RouteComponent() {
             <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
               <div className="flex-1">
                 <AutoForm
+                  // Remount when the saved estimate values change (i.e. after a
+                  // successful save) so the form resets to server values and the
+                  // dirty indicator re-arms on the next edit.
+                  key={`${worksheet?.estimatedAmountOfMembers ?? 0}-${worksheet?.estimatedAmountOfDays ?? 0}`}
                   schema={worksheetSchema.createWorksheetEstimatedSchema}
                   onSubmit={(data) => createEstimateMutation.mutate(data)}
+                  onDirtyChange={handleEstimatedDirtyChange}
                   isPending={createEstimateMutation.isPending}
                   submitLabel="Simpan Perkiraan"
                   defaultValues={{

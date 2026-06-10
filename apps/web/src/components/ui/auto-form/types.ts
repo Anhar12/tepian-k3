@@ -44,6 +44,12 @@ export type AutoFormProps<T extends z.ZodObject<z.ZodRawShape>> = {
   fieldOrder?: (keyof z.infer<T>)[];
   hideFields?: (keyof z.infer<T>)[];
   className?: string;
+  /**
+   * Called whenever the form's dirty state changes. Lets a parent surface an
+   * "unsaved edits" indicator for an AutoForm, since the form state is
+   * otherwise internal to the component.
+   */
+  onDirtyChange?: (dirty: boolean) => void;
 };
 
 export type FieldConfig = {
