@@ -4,16 +4,11 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import {
-  Eye,
-  Receipt,
-} from "lucide-react";
+import { Eye, Receipt } from "lucide-react";
 import dayjs from "dayjs";
 import { Pagination } from "./pagination";
 
