@@ -174,15 +174,16 @@ export const orderRouter = createTRPCRouter({
         revisionNotes: z.string().min(10, "Catatan revisi minimal 10 karakter"),
       }),
     )
-    .mutation(async ({ input, ctx }) => {
-      await runEffect(
-        orderQueries.reviseOrder(
-          input.orderId,
-          ctx.user.id,
-          input.revisionNotes,
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          orderQueries.reviseOrder(
+            input.orderId,
+            ctx.user.id,
+            input.revisionNotes,
+          ),
         ),
-      );
-    }),
+    ),
 
   cancelOrder: withProtectedRateLimit(rateLimiters.moderate())
     .input(
