@@ -593,7 +593,9 @@ const worksheetQueries = {
             }
 
             // Filter only pengujian items
-            const pengujianItems = orderData.items.filter(item => item.type === "pengujian");
+            const pengujianItems = orderData.items.filter(
+              (item) => item.type === "pengujian",
+            );
 
             // Validate order has items
             if (pengujianItems.length === 0) {
@@ -2525,6 +2527,75 @@ const worksheetQueries = {
           { action: "publish_offering" } as Record<string, unknown>,
           userId,
           "publish_offering",
+        ),
+      );
+    });
+  },
+
+  /**
+   * Persists the offering letter's number and issue date on the worksheet when
+   * Admin generates (Cetak) the offering PDF. These columns gate the downstream
+   * Invoice/SPK/SPT actions and pre-fill the Invoice's reference fields, so they
+   * must be saved every time the offering is printed (the latest values win).
+   *
+   * @param worksheetId - Worksheet whose offering letter info is being saved
+   * @param userId - Acting user, for the audit log
+   * @param letterNumber - The offering letter number entered in the dialog
+   */
+  saveOfferingLetterInfo(
+    worksheetId: string,
+    userId: string,
+    letterNumber: string,
+  ) {
+    return Effect.gen(function* () {
+      yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.id, worksheetId),
+            });
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            await tx
+              .update(worksheets)
+              .set({
+                offeringLetterNumber: letterNumber,
+                offeringLetterDate: sql`CURRENT_TIMESTAMP`,
+                updatedAt: sql`CURRENT_TIMESTAMP`,
+              })
+              .where(eq(worksheets.id, worksheetId));
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.saveOfferingLetterInfo",
+            "Failed to save offering letter info",
+            { error, worksheetId },
+          );
+          if (error instanceof TRPCError) throw error;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menyimpan data surat penawaran",
+          });
+        },
+      });
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          {},
+          { letterNumber, action: "save_offering_letter_info" } as Record<
+            string,
+            unknown
+          >,
+          userId,
+          "save_offering_letter_info",
         ),
       );
     });

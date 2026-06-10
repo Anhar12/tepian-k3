@@ -24,7 +24,7 @@ export const generateDocumentRouter = createTRPCRouter({
   generateOfferingLetter: withPermission("documents.create")
     .input(generateDocumentSchema.generateOfferingLetterDocumentSchema)
     .mutation(
-      async ({ input }) =>
+      async ({ input, ctx }) =>
         await runEffect(
           Effect.gen(function* () {
             const worksheet =
@@ -88,6 +88,15 @@ export const generateDocumentRouter = createTRPCRouter({
             //     folder: "generated-documents/offering-letters",
             //   },
             // );
+
+            // Persist the offering letter number + issue date on the worksheet.
+            // These gate the downstream Invoice/SPK/SPT actions and pre-fill the
+            // Invoice reference, so they must be saved on every Cetak.
+            yield* worksheetQueries.saveOfferingLetterInfo(
+              input.worksheetId,
+              ctx.user.id,
+              input.letterNumber,
+            );
 
             return {
               base64: Buffer.from(mergedPdf as Buffer).toString("base64"),
