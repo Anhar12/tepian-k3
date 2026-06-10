@@ -1,6 +1,6 @@
 {
-  "id": "45172b01-279c-4627-bd3a-939d0e2fd5d3",
-  "prevId": "135f1589-a328-4184-bd4d-bf9f43c666c5",
+  "id": "e5d1f9e6-aa93-4465-a19d-363347089ee1",
+  "prevId": "80702e3c-fbc3-4c69-9010-bcc3ae2a1bd1",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -198,12 +198,8 @@
           "name": "audits_user_id_users_id_fk",
           "tableFrom": "audits",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -403,12 +399,8 @@
           "name": "districts_regency_id_regencies_id_fk",
           "tableFrom": "districts",
           "tableTo": "regencies",
-          "columnsFrom": [
-            "regency_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["regency_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -595,12 +587,8 @@
           "name": "document_signatures_document_id_documents_id_fk",
           "tableFrom": "document_signatures",
           "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["document_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -608,12 +596,8 @@
           "name": "document_signatures_signed_by_user_id_users_id_fk",
           "tableFrom": "document_signatures",
           "tableTo": "users",
-          "columnsFrom": [
-            "signed_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["signed_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -623,9 +607,7 @@
         "document_signatures_verification_token_unique": {
           "name": "document_signatures_verification_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "verification_token"
-          ]
+          "columns": ["verification_token"]
         }
       },
       "policies": {},
@@ -747,12 +729,8 @@
           "name": "document_verifications_document_id_documents_id_fk",
           "tableFrom": "document_verifications",
           "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["document_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -760,12 +738,8 @@
           "name": "document_verifications_verified_by_user_id_users_id_fk",
           "tableFrom": "document_verifications",
           "tableTo": "users",
-          "columnsFrom": [
-            "verified_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["verified_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1033,12 +1007,8 @@
           "name": "documents_uploaded_by_user_id_users_id_fk",
           "tableFrom": "documents",
           "tableTo": "users",
-          "columnsFrom": [
-            "uploaded_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["uploaded_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1046,12 +1016,8 @@
           "name": "documents_signed_by_user_id_users_id_fk",
           "tableFrom": "documents",
           "tableTo": "users",
-          "columnsFrom": [
-            "signed_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["signed_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1061,16 +1027,12 @@
         "documents_document_number_unique": {
           "name": "documents_document_number_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "document_number"
-          ]
+          "columns": ["document_number"]
         },
         "documents_verification_token_unique": {
           "name": "documents_verification_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "verification_token"
-          ]
+          "columns": ["verification_token"]
         }
       },
       "policies": {},
@@ -1180,12 +1142,8 @@
           "name": "employee_certifications_employee_id_employees_id_fk",
           "tableFrom": "employee_certifications",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1322,12 +1280,8 @@
           "name": "employees_position_id_positions_id_fk",
           "tableFrom": "employees",
           "tableTo": "positions",
-          "columnsFrom": [
-            "position_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["position_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1335,12 +1289,8 @@
           "name": "employees_user_id_users_id_fk",
           "tableFrom": "employees",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1350,25 +1300,136 @@
         "employees_user_id_unique": {
           "name": "employees_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         },
         "employees_email_unique": {
           "name": "employees_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "employees_nip_unique": {
           "name": "employees_nip_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "nip"
-          ]
+          "columns": ["nip"]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.faqs": {
+      "name": "faqs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "question": {
+          "name": "question",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "answer": {
+          "name": "answer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'general'"
+        },
+        "order_index": {
+          "name": "order_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "faq_id_idx": {
+          "name": "faq_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "faq_category_idx": {
+          "name": "faq_category_idx",
+          "columns": [
+            {
+              "expression": "category",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "faq_is_active_idx": {
+          "name": "faq_is_active_idx",
+          "columns": [
+            {
+              "expression": "is_active",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1669,12 +1730,8 @@
           "name": "notifications_user_id_users_id_fk",
           "tableFrom": "notifications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1777,12 +1834,8 @@
           "name": "otp_codes_user_id_users_id_fk",
           "tableFrom": "otp_codes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1841,12 +1894,8 @@
           "name": "password_resets_user_id_users_id_fk",
           "tableFrom": "password_resets",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1856,9 +1905,7 @@
         "password_resets_token_unique": {
           "name": "password_resets_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1955,9 +2002,7 @@
         "permissions_name_unique": {
           "name": "permissions_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -2029,9 +2074,7 @@
         "positions_name_unique": {
           "name": "positions_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -2234,12 +2277,8 @@
           "name": "refresh_tokens_user_id_users_id_fk",
           "tableFrom": "refresh_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2249,9 +2288,7 @@
         "refresh_tokens_token_unique": {
           "name": "refresh_tokens_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -2337,12 +2374,8 @@
           "name": "regencies_province_id_provinces_id_fk",
           "tableFrom": "regencies",
           "tableTo": "provinces",
-          "columnsFrom": [
-            "province_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["province_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2414,12 +2447,8 @@
           "name": "role_permissions_role_id_roles_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2427,12 +2456,8 @@
           "name": "role_permissions_permission_id_permissions_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "permissions",
-          "columnsFrom": [
-            "permission_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["permission_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2440,10 +2465,7 @@
       "compositePrimaryKeys": {
         "role_permissions_role_id_permission_id_pk": {
           "name": "role_permissions_role_id_permission_id_pk",
-          "columns": [
-            "role_id",
-            "permission_id"
-          ]
+          "columns": ["role_id", "permission_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2516,11 +2538,97 @@
         "roles_name_unique": {
           "name": "roles_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.settings": {
+      "name": "settings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "settings_key_unique_idx": {
+          "name": "settings_key_unique_idx",
+          "columns": [
+            {
+              "expression": "key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"settings\".\"deleted_at\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "settings_id_idx": {
+          "name": "settings_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -2593,12 +2701,8 @@
           "name": "user_permissions_user_id_users_id_fk",
           "tableFrom": "user_permissions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2606,12 +2710,8 @@
           "name": "user_permissions_permission_id_permissions_id_fk",
           "tableFrom": "user_permissions",
           "tableTo": "permissions",
-          "columnsFrom": [
-            "permission_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["permission_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2619,10 +2719,7 @@
       "compositePrimaryKeys": {
         "user_permissions_user_id_permission_id_pk": {
           "name": "user_permissions_user_id_permission_id_pk",
-          "columns": [
-            "user_id",
-            "permission_id"
-          ]
+          "columns": ["user_id", "permission_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2690,12 +2787,8 @@
           "name": "user_roles_user_id_users_id_fk",
           "tableFrom": "user_roles",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2703,12 +2796,8 @@
           "name": "user_roles_role_id_roles_id_fk",
           "tableFrom": "user_roles",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2716,10 +2805,7 @@
       "compositePrimaryKeys": {
         "user_roles_user_id_role_id_pk": {
           "name": "user_roles_user_id_role_id_pk",
-          "columns": [
-            "user_id",
-            "role_id"
-          ]
+          "columns": ["user_id", "role_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2860,9 +2946,7 @@
         "user_email_unique_idx": {
           "name": "user_email_unique_idx",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -2948,12 +3032,8 @@
           "name": "villages_district_id_districts_id_fk",
           "tableFrom": "villages",
           "tableTo": "districts",
-          "columnsFrom": [
-            "district_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["district_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3098,12 +3178,8 @@
           "name": "cart_user_id_users_id_fk",
           "tableFrom": "cart",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3111,12 +3187,8 @@
           "name": "cart_company_id_user_companies_id_fk",
           "tableFrom": "cart",
           "tableTo": "user_companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3124,12 +3196,8 @@
           "name": "cart_location_id_user_company_testing_locations_id_fk",
           "tableFrom": "cart",
           "tableTo": "user_company_testing_locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3137,12 +3205,8 @@
           "name": "cart_parameter_id_parameters_id_fk",
           "tableFrom": "cart",
           "tableTo": "parameters",
-          "columnsFrom": [
-            "parameter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parameter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3334,9 +3398,7 @@
         "chemical_materials_code_unique": {
           "name": "chemical_materials_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -3423,9 +3485,7 @@
         "clusters_name_unique": {
           "name": "clusters_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -3784,12 +3844,8 @@
           "name": "orders_user_id_users_id_fk",
           "tableFrom": "orders",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3797,12 +3853,8 @@
           "name": "orders_company_id_user_companies_id_fk",
           "tableFrom": "orders",
           "tableTo": "user_companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3812,9 +3864,7 @@
         "orders_order_number_unique": {
           "name": "orders_order_number_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "order_number"
-          ]
+          "columns": ["order_number"]
         }
       },
       "policies": {},
@@ -3939,12 +3989,8 @@
           "name": "order_items_order_id_orders_id_fk",
           "tableFrom": "order_items",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3952,12 +3998,8 @@
           "name": "order_items_parameter_id_parameters_id_fk",
           "tableFrom": "order_items",
           "tableTo": "parameters",
-          "columnsFrom": [
-            "parameter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parameter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3965,12 +4007,8 @@
           "name": "order_items_location_id_user_company_testing_locations_id_fk",
           "tableFrom": "order_items",
           "tableTo": "user_company_testing_locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4073,12 +4111,8 @@
           "name": "order_status_history_order_id_orders_id_fk",
           "tableFrom": "order_status_history",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4086,12 +4120,8 @@
           "name": "order_status_history_changed_by_users_id_fk",
           "tableFrom": "order_status_history",
           "tableTo": "users",
-          "columnsFrom": [
-            "changed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["changed_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4202,12 +4232,8 @@
           "name": "parameter_categories_cluster_id_clusters_id_fk",
           "tableFrom": "parameter_categories",
           "tableTo": "clusters",
-          "columnsFrom": [
-            "cluster_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cluster_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4217,9 +4243,7 @@
         "parameter_categories_name_unique": {
           "name": "parameter_categories_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -4320,12 +4344,8 @@
           "name": "parameter_chemical_materials_parameter_id_parameters_id_fk",
           "tableFrom": "parameter_chemical_materials",
           "tableTo": "parameters",
-          "columnsFrom": [
-            "parameter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parameter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4333,12 +4353,8 @@
           "name": "parameter_chemical_materials_chemical_material_id_chemical_materials_id_fk",
           "tableFrom": "parameter_chemical_materials",
           "tableTo": "chemical_materials",
-          "columnsFrom": [
-            "chemical_material_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chemical_material_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4443,12 +4459,8 @@
           "name": "parameter_tools_parameter_id_parameters_id_fk",
           "tableFrom": "parameter_tools",
           "tableTo": "parameters",
-          "columnsFrom": [
-            "parameter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parameter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4456,12 +4468,8 @@
           "name": "parameter_tools_tool_id_tools_id_fk",
           "tableFrom": "parameter_tools",
           "tableTo": "tools",
-          "columnsFrom": [
-            "tool_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4584,12 +4592,8 @@
           "name": "parameters_parameter_category_id_parameter_categories_id_fk",
           "tableFrom": "parameters",
           "tableTo": "parameter_categories",
-          "columnsFrom": [
-            "parameter_category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parameter_category_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4691,12 +4695,8 @@
           "name": "survey_feedback_order_id_orders_id_fk",
           "tableFrom": "survey_feedback",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4704,12 +4704,8 @@
           "name": "survey_feedback_submitted_by_user_id_users_id_fk",
           "tableFrom": "survey_feedback",
           "tableTo": "users",
-          "columnsFrom": [
-            "submitted_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["submitted_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4719,9 +4715,7 @@
         "survey_feedback_order_id_unique": {
           "name": "survey_feedback_order_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "order_id"
-          ]
+          "columns": ["order_id"]
         }
       },
       "policies": {},
@@ -4959,12 +4953,8 @@
           "name": "survey_responses_order_id_orders_id_fk",
           "tableFrom": "survey_responses",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4972,12 +4962,8 @@
           "name": "survey_responses_question_id_survey_questions_id_fk",
           "tableFrom": "survey_responses",
           "tableTo": "survey_questions",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["question_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5150,12 +5136,8 @@
           "name": "testing_order_id_orders_id_fk",
           "tableFrom": "testing",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5163,12 +5145,8 @@
           "name": "testing_worksheet_id_worksheets_id_fk",
           "tableFrom": "testing",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5176,12 +5154,8 @@
           "name": "testing_user_id_users_id_fk",
           "tableFrom": "testing",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5189,12 +5163,8 @@
           "name": "testing_company_id_user_companies_id_fk",
           "tableFrom": "testing",
           "tableTo": "user_companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5202,12 +5172,8 @@
           "name": "testing_testing_type_parameter_categories_id_fk",
           "tableFrom": "testing",
           "tableTo": "parameter_categories",
-          "columnsFrom": [
-            "testing_type"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["testing_type"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5217,9 +5183,7 @@
         "testing_testing_number_unique": {
           "name": "testing_testing_number_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "testing_number"
-          ]
+          "columns": ["testing_number"]
         }
       },
       "policies": {},
@@ -5363,12 +5327,8 @@
           "name": "testing_item_testing_id_testing_id_fk",
           "tableFrom": "testing_item",
           "tableTo": "testing",
-          "columnsFrom": [
-            "testing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["testing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5376,12 +5336,8 @@
           "name": "testing_item_order_item_id_order_items_id_fk",
           "tableFrom": "testing_item",
           "tableTo": "order_items",
-          "columnsFrom": [
-            "order_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5389,12 +5345,8 @@
           "name": "testing_item_parameter_id_parameters_id_fk",
           "tableFrom": "testing_item",
           "tableTo": "parameters",
-          "columnsFrom": [
-            "parameter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parameter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5402,12 +5354,8 @@
           "name": "testing_item_location_id_user_company_testing_locations_id_fk",
           "tableFrom": "testing_item",
           "tableTo": "user_company_testing_locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5497,12 +5445,8 @@
           "name": "tool_calibration_certificates_tool_calibration_id_tool_calibrations_id_fk",
           "tableFrom": "tool_calibration_certificates",
           "tableTo": "tool_calibrations",
-          "columnsFrom": [
-            "tool_calibration_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_calibration_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5592,12 +5536,8 @@
           "name": "tool_calibration_documentations_tool_calibration_id_tool_calibrations_id_fk",
           "tableFrom": "tool_calibration_documentations",
           "tableTo": "tool_calibrations",
-          "columnsFrom": [
-            "tool_calibration_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_calibration_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5693,12 +5633,8 @@
           "name": "tool_calibrations_tool_id_tools_id_fk",
           "tableFrom": "tool_calibrations",
           "tableTo": "tools",
-          "columnsFrom": [
-            "tool_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5834,12 +5770,8 @@
           "name": "tool_checks_tool_id_tools_id_fk",
           "tableFrom": "tool_checks",
           "tableTo": "tools",
-          "columnsFrom": [
-            "tool_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5847,12 +5779,8 @@
           "name": "tool_checks_checked_by_employees_id_fk",
           "tableFrom": "tool_checks",
           "tableTo": "employees",
-          "columnsFrom": [
-            "checked_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["checked_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -5965,9 +5893,7 @@
         "tool_codes_code_unique": {
           "name": "tool_codes_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -6160,12 +6086,8 @@
           "name": "tools_tool_code_id_tool_codes_id_fk",
           "tableFrom": "tools",
           "tableTo": "tool_codes",
-          "columnsFrom": [
-            "tool_code_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_code_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6385,12 +6307,8 @@
           "name": "user_companies_user_id_users_id_fk",
           "tableFrom": "user_companies",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6398,12 +6316,8 @@
           "name": "user_companies_kbli_id_kblis_id_fk",
           "tableFrom": "user_companies",
           "tableTo": "kblis",
-          "columnsFrom": [
-            "kbli_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["kbli_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6411,12 +6325,8 @@
           "name": "user_companies_provinceId_provinces_id_fk",
           "tableFrom": "user_companies",
           "tableTo": "provinces",
-          "columnsFrom": [
-            "provinceId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["provinceId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6424,12 +6334,8 @@
           "name": "user_companies_districtId_districts_id_fk",
           "tableFrom": "user_companies",
           "tableTo": "districts",
-          "columnsFrom": [
-            "districtId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["districtId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6437,12 +6343,8 @@
           "name": "user_companies_regencyId_regencies_id_fk",
           "tableFrom": "user_companies",
           "tableTo": "regencies",
-          "columnsFrom": [
-            "regencyId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["regencyId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6450,12 +6352,8 @@
           "name": "user_companies_villageId_villages_id_fk",
           "tableFrom": "user_companies",
           "tableTo": "villages",
-          "columnsFrom": [
-            "villageId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["villageId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6563,12 +6461,8 @@
           "name": "user_company_testing_locations_user_company_id_user_companies_id_fk",
           "tableFrom": "user_company_testing_locations",
           "tableTo": "user_companies",
-          "columnsFrom": [
-            "user_company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6576,12 +6470,8 @@
           "name": "user_company_testing_locations_regency_id_regencies_id_fk",
           "tableFrom": "user_company_testing_locations",
           "tableTo": "regencies",
-          "columnsFrom": [
-            "regency_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["regency_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6589,12 +6479,8 @@
           "name": "user_company_testing_locations_district_id_districts_id_fk",
           "tableFrom": "user_company_testing_locations",
           "tableTo": "districts",
-          "columnsFrom": [
-            "district_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["district_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6602,12 +6488,8 @@
           "name": "user_company_testing_locations_user_id_users_id_fk",
           "tableFrom": "user_company_testing_locations",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6718,12 +6600,8 @@
           "name": "worksheet_assignments_worksheet_id_worksheets_id_fk",
           "tableFrom": "worksheet_assignments",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6731,12 +6609,8 @@
           "name": "worksheet_assignments_employee_id_employees_id_fk",
           "tableFrom": "worksheet_assignments",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6744,12 +6618,8 @@
           "name": "worksheet_assignments_assigned_by_users_id_fk",
           "tableFrom": "worksheet_assignments",
           "tableTo": "users",
-          "columnsFrom": [
-            "assigned_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -6868,12 +6738,8 @@
           "name": "worksheet_chemical_materials_worksheet_id_worksheets_id_fk",
           "tableFrom": "worksheet_chemical_materials",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6881,12 +6747,8 @@
           "name": "worksheet_chemical_materials_chemical_material_id_chemical_materials_id_fk",
           "tableFrom": "worksheet_chemical_materials",
           "tableTo": "chemical_materials",
-          "columnsFrom": [
-            "chemical_material_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chemical_material_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7032,12 +6894,8 @@
           "name": "worksheet_items_worksheet_id_worksheets_id_fk",
           "tableFrom": "worksheet_items",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7045,12 +6903,8 @@
           "name": "worksheet_items_parameter_id_parameters_id_fk",
           "tableFrom": "worksheet_items",
           "tableTo": "parameters",
-          "columnsFrom": [
-            "parameter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parameter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7058,12 +6912,8 @@
           "name": "worksheet_items_location_id_user_company_testing_locations_id_fk",
           "tableFrom": "worksheet_items",
           "tableTo": "user_company_testing_locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7166,12 +7016,8 @@
           "name": "worksheet_notes_worksheet_id_worksheets_id_fk",
           "tableFrom": "worksheet_notes",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7179,12 +7025,8 @@
           "name": "worksheet_notes_created_by_users_id_fk",
           "tableFrom": "worksheet_notes",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -7307,12 +7149,8 @@
           "name": "worksheet_operational_costs_worksheet_id_worksheets_id_fk",
           "tableFrom": "worksheet_operational_costs",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7423,12 +7261,8 @@
           "name": "worksheet_tool_needed_worksheet_id_worksheets_id_fk",
           "tableFrom": "worksheet_tool_needed",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7436,12 +7270,8 @@
           "name": "worksheet_tool_needed_tool_id_tools_id_fk",
           "tableFrom": "worksheet_tool_needed",
           "tableTo": "tools",
-          "columnsFrom": [
-            "tool_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7610,12 +7440,8 @@
           "name": "worksheet_tools_worksheet_id_worksheets_id_fk",
           "tableFrom": "worksheet_tools",
           "tableTo": "worksheets",
-          "columnsFrom": [
-            "worksheet_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["worksheet_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7623,12 +7449,8 @@
           "name": "worksheet_tools_tool_id_tools_id_fk",
           "tableFrom": "worksheet_tools",
           "tableTo": "tools",
-          "columnsFrom": [
-            "tool_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tool_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7636,12 +7458,8 @@
           "name": "worksheet_tools_borrowed_by_employees_id_fk",
           "tableFrom": "worksheet_tools",
           "tableTo": "employees",
-          "columnsFrom": [
-            "borrowed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["borrowed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -7649,12 +7467,8 @@
           "name": "worksheet_tools_returned_by_employees_id_fk",
           "tableFrom": "worksheet_tools",
           "tableTo": "employees",
-          "columnsFrom": [
-            "returned_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["returned_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -7793,6 +7607,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "offering_letter_number": {
+          "name": "offering_letter_number",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "offering_letter_date": {
+          "name": "offering_letter_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "billing_code": {
+          "name": "billing_code",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "billing_expiry_date": {
+          "name": "billing_expiry_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "deleted_at": {
           "name": "deleted_at",
           "type": "timestamp with time zone",
@@ -7910,12 +7748,8 @@
           "name": "worksheets_order_id_orders_id_fk",
           "tableFrom": "worksheets",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7923,12 +7757,8 @@
           "name": "worksheets_main_supervisor_id_employees_id_fk",
           "tableFrom": "worksheets",
           "tableTo": "employees",
-          "columnsFrom": [
-            "main_supervisor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["main_supervisor_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -7936,12 +7766,8 @@
           "name": "worksheets_accompanying_supervisor_id_employees_id_fk",
           "tableFrom": "worksheets",
           "tableTo": "employees",
-          "columnsFrom": [
-            "accompanying_supervisor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["accompanying_supervisor_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -7949,12 +7775,8 @@
           "name": "worksheets_created_by_users_id_fk",
           "tableFrom": "worksheets",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -8010,7 +7832,7 @@
           "type": "pelatihan_level",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "type": {
           "name": "type",
@@ -8114,6 +7936,39 @@
           "primaryKey": false,
           "notNull": false
         },
+        "requirements": {
+          "name": "requirements",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dynamic_requirements": {
+          "name": "dynamic_requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::jsonb"
+        },
+        "certificate_number_format": {
+          "name": "certificate_number_format",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attendance_required": {
+          "name": "attendance_required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "min_attendance_percentage": {
+          "name": "min_attendance_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 85
+        },
         "deleted_at": {
           "name": "deleted_at",
           "type": "timestamp with time zone",
@@ -8157,12 +8012,8 @@
           "name": "pelatihan_category_id_pelatihan_categories_id_fk",
           "tableFrom": "pelatihan",
           "tableTo": "pelatihan_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -8172,9 +8023,7 @@
         "pelatihan_slug_unique": {
           "name": "pelatihan_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -8289,12 +8138,8 @@
           "name": "pelatihan_assessment_answers_attempt_id_pelatihan_assessment_attempts_id_fk",
           "tableFrom": "pelatihan_assessment_answers",
           "tableTo": "pelatihan_assessment_attempts",
-          "columnsFrom": [
-            "attempt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["attempt_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8302,12 +8147,8 @@
           "name": "pelatihan_assessment_answers_question_id_pelatihan_questions_id_fk",
           "tableFrom": "pelatihan_assessment_answers",
           "tableTo": "pelatihan_questions",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["question_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8315,12 +8156,8 @@
           "name": "pelatihan_assessment_answers_graded_by_users_id_fk",
           "tableFrom": "pelatihan_assessment_answers",
           "tableTo": "users",
-          "columnsFrom": [
-            "graded_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["graded_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -8430,12 +8267,8 @@
           "name": "pelatihan_assessment_attempts_enrollment_id_pelatihan_enrollments_id_fk",
           "tableFrom": "pelatihan_assessment_attempts",
           "tableTo": "pelatihan_enrollments",
-          "columnsFrom": [
-            "enrollment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enrollment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8443,12 +8276,8 @@
           "name": "pelatihan_assessment_attempts_assessment_id_pelatihan_assessments_id_fk",
           "tableFrom": "pelatihan_assessment_attempts",
           "tableTo": "pelatihan_assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8559,12 +8388,115 @@
           "name": "pelatihan_assessments_pelatihan_id_pelatihan_id_fk",
           "tableFrom": "pelatihan_assessments",
           "tableTo": "pelatihan",
-          "columnsFrom": [
-            "pelatihan_id"
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pelatihan_attendances": {
+      "name": "pelatihan_attendances",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "enrollment_id": {
+          "name": "enrollment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "schedule_id": {
+          "name": "schedule_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "attendance_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'present'"
+        },
+        "checked_in_at": {
+          "name": "checked_in_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "attendance_enrollment_schedule_idx": {
+          "name": "attendance_enrollment_schedule_idx",
+          "columns": [
+            {
+              "expression": "enrollment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "schedule_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "columnsTo": [
-            "id"
-          ],
+          "isUnique": true,
+          "where": "\"pelatihan_attendances\".\"deleted_at\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pelatihan_attendances_enrollment_id_pelatihan_enrollments_id_fk": {
+          "name": "pelatihan_attendances_enrollment_id_pelatihan_enrollments_id_fk",
+          "tableFrom": "pelatihan_attendances",
+          "tableTo": "pelatihan_enrollments",
+          "columnsFrom": ["enrollment_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pelatihan_attendances_schedule_id_pelatihan_schedules_id_fk": {
+          "name": "pelatihan_attendances_schedule_id_pelatihan_schedules_id_fk",
+          "tableFrom": "pelatihan_attendances",
+          "tableTo": "pelatihan_schedules",
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8665,12 +8597,8 @@
           "name": "pelatihan_cart_user_id_users_id_fk",
           "tableFrom": "pelatihan_cart",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8678,12 +8606,8 @@
           "name": "pelatihan_cart_pelatihan_id_pelatihan_id_fk",
           "tableFrom": "pelatihan_cart",
           "tableTo": "pelatihan",
-          "columnsFrom": [
-            "pelatihan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8755,18 +8679,177 @@
           "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "pelatihan_categories_slug_unique": {
-          "name": "pelatihan_categories_slug_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "pelatihan_category_slug_idx": {
+          "name": "pelatihan_category_slug_idx",
           "columns": [
-            "slug"
-          ]
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"pelatihan_categories\".\"deleted_at\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pelatihan_certificate_templates": {
+      "name": "pelatihan_certificate_templates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pelatihan_id": {
+          "name": "pelatihan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "template_file_url": {
+          "name": "template_file_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "template_file_name": {
+          "name": "template_file_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "template_file_type": {
+          "name": "template_file_type",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "field_mappings": {
+          "name": "field_mappings",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "cert_template_pelatihan_idx": {
+          "name": "cert_template_pelatihan_idx",
+          "columns": [
+            {
+              "expression": "pelatihan_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cert_template_active_idx": {
+          "name": "cert_template_active_idx",
+          "columns": [
+            {
+              "expression": "pelatihan_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "is_active",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pelatihan_certificate_templates_pelatihan_id_pelatihan_id_fk": {
+          "name": "pelatihan_certificate_templates_pelatihan_id_pelatihan_id_fk",
+          "tableFrom": "pelatihan_certificate_templates",
+          "tableTo": "pelatihan",
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pelatihan_certificate_templates_created_by_users_id_fk": {
+          "name": "pelatihan_certificate_templates_created_by_users_id_fk",
+          "tableFrom": "pelatihan_certificate_templates",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -8798,6 +8881,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "template_id": {
+          "name": "template_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "certificate_number": {
           "name": "certificate_number",
@@ -8903,12 +8992,8 @@
           "name": "pelatihan_certificates_enrollment_id_pelatihan_enrollments_id_fk",
           "tableFrom": "pelatihan_certificates",
           "tableTo": "pelatihan_enrollments",
-          "columnsFrom": [
-            "enrollment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enrollment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8916,12 +9001,8 @@
           "name": "pelatihan_certificates_user_id_users_id_fk",
           "tableFrom": "pelatihan_certificates",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8929,25 +9010,26 @@
           "name": "pelatihan_certificates_pelatihan_id_pelatihan_id_fk",
           "tableFrom": "pelatihan_certificates",
           "tableTo": "pelatihan",
-          "columnsFrom": [
-            "pelatihan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pelatihan_certificates_template_id_pelatihan_certificate_templates_id_fk": {
+          "name": "pelatihan_certificates_template_id_pelatihan_certificate_templates_id_fk",
+          "tableFrom": "pelatihan_certificates",
+          "tableTo": "pelatihan_certificate_templates",
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "pelatihan_certificates_document_id_documents_id_fk": {
           "name": "pelatihan_certificates_document_id_documents_id_fk",
           "tableFrom": "pelatihan_certificates",
           "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["document_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -8957,16 +9039,12 @@
         "pelatihan_certificates_enrollment_id_unique": {
           "name": "pelatihan_certificates_enrollment_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "enrollment_id"
-          ]
+          "columns": ["enrollment_id"]
         },
         "pelatihan_certificates_certificate_number_unique": {
           "name": "pelatihan_certificates_certificate_number_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "certificate_number"
-          ]
+          "columns": ["certificate_number"]
         }
       },
       "policies": {},
@@ -9071,6 +9149,158 @@
           "primaryKey": false,
           "notNull": false
         },
+        "company_name": {
+          "name": "company_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_address": {
+          "name": "company_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_province_id": {
+          "name": "company_province_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_regency_id": {
+          "name": "company_regency_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_district_id": {
+          "name": "company_district_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_kbli": {
+          "name": "company_kbli",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_name": {
+          "name": "participant_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_nik": {
+          "name": "participant_nik",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_birth_place": {
+          "name": "participant_birth_place",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_birth_date": {
+          "name": "participant_birth_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_email": {
+          "name": "participant_email",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_phone": {
+          "name": "participant_phone",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_address": {
+          "name": "participant_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employment_letter_url": {
+          "name": "employment_letter_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employment_letter_name": {
+          "name": "employment_letter_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consent_letter_url": {
+          "name": "consent_letter_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consent_letter_name": {
+          "name": "consent_letter_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diploma_url": {
+          "name": "diploma_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diploma_name": {
+          "name": "diploma_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pass_photo_url": {
+          "name": "pass_photo_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pass_photo_name": {
+          "name": "pass_photo_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_status": {
+          "name": "verification_status",
+          "type": "pelatihan_verification_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "rejection_reason": {
+          "name": "rejection_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_at": {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_by": {
+          "name": "verified_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "deleted_at": {
           "name": "deleted_at",
           "type": "timestamp with time zone",
@@ -9120,12 +9350,8 @@
           "name": "pelatihan_enrollments_user_id_users_id_fk",
           "tableFrom": "pelatihan_enrollments",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9133,12 +9359,8 @@
           "name": "pelatihan_enrollments_pelatihan_id_pelatihan_id_fk",
           "tableFrom": "pelatihan_enrollments",
           "tableTo": "pelatihan",
-          "columnsFrom": [
-            "pelatihan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9146,12 +9368,44 @@
           "name": "pelatihan_enrollments_order_id_pelatihan_orders_id_fk",
           "tableFrom": "pelatihan_enrollments",
           "tableTo": "pelatihan_orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "pelatihan_enrollments_company_province_id_provinces_id_fk": {
+          "name": "pelatihan_enrollments_company_province_id_provinces_id_fk",
+          "tableFrom": "pelatihan_enrollments",
+          "tableTo": "provinces",
+          "columnsFrom": ["company_province_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "pelatihan_enrollments_company_regency_id_regencies_id_fk": {
+          "name": "pelatihan_enrollments_company_regency_id_regencies_id_fk",
+          "tableFrom": "pelatihan_enrollments",
+          "tableTo": "regencies",
+          "columnsFrom": ["company_regency_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "pelatihan_enrollments_company_district_id_districts_id_fk": {
+          "name": "pelatihan_enrollments_company_district_id_districts_id_fk",
+          "tableFrom": "pelatihan_enrollments",
+          "tableTo": "districts",
+          "columnsFrom": ["company_district_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "pelatihan_enrollments_verified_by_users_id_fk": {
+          "name": "pelatihan_enrollments_verified_by_users_id_fk",
+          "tableFrom": "pelatihan_enrollments",
+          "tableTo": "users",
+          "columnsFrom": ["verified_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -9267,12 +9521,8 @@
           "name": "pelatihan_materials_pelatihan_id_pelatihan_id_fk",
           "tableFrom": "pelatihan_materials",
           "tableTo": "pelatihan",
-          "columnsFrom": [
-            "pelatihan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9280,12 +9530,8 @@
           "name": "pelatihan_materials_module_id_pelatihan_modules_id_fk",
           "tableFrom": "pelatihan_materials",
           "tableTo": "pelatihan_modules",
-          "columnsFrom": [
-            "module_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["module_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -9357,12 +9603,8 @@
           "name": "pelatihan_modules_pelatihan_id_pelatihan_id_fk",
           "tableFrom": "pelatihan_modules",
           "tableTo": "pelatihan",
-          "columnsFrom": [
-            "pelatihan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9427,12 +9669,8 @@
           "name": "pelatihan_order_items_order_id_pelatihan_orders_id_fk",
           "tableFrom": "pelatihan_order_items",
           "tableTo": "pelatihan_orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9440,12 +9678,8 @@
           "name": "pelatihan_order_items_pelatihan_id_pelatihan_id_fk",
           "tableFrom": "pelatihan_order_items",
           "tableTo": "pelatihan",
-          "columnsFrom": [
-            "pelatihan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9493,6 +9727,20 @@
           "notNull": true,
           "default": 0
         },
+        "approval_status": {
+          "name": "approval_status",
+          "type": "pelatihan_order_approval_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "approval_reject_reason": {
+          "name": "approval_reject_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "payment_status": {
           "name": "payment_status",
           "type": "pelatihan_payment_status",
@@ -9500,6 +9748,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'unpaid'"
+        },
+        "payment_rejected_reason": {
+          "name": "payment_rejected_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "payment_proof_url": {
           "name": "payment_proof_url",
@@ -9510,6 +9764,18 @@
         "payment_proof_uploaded_at": {
           "name": "payment_proof_uploaded_at",
           "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_at": {
+          "name": "approved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_by": {
+          "name": "approved_by",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -9581,6 +9847,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "pelatihan_orders_approval_status_idx": {
+          "name": "pelatihan_orders_approval_status_idx",
+          "columns": [
+            {
+              "expression": "approval_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -9588,25 +9869,26 @@
           "name": "pelatihan_orders_user_id_users_id_fk",
           "tableFrom": "pelatihan_orders",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pelatihan_orders_approved_by_users_id_fk": {
+          "name": "pelatihan_orders_approved_by_users_id_fk",
+          "tableFrom": "pelatihan_orders",
+          "tableTo": "users",
+          "columnsFrom": ["approved_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "pelatihan_orders_verified_by_users_id_fk": {
           "name": "pelatihan_orders_verified_by_users_id_fk",
           "tableFrom": "pelatihan_orders",
           "tableTo": "users",
-          "columnsFrom": [
-            "verified_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["verified_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -9616,9 +9898,7 @@
         "pelatihan_orders_order_number_unique": {
           "name": "pelatihan_orders_order_number_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "order_number"
-          ]
+          "columns": ["order_number"]
         }
       },
       "policies": {},
@@ -9715,12 +9995,8 @@
           "name": "pelatihan_progress_enrollment_id_pelatihan_enrollments_id_fk",
           "tableFrom": "pelatihan_progress",
           "tableTo": "pelatihan_enrollments",
-          "columnsFrom": [
-            "enrollment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enrollment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9728,12 +10004,8 @@
           "name": "pelatihan_progress_material_id_pelatihan_materials_id_fk",
           "tableFrom": "pelatihan_progress",
           "tableTo": "pelatihan_materials",
-          "columnsFrom": [
-            "material_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["material_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9806,12 +10078,8 @@
           "name": "pelatihan_question_options_question_id_pelatihan_questions_id_fk",
           "tableFrom": "pelatihan_question_options",
           "tableTo": "pelatihan_questions",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["question_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9903,12 +10171,8 @@
           "name": "pelatihan_questions_assessment_id_pelatihan_assessments_id_fk",
           "tableFrom": "pelatihan_questions",
           "tableTo": "pelatihan_assessments",
-          "columnsFrom": [
-            "assessment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assessment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9918,18 +10182,347 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.pelatihan_schedules": {
+      "name": "pelatihan_schedules",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pelatihan_id": {
+          "name": "pelatihan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session_date": {
+          "name": "session_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "room": {
+          "name": "room",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "material_url": {
+          "name": "material_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meet_url": {
+          "name": "meet_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pelatihan_schedules_pelatihan_id_pelatihan_id_fk": {
+          "name": "pelatihan_schedules_pelatihan_id_pelatihan_id_fk",
+          "tableFrom": "pelatihan_schedules",
+          "tableTo": "pelatihan",
+          "columnsFrom": ["pelatihan_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_training_profiles": {
+      "name": "user_training_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "company_name": {
+          "name": "company_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_address": {
+          "name": "company_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_province_id": {
+          "name": "company_province_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_regency_id": {
+          "name": "company_regency_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_district_id": {
+          "name": "company_district_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_kbli": {
+          "name": "company_kbli",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_name": {
+          "name": "participant_name",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_nik": {
+          "name": "participant_nik",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_birth_place": {
+          "name": "participant_birth_place",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_birth_date": {
+          "name": "participant_birth_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_phone": {
+          "name": "participant_phone",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_address": {
+          "name": "participant_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_blood_type": {
+          "name": "participant_blood_type",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_province_id": {
+          "name": "participant_province_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_regency_id": {
+          "name": "participant_regency_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participant_district_id": {
+          "name": "participant_district_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "user_training_profile_user_id_idx": {
+          "name": "user_training_profile_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_training_profiles_user_id_users_id_fk": {
+          "name": "user_training_profiles_user_id_users_id_fk",
+          "tableFrom": "user_training_profiles",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_training_profiles_company_province_id_provinces_id_fk": {
+          "name": "user_training_profiles_company_province_id_provinces_id_fk",
+          "tableFrom": "user_training_profiles",
+          "tableTo": "provinces",
+          "columnsFrom": ["company_province_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "user_training_profiles_company_regency_id_regencies_id_fk": {
+          "name": "user_training_profiles_company_regency_id_regencies_id_fk",
+          "tableFrom": "user_training_profiles",
+          "tableTo": "regencies",
+          "columnsFrom": ["company_regency_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "user_training_profiles_company_district_id_districts_id_fk": {
+          "name": "user_training_profiles_company_district_id_districts_id_fk",
+          "tableFrom": "user_training_profiles",
+          "tableTo": "districts",
+          "columnsFrom": ["company_district_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "user_training_profiles_participant_province_id_provinces_id_fk": {
+          "name": "user_training_profiles_participant_province_id_provinces_id_fk",
+          "tableFrom": "user_training_profiles",
+          "tableTo": "provinces",
+          "columnsFrom": ["participant_province_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "user_training_profiles_participant_regency_id_regencies_id_fk": {
+          "name": "user_training_profiles_participant_regency_id_regencies_id_fk",
+          "tableFrom": "user_training_profiles",
+          "tableTo": "regencies",
+          "columnsFrom": ["participant_regency_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "user_training_profiles_participant_district_id_districts_id_fk": {
+          "name": "user_training_profiles_participant_district_id_districts_id_fk",
+          "tableFrom": "user_training_profiles",
+          "tableTo": "districts",
+          "columnsFrom": ["participant_district_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_training_profiles_user_id_unique": {
+          "name": "user_training_profiles_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["user_id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
     "public.audit_action": {
       "name": "audit_action",
       "schema": "public",
-      "values": [
-        "create",
-        "update",
-        "delete",
-        "status_change"
-      ]
+      "values": ["create", "update", "delete", "status_change"]
     },
     "public.document_entity_type": {
       "name": "document_entity_type",
@@ -9946,13 +10539,7 @@
     "public.document_status": {
       "name": "document_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "pending_signature",
-        "signed",
-        "verified",
-        "rejected"
-      ]
+      "values": ["draft", "pending_signature", "signed", "verified", "rejected"]
     },
     "public.document_type": {
       "name": "document_type",
@@ -9974,18 +10561,18 @@
         "business_license",
         "company_registration",
         "id_card",
-        "certification"
+        "certification",
+        "employment_letter",
+        "salary_slip",
+        "employment_contract",
+        "diploma",
+        "pass_photo"
       ]
     },
     "public.employee_status": {
       "name": "employee_status",
       "schema": "public",
-      "values": [
-        "siap",
-        "spt",
-        "standby",
-        "cuti"
-      ]
+      "values": ["siap", "spt", "standby", "cuti"]
     },
     "public.notification_type": {
       "name": "notification_type",
@@ -10021,45 +10608,22 @@
     "public.bahan_status": {
       "name": "bahan_status",
       "schema": "public",
-      "values": [
-        "tersedia",
-        "hampir_habis",
-        "habis",
-        "expired",
-        "dipesan"
-      ]
+      "values": ["tersedia", "hampir_habis", "habis", "expired", "dipesan"]
     },
     "public.bahan_unit": {
       "name": "bahan_unit",
       "schema": "public",
-      "values": [
-        "gram",
-        "kg",
-        "botol",
-        "ml",
-        "liter"
-      ]
+      "values": ["gram", "kg", "botol", "ml", "liter"]
     },
     "public.tools_availability": {
       "name": "tools_availability",
       "schema": "public",
-      "values": [
-        "ready",
-        "kalibrasi",
-        "not_ready",
-        "maintenance",
-        "dipinjam"
-      ]
+      "values": ["ready", "kalibrasi", "not_ready", "maintenance", "dipinjam"]
     },
     "public.tools_condition": {
       "name": "tools_condition",
       "schema": "public",
-      "values": [
-        "baik",
-        "rusak",
-        "diperingatkan",
-        "tidak_menyala"
-      ]
+      "values": ["baik", "rusak", "diperingatkan", "tidak_menyala"]
     },
     "public.approval_status": {
       "name": "approval_status",
@@ -10075,10 +10639,7 @@
     "public.order_item_type": {
       "name": "order_item_type",
       "schema": "public",
-      "values": [
-        "pengujian",
-        "pelatihan"
-      ]
+      "values": ["pengujian", "pelatihan"]
     },
     "public.order_status": {
       "name": "order_status",
@@ -10087,6 +10648,7 @@
         "pending",
         "kaji_ulang",
         "kaji_ulang_disetujui",
+        "penawaran_review",
         "penawaran_diterbitkan",
         "revision",
         "upload_surat_persetujuan",
@@ -10109,12 +10671,7 @@
     "public.payment_status": {
       "name": "payment_status",
       "schema": "public",
-      "values": [
-        "unpaid",
-        "pending_verification",
-        "paid",
-        "rejected"
-      ]
+      "values": ["unpaid", "pending_verification", "paid", "rejected"]
     },
     "public.testing_status": {
       "name": "testing_status",
@@ -10159,61 +10716,49 @@
     "public.assessment_type": {
       "name": "assessment_type",
       "schema": "public",
-      "values": [
-        "pre_test",
-        "post_test"
-      ]
+      "values": ["pre_test", "post_test", "quiz"]
     },
     "public.attempt_status": {
       "name": "attempt_status",
       "schema": "public",
-      "values": [
-        "in_progress",
-        "submitted",
-        "graded",
-        "reviewed"
-      ]
+      "values": ["in_progress", "submitted", "graded", "reviewed"]
+    },
+    "public.attendance_status": {
+      "name": "attendance_status",
+      "schema": "public",
+      "values": ["present", "absent", "excused", "sick", "visited"]
     },
     "public.enrollment_status": {
       "name": "enrollment_status",
       "schema": "public",
-      "values": [
-        "enrolled",
-        "in_progress",
-        "completed",
-        "failed",
-        "expired"
-      ]
+      "values": ["enrolled", "in_progress", "completed", "failed", "expired"]
     },
     "public.material_type": {
       "name": "material_type",
       "schema": "public",
-      "values": [
-        "ppt",
-        "pdf",
-        "video",
-        "document",
-        "link"
-      ]
+      "values": ["ppt", "pdf", "video", "document", "link"]
     },
     "public.pelatihan_level": {
       "name": "pelatihan_level",
       "schema": "public",
-      "values": [
-        "beginner",
-        "intermediate",
-        "advanced"
-      ]
+      "values": ["beginner", "intermediate", "advanced"]
+    },
+    "public.pelatihan_order_approval_status": {
+      "name": "pelatihan_order_approval_status",
+      "schema": "public",
+      "values": ["pending", "approved", "rejected"]
     },
     "public.pelatihan_order_status": {
       "name": "pelatihan_order_status",
       "schema": "public",
       "values": [
         "pending",
+        "waiting_payment",
         "waiting_verification",
         "verified",
         "cancelled",
-        "expired"
+        "expired",
+        "rejected"
       ]
     },
     "public.pelatihan_payment_status": {
@@ -10222,36 +10767,31 @@
       "values": [
         "unpaid",
         "pending",
+        "pending_verification",
         "paid",
-        "refunded"
+        "refunded",
+        "rejected"
       ]
     },
     "public.pelatihan_status": {
       "name": "pelatihan_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "published",
-        "archived"
-      ]
+      "values": ["draft", "published", "archived"]
     },
     "public.pelatihan_type": {
       "name": "pelatihan_type",
       "schema": "public",
-      "values": [
-        "elearning",
-        "bimtek",
-        "webinar"
-      ]
+      "values": ["elearning", "bimtek", "webinar"]
     },
     "public.question_type": {
       "name": "question_type",
       "schema": "public",
-      "values": [
-        "multiple_choice",
-        "true_false",
-        "essay"
-      ]
+      "values": ["multiple_choice", "true_false", "essay"]
+    },
+    "public.pelatihan_verification_status": {
+      "name": "pelatihan_verification_status",
+      "schema": "public",
+      "values": ["pending", "verified", "rejected"]
     }
   },
   "schemas": {},

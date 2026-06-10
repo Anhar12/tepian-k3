@@ -5,6 +5,22 @@
 
 ---
 
+### 2026-06-10 — Repair corrupted pelatihan migration chain
+
+- **Masalah:** `pnpm db:migrate` gagal di `0010_good_marvel_apes.sql` dengan `relation "pelatihan" does not exist`. Penyebab dari merge PR #78 (pelatihan LMS):
+  - `_journal.json` terduplikasi — dua lineage ter-interleave dengan idx bertabrakan (dua `0009`, dua `0010`, … s/d `0022`).
+  - `CREATE TABLE "pelatihan"` (tabel induk) tidak pernah ada di SQL manapun — fitur dikembangkan via `db:push`, hanya ALTER turunannya yang ter-commit.
+- **Perbaikan (production-safe):**
+  - Hapus tail teracak: `0009_modern_night_thrasher.sql` + `0010`–`0023` beserta snapshot-nya (`0010_snapshot.json`–`0023_snapshot.json`).
+  - Rewind `_journal.json` ke migration bersih terakhir `0009_rare_edwin_jarvis` (idx 0–9).
+  - `pnpm db:generate` → hasilkan satu migration konsolidasi `0010_freezing_mattie_franklin.sql` (21 CREATE TABLE termasuk `pelatihan`, semua enum pelatihan, penambahan `document_type`/`order_item_type`).
+  - File `0000`–`0009_rare_edwin_jarvis` dibiarkan **byte-identical** → hash di `drizzle.__drizzle_migrations` prod tetap valid; prod cukup apply `0010` baru sebagai pending.
+  - `pnpm db:migrate` lulus di DB dev.
+- **AGENTS.md** — Tambah dua aturan di "Database & Data Integrity": jangan `db:push` lalu commit ALTER manual; jaga koherensi migration chain + jangan ubah migration yang sudah teraplikasi di prod.
+- **Sebelum deploy prod:** verifikasi last applied = `0009_rare_edwin_jarvis` (atau lebih awal) via `SELECT ... FROM drizzle.__drizzle_migrations`.
+
+---
+
 ### 2026-06-01 — Documentation overhaul + Pelatihan back-office UI
 
 - **AGENTS.md** — Ditulis ulang sepenuhnya:

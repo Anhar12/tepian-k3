@@ -415,6 +415,8 @@ Ikuti urutan ini **setiap kali** menambah fitur di domain yang ada atau domain b
 
 - **Transaksi wajib** jika satu mutasi menyentuh lebih dari satu tabel.
 - **Cascade deletes aktif** — hati-hati saat melakukan delete, bisa menghapus data terkait.
+- **Jangan kembangkan schema lewat `db:push` lalu commit ALTER manual** — base `CREATE TABLE` tidak akan tertangkap sebagai SQL dan migration akan gagal di environment bersih (`relation "x" does not exist`). Selalu `pnpm db:generate` agar setiap perubahan punya file SQL lengkap.
+- **Migration chain harus koheren** — jangan pernah merge `_journal.json` sampai menghasilkan idx duplikat atau dua tag dengan nomor sama. Saat resolve konflik journal/migration, pilih satu lineage; jika perlu, hapus tail yang belum pernah teraplikasi di prod (verifikasi via `drizzle.__drizzle_migrations`) dan regenerate satu migration konsolidasi dari snapshot bersih terakhir. **Jangan ubah isi file migration yang sudah teraplikasi di prod** — hash-nya harus tetap valid.
 - **File uploads** harus melalui `storageService` dari `@tepian-k3/services`.
 - **UUIDs selalu v7** — gunakan `uuidv7()` dari package `uuid`.
 - **Selalu validasi input** dengan Zod schemas dari `@tepian-k3/schema`.
