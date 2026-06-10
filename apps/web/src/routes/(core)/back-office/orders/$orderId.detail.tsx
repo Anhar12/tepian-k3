@@ -528,6 +528,16 @@ function RouteComponent() {
   };
 
   const handleCreateTesting = () => {
+    if (!worksheet?.isPersonnelDateSet)
+      return globalErrorToast(
+        "Jadwal dan personel belum ditetapkan oleh Tim Penjadwalan. Tidak dapat membuat testing.",
+      );
+
+    if (!order?.documents.some((doc) => doc.type === "assignment_letter"))
+      return globalErrorToast(
+        "Dokumen SPT belum diunggah. Tidak dapat membuat testing.",
+      );
+
     createTestingMutation.mutate({ orderId });
   };
 
@@ -645,6 +655,18 @@ function RouteComponent() {
   const isPaymentVerifiedNeedsTesting =
     order.paymentStatus === "paid" && !order.testing;
   const hasTestingCreated = !!order.testing;
+
+  // "Buat Pengujian" may only run after Tim Penjadwalan has set the schedule +
+  // personnel and the SPT document has been uploaded — keeping the milestone
+  // order jadwal → SPT → pengujian.
+  const isSchedulingDone = !!worksheet?.isPersonnelDateSet;
+  const hasSPTDocument = order.documents.some(
+    (doc) => doc.type === "assignment_letter",
+  );
+  const canCreateTesting = isSchedulingDone && hasSPTDocument;
+  const createTestingLockReason = !isSchedulingDone
+    ? "Tunggu Tim Penjadwalan menetapkan jadwal dan personel."
+    : "Tunggu dokumen SPT diunggah terlebih dahulu.";
 
   // Worksheet status flags (new flow: worksheet created during kaji ulang)
   const hasWorksheet = !!worksheet;
@@ -1885,18 +1907,32 @@ function RouteComponent() {
                     </Card>
 
                     <div className="flex justify-end pt-4">
-                      <Button
-                        className="bg-blue-500 hover:bg-blue-600"
-                        onClick={handleCreateTesting}
-                        disabled={createTestingMutation.isPending}
-                      >
-                        {createTestingMutation.isPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Plus className="mr-2 h-4 w-4" />
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0}>
+                            <Button
+                              className="bg-blue-500 hover:bg-blue-600"
+                              onClick={handleCreateTesting}
+                              disabled={
+                                createTestingMutation.isPending ||
+                                !canCreateTesting
+                              }
+                            >
+                              {createTestingMutation.isPending ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Plus className="mr-2 h-4 w-4" />
+                              )}
+                              Buat Pengujian
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        {!canCreateTesting && (
+                          <TooltipContent>
+                            {createTestingLockReason}
+                          </TooltipContent>
                         )}
-                        Buat Pengujian
-                      </Button>
+                      </Tooltip>
                     </div>
                   </div>
                 </CardContent>

@@ -149,6 +149,7 @@ const testingQueries = {
                 },
                 company: true,
                 user: true,
+                documents: true,
               },
             });
 
@@ -171,6 +172,29 @@ const testingQueries = {
               });
             }
 
+            // Testing may only be created after Tim Penjadwalan has confirmed the
+            // schedule + personnel (isPersonnelDateSet) and the SPT has been issued
+            // and uploaded. This keeps the milestone order: jadwal → SPT → pengujian.
+            if (!worksheetFromKajiUlang.isPersonnelDateSet) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Jadwal dan personel belum ditetapkan oleh Tim Penjadwalan. Tidak dapat membuat testing.",
+              });
+            }
+
+            const hasSPTDocument = orderData.documents.some(
+              (doc) => doc.type === "assignment_letter",
+            );
+
+            if (!hasSPTDocument) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message:
+                  "Dokumen SPT belum diunggah. Tidak dapat membuat testing.",
+              });
+            }
+
             // Check if testing already exists for this order
             const existingTesting = await tx.query.testing.findFirst({
               where: eq(testing.orderId, orderId),
@@ -184,7 +208,9 @@ const testingQueries = {
             }
 
             // Filter only pengujian items
-            const pengujianItems = orderData.items.filter(item => item.type === "pengujian");
+            const pengujianItems = orderData.items.filter(
+              (item) => item.type === "pengujian",
+            );
 
             // Validate order has items
             if (pengujianItems.length === 0) {
@@ -260,11 +286,13 @@ const testingQueries = {
               .values(testingItemsData)
               .returning();
 
-            // 5. Update order status to menunggu_penerbitan_spt_jadwal
+            // 5. Update order status to proses_pengambilan_sampel.
+            // Scheduling + SPT are already done by this point (guarded above), so
+            // creating the testing advances the order to sample collection.
             await tx
               .update(order)
               .set({
-                status: "menunggu_penerbitan_spt_jadwal",
+                status: "proses_pengambilan_sampel",
                 updatedAt: sql`CURRENT_TIMESTAMP`,
               })
               .where(eq(order.id, orderId));
@@ -274,7 +302,7 @@ const testingQueries = {
               orderStatusHistoryQueries.createOrderStatusHistory(
                 tx,
                 orderId,
-                "menunggu_penerbitan_spt_jadwal",
+                "proses_pengambilan_sampel",
                 orderData.userId,
                 "Testing record created",
               ),
