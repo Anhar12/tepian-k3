@@ -69,7 +69,7 @@ beta
 
 ### v2.0.0 - Pelatihan (Training) Module
 
-**Status:** Planning
+**Status:** 🚧 In Progress
 **Target:** TBD
 **Branch:** `feat/pelatihan`
 
@@ -101,31 +101,35 @@ beta
 
 **Alpha Phase (Backend)**
 
-- [ ] Database schema (12 tables, 6 enums)
-- [ ] Drizzle migrations
-- [ ] Query functions (Effect-based)
-- [ ] Zod validation schemas
-- [ ] tRPC routers (10 routers)
-- [ ] Cart system for paid trainings
-- [ ] Free enrollment flow
-- [ ] Order system integration (payment → auto-enrollment)
+- [x] Database schema (12 tables, 6 enums)
+- [x] Drizzle migrations
+- [x] Query functions (Effect-based)
+- [x] Zod validation schemas
+- [x] tRPC routers (pelatihan.base, categories, materials, assessments, enrollments)
+- [x] Cart system for paid trainings
+- [x] Free enrollment flow
+- [x] Order system integration (payment → auto-enrollment)
 - [ ] Certificate generation service
-- [ ] Permission seeding
+- [x] Permission seeding
 
 **Beta Phase (Frontend)**
 
-- [ ] Browse trainings page
-- [ ] Training detail page
+- [ ] Browse trainings page (public)
+- [ ] Training detail page (public)
 - [ ] Cart page + checkout flow
 - [ ] My trainings dashboard
 - [ ] Material viewer (PPT, PDF)
 - [ ] Pre-test / post-test interface
 - [ ] Progress tracking UI
 - [ ] Certificate viewer + download
-- [ ] Admin: training CRUD
-- [ ] Admin: material management
-- [ ] Admin: assessment + question builder
-- [ ] Admin: enrollment management
+- [x] Admin: training list + filters (`back-office/pelatihan/`)
+- [x] Admin: training create form (`back-office/pelatihan/create`)
+- [x] Admin: training edit form (`back-office/pelatihan/$id/edit`)
+- [x] Admin: training detail layout (CourseHeader + TabNav)
+- [x] Admin: Overview tab (stats, course info, recent activity)
+- [x] Admin: Materi tab (module management)
+- [x] Admin: Quiz & Post Test tab (assessment management)
+- [x] Admin: Peserta tab (participant list + stats)
 
 **RC Phase (Quality)**
 

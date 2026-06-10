@@ -79,62 +79,8 @@ const pusatLayananItems: {
   },
 ];
 
-const faqItems = [
-  {
-    value: "item-1",
-    trigger: "Is it accessible?",
-    content: "",
-  },
-  {
-    value: "item-2",
-    trigger: "Shipping Details",
-    content: "",
-  },
-  {
-    value: "item-3",
-    trigger: "Product Information",
-    content: (
-      <>
-        <p>
-          Our flagship product combines cutting-edge technology with sleek
-          design. Built with premium materials, it offers unparalleled
-          performance and reliability.
-        </p>
-        <p>
-          Key features include advanced processing capabilities, and an
-          intuitive user interface designed for both beginners and experts.
-        </p>
-      </>
-    ),
-  },
-  {
-    value: "item-4",
-    trigger:
-      "What are the key considerations when implementing a comprehensive enterprise-level authentication system?",
-    content: "",
-  },
-  {
-    value: "item-5",
-    trigger:
-      "How does modern distributed system architecture handle eventual consistency and data synchronization across multiple regions?",
-    content: "",
-  },
-];
 
-const footerLinks = {
-  tautanCepat: [
-    { label: "Program Pelatihan", href: "/pelatihan" },
-    { label: "Jadwal Pengujian", href: "/pengujian" },
-    { label: "Biaya Layanan", href: "/katalog" },
-    { label: "Verifikasi Sertifikat", href: "/verify" },
-  ],
-  hubungiKami: [
-    { label: "Program Pelatihan", href: "/pelatihan" },
-    { label: "Jadwal Pengujian", href: "/pengujian" },
-    { label: "Biaya Layanan", href: "/katalog" },
-    { label: "Verifikasi Sertifikat", href: "/verify" },
-  ],
-};
+
 
 function HomeComponent() {
   const navigate = useNavigate();
@@ -146,6 +92,64 @@ function HomeComponent() {
   const { data: news, isLoading: isNewsLoading } = useQuery(
     trpc.platform.news.getFirst5News.queryOptions(),
   );
+
+  const { data: dbFaqs } = useQuery(
+    trpc.platform.faq.getByCategory.queryOptions({ category: "general" }),
+  );
+
+  const { data: heroBannerSetting } = useQuery(
+    trpc.platform.setting.getByKey.queryOptions({
+      key: "landing.hero.image_url",
+    }),
+  );
+
+  const heroImageSrc = heroBannerSetting?.value
+    ? getPublicUrl(heroBannerSetting.value)
+    : "/assets/hero-banner.webp";
+
+  const faqItems =
+    dbFaqs && dbFaqs.length > 0
+      ? dbFaqs.map((f, i) => ({
+          value: `item-${i + 1}`,
+          trigger: f.question,
+          content: <p>{f.answer}</p>,
+        }))
+      : [
+          {
+            value: "item-1",
+            trigger: "Apakah Balai K3 Samarinda merupakan lembaga resmi?",
+            content: (
+              <p>
+                Ya, Balai Keselamatan dan Kesehatan Kerja (K3) Samarinda adalah
+                Unit Pelaksana Teknis resmi pemerintah yang didirikan untuk
+                menyelenggarakan pembinaan, pengujian, dan sertifikasi K3.
+              </p>
+            ),
+          },
+          {
+            value: "item-2",
+            trigger:
+              "Bagaimana cara memesan layanan pengujian lingkungan kerja?",
+            content: (
+              <p>
+                Anda dapat memilih menu layanan Pengujian di halaman utama,
+                memilih parameter uji yang dibutuhkan, mendaftar akun
+                perusahaan, and menyelesaikan proses checkout secara online.
+              </p>
+            ),
+          },
+          {
+            value: "item-3",
+            trigger: "Apakah sertifikat hasil pengujian K3 diakui hukum?",
+            content: (
+              <p>
+                Tentu saja. Seluruh laporan hasil pengujian lingkungan kerja
+                yang kami terbitkan sah secara hukum dan diakui resmi oleh
+                Kemenaker RI serta stakeholder keselamatan kerja nasional.
+              </p>
+            ),
+          },
+        ];
 
   return (
     <div className="w-full overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950">
@@ -160,60 +164,10 @@ function HomeComponent() {
         {/* Background Image */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden bg-primary">
           <ImageWithFallback
-            src="/assets/hero-banner.webp"
+            src={heroImageSrc}
             className="h-full w-full"
             imgClassName="object-cover object-bottom-right"
           />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 flex h-full w-full flex-1 flex-col items-start justify-center px-4 sm:px-6 md:px-16">
-          {/* Hero Title & Description */}
-          <div className="mt-auto mb-auto max-w-2xl">
-            <h1 className="text-start text-3xl leading-tight font-bold text-white sm:text-4xl md:text-5xl lg:text-7xl">
-              Pusat Pelatihan
-              <br />
-              K3 Samarinda
-            </h1>
-            <p className="mt-4 max-w-lg text-start text-sm leading-relaxed text-white/90 sm:text-base md:mt-6 md:text-lg">
-              Meningkatkan standar keselamatan kerja melalui program pelatihan
-              profesional dan sertifikasi kompetensi yang diakui secara
-              nasional.
-            </p>
-          </div>
-
-          {/* Hero Footer */}
-          <div className="mb-4 flex w-full items-end justify-between sm:mb-8">
-            {/* Stats */}
-            <div className="flex items-center gap-3 sm:gap-6">
-              <div className="flex flex-col items-start gap-1">
-                <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
-                  500+
-                </h2>
-                <p className="text-xs text-white/80 sm:text-sm">
-                  Perusahaan Mitra
-                </p>
-              </div>
-              <div className="h-8 w-px bg-white/40 sm:h-12" />
-              <div className="flex flex-col items-start gap-1">
-                <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
-                  10K+
-                </h2>
-                <p className="text-xs text-white/80 sm:text-sm">
-                  Pelatihan Selesai
-                </p>
-              </div>
-              <div className="h-8 w-px bg-white/40 sm:h-12" />
-              <div className="flex flex-col items-start gap-1">
-                <h2 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
-                  98%
-                </h2>
-                <p className="text-xs text-white/80 sm:text-sm">
-                  Tingkat Kepuasan
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -297,11 +251,6 @@ function HomeComponent() {
               alt="Balai K3 Icon"
               className="h-16 w-auto object-contain brightness-0 invert"
             />
-          </div>
-          {/* 30+ Tahun Badge */}
-          <div className="absolute right-4 -bottom-6 flex flex-col items-center rounded-2xl bg-primary px-8 py-5 text-white shadow-lg">
-            <span className="text-4xl font-bold">30+</span>
-            <span className="text-sm font-medium">Tahun Pengalaman</span>
           </div>
         </div>
 
@@ -546,65 +495,214 @@ function HomeComponent() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground" id="footer">
-        {/* Main Footer Content */}
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-10 py-14 md:grid-cols-4">
-          {/* Column 1: Logo & Description */}
-          <div className="flex flex-col gap-4">
-            <ImageWithFallback
-              src="/assets/logo-tepiank3-white.webp"
-              alt="Tepian K3 Logo"
-              className="h-12 w-fit object-contain"
-            />
-            <p className="text-sm leading-relaxed text-primary-foreground/80">
-              Lembaga pelatihan dan pengujian keselamatan kerja terpercaya di
-              Kalimantan Timur. Membangun budaya aman untuk Indonesia maju.
-            </p>
-          </div>
-
-          {/* Column 2: Tautan Cepat */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-base font-semibold">Tautan Cepat</h3>
-            <nav className="flex flex-col gap-2.5">
-              {footerLinks.tautanCepat.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.href}
-                  className="text-sm text-primary-foreground/80 transition-colors hover:text-primary-foreground"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Column 3: Hubungi Kami */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-base font-semibold">Hubungi Kami</h3>
-            <nav className="flex flex-col gap-2.5">
-              {footerLinks.hubungiKami.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.href}
-                  className="text-sm text-primary-foreground/80 transition-colors hover:text-primary-foreground"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Column 4: Ikuti Kami */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-base font-semibold">Ikuti Kami</h3>
-          </div>
+      <footer
+        className="relative overflow-hidden bg-[#1061D6] py-16 text-white"
+        id="footer"
+      >
+        {/* Decorative watermark background */}
+        <div className="pointer-events-none absolute top-0 bottom-0 left-0 w-full overflow-hidden">
+          <ImageWithFallback
+            src="/assets/LOGO TEPIANK3 2.png"
+            alt="Watermark Tepian K3"
+            className="absolute -top-[32px] -left-[27px] h-[666px] w-[705px] object-contain opacity-[0.08] select-none"
+          />
         </div>
 
-        {/* Copyright */}
-        <div className="flex items-center justify-center bg-primary-foreground px-10 py-5">
-          <p className="text-center text-sm text-[hsla(213,97%,14%,1)]">
-            Copyright &copy; 2025 Balai K3 Samarinda
-          </p>
+        <div className="relative z-10 mx-auto max-w-7xl px-6 sm:px-12">
+          {/* Top Grid Area */}
+          <div className="grid grid-cols-1 gap-12 pb-12 md:grid-cols-12">
+            {/* Column 1: Logo & Description */}
+            <div className="relative z-10 space-y-6 md:col-span-5">
+              <ImageWithFallback
+                src="/assets/LOGO TEPIANK3 1.png"
+                alt="Tepian K3 Logo Putih"
+                className="h-16 w-auto object-contain"
+              />
+              <p className="font-poppins max-w-md text-base leading-relaxed font-medium text-white/90">
+                Lembaga pelatihan dan pengujian keselamatan kerja terpercaya di
+                Kalimantan Timur. Membangun budaya aman untuk Indonesia maju.
+              </p>
+            </div>
+
+            {/* Column 2: Tautan Cepat */}
+            <div className="space-y-6 md:col-span-3 md:pl-8">
+              <h3 className="font-poppins text-lg font-bold tracking-wider text-white">
+                Tautan Cepat
+              </h3>
+              <ul className="font-poppins space-y-3.5 text-base font-semibold text-white/95">
+                <li>
+                  <Link
+                    to="/pelatihan"
+                    className="transition-all hover:underline"
+                  >
+                    Program Pelatihan
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/katalog"
+                    className="transition-all hover:underline"
+                  >
+                    Jadwal Pengujian
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/katalog"
+                    className="transition-all hover:underline"
+                  >
+                    Biaya Layanan
+                  </Link>
+                </li>
+                <li>
+                  <a href="/verify" className="transition-all hover:underline">
+                    Verifikasi Sertifikat
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Hubungi Kami */}
+            <div className="space-y-6 md:col-span-4">
+              <h3 className="font-poppins text-lg font-bold tracking-wider text-white">
+                Hubungi Kami
+              </h3>
+              <ul className="font-poppins space-y-3.5 text-base font-semibold text-white/95">
+                <li>
+                  <a
+                    href="mailto:balaik3samarinda@gmail.com"
+                    className="block transition-all hover:underline"
+                  >
+                    balaik3samarinda@gmail.com
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="tel:0541771306"
+                    className="block transition-all hover:underline"
+                  >
+                    (0541) 771306
+                  </a>
+                </li>
+                <li className="leading-relaxed font-medium text-white/90">
+                  Jl. Sentosa No.9, Sungai Pinang Dalam, Kec. Sungai Pinang,
+                  Kota Samarinda, Kalimantan Timur 75242
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="flex flex-col items-center justify-center space-y-6 border-t border-white/20 pt-10">
+            {/* Social Media Row */}
+            <div className="flex flex-col items-center gap-4 sm:flex-row">
+              <span className="font-poppins text-base font-bold text-white">
+                Sosial Media Kami
+              </span>
+              <div className="flex items-center gap-3">
+                {/* Instagram */}
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect
+                      x="2"
+                      y="2"
+                      width="20"
+                      height="20"
+                      rx="5"
+                      ry="5"
+                    ></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                  </svg>
+                </a>
+                {/* YouTube */}
+                <a
+                  href="https://youtube.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                  </svg>
+                </a>
+                {/* TikTok */}
+                <a
+                  href="https://tiktok.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
+                  </svg>
+                </a>
+                {/* X (formerly Twitter) */}
+                <a
+                  href="https://x.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+                    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            {/* Copyright */}
+            <p className="font-poppins text-center text-sm font-semibold text-white/90">
+              Copyright &copy; 2026 Balai K3 Samarinda. All Rights Reserved
+            </p>
+          </div>
         </div>
       </footer>
     </div>

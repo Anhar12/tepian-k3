@@ -1,6 +1,13 @@
 // Invoice generator
 export { generateInvoicePdf } from "./generator/invoice";
 
+// Dynamic Certificate generator
+export {
+  generateDynamicCertificatePdf,
+  type GenerateCertificateOptions,
+  type CertificateData,
+} from "./generator/certificate";
+
 // Offering Letter generator
 export { generateOfferingLetterPdf } from "./generator/offering-letter";
 

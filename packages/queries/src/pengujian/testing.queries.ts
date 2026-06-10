@@ -183,24 +183,27 @@ const testingQueries = {
               });
             }
 
+            // Filter only pengujian items
+            const pengujianItems = orderData.items.filter(item => item.type === "pengujian");
+
             // Validate order has items
-            if (orderData.items.length === 0) {
+            if (pengujianItems.length === 0) {
               throw new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Order tidak memiliki item untuk testing",
+                message: "Order tidak memiliki item pengujian untuk testing",
               });
             }
 
             // Get the testing type (category) from the first item
             // All items should have the same category based on order creation logic
             const testingTypeId =
-              orderData.items[0]?.parameter?.parameterCategoryId;
+              pengujianItems[0]?.parameter?.parameterCategoryId;
 
             if (!testingTypeId) {
               throw new TRPCError({
                 code: "BAD_REQUEST",
                 message:
-                  "Parameter categoryId tidak ditemukan pada item pertama",
+                  "Parameter categoryId tidak ditemukan pada item pengujian pertama",
               });
             }
 
@@ -209,6 +212,13 @@ const testingQueries = {
               tx,
               "TEST",
             );
+
+            if (!orderData.companyId) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Order pengujian harus memiliki companyId",
+              });
+            }
 
             // 3. Create testing record
             const [newTesting] = await tx
@@ -233,11 +243,11 @@ const testingQueries = {
             }
 
             // 4. Create testing items from order items
-            const testingItemsData = orderData.items.map((item) => ({
+            const testingItemsData = pengujianItems.map((item) => ({
               testingId: newTesting.id,
               orderItemId: item.id,
-              parameterId: item.parameterId,
-              locationId: item.locationId,
+              parameterId: item.parameterId!,
+              locationId: item.locationId!,
               quantity: item.quantity,
               price: item.price,
               subTotal: item.subTotal,

@@ -11,6 +11,7 @@ import { getAllPermissions } from "./permissions";
 export const ROLES = [
   "super_admin", // Super Administrator
   "admin", // Administrator Back Office
+  "admin_pelatihan", // Administrator Pelatihan
   "user", // Pengguna Layanan / Perusahaan
   "employee", // Karyawan dasar
   "petugas_sampling", // Petugas Sampling
@@ -54,6 +55,7 @@ export const EMPLOYEE_ROLES = [
  */
 export const BACK_OFFICE_ROLES = [
   "admin",
+  "admin_pelatihan",
   "super_admin",
   "viewer",
 ] as const satisfies readonly Role[];
@@ -75,6 +77,9 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
 
   admin:
     "Administrator back office yang menerima, memverifikasi kelengkapan data order, dan meneruskan ke alur kaji ulang",
+
+  admin_pelatihan:
+    "Administrator khusus untuk mengelola data pelatihan, sertifikasi, dan pendaftaran peserta",
 
   user: "Pengguna layanan yang dapat membuat pesanan, memantau status pengujian, dan mengunggah dokumen pembayaran",
 
@@ -126,6 +131,67 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   // Super Admin: semua izin sistem
   super_admin: getAllPermissions(),
+
+  admin_pelatihan: [
+    "pelatihan.view",
+    "pelatihan.create",
+    "pelatihan.read",
+    "pelatihan.update",
+    "pelatihan.delete",
+    "pelatihan.review",
+    "pelatihan.verify",
+    "pelatihan.approve",
+    "pelatihan.reject",
+    "pelatihan-enrollments.view",
+    "pelatihan-enrollments.create",
+    "pelatihan-enrollments.read",
+    "pelatihan-enrollments.update",
+    "pelatihan-enrollments.delete",
+    "pelatihan-enrollments.review",
+    "pelatihan-enrollments.verify",
+    "pelatihan-enrollments.approve",
+    "pelatihan-enrollments.reject",
+    "pelatihan-assessments.view",
+    "pelatihan-assessments.create",
+    "pelatihan-assessments.read",
+    "pelatihan-assessments.update",
+    "pelatihan-assessments.delete",
+    "pelatihan-questions.view",
+    "pelatihan-questions.create",
+    "pelatihan-questions.read",
+    "pelatihan-questions.update",
+    "pelatihan-questions.delete",
+    "pelatihan-categories.view",
+    "pelatihan-categories.create",
+    "pelatihan-categories.read",
+    "pelatihan-categories.update",
+    "pelatihan-categories.delete",
+    "pelatihan-materials.view",
+    "pelatihan-materials.create",
+    "pelatihan-materials.read",
+    "pelatihan-materials.update",
+    "pelatihan-materials.delete",
+    "pelatihan-certificates.view",
+    "pelatihan-certificates.create",
+    "pelatihan-certificates.read",
+    "pelatihan-certificates.update",
+    "pelatihan-certificates.delete",
+    "pelatihan-certificates.approve",
+    "pelatihan-certificates.reject",
+    "documents.view",
+    "documents.read",
+    "documents.update",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
+    "banners.view",
+    "banners.create",
+    "banners.read",
+    "banners.update",
+    "banners.delete",
+  ],
 
   // Admin: verifikasi data order, teruskan ke kaji ulang, kelola dokumen — tidak dapat setujui/tolak order
   admin: [
@@ -220,6 +286,54 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "notifications.view",
     "notifications.read",
     "notifications.update",
+    "pelatihan.view",
+    "pelatihan.create",
+    "pelatihan.read",
+    "pelatihan.update",
+    "pelatihan.delete",
+    "pelatihan.review",
+    "pelatihan.verify",
+    "pelatihan.approve",
+    "pelatihan.reject",
+    "pelatihan-categories.view",
+    "pelatihan-categories.create",
+    "pelatihan-categories.read",
+    "pelatihan-categories.update",
+    "pelatihan-categories.delete",
+    "pelatihan-materials.view",
+    "pelatihan-materials.create",
+    "pelatihan-materials.read",
+    "pelatihan-materials.update",
+    "pelatihan-materials.delete",
+    "pelatihan-assessments.view",
+    "pelatihan-assessments.create",
+    "pelatihan-assessments.read",
+    "pelatihan-assessments.update",
+    "pelatihan-assessments.delete",
+    "pelatihan-questions.view",
+    "pelatihan-questions.create",
+    "pelatihan-questions.read",
+    "pelatihan-questions.update",
+    "pelatihan-questions.delete",
+    "pelatihan-enrollments.view",
+    "pelatihan-enrollments.read",
+    "pelatihan-enrollments.update",
+    "pelatihan-enrollments.review",
+    "pelatihan-enrollments.verify",
+    "pelatihan-enrollments.approve",
+    "pelatihan-enrollments.reject",
+    "pelatihan-certificates.view",
+    "pelatihan-certificates.create",
+    "pelatihan-certificates.read",
+    "pelatihan-certificates.update",
+    "pelatihan-certificates.delete",
+    "pelatihan-certificates.approve",
+    "pelatihan-certificates.reject",
+    "banners.view",
+    "banners.create",
+    "banners.read",
+    "banners.update",
+    "banners.delete",
   ],
 
   // Pengguna Layanan: 72 izin — buat order, bayar, pantau status

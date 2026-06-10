@@ -95,7 +95,7 @@ export default function getOrdersColumns({
       accessorKey: "company.name",
       header: "Perusahaan",
       cell: ({ row }) => (
-        <div className="w-48 truncate">{row.original.company.name}</div>
+        <div className="w-48 truncate">{row.original.company?.name || "-"}</div>
       ),
     },
     {

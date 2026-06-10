@@ -230,11 +230,11 @@ function RouteComponent() {
   const [reviseOfferingNote, setReviseOfferingNote] = useState("");
 
   const previewOfferingMutation = useMutation(
-    trpc.pengujian.generateDocument.previewOfferingLetter.mutationOptions({
-      onSuccess: (data) => {
+    trpc.pengujian.generateDocument.generateOfferingLetter.mutationOptions({
+      onSuccess: (data: { base64: string; contentType: string }) => {
         openBase64InNewTab(data.base64, data.contentType);
       },
-      onError: (error) => {
+      onError: (error: { message: string }) => {
         globalErrorToast("Gagal membuka pratinjau penawaran: " + error.message);
       },
     }),
@@ -708,17 +708,17 @@ function RouteComponent() {
                     {order.items.map((item) => (
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">
-                          {item.parameter.name}
+                          {item.parameter?.name}
                         </TableCell>
                         <TableCell>
                           <Badge
                             className={cn(
                               getClusterColor(
-                                item.parameter.category.cluster.name,
+                                item.parameter?.category?.cluster?.name ?? "",
                               ),
                             )}
                           >
-                            {item.parameter.category.cluster.name}
+                            {item.parameter?.category?.cluster?.name ?? "-"}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -790,6 +790,9 @@ function RouteComponent() {
                         if (worksheet?.id) {
                           previewOfferingMutation.mutate({
                             worksheetId: worksheet.id,
+                            letterNumber: worksheet.offeringLetterNumber ?? "-",
+                            adminEmail: "",
+                            adminContact: "",
                           });
                         }
                       }}
@@ -1841,7 +1844,7 @@ function RouteComponent() {
                               className="flex items-center justify-between border-b py-2"
                             >
                               <span className="font-medium">
-                                {item.parameter.name}
+                                {item.parameter?.name ?? "-"}
                               </span>
                               <span className="text-sm text-muted-foreground">
                                 Qty: {item.quantity}
@@ -1975,19 +1978,25 @@ function RouteComponent() {
                     <dt className="text-sm text-muted-foreground">
                       Perusahaan
                     </dt>
-                    <dd className="font-medium">{order.company.name}</dd>
+                    <dd className="font-medium">
+                      {order.company?.name || "-"}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-muted-foreground">
                       Alamat Perusahaan
                     </dt>
-                    <dd className="font-medium">{order.company.address}</dd>
+                    <dd className="font-medium">
+                      {order.company?.address || "-"}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-muted-foreground">
                       Email Perusahaan
                     </dt>
-                    <dd className="font-medium">{order.company.email}</dd>
+                    <dd className="font-medium">
+                      {order.company?.email || "-"}
+                    </dd>
                   </div>
 
                   <div>
@@ -1995,7 +2004,7 @@ function RouteComponent() {
                       Nama Pimpinan
                     </dt>
                     <dd className="font-medium">
-                      {order.company.headOfCompany}
+                      {order.company?.headOfCompany || "-"}
                     </dd>
                   </div>
                   <div>
@@ -2003,25 +2012,25 @@ function RouteComponent() {
                       Jabatan Pimpinan
                     </dt>
                     <dd className="font-medium">
-                      {order.company.headOfCompanyPosition}
+                      {order.company?.headOfCompanyPosition || "-"}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-muted-foreground">Nama PIC</dt>
                     <dd className="font-medium">
-                      {order.company.responsibleTestingPerson}
+                      {order.company?.responsibleTestingPerson || "-"}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-muted-foreground">Email PIC</dt>
                     <dd className="font-medium">
-                      {order.company.responsibleTestingPersonEmail}
+                      {order.company?.responsibleTestingPersonEmail || "-"}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-muted-foreground">No WA PIC</dt>
                     <dd className="font-medium">
-                      {order.company.responsibleTestingPersonPhone}
+                      {order.company?.responsibleTestingPersonPhone || "-"}
                     </dd>
                   </div>
                 </dl>

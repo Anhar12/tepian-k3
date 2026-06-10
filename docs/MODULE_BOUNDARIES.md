@@ -47,9 +47,22 @@ Lab testing domain: order → testing → worksheet → document.
 
 **Contains:** parameters, tools, clusters, chemical materials, cart, order, testing, worksheets, survey, kbli, user companies.
 
-### pelatihan / uji-kompetensi / konsultasi
+### pelatihan — 🚧 In Progress
 
-Empty scaffolds. Follow the same structure as `pengujian` when building them out.
+LMS/Training domain: browse → enroll → learn → assess → certificate.
+
+| Package      | Path                                  |
+| ------------ | ------------------------------------- |
+| DB schema    | `packages/db/src/schema/pelatihan.ts` |
+| Queries      | `packages/queries/src/pelatihan/`     |
+| Zod schemas  | `packages/schema/src/pelatihan/`      |
+| tRPC routers | `packages/api/src/routers/pelatihan/` |
+
+**Contains:** pelatihan courses, categories, materials, assessments, questions, enrollments, progress, certificates, cart.
+
+### uji-kompetensi / konsultasi — 📋 Planned
+
+Empty scaffolds. Ikuti struktur yang sama dengan `pengujian` saat membangunnya.
 
 ---
 

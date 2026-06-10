@@ -32,6 +32,7 @@
     "@node-rs/argon2": "catalog:",
     "effect": "catalog:",
     "qrcode": "catalog:",
+    "uuid": "catalog:",
     "zod": "catalog:"
   }
 }

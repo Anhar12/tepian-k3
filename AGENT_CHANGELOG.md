@@ -5,6 +5,36 @@
 
 ---
 
+### 2026-06-01 — Documentation overhaul + Pelatihan back-office UI
+
+- **AGENTS.md** — Ditulis ulang sepenuhnya:
+  - Tambahkan tabel domain status (Pengujian ✅, Pelatihan 🚧, Uji Kompetensi/Konsultasi 📋)
+  - Perbarui tRPC namespace dari flat (`trpc.user.*`) ke modular (`trpc.platform.user.*`)
+  - Tambahkan monorepo structure tree yang mencerminkan schema modular monolith
+  - Tambahkan tabel database tables per domain (platform, pengujian, pelatihan)
+  - Tambahkan checklist "Adding a New Feature" step-by-step
+  - Tambahkan frontend route structure tree (termasuk pelatihan sub-routes)
+  - Perbarui Documentation Index dengan semua dokumen yang ada
+- **docs/PATTERNS.md** — Ditulis ulang dengan 11 pola komplit:
+  - Tambahkan JSDoc ke semua contoh kode
+  - Perbarui tRPC client patterns ke modern `useSuspenseQuery` + options proxy
+  - Tambahkan Section 11: "Adding a New Domain Module" checklist
+  - Perbaiki contoh audit logging agar mencakup `oldValues`, `changedFields`, `description`
+  - Perbaiki pagination pattern dengan `::int` cast dan `orderBy` yang lebih lengkap
+- **docs/JSDOC_CONVENTION.md** — Ditulis ulang:
+  - Tambahkan contoh untuk tRPC procedures dan Effect-based query functions
+  - Tambahkan aturan bahasa (deskripsi = Bahasa Indonesia, types = Inggris)
+  - Tambahkan tabel aturan quick-reference
+  - Tambahkan contoh baik vs buruk
+- **Pelatihan back-office UI** (sebelumnya di sesi ini):
+  - Buat `$pelatihanId.tsx` layout route dengan CourseHeader + TabNav + Outlet
+  - Buat komponen `CourseHeader` dan `TabNav`
+  - Implementasi 4 tab: Overview, Materi, Quiz & Post Test, Peserta
+  - Fix TypeScript errors: AppRouter import path (`@tepian-k3/api/root`), params `z.object()`, relative imports
+  - `pnpm check-types` lulus 12/12 packages, 0 errors ✅
+
+---
+
 ### 2026-05-30 — Per-resource approval actions
 
 - Split permission actions in `packages/constants/src/permissions.ts` into

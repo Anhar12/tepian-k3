@@ -127,6 +127,18 @@ export const RESOURCES = [
     approvalActions: "all",
   },
 
+  // ==================== PELATIHAN ====================
+  { key: "pelatihan", approvalActions: "all" },
+  { key: "pelatihan-categories" },
+  { key: "pelatihan-cart" },
+  { key: "pelatihan-materials" },
+  { key: "pelatihan-assessments" },
+  { key: "pelatihan-questions" },
+  { key: "pelatihan-enrollments", approvalActions: "all" },
+  { key: "pelatihan-progress" },
+  { key: "pelatihan-assessment-attempts" },
+  { key: "pelatihan-certificates", approvalActions: ["approve", "reject"] },
+
   // ==================== SURVEY ====================
   { key: "survey-questions" },
   { key: "survey-responses" },

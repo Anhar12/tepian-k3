@@ -1,0 +1,2 @@
+ALTER TABLE "pelatihan" ADD COLUMN "attendance_required" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+ALTER TABLE "pelatihan" ADD COLUMN "min_attendance_percentage" integer DEFAULT 85 NOT NULL;

@@ -100,12 +100,14 @@ import PDFQRCodeEditor from "@/components/pdf/pdf-qrcode-editor";
 
 // After
 import { lazy, Suspense } from "react";
-const PDFQRCodeEditor = lazy(() => import("@/components/pdf/pdf-qrcode-editor"));
+const PDFQRCodeEditor = lazy(
+  () => import("@/components/pdf/pdf-qrcode-editor"),
+);
 
 // Wrapped with Suspense
 <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin" />}>
   <PDFQRCodeEditor />
-</Suspense>
+</Suspense>;
 ```
 
 #### Benefits:

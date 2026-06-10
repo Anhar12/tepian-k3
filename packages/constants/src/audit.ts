@@ -30,6 +30,8 @@ export const AUDIT_ENTITY_TYPES = [
   "worksheet_tool",
   "worksheet_note",
   "chemical_material",
+  "faq",
+  "setting",
 ] as const;
 
 export type AuditEntityType = (typeof AUDIT_ENTITY_TYPES)[number];
@@ -50,4 +52,6 @@ export const AUDIT_ENTITY_TYPE_LABELS: Record<AuditEntityType, string> = {
   worksheet_tool: "Worksheet Tool",
   worksheet_note: "Worksheet Note",
   chemical_material: "Bahan Kimia",
+  faq: "FAQ",
+  setting: "Pengaturan Landing Page",
 };

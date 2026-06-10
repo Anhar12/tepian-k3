@@ -40,14 +40,16 @@ Added `getAllOrdersSchema` for validating query parameters:
 const getAllOrdersSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   perPage: z.coerce.number().int().positive().max(100).default(10),
-  status: z.enum([
-    "pending",
-    "approved",
-    "rejected",
-    "in_progress",
-    "completed",
-    "cancelled"
-  ]).optional(),
+  status: z
+    .enum([
+      "pending",
+      "approved",
+      "rejected",
+      "in_progress",
+      "completed",
+      "cancelled",
+    ])
+    .optional(),
   search: z.string().optional(),
 });
 ```

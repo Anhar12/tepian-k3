@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -8,6 +8,7 @@
   /* --font-sans: "Inter", "Geist", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
   --font-sans: "Poppins", sans-serif;
+  --font-plus-jakarta: "Plus Jakarta Sans", sans-serif;
 }
 
 html,
@@ -47,14 +48,14 @@ body {
   --chart-3: oklch(0.55 0.2 280);
   --chart-4: oklch(0.5 0.18 250);
   --chart-5: oklch(0.45 0.15 240);
-  --sidebar: oklch(0.98 0.008 259);
-  --sidebar-foreground: oklch(0.2 0.02 259);
-  --sidebar-primary: oklch(0.5208 0.1943 259.4);
-  --sidebar-primary-foreground: oklch(0.98 0.01 259);
-  --sidebar-accent: oklch(0.94 0.03 259);
-  --sidebar-accent-foreground: oklch(0.3 0.05 259);
-  --sidebar-border: oklch(0.9 0.02 259);
-  --sidebar-ring: oklch(0.5208 0.1943 259.4);
+  --sidebar: #1e53a4;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #1061d6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1061d6;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #1061d6;
   --accent-linear-1: oklch(0.5208 0.1943 259.4);
   --accent-linear-2: oklch(0.8241 0.1771 143.24);
   --accent-linear-3: oklch(1 0 0);
@@ -85,14 +86,14 @@ body {
   --chart-3: oklch(0.6 0.19 280);
   --chart-4: oklch(0.55 0.17 250);
   --chart-5: oklch(0.5 0.14 240);
-  --sidebar: oklch(0.18 0.02 259);
-  --sidebar-foreground: oklch(0.95 0.01 259);
-  --sidebar-primary: oklch(0.5208 0.1943 259.4);
-  --sidebar-primary-foreground: oklch(0.98 0.01 259);
-  --sidebar-accent: oklch(0.28 0.04 259);
-  --sidebar-accent-foreground: oklch(0.92 0.01 259);
-  --sidebar-border: oklch(0.3 0.03 259);
-  --sidebar-ring: oklch(0.5208 0.1943 259.4);
+  --sidebar: #194689;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #1061d6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1061d6;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #1061d6;
   --accent-linear-1: oklch(0.5208 0.1943 259.4);
   --accent-linear-2: oklch(0.8241 0.1771 143.24);
   --accent-linear-3: oklch(0.9672 0 0);

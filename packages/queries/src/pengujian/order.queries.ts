@@ -358,6 +358,12 @@ const orderQueries = {
                     name: true,
                   },
                 },
+                pelatihan: {
+                  columns: {
+                    id: true,
+                    title: true,
+                  },
+                },
               },
             },
             testing: true,
@@ -439,6 +445,12 @@ const orderQueries = {
                   columns: {
                     id: true,
                     name: true,
+                  },
+                },
+                pelatihan: {
+                  columns: {
+                    id: true,
+                    title: true,
                   },
                 },
               },
@@ -1699,6 +1711,17 @@ const orderQueries = {
           }),
         );
       }
+
+      // If there are pelatihan items, auto enroll the user
+      const autoEnrollQueries = yield* Effect.promise(() =>
+        import("@tepian-k3/queries/pelatihan/auto-enroll.queries").then(
+          (m) => m.default,
+        )
+      );
+      yield* autoEnrollQueries.processPaidPelatihanOrder(
+        orderId,
+        orderToVerify.user.id
+      );
 
       // create order status history - pembayaran_diterima
       yield* orderStatusHistoryQueries.createOrderStatusHistory(

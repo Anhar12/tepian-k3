@@ -590,7 +590,7 @@ export function StatusStateContactRevisionRequested({
         <div className="mt-4 flex flex-row justify-end gap-2">
           <Link
             to="/dashboard/company/$companyId/edit"
-            params={{ companyId: orderDetail.company.id }}
+            params={{ companyId: orderDetail.company?.id ?? "" }}
             className={cn(Button({ variant: "outline", size: "sm" }))}
           >
             Edit Data Kontak

@@ -17,6 +17,23 @@ import {
   parameterChemicalMaterials,
   parameters,
   parameterTools,
+  pelatihan,
+  pelatihanCategories,
+  pelatihanCart,
+  pelatihanModules,
+  pelatihanMaterials,
+  pelatihanAssessments,
+  pelatihanQuestions,
+  pelatihanQuestionOptions,
+  pelatihanEnrollments,
+  pelatihanOrders,
+  pelatihanOrderItems,
+  pelatihanAssessmentAttempts,
+  pelatihanAssessmentAnswers,
+  pelatihanCertificates,
+  pelatihanProgress,
+  pelatihanSchedules,
+  pelatihanAttendances,
   permission,
   positions,
   provinces,
@@ -47,6 +64,7 @@ import {
   worksheets,
   worksheetToolNeeded,
   worksheetTools,
+  userTrainingProfiles,
 } from "./schema";
 
 export const userRelations = relations(users, ({ many, one }) => ({
@@ -62,6 +80,10 @@ export const userRelations = relations(users, ({ many, one }) => ({
   // Polymorphic relation: documents where entityType = 'user' and entityId = user.id
   documents: many(documents, {
     relationName: "userDocuments",
+  }),
+  trainingProfile: one(userTrainingProfiles, {
+    fields: [users.id],
+    references: [userTrainingProfiles.userId],
   }),
 }));
 
@@ -354,6 +376,10 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
   parameter: one(parameters, {
     fields: [orderItem.parameterId],
     references: [parameters.id],
+  }),
+  pelatihan: one(pelatihan, {
+    fields: [orderItem.pelatihanId],
+    references: [pelatihan.id],
   }),
   location: one(userCompanyTestingLocation, {
     fields: [orderItem.locationId],
@@ -665,3 +691,285 @@ export const surveyFeedbackRelations = relations(surveyFeedback, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// ==================== PELATIHAN RELATIONS ====================
+
+export const pelatihanCategoryRelations = relations(
+  pelatihanCategories,
+  ({ many }) => ({
+    pelatihans: many(pelatihan),
+  }),
+);
+
+export const pelatihanRelations = relations(pelatihan, ({ one, many }) => ({
+  category: one(pelatihanCategories, {
+    fields: [pelatihan.categoryId],
+    references: [pelatihanCategories.id],
+  }),
+  modules: many(pelatihanModules),
+  materials: many(pelatihanMaterials),
+  assessments: many(pelatihanAssessments),
+  enrollments: many(pelatihanEnrollments),
+  cartItems: many(pelatihanCart),
+  schedules: many(pelatihanSchedules),
+}));
+
+export const pelatihanModuleRelations = relations(
+  pelatihanModules,
+  ({ one, many }) => ({
+    pelatihan: one(pelatihan, {
+      fields: [pelatihanModules.pelatihanId],
+      references: [pelatihan.id],
+    }),
+    materials: many(pelatihanMaterials),
+  }),
+);
+
+export const pelatihanCartRelations = relations(pelatihanCart, ({ one }) => ({
+  pelatihan: one(pelatihan, {
+    fields: [pelatihanCart.pelatihanId],
+    references: [pelatihan.id],
+  }),
+  user: one(users, {
+    fields: [pelatihanCart.userId],
+    references: [users.id],
+  }),
+}));
+
+export const pelatihanOrderRelations = relations(
+  pelatihanOrders,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [pelatihanOrders.userId],
+      references: [users.id],
+    }),
+    approvedBy: one(users, {
+      fields: [pelatihanOrders.approvedBy],
+      references: [users.id],
+      relationName: "pelatihanOrderApprover",
+    }),
+    verifiedBy: one(users, {
+      fields: [pelatihanOrders.verifiedBy],
+      references: [users.id],
+      relationName: "pelatihanOrderVerifier",
+    }),
+    items: many(pelatihanOrderItems),
+    enrollments: many(pelatihanEnrollments),
+  }),
+);
+
+export const pelatihanOrderItemRelations = relations(
+  pelatihanOrderItems,
+  ({ one }) => ({
+    order: one(pelatihanOrders, {
+      fields: [pelatihanOrderItems.orderId],
+      references: [pelatihanOrders.id],
+    }),
+    pelatihan: one(pelatihan, {
+      fields: [pelatihanOrderItems.pelatihanId],
+      references: [pelatihan.id],
+    }),
+  }),
+);
+
+export const pelatihanMaterialRelations = relations(
+  pelatihanMaterials,
+  ({ one }) => ({
+    pelatihan: one(pelatihan, {
+      fields: [pelatihanMaterials.pelatihanId],
+      references: [pelatihan.id],
+    }),
+    module: one(pelatihanModules, {
+      fields: [pelatihanMaterials.moduleId],
+      references: [pelatihanModules.id],
+    }),
+  }),
+);
+
+export const pelatihanAssessmentRelations = relations(
+  pelatihanAssessments,
+  ({ one, many }) => ({
+    pelatihan: one(pelatihan, {
+      fields: [pelatihanAssessments.pelatihanId],
+      references: [pelatihan.id],
+    }),
+    questions: many(pelatihanQuestions),
+  }),
+);
+
+export const pelatihanQuestionRelations = relations(
+  pelatihanQuestions,
+  ({ one, many }) => ({
+    assessment: one(pelatihanAssessments, {
+      fields: [pelatihanQuestions.assessmentId],
+      references: [pelatihanAssessments.id],
+    }),
+    options: many(pelatihanQuestionOptions),
+  }),
+);
+
+export const pelatihanQuestionOptionRelations = relations(
+  pelatihanQuestionOptions,
+  ({ one }) => ({
+    question: one(pelatihanQuestions, {
+      fields: [pelatihanQuestionOptions.questionId],
+      references: [pelatihanQuestions.id],
+    }),
+  }),
+);
+
+export const pelatihanEnrollmentRelations = relations(
+  pelatihanEnrollments,
+  ({ one, many }) => ({
+    pelatihan: one(pelatihan, {
+      fields: [pelatihanEnrollments.pelatihanId],
+      references: [pelatihan.id],
+    }),
+    user: one(users, {
+      fields: [pelatihanEnrollments.userId],
+      references: [users.id],
+    }),
+    order: one(pelatihanOrders, {
+      fields: [pelatihanEnrollments.orderId],
+      references: [pelatihanOrders.id],
+    }),
+    companyProvince: one(provinces, {
+      fields: [pelatihanEnrollments.companyProvinceId],
+      references: [provinces.id],
+    }),
+    companyRegency: one(regencies, {
+      fields: [pelatihanEnrollments.companyRegencyId],
+      references: [regencies.id],
+    }),
+    companyDistrict: one(districts, {
+      fields: [pelatihanEnrollments.companyDistrictId],
+      references: [districts.id],
+    }),
+    progresses: many(pelatihanProgress),
+    attempts: many(pelatihanAssessmentAttempts),
+    certificates: many(pelatihanCertificates),
+    attendances: many(pelatihanAttendances),
+  }),
+);
+
+export const pelatihanProgressRelations = relations(
+  pelatihanProgress,
+  ({ one }) => ({
+    enrollment: one(pelatihanEnrollments, {
+      fields: [pelatihanProgress.enrollmentId],
+      references: [pelatihanEnrollments.id],
+    }),
+    material: one(pelatihanMaterials, {
+      fields: [pelatihanProgress.materialId],
+      references: [pelatihanMaterials.id],
+    }),
+  }),
+);
+
+export const pelatihanAttemptRelations = relations(
+  pelatihanAssessmentAttempts,
+  ({ one, many }) => ({
+    enrollment: one(pelatihanEnrollments, {
+      fields: [pelatihanAssessmentAttempts.enrollmentId],
+      references: [pelatihanEnrollments.id],
+    }),
+    assessment: one(pelatihanAssessments, {
+      fields: [pelatihanAssessmentAttempts.assessmentId],
+      references: [pelatihanAssessments.id],
+    }),
+    answers: many(pelatihanAssessmentAnswers),
+  }),
+);
+
+export const pelatihanAnswerRelations = relations(
+  pelatihanAssessmentAnswers,
+  ({ one }) => ({
+    attempt: one(pelatihanAssessmentAttempts, {
+      fields: [pelatihanAssessmentAnswers.attemptId],
+      references: [pelatihanAssessmentAttempts.id],
+    }),
+    question: one(pelatihanQuestions, {
+      fields: [pelatihanAssessmentAnswers.questionId],
+      references: [pelatihanQuestions.id],
+    }),
+  }),
+);
+
+export const pelatihanCertificateRelations = relations(
+  pelatihanCertificates,
+  ({ one }) => ({
+    enrollment: one(pelatihanEnrollments, {
+      fields: [pelatihanCertificates.enrollmentId],
+      references: [pelatihanEnrollments.id],
+    }),
+  }),
+);
+
+// ##################
+// authored (generated by gemini, Jun 03 2026 17:42 WITA)
+// ##################
+
+export const pelatihanScheduleRelations = relations(
+  pelatihanSchedules,
+  ({ one, many }) => ({
+    pelatihan: one(pelatihan, {
+      fields: [pelatihanSchedules.pelatihanId],
+      references: [pelatihan.id],
+    }),
+    attendances: many(pelatihanAttendances),
+  }),
+);
+
+export const pelatihanAttendanceRelations = relations(
+  pelatihanAttendances,
+  ({ one }) => ({
+    enrollment: one(pelatihanEnrollments, {
+      fields: [pelatihanAttendances.enrollmentId],
+      references: [pelatihanEnrollments.id],
+    }),
+    schedule: one(pelatihanSchedules, {
+      fields: [pelatihanAttendances.scheduleId],
+      references: [pelatihanSchedules.id],
+    }),
+  }),
+);
+
+export const userTrainingProfileRelations = relations(
+  userTrainingProfiles,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userTrainingProfiles.userId],
+      references: [users.id],
+    }),
+    companyProvince: one(provinces, {
+      fields: [userTrainingProfiles.companyProvinceId],
+      references: [provinces.id],
+    }),
+    companyRegency: one(regencies, {
+      fields: [userTrainingProfiles.companyRegencyId],
+      references: [regencies.id],
+    }),
+    companyDistrict: one(districts, {
+      fields: [userTrainingProfiles.companyDistrictId],
+      references: [districts.id],
+    }),
+    participantProvince: one(provinces, {
+      fields: [userTrainingProfiles.participantProvinceId],
+      references: [provinces.id],
+    }),
+    participantRegency: one(regencies, {
+      fields: [userTrainingProfiles.participantRegencyId],
+      references: [regencies.id],
+    }),
+    participantDistrict: one(districts, {
+      fields: [userTrainingProfiles.participantDistrictId],
+      references: [districts.id],
+    }),
+  }),
+);
+
+// ##################
+// end authored
+// ##################
+
+

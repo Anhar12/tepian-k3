@@ -211,24 +211,24 @@ export const Invoice: React.FC<InvoiceProps> = ({
           <View style={styles.row}>
             <Text style={styles.label}>Nama Perusahaan</Text>
             <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{order.company.name}</Text>
+            <Text style={styles.value}>{order.company?.name || "Personal Order"}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Alamat</Text>
             <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{order.company.address}</Text>
+            <Text style={styles.value}>{order.company?.address || "-"}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Kota</Text>
             <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{order.company.regency.name}</Text>
+            <Text style={styles.value}>{order.company?.regency?.name || "-"}</Text>
           </View>
-          {order.company.responsibleTestingPersonPhone && (
+          {order.company?.responsibleTestingPersonPhone && (
             <View style={styles.row}>
               <Text style={styles.label}>Telepon</Text>
               <Text style={styles.colon}>:</Text>
               <Text style={styles.value}>
-                {order.company.responsibleTestingPersonPhone}
+                {order.company?.responsibleTestingPersonPhone}
               </Text>
             </View>
           )}
@@ -250,8 +250,10 @@ export const Invoice: React.FC<InvoiceProps> = ({
             <View key={item.id} style={styles.tableRow}>
               <Text style={styles.tableColNo}>{index + 1}</Text>
               <Text style={styles.tableColParameter}>
-                {item.parameter.name}
-                {item.parameter.category.cluster && (
+                {item.type === "pelatihan" 
+                  ? item.pelatihan?.title || "Pelatihan"
+                  : item.parameter?.name || "Pengujian"}
+                {item.type === "pengujian" && item.parameter?.category?.cluster && (
                   <Text style={{ fontSize: 9, color: "#666" }}>
                     {"\n"}Cluster: {item.parameter.category.cluster.name}
                   </Text>
@@ -259,7 +261,7 @@ export const Invoice: React.FC<InvoiceProps> = ({
               </Text>
               <Text style={styles.tableColQty}>{item.quantity}</Text>
               <Text style={styles.tableColUnit}>
-                {item.parameter.unit || "-"}
+                {item.type === "pelatihan" ? "Orang" : (item.parameter?.unit || "-")}
               </Text>
               <Text style={styles.tableColPrice}>
                 {formatCurrency(item.price * item.quantity)}

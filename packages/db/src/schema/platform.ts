@@ -728,3 +728,44 @@ export const news = createTable(
     index("news_published_at_idx").using("btree", table.publishedAt),
   ],
 );
+
+export const faqs = createTable(
+  "faqs",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    question: text("question").notNull(),
+    answer: text("answer").notNull(),
+    category: varchar("category", { length: 100 }).notNull().default("general"),
+    orderIndex: integer("order_index").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    index("faq_id_idx").using("btree", table.id),
+    index("faq_category_idx").using("btree", table.category),
+    index("faq_is_active_idx").using("btree", table.isActive),
+  ],
+);
+
+export const settings = createTable(
+  "settings",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    key: varchar("key", { length: 250 }).notNull(),
+    value: text("value").notNull(),
+    description: text("description"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("settings_key_unique_idx")
+      .on(table.key)
+      .where(sql`${table.deletedAt} IS NULL`),
+    index("settings_id_idx").using("btree", table.id),
+  ],
+);

@@ -266,8 +266,8 @@ export async function seedOrders(isProduction: boolean) {
     for (const item of orderItemRecords) {
       await db.insert(worksheetItems).values({
         worksheetId: worksheet.id,
-        parameterId: item.parameterId,
-        locationId: item.locationId,
+        parameterId: item.parameterId!,
+        locationId: item.locationId!,
         quantity: item.quantity,
         isReady: seedOrder.worksheetStatus === "pending_verification",
       });

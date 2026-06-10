@@ -190,7 +190,7 @@ function RouteComponent() {
                         </TableCell> */}
                         <TableCell className="text-xs sm:text-sm">
                           <div className="max-w-50 truncate">
-                            {worksheet.order.company.name}
+                            {worksheet.order.company?.name ?? "-"}
                           </div>
                         </TableCell>
                         <TableCell>

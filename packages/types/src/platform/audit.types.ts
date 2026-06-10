@@ -21,7 +21,12 @@ export type AuditEntityType =
   | "worksheet_assignment"
   | "worksheet_tool"
   | "worksheet_note"
-  | "chemical_material";
+  | "chemical_material"
+  | "pelatihan"
+  | "pelatihan_certificate"
+  | "pelatihan_certificate_template"
+  | "faq"
+  | "setting";
 
 export interface AuditMetadata {
   ipAddress?: string;
@@ -42,8 +47,8 @@ export interface AuditLogOptions {
   action: AuditAction;
   userId?: string;
   userEmail?: string;
-  oldValues?: Record<string, unknown>;
-  newValues?: Record<string, unknown>;
+  oldValues?: Record<string, any> | null;
+  newValues?: Record<string, any> | null;
   metadata?: AuditMetadata;
   description?: string;
 }

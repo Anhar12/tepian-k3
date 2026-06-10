@@ -17,6 +17,10 @@ import {
   IconAd,
   IconNews,
   IconHash,
+  IconDeviceLaptop,
+  IconAward,
+  IconVideo,
+  IconSettings,
 } from "@tabler/icons-react";
 import type { NavMainProps } from "@/components/nav-main";
 
@@ -48,6 +52,42 @@ export const backOfficeMenu: {
       url: `${urlStarter}/testings`,
       icon: IconFileInvoice,
       permission: "testing.view",
+    },
+    {
+      title: "E-Learning",
+      url: `${urlStarter}/pelatihan?type=elearning`,
+      icon: IconDeviceLaptop,
+      permission: "pelatihan.view",
+    },
+    {
+      title: "Bimtek",
+      url: `${urlStarter}/pelatihan?type=bimtek`,
+      icon: IconAward,
+      permission: "pelatihan.view",
+    },
+    {
+      title: "Webinar",
+      url: `${urlStarter}/pelatihan?type=webinar`,
+      icon: IconVideo,
+      permission: "pelatihan.view",
+    },
+    {
+      title: "Order Pelatihan",
+      url: `${urlStarter}/order-pelatihan`,
+      icon: IconShoppingCart,
+      permission: "pelatihan.view",
+    },
+    {
+      title: "Manajemen Absensi",
+      url: `${urlStarter}/absensi`,
+      icon: IconFileInvoice,
+      permission: "pelatihan.view",
+    },
+    {
+      title: "Sertifikat Pelatihan",
+      url: `${urlStarter}/sertifikat-pelatihan`,
+      icon: IconAward,
+      permission: "pelatihan-certificates.read",
     },
     {
       title: "Pengguna",
@@ -120,6 +160,12 @@ export const backOfficeMenu: {
       url: `${urlStarter}/survey-questions`,
       icon: IconMessage2Question,
       permission: "survey-questions.view",
+    },
+    {
+      title: "Landing Page & FAQ",
+      url: `${urlStarter}/landing-settings`,
+      icon: IconSettings,
+      permission: "banners.view",
     },
     {
       title: "Spanduk",

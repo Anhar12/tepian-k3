@@ -490,7 +490,7 @@ function RouteComponent() {
                         }
                       >
                     >((acc, item) => {
-                      const locId = item.locationId;
+                      const locId = item.locationId ?? "unknown";
                       if (!acc[locId]) {
                         acc[locId] = {
                           name: item.location?.name ?? locId,
@@ -505,7 +505,8 @@ function RouteComponent() {
                       ([locId, { name, items }]) => (
                         <div key={locId} className="space-y-2">
                           <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-                            Lokasi: {name}
+                            Lokasi:{" "}
+                            {name === "unknown" ? "Tidak Diketahui" : name}
                           </p>
                           <div className="overflow-hidden rounded-xl border border-slate-100">
                             <table className="w-full text-sm">
@@ -532,10 +533,10 @@ function RouteComponent() {
                                     className="border-t border-slate-100"
                                   >
                                     <td className="px-4 py-2.5 font-medium text-slate-800">
-                                      {item.parameter.name}
+                                      {item.parameter?.name ?? "-"}
                                     </td>
                                     <td className="px-4 py-2.5 text-xs text-slate-500">
-                                      {item.parameter.category.name}
+                                      {item.parameter?.category.name ?? "-"}
                                     </td>
                                     <td className="px-4 py-2.5 text-center text-slate-600">
                                       {item.quantity}

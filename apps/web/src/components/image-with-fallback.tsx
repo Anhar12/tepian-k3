@@ -2,6 +2,7 @@ import { useState, type ImgHTMLAttributes } from "react";
 import { type LucideIcon, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getPublicUrl } from "@/utils/url";
 
 interface ImageWithFallbackProps extends Omit<
   ImgHTMLAttributes<HTMLImageElement>,
@@ -51,7 +52,7 @@ export default function ImageWithFallback({
         </div>
       ) : (
         <img
-          src={src}
+          src={getPublicUrl(src)}
           alt={alt}
           onLoad={() => setLoading(false)}
           onError={() => {

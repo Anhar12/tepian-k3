@@ -258,18 +258,18 @@ const updateUser = useMutation(
     onMutate: async (newUser) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries(
-        trpc.platform.user.getById.queryOptions({ id: newUser.id })
+        trpc.platform.user.getById.queryOptions({ id: newUser.id }),
       );
 
       // Snapshot previous value
       const previousUser = queryClient.getQueryData(
-        trpc.platform.user.getById.queryOptions({ id: newUser.id })
+        trpc.platform.user.getById.queryOptions({ id: newUser.id }),
       );
 
       // Optimistically update
       queryClient.setQueryData(
         trpc.platform.user.getById.queryOptions({ id: newUser.id }),
-        newUser
+        newUser,
       );
 
       return { previousUser };
@@ -278,16 +278,16 @@ const updateUser = useMutation(
       // Rollback on error
       queryClient.setQueryData(
         trpc.platform.user.getById.queryOptions({ id: newUser.id }),
-        context?.previousUser
+        context?.previousUser,
       );
     },
     onSettled: (data, error, variables) => {
       // Refetch after mutation
       queryClient.invalidateQueries(
-        trpc.platform.user.getById.queryOptions({ id: variables.id })
+        trpc.platform.user.getById.queryOptions({ id: variables.id }),
       );
     },
-  })
+  }),
 );
 ```
 
@@ -298,7 +298,7 @@ export const Route = createFileRoute("/users/$userId")({
   loader: async ({ context, params }) => {
     // Prefetch user data before rendering
     await context.queryClient.prefetchQuery(
-      trpc.platform.user.getById.queryOptions({ id: params.userId })
+      trpc.platform.user.getById.queryOptions({ id: params.userId }),
     );
   },
   component: UserDetail,
@@ -401,11 +401,9 @@ const updateUser = useMutation(
   trpc.platform.user.update.mutationOptions({
     onSuccess: () => {
       // ✅ Invalidate using tRPC query options
-      queryClient.invalidateQueries(
-        trpc.platform.user.getById.queryOptions()
-      );
+      queryClient.invalidateQueries(trpc.platform.user.getById.queryOptions());
     },
-  })
+  }),
 );
 ```
 
@@ -450,7 +448,7 @@ import { useMutation } from "@tanstack/react-query";
 const createUser = useMutation(
   trpc.platform.user.create.mutationOptions({
     onSuccess: () => toast.success("User created"),
-  })
+  }),
 );
 ```
 
@@ -471,7 +469,7 @@ function UserProfile() {
 // ✅ Good - use hooks
 function UserProfile() {
   const { data: user } = useQuery(
-    trpc.platform.user.getById.queryOptions({ id })
+    trpc.platform.user.getById.queryOptions({ id }),
   );
 }
 ```
@@ -480,9 +478,7 @@ function UserProfile() {
 
 ```typescript
 // ❌ Bad - data won't refresh
-const deleteUser = useMutation(
-  trpc.platform.user.delete.mutationOptions()
-);
+const deleteUser = useMutation(trpc.platform.user.delete.mutationOptions());
 
 // ✅ Good - invalidate related queries
 const deleteUser = useMutation(
@@ -490,7 +486,7 @@ const deleteUser = useMutation(
     onSuccess: () => {
       queryClient.invalidateQueries(trpc.platform.user.list.queryOptions());
     },
-  })
+  }),
 );
 ```
 

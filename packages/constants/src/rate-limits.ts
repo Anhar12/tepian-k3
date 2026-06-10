@@ -41,6 +41,7 @@ export const ROLE_RATE_LIMIT_TIERS: Record<Role, RateLimitTier> = {
   // Admin tiers - highest limits
   super_admin: "unlimited",
   admin: "unlimited",
+  admin_pelatihan: "premium",
   koordinator_pengujian: "premium",
 
   // Staff tiers - moderate limits

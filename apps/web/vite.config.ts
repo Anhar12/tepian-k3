@@ -18,5 +18,15 @@ export default defineConfig({
   envDir: "../../",
   server: {
     port: 3001,
+    proxy: {
+      "/api/uploads": {
+        target: process.env.VITE_SERVER_URL || "http://localhost:3005",
+        changeOrigin: true,
+      },
+      "/api/public": {
+        target: process.env.VITE_SERVER_URL || "http://localhost:3005",
+        changeOrigin: true,
+      },
+    },
   },
 });

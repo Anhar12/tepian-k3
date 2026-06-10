@@ -119,6 +119,12 @@ export type OrderWithCompanyAndItems = InferQueryModel<
               };
             };
           };
+          pelatihan: {
+            columns: {
+              id: true;
+              title: true;
+            };
+          };
         };
       };
     };
@@ -182,6 +188,12 @@ export type OrderDetailWithStatus = InferQueryModel<
                   };
                 };
               };
+            };
+          };
+          pelatihan: {
+            columns: {
+              id: true;
+              title: true;
             };
           };
         };

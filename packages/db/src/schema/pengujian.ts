@@ -527,7 +527,6 @@ export const order = createTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     companyId: uuid("company_id")
-      .notNull()
       .references(() => userCompanies.id, { onDelete: "cascade" }),
     status: orderStatusEnum("status").notNull().default("pending"),
     totalAmount: integer("total_amount").notNull(),
@@ -600,6 +599,11 @@ export const order = createTable(
   ],
 );
 
+export const orderItemTypeEnum = pgEnum("order_item_type", [
+  "pengujian",
+  "pelatihan",
+]);
+
 export const orderItem = createTable(
   "order_items",
   {
@@ -610,12 +614,12 @@ export const orderItem = createTable(
     orderId: uuid("order_id")
       .notNull()
       .references(() => order.id, { onDelete: "cascade" }),
+    type: orderItemTypeEnum("type").notNull().default("pengujian"),
     parameterId: uuid("parameter_id")
-      .notNull()
       .references(() => parameters.id, { onDelete: "cascade" }),
     locationId: uuid("location_id")
-      .notNull()
       .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    pelatihanId: uuid("pelatihan_id"), // Nullable by default
     quantity: integer("quantity").notNull().default(1),
     price: integer("price").notNull(),
     subTotal: integer("sub_total").notNull(),

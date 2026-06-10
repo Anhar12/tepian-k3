@@ -6,6 +6,7 @@ import {
   roles,
   userRoles,
   users,
+  pelatihanCategories,
 } from "../schema";
 import { exit } from "process";
 import { and, eq, inArray } from "drizzle-orm";
@@ -52,6 +53,12 @@ const SEED_USERS: {
     role: "admin",
     email: "admin@mail.com",
     name: "Admin",
+    productionOnly: true,
+  },
+  {
+    role: "admin_pelatihan",
+    email: "admin.pelatihan@mail.com",
+    name: "Admin Pelatihan",
     productionOnly: true,
   },
   { role: "user", email: "user@mail.com", name: "User" },
@@ -299,6 +306,22 @@ async function seed() {
   await seedKblis();
   await clearAllCache();
   await seedPositions();
+
+  console.log("🌱 Syncing K3 categories...");
+  const k3CategoriesToSeed = [
+    { id: "01900000-0000-4000-8000-000000000001", name: "K3 Umum", slug: "k3-umum" },
+    { id: "01900000-0000-4000-8000-000000000002", name: "Fire Safety", slug: "fire-safety" },
+    { id: "01900000-0000-4000-8000-000000000003", name: "HIRA / Risk Assessment", slug: "hira" },
+    { id: "01900000-0000-4000-8000-000000000004", name: "P3K & Pertolongan Pertama", slug: "p3k" },
+    { id: "01900000-0000-4000-8000-000000000005", name: "Ergonomi", slug: "ergonomi" },
+    { id: "01900000-0000-4000-8000-000000000006", name: "Hygiene Industri", slug: "hygiene-industri" },
+    { id: "01900000-0000-4000-8000-000000000007", name: "IT Security", slug: "it-security" },
+    { id: "01900000-0000-4000-8000-000000000008", name: "Lingkungan (AMDAL)", slug: "lingkungan" },
+    { id: "01900000-0000-4000-8000-000000000009", name: "Bahan Berbahaya & Beracun (B3)", slug: "b3" },
+    { id: "01900000-0000-4000-8000-000000000010", name: "K3 Konstruksi", slug: "konstruksi" },
+  ];
+  await db.insert(pelatihanCategories).values(k3CategoriesToSeed).onConflictDoNothing();
+  console.log("✅ K3 categories synced");
 
   // Create one seed user per role.
   // In production only users marked productionOnly: true are created.

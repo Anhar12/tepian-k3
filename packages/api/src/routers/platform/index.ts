@@ -15,6 +15,8 @@ import { regencyRouter } from "./regency";
 import { roleRouters } from "./role";
 import { userRouter } from "./user";
 import { villageRouter } from "./village";
+import { faqRouter } from "./faq";
+import { settingRouter } from "./setting";
 
 export const platformRouter = createTRPCRouter({
   auth: authRouter,
@@ -33,4 +35,6 @@ export const platformRouter = createTRPCRouter({
   banner: bannerRouter,
   news: newsRouter,
   employeeCertification: employeeCertificationRouter,
+  faq: faqRouter,
+  setting: settingRouter,
 });

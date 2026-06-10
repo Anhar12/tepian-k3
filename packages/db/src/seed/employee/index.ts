@@ -185,6 +185,7 @@ async function seedEmployees(isProduction: boolean) {
     const testEmployeeUsers: { email: string; roleName: string }[] = [
       { email: "superadmin@mail.com", roleName: "super_admin" },
       { email: "admin@mail.com", roleName: "admin" },
+      { email: "admin.pelatihan@mail.com", roleName: "admin_pelatihan" },
       { email: "employee@mail.com", roleName: "employee" },
       { email: "sample-collector@mail.com", roleName: "petugas_sampling" },
       { email: "lab-technician@mail.com", roleName: "petugas_laboratorium" },

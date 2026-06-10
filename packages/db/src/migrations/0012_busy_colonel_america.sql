@@ -1,0 +1,1 @@
+ALTER TABLE "pelatihan" ADD COLUMN "requirements" text;

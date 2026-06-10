@@ -1,22 +1,69 @@
-import { IconBuilding, IconDashboard } from "@tabler/icons-react";
+import {
+  IconBuilding,
+  IconDashboard,
+  IconBook,
+  IconReceipt,
+  IconFlask,
+  IconUser,
+  IconUsers,
+  IconVideo,
+  IconAward,
+} from "@tabler/icons-react";
 import type { NavMainProps } from "@/components/nav-main";
 
 const urlStarter = "/dashboard";
 
 export const userMenu: {
-  navMain: NavMainProps["items"];
+  pengujian: NavMainProps["items"];
+  pelatihan: NavMainProps["items"];
 } = {
-  navMain: [
+  pengujian: [
     {
-      title: "Dasbor",
+      title: "Dasbor Pengujian",
       url: urlStarter,
       icon: IconDashboard,
     },
-
     {
       title: "Data Perusahaan",
       url: `${urlStarter}/company`,
       icon: IconBuilding,
+    },
+    {
+      title: "Transaksi Pengujian",
+      url: "/pengujian/transaksi",
+      icon: IconFlask,
+    },
+  ],
+  pelatihan: [
+    {
+      title: "Profil Saya",
+      url: `${urlStarter}/pelatihan?tab=profil`,
+      icon: IconUser,
+    },
+    {
+      title: "E-Learning",
+      url: `${urlStarter}/pelatihan?tab=e-learning`,
+      icon: IconBook,
+    },
+    {
+      title: "Bimtek",
+      url: `${urlStarter}/pelatihan?tab=bimtek`,
+      icon: IconUsers,
+    },
+    {
+      title: "Webinar",
+      url: `${urlStarter}/pelatihan?tab=webinar`,
+      icon: IconVideo,
+    },
+    {
+      title: "Sertifikat",
+      url: `${urlStarter}/pelatihan?tab=sertifikat`,
+      icon: IconAward,
+    },
+    {
+      title: "Riwayat Transaksi",
+      url: `${urlStarter}/pelatihan?tab=riwayat-transaksi`,
+      icon: IconReceipt,
     },
   ],
 };

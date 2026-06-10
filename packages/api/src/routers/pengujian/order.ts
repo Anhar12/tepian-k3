@@ -846,7 +846,7 @@ export const orderRouter = createTRPCRouter({
             // update payment status to 'paid'
             yield* orderQueries.updatePaymentStatus(order.id, "paid");
 
-            // update order status to pembayaran_diterima
+            // update order status
             yield* orderQueries.updateOrderStatus(
               order.id,
               "menunggu_penerbitan_spt_jadwal",

@@ -43,6 +43,11 @@ export const DOCUMENT_TYPES = [
   // User documents
   "id_card",
   "certification",
+  "employment_letter",
+  "salary_slip",
+  "employment_contract",
+  "diploma",
+  "pass_photo",
 ] as const;
 
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
@@ -70,8 +75,13 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   company_registration: "Company Registration",
 
   // User documents
-  id_card: "ID Card",
-  certification: "Certification",
+  id_card: "Kartu Identitas (KTP)",
+  certification: "Sertifikat",
+  employment_letter: "Surat Keterangan Kerja",
+  salary_slip: "Slip Gaji Bulanan",
+  employment_contract: "Kontrak Kerja",
+  diploma: "Ijazah Terakhir",
+  pass_photo: "Pass Foto Latar Merah",
 };
 
 export const DOCUMENT_STATUS = [

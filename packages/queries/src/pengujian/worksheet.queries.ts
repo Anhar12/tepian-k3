@@ -592,11 +592,14 @@ const worksheetQueries = {
               });
             }
 
+            // Filter only pengujian items
+            const pengujianItems = orderData.items.filter(item => item.type === "pengujian");
+
             // Validate order has items
-            if (orderData.items.length === 0) {
+            if (pengujianItems.length === 0) {
               throw new TRPCError({
                 code: "BAD_REQUEST",
-                message: "Order tidak memiliki item untuk worksheet",
+                message: "Order tidak memiliki item pengujian untuk worksheet",
               });
             }
 
@@ -628,10 +631,10 @@ const worksheetQueries = {
             }
 
             // 3. Create worksheet items from order items
-            const worksheetItemsData = orderData.items.map((item) => ({
+            const worksheetItemsData = pengujianItems.map((item) => ({
               worksheetId: newWorksheet.id,
-              parameterId: item.parameterId,
-              locationId: item.locationId,
+              parameterId: item.parameterId!,
+              locationId: item.locationId!,
               quantity: item.quantity,
               value: null,
               note: null,

@@ -1,0 +1,1 @@
+ALTER TABLE "pelatihan" ALTER COLUMN "level" DROP NOT NULL;

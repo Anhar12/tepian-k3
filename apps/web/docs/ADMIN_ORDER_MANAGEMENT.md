@@ -109,9 +109,7 @@ The order detail page displays different UI based on 6 workflow states:
     <CardTitle>Title</CardTitle>
     <CardDescription>Description</CardDescription>
   </CardHeader>
-  <CardContent>
-    {/* Content */}
-  </CardContent>
+  <CardContent>{/* Content */}</CardContent>
 </Card>
 ```
 
@@ -369,7 +367,7 @@ export const createTestingFromOrder = (orderId: string) =>
           parameterId: item.parameterId,
           quantity: item.quantity,
           status: "pending",
-        }))
+        })),
       );
 
       // Update order status
@@ -425,24 +423,24 @@ Helper functions already implemented in the route file:
 
 ```typescript
 // Order status colors
-pending: 'bg-yellow-100 text-yellow-800'
-confirmed: 'bg-blue-100 text-blue-800'
-in_progress: 'bg-purple-100 text-purple-800'
-completed: 'bg-green-100 text-green-800'
-rejected: 'bg-red-100 text-red-800'
-cancelled: 'bg-gray-100 text-gray-800'
-revision: 'bg-orange-100 text-orange-800'
+pending: "bg-yellow-100 text-yellow-800";
+confirmed: "bg-blue-100 text-blue-800";
+in_progress: "bg-purple-100 text-purple-800";
+completed: "bg-green-100 text-green-800";
+rejected: "bg-red-100 text-red-800";
+cancelled: "bg-gray-100 text-gray-800";
+revision: "bg-orange-100 text-orange-800";
 
 // Approval status colors
-pending: 'bg-amber-100 text-amber-800'
-approved: 'bg-green-100 text-green-800'
-rejected: 'bg-red-100 text-red-800'
+pending: "bg-amber-100 text-amber-800";
+approved: "bg-green-100 text-green-800";
+rejected: "bg-red-100 text-red-800";
 
 // Payment status colors
-unpaid: 'bg-orange-100 text-orange-800'
-pending_verification: 'bg-blue-100 text-blue-800'
-paid: 'bg-green-100 text-green-800'
-rejected: 'bg-red-100 text-red-800'
+unpaid: "bg-orange-100 text-orange-800";
+pending_verification: "bg-blue-100 text-blue-800";
+paid: "bg-green-100 text-green-800";
+rejected: "bg-red-100 text-red-800";
 ```
 
 ## Next Steps

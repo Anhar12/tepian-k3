@@ -200,6 +200,47 @@ const RESOURCE_LABELS: Record<Resource, { title: string; category: string }> = {
     category: "Lembar Kerja Karyawan",
   },
 
+  pelatihan: {
+    title: "Program Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-categories": {
+    title: "Kategori Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-cart": {
+    title: "Keranjang Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-materials": {
+    title: "Materi Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-assessments": {
+    title: "Assessment Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-questions": {
+    title: "Pertanyaan Assessment",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-enrollments": {
+    title: "Pendaftaran Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-progress": {
+    title: "Progres Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-assessment-attempts": {
+    title: "Percobaan Assessment",
+    category: "Pelatihan & Sertifikasi",
+  },
+  "pelatihan-certificates": {
+    title: "Sertifikat Pelatihan",
+    category: "Pelatihan & Sertifikasi",
+  },
+
   "survey-questions": {
     title: "Pertanyaan Survei Kepuasan",
     category: "Survei & Kepuasan",

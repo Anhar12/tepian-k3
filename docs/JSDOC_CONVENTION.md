@@ -1,57 +1,163 @@
 # JSDoc Convention
 
-**All new exported functions, hooks, and React components MUST include JSDoc documentation.**
+**Semua exported functions, hooks, dan React components baru WAJIB menyertakan dokumentasi JSDoc.**
+
+Dokumentasi ini penting agar:
+
+- Developer lain (dan AI agents) dapat memahami tujuan setiap fungsi tanpa membaca implementasinya
+- IDE dapat menampilkan tooltip yang informatif
+- Kode generated oleh AI dapat di-review dengan mudah
 
 ---
 
-## Functions
+## Functions & Query Functions
 
 ```typescript
 /**
- * Retrieves a paginated list of users filtered by search term.
+ * Mengambil daftar pelatihan yang dipaginasi berdasarkan filter pencarian.
  *
- * @param input - Pagination and filter options
- * @param input.page - Current page number (1-indexed)
- * @param input.limit - Number of items per page
- * @param input.search - Optional search term to filter by name or email
- * @returns Paginated result with users and metadata
+ * @param input - Opsi filter dan paginasi
+ * @param input.page - Nomor halaman saat ini (dimulai dari 1)
+ * @param input.limit - Jumlah item per halaman (default: 10)
+ * @param input.search - Kata kunci pencarian berdasarkan judul (opsional)
+ * @param input.status - Filter berdasarkan status pelatihan (opsional)
+ * @returns Daftar pelatihan beserta metadata paginasi
  */
-export const getPaginatedUsers = (input: GetPaginatedUsersInput) => { ... };
+export const getPaginatedPelatihan = (input: GetPaginatedPelatihanInput) =>
+  Effect.tryPromise({ ... });
 ```
+
+---
 
 ## React Components
 
 ```typescript
 /**
- * Displays an order summary card with status badge and action buttons.
+ * Menampilkan kartu ringkasan pelatihan dengan thumbnail, judul, dan tombol aksi.
  *
- * @param props - Component props
- * @param props.order - The order data to display
- * @param props.onApprove - Callback fired when the approve button is clicked
- * @param props.isLoading - Whether an async action is in progress
+ * @param props - Props komponen
+ * @param props.pelatihan - Data pelatihan yang akan ditampilkan
+ * @param props.onEdit - Callback yang dipanggil saat tombol edit diklik
+ * @param props.onDelete - Callback yang dipanggil saat tombol hapus diklik
+ * @param props.isLoading - Menandakan apakah ada operasi async yang berjalan
  */
-export function OrderCard({ order, onApprove, isLoading }: OrderCardProps) { ... }
+export function PelatihanCard({
+  pelatihan,
+  onEdit,
+  onDelete,
+  isLoading,
+}: PelatihanCardProps) { ... }
 ```
 
-## Hooks
+---
+
+## Custom Hooks
 
 ```typescript
 /**
- * Custom hook that manages cart state and exposes add/remove/clear actions.
+ * Hook untuk mengelola state keranjang pelatihan dan aksi add/remove/clear.
  *
- * @param orderId - The order ID to associate cart items with
- * @returns Cart items, total price, and mutation handlers
+ * Menggunakan TanStack Query untuk cache management dan optimistic updates.
+ *
+ * @param userId - UUID user yang memiliki keranjang
+ * @returns Item keranjang, total harga, dan handler mutasi
+ *
+ * @example
+ * const { cartItems, totalPrice, addToCart, removeFromCart } = usePelatihanCart(userId);
  */
-export function useCart(orderId: string) { ... }
+export function usePelatihanCart(userId: string) { ... }
+```
+
+---
+
+## tRPC Router Procedures
+
+```typescript
+export const pelatihanRouter = createTRPCRouter({
+  /**
+   * Mengambil data satu pelatihan berdasarkan ID.
+   * Melempar NOT_FOUND jika pelatihan tidak ada atau sudah dihapus.
+   * Membutuhkan permission: pelatihan.view
+   */
+  getPelatihanById: withPermission("pelatihan.view")
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input }) => { ... }),
+
+  /**
+   * Membuat pelatihan baru dengan status draft.
+   * Membutuhkan permission: pelatihan.create
+   * Menyimpan audit log otomatis setelah pembuatan berhasil.
+   */
+  create: withPermission("pelatihan.create")
+    .input(createPelatihanSchema)
+    .mutation(async ({ ctx, input }) => { ... }),
+});
+```
+
+---
+
+## Query Functions (Effect-based)
+
+```typescript
+/**
+ * Membuat record pelatihan baru di database.
+ *
+ * @param input - Data pelatihan yang akan disimpan
+ * @returns Effect yang menghasilkan pelatihan yang baru dibuat,
+ *          atau melempar INTERNAL_SERVER_ERROR jika gagal
+ */
+export const createPelatihan = (input: CreatePelatihanInput) =>
+  Effect.tryPromise({ ... });
 ```
 
 ---
 
 ## Rules
 
-- **Always** add JSDoc to new exported functions, hooks, and components.
-- **Always** add JSDoc to new utility and service functions.
-- Document all parameters with `@param` and the return value with `@returns`.
-- Keep descriptions concise — explain the **purpose**, not just the name.
-- For complex logic inside a function body, use inline `//` comments.
-- Do **not** add JSDoc to trivial one-liners, anonymous arrow functions, or unexported internals.
+| Aturan        | Keterangan                                                                        |
+| ------------- | --------------------------------------------------------------------------------- |
+| ✅ **Selalu** | Tambahkan JSDoc ke exported functions, hooks, dan components baru                 |
+| ✅ **Selalu** | Tambahkan JSDoc ke utility dan service functions                                  |
+| ✅ **Selalu** | Dokumentasikan semua parameter dengan `@param` dan return value dengan `@returns` |
+| ✅ **Selalu** | Tulis deskripsi yang menjelaskan **tujuan** fungsi, bukan sekadar nama-nya        |
+| ✅ **Selalu** | Gunakan `@example` untuk hooks dan utility functions yang kompleks                |
+| ❌ **Jangan** | Tambahkan JSDoc ke one-liner sederhana atau anonymous arrow functions             |
+| ❌ **Jangan** | Tambahkan JSDoc ke unexported internals atau helper kecil                         |
+| ❌ **Jangan** | Copy-paste nama parameter sebagai deskripsi (misalnya `@param id - The id`)       |
+
+### Bahasa
+
+- Deskripsi JSDoc ditulis dalam **Bahasa Indonesia** (konsisten dengan error messages)
+- Nama parameter dan return types tetap dalam bahasa Inggris (mengikuti TypeScript)
+
+### Contoh Buruk (Hindari)
+
+```typescript
+// ❌ Terlalu singkat, tidak informatif
+/**
+ * Get pelatihan by id.
+ * @param id - The id
+ */
+export const getPelatihanById = (id: string) => ...
+
+// ❌ Hanya mendeskripsikan nama, bukan tujuan
+/**
+ * Create pelatihan function.
+ */
+export const createPelatihan = (input: CreatePelatihanInput) => ...
+```
+
+### Contoh Baik
+
+```typescript
+// ✅ Menjelaskan tujuan + behavior + side effects
+/**
+ * Mengambil detail lengkap satu pelatihan termasuk materi dan assessment-nya.
+ * Melempar NOT_FOUND jika pelatihan tidak ditemukan atau sudah dihapus (soft delete).
+ *
+ * @param id - UUID pelatihan yang ingin diambil
+ * @returns Data pelatihan lengkap termasuk relasi materials dan assessments
+ */
+export const getPelatihanById = (id: string) =>
+  Effect.tryPromise({ ... });
+```
