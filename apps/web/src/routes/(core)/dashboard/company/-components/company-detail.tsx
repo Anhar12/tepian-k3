@@ -289,7 +289,10 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
               <FieldSet>
                 <FieldLegend>Status WLKP di Perusahaan</FieldLegend>
                 <FieldDescription>
-                  Apakah perusahaan Anda memiliki status WLKP?
+                  WLKP (Wajib Lapor Ketenagakerjaan di Perusahaan) adalah
+                  kewajiban perusahaan untuk melaporkan data ketenagakerjaan
+                  kepada pemerintah sesuai UU No. 7 Tahun 1981. Apakah
+                  perusahaan Anda memiliki status WLKP?
                 </FieldDescription>
                 <RadioGroup
                   name="wlkpStatus"

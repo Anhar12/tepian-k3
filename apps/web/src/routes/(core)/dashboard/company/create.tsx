@@ -547,7 +547,10 @@ function RouteComponent() {
                   <FieldSet data-invalid={fieldState.invalid}>
                     <FieldLegend>Status WLKP Online *</FieldLegend>
                     <FieldDescription>
-                      Apakah perusahaan Anda memiliki status WLKP online?
+                      WLKP (Wajib Lapor Ketenagakerjaan di Perusahaan) adalah
+                      kewajiban perusahaan untuk melaporkan data ketenagakerjaan
+                      kepada pemerintah sesuai UU No. 7 Tahun 1981. Apakah
+                      perusahaan Anda memiliki status WLKP online?
                     </FieldDescription>
                     <RadioGroup
                       name={field.name}
