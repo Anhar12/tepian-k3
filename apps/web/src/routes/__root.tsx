@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { pageHead } from "@/utils/page-head";
 import type { trpc } from "@/utils/trpc";
+import { AstyChatbot } from "@/components/asty-chatbot";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
@@ -56,6 +57,7 @@ function RootComponent() {
           </NuqsAdapter>
         </div>
         <Toaster position="top-right" richColors />
+        <AstyChatbot />
       </ThemeProvider>
       <TanStackRouterDevtools position="bottom-left" />
       <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
