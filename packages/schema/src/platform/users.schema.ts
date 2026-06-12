@@ -18,11 +18,12 @@ const getAllUsersSchema = createPaginationSchema(SORTABLE_USER_FIELDS).extend({
 });
 
 const createUserSchema = createInsertSchema(users, {
-  name: z.string().min(1),
-  address: z.string().min(1),
+  name: z.string().min(1, "Nama lengkap harus diisi"),
+  address: z.string().min(1, "Alamat harus diisi"),
+  email: z.email("Format email tidak valid"),
   phone: z
     .string()
-    .min(1)
+    .min(1, "Nomor telepon harus diisi")
     .regex(/^\+?[0-9\s\-()]+$/, "Nomor telepon tidak valid"),
   password: strongPasswordSchema,
 }).pick({
@@ -34,14 +35,14 @@ const createUserSchema = createInsertSchema(users, {
 });
 
 const adminCreateUserSchema = createInsertSchema(users, {
-  name: z.string().min(1),
-  address: z.string().min(1),
+  name: z.string().min(1, "Nama lengkap harus diisi"),
+  address: z.string().min(1, "Alamat harus diisi"),
   phone: z
     .string()
-    .min(1)
+    .min(1, "Nomor telepon harus diisi")
     .regex(/^\+?[0-9\s\-()]+$/, "Nomor telepon tidak valid"),
   password: strongPasswordSchema,
-  email: z.email(),
+  email: z.email("Format email tidak valid"),
   emailVerified: z.boolean(),
   emailVerifiedAt: z.date().nullable(),
 })
@@ -60,13 +61,13 @@ const adminCreateUserSchema = createInsertSchema(users, {
 
 const adminUpdateUserSchema = createUpdateSchema(users, {
   id: z.uuid(),
-  name: z.string().min(1),
-  address: z.string().min(1),
+  name: z.string().min(1, "Nama lengkap harus diisi"),
+  address: z.string().min(1, "Alamat harus diisi"),
   phone: z
     .string()
-    .min(1)
+    .min(1, "Nomor telepon harus diisi")
     .regex(/^\+?[0-9\s\-()]+$/, "Nomor telepon tidak valid"),
-  email: z.email(),
+  email: z.email("Format email tidak valid"),
   emailVerified: z.boolean(),
   emailVerifiedAt: z.date().nullable(),
   password: z.optional(strongPasswordSchema),
@@ -87,11 +88,11 @@ const adminUpdateUserSchema = createUpdateSchema(users, {
   });
 
 const updateUserSchema = createUpdateSchema(users, {
-  name: z.string().min(1),
-  address: z.string().min(1),
+  name: z.string().min(1, "Nama lengkap harus diisi"),
+  address: z.string().min(1, "Alamat harus diisi"),
   phone: z
     .string()
-    .min(1)
+    .min(1, "Nomor telepon harus diisi")
     .regex(/^\+?[0-9\s\-()]+$/, "Nomor telepon tidak valid"),
 }).pick({
   name: true,

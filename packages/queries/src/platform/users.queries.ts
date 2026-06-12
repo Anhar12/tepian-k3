@@ -12,11 +12,11 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { userRoles, users } from "@tepian-k3/db/schema";
+import { roles, userRoles, users } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { hash } from "@node-rs/argon2";
-import { Effect } from "effect";
+import { Cause, Effect, Exit } from "effect";
 import { logError } from "@tepian-k3/services/logger";
 import { storageService } from "@tepian-k3/services/storage";
 import { filterColumns } from "@tepian-k3/utils/filter-column";
@@ -213,6 +213,8 @@ const usersQueries = {
                 address: users.address,
                 emailVerified: users.emailVerified,
                 emailVerifiedAt: users.emailVerifiedAt,
+                verificationStatus: users.verificationStatus,
+                verificationRejectionReason: users.verificationRejectionReason,
                 createdAt: users.createdAt,
                 updatedAt: users.updatedAt,
                 deletedAt: users.deletedAt,
@@ -318,6 +320,8 @@ const usersQueries = {
                 address: users.address,
                 emailVerified: users.emailVerified,
                 emailVerifiedAt: users.emailVerifiedAt,
+                verificationStatus: users.verificationStatus,
+                verificationRejectionReason: users.verificationRejectionReason,
                 createdAt: users.createdAt,
                 updatedAt: users.updatedAt,
                 deletedAt: users.deletedAt,
@@ -386,7 +390,7 @@ const usersQueries = {
         },
       });
 
-      if (isEmailTaken) {
+      if (isEmailTaken && isEmailTaken.verificationStatus !== "rejected") {
         return yield* Effect.fail(
           new TRPCError({
             code: "CONFLICT",
@@ -413,6 +417,14 @@ const usersQueries = {
       const user = yield* Effect.tryPromise({
         try: () =>
           db.transaction(async (tx) => {
+            // Delete old rejected user if exists to prevent email collision
+            if (
+              isEmailTaken &&
+              isEmailTaken.verificationStatus === "rejected"
+            ) {
+              await tx.delete(users).where(eq(users.id, isEmailTaken.id));
+            }
+
             const [newUser] = await tx
               .insert(users)
               .values({
@@ -429,9 +441,13 @@ const usersQueries = {
             }
 
             // Assign default role to user
-            await Effect.runPromise(
+            const assignRoleResult = await Effect.runPromiseExit(
               userRolesQueries.assignDefaultRoleToUser(newUser.id, tx),
             );
+
+            if (Exit.isFailure(assignRoleResult)) {
+              throw Cause.squash(assignRoleResult.cause);
+            }
 
             return newUser;
           }),
@@ -440,6 +456,9 @@ const usersQueries = {
             data,
             error: error,
           });
+          if (error instanceof TRPCError) {
+            throw error;
+          }
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal membuat pengguna.`,
@@ -519,6 +538,7 @@ const usersQueries = {
                   : data.emailVerifiedAt
                     ? new Date(data.emailVerifiedAt).toISOString()
                     : null,
+                verificationStatus: data.emailVerified ? "approved" : "pending",
                 password: hashedPassword,
               })
               .returning();
@@ -530,11 +550,16 @@ const usersQueries = {
               });
             }
 
-            data.roleId.forEach(async (roleId) => {
-              await Effect.runPromise(
-                userRolesQueries.assignRoleToUser(user.id, roleId, tx),
-              );
-            });
+            await Promise.all(
+              data.roleId.map(async (roleId) => {
+                const assignRoleResult = await Effect.runPromiseExit(
+                  userRolesQueries.assignRoleToUser(user.id, roleId, tx),
+                );
+                if (Exit.isFailure(assignRoleResult)) {
+                  throw Cause.squash(assignRoleResult.cause);
+                }
+              }),
+            );
 
             return user;
           }),
@@ -543,6 +568,9 @@ const usersQueries = {
             data,
             error,
           });
+          if (error instanceof TRPCError) {
+            throw error;
+          }
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: `Gagal membuat pengguna.`,
@@ -820,6 +848,8 @@ const usersQueries = {
             .set({
               emailVerified: true,
               emailVerifiedAt: new Date().toISOString(),
+              verificationStatus: "approved",
+              verificationRejectionReason: null,
             })
             .where(eq(users.id, userId))
             .returning(),
@@ -983,6 +1013,119 @@ const usersQueries = {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus permanen pengguna",
+        });
+      },
+    });
+  },
+
+  approveUser(userId: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .update(users)
+          .set({
+            emailVerified: true,
+            emailVerifiedAt: new Date().toISOString(),
+            verificationStatus: "approved",
+            verificationRejectionReason: null,
+          })
+          .where(eq(users.id, userId))
+          .returning(),
+      catch: (error) => {
+        logError("usersQueries.approveUser", "Failed to approve user", {
+          userId,
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menyetujui verifikasi pengguna",
+        });
+      },
+    });
+  },
+
+  rejectUser(userId: string, reason: string) {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .update(users)
+          .set({
+            emailVerified: false,
+            verificationStatus: "rejected",
+            verificationRejectionReason: reason,
+          })
+          .where(eq(users.id, userId))
+          .returning(),
+      catch: (error) => {
+        logError("usersQueries.rejectUser", "Failed to reject user", {
+          userId,
+          error,
+        });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menolak verifikasi pengguna",
+        });
+      },
+    });
+  },
+
+  getVerificationStatusByEmail(email: string) {
+    return Effect.tryPromise({
+      try: async () => {
+        const user = await db.query.users.findFirst({
+          where: eq(users.email, email),
+          columns: {
+            name: true,
+            email: true,
+            phone: true,
+            address: true,
+            verificationStatus: true,
+            verificationRejectionReason: true,
+          },
+        });
+        if (!user) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Pengguna dengan email tersebut tidak ditemukan",
+          });
+        }
+        return user;
+      },
+      catch: (error) => {
+        if (error instanceof TRPCError) throw error;
+        logError(
+          "usersQueries.getVerificationStatusByEmail",
+          "Failed to get verification status",
+          { email, error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil status verifikasi pengguna",
+        });
+      },
+    });
+  },
+
+  getAdmins() {
+    return Effect.tryPromise({
+      try: () =>
+        db
+          .select({ id: users.id })
+          .from(users)
+          .innerJoin(userRoles, eq(users.id, userRoles.userId))
+          .innerJoin(roles, eq(userRoles.roleId, roles.id))
+          .where(
+            and(
+              inArray(roles.name, ["super_admin", "admin", "admin_pelatihan"]),
+              isNull(users.deletedAt),
+            ),
+          ),
+      catch: (error) => {
+        logError("usersQueries.getAdmins", "Failed to get admins", { error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data administrator.",
+          cause: error,
         });
       },
     });

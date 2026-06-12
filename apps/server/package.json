@@ -28,6 +28,7 @@
     "@trpc/server": "catalog:",
     "date-fns": "catalog:",
     "dotenv": "catalog:",
+    "effect": "catalog:",
     "hono": "catalog:",
     "mime-types": "catalog:",
     "sharp": "^0.34.5",

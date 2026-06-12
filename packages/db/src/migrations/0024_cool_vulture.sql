@@ -1,0 +1,1 @@
+ALTER TABLE "users" DROP CONSTRAINT "user_email_unique_idx";

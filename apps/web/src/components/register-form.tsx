@@ -23,18 +23,26 @@ import { Separator } from "./ui/separator";
 
 export function RegisterForm({
   className,
+  initialData,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {
+  initialData?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+  };
+}) {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof userSchema.createUserSchema>>({
     resolver: zodResolver(userSchema.createUserSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      address: "",
-      phone: "",
+      name: initialData?.name ?? "",
+      email: initialData?.email ?? "",
+      address: initialData?.address ?? "",
+      phone: initialData?.phone ?? "",
       password: "",
     },
   });
