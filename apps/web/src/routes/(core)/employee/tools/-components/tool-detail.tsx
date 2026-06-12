@@ -77,23 +77,11 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
   );
 
-  // Guide: tools required per parameter (from parameterTools relationship)
+  // Guide: tools required per parameter (from parameterTools relationship).
+  // This is the only source for the tools table — we show only the tools that
+  // appear in "Panduan Alat yang Diperlukan", not the full inventory.
   const { data: guideToolsData, isLoading: isLoadingGuide } = useQuery(
     trpc.pengujian.tool.getForWorksheet.queryOptions({ worksheetId }),
-  );
-
-  // All tools from the tools inventory (paginated)
-  const { data: allToolsResult, isLoading: isLoadingTools } = useQuery(
-    trpc.pengujian.tool.getToolPaginated.queryOptions({
-      page,
-      perPage,
-      sort: [{ id: "toolName", desc: false }],
-      createdAt: [],
-      filters: [],
-      joinOperator: "and",
-      showDeleted: false,
-      toolName: debouncedSearch,
-    }),
   );
 
   // Pre-populate selections from existing worksheet tool assignments
@@ -174,18 +162,48 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     return map;
   }, [guideToolsData]);
 
-  // Apply client-side condition/availability filters to the current page results
-  const displayedTools = useMemo(() => {
-    if (!allToolsResult?.data) return [];
-    return allToolsResult.data.filter((tool) => {
+  // Deduplicate the per-(tool, parameter) guide rows into one entry per tool,
+  // keeping the full tool fields and aggregating the related parameter names.
+  const guideTools = useMemo(() => {
+    if (!guideToolsData) return [];
+    const map = new Map<
+      string,
+      (typeof guideToolsData)[number] & { parameterNames: string[] }
+    >();
+    for (const t of guideToolsData) {
+      const existing = map.get(t.id);
+      if (existing) {
+        if (!existing.parameterNames.includes(t.parameterName)) {
+          existing.parameterNames.push(t.parameterName);
+        }
+      } else {
+        map.set(t.id, { ...t, parameterNames: [t.parameterName] });
+      }
+    }
+    return Array.from(map.values());
+  }, [guideToolsData]);
+
+  // Apply client-side search + condition/availability filters to the guide tools
+  const filteredGuideTools = useMemo(() => {
+    const search = debouncedSearch.trim().toLowerCase();
+    return guideTools.filter((tool) => {
+      const matchesSearch =
+        search === "" || tool.toolName.toLowerCase().includes(search);
       const matchesCondition =
         conditionFilter === "all" || tool.condition === conditionFilter;
       const matchesAvailability =
         availabilityFilter === "all" ||
         tool.availability === availabilityFilter;
-      return matchesCondition && matchesAvailability;
+      return matchesSearch && matchesCondition && matchesAvailability;
     });
-  }, [allToolsResult?.data, conditionFilter, availabilityFilter]);
+  }, [guideTools, debouncedSearch, conditionFilter, availabilityFilter]);
+
+  // Client-side pagination over the filtered guide tools
+  const pageCount = Math.max(1, Math.ceil(filteredGuideTools.length / perPage));
+  const displayedTools = useMemo(() => {
+    const start = (page - 1) * perPage;
+    return filteredGuideTools.slice(start, start + perPage);
+  }, [filteredGuideTools, page, perPage]);
 
   const selectedToolsCount = selectedToolIds.size;
   const allDisplayedSelected =
@@ -204,16 +222,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
           }),
         );
         await queryClient.invalidateQueries(
-          trpc.pengujian.tool.getToolPaginated.queryOptions({
-            page,
-            perPage,
-            sort: [{ id: "toolName", desc: false }],
-            createdAt: [],
-            filters: [],
-            joinOperator: "and",
-            showDeleted: false,
-            toolName: debouncedSearch,
-          }),
+          trpc.pengujian.tool.getForWorksheet.queryOptions({ worksheetId }),
         );
         globalSuccessToast("Alat berhasil dipinjam");
       },
@@ -356,7 +365,13 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                 className="pl-9"
               />
             </div>
-            <Select value={conditionFilter} onValueChange={setConditionFilter}>
+            <Select
+              value={conditionFilter}
+              onValueChange={(v) => {
+                setConditionFilter(v);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Kondisi" />
               </SelectTrigger>
@@ -371,7 +386,10 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
             </Select>
             <Select
               value={availabilityFilter}
-              onValueChange={setAvailabilityFilter}
+              onValueChange={(v) => {
+                setAvailabilityFilter(v);
+                setPage(1);
+              }}
             >
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Ketersediaan" />
@@ -457,7 +475,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoadingTools ? (
+                  {isLoadingGuide ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
                         {Array.from({ length: 8 }).map((_, j) => (
@@ -479,7 +497,6 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                     </TableRow>
                   ) : (
                     displayedTools.map((tool) => {
-                      const guideEntry = guideByToolId.get(tool.id);
                       const isSelected = selectedToolIds.has(tool.id);
                       return (
                         <TableRow
@@ -532,9 +549,9 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                             />
                           </TableCell>
                           <TableCell>
-                            {guideEntry ? (
+                            {tool.parameterNames.length > 0 ? (
                               <div className="flex flex-col gap-0.5">
-                                {guideEntry.parameterNames.map((name, i) => (
+                                {tool.parameterNames.map((name, i) => (
                                   <Badge
                                     key={i}
                                     variant="secondary"
@@ -557,12 +574,12 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                 </TableBody>
               </Table>
             </div>
-            {allToolsResult && allToolsResult.pageCount > 1 && (
+            {pageCount > 1 && (
               <WorksheetDataTable
                 currentPage={page}
-                totalPages={allToolsResult.pageCount}
+                totalPages={pageCount}
                 pageSize={perPage}
-                totalItems={allToolsResult.pageCount * perPage}
+                totalItems={filteredGuideTools.length}
                 onPageChange={setPage}
                 onPageSizeChange={(size) => {
                   setPerPage(size);
