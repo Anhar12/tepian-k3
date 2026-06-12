@@ -77,23 +77,17 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     trpc.pengujian.worksheet.getWorksheetById.queryOptions({ worksheetId }),
   );
 
-  // Guide: tools required per parameter (from parameterTools relationship)
+  // Guide: tools required per parameter (from parameterTools relationship).
+  // Drives the "Panduan Alat yang Diperlukan" panel (types + planned quantity).
   const { data: guideToolsData, isLoading: isLoadingGuide } = useQuery(
     trpc.pengujian.tool.getForWorksheet.queryOptions({ worksheetId }),
   );
 
-  // All tools from the tools inventory (paginated)
-  const { data: allToolsResult, isLoading: isLoadingTools } = useQuery(
-    trpc.pengujian.tool.getToolPaginated.queryOptions({
-      page,
-      perPage,
-      sort: [{ id: "toolName", desc: false }],
-      createdAt: [],
-      filters: [],
-      joinOperator: "and",
-      showDeleted: false,
-      toolName: debouncedSearch,
-    }),
+  // Borrowable physical units: every tool unit sharing the tool code (type) of
+  // the guide's required tools. Drives the selectable table so the officer can
+  // fulfill a planned "× N" by ticking N distinct units of the required type.
+  const { data: unitToolsData, isLoading: isLoadingUnits } = useQuery(
+    trpc.pengujian.tool.getUnitsForWorksheet.queryOptions({ worksheetId }),
   );
 
   // Pre-populate selections from existing worksheet tool assignments
@@ -107,38 +101,14 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     }
   }, [worksheet?.tools]);
 
-  // Build guide map: toolId -> { parameterIds, parameterNames, plannedToolNeeded }
-  const guideByToolId = useMemo(() => {
-    const map = new Map<
-      string,
-      {
-        parameterIds: string[];
-        parameterNames: string[];
-        toolNeeded: number;
-      }
-    >();
-    if (!guideToolsData) return map;
-    for (const t of guideToolsData) {
-      const existing = map.get(t.id);
-      if (existing) {
-        existing.parameterIds.push(t.parameterId);
-        existing.parameterNames.push(t.parameterName);
-        if (
-          t.plannedToolNeeded != null &&
-          t.plannedToolNeeded > existing.toolNeeded
-        ) {
-          existing.toolNeeded = t.plannedToolNeeded;
-        }
-      } else {
-        map.set(t.id, {
-          parameterIds: [t.parameterId],
-          parameterNames: [t.parameterName],
-          toolNeeded: t.plannedToolNeeded ?? 0,
-        });
-      }
-    }
+  // Lookup of unit -> its annotated data (parameter ids, planned qty, etc.),
+  // used when borrowing to attach a unit to the parameters it serves.
+  const unitById = useMemo(() => {
+    const map = new Map<string, NonNullable<typeof unitToolsData>[number]>();
+    if (!unitToolsData) return map;
+    for (const u of unitToolsData) map.set(u.id, u);
     return map;
-  }, [guideToolsData]);
+  }, [unitToolsData]);
 
   // Build guide sections grouped by parameter (for the guide panel)
   const guideByParameter = useMemo(() => {
@@ -174,18 +144,46 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     return map;
   }, [guideToolsData]);
 
-  // Apply client-side condition/availability filters to the current page results
-  const displayedTools = useMemo(() => {
-    if (!allToolsResult?.data) return [];
-    return allToolsResult.data.filter((tool) => {
+  // Each unit is already one row (annotated with planned qty + parameters).
+  const unitTools = useMemo(() => unitToolsData ?? [], [unitToolsData]);
+
+  // Apply client-side search + condition/availability filters to the units
+  const filteredUnitTools = useMemo(() => {
+    const search = debouncedSearch.trim().toLowerCase();
+    return unitTools.filter((tool) => {
+      const matchesSearch =
+        search === "" ||
+        tool.toolName.toLowerCase().includes(search) ||
+        (tool.toolCode?.code?.toLowerCase().includes(search) ?? false);
       const matchesCondition =
         conditionFilter === "all" || tool.condition === conditionFilter;
       const matchesAvailability =
         availabilityFilter === "all" ||
         tool.availability === availabilityFilter;
-      return matchesCondition && matchesAvailability;
+      return matchesSearch && matchesCondition && matchesAvailability;
     });
-  }, [allToolsResult?.data, conditionFilter, availabilityFilter]);
+  }, [unitTools, debouncedSearch, conditionFilter, availabilityFilter]);
+
+  // Client-side pagination over the filtered units
+  const pageCount = Math.max(1, Math.ceil(filteredUnitTools.length / perPage));
+  const displayedTools = useMemo(() => {
+    const start = (page - 1) * perPage;
+    return filteredUnitTools.slice(start, start + perPage);
+  }, [filteredUnitTools, page, perPage]);
+
+  // Borrowing is per physical unit, so the planned "× N" quantity is satisfied
+  // by selecting N distinct units of the same tool type (tool code). Track
+  // needed vs. selected per type, across all pages — not just the current one.
+  const progressByToolCode = useMemo(() => {
+    const map = new Map<string, { needed: number; selected: number }>();
+    for (const t of unitTools) {
+      const entry = map.get(t.toolCodeId) ?? { needed: 0, selected: 0 };
+      entry.needed = Math.max(entry.needed, t.plannedToolNeeded ?? 0);
+      if (selectedToolIds.has(t.id)) entry.selected += 1;
+      map.set(t.toolCodeId, entry);
+    }
+    return map;
+  }, [unitTools, selectedToolIds]);
 
   const selectedToolsCount = selectedToolIds.size;
   const allDisplayedSelected =
@@ -204,15 +202,11 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
           }),
         );
         await queryClient.invalidateQueries(
-          trpc.pengujian.tool.getToolPaginated.queryOptions({
-            page,
-            perPage,
-            sort: [{ id: "toolName", desc: false }],
-            createdAt: [],
-            filters: [],
-            joinOperator: "and",
-            showDeleted: false,
-            toolName: debouncedSearch,
+          trpc.pengujian.tool.getForWorksheet.queryOptions({ worksheetId }),
+        );
+        await queryClient.invalidateQueries(
+          trpc.pengujian.tool.getUnitsForWorksheet.queryOptions({
+            worksheetId,
           }),
         );
         globalSuccessToast("Alat berhasil dipinjam");
@@ -248,7 +242,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     const items = Array.from(selectedToolIds)
       .map((toolId) => ({
         itemId: toolId,
-        parameterId: guideByToolId.get(toolId)?.parameterIds ?? [],
+        parameterId: unitById.get(toolId)?.parameterIds ?? [],
       }))
       .filter((item) => item.parameterId.length > 0);
     if (items.length === 0) {
@@ -356,7 +350,13 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                 className="pl-9"
               />
             </div>
-            <Select value={conditionFilter} onValueChange={setConditionFilter}>
+            <Select
+              value={conditionFilter}
+              onValueChange={(v) => {
+                setConditionFilter(v);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Kondisi" />
               </SelectTrigger>
@@ -371,7 +371,10 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
             </Select>
             <Select
               value={availabilityFilter}
-              onValueChange={setAvailabilityFilter}
+              onValueChange={(v) => {
+                setAvailabilityFilter(v);
+                setPage(1);
+              }}
             >
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Ketersediaan" />
@@ -440,6 +443,9 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                       Nama Alat
                     </TableHead>
                     <TableHead className="text-xs font-semibold sm:text-sm">
+                      Dibutuhkan
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold sm:text-sm">
                       Lokasi Alat
                     </TableHead>
                     <TableHead className="text-xs font-semibold sm:text-sm">
@@ -457,10 +463,10 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoadingTools ? (
+                  {isLoadingUnits ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 8 }).map((_, j) => (
+                        {Array.from({ length: 9 }).map((_, j) => (
                           <TableCell key={j}>
                             <Skeleton className="h-4 w-full" />
                           </TableCell>
@@ -470,7 +476,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                   ) : displayedTools.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={8}
+                        colSpan={9}
                         className="py-12 text-center text-muted-foreground"
                       >
                         <Wrench className="mx-auto mb-2 h-8 w-8 opacity-50" />
@@ -479,7 +485,6 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                     </TableRow>
                   ) : (
                     displayedTools.map((tool) => {
-                      const guideEntry = guideByToolId.get(tool.id);
                       const isSelected = selectedToolIds.has(tool.id);
                       return (
                         <TableRow
@@ -513,6 +518,42 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                           <TableCell className="text-xs font-medium sm:text-sm">
                             {tool.toolName}
                           </TableCell>
+                          <TableCell>
+                            {(() => {
+                              const progress = progressByToolCode.get(
+                                tool.toolCodeId,
+                              );
+                              const needed = progress?.needed ?? 0;
+                              if (needed <= 0) {
+                                return (
+                                  <span className="text-xs text-muted-foreground">
+                                    —
+                                  </span>
+                                );
+                              }
+                              const selected = progress?.selected ?? 0;
+                              const met = selected >= needed;
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs whitespace-nowrap"
+                                  >
+                                    × {needed}
+                                  </Badge>
+                                  <span
+                                    className={`text-xs whitespace-nowrap ${
+                                      met
+                                        ? "text-emerald-600"
+                                        : "text-muted-foreground"
+                                    }`}
+                                  >
+                                    {selected}/{needed} dipilih
+                                  </span>
+                                </div>
+                              );
+                            })()}
+                          </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {tool.location ?? "—"}
                           </TableCell>
@@ -532,9 +573,9 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                             />
                           </TableCell>
                           <TableCell>
-                            {guideEntry ? (
+                            {tool.parameterNames.length > 0 ? (
                               <div className="flex flex-col gap-0.5">
-                                {guideEntry.parameterNames.map((name, i) => (
+                                {tool.parameterNames.map((name, i) => (
                                   <Badge
                                     key={i}
                                     variant="secondary"
@@ -557,12 +598,12 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                 </TableBody>
               </Table>
             </div>
-            {allToolsResult && allToolsResult.pageCount > 1 && (
+            {pageCount > 1 && (
               <WorksheetDataTable
                 currentPage={page}
-                totalPages={allToolsResult.pageCount}
+                totalPages={pageCount}
                 pageSize={perPage}
-                totalItems={allToolsResult.pageCount * perPage}
+                totalItems={filteredUnitTools.length}
                 onPageChange={setPage}
                 onPageSizeChange={(size) => {
                   setPerPage(size);
