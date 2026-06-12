@@ -341,6 +341,139 @@ const toolsQueries = {
     });
   },
 
+  /**
+   * Returns every physical tool *unit* the equipment officer may borrow for a
+   * worksheet. Unlike {@link getForWorksheet} (which only returns the specific
+   * tool instances linked to the parameters via `parameterTools`), this expands
+   * the selection to all units sharing the *tool code* (type) of any linked
+   * tool. This lets the officer satisfy a planned quantity of `× N` by picking N
+   * distinct physical units of the required type, even when only one unit was
+   * explicitly linked to the parameter.
+   *
+   * Each unit is annotated with its type's planned quantity (`plannedToolNeeded`,
+   * the max across the type's linked tools), the related parameter ids/names,
+   * and whether it is already borrowed for this worksheet (`isBorrowed`).
+   *
+   * @param worksheetId - The worksheet whose required tool types drive the list.
+   * @returns Effect resolving to the borrowable tool units for the worksheet.
+   */
+  getUnitsForWorksheet(worksheetId: string) {
+    return Effect.tryPromise({
+      try: async () => {
+        // Parameter ids covered by this worksheet's items.
+        const worksheetItems = await db.query.worksheetItems.findMany({
+          where: (items, { eq }) => eq(items.worksheetId, worksheetId),
+          columns: {
+            parameterId: true,
+          },
+        });
+
+        const parameterIds = worksheetItems.map((item) => item.parameterId);
+
+        if (parameterIds.length === 0) return [];
+
+        // Tools explicitly linked to those parameters, with planned quantity.
+        const linked = await db
+          .selectDistinct({
+            toolId: tools.id,
+            toolCodeId: tools.toolCodeId,
+            parameterId: parameterTools.parameterId,
+            parameterName: parameters.name,
+            plannedToolNeeded: worksheetToolNeeded.toolNeeded,
+          })
+          .from(tools)
+          .innerJoin(parameterTools, eq(parameterTools.toolId, tools.id))
+          .innerJoin(parameters, eq(parameterTools.parameterId, parameters.id))
+          .leftJoin(
+            worksheetToolNeeded,
+            and(
+              eq(worksheetToolNeeded.toolId, tools.id),
+              eq(worksheetToolNeeded.worksheetId, worksheetId),
+            ),
+          )
+          .where(
+            and(
+              inArray(parameterTools.parameterId, parameterIds),
+              isNull(tools.deletedAt),
+            ),
+          );
+
+        if (linked.length === 0) return [];
+
+        // Aggregate planned quantity + related parameters per tool *type* (code).
+        const typeMap = new Map<
+          string,
+          { needed: number; parameters: Map<string, string> }
+        >();
+        for (const row of linked) {
+          const entry = typeMap.get(row.toolCodeId) ?? {
+            needed: 0,
+            parameters: new Map<string, string>(),
+          };
+          if (
+            row.plannedToolNeeded != null &&
+            row.plannedToolNeeded > entry.needed
+          ) {
+            entry.needed = row.plannedToolNeeded;
+          }
+          entry.parameters.set(row.parameterId, row.parameterName);
+          typeMap.set(row.toolCodeId, entry);
+        }
+
+        const toolCodeIds = Array.from(typeMap.keys());
+
+        // All physical units belonging to the required tool types.
+        const units = await db
+          .select({
+            ...getTableColumns(tools),
+            isBorrowed: sql<boolean>`${worksheetTools.id} IS NOT NULL`,
+            toolCode: {
+              ...getTableColumns(toolCodes),
+            },
+          })
+          .from(tools)
+          .leftJoin(
+            worksheetTools,
+            and(
+              eq(worksheetTools.toolId, tools.id),
+              eq(worksheetTools.worksheetId, worksheetId),
+            ),
+          )
+          .leftJoin(toolCodes, eq(toolCodes.id, tools.toolCodeId))
+          .where(
+            and(
+              inArray(tools.toolCodeId, toolCodeIds),
+              isNull(tools.deletedAt),
+            ),
+          )
+          .orderBy(asc(tools.toolName), asc(tools.toolUniqueCode));
+
+        // Annotate each unit with its type's planned quantity + parameters.
+        return units.map((unit) => {
+          const type = typeMap.get(unit.toolCodeId);
+          return {
+            ...unit,
+            plannedToolNeeded: type?.needed ?? 0,
+            parameterIds: type ? Array.from(type.parameters.keys()) : [],
+            parameterNames: type ? Array.from(type.parameters.values()) : [],
+          };
+        });
+      },
+      catch: (error) => {
+        logError(
+          "toolsQueries.getUnitsForWorksheet",
+          "Error fetching tool units for worksheet",
+          { error, worksheetId },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data unit alat untuk lembar kerja",
+          cause: error,
+        });
+      },
+    });
+  },
+
   createTool(data: z.infer<typeof toolsSchema.createToolSchema>) {
     return Effect.gen(this, function* () {
       yield* toolCodeQueries.getToolCodeById(data.toolCodeId);

@@ -78,10 +78,16 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
   );
 
   // Guide: tools required per parameter (from parameterTools relationship).
-  // This is the only source for the tools table — we show only the tools that
-  // appear in "Panduan Alat yang Diperlukan", not the full inventory.
+  // Drives the "Panduan Alat yang Diperlukan" panel (types + planned quantity).
   const { data: guideToolsData, isLoading: isLoadingGuide } = useQuery(
     trpc.pengujian.tool.getForWorksheet.queryOptions({ worksheetId }),
+  );
+
+  // Borrowable physical units: every tool unit sharing the tool code (type) of
+  // the guide's required tools. Drives the selectable table so the officer can
+  // fulfill a planned "× N" by ticking N distinct units of the required type.
+  const { data: unitToolsData, isLoading: isLoadingUnits } = useQuery(
+    trpc.pengujian.tool.getUnitsForWorksheet.queryOptions({ worksheetId }),
   );
 
   // Pre-populate selections from existing worksheet tool assignments
@@ -95,38 +101,14 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     }
   }, [worksheet?.tools]);
 
-  // Build guide map: toolId -> { parameterIds, parameterNames, plannedToolNeeded }
-  const guideByToolId = useMemo(() => {
-    const map = new Map<
-      string,
-      {
-        parameterIds: string[];
-        parameterNames: string[];
-        toolNeeded: number;
-      }
-    >();
-    if (!guideToolsData) return map;
-    for (const t of guideToolsData) {
-      const existing = map.get(t.id);
-      if (existing) {
-        existing.parameterIds.push(t.parameterId);
-        existing.parameterNames.push(t.parameterName);
-        if (
-          t.plannedToolNeeded != null &&
-          t.plannedToolNeeded > existing.toolNeeded
-        ) {
-          existing.toolNeeded = t.plannedToolNeeded;
-        }
-      } else {
-        map.set(t.id, {
-          parameterIds: [t.parameterId],
-          parameterNames: [t.parameterName],
-          toolNeeded: t.plannedToolNeeded ?? 0,
-        });
-      }
-    }
+  // Lookup of unit -> its annotated data (parameter ids, planned qty, etc.),
+  // used when borrowing to attach a unit to the parameters it serves.
+  const unitById = useMemo(() => {
+    const map = new Map<string, NonNullable<typeof unitToolsData>[number]>();
+    if (!unitToolsData) return map;
+    for (const u of unitToolsData) map.set(u.id, u);
     return map;
-  }, [guideToolsData]);
+  }, [unitToolsData]);
 
   // Build guide sections grouped by parameter (for the guide panel)
   const guideByParameter = useMemo(() => {
@@ -162,33 +144,17 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     return map;
   }, [guideToolsData]);
 
-  // Deduplicate the per-(tool, parameter) guide rows into one entry per tool,
-  // keeping the full tool fields and aggregating the related parameter names.
-  const guideTools = useMemo(() => {
-    if (!guideToolsData) return [];
-    const map = new Map<
-      string,
-      (typeof guideToolsData)[number] & { parameterNames: string[] }
-    >();
-    for (const t of guideToolsData) {
-      const existing = map.get(t.id);
-      if (existing) {
-        if (!existing.parameterNames.includes(t.parameterName)) {
-          existing.parameterNames.push(t.parameterName);
-        }
-      } else {
-        map.set(t.id, { ...t, parameterNames: [t.parameterName] });
-      }
-    }
-    return Array.from(map.values());
-  }, [guideToolsData]);
+  // Each unit is already one row (annotated with planned qty + parameters).
+  const unitTools = useMemo(() => unitToolsData ?? [], [unitToolsData]);
 
-  // Apply client-side search + condition/availability filters to the guide tools
-  const filteredGuideTools = useMemo(() => {
+  // Apply client-side search + condition/availability filters to the units
+  const filteredUnitTools = useMemo(() => {
     const search = debouncedSearch.trim().toLowerCase();
-    return guideTools.filter((tool) => {
+    return unitTools.filter((tool) => {
       const matchesSearch =
-        search === "" || tool.toolName.toLowerCase().includes(search);
+        search === "" ||
+        tool.toolName.toLowerCase().includes(search) ||
+        (tool.toolCode?.code?.toLowerCase().includes(search) ?? false);
       const matchesCondition =
         conditionFilter === "all" || tool.condition === conditionFilter;
       const matchesAvailability =
@@ -196,28 +162,28 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
         tool.availability === availabilityFilter;
       return matchesSearch && matchesCondition && matchesAvailability;
     });
-  }, [guideTools, debouncedSearch, conditionFilter, availabilityFilter]);
+  }, [unitTools, debouncedSearch, conditionFilter, availabilityFilter]);
 
-  // Client-side pagination over the filtered guide tools
-  const pageCount = Math.max(1, Math.ceil(filteredGuideTools.length / perPage));
+  // Client-side pagination over the filtered units
+  const pageCount = Math.max(1, Math.ceil(filteredUnitTools.length / perPage));
   const displayedTools = useMemo(() => {
     const start = (page - 1) * perPage;
-    return filteredGuideTools.slice(start, start + perPage);
-  }, [filteredGuideTools, page, perPage]);
+    return filteredUnitTools.slice(start, start + perPage);
+  }, [filteredUnitTools, page, perPage]);
 
   // Borrowing is per physical unit, so the planned "× N" quantity is satisfied
-  // by selecting N distinct units of the same tool type. Track needed vs.
-  // selected grouped by tool name (across all pages, not just the current one).
-  const progressByToolName = useMemo(() => {
+  // by selecting N distinct units of the same tool type (tool code). Track
+  // needed vs. selected per type, across all pages — not just the current one.
+  const progressByToolCode = useMemo(() => {
     const map = new Map<string, { needed: number; selected: number }>();
-    for (const t of guideTools) {
-      const entry = map.get(t.toolName) ?? { needed: 0, selected: 0 };
+    for (const t of unitTools) {
+      const entry = map.get(t.toolCodeId) ?? { needed: 0, selected: 0 };
       entry.needed = Math.max(entry.needed, t.plannedToolNeeded ?? 0);
       if (selectedToolIds.has(t.id)) entry.selected += 1;
-      map.set(t.toolName, entry);
+      map.set(t.toolCodeId, entry);
     }
     return map;
-  }, [guideTools, selectedToolIds]);
+  }, [unitTools, selectedToolIds]);
 
   const selectedToolsCount = selectedToolIds.size;
   const allDisplayedSelected =
@@ -237,6 +203,11 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
         );
         await queryClient.invalidateQueries(
           trpc.pengujian.tool.getForWorksheet.queryOptions({ worksheetId }),
+        );
+        await queryClient.invalidateQueries(
+          trpc.pengujian.tool.getUnitsForWorksheet.queryOptions({
+            worksheetId,
+          }),
         );
         globalSuccessToast("Alat berhasil dipinjam");
       },
@@ -271,7 +242,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     const items = Array.from(selectedToolIds)
       .map((toolId) => ({
         itemId: toolId,
-        parameterId: guideByToolId.get(toolId)?.parameterIds ?? [],
+        parameterId: unitById.get(toolId)?.parameterIds ?? [],
       }))
       .filter((item) => item.parameterId.length > 0);
     if (items.length === 0) {
@@ -492,7 +463,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoadingGuide ? (
+                  {isLoadingUnits ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
                         {Array.from({ length: 9 }).map((_, j) => (
@@ -549,8 +520,8 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                           </TableCell>
                           <TableCell>
                             {(() => {
-                              const progress = progressByToolName.get(
-                                tool.toolName,
+                              const progress = progressByToolCode.get(
+                                tool.toolCodeId,
                               );
                               const needed = progress?.needed ?? 0;
                               if (needed <= 0) {
@@ -632,7 +603,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                 currentPage={page}
                 totalPages={pageCount}
                 pageSize={perPage}
-                totalItems={filteredGuideTools.length}
+                totalItems={filteredUnitTools.length}
                 onPageChange={setPage}
                 onPageSizeChange={(size) => {
                   setPerPage(size);

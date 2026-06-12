@@ -71,6 +71,14 @@ export const toolRouter = createTRPCRouter({
       return await runEffect(toolsQureies.getForWorksheet(input.worksheetId));
     }),
 
+  getUnitsForWorksheet: withPermission("tools.view")
+    .input(z.object({ worksheetId: z.uuidv7() }))
+    .query(async ({ input }) => {
+      return await runEffect(
+        toolsQureies.getUnitsForWorksheet(input.worksheetId),
+      );
+    }),
+
   getToolDetails: withPermission("tools.read")
     .input(
       z.object({
