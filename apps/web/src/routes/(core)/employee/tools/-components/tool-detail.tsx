@@ -205,6 +205,20 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
     return filteredGuideTools.slice(start, start + perPage);
   }, [filteredGuideTools, page, perPage]);
 
+  // Borrowing is per physical unit, so the planned "× N" quantity is satisfied
+  // by selecting N distinct units of the same tool type. Track needed vs.
+  // selected grouped by tool name (across all pages, not just the current one).
+  const progressByToolName = useMemo(() => {
+    const map = new Map<string, { needed: number; selected: number }>();
+    for (const t of guideTools) {
+      const entry = map.get(t.toolName) ?? { needed: 0, selected: 0 };
+      entry.needed = Math.max(entry.needed, t.plannedToolNeeded ?? 0);
+      if (selectedToolIds.has(t.id)) entry.selected += 1;
+      map.set(t.toolName, entry);
+    }
+    return map;
+  }, [guideTools, selectedToolIds]);
+
   const selectedToolsCount = selectedToolIds.size;
   const allDisplayedSelected =
     displayedTools.length > 0 &&
@@ -458,6 +472,9 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                       Nama Alat
                     </TableHead>
                     <TableHead className="text-xs font-semibold sm:text-sm">
+                      Dibutuhkan
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold sm:text-sm">
                       Lokasi Alat
                     </TableHead>
                     <TableHead className="text-xs font-semibold sm:text-sm">
@@ -478,7 +495,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                   {isLoadingGuide ? (
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 8 }).map((_, j) => (
+                        {Array.from({ length: 9 }).map((_, j) => (
                           <TableCell key={j}>
                             <Skeleton className="h-4 w-full" />
                           </TableCell>
@@ -488,7 +505,7 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                   ) : displayedTools.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={8}
+                        colSpan={9}
                         className="py-12 text-center text-muted-foreground"
                       >
                         <Wrench className="mx-auto mb-2 h-8 w-8 opacity-50" />
@@ -529,6 +546,42 @@ export default function ToolDetail({ worksheetId }: ToolDetailProps) {
                           </TableCell>
                           <TableCell className="text-xs font-medium sm:text-sm">
                             {tool.toolName}
+                          </TableCell>
+                          <TableCell>
+                            {(() => {
+                              const progress = progressByToolName.get(
+                                tool.toolName,
+                              );
+                              const needed = progress?.needed ?? 0;
+                              if (needed <= 0) {
+                                return (
+                                  <span className="text-xs text-muted-foreground">
+                                    —
+                                  </span>
+                                );
+                              }
+                              const selected = progress?.selected ?? 0;
+                              const met = selected >= needed;
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs whitespace-nowrap"
+                                  >
+                                    × {needed}
+                                  </Badge>
+                                  <span
+                                    className={`text-xs whitespace-nowrap ${
+                                      met
+                                        ? "text-emerald-600"
+                                        : "text-muted-foreground"
+                                    }`}
+                                  >
+                                    {selected}/{needed} dipilih
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {tool.location ?? "—"}
