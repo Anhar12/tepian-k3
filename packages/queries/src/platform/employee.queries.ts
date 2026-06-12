@@ -341,6 +341,8 @@ const employeeQueries = {
               positionId: input.positionId,
               userId: input.userId,
               email: isUserExist.email,
+              nip: input.nip,
+              type: input.type,
             })
             .where(eq(employees.id, input.id))
             .returning(),
