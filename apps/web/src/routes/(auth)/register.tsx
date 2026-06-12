@@ -2,15 +2,26 @@ import { RegisterForm } from "@/components/register-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { pageHead } from "@/utils/page-head";
 import ImageWithFallback from "@/components/image-with-fallback";
+import { z } from "zod";
+
+const registerSearchSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
 
 const BannerImage = "/assets/banner-auth.webp";
 
 export const Route = createFileRoute("/(auth)/register")({
+  validateSearch: registerSearchSchema,
   component: RouteComponent,
   head: () => pageHead("Daftar"),
 });
 
 function RouteComponent() {
+  const search = Route.useSearch();
+
   return (
     <div className="grid min-h-svh bg-[#F4F4F4] font-['Inter'] lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-[#F4F4F4] lg:block">
@@ -33,7 +44,7 @@ function RouteComponent() {
             </p>
           </div>
 
-          <RegisterForm />
+          <RegisterForm initialData={search} />
         </div>
       </div>
     </div>
