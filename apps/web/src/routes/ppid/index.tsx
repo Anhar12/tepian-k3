@@ -3,10 +3,13 @@ import LandingNavbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import ImageWithFallback from "@/components/image-with-fallback";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { pageHead } from "@/utils/page-head";
-import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { trpc } from "@/utils/trpc";
+import { useQuery } from "@tanstack/react-query";
+import { getPublicUrl } from "@/utils/url";
 
 export const Route = createFileRoute("/ppid/")({
   component: PPIDPortalPage,
@@ -45,33 +48,7 @@ const carouselSlides = [
   },
 ];
 
-// Data berita & publikasi (statis, dapat disambungkan ke API di iterasi berikutnya)
-const newsItems = [
-  {
-    id: 1,
-    thumbnail: "/assets/news_thumb_1.webp",
-    title: "Layanan Pengujian Peralatan K3",
-    description:
-      "Layanan pengujian peralatan K3 dengan standar nasional dan internasional untuk memastikan keamanan maksimal.",
-    to: "/media-dan-publikasi" as any,
-  },
-  {
-    id: 2,
-    thumbnail: "/assets/news_thumb_2.webp",
-    title: "Program Pelatihan K3 Terbaru",
-    description:
-      "Berbagai program pelatihan K3 tersedia untuk meningkatkan kompetensi tenaga kerja di Kalimantan Timur.",
-    to: "/media-dan-publikasi" as any,
-  },
-  {
-    id: 3,
-    thumbnail: "/assets/news_thumb_3.webp",
-    title: "Uji Kompetensi Teknisi K3",
-    description:
-      "Penyelenggaraan uji kompetensi bagi teknisi K3 sesuai standar nasional yang berlaku.",
-    to: "/media-dan-publikasi" as any,
-  },
-];
+// Data berita & publikasi statis telah dihapus dan digantikan dengan integrasi tRPC dinamis.
 
 /**
  * Portal PPID Balai K3 Samarinda page component.
@@ -82,6 +59,14 @@ const newsItems = [
  */
 function PPIDPortalPage() {
   const navigate = useNavigate();
+
+  const { data: mediaData, isLoading } = useQuery(
+    trpc.platform.mediaPublications.getPublicOffsetPaginatedMedia.queryOptions({
+      page: 1,
+      perPage: 3,
+      sort: [{ id: "createdAt", desc: true }],
+    }),
+  );
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -434,75 +419,109 @@ function PPIDPortalPage() {
             </div>
 
             {/* 3 News Cards */}
-            <div className="flex w-full min-w-0 flex-1 flex-col gap-[15px]">
-              {newsItems.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => navigate({ to: item.to })}
-                  className="group flex w-full cursor-pointer flex-col overflow-hidden rounded-[20px] border border-[#E8F0FE] bg-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-transform duration-200 hover:-translate-y-1 dark:border-neutral-800 dark:bg-neutral-900"
-                >
-                  {/* Thumbnail */}
-                  <div className="h-[160px] w-full overflow-hidden rounded-t-[10px]">
-                    <ImageWithFallback
-                      src={item.thumbnail}
-                      alt={item.title}
-                      className="h-full w-full overflow-hidden rounded-t-[10px] transition-transform duration-300 group-hover:scale-105"
-                      imgClassName="object-cover"
-                    />
-                  </div>
-                  {/* Konten Teks */}
-                  <div className="flex flex-col gap-3 p-5">
-                    <h3 className="font-poppins text-left text-base font-semibold text-[#1061D6] lg:text-lg">
-                      {item.title}
-                    </h3>
-                    <p className="font-poppins text-left text-sm leading-relaxed text-[#4D4D4D] dark:text-neutral-400">
-                      {item.description}
-                    </p>
-                    {/* CTA */}
-                    <div className="flex items-center gap-1.5 text-[#1061D6]">
-                      <span className="font-poppins text-sm font-semibold">
-                        Baca selengkapnya
-                      </span>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                      </svg>
+            {isLoading ? (
+              <div className="flex w-full min-w-0 flex-1 flex-col gap-[15px]">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="flex w-full flex-col overflow-hidden rounded-[20px] border border-[#E8F0FE] bg-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] dark:border-neutral-800 dark:bg-neutral-900"
+                  >
+                    <Skeleton className="h-[160px] w-full rounded-t-[10px]" />
+                    <div className="flex flex-col gap-3 p-5">
+                      <Skeleton className="h-6 w-3/4 rounded-md" />
+                      <Skeleton className="h-4 w-full rounded-md" />
+                      <Skeleton className="h-4 w-5/6 rounded-md" />
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <Skeleton className="h-4 w-28 rounded-md" />
+                      </div>
                     </div>
                   </div>
-                </button>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : !mediaData?.data || mediaData.data.length === 0 ? (
+              <div className="flex w-full min-w-0 flex-1 flex-col items-center justify-center rounded-[20px] border border-[#E8F0FE] bg-white p-10 shadow-[0px_4px_24px_rgba(16,97,214,0.10)] dark:border-neutral-800 dark:bg-neutral-900">
+                <p className="font-poppins text-sm text-neutral-500">
+                  Belum ada media dan publikasi terbaru.
+                </p>
+              </div>
+            ) : (
+              <div className="flex w-full min-w-0 flex-1 flex-col gap-[15px]">
+                {mediaData.data.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() =>
+                      navigate({
+                        to: "/media-dan-publikasi/$newsId",
+                        params: { newsId: item.id },
+                      })
+                    }
+                    className="group flex w-full cursor-pointer flex-col overflow-hidden rounded-[20px] border border-[#E8F0FE] bg-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-transform duration-200 hover:-translate-y-1 dark:border-neutral-800 dark:bg-neutral-900"
+                  >
+                    {/* Thumbnail */}
+                    <div className="h-[160px] w-full overflow-hidden rounded-t-[10px]">
+                      <ImageWithFallback
+                        src={getPublicUrl(item.imageUrl)}
+                        alt={item.title}
+                        className="h-full w-full overflow-hidden rounded-t-[10px] transition-transform duration-300 group-hover:scale-105"
+                        imgClassName="object-cover"
+                      />
+                    </div>
+                    {/* Konten Teks */}
+                    <div className="flex flex-col gap-3 p-5">
+                      <h3 className="font-poppins line-clamp-2 text-left text-base font-semibold text-[#1061D6] lg:text-lg">
+                        {item.title}
+                      </h3>
+                      <p className="font-poppins line-clamp-2 text-left text-sm leading-relaxed text-[#4D4D4D] dark:text-neutral-400">
+                        {item.description ?? ""}
+                      </p>
+                      {/* CTA */}
+                      <div className="flex items-center gap-1.5 text-[#1061D6]">
+                        <span className="font-poppins text-sm font-semibold">
+                          Baca selengkapnya
+                        </span>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* — Tombol Lihat Semua — */}
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/media-dan-publikasi" as any })}
-            className="font-poppins flex items-center gap-2 rounded-xl border-2 border-[#AFCFFA] bg-[#1061D6] px-6 py-2.5 text-sm font-semibold text-white shadow-[0px_0px_100px_-2px_rgba(16,97,214,0.14)] transition-all hover:-translate-y-0.5 hover:bg-[#0d52b8]"
-          >
-            Lihat semua
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <div className="flex w-full justify-end">
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/media-dan-publikasi" as any })}
+              className="font-poppins flex items-center gap-2 rounded-xl border-2 border-[#AFCFFA] bg-[#1061D6] px-6 py-2.5 text-sm font-semibold text-white shadow-[0px_0px_100px_-2px_rgba(16,97,214,0.14)] transition-all hover:-translate-y-0.5 hover:bg-[#0d52b8]"
             >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </button>
+              Lihat semua
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -524,24 +543,27 @@ function PPIDPortalPage() {
           </div>
 
           {/* — Grid Kartu Kontak — */}
-          <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="grid w-full grid-cols-1 justify-items-center gap-5 md:grid-cols-2">
             {/* Kartu Telepon */}
-            <div className="relative overflow-hidden rounded-[20px] bg-[#1061D6] p-8 text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
-              {/* Ornamen Ellipse */}
-              <div className="absolute top-[-20px] right-[-20px] h-32 w-32 rounded-full bg-white/10" />
-              <div className="absolute right-[40px] bottom-[-40px] h-24 w-24 rounded-full bg-white/5" />
+            <div className="relative flex min-h-[180px] w-full max-w-[638px] items-center overflow-hidden rounded-[20px] bg-[#1061D6] py-6 pr-6 pl-[44px] text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
+              {/* Ornamen Ellipse Figma */}
+              <div className="pointer-events-none absolute top-[28px] left-[285px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.07)]" />
+              <div className="pointer-events-none absolute top-[45px] left-[296px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.10)]" />
 
-              <div className="relative z-10 flex items-start gap-5">
-                <div className="mt-1 flex shrink-0 items-center justify-center">
-                  <Phone className="h-8 w-8 text-white" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-poppins text-lg font-semibold lg:text-xl">
+              <div className="relative z-10 flex items-center gap-[30px]">
+                <ImageWithFallback
+                  src="/assets/icon_calling_bold.svg"
+                  alt="Telepon"
+                  className="h-[50px] w-[50px] shrink-0"
+                  imgClassName="object-contain"
+                />
+                <div className="flex flex-col text-left">
+                  <h3 className="font-poppins text-[28px] leading-[1.4] font-semibold text-white">
                     Nomor Telepon
                   </h3>
                   <a
                     href="tel:0541771306"
-                    className="font-poppins text-base font-normal underline transition-opacity hover:opacity-85 lg:text-lg"
+                    className="font-poppins text-[24px] leading-[1.4] font-normal text-white underline transition-opacity hover:opacity-85"
                   >
                     (0541) 771306
                   </a>
@@ -550,22 +572,25 @@ function PPIDPortalPage() {
             </div>
 
             {/* Kartu E-mail */}
-            <div className="relative overflow-hidden rounded-[20px] bg-[#1061D6] p-8 text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
-              {/* Ornamen Ellipse */}
-              <div className="absolute top-[-20px] right-[-20px] h-32 w-32 rounded-full bg-white/10" />
-              <div className="absolute right-[40px] bottom-[-40px] h-24 w-24 rounded-full bg-white/5" />
+            <div className="relative flex min-h-[180px] w-full max-w-[638px] items-center overflow-hidden rounded-[20px] bg-[#1061D6] py-6 pr-6 pl-[44px] text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
+              {/* Ornamen Ellipse Figma */}
+              <div className="pointer-events-none absolute top-[28px] left-[285px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.07)]" />
+              <div className="pointer-events-none absolute top-[45px] left-[296px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.10)]" />
 
-              <div className="relative z-10 flex items-start gap-5">
-                <div className="mt-1 flex shrink-0 items-center justify-center">
-                  <Mail className="h-8 w-8 text-white" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-poppins text-lg font-semibold lg:text-xl">
+              <div className="relative z-10 flex items-center gap-[30px]">
+                <ImageWithFallback
+                  src="/assets/icon_message_bold.svg"
+                  alt="Email"
+                  className="h-[50px] w-[50px] shrink-0"
+                  imgClassName="object-contain"
+                />
+                <div className="flex flex-col text-left">
+                  <h3 className="font-poppins text-[28px] leading-[1.4] font-medium text-white">
                     E-mail
                   </h3>
                   <a
                     href="mailto:balaik3samarinda@gmail.com"
-                    className="font-poppins text-base font-normal break-all transition-opacity hover:opacity-85 lg:text-lg"
+                    className="font-poppins text-[24px] leading-[1.4] font-normal break-all text-white transition-opacity hover:opacity-85"
                   >
                     balaik3samarinda@gmail.com
                   </a>
@@ -574,48 +599,50 @@ function PPIDPortalPage() {
             </div>
 
             {/* Kartu Alamat */}
-            <div className="relative overflow-hidden rounded-[20px] bg-[#1061D6] p-8 text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
-              {/* Ornamen Ellipse */}
-              <div className="absolute top-[-20px] right-[-20px] h-32 w-32 rounded-full bg-white/10" />
-              <div className="absolute right-[40px] bottom-[-40px] h-24 w-24 rounded-full bg-white/5" />
+            <div className="relative flex min-h-[180px] w-full max-w-[638px] items-center overflow-hidden rounded-[20px] bg-[#1061D6] py-6 pr-6 pl-[44px] text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
+              {/* Ornamen Ellipse Figma */}
+              <div className="pointer-events-none absolute top-[28px] left-[285px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.07)]" />
+              <div className="pointer-events-none absolute top-[45px] left-[296px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.10)]" />
 
-              <div className="relative z-10 flex items-start gap-5">
-                <div className="mt-1 flex shrink-0 items-center justify-center">
-                  <MapPin className="h-8 w-8 text-white" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-poppins text-lg font-semibold lg:text-xl">
+              <div className="relative z-10 flex items-center gap-[30px]">
+                <ImageWithFallback
+                  src="/assets/icon_location_bold.svg"
+                  alt="Alamat"
+                  className="h-[50px] w-[50px] shrink-0"
+                  imgClassName="object-contain"
+                />
+                <div className="flex flex-col text-left">
+                  <h3 className="font-poppins text-[28px] leading-[1.4] font-semibold text-white">
                     Alamat
                   </h3>
-                  <p className="font-poppins text-base leading-relaxed font-normal text-white/90 lg:text-lg">
-                    Jl. Sentosa No.9, Sungai Pinang Dalam,
-                    <br />
-                    Kec. Sungai Pinang, Kota Samarinda,
-                    <br />
-                    Kalimantan Timur 75242
+                  <p className="font-poppins text-[24px] leading-[1.4] font-normal text-white">
+                    Jl. Sentosa No.9, Sungai Pinang Dalam, Kec. Sungai Pinang,
+                    Kota Samarinda, Kalimantan Timur 75242
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Kartu Jam Operasional */}
-            <div className="relative overflow-hidden rounded-[20px] bg-[#1061D6] p-8 text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
-              {/* Ornamen Ellipse */}
-              <div className="absolute top-[-20px] right-[-20px] h-32 w-32 rounded-full bg-white/10" />
-              <div className="absolute right-[40px] bottom-[-40px] h-24 w-24 rounded-full bg-white/5" />
+            <div className="relative flex min-h-[180px] w-full max-w-[638px] items-center overflow-hidden rounded-[20px] bg-[#1061D6] py-6 pr-6 pl-[44px] text-white shadow-[0px_4px_24px_rgba(16,97,214,0.10)] transition-all duration-300 hover:-translate-y-1">
+              {/* Ornamen Ellipse Figma */}
+              <div className="pointer-events-none absolute top-[28px] left-[285px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.07)]" />
+              <div className="pointer-events-none absolute top-[45px] left-[296px] h-[448px] w-[602px] rounded-full bg-[rgba(255,255,255,0.10)]" />
 
-              <div className="relative z-10 flex items-start gap-5">
-                <div className="mt-1 flex shrink-0 items-center justify-center">
-                  <Clock className="h-8 w-8 text-white" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-poppins text-lg font-semibold lg:text-xl">
+              <div className="relative z-10 flex items-center gap-[30px]">
+                <ImageWithFallback
+                  src="/assets/icon_time_circle_bold.svg"
+                  alt="Jam Operasional"
+                  className="h-[50px] w-[50px] shrink-0"
+                  imgClassName="object-contain"
+                />
+                <div className="flex flex-col text-left">
+                  <h3 className="font-poppins text-[28px] leading-[1.4] font-medium text-white">
                     Jam Operasional
                   </h3>
-                  <p className="font-poppins text-base leading-relaxed font-normal text-white/90 lg:text-lg">
-                    Senin - Kamis : 07.30 - 16.00 WITA
-                    <br />
-                    Jum’at : 07.30 - 16.30 WITA
+                  <p className="font-poppins text-[24px] leading-[1.4] font-normal whitespace-pre-line text-white">
+                    Senin - Kamis : 07.30 - 16.00 WITA{"\n"}Jum’at : 07.30 -
+                    16.30 WITA
                   </p>
                 </div>
               </div>
