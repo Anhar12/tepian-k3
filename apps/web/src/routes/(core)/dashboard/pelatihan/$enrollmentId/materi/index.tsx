@@ -1,18 +1,10 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  CheckCircle,
-  FileText,
-  Lock,
-  PlayCircle,
-  Video,
-} from "lucide-react";
+import { CheckCircle, FileText, Lock, PlayCircle, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute(

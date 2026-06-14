@@ -180,6 +180,12 @@ export const backOfficeMenu: {
       permission: "news.view",
     },
     {
+      title: "Media & Publikasi",
+      url: `${urlStarter}/media-publications`,
+      icon: IconNews,
+      permission: "media-publications.view",
+    },
+    {
       title: "Log Audit",
       url: `${urlStarter}/audits`,
       icon: IconHistory,

@@ -17,6 +17,8 @@ import { userRouter } from "./user";
 import { villageRouter } from "./village";
 import { faqRouter } from "./faq";
 import { settingRouter } from "./setting";
+import { ppidRouter } from "./ppid";
+import { mediaPublicationsRouter } from "./media-publications";
 
 export const platformRouter = createTRPCRouter({
   auth: authRouter,
@@ -37,4 +39,6 @@ export const platformRouter = createTRPCRouter({
   employeeCertification: employeeCertificationRouter,
   faq: faqRouter,
   setting: settingRouter,
+  ppid: ppidRouter,
+  mediaPublications: mediaPublicationsRouter,
 });

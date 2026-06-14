@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 // import GridBackground from "@/components/grid-background";
 import LandingNavbar from "@/components/navbar";
+import Footer from "@/components/footer";
 import {
   Accordion,
   AccordionContent,
@@ -78,9 +79,6 @@ const pusatLayananItems: {
     textColor: "#44a86b",
   },
 ];
-
-
-
 
 function HomeComponent() {
   const navigate = useNavigate();
@@ -179,10 +177,10 @@ function HomeComponent() {
         {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
           <span className="flex items-center gap-1.5 text-sm font-medium tracking-wider text-primary">
-            <GradientBox /> layanan pusat K3
+            <GradientBox /> layanan K3
           </span>
           <h2 className="mb-2 text-center text-5xl font-semibold text-primary md:text-6xl">
-            Pusat layanan kami
+            Layanan kami
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
@@ -191,15 +189,13 @@ function HomeComponent() {
           {pusatLayananItems.map((item) => (
             <div
               key={item.title}
-              className="relative h-80 w-70 cursor-pointer overflow-hidden rounded-[40px] border-4 border-white bg-white shadow-[0px_0px_100px_-2px_rgba(16,97,214,0.14)] transition-transform hover:scale-105 hover:shadow-xl"
+              className="relative h-64 w-56 cursor-pointer overflow-hidden rounded-[30px] border-4 border-white bg-white shadow-[0px_0px_100px_-2px_rgba(16,97,214,0.14)] transition-transform hover:scale-105 hover:shadow-xl"
               onClick={() => navigate({ to: item.to })}
             >
               {/* Colored top background — badge/shield shape */}
               <svg
-                className="absolute top-0 left-0 z-10"
+                className="absolute top-0 left-0 z-10 h-auto w-full"
                 xmlns="http://www.w3.org/2000/svg"
-                width="280"
-                height="201"
                 viewBox="0 0 280 201"
                 fill="none"
               >
@@ -210,7 +206,7 @@ function HomeComponent() {
               </svg>
 
               {/* 3D Illustration */}
-              <div className="absolute inset-x-0 top-0 z-20 flex h-66.25 items-end justify-center">
+              <div className="absolute inset-x-0 top-0 z-20 flex h-[190px] items-end justify-center">
                 <ImageWithFallback
                   src={item.imageSrc}
                   alt={item.title}
@@ -220,7 +216,7 @@ function HomeComponent() {
 
               {/* Label */}
               <p
-                className="absolute inset-x-0 bottom-5 text-center text-2xl font-semibold tracking-wide"
+                className="absolute inset-x-0 bottom-4 text-center text-xl font-semibold tracking-wide"
                 style={{ color: item.textColor }}
               >
                 {item.title}
@@ -495,216 +491,7 @@ function HomeComponent() {
       </section>
 
       {/* Footer */}
-      <footer
-        className="relative overflow-hidden bg-[#1061D6] py-16 text-white"
-        id="footer"
-      >
-        {/* Decorative watermark background */}
-        <div className="pointer-events-none absolute top-0 bottom-0 left-0 w-full overflow-hidden">
-          <ImageWithFallback
-            src="/assets/LOGO TEPIANK3 2.png"
-            alt="Watermark Tepian K3"
-            className="absolute -top-[32px] -left-[27px] h-[666px] w-[705px] object-contain opacity-[0.08] select-none"
-          />
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-7xl px-6 sm:px-12">
-          {/* Top Grid Area */}
-          <div className="grid grid-cols-1 gap-12 pb-12 md:grid-cols-12">
-            {/* Column 1: Logo & Description */}
-            <div className="relative z-10 space-y-6 md:col-span-5">
-              <ImageWithFallback
-                src="/assets/LOGO TEPIANK3 1.png"
-                alt="Tepian K3 Logo Putih"
-                className="h-16 w-auto object-contain"
-              />
-              <p className="font-poppins max-w-md text-base leading-relaxed font-medium text-white/90">
-                Lembaga pelatihan dan pengujian keselamatan kerja terpercaya di
-                Kalimantan Timur. Membangun budaya aman untuk Indonesia maju.
-              </p>
-            </div>
-
-            {/* Column 2: Tautan Cepat */}
-            <div className="space-y-6 md:col-span-3 md:pl-8">
-              <h3 className="font-poppins text-lg font-bold tracking-wider text-white">
-                Tautan Cepat
-              </h3>
-              <ul className="font-poppins space-y-3.5 text-base font-semibold text-white/95">
-                <li>
-                  <Link
-                    to="/pelatihan"
-                    className="transition-all hover:underline"
-                  >
-                    Program Pelatihan
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/katalog"
-                    className="transition-all hover:underline"
-                  >
-                    Jadwal Pengujian
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/katalog"
-                    className="transition-all hover:underline"
-                  >
-                    Biaya Layanan
-                  </Link>
-                </li>
-                <li>
-                  <a href="/verify" className="transition-all hover:underline">
-                    Verifikasi Sertifikat
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Hubungi Kami */}
-            <div className="space-y-6 md:col-span-4">
-              <h3 className="font-poppins text-lg font-bold tracking-wider text-white">
-                Hubungi Kami
-              </h3>
-              <ul className="font-poppins space-y-3.5 text-base font-semibold text-white/95">
-                <li>
-                  <a
-                    href="mailto:balaik3samarinda@gmail.com"
-                    className="block transition-all hover:underline"
-                  >
-                    balaik3samarinda@gmail.com
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="tel:0541771306"
-                    className="block transition-all hover:underline"
-                  >
-                    (0541) 771306
-                  </a>
-                </li>
-                <li className="leading-relaxed font-medium text-white/90">
-                  Jl. Sentosa No.9, Sungai Pinang Dalam, Kec. Sungai Pinang,
-                  Kota Samarinda, Kalimantan Timur 75242
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom Section */}
-          <div className="flex flex-col items-center justify-center space-y-6 border-t border-white/20 pt-10">
-            {/* Social Media Row */}
-            <div className="flex flex-col items-center gap-4 sm:flex-row">
-              <span className="font-poppins text-base font-bold text-white">
-                Sosial Media Kami
-              </span>
-              <div className="flex items-center gap-3">
-                {/* Instagram */}
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect
-                      x="2"
-                      y="2"
-                      width="20"
-                      height="20"
-                      rx="5"
-                      ry="5"
-                    ></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                  </svg>
-                </a>
-                {/* YouTube */}
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
-                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
-                  </svg>
-                </a>
-                {/* TikTok */}
-                <a
-                  href="https://tiktok.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>
-                  </svg>
-                </a>
-                {/* X (formerly Twitter) */}
-                <a
-                  href="https://x.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1061D6] transition-all duration-300 hover:scale-[1.05] hover:bg-slate-100"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
-                    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-
-            {/* Copyright */}
-            <p className="font-poppins text-center text-sm font-semibold text-white/90">
-              Copyright &copy; 2026 Balai K3 Samarinda. All Rights Reserved
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
