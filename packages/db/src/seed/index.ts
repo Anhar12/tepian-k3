@@ -309,18 +309,61 @@ async function seed() {
 
   console.log("🌱 Syncing K3 categories...");
   const k3CategoriesToSeed = [
-    { id: "01900000-0000-4000-8000-000000000001", name: "K3 Umum", slug: "k3-umum" },
-    { id: "01900000-0000-4000-8000-000000000002", name: "Fire Safety", slug: "fire-safety" },
-    { id: "01900000-0000-4000-8000-000000000003", name: "HIRA / Risk Assessment", slug: "hira" },
-    { id: "01900000-0000-4000-8000-000000000004", name: "P3K & Pertolongan Pertama", slug: "p3k" },
-    { id: "01900000-0000-4000-8000-000000000005", name: "Ergonomi", slug: "ergonomi" },
-    { id: "01900000-0000-4000-8000-000000000006", name: "Hygiene Industri", slug: "hygiene-industri" },
-    { id: "01900000-0000-4000-8000-000000000007", name: "IT Security", slug: "it-security" },
-    { id: "01900000-0000-4000-8000-000000000008", name: "Lingkungan (AMDAL)", slug: "lingkungan" },
-    { id: "01900000-0000-4000-8000-000000000009", name: "Bahan Berbahaya & Beracun (B3)", slug: "b3" },
-    { id: "01900000-0000-4000-8000-000000000010", name: "K3 Konstruksi", slug: "konstruksi" },
+    {
+      id: "01900000-0000-4000-8000-000000000001",
+      name: "K3 Umum",
+      slug: "k3-umum",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000002",
+      name: "Fire Safety",
+      slug: "fire-safety",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000003",
+      name: "HIRA / Risk Assessment",
+      slug: "hira",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000004",
+      name: "P3K & Pertolongan Pertama",
+      slug: "p3k",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000005",
+      name: "Ergonomi",
+      slug: "ergonomi",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000006",
+      name: "Hygiene Industri",
+      slug: "hygiene-industri",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000007",
+      name: "IT Security",
+      slug: "it-security",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000008",
+      name: "Lingkungan (AMDAL)",
+      slug: "lingkungan",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000009",
+      name: "Bahan Berbahaya & Beracun (B3)",
+      slug: "b3",
+    },
+    {
+      id: "01900000-0000-4000-8000-000000000010",
+      name: "K3 Konstruksi",
+      slug: "konstruksi",
+    },
   ];
-  await db.insert(pelatihanCategories).values(k3CategoriesToSeed).onConflictDoNothing();
+  await db
+    .insert(pelatihanCategories)
+    .values(k3CategoriesToSeed)
+    .onConflictDoNothing();
   console.log("✅ K3 categories synced");
 
   // Create one seed user per role.
@@ -358,6 +401,7 @@ async function seed() {
           phone: "081234567890",
           emailVerified: true,
           emailVerifiedAt: new Date().toISOString(),
+          verificationStatus: "approved",
         })
         .returning();
       userRecord = inserted;
