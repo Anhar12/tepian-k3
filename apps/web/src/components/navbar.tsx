@@ -22,7 +22,7 @@ const navItems: {
   { label: "Beranda", href: "/" },
   { label: "Katalog", href: "/katalog" },
   { label: "FAQ", href: "/#faq" },
-  { label: "PPID", href: "#" },
+  { label: "PPID", href: "/ppid" },
 ];
 
 export default function Navbar() {

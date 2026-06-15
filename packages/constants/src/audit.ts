@@ -32,6 +32,8 @@ export const AUDIT_ENTITY_TYPES = [
   "chemical_material",
   "faq",
   "setting",
+  "ppid_documents",
+  "ppid_submissions",
 ] as const;
 
 export type AuditEntityType = (typeof AUDIT_ENTITY_TYPES)[number];
@@ -54,4 +56,6 @@ export const AUDIT_ENTITY_TYPE_LABELS: Record<AuditEntityType, string> = {
   chemical_material: "Bahan Kimia",
   faq: "FAQ",
   setting: "Pengaturan Landing Page",
+  ppid_documents: "Dokumen PPID",
+  ppid_submissions: "Permohonan PPID",
 };

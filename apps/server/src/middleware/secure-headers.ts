@@ -18,7 +18,10 @@ export const secureHeaders = (): MiddlewareHandler => {
     // shared browsing context state (e.g. localStorage visibility) with other pages
     // on the same origin. Only needed for SharedArrayBuffer — skip for log viewer.
     const isLogsRoute = c.req.path.startsWith("/api/logs");
-    if (!isLogsRoute) {
+    const isStaticRoute =
+      c.req.path.startsWith("/api/uploads") ||
+      c.req.path.startsWith("/api/public");
+    if (!isLogsRoute && !isStaticRoute) {
       c.header("Cross-Origin-Embedder-Policy", "require-corp");
       c.header("Cross-Origin-Opener-Policy", "same-origin");
     }

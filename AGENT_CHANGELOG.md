@@ -5,6 +5,75 @@
 
 ---
 
+### 2026-06-15 — Mengganti tag img dengan ImageWithFallback untuk mematuhi aturan linting
+
+- **Perbaikan:** Mengganti semua penggunaan tag native `<img>` di halaman utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`) dengan komponen `<ImageWithFallback />` guna memenuhi aturan linter `tepian/no-img-element` dan mencegah kegagalan commit pada pre-commit hook (husky):
+  - Mengubah tag `<img>` untuk roda gigi K3 melayang 1 dan 2.
+  - Mengubah tag `<img>` untuk background biru shape `talent_bg.png`.
+  - Mengubah tag `<img>` untuk logo watermark background `logo-watermark.png`.
+
+---
+
+### 2026-06-15 — Penyesuaian proporsi gambar talent dan merapatkan roda gerigi K3
+
+- **Perbaikan:** Menyesuaikan elemen-elemen di section "Gambar Talent" (Kenapa Memilih Kami) pada halaman utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`):
+  - Mengurangi ukuran wadah gambar talent (`h-[86%]` dan `w-[90%]`) serta mengaturnya ke posisi bawah (`bottom-0`) agar proporsinya seimbang dan tidak terlalu mendominasi background biru.
+  - Memperbarui koordinat wadah pemotongan sudut kiri (`rounded-tl-[155px]` dan `rounded-bl-[170px]`) agar sejalan dengan skala baru.
+  - Merapatkan posisi roda gigi K3 atas-kiri ke arah talent (menjadi `left-[7%]` dan `top-[12%]`).
+  - Merapatkan posisi roda gigi K3 bawah-kanan ke arah talent (menjadi `left-[54%]` dan `top-[59%]`).
+
+---
+
+### 2026-06-15 — Update background shape Gambar Talent (Why Choose Us) dengan image dari Figma
+
+- **Perbaikan:** Memperbarui background "Gambar Talent" (Kenapa Memilih Kami) di halaman utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`) dengan:
+  - Mengunduh background asli `talent_bg.png` (node 2703:9341) dari Figma.
+  - Mengganti elemen CSS `div` dengan tag `<img>` yang merujuk ke `/assets/talent_bg.png` agar desain 100% presisi dengan layout asli Figma.
+  - Menyelaraskan dimensi background menjadi tinggi `443.65px` dan lebar `527.44px`.
+
+---
+
+### 2026-06-15 — Update layout Gambar Talent (Why Choose Us) dengan Floating Gears K3
+
+- **Perbaikan:** Memperbarui visual section "Gambar Talent" (Kenapa Memilih Kami) di halaman utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`) dengan:
+  - Mengunduh dan memasang asset gambar baru `talent_new.png` dari Figma.
+  - Mengunduh asset roda gigi K3 (`gear_k3.png`) dari Figma.
+  - Menyusun layout responsif `Group 1000002958` (node 2797:8613) yang memiliki gambar talent dengan background shape biru solid `bg-blue-500` (lebar `527.44px`, tinggi `h-96`) dan dua roda gigi K3 yang melayang.
+  - Membalik gambar talent secara horizontal (`scale-x-[-1]`) agar talent menghadap ke kiri.
+  - Mengurangi intensitas efek blur pada roda gigi K3 (menjadi `blur(2px)` di kiri atas dan `blur(3px)` di kanan bawah) agar tidak terlalu blur.
+  - Menerapkan animasi putaran lambat (searah jarum jam 25s, berlawanan jarum jam 35s) sebagai micro-interaction premium.
+  - Membersihkan imports Lucide icons yang tidak digunakan (`Award`, `CheckCircle2`).
+
+---
+
+### 2026-06-15 — Update layout Butuh In-House Training sesuai Figma
+
+- **Perbaikan:** Memperbarui visual section "Butuh In-House Training" di halaman utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`) dengan:
+  - Mengubah background menjadi solid `#3A86F4`.
+  - Mengunduh dan memasang asset gambar baru `in_house_new.png` dari Figma.
+  - Memasang logo watermark bundar Tepian K3 (`logo-watermark.png`) di sebelah kiri sebagai latar belakang.
+  - Menerapkan absolute-positioned background shapes (light blue circles) dan menyelaraskan padding serta layout grid agar responsif dan presisi sesuai Figma.
+
+---
+
+### 2026-06-15 — Hapus FAQ di halaman Pelatihan
+
+- **Perbaikan:** Menghapus bagian FAQ (Frequently Asked Questions) beserta *state*, *query*, dan *imports* yang berkaitan dari halaman katalog utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`).
+
+---
+
+### 2026-06-15 — Fix ERR_BLOCKED_BY_RESPONSE.NotSameOrigin on static files in production
+
+- **Masalah:** Di production, gambar-gambar statis (`/api/public/*` dan `/api/uploads/*`) diblokir oleh browser dengan eror `Failed to load resource: net::ERR_BLOCKED_BY_RESPONSE.NotSameOrigin`. Hal ini dikarenakan:
+  1. Header `Cross-Origin-Resource-Policy` diset ke `same-site`, sehingga memblokir pemuatan gambar jika domain frontend dan backend dianggap cross-site oleh browser.
+  2. Middleware `secureHeaders` menyertakan `Cross-Origin-Embedder-Policy: require-corp` secara global pada file statis.
+- **Perbaikan:**
+  - Mengubah CORP header menjadi `cross-origin` pada route `/api/public/*` dan `/api/uploads/*` di [index.ts](file:///d:/project/k3/tepian-k3/apps/server/src/index.ts).
+  - Melewati pengisian header `Cross-Origin-Embedder-Policy` dan `Cross-Origin-Opener-Policy` untuk route statis (`/api/uploads` dan `/api/public`) di [secure-headers.ts](file:///d:/project/k3/tepian-k3/apps/server/src/middleware/secure-headers.ts).
+- **Verifikasi:** Menjalankan `pnpm check-types` dan berhasil lulus (12/12 packages sukses).
+
+---
+
 ### 2026-06-10 — Repair corrupted pelatihan migration chain
 
 - **Masalah:** `pnpm db:migrate` gagal di `0010_good_marvel_apes.sql` dengan `relation "pelatihan" does not exist`. Penyebab dari merge PR #78 (pelatihan LMS):

@@ -100,6 +100,18 @@ const RESOURCE_LABELS: Record<Resource, { title: string; category: string }> = {
 
   banners: { title: "Banner Informasi", category: "Konten & Informasi Web" },
   news: { title: "Berita & Pengumuman", category: "Konten & Informasi Web" },
+  "media-publications": {
+    title: "Media & Publikasi",
+    category: "Konten & Informasi Web",
+  },
+  "ppid-documents": {
+    title: "Dokumen Regulasi PPID",
+    category: "PPID & Layanan Publik",
+  },
+  "ppid-submissions": {
+    title: "Permohonan Tiket PPID",
+    category: "PPID & Layanan Publik",
+  },
 
   cart: { title: "Keranjang Belanja", category: "Pemesanan & Keuangan" },
   orders: { title: "Daftar Pesanan", category: "Pemesanan & Keuangan" },

@@ -11,6 +11,8 @@ export const CACHE_KEYS = {
   NEWS_FIRST_5: "cache:news:first-5",
   NEWS_CURSOR_PREFIX: "cache:news:cursor:",
   NEWS_PREFIX: "cache:news:",
+  MEDIA_ALL: "cache:media:all",
+  MEDIA_PREFIX: "cache:media:",
   PARAMETER_CATEGORIES_ALL: "cache:parameter-categories:all",
   PARAMETER_CATEGORIES_PREFIX: "cache:parameter-categories:",
   PROVINCES_ALL: "cache:provinces:all",

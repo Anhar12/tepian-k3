@@ -16,13 +16,21 @@ import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PpidIndexRouteImport } from './routes/ppid/index'
 import { Route as PelatihanIndexRouteImport } from './routes/pelatihan/index'
+import { Route as MediaDanPublikasiIndexRouteImport } from './routes/media-dan-publikasi/index'
 import { Route as BeritaIndexRouteImport } from './routes/berita/index'
 import { Route as VerifyTokenRouteImport } from './routes/verify.$token'
+import { Route as PpidSertaMertaRouteImport } from './routes/ppid/serta-merta'
+import { Route as PpidProfilRouteImport } from './routes/ppid/profil'
+import { Route as PpidPermohonanRouteImport } from './routes/ppid/permohonan'
+import { Route as PpidDikecualikanRouteImport } from './routes/ppid/dikecualikan'
+import { Route as PpidBerkalaRouteImport } from './routes/ppid/berkala'
 import { Route as PelatihanWebinarRouteImport } from './routes/pelatihan/webinar'
 import { Route as PelatihanElearningRouteImport } from './routes/pelatihan/elearning'
 import { Route as PelatihanBimtekRouteImport } from './routes/pelatihan/bimtek'
 import { Route as PelatihanSlugRouteImport } from './routes/pelatihan/$slug'
+import { Route as MediaDanPublikasiNewsIdRouteImport } from './routes/media-dan-publikasi/$newsId'
 import { Route as BeritaNewsIdRouteImport } from './routes/berita/$newsId'
 import { Route as coreSettingsRouteImport } from './routes/(core)/settings'
 import { Route as coreProfileRouteImport } from './routes/(core)/profile'
@@ -42,6 +50,7 @@ import { Route as coreEmployeeRouteRouteImport } from './routes/(core)/employee/
 import { Route as coreDisplayBoardRouteRouteImport } from './routes/(core)/display-board/route'
 import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
 import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
+import { Route as PpidSetiapSaatIndexRouteImport } from './routes/ppid/setiap-saat/index'
 import { Route as PelatihanTransaksiIndexRouteImport } from './routes/pelatihan/transaksi/index'
 import { Route as coreWorksheetsIndexRouteImport } from './routes/(core)/worksheets/index'
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
@@ -51,6 +60,8 @@ import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboar
 import { Route as coreCartPelatihanIndexRouteImport } from './routes/(core)/cart-pelatihan/index'
 import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-office/index'
 import { Route as VerifyCertificateTokenRouteImport } from './routes/verify.certificate.$token'
+import { Route as PpidSetiapSaatRegulasiRouteImport } from './routes/ppid/setiap-saat/regulasi'
+import { Route as PpidSetiapSaatDocumentIdRouteImport } from './routes/ppid/setiap-saat/$documentId'
 import { Route as PelatihanTransaksiOrderIdRouteImport } from './routes/pelatihan/transaksi/$orderId'
 import { Route as coreWorksheetsJadwalPersonelRouteImport } from './routes/(core)/worksheets/jadwal-personel'
 import { Route as coreWorksheetsDetailTransaksiRouteImport } from './routes/(core)/worksheets/detail-transaksi'
@@ -74,6 +85,7 @@ import { Route as coreBackOfficeTestingsIndexRouteImport } from './routes/(core)
 import { Route as coreBackOfficeSurveyQuestionsIndexRouteImport } from './routes/(core)/back-office/survey-questions/index'
 import { Route as coreBackOfficeSertifikatPelatihanIndexRouteImport } from './routes/(core)/back-office/sertifikat-pelatihan/index'
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
+import { Route as coreBackOfficePpidIndexRouteImport } from './routes/(core)/back-office/ppid/index'
 import { Route as coreBackOfficePositionsIndexRouteImport } from './routes/(core)/back-office/positions/index'
 import { Route as coreBackOfficePelatihanIndexRouteImport } from './routes/(core)/back-office/pelatihan/index'
 import { Route as coreBackOfficeParametersIndexRouteImport } from './routes/(core)/back-office/parameters/index'
@@ -81,6 +93,7 @@ import { Route as coreBackOfficeParameterCategoriesIndexRouteImport } from './ro
 import { Route as coreBackOfficeOrdersIndexRouteImport } from './routes/(core)/back-office/orders/index'
 import { Route as coreBackOfficeOrderPelatihanIndexRouteImport } from './routes/(core)/back-office/order-pelatihan/index'
 import { Route as coreBackOfficeNewsIndexRouteImport } from './routes/(core)/back-office/news/index'
+import { Route as coreBackOfficeMediaPublicationsIndexRouteImport } from './routes/(core)/back-office/media-publications/index'
 import { Route as coreBackOfficeLandingSettingsIndexRouteImport } from './routes/(core)/back-office/landing-settings/index'
 import { Route as coreBackOfficeKblisIndexRouteImport } from './routes/(core)/back-office/kblis/index'
 import { Route as coreBackOfficeEmployeesIndexRouteImport } from './routes/(core)/back-office/employees/index'
@@ -101,6 +114,7 @@ import { Route as coreBackOfficeParametersCreateRouteImport } from './routes/(co
 import { Route as coreBackOfficeParameterCategoriesCreateRouteImport } from './routes/(core)/back-office/parameter-categories/create'
 import { Route as coreBackOfficeOrderPelatihanOrderIdRouteImport } from './routes/(core)/back-office/order-pelatihan/$orderId'
 import { Route as coreBackOfficeNewsCreateRouteImport } from './routes/(core)/back-office/news/create'
+import { Route as coreBackOfficeMediaPublicationsCreateRouteImport } from './routes/(core)/back-office/media-publications/create'
 import { Route as coreBackOfficeKblisCreateRouteImport } from './routes/(core)/back-office/kblis/create'
 import { Route as coreBackOfficeEmployeesCreateRouteImport } from './routes/(core)/back-office/employees/create'
 import { Route as coreBackOfficeClustersCreateRouteImport } from './routes/(core)/back-office/clusters/create'
@@ -134,6 +148,7 @@ import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from '.
 import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
 import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from './routes/(core)/back-office/orders/$orderId.detail'
 import { Route as coreBackOfficeNewsNewsIdEditRouteImport } from './routes/(core)/back-office/news/$newsId.edit'
+import { Route as coreBackOfficeMediaPublicationsMediaIdEditRouteImport } from './routes/(core)/back-office/media-publications/$mediaId.edit'
 import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
 import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './routes/(core)/back-office/employees/$employeeId.edit'
 import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
@@ -184,9 +199,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PpidIndexRoute = PpidIndexRouteImport.update({
+  id: '/ppid/',
+  path: '/ppid/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PelatihanIndexRoute = PelatihanIndexRouteImport.update({
   id: '/pelatihan/',
   path: '/pelatihan/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediaDanPublikasiIndexRoute = MediaDanPublikasiIndexRouteImport.update({
+  id: '/media-dan-publikasi/',
+  path: '/media-dan-publikasi/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BeritaIndexRoute = BeritaIndexRouteImport.update({
@@ -197,6 +222,31 @@ const BeritaIndexRoute = BeritaIndexRouteImport.update({
 const VerifyTokenRoute = VerifyTokenRouteImport.update({
   id: '/verify/$token',
   path: '/verify/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpidSertaMertaRoute = PpidSertaMertaRouteImport.update({
+  id: '/ppid/serta-merta',
+  path: '/ppid/serta-merta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpidProfilRoute = PpidProfilRouteImport.update({
+  id: '/ppid/profil',
+  path: '/ppid/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpidPermohonanRoute = PpidPermohonanRouteImport.update({
+  id: '/ppid/permohonan',
+  path: '/ppid/permohonan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpidDikecualikanRoute = PpidDikecualikanRouteImport.update({
+  id: '/ppid/dikecualikan',
+  path: '/ppid/dikecualikan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpidBerkalaRoute = PpidBerkalaRouteImport.update({
+  id: '/ppid/berkala',
+  path: '/ppid/berkala',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PelatihanWebinarRoute = PelatihanWebinarRouteImport.update({
@@ -217,6 +267,11 @@ const PelatihanBimtekRoute = PelatihanBimtekRouteImport.update({
 const PelatihanSlugRoute = PelatihanSlugRouteImport.update({
   id: '/pelatihan/$slug',
   path: '/pelatihan/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediaDanPublikasiNewsIdRoute = MediaDanPublikasiNewsIdRouteImport.update({
+  id: '/media-dan-publikasi/$newsId',
+  path: '/media-dan-publikasi/$newsId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BeritaNewsIdRoute = BeritaNewsIdRouteImport.update({
@@ -314,6 +369,11 @@ const coreBackOfficeRouteRoute = coreBackOfficeRouteRouteImport.update({
   path: '/back-office',
   getParentRoute: () => coreRouteRoute,
 } as any)
+const PpidSetiapSaatIndexRoute = PpidSetiapSaatIndexRouteImport.update({
+  id: '/ppid/setiap-saat/',
+  path: '/ppid/setiap-saat/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PelatihanTransaksiIndexRoute = PelatihanTransaksiIndexRouteImport.update({
   id: '/pelatihan/transaksi/',
   path: '/pelatihan/transaksi/',
@@ -359,6 +419,17 @@ const VerifyCertificateTokenRoute = VerifyCertificateTokenRouteImport.update({
   path: '/verify/certificate/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PpidSetiapSaatRegulasiRoute = PpidSetiapSaatRegulasiRouteImport.update({
+  id: '/ppid/setiap-saat/regulasi',
+  path: '/ppid/setiap-saat/regulasi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PpidSetiapSaatDocumentIdRoute =
+  PpidSetiapSaatDocumentIdRouteImport.update({
+    id: '/ppid/setiap-saat/$documentId',
+    path: '/ppid/setiap-saat/$documentId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PelatihanTransaksiOrderIdRoute =
   PelatihanTransaksiOrderIdRouteImport.update({
     id: '/pelatihan/transaksi/$orderId',
@@ -491,6 +562,11 @@ const coreBackOfficeRolesIndexRoute =
     path: '/roles/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficePpidIndexRoute = coreBackOfficePpidIndexRouteImport.update({
+  id: '/ppid/',
+  path: '/ppid/',
+  getParentRoute: () => coreBackOfficeRouteRoute,
+} as any)
 const coreBackOfficePositionsIndexRoute =
   coreBackOfficePositionsIndexRouteImport.update({
     id: '/positions/',
@@ -532,6 +608,12 @@ const coreBackOfficeNewsIndexRoute = coreBackOfficeNewsIndexRouteImport.update({
   path: '/news/',
   getParentRoute: () => coreBackOfficeRouteRoute,
 } as any)
+const coreBackOfficeMediaPublicationsIndexRoute =
+  coreBackOfficeMediaPublicationsIndexRouteImport.update({
+    id: '/media-publications/',
+    path: '/media-publications/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeLandingSettingsIndexRoute =
   coreBackOfficeLandingSettingsIndexRouteImport.update({
     id: '/landing-settings/',
@@ -650,6 +732,12 @@ const coreBackOfficeNewsCreateRoute =
   coreBackOfficeNewsCreateRouteImport.update({
     id: '/news/create',
     path: '/news/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeMediaPublicationsCreateRoute =
+  coreBackOfficeMediaPublicationsCreateRouteImport.update({
+    id: '/media-publications/create',
+    path: '/media-publications/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeKblisCreateRoute =
@@ -850,6 +938,12 @@ const coreBackOfficeNewsNewsIdEditRoute =
     path: '/news/$newsId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeMediaPublicationsMediaIdEditRoute =
+  coreBackOfficeMediaPublicationsMediaIdEditRouteImport.update({
+    id: '/media-publications/$mediaId/edit',
+    path: '/media-publications/$mediaId/edit',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeKblisKbliIdEditRoute =
   coreBackOfficeKblisKbliIdEditRouteImport.update({
     id: '/kblis/$kbliId/edit',
@@ -975,13 +1069,21 @@ export interface FileRoutesByFullPath {
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/berita/$newsId': typeof BeritaNewsIdRoute
+  '/media-dan-publikasi/$newsId': typeof MediaDanPublikasiNewsIdRoute
   '/pelatihan/$slug': typeof PelatihanSlugRoute
   '/pelatihan/bimtek': typeof PelatihanBimtekRoute
   '/pelatihan/elearning': typeof PelatihanElearningRoute
   '/pelatihan/webinar': typeof PelatihanWebinarRoute
+  '/ppid/berkala': typeof PpidBerkalaRoute
+  '/ppid/dikecualikan': typeof PpidDikecualikanRoute
+  '/ppid/permohonan': typeof PpidPermohonanRoute
+  '/ppid/profil': typeof PpidProfilRoute
+  '/ppid/serta-merta': typeof PpidSertaMertaRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
+  '/media-dan-publikasi': typeof MediaDanPublikasiIndexRoute
   '/pelatihan': typeof PelatihanIndexRoute
+  '/ppid': typeof PpidIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
@@ -990,6 +1092,8 @@ export interface FileRoutesByFullPath {
   '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
   '/pelatihan/transaksi/$orderId': typeof PelatihanTransaksiOrderIdRoute
+  '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
+  '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
   '/back-office/': typeof coreBackOfficeIndexRoute
   '/cart-pelatihan': typeof coreCartPelatihanIndexRoute
@@ -999,12 +1103,14 @@ export interface FileRoutesByFullPath {
   '/pengujian/': typeof corePengujianIndexRoute
   '/worksheets/': typeof coreWorksheetsIndexRoute
   '/pelatihan/transaksi': typeof PelatihanTransaksiIndexRoute
+  '/ppid/setiap-saat': typeof PpidSetiapSaatIndexRoute
   '/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/media-publications/create': typeof coreBackOfficeMediaPublicationsCreateRoute
   '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/back-office/order-pelatihan/$orderId': typeof coreBackOfficeOrderPelatihanOrderIdRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -1025,6 +1131,7 @@ export interface FileRoutesByFullPath {
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
   '/back-office/landing-settings': typeof coreBackOfficeLandingSettingsIndexRoute
+  '/back-office/media-publications': typeof coreBackOfficeMediaPublicationsIndexRoute
   '/back-office/news': typeof coreBackOfficeNewsIndexRoute
   '/back-office/order-pelatihan': typeof coreBackOfficeOrderPelatihanIndexRoute
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
@@ -1032,6 +1139,7 @@ export interface FileRoutesByFullPath {
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/pelatihan': typeof coreBackOfficePelatihanIndexRoute
   '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
+  '/back-office/ppid': typeof coreBackOfficePpidIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/sertifikat-pelatihan': typeof coreBackOfficeSertifikatPelatihanIndexRoute
   '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
@@ -1052,6 +1160,7 @@ export interface FileRoutesByFullPath {
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/media-publications/$mediaId/edit': typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
@@ -1110,13 +1219,21 @@ export interface FileRoutesByTo {
   '/profile': typeof coreProfileRoute
   '/settings': typeof coreSettingsRoute
   '/berita/$newsId': typeof BeritaNewsIdRoute
+  '/media-dan-publikasi/$newsId': typeof MediaDanPublikasiNewsIdRoute
   '/pelatihan/$slug': typeof PelatihanSlugRoute
   '/pelatihan/bimtek': typeof PelatihanBimtekRoute
   '/pelatihan/elearning': typeof PelatihanElearningRoute
   '/pelatihan/webinar': typeof PelatihanWebinarRoute
+  '/ppid/berkala': typeof PpidBerkalaRoute
+  '/ppid/dikecualikan': typeof PpidDikecualikanRoute
+  '/ppid/permohonan': typeof PpidPermohonanRoute
+  '/ppid/profil': typeof PpidProfilRoute
+  '/ppid/serta-merta': typeof PpidSertaMertaRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
+  '/media-dan-publikasi': typeof MediaDanPublikasiIndexRoute
   '/pelatihan': typeof PelatihanIndexRoute
+  '/ppid': typeof PpidIndexRoute
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
@@ -1125,6 +1242,8 @@ export interface FileRoutesByTo {
   '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
   '/pelatihan/transaksi/$orderId': typeof PelatihanTransaksiOrderIdRoute
+  '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
+  '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
   '/back-office': typeof coreBackOfficeIndexRoute
   '/cart-pelatihan': typeof coreCartPelatihanIndexRoute
@@ -1134,12 +1253,14 @@ export interface FileRoutesByTo {
   '/pengujian': typeof corePengujianIndexRoute
   '/worksheets': typeof coreWorksheetsIndexRoute
   '/pelatihan/transaksi': typeof PelatihanTransaksiIndexRoute
+  '/ppid/setiap-saat': typeof PpidSetiapSaatIndexRoute
   '/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/back-office/media-publications/create': typeof coreBackOfficeMediaPublicationsCreateRoute
   '/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/back-office/order-pelatihan/$orderId': typeof coreBackOfficeOrderPelatihanOrderIdRoute
   '/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -1160,6 +1281,7 @@ export interface FileRoutesByTo {
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
   '/back-office/kblis': typeof coreBackOfficeKblisIndexRoute
   '/back-office/landing-settings': typeof coreBackOfficeLandingSettingsIndexRoute
+  '/back-office/media-publications': typeof coreBackOfficeMediaPublicationsIndexRoute
   '/back-office/news': typeof coreBackOfficeNewsIndexRoute
   '/back-office/order-pelatihan': typeof coreBackOfficeOrderPelatihanIndexRoute
   '/back-office/orders': typeof coreBackOfficeOrdersIndexRoute
@@ -1167,6 +1289,7 @@ export interface FileRoutesByTo {
   '/back-office/parameters': typeof coreBackOfficeParametersIndexRoute
   '/back-office/pelatihan': typeof coreBackOfficePelatihanIndexRoute
   '/back-office/positions': typeof coreBackOfficePositionsIndexRoute
+  '/back-office/ppid': typeof coreBackOfficePpidIndexRoute
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/sertifikat-pelatihan': typeof coreBackOfficeSertifikatPelatihanIndexRoute
   '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
@@ -1187,6 +1310,7 @@ export interface FileRoutesByTo {
   '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/back-office/media-publications/$mediaId/edit': typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
@@ -1254,13 +1378,21 @@ export interface FileRoutesById {
   '/(core)/profile': typeof coreProfileRoute
   '/(core)/settings': typeof coreSettingsRoute
   '/berita/$newsId': typeof BeritaNewsIdRoute
+  '/media-dan-publikasi/$newsId': typeof MediaDanPublikasiNewsIdRoute
   '/pelatihan/$slug': typeof PelatihanSlugRoute
   '/pelatihan/bimtek': typeof PelatihanBimtekRoute
   '/pelatihan/elearning': typeof PelatihanElearningRoute
   '/pelatihan/webinar': typeof PelatihanWebinarRoute
+  '/ppid/berkala': typeof PpidBerkalaRoute
+  '/ppid/dikecualikan': typeof PpidDikecualikanRoute
+  '/ppid/permohonan': typeof PpidPermohonanRoute
+  '/ppid/profil': typeof PpidProfilRoute
+  '/ppid/serta-merta': typeof PpidSertaMertaRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/berita/': typeof BeritaIndexRoute
+  '/media-dan-publikasi/': typeof MediaDanPublikasiIndexRoute
   '/pelatihan/': typeof PelatihanIndexRoute
+  '/ppid/': typeof PpidIndexRoute
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
@@ -1269,6 +1401,8 @@ export interface FileRoutesById {
   '/(core)/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/(core)/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
   '/pelatihan/transaksi/$orderId': typeof PelatihanTransaksiOrderIdRoute
+  '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
+  '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
   '/(core)/back-office/': typeof coreBackOfficeIndexRoute
   '/(core)/cart-pelatihan/': typeof coreCartPelatihanIndexRoute
@@ -1278,12 +1412,14 @@ export interface FileRoutesById {
   '/(core)/pengujian/': typeof corePengujianIndexRoute
   '/(core)/worksheets/': typeof coreWorksheetsIndexRoute
   '/pelatihan/transaksi/': typeof PelatihanTransaksiIndexRoute
+  '/ppid/setiap-saat/': typeof PpidSetiapSaatIndexRoute
   '/(core)/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/(core)/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
   '/(core)/back-office/chemical-materials/create': typeof coreBackOfficeChemicalMaterialsCreateRoute
   '/(core)/back-office/clusters/create': typeof coreBackOfficeClustersCreateRoute
   '/(core)/back-office/employees/create': typeof coreBackOfficeEmployeesCreateRoute
   '/(core)/back-office/kblis/create': typeof coreBackOfficeKblisCreateRoute
+  '/(core)/back-office/media-publications/create': typeof coreBackOfficeMediaPublicationsCreateRoute
   '/(core)/back-office/news/create': typeof coreBackOfficeNewsCreateRoute
   '/(core)/back-office/order-pelatihan/$orderId': typeof coreBackOfficeOrderPelatihanOrderIdRoute
   '/(core)/back-office/parameter-categories/create': typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -1304,6 +1440,7 @@ export interface FileRoutesById {
   '/(core)/back-office/employees/': typeof coreBackOfficeEmployeesIndexRoute
   '/(core)/back-office/kblis/': typeof coreBackOfficeKblisIndexRoute
   '/(core)/back-office/landing-settings/': typeof coreBackOfficeLandingSettingsIndexRoute
+  '/(core)/back-office/media-publications/': typeof coreBackOfficeMediaPublicationsIndexRoute
   '/(core)/back-office/news/': typeof coreBackOfficeNewsIndexRoute
   '/(core)/back-office/order-pelatihan/': typeof coreBackOfficeOrderPelatihanIndexRoute
   '/(core)/back-office/orders/': typeof coreBackOfficeOrdersIndexRoute
@@ -1311,6 +1448,7 @@ export interface FileRoutesById {
   '/(core)/back-office/parameters/': typeof coreBackOfficeParametersIndexRoute
   '/(core)/back-office/pelatihan/': typeof coreBackOfficePelatihanIndexRoute
   '/(core)/back-office/positions/': typeof coreBackOfficePositionsIndexRoute
+  '/(core)/back-office/ppid/': typeof coreBackOfficePpidIndexRoute
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
   '/(core)/back-office/sertifikat-pelatihan/': typeof coreBackOfficeSertifikatPelatihanIndexRoute
   '/(core)/back-office/survey-questions/': typeof coreBackOfficeSurveyQuestionsIndexRoute
@@ -1331,6 +1469,7 @@ export interface FileRoutesById {
   '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
+  '/(core)/back-office/media-publications/$mediaId/edit': typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   '/(core)/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/(core)/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
   '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
@@ -1397,13 +1536,21 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/berita/$newsId'
+    | '/media-dan-publikasi/$newsId'
     | '/pelatihan/$slug'
     | '/pelatihan/bimtek'
     | '/pelatihan/elearning'
     | '/pelatihan/webinar'
+    | '/ppid/berkala'
+    | '/ppid/dikecualikan'
+    | '/ppid/permohonan'
+    | '/ppid/profil'
+    | '/ppid/serta-merta'
     | '/verify/$token'
     | '/berita'
+    | '/media-dan-publikasi'
     | '/pelatihan'
+    | '/ppid'
     | '/pengujian/checkout'
     | '/pengujian/sertifikat'
     | '/pengujian/status'
@@ -1412,6 +1559,8 @@ export interface FileRouteTypes {
     | '/worksheets/detail-transaksi'
     | '/worksheets/jadwal-personel'
     | '/pelatihan/transaksi/$orderId'
+    | '/ppid/setiap-saat/$documentId'
+    | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
     | '/back-office/'
     | '/cart-pelatihan'
@@ -1421,12 +1570,14 @@ export interface FileRouteTypes {
     | '/pengujian/'
     | '/worksheets/'
     | '/pelatihan/transaksi'
+    | '/ppid/setiap-saat'
     | '/back-office/audits/$auditId'
     | '/back-office/banners/create'
     | '/back-office/chemical-materials/create'
     | '/back-office/clusters/create'
     | '/back-office/employees/create'
     | '/back-office/kblis/create'
+    | '/back-office/media-publications/create'
     | '/back-office/news/create'
     | '/back-office/order-pelatihan/$orderId'
     | '/back-office/parameter-categories/create'
@@ -1447,6 +1598,7 @@ export interface FileRouteTypes {
     | '/back-office/employees'
     | '/back-office/kblis'
     | '/back-office/landing-settings'
+    | '/back-office/media-publications'
     | '/back-office/news'
     | '/back-office/order-pelatihan'
     | '/back-office/orders'
@@ -1454,6 +1606,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters'
     | '/back-office/pelatihan'
     | '/back-office/positions'
+    | '/back-office/ppid'
     | '/back-office/roles'
     | '/back-office/sertifikat-pelatihan'
     | '/back-office/survey-questions'
@@ -1474,6 +1627,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/media-publications/$mediaId/edit'
     | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
@@ -1532,13 +1686,21 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/berita/$newsId'
+    | '/media-dan-publikasi/$newsId'
     | '/pelatihan/$slug'
     | '/pelatihan/bimtek'
     | '/pelatihan/elearning'
     | '/pelatihan/webinar'
+    | '/ppid/berkala'
+    | '/ppid/dikecualikan'
+    | '/ppid/permohonan'
+    | '/ppid/profil'
+    | '/ppid/serta-merta'
     | '/verify/$token'
     | '/berita'
+    | '/media-dan-publikasi'
     | '/pelatihan'
+    | '/ppid'
     | '/pengujian/checkout'
     | '/pengujian/sertifikat'
     | '/pengujian/status'
@@ -1547,6 +1709,8 @@ export interface FileRouteTypes {
     | '/worksheets/detail-transaksi'
     | '/worksheets/jadwal-personel'
     | '/pelatihan/transaksi/$orderId'
+    | '/ppid/setiap-saat/$documentId'
+    | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
     | '/back-office'
     | '/cart-pelatihan'
@@ -1556,12 +1720,14 @@ export interface FileRouteTypes {
     | '/pengujian'
     | '/worksheets'
     | '/pelatihan/transaksi'
+    | '/ppid/setiap-saat'
     | '/back-office/audits/$auditId'
     | '/back-office/banners/create'
     | '/back-office/chemical-materials/create'
     | '/back-office/clusters/create'
     | '/back-office/employees/create'
     | '/back-office/kblis/create'
+    | '/back-office/media-publications/create'
     | '/back-office/news/create'
     | '/back-office/order-pelatihan/$orderId'
     | '/back-office/parameter-categories/create'
@@ -1582,6 +1748,7 @@ export interface FileRouteTypes {
     | '/back-office/employees'
     | '/back-office/kblis'
     | '/back-office/landing-settings'
+    | '/back-office/media-publications'
     | '/back-office/news'
     | '/back-office/order-pelatihan'
     | '/back-office/orders'
@@ -1589,6 +1756,7 @@ export interface FileRouteTypes {
     | '/back-office/parameters'
     | '/back-office/pelatihan'
     | '/back-office/positions'
+    | '/back-office/ppid'
     | '/back-office/roles'
     | '/back-office/sertifikat-pelatihan'
     | '/back-office/survey-questions'
@@ -1609,6 +1777,7 @@ export interface FileRouteTypes {
     | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
+    | '/back-office/media-publications/$mediaId/edit'
     | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
     | '/back-office/parameter-categories/$parameterCategoriesId/edit'
@@ -1675,13 +1844,21 @@ export interface FileRouteTypes {
     | '/(core)/profile'
     | '/(core)/settings'
     | '/berita/$newsId'
+    | '/media-dan-publikasi/$newsId'
     | '/pelatihan/$slug'
     | '/pelatihan/bimtek'
     | '/pelatihan/elearning'
     | '/pelatihan/webinar'
+    | '/ppid/berkala'
+    | '/ppid/dikecualikan'
+    | '/ppid/permohonan'
+    | '/ppid/profil'
+    | '/ppid/serta-merta'
     | '/verify/$token'
     | '/berita/'
+    | '/media-dan-publikasi/'
     | '/pelatihan/'
+    | '/ppid/'
     | '/(core)/pengujian/checkout'
     | '/(core)/pengujian/sertifikat'
     | '/(core)/pengujian/status'
@@ -1690,6 +1867,8 @@ export interface FileRouteTypes {
     | '/(core)/worksheets/detail-transaksi'
     | '/(core)/worksheets/jadwal-personel'
     | '/pelatihan/transaksi/$orderId'
+    | '/ppid/setiap-saat/$documentId'
+    | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
     | '/(core)/back-office/'
     | '/(core)/cart-pelatihan/'
@@ -1699,12 +1878,14 @@ export interface FileRouteTypes {
     | '/(core)/pengujian/'
     | '/(core)/worksheets/'
     | '/pelatihan/transaksi/'
+    | '/ppid/setiap-saat/'
     | '/(core)/back-office/audits/$auditId'
     | '/(core)/back-office/banners/create'
     | '/(core)/back-office/chemical-materials/create'
     | '/(core)/back-office/clusters/create'
     | '/(core)/back-office/employees/create'
     | '/(core)/back-office/kblis/create'
+    | '/(core)/back-office/media-publications/create'
     | '/(core)/back-office/news/create'
     | '/(core)/back-office/order-pelatihan/$orderId'
     | '/(core)/back-office/parameter-categories/create'
@@ -1725,6 +1906,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/employees/'
     | '/(core)/back-office/kblis/'
     | '/(core)/back-office/landing-settings/'
+    | '/(core)/back-office/media-publications/'
     | '/(core)/back-office/news/'
     | '/(core)/back-office/order-pelatihan/'
     | '/(core)/back-office/orders/'
@@ -1732,6 +1914,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/parameters/'
     | '/(core)/back-office/pelatihan/'
     | '/(core)/back-office/positions/'
+    | '/(core)/back-office/ppid/'
     | '/(core)/back-office/roles/'
     | '/(core)/back-office/sertifikat-pelatihan/'
     | '/(core)/back-office/survey-questions/'
@@ -1752,6 +1935,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/employees/$employeeId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
+    | '/(core)/back-office/media-publications/$mediaId/edit'
     | '/(core)/back-office/news/$newsId/edit'
     | '/(core)/back-office/orders/$orderId/detail'
     | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
@@ -1801,16 +1985,27 @@ export interface RootRouteChildren {
   TestRoute: typeof TestRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
   BeritaNewsIdRoute: typeof BeritaNewsIdRoute
+  MediaDanPublikasiNewsIdRoute: typeof MediaDanPublikasiNewsIdRoute
   PelatihanSlugRoute: typeof PelatihanSlugRoute
   PelatihanBimtekRoute: typeof PelatihanBimtekRoute
   PelatihanElearningRoute: typeof PelatihanElearningRoute
   PelatihanWebinarRoute: typeof PelatihanWebinarRoute
+  PpidBerkalaRoute: typeof PpidBerkalaRoute
+  PpidDikecualikanRoute: typeof PpidDikecualikanRoute
+  PpidPermohonanRoute: typeof PpidPermohonanRoute
+  PpidProfilRoute: typeof PpidProfilRoute
+  PpidSertaMertaRoute: typeof PpidSertaMertaRoute
   VerifyTokenRoute: typeof VerifyTokenRoute
   BeritaIndexRoute: typeof BeritaIndexRoute
+  MediaDanPublikasiIndexRoute: typeof MediaDanPublikasiIndexRoute
   PelatihanIndexRoute: typeof PelatihanIndexRoute
+  PpidIndexRoute: typeof PpidIndexRoute
   PelatihanTransaksiOrderIdRoute: typeof PelatihanTransaksiOrderIdRoute
+  PpidSetiapSaatDocumentIdRoute: typeof PpidSetiapSaatDocumentIdRoute
+  PpidSetiapSaatRegulasiRoute: typeof PpidSetiapSaatRegulasiRoute
   VerifyCertificateTokenRoute: typeof VerifyCertificateTokenRoute
   PelatihanTransaksiIndexRoute: typeof PelatihanTransaksiIndexRoute
+  PpidSetiapSaatIndexRoute: typeof PpidSetiapSaatIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1864,11 +2059,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ppid/': {
+      id: '/ppid/'
+      path: '/ppid'
+      fullPath: '/ppid'
+      preLoaderRoute: typeof PpidIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pelatihan/': {
       id: '/pelatihan/'
       path: '/pelatihan'
       fullPath: '/pelatihan'
       preLoaderRoute: typeof PelatihanIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/media-dan-publikasi/': {
+      id: '/media-dan-publikasi/'
+      path: '/media-dan-publikasi'
+      fullPath: '/media-dan-publikasi'
+      preLoaderRoute: typeof MediaDanPublikasiIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/berita/': {
@@ -1883,6 +2092,41 @@ declare module '@tanstack/react-router' {
       path: '/verify/$token'
       fullPath: '/verify/$token'
       preLoaderRoute: typeof VerifyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppid/serta-merta': {
+      id: '/ppid/serta-merta'
+      path: '/ppid/serta-merta'
+      fullPath: '/ppid/serta-merta'
+      preLoaderRoute: typeof PpidSertaMertaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppid/profil': {
+      id: '/ppid/profil'
+      path: '/ppid/profil'
+      fullPath: '/ppid/profil'
+      preLoaderRoute: typeof PpidProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppid/permohonan': {
+      id: '/ppid/permohonan'
+      path: '/ppid/permohonan'
+      fullPath: '/ppid/permohonan'
+      preLoaderRoute: typeof PpidPermohonanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppid/dikecualikan': {
+      id: '/ppid/dikecualikan'
+      path: '/ppid/dikecualikan'
+      fullPath: '/ppid/dikecualikan'
+      preLoaderRoute: typeof PpidDikecualikanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppid/berkala': {
+      id: '/ppid/berkala'
+      path: '/ppid/berkala'
+      fullPath: '/ppid/berkala'
+      preLoaderRoute: typeof PpidBerkalaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pelatihan/webinar': {
@@ -1911,6 +2155,13 @@ declare module '@tanstack/react-router' {
       path: '/pelatihan/$slug'
       fullPath: '/pelatihan/$slug'
       preLoaderRoute: typeof PelatihanSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/media-dan-publikasi/$newsId': {
+      id: '/media-dan-publikasi/$newsId'
+      path: '/media-dan-publikasi/$newsId'
+      fullPath: '/media-dan-publikasi/$newsId'
+      preLoaderRoute: typeof MediaDanPublikasiNewsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/berita/$newsId': {
@@ -2046,6 +2297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeRouteRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/ppid/setiap-saat/': {
+      id: '/ppid/setiap-saat/'
+      path: '/ppid/setiap-saat'
+      fullPath: '/ppid/setiap-saat'
+      preLoaderRoute: typeof PpidSetiapSaatIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pelatihan/transaksi/': {
       id: '/pelatihan/transaksi/'
       path: '/pelatihan/transaksi'
@@ -2107,6 +2365,20 @@ declare module '@tanstack/react-router' {
       path: '/verify/certificate/$token'
       fullPath: '/verify/certificate/$token'
       preLoaderRoute: typeof VerifyCertificateTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppid/setiap-saat/regulasi': {
+      id: '/ppid/setiap-saat/regulasi'
+      path: '/ppid/setiap-saat/regulasi'
+      fullPath: '/ppid/setiap-saat/regulasi'
+      preLoaderRoute: typeof PpidSetiapSaatRegulasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ppid/setiap-saat/$documentId': {
+      id: '/ppid/setiap-saat/$documentId'
+      path: '/ppid/setiap-saat/$documentId'
+      fullPath: '/ppid/setiap-saat/$documentId'
+      preLoaderRoute: typeof PpidSetiapSaatDocumentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pelatihan/transaksi/$orderId': {
@@ -2270,6 +2542,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeRolesIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/ppid/': {
+      id: '/(core)/back-office/ppid/'
+      path: '/ppid'
+      fullPath: '/back-office/ppid'
+      preLoaderRoute: typeof coreBackOfficePpidIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/positions/': {
       id: '/(core)/back-office/positions/'
       path: '/positions'
@@ -2317,6 +2596,13 @@ declare module '@tanstack/react-router' {
       path: '/news'
       fullPath: '/back-office/news'
       preLoaderRoute: typeof coreBackOfficeNewsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/media-publications/': {
+      id: '/(core)/back-office/media-publications/'
+      path: '/media-publications'
+      fullPath: '/back-office/media-publications'
+      preLoaderRoute: typeof coreBackOfficeMediaPublicationsIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/landing-settings/': {
@@ -2457,6 +2743,13 @@ declare module '@tanstack/react-router' {
       path: '/news/create'
       fullPath: '/back-office/news/create'
       preLoaderRoute: typeof coreBackOfficeNewsCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/media-publications/create': {
+      id: '/(core)/back-office/media-publications/create'
+      path: '/media-publications/create'
+      fullPath: '/back-office/media-publications/create'
+      preLoaderRoute: typeof coreBackOfficeMediaPublicationsCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/kblis/create': {
@@ -2690,6 +2983,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeNewsNewsIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/media-publications/$mediaId/edit': {
+      id: '/(core)/back-office/media-publications/$mediaId/edit'
+      path: '/media-publications/$mediaId/edit'
+      fullPath: '/back-office/media-publications/$mediaId/edit'
+      preLoaderRoute: typeof coreBackOfficeMediaPublicationsMediaIdEditRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/kblis/$kbliId/edit': {
       id: '/(core)/back-office/kblis/$kbliId/edit'
       path: '/kblis/$kbliId/edit'
@@ -2863,6 +3163,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeClustersCreateRoute: typeof coreBackOfficeClustersCreateRoute
   coreBackOfficeEmployeesCreateRoute: typeof coreBackOfficeEmployeesCreateRoute
   coreBackOfficeKblisCreateRoute: typeof coreBackOfficeKblisCreateRoute
+  coreBackOfficeMediaPublicationsCreateRoute: typeof coreBackOfficeMediaPublicationsCreateRoute
   coreBackOfficeNewsCreateRoute: typeof coreBackOfficeNewsCreateRoute
   coreBackOfficeOrderPelatihanOrderIdRoute: typeof coreBackOfficeOrderPelatihanOrderIdRoute
   coreBackOfficeParameterCategoriesCreateRoute: typeof coreBackOfficeParameterCategoriesCreateRoute
@@ -2881,6 +3182,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeEmployeesIndexRoute: typeof coreBackOfficeEmployeesIndexRoute
   coreBackOfficeKblisIndexRoute: typeof coreBackOfficeKblisIndexRoute
   coreBackOfficeLandingSettingsIndexRoute: typeof coreBackOfficeLandingSettingsIndexRoute
+  coreBackOfficeMediaPublicationsIndexRoute: typeof coreBackOfficeMediaPublicationsIndexRoute
   coreBackOfficeNewsIndexRoute: typeof coreBackOfficeNewsIndexRoute
   coreBackOfficeOrderPelatihanIndexRoute: typeof coreBackOfficeOrderPelatihanIndexRoute
   coreBackOfficeOrdersIndexRoute: typeof coreBackOfficeOrdersIndexRoute
@@ -2888,6 +3190,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeParametersIndexRoute: typeof coreBackOfficeParametersIndexRoute
   coreBackOfficePelatihanIndexRoute: typeof coreBackOfficePelatihanIndexRoute
   coreBackOfficePositionsIndexRoute: typeof coreBackOfficePositionsIndexRoute
+  coreBackOfficePpidIndexRoute: typeof coreBackOfficePpidIndexRoute
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
   coreBackOfficeSertifikatPelatihanIndexRoute: typeof coreBackOfficeSertifikatPelatihanIndexRoute
   coreBackOfficeSurveyQuestionsIndexRoute: typeof coreBackOfficeSurveyQuestionsIndexRoute
@@ -2901,6 +3204,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeEmployeesEmployeeIdEditRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
+  coreBackOfficeMediaPublicationsMediaIdEditRoute: typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   coreBackOfficeNewsNewsIdEditRoute: typeof coreBackOfficeNewsNewsIdEditRoute
   coreBackOfficeOrdersOrderIdDetailRoute: typeof coreBackOfficeOrdersOrderIdDetailRoute
   coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
@@ -2933,6 +3237,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeClustersCreateRoute: coreBackOfficeClustersCreateRoute,
   coreBackOfficeEmployeesCreateRoute: coreBackOfficeEmployeesCreateRoute,
   coreBackOfficeKblisCreateRoute: coreBackOfficeKblisCreateRoute,
+  coreBackOfficeMediaPublicationsCreateRoute:
+    coreBackOfficeMediaPublicationsCreateRoute,
   coreBackOfficeNewsCreateRoute: coreBackOfficeNewsCreateRoute,
   coreBackOfficeOrderPelatihanOrderIdRoute:
     coreBackOfficeOrderPelatihanOrderIdRoute,
@@ -2957,6 +3263,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeKblisIndexRoute: coreBackOfficeKblisIndexRoute,
   coreBackOfficeLandingSettingsIndexRoute:
     coreBackOfficeLandingSettingsIndexRoute,
+  coreBackOfficeMediaPublicationsIndexRoute:
+    coreBackOfficeMediaPublicationsIndexRoute,
   coreBackOfficeNewsIndexRoute: coreBackOfficeNewsIndexRoute,
   coreBackOfficeOrderPelatihanIndexRoute:
     coreBackOfficeOrderPelatihanIndexRoute,
@@ -2966,6 +3274,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeParametersIndexRoute: coreBackOfficeParametersIndexRoute,
   coreBackOfficePelatihanIndexRoute: coreBackOfficePelatihanIndexRoute,
   coreBackOfficePositionsIndexRoute: coreBackOfficePositionsIndexRoute,
+  coreBackOfficePpidIndexRoute: coreBackOfficePpidIndexRoute,
   coreBackOfficeRolesIndexRoute: coreBackOfficeRolesIndexRoute,
   coreBackOfficeSertifikatPelatihanIndexRoute:
     coreBackOfficeSertifikatPelatihanIndexRoute,
@@ -2985,6 +3294,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeEmployeesEmployeeIdEditRoute:
     coreBackOfficeEmployeesEmployeeIdEditRoute,
   coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
+  coreBackOfficeMediaPublicationsMediaIdEditRoute:
+    coreBackOfficeMediaPublicationsMediaIdEditRoute,
   coreBackOfficeNewsNewsIdEditRoute: coreBackOfficeNewsNewsIdEditRoute,
   coreBackOfficeOrdersOrderIdDetailRoute:
     coreBackOfficeOrdersOrderIdDetailRoute,
@@ -3220,16 +3531,27 @@ const rootRouteChildren: RootRouteChildren = {
   TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
   BeritaNewsIdRoute: BeritaNewsIdRoute,
+  MediaDanPublikasiNewsIdRoute: MediaDanPublikasiNewsIdRoute,
   PelatihanSlugRoute: PelatihanSlugRoute,
   PelatihanBimtekRoute: PelatihanBimtekRoute,
   PelatihanElearningRoute: PelatihanElearningRoute,
   PelatihanWebinarRoute: PelatihanWebinarRoute,
+  PpidBerkalaRoute: PpidBerkalaRoute,
+  PpidDikecualikanRoute: PpidDikecualikanRoute,
+  PpidPermohonanRoute: PpidPermohonanRoute,
+  PpidProfilRoute: PpidProfilRoute,
+  PpidSertaMertaRoute: PpidSertaMertaRoute,
   VerifyTokenRoute: VerifyTokenRoute,
   BeritaIndexRoute: BeritaIndexRoute,
+  MediaDanPublikasiIndexRoute: MediaDanPublikasiIndexRoute,
   PelatihanIndexRoute: PelatihanIndexRoute,
+  PpidIndexRoute: PpidIndexRoute,
   PelatihanTransaksiOrderIdRoute: PelatihanTransaksiOrderIdRoute,
+  PpidSetiapSaatDocumentIdRoute: PpidSetiapSaatDocumentIdRoute,
+  PpidSetiapSaatRegulasiRoute: PpidSetiapSaatRegulasiRoute,
   VerifyCertificateTokenRoute: VerifyCertificateTokenRoute,
   PelatihanTransaksiIndexRoute: PelatihanTransaksiIndexRoute,
+  PpidSetiapSaatIndexRoute: PpidSetiapSaatIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -646,7 +646,9 @@ function LandingSettingsComponent() {
                         const val = JSON.parse(trainingSlidesSetting.value);
                         if (Array.isArray(val)) parsed = val;
                       }
-                    } catch (_e) { /* empty */ }
+                    } catch (_e) {
+                      /* empty */
+                    }
                     return (
                       <Badge
                         className={`${parsed.length > 0 ? "bg-indigo-600" : "bg-slate-500"} font-bold text-white`}
@@ -666,7 +668,9 @@ function LandingSettingsComponent() {
                       const val = JSON.parse(trainingSlidesSetting.value);
                       if (Array.isArray(val)) parsed = val;
                     }
-                  } catch (_e) { /* empty */ }
+                  } catch (_e) {
+                    /* empty */
+                  }
 
                   if (parsed.length === 0) {
                     return (
@@ -719,7 +723,9 @@ function LandingSettingsComponent() {
                       const val = JSON.parse(trainingSlidesSetting.value);
                       if (Array.isArray(val)) parsed = val;
                     }
-                  } catch (_e) { /* empty */ }
+                  } catch (_e) {
+                    /* empty */
+                  }
 
                   if (parsed.length >= 5) {
                     return (
