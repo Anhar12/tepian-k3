@@ -66,6 +66,13 @@ export const RESOURCES = [
   // ==================== NEWS ====================
   { key: "news" },
 
+  // ==================== MEDIA & PUBLICATIONS ====================
+  { key: "media-publications" },
+
+  // ==================== PPID ====================
+  { key: "ppid-documents" },
+  { key: "ppid-submissions", approvalActions: "all" },
+
   // ==================== CART ====================
   { key: "cart" },
 

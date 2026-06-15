@@ -26,7 +26,9 @@ export type AuditEntityType =
   | "pelatihan_certificate"
   | "pelatihan_certificate_template"
   | "faq"
-  | "setting";
+  | "setting"
+  | "ppid_documents"
+  | "ppid_submissions";
 
 export interface AuditMetadata {
   ipAddress?: string;

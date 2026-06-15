@@ -191,6 +191,11 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "banners.read",
     "banners.update",
     "banners.delete",
+    "media-publications.view",
+    "media-publications.create",
+    "media-publications.read",
+    "media-publications.update",
+    "media-publications.delete",
   ],
 
   // Admin: verifikasi data order, teruskan ke kaji ulang, kelola dokumen — tidak dapat setujui/tolak order

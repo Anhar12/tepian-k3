@@ -12,15 +12,15 @@ const insertOtpSchema = createInsertSchema(otpCodes).pick({
 });
 
 const createOtpSchema = z.object({
-  email: z.email(),
+  email: z.email("Format email tidak valid"),
 });
 
 const verifyOtpSchema = z.object({
-  email: z.email(),
+  email: z.email("Format email tidak valid"),
   code: z
     .string()
-    .length(6, "OTP must be 6 digits")
-    .regex(/^\d+$/, "OTP must contain only digits"),
+    .length(6, "OTP harus terdiri dari 6 digit")
+    .regex(/^\d+$/, "OTP hanya boleh berisi angka"),
 });
 
 const otpSchema = {

@@ -1,40 +1,72 @@
+# =============================================================================
 # Dependencies
+# =============================================================================
 node_modules
 .pnp
 .pnp.js
 
-# Build outputs
+# =============================================================================
+# Build Outputs
+# =============================================================================
 dist
 build
+out
+.next
 *.tsbuildinfo
 
-# Environment variables
+# =============================================================================
+# Environment Variables — JANGAN PERNAH DI-COMMIT!
+# =============================================================================
 .env
-.env*.local
-.env.test
-.env.production
-.env.development
-.env.prod
-.env.dev
-.env.docker
-.env.build
+.env.*
+!.env.example
+temp.env.docker
 
-# IDEs and editors
+# =============================================================================
+# IDEs & Editors
+# =============================================================================
 .vscode/*
 !.vscode/settings.json
-!.vscode/custom.css
-!.vscode/custom.js
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.idea
+!.vscode/custom.css
+!.vscode/custom.js
+.idea/
 *.swp
 *.swo
 *~
-.DS_Store
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-# Logs
-logs
+# =============================================================================
+# OS-Specific
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+
+# =============================================================================
+# Logs & Debug
+# =============================================================================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -42,22 +74,59 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# Turbo
-.turbo
+# =============================================================================
+# Testing & Coverage
+# =============================================================================
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
 
-# Better-T-Stack
-.alchemy
+# =============================================================================
+# Turbo & Caching
+# =============================================================================
+.turbo/
+.cache/
+.eslintcache
+.stylelintcache
 
-# Testing
-coverage
-.nyc_output
+# =============================================================================
+# Better-T-Stack / Drizzle
+# =============================================================================
+.alchemy/
 
-# Misc
+# =============================================================================
+# Misc Build Artifacts
+# =============================================================================
 *.tgz
-.cache
-tmp
-temp.env.docker
-docs/PRICING_SUMMARY.md
-tepian-k3-laptop.zip
+*.zip
+tmp/
+
+# =============================================================================
+# AI Agent Artifacts (lokal saja, tidak perlu di repo)
+# =============================================================================
+.agent/
+.gemini/
+.cursor/
+.codeium/
+.copilot/
+
+# =============================================================================
+# Dokumen Lokal (tidak relevan untuk kolaborasi GitHub)
+# =============================================================================
 AGENTS.md
 DESIGN.md
+TODO.md
+AGENT_CHANGELOG.md
+docs/PRICING_SUMMARY.md
+docs/AI_AGENT_RULES.md
+docs/FRONTEND_DESIGN_GUIDE.md
+
+# =============================================================================
+# Arsip & File Distribusi
+# =============================================================================
+tepian-k3-laptop.zip
+*.zip
+*.tar.gz
+*.rar
