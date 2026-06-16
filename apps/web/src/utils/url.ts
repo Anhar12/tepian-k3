@@ -11,5 +11,6 @@ export const getPublicUrl = (key: string): string => {
     return key;
   }
   const path = `/api/uploads/${key.replace(/^\/+/, "")}`;
-  return `${getBaseUrl()}${path}`;
+  const baseUrl = getBaseUrl().replace(/\/+$/, "");
+  return `${baseUrl}${path}`;
 };
