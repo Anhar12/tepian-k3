@@ -11,6 +11,7 @@
     "postinstall": "turbo run check-types --only",
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "test": "vitest",
     "check-types": "turbo run check-types",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
@@ -37,6 +38,7 @@
     "db:snapshot": "turbo run db:snapshot -F @tepian-k3/db",
     "db:restore": "turbo run db:restore -F @tepian-k3/db --",
     "db:clear-cache": "turbo run db:clear-cache -F @tepian-k3/db",
+    "db:validate-migrations": "turbo run db:validate-migrations -F @tepian-k3/db",
     "email:dev": "turbo run email:dev -F @tepian-k3/services",
     "email:verify": "turbo run email:verify -F @tepian-k3/services",
     "web:prettier": "turbo run prettier -F @tepian-k3/web",
@@ -72,7 +74,9 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.6.3",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.60.0"
+    "typescript-eslint": "^8.60.0",
+    "vitest": "^3.0.5",
+    "@vitest/coverage-v8": "^3.0.5"
   },
   "packageManager": "pnpm@10.5.2",
   "engines": {

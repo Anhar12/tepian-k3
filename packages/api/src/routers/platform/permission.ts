@@ -21,18 +21,33 @@ export const permissionRouters = createTRPCRouter({
         removedPermissions: z.array(z.string()),
       }),
     )
-    .mutation(
-      async ({ input }) =>
-        await withCacheInvalidation(
-          [CACHE_KEYS.PERMISSIONS_PREFIX, CACHE_KEYS.ROLES_PREFIX],
-          () =>
-            runEffect(
-              permissionsQueries.updateRolePermissions(
-                input.roleId,
-                input.addedPermissions,
-                input.removedPermissions,
-              ),
+    .mutation(async ({ input }) => {
+      const result = await withCacheInvalidation(
+        [CACHE_KEYS.PERMISSIONS_PREFIX, CACHE_KEYS.ROLES_PREFIX],
+        () =>
+          runEffect(
+            permissionsQueries.updateRolePermissions(
+              input.roleId,
+              input.addedPermissions,
+              input.removedPermissions,
             ),
-        ),
-    ),
+          ),
+      );
+
+      // Find users with this role and blacklist their tokens
+      const { default: rolesQueries } =
+        await import("@tepian-k3/queries/platform/roles.queries");
+      const role = await runEffect(rolesQueries.getRoleById(input.roleId));
+      if (role) {
+        const users = await runEffect(rolesQueries.getUsersByRole(role.name));
+        if (users && users.length > 0) {
+          const { blacklistAllUserTokens } = await import("@tepian-k3/auth");
+          await Promise.all(
+            users.map((user) => blacklistAllUserTokens(user.id)),
+          );
+        }
+      }
+
+      return result;
+    }),
 });

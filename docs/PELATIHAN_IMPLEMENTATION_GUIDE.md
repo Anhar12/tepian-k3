@@ -1,6 +1,6 @@
 # Pelatihan (Training) Feature - Implementation Guide
 
-Dokumen ini adalah referensi utama (Single Source of Truth) untuk mengimplementasikan fitur Pelatihan secara _end-to-end_. Dokumen ini mensintesis desain UI dari Figma (User & Backoffice) dengan arsitektur Better-T-Stack monorepo.
+Dokumen ini adalah referensi utama (Single Source of Truth) untuk mengimplementasikan dan mengembangkan fitur Pelatihan secara _end-to-end_. Dokumen ini mensintesis desain UI dari Figma (User & Backoffice) dengan arsitektur Better-T-Stack monorepo yang sudah berjalan di sistem.
 
 ---
 
@@ -8,155 +8,94 @@ Dokumen ini adalah referensi utama (Single Source of Truth) untuk mengimplementa
 
 ### A. Sisi Pengguna (End-User)
 
-| Halaman Figma                | Tabel Utama                                  | tRPC Router                                      | Keterangan / Pola UI                                                                              |
-| ---------------------------- | -------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| **Landing Page / Katalog**   | `pelatihan`, `pelatihanCategories`           | `pelatihan.getAll`, `pelatihanCategories.getAll` | Menampilkan _card_ kursus. Filter dan _pagination_ diterapkan di sisi klien/server.               |
-| **Detail Pelatihan**         | `pelatihan`, `pelatihanMaterials`            | `pelatihan.getBySlug`                            | Tombol `Enroll Now` (jika gratis) atau `Add to Cart` (jika berbayar).                             |
-| **Cart & Checkout**          | `pelatihanCart`                              | `pelatihanCart.*`, `order.create`                | Cart Pelatihan **terpisah** dari Cart Pengujian. Checkout membuat entitas di tabel `order`.       |
-| **Dashboard (My Trainings)** | `pelatihanEnrollments`, `pelatihanProgress`  | `pelatihanEnrollments.getMyEnrollments`          | Menampilkan progres (%) kursus.                                                                   |
-| **E-Learning & Materi**      | `pelatihanMaterials`                         | `pelatihanProgress.markMaterialComplete`         | Layout _sidebar_ (daftar materi) & _main content_ (video/PDF). Accordion digunakan untuk silabus. |
-| **Pre/Post Test**            | `pelatihanAssessments`, `pelatihanQuestions` | `pelatihanAssessmentAttempts.*`                  | Soal pilihan ganda/esai. Timer berjalan di _client_, validasi akhir di _server_.                  |
+| Halaman Figma & Aplikasi     | Tabel Utama                                              | tRPC Router & Endpoint                                                              | Keterangan / Pola UI                                                                                                                                                      |
+| ---------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Landing Page / Katalog**   | `pelatihan`, `pelatihanCategories`                       | `trpc.pelatihan.base.getAll`, `trpc.pelatihan.categories.getAll`                    | Menampilkan _card_ kursus. Filter kategori dan _pagination_ di tingkat server.                                                                                            |
+| **Detail Pelatihan**         | `pelatihan`, `pelatihanMaterials`                        | `trpc.pelatihan.base.getBySlug`                                                     | Menampilkan deskripsi, silabus, dan tombol `Enroll Now` (gratis) atau `Add to Cart` (berbayar).                                                                           |
+| **Keranjang & Checkout**     | `pelatihanCart`                                          | `trpc.pelatihan.cart.*`, `trpc.pengujian.order.create`                              | Keranjang belanja pelatihan. Proses checkout membuat entitas order dengan tipe `pelatihan`.                                                                               |
+| **Dashboard (My Trainings)** | `pelatihanEnrollments`                                   | `trpc.pelatihan.enrollment.getMyEnrollments`                                        | Menampilkan daftar pendaftaran kelas beserta persentase kemajuan belajar (%) pengguna.                                                                                    |
+| **Daftar Transaksi**         | `order`, `orderItem`                                     | `trpc.pelatihan.order.getMyOrders`                                                  | Riwayat pendaftaran berbayar pengguna dan status pembayaran di [transaksi.tsx](<file:///d:/project/k3/tepian-k3/apps/web/src/routes/(core)/pelatihan/transaksi.tsx>).     |
+| **Buku Ruang Kelas (LMS)**   | `pelatihanMaterials`, `pelatihanProgress`                | `trpc.pelatihan.progress.markMaterialComplete`                                      | Wadah belajar di [belajar.$enrollmentId.tsx](<file:///d:/project/k3/tepian-k3/apps/web/src/routes/(core)/pelatihan/belajar/$enrollmentId.tsx>) (sidebar materi & player). |
+| **Ujian (Pre/Post Test)**    | `pelatihanAssessments`, `pelatihanQuestions`, `attempts` | `trpc.pelatihan.assessment.startAttempt`, `trpc.pelatihan.assessment.submitAttempt` | Menjawab soal pilihan ganda atau esai. Halaman ujian di `/pelatihan/belajar/$enrollmentId/ujian/$id`.                                                                     |
+| **Sertifikat Kelulusan**     | `pelatihanCertificates`                                  | `trpc.pelatihan.certificate.getById`                                                | Menampilkan sertifikat digital ber-QR code untuk kelas yang telah diselesaikan (_completed_).                                                                             |
 
-### B. Sisi Backoffice Admin
+### B. Sisi Backoffice / Instruktur
 
-| Halaman Figma                | Tabel Utama                                  | tRPC Router                                      | Keterangan / Pola UI                                                   |
-| ---------------------------- | -------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------- |
-| **Manajemen Kursus**         | `pelatihan`                                  | `pelatihan.*`                                    | Tabel data (CRUD). Penggunaan status `draft`, `published`, `archived`. |
-| **Manajemen Materi & Ujian** | `pelatihanMaterials`, `pelatihanAssessments` | `pelatihanMaterials.*`, `pelatihanAssessments.*` | UI _drag-and-drop_ / pengurutan modul (_orderIndex_).                  |
-| **Monitoring Peserta**       | `pelatihanEnrollments`                       | `pelatihanEnrollments.getPaginated`              | Pantau progres, nilai pre/post test, dan status kelulusan peserta.     |
+| Halaman Aplikasi Backoffice | Tabel Utama                                  | tRPC Router & Endpoint                                                 | Keterangan / Pola UI                                                                           |
+| --------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Manajemen Kursus**        | `pelatihan`                                  | `trpc.pelatihan.base.*`                                                | Pengelolaan kursus CRUD (Draft, Published, Archived) di panel back-office admin.               |
+| **Manajemen Kurikulum**     | `pelatihanMaterials`, `pelatihanAssessments` | `trpc.pelatihan.materials.*`, `trpc.pelatihan.assessment.*`            | Menyusun materi video/PDF dan instrumen ujian per bab (mengacu `orderIndex`).                  |
+| **Pemeriksaan Tugas/Esai**  | `pelatihanAssessmentAttempts`, `answers`     | `trpc.pelatihan.assessment.getAttemptsForGrading`, `gradeEssayAnswers` | Panel khusus instruktur untuk memeriksa dan memberi nilai pada jawaban esai peserta pelatihan. |
 
 ---
 
-## 2. Cuplikan Kode Spesifik (Drizzle & Zod)
+## 2. Struktur Schema & Keamanan Database
 
-### A. Schema Drizzle Core (packages/db/src/schema.ts)
+### A. Tabel Jadwal & Token Presensi (`pelatihanSchedules`)
 
-Penambahan Enum:
+Tabel `pelatihanSchedules` di [pelatihan.ts](file:///d:/project/k3/tepian-k3/packages/db/src/schema/pelatihan.ts) mencatat sesi kelas langsung (sinkronus). Untuk verifikasi kehadiran, kolom `attendanceToken` menyimpan token 10 karakter unik yang di-generate instruktur:
 
 ```typescript
-export const pelatihanLevelEnum = pgEnum("pelatihan_level", [
-  "beginner",
-  "intermediate",
-  "advanced",
-]);
-export const pelatihanStatusEnum = pgEnum("pelatihan_status", [
-  "draft",
-  "published",
-  "archived",
-]);
-export const materialTypeEnum = pgEnum("material_type", [
-  "ppt",
-  "pdf",
-  "video",
-  "document",
-  "link",
-]);
-export const enrollmentStatusEnum = pgEnum("enrollment_status", [
-  "enrolled",
-  "in_progress",
-  "completed",
-  "failed",
-  "expired",
-]);
+attendanceToken: varchar("attendance_token", { length: 10 });
 ```
 
-_Pastikan menambahkan `pelatihan` ke dalam `orderItemTypeEnum` yang sudah ada._
+Pengguna wajib menginput token yang sama pada method `submitAttendance` untuk mengubah status kehadiran menjadi `present`.
 
-Contoh Tabel `pelatihan`:
+### B. Zod Validation (Essay Grading)
 
-```typescript
-export const pelatihan = createTable(
-  "pelatihan",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .notNull()
-      .$default(() => uuidv7()),
-    title: varchar("title", { length: 250 }).notNull(),
-    slug: varchar("slug", { length: 250 }).notNull().unique(),
-    description: text("description"),
-    shortDescription: varchar("short_description", { length: 500 }),
-    categoryId: uuid("category_id").references(() => pelatihanCategories.id),
-    level: pelatihanLevelEnum("level").notNull(),
-    duration: integer("duration").notNull(), // dalam jam
-    capacity: integer("capacity"),
-    price: integer("price").notNull().default(0), // 0 = Gratis
-    discountPrice: integer("discount_price"),
-    prerequisiteIds: uuid("prerequisite_ids").array(),
-    minimumScore: integer("minimum_score").notNull().default(70),
-    status: pelatihanStatusEnum("status").notNull().default("draft"),
-    thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
-    instructorName: varchar("instructor_name", { length: 250 }),
-    ...timestamps,
-  },
-  (table) => ({
-    slugIdx: uniqueIndex("pelatihan_slug_idx")
-      .on(table.slug)
-      .where(sql`${table.deletedAt} IS NULL`),
-  }),
-);
-```
-
-### B. Validasi Zod (packages/schema/src/pelatihan.schema.ts)
-
-Contoh Skema Cart & Enrollment:
+Skema penyerahan nilai esai divalidasi menggunakan `gradeEssayAnswersSchema` di [pelatihan.schema.ts](file:///d:/project/k3/tepian-k3/packages/schema/src/pelatihan/pelatihan.schema.ts):
 
 ```typescript
-import { z } from "zod";
-
-export const addToCartSchema = z.object({
-  pelatihanId: z.string().uuid(),
-  quantity: z.number().min(1).default(1),
-});
-
-export const directEnrollmentSchema = z.object({
-  pelatihanId: z.string().uuid(),
-  // Berlaku validasi backend tambahan: pastikan pelatihan.price === 0
-});
-
-export const updateProgressSchema = z.object({
-  enrollmentId: z.string().uuid(),
-  materialId: z.string().uuid(),
-  watchedDuration: z.number().optional(), // dalam detik
+export const gradeEssayAnswersSchema = z.object({
+  attemptId: z.string().uuid(),
+  grades: z.array(
+    z.object({
+      questionId: z.string().uuid(),
+      pointsEarned: z.number().min(0),
+      isCorrect: z.boolean(),
+      feedback: z.string().optional(),
+    }),
+  ),
 });
 ```
 
 ---
 
-## 3. Logika Bisnis Kritis (Alur Kerja)
+## 3. Logika Bisnis Kritis (Crucial Business Workflows)
 
-1. **Konstrain Unik Cart & Enrollment:**
-   - Seorang pengguna tidak boleh memiliki kursus yang sama di dalam keranjang lebih dari satu (Unik: `userId`, `pelatihanId` di `pelatihanCart`).
-   - Seorang pengguna tidak boleh mendaftar kursus yang sama dua kali (Unik: `userId`, `pelatihanId` di `pelatihanEnrollments`).
+### 1. Kunci Kurikulum Berurutan (Sequential Material Lock)
 
-2. **Auto-Enrollment Webhook:**
-   Ketika Admin/Sistem memverifikasi pembayaran (`confirmPayment` di router `order`), sistem **harus** melakukan _looping_ pada `orderItems`. Jika `type === "pelatihan"`, secara otomatis buat data di `pelatihanEnrollments` dengan status `enrolled`, lalu hapus item dari `pelatihanCart`.
+Untuk memastikan pengguna belajar secara terstruktur, sistem menerapkan validasi sekuensial di layer query [enrollment.queries.ts](file:///d:/project/k3/tepian-k3/packages/queries/src/pelatihan/enrollment.queries.ts#L486):
 
-3. **Sertifikat & QR:**
-   Jika pengguna mendapatkan `postTestScore >= minimumScore`, sistem memanggil `generatePelatihanCertificate` dari `services`. Servis ini membuat token, _embed_ QR Code via PDF Service, menyimpannya di Storage, dan mencatatnya ke tabel `pelatihanCertificates`.
+- Ketika pengguna mencoba membuka/menyelesaikan materi pada indeks $N$ ($N > 0$), sistem akan mengambil seluruh materi pelatihan yang diurutkan berdasarkan `orderIndex` terkecil.
+- Sistem mencari materi ke-$N-1$. Progress materi ke-$N-1$ tersebut wajib bernilai `completed: true`.
+- Jika belum selesai, tRPC akan melempar `403 FORBIDDEN` dengan pesan `"Materi sebelumnya belum diselesaikan"`.
 
----
+### 2. Alur Penilaian Ujian Esai (Manual Essay Grading)
 
-## 4. Urutan Pengerjaan (Execution Checklist)
+Berbeda dengan pilihan ganda yang dinilai otomatis oleh server, ujian esai membutuhkan penilaian manual oleh instruktur:
 
-- [ ] **1. Modifikasi Database (`packages/db`)**
-  - Buat enum dan 12 tabel baru di `schema.ts`.
-  - Jalankan `pnpm db:generate` dan `pnpm db:migrate`.
-- [ ] **2. Constants & Access Control (`packages/constants`)**
-  - Tambahkan list permission baru (e.g., `pelatihan.read`, `pelatihan.manage`) di `permissions.ts`.
-- [ ] **3. Input Validation (`packages/schema`)**
-  - Buat file `.schema.ts` untuk validasi formulir dan _payload_ API.
-- [ ] **4. Business Logic Queries (`packages/queries`)**
-  - Gunakan `Effect.gen` murni untuk operasi CRUD dan logika transaksional kompleks.
-- [ ] **5. Backend API (`packages/api`)**
-  - Buat 10 router tRPC baru dan sematkan validasi permission (`withPermission`).
-  - _Inject_ logika auto-enrollment di router order yang sudah ada.
-- [ ] **6. UI Backoffice Admin (`apps/web`)**
-  - Implementasi tabel data dan formulir manajemen pelatihan, menggunakan komponen standar Shadcn.
-- [ ] **7. UI End-User (`apps/web`)**
-  - Implementasi Landing Page, Cart, interaksi Checkout.
-  - Implementasi Learning Management System (LMS) mikro: Sidebar materi, video player, dan halaman Assessment.
+1.  Peserta mengirim jawaban → status attempt diatur menjadi `submitted`.
+2.  Instruktur memanggil `getAttemptsForGrading` untuk melihat daftar ujian yang perlu dinilai.
+3.  Instruktur memberikan nilai per pertanyaan melalui `gradeEssayAnswers`.
+4.  Di dalam **satu transaksi database tunggal** (`db.transaction`):
+    - Setiap baris di `pelatihanAssessmentAnswers` diubah (disimpan nilai poin, status benar/salah, komentar instruktur, dan ID penilai).
+    - Skor total pengerjaan dihitung ulang berdasarkan perbandingan `pointsEarned` dengan nilai bobot maksimal di `pelatihanQuestions`.
+    - Status attempt diubah menjadi `graded`.
+    - Jika ujian tersebut bertipe `post_test` dan hasil nilai melampaui `passingScore`, status `pelatihanEnrollments` pengguna secara otomatis diubah menjadi `completed` (Lulus) dan mencatat waktu kelulusan `completedAt`.
+5.  Notifikasi kelulusan/penilaian dikirimkan secara instan ke notifikasi akun pengguna.
+
+### 3. Otomasi Pembayaran & Aktivasi Kelas (Auto-Enrollment Webhook)
+
+Ketika modul pembayaran mengonfirmasi pembayaran pesanan (`confirmPayment`), sistem melakukan iterasi pada item pesanan. Jika bertipe `"pelatihan"`, maka secara otomatis mendaftarkan pengguna ke kelas bersangkutan, menghapus item dari keranjang pelatihan, dan mengirimkan notifikasi selamat bergabung.
 
 ---
 
-> _Dokumen ini merupakan panduan iterasi. Jika ada perubahan struktur di masa mendatang, dokumen ini harus diperbarui agar selaras dengan basis kode monorepo._
+## 4. Panduan bagi Developer & AI Model
+
+### Tips Maintainability & Best Practices
+
+1.  **Gunakan Effect gen murni:** Semua manipulasi data database di layer queries harus mengembalikan objek `Effect` untuk kontrol kesalahan terpadu.
+2.  **Order Index:** Selalu gunakan pengurutan `.orderBy(asc(materials.orderIndex))` saat memproses kurikulum agar urutan kunci sequential lock konsisten antara client dan server.
+3.  **Audit Logs:** Pastikan setiap fungsi mutasi baru di tRPC router memanggil `auditQueries.createAudit` untuk menjamin kepatuhan audit log platform.
+4.  **Casing PK:** Gunakan UUIDv7 untuk primary key baru pada tabel pelatihan di masa mendatang.

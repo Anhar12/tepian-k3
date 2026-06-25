@@ -1,0 +1,1 @@
+ALTER TABLE "pelatihan_schedules" ADD COLUMN "attendance_token_expired_at" timestamp with time zone;

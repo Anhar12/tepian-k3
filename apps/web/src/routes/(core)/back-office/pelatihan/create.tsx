@@ -1734,6 +1734,8 @@ function Step3BimtekJadwalFasilitas({
   );
 }
 
+import SingleImageUpload from "@/components/ui/single-image-upload";
+
 function Step4GambarMedia({
   form,
 }: {
@@ -1754,24 +1756,6 @@ function Step4GambarMedia({
       },
     }),
   );
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        globalErrorToast("Ukuran file harus kurang dari 5MB");
-        return;
-      }
-      if (!file.type.startsWith("image/")) {
-        globalErrorToast("Harap pilih berkas gambar (JPG, PNG, WEBP)");
-        return;
-      }
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      uploadMutation.mutate(formData);
-    }
-  };
 
   const resolvedThumbnailUrl = useMemo(() => {
     const val = form.watch("thumbnailUrl");
@@ -1799,63 +1783,33 @@ function Step4GambarMedia({
       <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2">
         {/* Left Column: Form Controls */}
         <div className="grid gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-5">
-          <div className="grid gap-2">
-            <Label className="text-xs font-bold text-[#475569]">
-              Pilihan 1: Unggah Berkas Gambar
-            </Label>
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                type="file"
-                accept="image/*"
-                id="thumbnail-file"
-                className="hidden"
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10 rounded-lg border-slate-200 bg-white text-xs font-bold text-[#475569] hover:bg-slate-50"
-                onClick={() =>
-                  document.getElementById("thumbnail-file")?.click()
-                }
-                disabled={isUploading}
-              >
-                {isUploading ? (
-                  <>
-                    <IconLoader className="mr-1.5 size-4 animate-spin text-slate-400" />
-                    Mengunggah...
-                  </>
-                ) : (
-                  "Pilih & Unggah File"
-                )}
-              </Button>
-              <span className="text-[10px] text-[#768094]">Maks. 5MB</span>
-            </div>
-          </div>
-
-          <div className="relative flex items-center py-1">
-            <div className="flex-grow border-t border-slate-200"></div>
-            <span className="mx-3 flex-shrink text-[9px] font-bold text-slate-400 uppercase">
-              Atau
-            </span>
-            <div className="flex-grow border-t border-slate-200"></div>
-          </div>
-
           <FormField
             control={form.control}
             name="thumbnailUrl"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormLabel className="text-xs font-bold text-[#475569]">
-                  Pilihan 2: Tempel URL Gambar
+                  Unggah Sampul
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="h-10 rounded-lg border-slate-200 bg-white text-xs focus:border-[#1061D6]"
-                    {...field}
-                    value={field.value || ""}
+                  <SingleImageUpload
+                    onChange={(file) => {
+                      if (file) {
+                        setIsUploading(true);
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        uploadMutation.mutate(formData);
+                      } else {
+                        form.setValue("thumbnailUrl", "", {
+                          shouldValidate: true,
+                        });
+                      }
+                    }}
+                    value={resolvedThumbnailUrl || null}
+                    disabled={isUploading}
+                    targetWidth={1280}
+                    targetHeight={720}
+                    aspectRatio={16 / 9}
                   />
                 </FormControl>
                 <FormMessage className="text-[10px]" />

@@ -7,22 +7,22 @@
 
 ## TL;DR — Baca Ini Dulu
 
-| Hal | Keterangan |
-|---|---|
-| **Stack** | TypeScript monorepo · Hono + tRPC backend · React 19 + TanStack Router frontend · PostgreSQL + Drizzle ORM · JWT auth |
-| **Package manager** | `pnpm` + Turborepo. **Jangan pernah** gunakan `npm` atau `yarn` |
-| **Dev server** | `pnpm dev` → web `:3001`, server `:3000` |
-| **Type check** | `pnpm check-types` — **wajib lulus** sebelum menyelesaikan tugas |
-| **DB change** | Edit schema → `pnpm db:generate` → `pnpm db:migrate` |
-| **New feature** | schema → queries → router → daftarkan di `packages/api/src/routers/<domain>/index.ts` |
-| **Query pattern** | Semua query pakai `Effect.gen` + `runEffect`. Semua mutasi log ke audit table |
-| **PK** | UUIDv7 (`uuidv7()`) di semua tabel. Soft delete via `deletedAt` |
-| **Error messages** | Harus dalam **Bahasa Indonesia** |
-| **tRPC namespace** | `trpc.platform.*`, `trpc.pengujian.*`, `trpc.pelatihan.*` (modular) |
-| **JSDoc** | Wajib di semua exported functions, hooks, dan components |
-| **Commit/PR** | Jangan jalankan `git commit` / `git push` / `gh pr create` — berikan perintahnya ke user |
-| **Max TS retry** | Stop setelah 2 kali gagal type fix — presentasikan alternatif |
-| **Design rules** | Baca **wajib**: [AI_AGENT_RULES.md](docs/AI_AGENT_RULES.md) + [FRONTEND_DESIGN_GUIDE.md](docs/FRONTEND_DESIGN_GUIDE.md) |
+| Hal                 | Keterangan                                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Stack**           | TypeScript monorepo · Hono + tRPC backend · React 19 + TanStack Router frontend · PostgreSQL + Drizzle ORM · JWT auth   |
+| **Package manager** | `pnpm` + Turborepo. **Jangan pernah** gunakan `npm` atau `yarn`                                                         |
+| **Dev server**      | `pnpm dev` → web `:3001`, server `:3000`                                                                                |
+| **Type check**      | `pnpm check-types` — **wajib lulus** sebelum menyelesaikan tugas                                                        |
+| **DB change**       | Edit schema → `pnpm db:generate` → `pnpm db:migrate`                                                                    |
+| **New feature**     | schema → queries → router → daftarkan di `packages/api/src/routers/<domain>/index.ts`                                   |
+| **Query pattern**   | Semua query pakai `Effect.gen` + `runEffect`. Semua mutasi log ke audit table                                           |
+| **PK**              | UUIDv7 (`uuidv7()`) di semua tabel. Soft delete via `deletedAt`                                                         |
+| **Error messages**  | Harus dalam **Bahasa Indonesia**                                                                                        |
+| **tRPC namespace**  | `trpc.platform.*`, `trpc.pengujian.*`, `trpc.pelatihan.*` (modular)                                                     |
+| **JSDoc**           | Wajib di semua exported functions, hooks, dan components                                                                |
+| **Commit/PR**       | Jangan jalankan `git commit` / `git push` / `gh pr create` — berikan perintahnya ke user                                |
+| **Max TS retry**    | Stop setelah 2 kali gagal type fix — presentasikan alternatif                                                           |
+| **Design rules**    | Baca **wajib**: [AI_AGENT_RULES.md](docs/AI_AGENT_RULES.md) + [FRONTEND_DESIGN_GUIDE.md](docs/FRONTEND_DESIGN_GUIDE.md) |
 
 ---
 
@@ -32,12 +32,12 @@
 
 Sistem memiliki **4 domain bisnis**:
 
-| Domain | Status | Deskripsi |
-|---|---|---|
-| **Pengujian** | ✅ Production | Lab testing: order → testing → worksheet → document |
-| **Pelatihan** | 🚧 In Progress | LMS/Training management (v2.0.0) |
-| **Uji Kompetensi** | 📋 Planned | Competency testing |
-| **Konsultasi** | 📋 Planned | Consultation management |
+| Domain             | Status        | Deskripsi                                           |
+| ------------------ | ------------- | --------------------------------------------------- |
+| **Pengujian**      | ✅ Production | Lab testing: order → testing → worksheet → document |
+| **Pelatihan**      | ✅ Production | LMS/Training management (v2.0.0)                    |
+| **Uji Kompetensi** | 📋 Planned    | Competency testing                                  |
+| **Konsultasi**     | 📋 Planned    | Consultation management                             |
 
 **Tech Stack:**
 
@@ -97,18 +97,18 @@ tepian-k3/
     │   └── src/routers/
     │       ├── platform/       # Auth, users, roles, employees, documents, etc.
     │       ├── pengujian/      # Parameters, tools, orders, testing, worksheets
-    │       └── pelatihan/      # Training management (in progress)
+    │       └── pelatihan/      # Training management (LMS)
     ├── auth/                   # JWT middleware + permission helpers
     ├── db/                     # Drizzle schema + migrations
     │   └── src/schema/
     │       ├── platform.ts     # Platform tables
     │       ├── pengujian.ts    # Pengujian tables
-    │       └── pelatihan.ts    # Pelatihan tables (in progress)
+    │       └── pelatihan.ts    # Pelatihan tables
     ├── queries/                # Effect-based DB query functions
     │   └── src/
     │       ├── platform/       # Platform queries
     │       ├── pengujian/      # Pengujian queries
-    │       └── pelatihan/      # Pelatihan queries (in progress)
+    │       └── pelatihan/      # Pelatihan queries
     ├── schema/                 # Zod validation schemas
     │   └── src/
     │       ├── platform/
@@ -148,11 +148,11 @@ konsultasi      ← hanya boleh import dari platform
 
 Semua tRPC calls di frontend menggunakan namespace modular:
 
-| Namespace | Berisi |
-|---|---|
-| `trpc.platform.*` | `auth`, `user`, `role`, `permission`, `employee`, `employeeCertification`, `position`, `province`, `regency`, `district`, `village`, `notifications`, `event`, `audit`, `document`, `banner`, `news` |
-| `trpc.pengujian.*` | `parameter`, `parameterCategories`, `parameterTool`, `parameterChemicalMaterial`, `tool`, `cluster`, `chemicalMaterial`, `cart`, `order`, `test`, `testing`, `worksheet`, `survey`, `kbli`, `userCompany`, `userCompanyTestingLocation`, `generateDocument` |
-| `trpc.pelatihan.*` | `base`, `categories`, `materials`, `assessments`, `enrollments`, `progress` *(in progress)* |
+| Namespace          | Berisi                                                                                                                                                                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `trpc.platform.*`  | `auth`, `user`, `role`, `permission`, `employee`, `employeeCertification`, `position`, `province`, `regency`, `district`, `village`, `notifications`, `event`, `audit`, `document`, `banner`, `news`                                                                          |
+| `trpc.pengujian.*` | `parameter`, `parameterCategories`, `parameterTool`, `parameterChemicalMaterial`, `tool`, `cluster`, `chemicalMaterial`, `cart`, `order`, `test`, `testing`, `worksheet`, `survey`, `kbli`, `userCompany`, `userCompanyTestingLocation`, `generateDocument`, `pengujianExcel` |
+| `trpc.pelatihan.*` | `base`, `categories`, `materials`, `assessments`, `enrollments`, `progress`, `schedules` _(in progress)_                                                                                                                                                                      |
 
 **Contoh penggunaan:**
 
@@ -162,10 +162,14 @@ const user = useQuery(trpc.platform.user.getById.queryOptions({ id }));
 const update = useMutation(trpc.platform.user.update.mutationOptions());
 
 // Pengujian domain
-const orders = useQuery(trpc.pengujian.order.getPaginated.queryOptions({ page: 1 }));
+const orders = useQuery(
+  trpc.pengujian.order.getPaginated.queryOptions({ page: 1 }),
+);
 
 // Pelatihan domain
-const pelatihan = useQuery(trpc.pelatihan.base.getPelatihanById.queryOptions({ id }));
+const pelatihan = useQuery(
+  trpc.pelatihan.base.getPelatihanById.queryOptions({ id }),
+);
 ```
 
 ---
@@ -174,37 +178,39 @@ const pelatihan = useQuery(trpc.pelatihan.base.getPelatihanById.queryOptions({ i
 
 ### Platform Domain (`packages/db/src/schema/platform.ts`)
 
-| Group | Tables |
-|---|---|
-| Users & Auth | `users`, `otpCodes`, `passwordResets`, `refreshTokens` |
+| Group         | Tables                                                                    |
+| ------------- | ------------------------------------------------------------------------- |
+| Users & Auth  | `users`, `otpCodes`, `passwordResets`, `refreshTokens`                    |
 | Authorization | `roles`, `permissions`, `userRoles`, `rolePermissions`, `userPermissions` |
-| Employees | `employees`, `positions`, `employeeCertifications` |
-| Geography | `provinces`, `regencies`, `districts`, `villages` |
-| Documents | `documents`, `documentSignatures`, `documentVerifications` |
-| Content | `banners`, `news` |
-| System | `notifications`, `audits` |
+| Employees     | `employees`, `positions`, `employeeCertifications`                        |
+| Geography     | `provinces`, `regencies`, `districts`, `villages`                         |
+| Documents     | `documents`, `documentSignatures`, `documentVerifications`                |
+| Content       | `banners`, `news`                                                         |
+| System        | `notifications`, `audits`                                                 |
 
 ### Pengujian Domain (`packages/db/src/schema/pengujian.ts`)
 
-| Group | Tables |
-|---|---|
-| Parameters | `parameters`, `parameterCategories`, `parameterTools`, `parameterChemicalMaterials` |
-| Tools | `tools`, `toolCalibrations`, `toolCalibrationCertificates`, `toolCalibrationDocumentations` |
-| Master Data | `clusters`, `chemicalMaterials`, `kblis`, `userCompanies`, `userCompanyTestingLocation` |
-| Orders | `cart`, `order`, `orderItem`, `orderStatusHistory` |
-| Testing Process | `testing`, `testingItem` |
-| Worksheets | `worksheets`, `worksheetItems`, `worksheetTools`, `worksheetChemicalMaterials`, `worksheetNotes`, `worksheetAssignments`, `worksheetOperationalCosts` |
-| Survey | `surveyQuestions`, `surveyResponses`, `surveyFeedback` |
+| Group           | Tables                                                                                                                                                |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parameters      | `parameters`, `parameterCategories`, `parameterTools`, `parameterChemicalMaterials`                                                                   |
+| Tools           | `tools`, `toolCalibrations`, `toolCalibrationCertificates`, `toolCalibrationDocumentations`                                                           |
+| Master Data     | `clusters`, `chemicalMaterials`, `kblis`, `userCompanies`, `userCompanyTestingLocation`                                                               |
+| Orders          | `cart`, `order`, `orderItem`, `orderStatusHistory`                                                                                                    |
+| Testing Process | `testing`, `testingItem`                                                                                                                              |
+| Worksheets      | `worksheets`, `worksheetItems`, `worksheetTools`, `worksheetChemicalMaterials`, `worksheetNotes`, `worksheetAssignments`, `worksheetOperationalCosts` |
+| Survey          | `surveyQuestions`, `surveyResponses`, `surveyFeedback`                                                                                                |
 
-### Pelatihan Domain (`packages/db/src/schema/pelatihan.ts`) — *In Progress*
+### Pelatihan Domain (`packages/db/src/schema/pelatihan.ts`)
 
-| Group | Tables |
-|---|---|
-| Core | `pelatihan`, `pelatihanCategories` |
-| Content | `pelatihanMaterials`, `pelatihanAssessments`, `pelatihanQuestions`, `pelatihanQuestionOptions` |
-| Enrollment | `pelatihanCart`, `pelatihanEnrollments`, `pelatihanProgress` |
-| Assessments | `pelatihanAssessmentAttempts`, `pelatihanAssessmentAnswers` |
-| Certificates | `pelatihanCertificates` |
+| Group                  | Tables                                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| Core                   | `pelatihan`, `pelatihanCategories`                                                             |
+| Content                | `pelatihanMaterials`, `pelatihanAssessments`, `pelatihanQuestions`, `pelatihanQuestionOptions` |
+| Enrollment             | `pelatihanCart`, `pelatihanEnrollments`, `pelatihanProgress`                                   |
+| Assessments            | `pelatihanAssessmentAttempts`, `pelatihanAssessmentAnswers`                                    |
+| Schedules & Attendance | `pelatihanSchedules`, `pelatihanAttendances`                                                   |
+| Profiles               | `userTrainingProfiles`                                                                         |
+| Certificates           | `pelatihanCertificates`                                                                        |
 
 ---
 
@@ -234,7 +240,10 @@ export const getById = (id: string) =>
         where: and(eq(table.id, id), isNull(table.deletedAt)),
       });
       if (!item)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Data tidak ditemukan" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Data tidak ditemukan",
+        });
       return item;
     },
     catch: (error) => error as TRPCError,
@@ -285,20 +294,20 @@ export const resourceRouter = createTRPCRouter({
 
 ### 4. tRPC Procedure Types
 
-| Procedure | Gunakan ketika |
-|---|---|
-| `publicProcedure` | Tidak perlu autentikasi |
-| `protectedProcedure` | User mana pun yang sudah login |
-| `withPermission("resource.action")` | Butuh permission spesifik |
-| `withRole("roleName")` / `withAnyRole` / `withAllRoles` | Role-based access |
-| `withRateLimit` / `withProtectedRateLimit` / `withRoleBasedRateLimit` | Perlu rate limiting |
-| `formDataProcedure(schema)` | File uploads |
+| Procedure                                                             | Gunakan ketika                 |
+| --------------------------------------------------------------------- | ------------------------------ |
+| `publicProcedure`                                                     | Tidak perlu autentikasi        |
+| `protectedProcedure`                                                  | User mana pun yang sudah login |
+| `withPermission("resource.action")`                                   | Butuh permission spesifik      |
+| `withRole("roleName")` / `withAnyRole` / `withAllRoles`               | Role-based access              |
+| `withRateLimit` / `withProtectedRateLimit` / `withRoleBasedRateLimit` | Perlu rate limiting            |
+| `formDataProcedure(schema)`                                           | File uploads                   |
 
 ### 5. Frontend Route Protection
 
 ```typescript
-export const Route = createFileRoute("/(core)/back-office/resource/")(  {
-  params: z.object({ id: z.string() }),   // gunakan z.object, bukan parse/stringify
+export const Route = createFileRoute("/(core)/back-office/resource/")({
+  params: z.object({ id: z.string() }), // gunakan z.object, bukan parse/stringify
   beforeLoad: async ({ context }) => {
     await requirePermission(context, { permission: "resource.read" });
     // Untuk beberapa permission (OR): permission: ["resource.read", "admin.access"]
@@ -306,7 +315,7 @@ export const Route = createFileRoute("/(core)/back-office/resource/")(  {
   },
   loader: async ({ context, params }) =>
     context.queryClient.ensureQueryData(
-      context.trpc.domain.resource.getById.queryOptions({ id: params.id })
+      context.trpc.domain.resource.getById.queryOptions({ id: params.id }),
     ),
   component: MyComponent,
 });
@@ -316,19 +325,21 @@ export const Route = createFileRoute("/(core)/back-office/resource/")(  {
 
 ```typescript
 // Delete (set timestamp)
-await db.update(table)
+await db
+  .update(table)
   .set({ deletedAt: sql`CURRENT_TIMESTAMP` })
   .where(eq(table.id, id))
   .returning();
 
 // Restore (clear timestamp)
-await db.update(table)
+await db
+  .update(table)
   .set({ deletedAt: null })
   .where(eq(table.id, id))
   .returning();
 
 // SELALU exclude soft-deleted dalam query
-where: and(eq(table.id, id), isNull(table.deletedAt))
+where: and(eq(table.id, id), isNull(table.deletedAt));
 ```
 
 ### 7. Pagination Pattern
@@ -347,7 +358,9 @@ const [items, [{ count }]] = await Promise.all([
     offset,
     orderBy: desc(table.createdAt),
   }),
-  db.select({ count: sql<number>`count(*)` }).from(table)
+  db
+    .select({ count: sql<number>`count(*)` })
+    .from(table)
     .where(isNull(table.deletedAt)),
 ]);
 
@@ -404,9 +417,15 @@ Ikuti urutan ini **setiap kali** menambah fitur di domain yang ada atau domain b
 
 ## Important Rules
 
+### Panduan Utama & Pola Kode
+
+- **Developer Playbook** — Rujuk ke [docs/DEVELOPER_AND_AGENT_PLAYBOOK.md](docs/DEVELOPER_AND_AGENT_PLAYBOOK.md) untuk panduan arsitektur lengkap, template kode fungsional (Effect Library & Router), dan langkah-langkah debugging.
+- **Import CommonJS di ESM** — Jika mengimpor library CommonJS (seperti `exceljs`), wajib menggunakan default import: `import exceljs from "exceljs"`. Jangan gunakan `import * as exceljs` karena akan memicu crash `Workbook is not a constructor` di runtime.
+- **Pola Query Effect** — Selalu gunakan `Effect.tryPromise` untuk query DB di `packages/queries` dan `runEffect(Effect.gen(function* () { ... }))` di tRPC router. Jangan gunakan async/await biasa dengan try/catch di dalam fungsi query.
+
 ### Git & Perubahan Kode
 
-- **Jangan jalankan `git commit`, `git push`, atau `gh pr create`** — sediakan perintah eksak untuk dijalankan user sendiri. Exception: jika user secara eksplisit minta *generate PR title/description*, tulis teks saja tanpa menjalankan perintah apapun.
+- **Jangan jalankan `git commit`, `git push`, atau `gh pr create`** — sediakan perintah eksak untuk dijalankan user sendiri. Exception: jika user secara eksplisit minta _generate PR title/description_, tulis teks saja tanpa menjalankan perintah apapun.
 - **Jangan pernah commit `.env`** — gunakan `.env.example` sebagai template.
 - **Multi-file changes** — presentasikan checklist lengkap ke user, minta konfirmasi sebelum memulai.
 - **Maksimal 2 kali** percobaan fix TypeScript type error — jika masih gagal, presentasikan alternatif solusi.
@@ -508,7 +527,18 @@ apps/web/src/routes/
 │   │   │       └── edit.tsx         # Edit training form
 │   │   └── ...
 │   ├── employee/                    # Employee self-service
-│   └── display-board/               # Read-only display
+│   ├── display-board/               # Read-only display
+│   └── pelatihan/                   # Pelatihan (LMS) workspace
+│       ├── transaksi.tsx            # Daftar transaksi pelatihan
+│       ├── transaksi.$orderId.tsx   # Rincian transaksi pelatihan
+│       ├── sertifikat.$enrollmentId.tsx # Cetak sertifikat kelulusan
+│       ├── belajar/                 # Kelas belajar aktif
+│       │   ├── $enrollmentId.tsx    # Layout belajar
+│       │   └── $enrollmentId/
+│       │       ├── index.tsx        # Homepage belajar
+│       │       ├── materi.$materiId.tsx # Halaman belajar materi
+│       │       └── ujian.$assessmentId.tsx # Ujian pre-test / post-test
+│       └── ...
 └── (public)/                        # Unauthenticated
     ├── login.tsx
     ├── register.tsx
@@ -519,22 +549,24 @@ apps/web/src/routes/
 
 ## Documentation Index
 
-| Dokumen | Topik |
-|---|---|
-| [docs/AI_AGENT_RULES.md](docs/AI_AGENT_RULES.md) | **⚠️ WAJIB BACA** — Aturan lengkap AI agents (backend, frontend, design, security) |
-| [docs/FRONTEND_DESIGN_GUIDE.md](docs/FRONTEND_DESIGN_GUIDE.md) | **⚠️ WAJIB BACA** — UI/UX design system, component library, layout patterns |
-| [docs/DEVELOPER_AND_AGENT_PLAYBOOK.md](docs/DEVELOPER_AND_AGENT_PLAYBOOK.md) | Buku Panduan Pengembang & AI Agent (Playbook) Better-T-Stack |
-| [docs/PATTERNS.md](docs/PATTERNS.md) | Code patterns dan contoh lengkap |
-| [docs/JSDOC_CONVENTION.md](docs/JSDOC_CONVENTION.md) | Aturan dan contoh JSDoc |
-| [docs/MODULE_BOUNDARIES.md](docs/MODULE_BOUNDARIES.md) | Modular monolith boundaries |
-| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md) | Docker setup dan troubleshooting |
-| [docs/EMPLOYEE_AUTH_GUIDE.md](docs/EMPLOYEE_AUTH_GUIDE.md) | Autentikasi karyawan |
-| [docs/POLYMORPHIC_RELATIONS_GUIDE.md](docs/POLYMORPHIC_RELATIONS_GUIDE.md) | Relasi polimorfik dokumen |
-| [docs/DOCUMENT_VERIFICATION.md](docs/DOCUMENT_VERIFICATION.md) | Sistem verifikasi dokumen |
-| [docs/PERMISSIONS_GUIDE.md](docs/PERMISSIONS_GUIDE.md) | Permission system (363 permissions) |
-| [docs/PELATIHAN_FEATURE_DESIGN.md](docs/PELATIHAN_FEATURE_DESIGN.md) | Desain fitur pelatihan (LMS) |
-| [docs/VERSION_PLANNING.md](docs/VERSION_PLANNING.md) | SemVer strategy + release plan |
-| [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md) | Git branch naming conventions |
-| [apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md) | tRPC + TanStack Query patterns |
-| [AGENT_CHANGELOG.md](AGENT_CHANGELOG.md) | Riwayat perubahan oleh AI agents |
-| [TODO.md](TODO.md) | Roadmap fitur + migration checklist |
+| Dokumen                                                                                  | Topik                                                                              |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [docs/AI_AGENT_RULES.md](docs/AI_AGENT_RULES.md)                                         | **⚠️ WAJIB BACA** — Aturan lengkap AI agents (backend, frontend, design, security) |
+| [docs/FRONTEND_DESIGN_GUIDE.md](docs/FRONTEND_DESIGN_GUIDE.md)                           | **⚠️ WAJIB BACA** — UI/UX design system, component library, layout patterns        |
+| [docs/DEVELOPER_AND_AGENT_PLAYBOOK.md](docs/DEVELOPER_AND_AGENT_PLAYBOOK.md)             | Buku Panduan Pengembang & AI Agent (Playbook) Better-T-Stack                       |
+| [docs/PATTERNS.md](docs/PATTERNS.md)                                                     | Code patterns dan contoh lengkap                                                   |
+| [docs/JSDOC_CONVENTION.md](docs/JSDOC_CONVENTION.md)                                     | Aturan dan contoh JSDoc                                                            |
+| [docs/MODULE_BOUNDARIES.md](docs/MODULE_BOUNDARIES.md)                                   | Modular monolith boundaries                                                        |
+| [docs/DOCKER_COMPOSE_GUIDE.md](docs/DOCKER_COMPOSE_GUIDE.md)                             | Docker setup dan troubleshooting                                                   |
+| [docs/EMPLOYEE_AUTH_GUIDE.md](docs/EMPLOYEE_AUTH_GUIDE.md)                               | Autentikasi karyawan                                                               |
+| [docs/POLYMORPHIC_RELATIONS_GUIDE.md](docs/POLYMORPHIC_RELATIONS_GUIDE.md)               | Relasi polimorfik dokumen                                                          |
+| [docs/DOCUMENT_VERIFICATION.md](docs/DOCUMENT_VERIFICATION.md)                           | Sistem verifikasi dokumen                                                          |
+| [docs/PERMISSIONS_GUIDE.md](docs/PERMISSIONS_GUIDE.md)                                   | Permission system (363 permissions)                                                |
+| [docs/PELATIHAN_FEATURE_DESIGN.md](docs/PELATIHAN_FEATURE_DESIGN.md)                     | Desain fitur pelatihan (LMS)                                                       |
+| [docs/PELATIHAN_IMPLEMENTATION_GUIDE.md](docs/PELATIHAN_IMPLEMENTATION_GUIDE.md)         | Panduan implementasi modul Pelatihan (LMS)                                         |
+| [docs/PENGUJIAN_EXCEL_IMPORT_EXPORT.md](docs/PENGUJIAN_EXCEL_IMPORT_EXPORT.md)           | Panduan teknis ekspor/impor Excel data master Pengujian                            |
+| [docs/VERSION_PLANNING.md](docs/VERSION_PLANNING.md)                                     | SemVer strategy + release plan                                                     |
+| [docs/BRANCH_NAMING.md](docs/BRANCH_NAMING.md)                                           | Git branch naming conventions                                                      |
+| [apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md](apps/web/docs/TRPC_TANSTACK_QUERY_USAGE.md) | tRPC + TanStack Query patterns                                                     |
+| [AGENT_CHANGELOG.md](AGENT_CHANGELOG.md)                                                 | Riwayat perubahan oleh AI agents                                                   |
+| [TODO.md](TODO.md)                                                                       | Roadmap fitur + migration checklist                                                |

@@ -81,11 +81,10 @@ export const pelatihanPaymentStatusEnum = pgEnum("pelatihan_payment_status", [
   "rejected",
 ]);
 
-export const pelatihanOrderApprovalStatusEnum = pgEnum("pelatihan_order_approval_status", [
-  "pending",
-  "approved",
-  "rejected",
-]);
+export const pelatihanOrderApprovalStatusEnum = pgEnum(
+  "pelatihan_order_approval_status",
+  ["pending", "approved", "rejected"],
+);
 
 export const attemptStatusEnum = pgEnum("attempt_status", [
   "in_progress",
@@ -184,28 +183,34 @@ export const pelatihan = createTable(
     location: varchar("location", { length: 250 }),
     facilities: varchar("facilities", { length: 250 }).array(),
     requirements: text("requirements"),
-    dynamicRequirements: jsonb("dynamic_requirements").$type<{
-      participantNik?: boolean;
-      participantBirthPlace?: boolean;
-      participantBirthDate?: boolean;
-      participantPhone?: boolean;
-      participantAddress?: boolean;
-      participantBloodType?: boolean;
-      companyName?: boolean;
-      companyAddress?: boolean;
-      companyProvinceId?: boolean;
-      companyRegencyId?: boolean;
-      companyDistrictId?: boolean;
-      companyKbli?: boolean;
-      ktpDoc?: boolean;
-      employmentLetter?: boolean;
-      consentLetter?: boolean;
-      diploma?: boolean;
-      passPhoto?: boolean;
-    }>().default({}),
-    certificateNumberFormat: varchar("certificate_number_format", { length: 250 }),
+    dynamicRequirements: jsonb("dynamic_requirements")
+      .$type<{
+        participantNik?: boolean;
+        participantBirthPlace?: boolean;
+        participantBirthDate?: boolean;
+        participantPhone?: boolean;
+        participantAddress?: boolean;
+        participantBloodType?: boolean;
+        companyName?: boolean;
+        companyAddress?: boolean;
+        companyProvinceId?: boolean;
+        companyRegencyId?: boolean;
+        companyDistrictId?: boolean;
+        companyKbli?: boolean;
+        ktpDoc?: boolean;
+        employmentLetter?: boolean;
+        consentLetter?: boolean;
+        diploma?: boolean;
+        passPhoto?: boolean;
+      }>()
+      .default({}),
+    certificateNumberFormat: varchar("certificate_number_format", {
+      length: 250,
+    }),
     attendanceRequired: boolean("attendance_required").notNull().default(true),
-    minAttendancePercentage: integer("min_attendance_percentage").notNull().default(85),
+    minAttendancePercentage: integer("min_attendance_percentage")
+      .notNull()
+      .default(85),
     ...timestamps,
   },
   (table) => [
@@ -347,7 +352,6 @@ export const pelatihanMaterials = createTable("pelatihan_materials", {
   ...timestamps,
 });
 
-
 // 5. pelatihanAssessments
 export const pelatihanAssessments = createTable("pelatihan_assessments", {
   id: uuid("id")
@@ -448,15 +452,24 @@ export const pelatihanEnrollments = createTable(
     // Data Perusahaan
     companyName: varchar("company_name", { length: 250 }),
     companyAddress: text("company_address"),
-    companyProvinceId: uuid("company_province_id").references(() => provinces.id, {
-      onDelete: "set null",
-    }),
-    companyRegencyId: uuid("company_regency_id").references(() => regencies.id, {
-      onDelete: "set null",
-    }),
-    companyDistrictId: uuid("company_district_id").references(() => districts.id, {
-      onDelete: "set null",
-    }),
+    companyProvinceId: uuid("company_province_id").references(
+      () => provinces.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    companyRegencyId: uuid("company_regency_id").references(
+      () => regencies.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    companyDistrictId: uuid("company_district_id").references(
+      () => districts.id,
+      {
+        onDelete: "set null",
+      },
+    ),
     companyKbli: varchar("company_kbli", { length: 250 }),
 
     // Data Diri Peserta
@@ -624,18 +637,78 @@ export const pelatihanCertificateTemplates = createTable(
     templateFileUrl: varchar("template_file_url", { length: 500 }).notNull(),
     templateFileName: varchar("template_file_name", { length: 250 }).notNull(),
     templateFileType: varchar("template_file_type", { length: 50 }).notNull(), // e.g. "pdf"
-    fieldMappings: jsonb("field_mappings").$type<{
-      participantName?: { x: number; y: number; fontSize: number; color?: string; align?: string; enabled: boolean };
-      certificateNumber?: { x: number; y: number; fontSize: number; color?: string; align?: string; enabled: boolean };
-      pelatihanTitle?: { x: number; y: number; fontSize: number; color?: string; align?: string; enabled: boolean };
-      completionDate?: { x: number; y: number; fontSize: number; color?: string; align?: string; enabled: boolean };
-      issuedAt?: { x: number; y: number; fontSize: number; color?: string; align?: string; enabled: boolean };
-      finalScore?: { x: number; y: number; fontSize: number; color?: string; align?: string; enabled: boolean };
-      instructorName?: { x: number; y: number; fontSize: number; color?: string; align?: string; enabled: boolean };
-      qrCode?: { x: number; y: number; width: number; height: number; enabled: boolean };
-    }>().notNull().default({}),
+    fieldMappings: jsonb("field_mappings")
+      .$type<{
+        participantName?: {
+          x: number;
+          y: number;
+          fontSize: number;
+          color?: string;
+          align?: string;
+          enabled: boolean;
+        };
+        certificateNumber?: {
+          x: number;
+          y: number;
+          fontSize: number;
+          color?: string;
+          align?: string;
+          enabled: boolean;
+        };
+        pelatihanTitle?: {
+          x: number;
+          y: number;
+          fontSize: number;
+          color?: string;
+          align?: string;
+          enabled: boolean;
+        };
+        completionDate?: {
+          x: number;
+          y: number;
+          fontSize: number;
+          color?: string;
+          align?: string;
+          enabled: boolean;
+        };
+        issuedAt?: {
+          x: number;
+          y: number;
+          fontSize: number;
+          color?: string;
+          align?: string;
+          enabled: boolean;
+        };
+        finalScore?: {
+          x: number;
+          y: number;
+          fontSize: number;
+          color?: string;
+          align?: string;
+          enabled: boolean;
+        };
+        instructorName?: {
+          x: number;
+          y: number;
+          fontSize: number;
+          color?: string;
+          align?: string;
+          enabled: boolean;
+        };
+        qrCode?: {
+          x: number;
+          y: number;
+          width: number;
+          height: number;
+          enabled: boolean;
+        };
+      }>()
+      .notNull()
+      .default({}),
     isActive: boolean("is_active").notNull().default(false),
-    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdBy: uuid("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     ...timestamps,
   },
   (table) => [
@@ -662,9 +735,12 @@ export const pelatihanCertificates = createTable(
     pelatihanId: uuid("pelatihan_id")
       .notNull()
       .references(() => pelatihan.id, { onDelete: "cascade" }),
-    templateId: uuid("template_id").references(() => pelatihanCertificateTemplates.id, {
-      onDelete: "set null",
-    }),
+    templateId: uuid("template_id").references(
+      () => pelatihanCertificateTemplates.id,
+      {
+        onDelete: "set null",
+      },
+    ),
     certificateNumber: varchar("certificate_number", { length: 100 })
       .notNull()
       .unique(),
@@ -721,6 +797,11 @@ export const pelatihanSchedules = createTable("pelatihan_schedules", {
   category: varchar("category", { length: 100 }),
   materialUrl: varchar("material_url", { length: 500 }),
   meetUrl: varchar("meet_url", { length: 500 }),
+  attendanceToken: varchar("attendance_token", { length: 10 }),
+  attendanceTokenExpiredAt: timestamp("attendance_token_expired_at", {
+    withTimezone: true,
+    mode: "string",
+  }),
   ...timestamps,
 });
 
@@ -742,7 +823,9 @@ export const pelatihanAttendances = createTable(
     checkedInAt: timestamp("checked_in_at", {
       withTimezone: true,
       mode: "string",
-    }).notNull().defaultNow(),
+    })
+      .notNull()
+      .defaultNow(),
     ...timestamps,
   },
   (table) => [
@@ -772,19 +855,28 @@ export const userTrainingProfiles = createTable(
       .notNull()
       .unique()
       .references(() => users.id, { onDelete: "cascade" }),
-    
+
     // Data Perusahaan
     companyName: varchar("company_name", { length: 250 }),
     companyAddress: text("company_address"),
-    companyProvinceId: uuid("company_province_id").references(() => provinces.id, {
-      onDelete: "set null",
-    }),
-    companyRegencyId: uuid("company_regency_id").references(() => regencies.id, {
-      onDelete: "set null",
-    }),
-    companyDistrictId: uuid("company_district_id").references(() => districts.id, {
-      onDelete: "set null",
-    }),
+    companyProvinceId: uuid("company_province_id").references(
+      () => provinces.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    companyRegencyId: uuid("company_regency_id").references(
+      () => regencies.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    companyDistrictId: uuid("company_district_id").references(
+      () => districts.id,
+      {
+        onDelete: "set null",
+      },
+    ),
     companyKbli: varchar("company_kbli", { length: 250 }),
 
     // Data Diri Peserta
@@ -798,15 +890,24 @@ export const userTrainingProfiles = createTable(
     participantPhone: varchar("participant_phone", { length: 50 }),
     participantAddress: text("participant_address"),
     participantBloodType: varchar("participant_blood_type", { length: 10 }),
-    participantProvinceId: uuid("participant_province_id").references(() => provinces.id, {
-      onDelete: "set null",
-    }),
-    participantRegencyId: uuid("participant_regency_id").references(() => regencies.id, {
-      onDelete: "set null",
-    }),
-    participantDistrictId: uuid("participant_district_id").references(() => districts.id, {
-      onDelete: "set null",
-    }),
+    participantProvinceId: uuid("participant_province_id").references(
+      () => provinces.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    participantRegencyId: uuid("participant_regency_id").references(
+      () => regencies.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    participantDistrictId: uuid("participant_district_id").references(
+      () => districts.id,
+      {
+        onDelete: "set null",
+      },
+    ),
 
     ...timestamps,
   },
@@ -818,4 +919,3 @@ export const userTrainingProfiles = createTable(
 // ##################
 // end authored
 // ##################
-

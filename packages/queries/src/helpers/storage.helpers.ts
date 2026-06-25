@@ -1,13 +1,14 @@
 import { Effect } from "effect";
 import { TRPCError } from "@trpc/server";
-import { storageService, FileNotFoundError } from "@tepian-k3/services/storage";
+import { storageService } from "@tepian-k3/services/storage";
 import { logError } from "@tepian-k3/services/logger";
+import { QueueName, queueService } from "@tepian-k3/services/queue";
 
 /**
- * Deletes a previous file from storage given its URL.
+ * Deletes a previous file from storage given its URL by queuing a background job.
  *
  * Extracts the storage key from the URL, logs an error if extraction fails,
- * and deletes the file. Safe to call with null/undefined — returns immediately.
+ * and enqueues a delete job. Safe to call with null/undefined — returns immediately.
  *
  * @example
  * ```ts
@@ -25,7 +26,7 @@ import { logError } from "@tepian-k3/services/logger";
 export function deleteStorageFile(
   url: string | null | undefined,
   caller: string,
-): Effect.Effect<void, TRPCError | FileNotFoundError> {
+): Effect.Effect<void, TRPCError> {
   return Effect.gen(function* () {
     if (!url) return;
 
@@ -41,7 +42,17 @@ export function deleteStorageFile(
       );
     }
 
-    yield* storageService.delete(key);
+    // Queue deletion using BullMQ instead of inline delete
+    yield* Effect.tryPromise({
+      try: () => queueService.addJob(QueueName.CLEANUP, "delete-file", { key }),
+      catch: (error) => {
+        logError(caller, "Failed to queue file deletion job", { key, error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menjadwalkan pembersihan file lama.",
+        });
+      },
+    });
   });
 }
 
@@ -67,7 +78,7 @@ export function replaceStorageFile(
   newKey: string | undefined | null,
   oldUrl: string | undefined | null,
   caller: string,
-): Effect.Effect<void, TRPCError | FileNotFoundError> {
+): Effect.Effect<void, TRPCError> {
   return Effect.gen(function* () {
     if (!newKey || !oldUrl) return;
 

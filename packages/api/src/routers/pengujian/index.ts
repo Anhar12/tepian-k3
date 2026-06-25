@@ -18,6 +18,7 @@ import { userCompanyRouter } from "./user-company";
 import { userCompanyTestingLocationRouter } from "./user-company-testing-location";
 import { worksheetRouter } from "./worksheet";
 import { toolCodeRouter } from "./tool-code";
+import { pengujianExcelRouter } from "./pengujian-excel";
 
 export const pengujianRouter = createTRPCRouter({
   toolCode: toolCodeRouter,
@@ -39,4 +40,5 @@ export const pengujianRouter = createTRPCRouter({
   generateDocument: generateDocumentRouter,
   survey: surveyRouter,
   document: documentRouter,
+  pengujianExcel: pengujianExcelRouter,
 });

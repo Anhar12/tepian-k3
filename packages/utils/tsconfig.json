@@ -2,7 +2,8 @@
   "extends": "@tepian-k3/config/typescript/tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "noEmit": true
+    "noEmit": true,
+    "moduleResolution": "Bundler"
   },
   "include": ["src"],
   "exclude": ["node_modules"]

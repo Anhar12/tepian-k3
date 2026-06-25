@@ -13,6 +13,8 @@ import {
   pelatihanAssessmentAttempts,
   pelatihan,
   users,
+  pelatihanAttendances,
+  pelatihanSchedules,
 } from "@tepian-k3/db/schema";
 import { eq, and, isNull, desc, sql, or, ilike } from "@tepian-k3/db";
 import { Effect } from "effect";
@@ -46,7 +48,7 @@ const certificateQueries = {
     return Effect.tryPromise({
       try: async () => {
         const id = uuidv7();
-        
+
         // Use a transaction to deactivate other templates if this is the first template
         const template = await db.transaction(async (tx) => {
           // Check if there are other templates for this training
@@ -55,14 +57,17 @@ const certificateQueries = {
             .from(pelatihanCertificateTemplates)
             .where(
               and(
-                eq(pelatihanCertificateTemplates.pelatihanId, input.pelatihanId),
-                isNull(pelatihanCertificateTemplates.deletedAt)
-              )
+                eq(
+                  pelatihanCertificateTemplates.pelatihanId,
+                  input.pelatihanId,
+                ),
+                isNull(pelatihanCertificateTemplates.deletedAt),
+              ),
             );
-          
+
           // If this is the first template, set it as active
           const shouldBeActive = existingTemplates.length === 0;
-          
+
           const [newTemplate] = await tx
             .insert(pelatihanCertificateTemplates)
             .values({
@@ -78,10 +83,10 @@ const certificateQueries = {
               createdBy: userId,
             })
             .returning();
-          
+
           return newTemplate;
         });
-        
+
         if (!template) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -97,14 +102,18 @@ const certificateQueries = {
             template,
             userId,
             userEmail,
-          )
+          ),
         );
 
         return template;
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.createTemplate", "Failed to create cert template", { error, input });
+        logError(
+          "certificateQueries.createTemplate",
+          "Failed to create cert template",
+          { error, input },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal membuat template sertifikat.",
@@ -126,13 +135,16 @@ const certificateQueries = {
           .where(
             and(
               eq(pelatihanCertificateTemplates.pelatihanId, pelatihanId),
-              isNull(pelatihanCertificateTemplates.deletedAt)
-            )
+              isNull(pelatihanCertificateTemplates.deletedAt),
+            ),
           )
           .orderBy(desc(pelatihanCertificateTemplates.createdAt));
       },
       catch: (error) => {
-        logError("certificateQueries.getTemplates", "Failed to get templates", { error, pelatihanId });
+        logError("certificateQueries.getTemplates", "Failed to get templates", {
+          error,
+          pelatihanId,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memuat daftar template sertifikat.",
@@ -148,25 +160,31 @@ const certificateQueries = {
   getTemplateById(id: string) {
     return Effect.tryPromise({
       try: async () => {
-        const template = await db.query.pelatihanCertificateTemplates.findFirst({
-          where: and(
-            eq(pelatihanCertificateTemplates.id, id),
-            isNull(pelatihanCertificateTemplates.deletedAt)
-          ),
-        });
-        
+        const template = await db.query.pelatihanCertificateTemplates.findFirst(
+          {
+            where: and(
+              eq(pelatihanCertificateTemplates.id, id),
+              isNull(pelatihanCertificateTemplates.deletedAt),
+            ),
+          },
+        );
+
         if (!template) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Template sertifikat tidak ditemukan.",
           });
         }
-        
+
         return template;
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.getTemplateById", "Failed to get template by ID", { error, id });
+        logError(
+          "certificateQueries.getTemplateById",
+          "Failed to get template by ID",
+          { error, id },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memuat data template sertifikat.",
@@ -191,31 +209,39 @@ const certificateQueries = {
   ) {
     return Effect.tryPromise({
       try: async () => {
-        const existing = await db.query.pelatihanCertificateTemplates.findFirst({
-          where: and(
-            eq(pelatihanCertificateTemplates.id, input.id),
-            isNull(pelatihanCertificateTemplates.deletedAt)
-          ),
-        });
-        
+        const existing = await db.query.pelatihanCertificateTemplates.findFirst(
+          {
+            where: and(
+              eq(pelatihanCertificateTemplates.id, input.id),
+              isNull(pelatihanCertificateTemplates.deletedAt),
+            ),
+          },
+        );
+
         if (!existing) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Template sertifikat tidak ditemukan.",
           });
         }
-        
+
         const [updated] = await db
           .update(pelatihanCertificateTemplates)
           .set({
             name: input.name ?? existing.name,
-            description: input.description !== undefined ? input.description : existing.description,
-            fieldMappings: input.fieldMappings !== undefined ? input.fieldMappings : existing.fieldMappings,
+            description:
+              input.description !== undefined
+                ? input.description
+                : existing.description,
+            fieldMappings:
+              input.fieldMappings !== undefined
+                ? input.fieldMappings
+                : existing.fieldMappings,
             updatedAt: new Date().toISOString(),
           })
           .where(eq(pelatihanCertificateTemplates.id, input.id))
           .returning();
-          
+
         if (!updated) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -232,14 +258,18 @@ const certificateQueries = {
             updated,
             userId,
             userEmail,
-          )
+          ),
         );
 
         return updated;
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.updateTemplate", "Failed to update template", { error, input });
+        logError(
+          "certificateQueries.updateTemplate",
+          "Failed to update template",
+          { error, input },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memperbarui data template sertifikat.",
@@ -252,31 +282,36 @@ const certificateQueries = {
   /**
    * Set a template as active for a training (deactivates other templates for the same training).
    */
-  setActiveTemplate(pelatihanId: string, templateId: string, userId: string, userEmail: string) {
+  setActiveTemplate(
+    pelatihanId: string,
+    templateId: string,
+    userId: string,
+    userEmail: string,
+  ) {
     return Effect.tryPromise({
       try: async () => {
         const target = await db.query.pelatihanCertificateTemplates.findFirst({
           where: and(
             eq(pelatihanCertificateTemplates.id, templateId),
             eq(pelatihanCertificateTemplates.pelatihanId, pelatihanId),
-            isNull(pelatihanCertificateTemplates.deletedAt)
+            isNull(pelatihanCertificateTemplates.deletedAt),
           ),
         });
-        
+
         if (!target) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Template sertifikat tidak ditemukan untuk pelatihan ini.",
           });
         }
-        
+
         await db.transaction(async (tx) => {
           // Deactivate all templates for this training
           await tx
             .update(pelatihanCertificateTemplates)
             .set({ isActive: false, updatedAt: new Date().toISOString() })
             .where(eq(pelatihanCertificateTemplates.pelatihanId, pelatihanId));
-          
+
           // Activate target template
           await tx
             .update(pelatihanCertificateTemplates)
@@ -293,15 +328,19 @@ const certificateQueries = {
             { isActive: true },
             userId,
             userEmail,
-            { pelatihanId }
-          )
+            { pelatihanId },
+          ),
         );
 
         return { success: true };
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.setActiveTemplate", "Failed to set active template", { error, pelatihanId, templateId });
+        logError(
+          "certificateQueries.setActiveTemplate",
+          "Failed to set active template",
+          { error, pelatihanId, templateId },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengaktifkan template sertifikat.",
@@ -317,20 +356,22 @@ const certificateQueries = {
   deleteTemplate(id: string, userId: string, userEmail: string) {
     return Effect.tryPromise({
       try: async () => {
-        const existing = await db.query.pelatihanCertificateTemplates.findFirst({
-          where: and(
-            eq(pelatihanCertificateTemplates.id, id),
-            isNull(pelatihanCertificateTemplates.deletedAt)
-          ),
-        });
-        
+        const existing = await db.query.pelatihanCertificateTemplates.findFirst(
+          {
+            where: and(
+              eq(pelatihanCertificateTemplates.id, id),
+              isNull(pelatihanCertificateTemplates.deletedAt),
+            ),
+          },
+        );
+
         if (!existing) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Template sertifikat tidak ditemukan.",
           });
         }
-        
+
         const [deleted] = await db
           .update(pelatihanCertificateTemplates)
           .set({
@@ -356,14 +397,18 @@ const certificateQueries = {
             deleted as Record<string, unknown>,
             userId,
             userEmail,
-          )
+          ),
         );
 
         return { success: true };
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.deleteTemplate", "Failed to delete template", { error, id });
+        logError(
+          "certificateQueries.deleteTemplate",
+          "Failed to delete template",
+          { error, id },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus template sertifikat.",
@@ -386,15 +431,18 @@ const certificateQueries = {
             pelatihan: pelatihan,
           })
           .from(pelatihanEnrollments)
-          .innerJoin(pelatihan, eq(pelatihanEnrollments.pelatihanId, pelatihan.id))
+          .innerJoin(
+            pelatihan,
+            eq(pelatihanEnrollments.pelatihanId, pelatihan.id),
+          )
           .where(
             and(
               eq(pelatihanEnrollments.id, enrollmentId),
               eq(pelatihanEnrollments.userId, userId),
-              isNull(pelatihanEnrollments.deletedAt)
-            )
+              isNull(pelatihanEnrollments.deletedAt),
+            ),
           );
-        
+
         const firstRow = enrollmentRows[0];
         if (!firstRow) {
           throw new TRPCError({
@@ -402,9 +450,9 @@ const certificateQueries = {
             message: "Pendaftaran pelatihan tidak ditemukan.",
           });
         }
-        
+
         const { enrollment, pelatihan: training } = firstRow;
-        
+
         // 2. Check all training materials completed
         const materials = await db
           .select()
@@ -412,12 +460,12 @@ const certificateQueries = {
           .where(
             and(
               eq(pelatihanMaterials.pelatihanId, training.id),
-              isNull(pelatihanMaterials.deletedAt)
-            )
+              isNull(pelatihanMaterials.deletedAt),
+            ),
           );
-        
+
         const totalMaterials = materials.length;
-        
+
         const completedProgress = await db
           .select()
           .from(pelatihanProgress)
@@ -425,20 +473,20 @@ const certificateQueries = {
             and(
               eq(pelatihanProgress.enrollmentId, enrollmentId),
               eq(pelatihanProgress.completed, true),
-              isNull(pelatihanProgress.deletedAt)
-            )
+              isNull(pelatihanProgress.deletedAt),
+            ),
           );
-        
+
         const completedCount = completedProgress.length;
-        
+
         if (completedCount < totalMaterials) {
           return {
             eligible: false,
             reason: `Materi belum lengkap (${completedCount}/${totalMaterials} selesai).`,
-            details: { completedCount, totalMaterials }
+            details: { completedCount, totalMaterials },
           };
         }
-        
+
         // 3. Check all assessments passed
         const assessments = await db
           .select()
@@ -446,10 +494,10 @@ const certificateQueries = {
           .where(
             and(
               eq(pelatihanAssessments.pelatihanId, training.id),
-              isNull(pelatihanAssessments.deletedAt)
-            )
+              isNull(pelatihanAssessments.deletedAt),
+            ),
           );
-        
+
         for (const assessment of assessments) {
           const attempts = await db
             .select()
@@ -459,29 +507,67 @@ const certificateQueries = {
                 eq(pelatihanAssessmentAttempts.enrollmentId, enrollmentId),
                 eq(pelatihanAssessmentAttempts.assessmentId, assessment.id),
                 eq(pelatihanAssessmentAttempts.passed, true),
-                isNull(pelatihanAssessmentAttempts.deletedAt)
-              )
+                isNull(pelatihanAssessmentAttempts.deletedAt),
+              ),
             );
-          
+
           if (attempts.length === 0) {
             return {
               eligible: false,
               reason: `Anda belum lulus ujian: ${assessment.title}`,
-              details: { missingAssessmentId: assessment.id }
+              details: { missingAssessmentId: assessment.id },
             };
           }
         }
-        
+
+        // 3.5 Check attendance for bimtek
+        if (training.type === "bimtek" && training.attendanceRequired) {
+          const schedules = await db
+            .select()
+            .from(pelatihanSchedules)
+            .where(
+              and(
+                eq(pelatihanSchedules.pelatihanId, training.id),
+                isNull(pelatihanSchedules.deletedAt),
+              ),
+            );
+
+          if (schedules.length > 0) {
+            const attendances = await db
+              .select()
+              .from(pelatihanAttendances)
+              .where(
+                and(
+                  eq(pelatihanAttendances.enrollmentId, enrollmentId),
+                  eq(pelatihanAttendances.status, "present"),
+                  isNull(pelatihanAttendances.deletedAt),
+                ),
+              );
+
+            const attendancePercentage =
+              (attendances.length / schedules.length) * 100;
+            const minPercentage = training.minAttendancePercentage ?? 85;
+
+            if (attendancePercentage < minPercentage) {
+              return {
+                eligible: false,
+                reason: `Tingkat kehadiran presensi minimal tidak terpenuhi (${Math.round(attendancePercentage)}% dari ${minPercentage}% yang disyaratkan).`,
+                details: { attendancePercentage, minPercentage },
+              };
+            }
+          }
+        }
+
         // 4. Check if final score meets the minimum score requirement
         const finalScore = enrollment.finalScore ?? 0;
         if (finalScore < training.minimumScore) {
           return {
             eligible: false,
             reason: `Nilai akhir Anda (${finalScore}) kurang dari batas minimum (${training.minimumScore}).`,
-            details: { finalScore, minimumScore: training.minimumScore }
+            details: { finalScore, minimumScore: training.minimumScore },
           };
         }
-        
+
         return {
           eligible: true,
           enrollment,
@@ -490,53 +576,116 @@ const certificateQueries = {
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.checkCompletionEligibility", "Eligibility check failed", { error, userId, enrollmentId });
+        logError(
+          "certificateQueries.checkCompletionEligibility",
+          "Eligibility check failed",
+          { error, userId, enrollmentId },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memverifikasi kelayakan kelulusan sertifikat.",
           cause: error,
         });
-      }
+      },
     });
   },
 
   /**
    * Issues a certificate for a completed enrollment.
    */
-  issueCertificate(userId: string, enrollmentId: string, userEmail: string) {
+  issueCertificate(
+    userId: string,
+    enrollmentId: string,
+    userEmail: string,
+    force: boolean = false,
+  ) {
     return Effect.gen(function* () {
       // 1. Verify eligibility
-      const eligibilityResult = yield* certificateQueries.checkCompletionEligibility(userId, enrollmentId);
-      
-      if (!eligibilityResult.eligible) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: eligibilityResult.reason || "Peserta belum memenuhi syarat kelulusan.",
+      let enrollment: any;
+      let training: any;
+
+      if (!force) {
+        const eligibilityResult =
+          yield* certificateQueries.checkCompletionEligibility(
+            userId,
+            enrollmentId,
+          );
+
+        if (!eligibilityResult.eligible) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              eligibilityResult.reason ||
+              "Peserta belum memenuhi syarat kelulusan.",
+          });
+        }
+
+        enrollment = eligibilityResult.enrollment;
+        training = eligibilityResult.training;
+      } else {
+        const enrollmentRows = yield* Effect.tryPromise({
+          try: async () => {
+            return await db
+              .select({
+                enrollment: pelatihanEnrollments,
+                pelatihan: pelatihan,
+              })
+              .from(pelatihanEnrollments)
+              .innerJoin(
+                pelatihan,
+                eq(pelatihanEnrollments.pelatihanId, pelatihan.id),
+              )
+              .where(
+                and(
+                  eq(pelatihanEnrollments.id, enrollmentId),
+                  isNull(pelatihanEnrollments.deletedAt),
+                ),
+              );
+          },
+          catch: (e) => {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal memproses pendaftaran.",
+              cause: e,
+            });
+          },
         });
+
+        const firstRow = enrollmentRows[0];
+        if (!firstRow) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Pendaftaran pelatihan tidak ditemukan.",
+          });
+        }
+
+        enrollment = firstRow.enrollment;
+        training = firstRow.pelatihan;
       }
-      
-      const enrollment = eligibilityResult.enrollment;
-      const training = eligibilityResult.training;
-      
+
       if (!enrollment || !training) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Data pendaftaran atau pelatihan tidak lengkap.",
         });
       }
-      
+
       // 2. Check if a certificate already exists
       const existingCert = yield* Effect.tryPromise({
         try: async () => {
           return await db.query.pelatihanCertificates.findFirst({
             where: and(
               eq(pelatihanCertificates.enrollmentId, enrollmentId),
-              isNull(pelatihanCertificates.deletedAt)
+              isNull(pelatihanCertificates.deletedAt),
             ),
           });
         },
         catch: (e) => {
-          logError("certificateQueries.issueCertificate.existingCert", "Failed to check existing certificate", { error: e, enrollmentId });
+          logError(
+            "certificateQueries.issueCertificate.existingCert",
+            "Failed to check existing certificate",
+            { error: e, enrollmentId },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memeriksa status sertifikat.",
@@ -544,11 +693,11 @@ const certificateQueries = {
           });
         },
       });
-      
+
       if (existingCert) {
         return existingCert;
       }
-      
+
       // 3. Get the active template
       const activeTemplate = yield* Effect.tryPromise({
         try: async () => {
@@ -556,12 +705,16 @@ const certificateQueries = {
             where: and(
               eq(pelatihanCertificateTemplates.pelatihanId, training.id),
               eq(pelatihanCertificateTemplates.isActive, true),
-              isNull(pelatihanCertificateTemplates.deletedAt)
+              isNull(pelatihanCertificateTemplates.deletedAt),
             ),
           });
         },
         catch: (e) => {
-          logError("certificateQueries.issueCertificate.activeTemplate", "Failed to fetch active template", { error: e, trainingId: training.id });
+          logError(
+            "certificateQueries.issueCertificate.activeTemplate",
+            "Failed to fetch active template",
+            { error: e, trainingId: training.id },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil template sertifikat.",
@@ -569,14 +722,15 @@ const certificateQueries = {
           });
         },
       });
-      
+
       if (!activeTemplate) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Template sertifikat aktif belum diunggah oleh admin untuk pelatihan ini.",
+          message:
+            "Template sertifikat aktif belum diunggah oleh admin untuk pelatihan ini.",
         });
       }
-      
+
       // 4. Generate certificate number
       const certificateNumber = yield* Effect.tryPromise({
         try: async () => {
@@ -584,24 +738,28 @@ const certificateQueries = {
             .select({ count: sql<number>`count(*)` })
             .from(pelatihanCertificates)
             .where(eq(pelatihanCertificates.pelatihanId, training.id));
-          
+
           const count = countResult[0]?.count ?? 0;
           const sequence = String(count + 1).padStart(4, "0");
           const year = new Date().getFullYear().toString();
           const month = String(new Date().getMonth() + 1).padStart(2, "0");
           const format = training.certificateNumberFormat;
-          
+
           if (format && format.trim() !== "") {
             return format
               .replace("{{SEQ}}", sequence)
               .replace("{{YEAR}}", year)
               .replace("{{MONTH}}", month);
           }
-          
+
           return `CERT/K3/${year}/${sequence}`;
         },
         catch: (e) => {
-          logError("certificateQueries.issueCertificate.certificateNumber", "Failed to generate certificate number", { error: e });
+          logError(
+            "certificateQueries.issueCertificate.certificateNumber",
+            "Failed to generate certificate number",
+            { error: e },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal membuat nomor sertifikat.",
@@ -609,22 +767,25 @@ const certificateQueries = {
           });
         },
       });
-      
+
       // 5. Generate verification token and QR code
       const verificationToken = uuidv7();
-      const qrResult = yield* generateDocumentVerificationQRCode(verificationToken);
-      
+      const qrResult =
+        yield* generateDocumentVerificationQRCode(verificationToken);
+
       // 6. Download template file buffer
-      const templateKey = storageService.getKeyFromUrl(activeTemplate.templateFileUrl);
+      const templateKey = storageService.getKeyFromUrl(
+        activeTemplate.templateFileUrl,
+      );
       if (!templateKey) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Format URL template tidak valid.",
         });
       }
-      
+
       const templateBuffer = yield* storageService.download(templateKey);
-      
+
       // 7. Get student's details
       const user = yield* Effect.tryPromise({
         try: async () => {
@@ -633,7 +794,11 @@ const certificateQueries = {
           });
         },
         catch: (e) => {
-          logError("certificateQueries.issueCertificate.user", "Failed to fetch user details", { error: e, userId });
+          logError(
+            "certificateQueries.issueCertificate.user",
+            "Failed to fetch user details",
+            { error: e, userId },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil data user.",
@@ -641,22 +806,25 @@ const certificateQueries = {
           });
         },
       });
-      
+
       if (!user) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Data user tidak ditemukan.",
         });
       }
-      
+
       // Formats completion date
       const completionDate = enrollment.completedAt || new Date().toISOString();
-      const formattedDate = new Date(completionDate).toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-      
+      const formattedDate = new Date(completionDate).toLocaleDateString(
+        "id-ID",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        },
+      );
+
       const issuedAtDate = new Date().toLocaleDateString("id-ID", {
         day: "numeric",
         month: "long",
@@ -674,26 +842,29 @@ const certificateQueries = {
         qrCodeDataURL: qrResult.qrCodeDataURL,
         fieldMappings: activeTemplate.fieldMappings,
         data: {
-          participantName: enrollment.participantName || user.name || "Peserta Pelatihan",
+          participantName:
+            enrollment.participantName || user.name || "Peserta Pelatihan",
           participantNik: enrollment.participantNik || undefined,
           certificateNumber,
           pelatihanTitle: training.title,
           pelatihanType: training.type,
           completionDate: formattedDate,
           issuedAt: issuedAtDate,
-          finalScore: enrollment.finalScore ? String(enrollment.finalScore) : undefined,
+          finalScore: enrollment.finalScore
+            ? String(enrollment.finalScore)
+            : undefined,
           instructorName: training.instructorName || undefined,
           companyName: enrollment.companyName || undefined,
         },
       });
-      
+
       // 9. Upload generated PDF to storage
       const uploadResult = yield* storageService.upload(pdfBuffer, {
         folder: "pelatihan/certificates",
         filename: `certificate_${enrollmentId}.pdf`,
         contentType: "application/pdf",
       });
-      
+
       // 10. Save certificate database records and update enrollment status in a transaction
       const finalCertificate = yield* Effect.tryPromise({
         try: async () => {
@@ -717,14 +888,14 @@ const certificateQueries = {
                 expiresAt,
               })
               .returning();
-            
+
             if (!cert) {
               throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
                 message: "Gagal menyimpan sertifikat ke database.",
               });
             }
-            
+
             // Update enrollment status to completed
             await tx
               .update(pelatihanEnrollments)
@@ -736,12 +907,16 @@ const certificateQueries = {
                 updatedAt: new Date().toISOString(),
               })
               .where(eq(pelatihanEnrollments.id, enrollmentId));
-              
+
             return cert;
           });
         },
         catch: (error) => {
-          logError("certificateQueries.issueCertificate.finalCertificate", "Failed to save certificate record", { error, enrollmentId });
+          logError(
+            "certificateQueries.issueCertificate.finalCertificate",
+            "Failed to save certificate record",
+            { error, enrollmentId },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal menerbitkan sertifikat di database.",
@@ -749,14 +924,14 @@ const certificateQueries = {
           });
         },
       });
-      
+
       if (!finalCertificate) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Sertifikat tidak berhasil diterbitkan.",
         });
       }
-      
+
       // Log audit
       yield* logCreate(
         "pelatihan_certificate",
@@ -765,7 +940,24 @@ const certificateQueries = {
         userId,
         userEmail,
       );
-      
+
+      const notificationsQueries = yield* Effect.promise(() =>
+        import("../platform/notifications.queries").then(
+          (m) => m.notificationsQueries,
+        ),
+      );
+
+      yield* notificationsQueries.create({
+        userId,
+        title: "Sertifikat Kelulusan Terbit",
+        message: `Selamat! Sertifikat kelulusan Anda untuk pelatihan "${training.title}" telah diterbitkan dan dapat diunduh.`,
+        type: "document_ready",
+        metadata: {
+          enrollmentId,
+          certificateId: finalCertificate.id,
+        },
+      });
+
       return finalCertificate;
     });
   },
@@ -773,7 +965,11 @@ const certificateQueries = {
   /**
    * Admin manual issue certificate (bypasses automatic check).
    */
-  issueCertificateManual(enrollmentId: string, _adminId: string, adminEmail: string) {
+  issueCertificateManual(
+    enrollmentId: string,
+    _adminId: string,
+    adminEmail: string,
+  ) {
     return Effect.gen(function* () {
       // Get enrollment directly
       const enrollmentRows = yield* Effect.tryPromise({
@@ -784,16 +980,23 @@ const certificateQueries = {
               pelatihan: pelatihan,
             })
             .from(pelatihanEnrollments)
-            .innerJoin(pelatihan, eq(pelatihanEnrollments.pelatihanId, pelatihan.id))
+            .innerJoin(
+              pelatihan,
+              eq(pelatihanEnrollments.pelatihanId, pelatihan.id),
+            )
             .where(
               and(
                 eq(pelatihanEnrollments.id, enrollmentId),
-                isNull(pelatihanEnrollments.deletedAt)
-              )
+                isNull(pelatihanEnrollments.deletedAt),
+              ),
             );
         },
         catch: (e) => {
-          logError("certificateQueries.issueCertificateManual.fetchEnrollment", "Failed to fetch enrollment", { error: e, enrollmentId });
+          logError(
+            "certificateQueries.issueCertificateManual.fetchEnrollment",
+            "Failed to fetch enrollment",
+            { error: e, enrollmentId },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memproses pendaftaran.",
@@ -801,7 +1004,7 @@ const certificateQueries = {
           });
         },
       });
-      
+
       const firstRow = enrollmentRows[0];
       if (!firstRow) {
         throw new TRPCError({
@@ -809,16 +1012,17 @@ const certificateQueries = {
           message: "Pendaftaran pelatihan tidak ditemukan.",
         });
       }
-      
+
       const { enrollment } = firstRow;
-      
-      // Simply trigger issuance (this will run the check first, but since the admin triggers it, 
+
+      // Simply trigger issuance (this will run the check first, but since the admin triggers it,
       // they might have updated scores/progress already. If they want to force it, we can force-grade
       // or simply run the normal flow. If the user fails, admin can force grade first).
       return yield* certificateQueries.issueCertificate(
         enrollment.userId,
         enrollmentId,
         adminEmail,
+        true,
       );
     });
   },
@@ -826,23 +1030,28 @@ const certificateQueries = {
   /**
    * Revoke certificate (soft delete).
    */
-  revokeCertificate(certificateId: string, reason: string, adminId: string, adminEmail: string) {
+  revokeCertificate(
+    certificateId: string,
+    reason: string,
+    adminId: string,
+    adminEmail: string,
+  ) {
     return Effect.tryPromise({
       try: async () => {
         const cert = await db.query.pelatihanCertificates.findFirst({
           where: and(
             eq(pelatihanCertificates.id, certificateId),
-            isNull(pelatihanCertificates.deletedAt)
+            isNull(pelatihanCertificates.deletedAt),
           ),
         });
-        
+
         if (!cert) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Sertifikat tidak ditemukan.",
           });
         }
-        
+
         const result = await db.transaction(async (tx) => {
           // Soft delete certificate
           const [deletedCert] = await tx
@@ -853,14 +1062,14 @@ const certificateQueries = {
             })
             .where(eq(pelatihanCertificates.id, certificateId))
             .returning();
-            
+
           if (!deletedCert) {
             throw new TRPCError({
               code: "INTERNAL_SERVER_ERROR",
               message: "Gagal mencabut sertifikat.",
             });
           }
-            
+
           // Reset enrollment status/certificate url
           await tx
             .update(pelatihanEnrollments)
@@ -871,7 +1080,7 @@ const certificateQueries = {
               updatedAt: new Date().toISOString(),
             })
             .where(eq(pelatihanEnrollments.id, cert.enrollmentId));
-            
+
           return deletedCert;
         });
 
@@ -884,15 +1093,19 @@ const certificateQueries = {
             result as Record<string, unknown>,
             adminId,
             adminEmail,
-            { reason }
-          )
+            { reason },
+          ),
         );
 
         return { success: true };
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.revokeCertificate", "Failed to revoke certificate", { error, certificateId });
+        logError(
+          "certificateQueries.revokeCertificate",
+          "Failed to revoke certificate",
+          { error, certificateId },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mencabut sertifikat.",
@@ -912,19 +1125,23 @@ const certificateQueries = {
           eq(pelatihanCertificates.enrollmentId, enrollmentId),
           isNull(pelatihanCertificates.deletedAt),
         ];
-        
+
         if (userId) {
           whereClause.push(eq(pelatihanCertificates.userId, userId));
         }
-        
+
         const cert = await db.query.pelatihanCertificates.findFirst({
           where: and(...whereClause),
         });
-        
+
         return cert ?? null;
       },
       catch: (error) => {
-        logError("certificateQueries.getCertificateByEnrollment", "Failed to fetch certificate", { error, enrollmentId });
+        logError(
+          "certificateQueries.getCertificateByEnrollment",
+          "Failed to fetch certificate",
+          { error, enrollmentId },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil data sertifikat.",
@@ -957,26 +1174,34 @@ const certificateQueries = {
           })
           .from(pelatihanCertificates)
           .innerJoin(users, eq(pelatihanCertificates.userId, users.id))
-          .innerJoin(pelatihan, eq(pelatihanCertificates.pelatihanId, pelatihan.id))
+          .innerJoin(
+            pelatihan,
+            eq(pelatihanCertificates.pelatihanId, pelatihan.id),
+          )
           .where(
             and(
               eq(pelatihanCertificates.verificationToken, token),
-              isNull(pelatihanCertificates.deletedAt)
-            )
+              isNull(pelatihanCertificates.deletedAt),
+            ),
           );
-        
+
         if (rows.length === 0) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Sertifikat tidak valid atau tidak terdaftar di sistem kami.",
+            message:
+              "Sertifikat tidak valid atau tidak terdaftar di sistem kami.",
           });
         }
-        
+
         return rows[0];
       },
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("certificateQueries.verifyCertificate", "Failed to verify token", { error, token });
+        logError(
+          "certificateQueries.verifyCertificate",
+          "Failed to verify token",
+          { error, token },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memproses verifikasi sertifikat.",
@@ -991,23 +1216,26 @@ const certificateQueries = {
    */
   getCertificatesByPelatihan(
     pelatihanId: string,
-    pagination: { page: number; limit: number; search?: string }
+    pagination: { page: number; limit: number; search?: string },
   ) {
     return Effect.tryPromise({
       try: async () => {
         const offset = (pagination.page - 1) * pagination.limit;
-        
+
         const searchFilter = pagination.search
           ? or(
               ilike(users.name, `%${pagination.search}%`),
-              ilike(pelatihanCertificates.certificateNumber, `%${pagination.search}%`)
+              ilike(
+                pelatihanCertificates.certificateNumber,
+                `%${pagination.search}%`,
+              ),
             )
           : undefined;
 
         const whereClause = and(
           eq(pelatihanCertificates.pelatihanId, pelatihanId),
           isNull(pelatihanCertificates.deletedAt),
-          searchFilter
+          searchFilter,
         );
 
         const [items, countResult] = await Promise.all([
@@ -1049,7 +1277,11 @@ const certificateQueries = {
         };
       },
       catch: (error) => {
-        logError("certificateQueries.getCertificatesByPelatihan", "Failed to load certs for training", { error, pelatihanId });
+        logError(
+          "certificateQueries.getCertificatesByPelatihan",
+          "Failed to load certs for training",
+          { error, pelatihanId },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil daftar sertifikat pelatihan.",
@@ -1073,11 +1305,14 @@ const certificateQueries = {
     return Effect.tryPromise({
       try: async () => {
         const offset = (pagination.page - 1) * pagination.limit;
-        
+
         const searchFilter = pagination.search
           ? or(
               ilike(users.name, `%${pagination.search}%`),
-              ilike(pelatihanCertificates.certificateNumber, `%${pagination.search}%`)
+              ilike(
+                pelatihanCertificates.certificateNumber,
+                `%${pagination.search}%`,
+              ),
             )
           : undefined;
 
@@ -1088,7 +1323,9 @@ const certificateQueries = {
         }
 
         if (pagination.pelatihanId) {
-          filters.push(eq(pelatihanCertificates.pelatihanId, pagination.pelatihanId));
+          filters.push(
+            eq(pelatihanCertificates.pelatihanId, pagination.pelatihanId),
+          );
         }
 
         if (pagination.type) {
@@ -1099,7 +1336,7 @@ const certificateQueries = {
           const nowStr = new Date().toISOString();
           if (pagination.status === "active") {
             filters.push(
-              sql`${pelatihanCertificates.expiresAt} IS NULL OR ${pelatihanCertificates.expiresAt} >= ${nowStr}`
+              sql`${pelatihanCertificates.expiresAt} IS NULL OR ${pelatihanCertificates.expiresAt} >= ${nowStr}`,
             );
           } else if (pagination.status === "expired") {
             filters.push(sql`${pelatihanCertificates.expiresAt} < ${nowStr}`);
@@ -1126,7 +1363,10 @@ const certificateQueries = {
             })
             .from(pelatihanCertificates)
             .innerJoin(users, eq(pelatihanCertificates.userId, users.id))
-            .innerJoin(pelatihan, eq(pelatihanCertificates.pelatihanId, pelatihan.id))
+            .innerJoin(
+              pelatihan,
+              eq(pelatihanCertificates.pelatihanId, pelatihan.id),
+            )
             .where(whereClause)
             .limit(pagination.limit)
             .offset(offset)
@@ -1135,7 +1375,10 @@ const certificateQueries = {
             .select({ count: sql<number>`count(*)` })
             .from(pelatihanCertificates)
             .innerJoin(users, eq(pelatihanCertificates.userId, users.id))
-            .innerJoin(pelatihan, eq(pelatihanCertificates.pelatihanId, pelatihan.id))
+            .innerJoin(
+              pelatihan,
+              eq(pelatihanCertificates.pelatihanId, pelatihan.id),
+            )
             .where(whereClause),
         ]);
 
@@ -1152,7 +1395,11 @@ const certificateQueries = {
         };
       },
       catch: (error) => {
-        logError("certificateQueries.getAllCertificates", "Failed to load all certificates", { error, pagination });
+        logError(
+          "certificateQueries.getAllCertificates",
+          "Failed to load all certificates",
+          { error, pagination },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil daftar seluruh sertifikat pelatihan.",

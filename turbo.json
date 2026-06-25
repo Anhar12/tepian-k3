@@ -63,6 +63,9 @@
     "db:clear-cache": {
       "cache": false
     },
+    "db:validate-migrations": {
+      "cache": false
+    },
     "email:dev": {
       "cache": false,
       "persistent": true

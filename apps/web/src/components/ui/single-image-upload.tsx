@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CircleX, CloudUpload, Image, AlertTriangle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ImageCropperModal } from "./image-cropper-modal";
 
 interface ImageFile {
   file: File;
@@ -31,6 +32,9 @@ interface SingleImageUploadProps {
   name?: string;
   disabled?: boolean;
   error?: string;
+  aspectRatio?: number;
+  targetWidth?: number;
+  targetHeight?: number;
 }
 
 const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
@@ -45,6 +49,9 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
       name: _name,
       disabled = false,
       error,
+      aspectRatio,
+      targetWidth,
+      targetHeight,
     },
     ref,
   ) => {
@@ -52,6 +59,10 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
     const [preview, setPreview] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
+    const [showCropper, setShowCropper] = useState(false);
+    const [rawFile, setRawFile] = useState<{ file: File; url: string } | null>(
+      null,
+    );
 
     // Handle external value changes (e.g., from form reset)
     useEffect(() => {
@@ -91,47 +102,12 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omitting `image` to avoid infinite loop
     }, [value]);
 
-    const addImage = useCallback(
-      (file: File) => {
-        const validateFile = (f: File): string | null => {
-          if (!f.type.startsWith("image/")) {
-            return "File must be an image";
-          }
-          if (f.size > maxSize) {
-            return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
-          }
-          return null;
-        };
-
-        const simulateUpload = (uploadedFile: File) => {
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += Math.random() * 20;
-            if (progress >= 100) {
-              progress = 100;
-              clearInterval(interval);
-
-              setImage((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      progress: 100,
-                      status: "completed",
-                    }
-                  : null,
-              );
-
-              // Notify parent component
-              onChange?.(uploadedFile);
-            } else {
-              setImage((prev) => (prev ? { ...prev, progress } : null));
-            }
-          }, 100);
-        };
-
-        const validationError = validateFile(file);
-        if (validationError) {
-          setUploadError(validationError);
+    const processUpload = useCallback(
+      (uploadedFile: File) => {
+        if (uploadedFile.size > maxSize) {
+          setUploadError(
+            `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`,
+          );
           return;
         }
 
@@ -143,8 +119,8 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
         }
 
         const imageFile: ImageFile = {
-          file,
-          preview: URL.createObjectURL(file),
+          file: uploadedFile,
+          preview: URL.createObjectURL(uploadedFile),
           progress: 0,
           status: "uploading",
         };
@@ -152,10 +128,60 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
         setImage(imageFile);
         setPreview(imageFile.preview);
 
-        // Simulate upload progress
-        simulateUpload(file);
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 20;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+
+            setImage((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    progress: 100,
+                    status: "completed",
+                  }
+                : null,
+            );
+
+            // Notify parent component
+            onChange?.(uploadedFile);
+          } else {
+            setImage((prev) => (prev ? { ...prev, progress } : null));
+          }
+        }, 100);
       },
       [image, maxSize, onChange],
+    );
+
+    const addImage = useCallback(
+      (file: File) => {
+        const validateFile = (f: File): string | null => {
+          if (!f.type.startsWith("image/")) {
+            return "File must be an image";
+          }
+          if (!aspectRatio && f.size > maxSize) {
+            return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(1)}MB`;
+          }
+          return null;
+        };
+
+        const validationError = validateFile(file);
+        if (validationError) {
+          setUploadError(validationError);
+          return;
+        }
+
+        if (aspectRatio && targetWidth && targetHeight) {
+          setRawFile({ file, url: URL.createObjectURL(file) });
+          setShowCropper(true);
+          return;
+        }
+
+        processUpload(file);
+      },
+      [aspectRatio, targetWidth, targetHeight, processUpload, maxSize],
     );
 
     const removeImage = useCallback(() => {
@@ -302,6 +328,9 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
               </h3>
               <span className="mb-3 block text-xs font-normal text-secondary-foreground">
                 {renderMimeTypes(accept)} up to {formatBytes(maxSize)}.
+                {targetWidth &&
+                  targetHeight &&
+                  ` Recommended resolution: ${targetWidth}x${targetHeight}px`}
               </span>
               <Button
                 size="sm"
@@ -372,6 +401,27 @@ const SingleImageUpload = forwardRef<HTMLDivElement, SingleImageUploadProps>(
               <AlertDescription>{displayError}</AlertDescription>
             </AlertContent>
           </Alert>
+        )}
+
+        {aspectRatio && targetWidth && targetHeight && rawFile && (
+          <ImageCropperModal
+            isOpen={showCropper}
+            onClose={() => {
+              setShowCropper(false);
+              URL.revokeObjectURL(rawFile.url);
+              setRawFile(null);
+            }}
+            imageUrl={rawFile.url}
+            aspectRatio={aspectRatio}
+            targetWidth={targetWidth}
+            targetHeight={targetHeight}
+            onCropComplete={(croppedFile) => {
+              setShowCropper(false);
+              URL.revokeObjectURL(rawFile.url);
+              setRawFile(null);
+              processUpload(croppedFile);
+            }}
+          />
         )}
       </div>
     );

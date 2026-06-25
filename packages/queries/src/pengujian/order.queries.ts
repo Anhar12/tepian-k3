@@ -1725,16 +1725,7 @@ const orderQueries = {
         );
       }
 
-      // If there are pelatihan items, auto enroll the user
-      const autoEnrollQueries = yield* Effect.promise(() =>
-        import("@tepian-k3/queries/pelatihan/auto-enroll.queries").then(
-          (m) => m.default,
-        ),
-      );
-      yield* autoEnrollQueries.processPaidPelatihanOrder(
-        orderId,
-        orderToVerify.user.id,
-      );
+      // Auto-enrollment logic has been removed as it is now handled by the payment gateway webhook
 
       // create order status history - pembayaran_diterima
       yield* orderStatusHistoryQueries.createOrderStatusHistory(

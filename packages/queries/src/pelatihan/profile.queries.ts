@@ -127,24 +127,39 @@ const profileQueries = {
   ) {
     return Effect.tryPromise({
       try: async () => {
-        const [doc] = await db
-          .insert(documents)
-          .values({
-            ...docData,
-            entityType: "user",
-            entityId: userId,
-            uploadedByUserId: userId,
-            status: "draft",
-          })
-          .returning();
+        return await db.transaction(async (tx) => {
+          // Soft-delete existing active document of the same type for this user
+          await tx
+            .update(documents)
+            .set({ deletedAt: sql`CURRENT_TIMESTAMP` })
+            .where(
+              and(
+                eq(documents.entityType, "user"),
+                eq(documents.entityId, userId),
+                eq(documents.type, docData.type),
+                isNull(documents.deletedAt),
+              ),
+            );
 
-        if (!doc) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Gagal menyimpan dokumen pendukung.",
-          });
-        }
-        return doc;
+          const [doc] = await tx
+            .insert(documents)
+            .values({
+              ...docData,
+              entityType: "user",
+              entityId: userId,
+              uploadedByUserId: userId,
+              status: "draft",
+            })
+            .returning();
+
+          if (!doc) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal menyimpan dokumen pendukung.",
+            });
+          }
+          return doc;
+        });
       },
       catch: (error) => {
         logError(
@@ -213,69 +228,110 @@ const profileQueries = {
   },
 
   upsertTrainingProfileAndDocuments(userId: string, input: any) {
-    return Effect.gen(function* () {
-      const profileData: any = {};
-      const profileKeys = [
-        "participantName",
-        "participantNik",
-        "participantBirthPlace",
-        "participantBirthDate",
-        "participantPhone",
-        "participantAddress",
-        "participantBloodType",
-        "companyName",
-        "companyAddress",
-        "companyProvinceId",
-        "companyRegencyId",
-        "companyDistrictId",
-        "companyKbli"
-      ];
-      
-      for (const key of profileKeys) {
-        if (input[key] !== undefined) {
-          profileData[key] = input[key];
-        }
-      }
+    return Effect.tryPromise({
+      try: () =>
+        db.transaction(async (tx) => {
+          const profileData: any = {};
+          const profileKeys = [
+            "participantName",
+            "participantNik",
+            "participantBirthPlace",
+            "participantBirthDate",
+            "participantPhone",
+            "participantAddress",
+            "participantBloodType",
+            "companyName",
+            "companyAddress",
+            "companyProvinceId",
+            "companyRegencyId",
+            "companyDistrictId",
+            "companyKbli",
+          ];
 
-      if (Object.keys(profileData).length > 0) {
-        yield* profileQueries.upsertProfile(userId, profileData);
-      }
+          for (const key of profileKeys) {
+            if (input[key] !== undefined) {
+              profileData[key] = input[key];
+            }
+          }
 
-      const docsToInsert = [
-        { urlKey: "ktpDocUrl", nameKey: "ktpDocName", type: "id_card", title: "Scan Kartu Identitas (KTP)" },
-        { urlKey: "employmentLetterUrl", nameKey: "employmentLetterName", type: "employment_letter", title: "Surat Keterangan Kerja" },
-        { urlKey: "consentLetterUrl", nameKey: "consentLetterName", type: "employment_contract", title: "Surat Pernyataan Kesediaan" },
-        { urlKey: "diplomaUrl", nameKey: "diplomaName", type: "diploma", title: "Ijazah Terakhir" },
-        { urlKey: "passPhotoUrl", nameKey: "passPhotoName", type: "pass_photo", title: "Pass Foto Latar Merah" },
-      ];
+          if (Object.keys(profileData).length > 0) {
+            await tx
+              .insert(userTrainingProfiles)
+              .values({
+                ...profileData,
+                userId,
+              })
+              .onConflictDoUpdate({
+                target: userTrainingProfiles.userId,
+                set: {
+                  ...profileData,
+                  updatedAt: new Date().toISOString(),
+                },
+              });
+          }
 
-      for (const doc of docsToInsert) {
-        const fileUrl = input[doc.urlKey];
-        const fileName = input[doc.nameKey] || `${doc.title}`;
-        if (fileUrl) {
-          yield* Effect.tryPromise({
-            try: async () => {
-              const existingDoc = await db.query.documents.findFirst({
+          const docsToInsert = [
+            {
+              urlKey: "ktpDocUrl",
+              nameKey: "ktpDocName",
+              type: "id_card",
+              title: "Scan Kartu Identitas (KTP)",
+            },
+            {
+              urlKey: "employmentLetterUrl",
+              nameKey: "employmentLetterName",
+              type: "employment_letter",
+              title: "Surat Keterangan Kerja",
+            },
+            {
+              urlKey: "consentLetterUrl",
+              nameKey: "consentLetterName",
+              type: "employment_contract",
+              title: "Surat Pernyataan Kesediaan",
+            },
+            {
+              urlKey: "diplomaUrl",
+              nameKey: "diplomaName",
+              type: "diploma",
+              title: "Ijazah Terakhir",
+            },
+            {
+              urlKey: "passPhotoUrl",
+              nameKey: "passPhotoName",
+              type: "pass_photo",
+              title: "Pass Foto Latar Merah",
+            },
+          ];
+
+          for (const doc of docsToInsert) {
+            const fileUrl = input[doc.urlKey];
+            const fileName = input[doc.nameKey] || `${doc.title}`;
+            if (fileUrl) {
+              const existingDoc = await tx.query.documents.findFirst({
                 where: and(
                   eq(documents.entityType, "user"),
                   eq(documents.entityId, userId),
                   eq(documents.type, doc.type as any),
-                  isNull(documents.deletedAt)
-                )
+                  isNull(documents.deletedAt),
+                ),
               });
 
               if (existingDoc) {
-                await db.update(documents)
+                await tx
+                  .update(documents)
                   .set({
                     fileUrl,
                     fileName,
-                    updatedAt: new Date().toISOString()
+                    updatedAt: new Date().toISOString(),
                   })
                   .where(eq(documents.id, existingDoc.id));
               } else {
-                const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+                const dateStr = new Date()
+                  .toISOString()
+                  .slice(0, 10)
+                  .replace(/-/g, "");
                 const docNo = `DOC-${dateStr}-${Math.floor(1000 + Math.random() * 9000)}`;
-                await db.insert(documents).values({
+                await tx.insert(documents).values({
                   documentNumber: docNo,
                   type: doc.type as any,
                   title: doc.title,
@@ -284,21 +340,25 @@ const profileQueries = {
                   entityType: "user",
                   entityId: userId,
                   uploadedByUserId: userId,
-                  status: "draft"
+                  status: "draft",
                 });
               }
-            },
-            catch: (error) => {
-              logError("profileQueries.upsertTrainingProfileAndDocuments.docs", "Failed to save user doc", { error, userId, doc });
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: `Gagal menyimpan dokumen ${doc.title}.`
-              });
             }
-          });
-        }
-      }
-      return { success: true };
+          }
+          return { success: true };
+        }),
+      catch: (error) => {
+        logError(
+          "profileQueries.upsertTrainingProfileAndDocuments",
+          "Failed to upsert training profile and documents",
+          { error, userId },
+        );
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal menyimpan data.",
+        });
+      },
     });
   },
 };

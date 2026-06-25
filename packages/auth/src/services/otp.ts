@@ -210,11 +210,14 @@ export class OTPService {
           );
         }
 
+        const sessionId = uuidv7();
+
         // Create access token with short expiry
         const accessToken = yield* Effect.tryPromise({
           try: () =>
             createAccessToken({
               id: user.id,
+              sessionId,
               email: user.email,
               roles: user.roles.map((role) => role.name),
               createdAt: user.createdAt,
@@ -233,7 +236,6 @@ export class OTPService {
         });
 
         // Create refresh token with long expiry
-        const sessionId = uuidv7();
         const refreshTokenJWT = yield* Effect.tryPromise({
           try: () =>
             createRefreshToken({

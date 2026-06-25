@@ -17,6 +17,7 @@ export interface JWTPayload extends JoseJWTPayload {
 
 export interface AccessTokenPayload extends JoseJWTPayload {
   id: string;
+  sessionId: string;
   email: string;
   roles: string[];
   createdAt: string;

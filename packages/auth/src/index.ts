@@ -7,8 +7,7 @@ import type {
   ResetTokenPayload,
 } from "./types/auth.types";
 
-// Re-export token blacklist service from services package
-export {
+import {
   initializeTokenBlacklist,
   isBlacklistReady,
   blacklistToken,
@@ -17,6 +16,16 @@ export {
   isTokenIssuedBeforeBlacklist,
   shutdownTokenBlacklist,
 } from "@tepian-k3/services/token-blacklist";
+
+export {
+  initializeTokenBlacklist,
+  isBlacklistReady,
+  blacklistToken,
+  isTokenBlacklisted,
+  blacklistAllUserTokens,
+  isTokenIssuedBeforeBlacklist,
+  shutdownTokenBlacklist,
+};
 
 const secretKey = env.JWT_SECRET;
 const key = new TextEncoder().encode(secretKey);
@@ -48,7 +57,28 @@ export async function verifyAccessToken(
 ): Promise<AccessTokenPayload | null> {
   try {
     const { payload } = await jwtVerify(token, key);
-    return payload as AccessTokenPayload;
+    const accessTokenPayload = payload as AccessTokenPayload;
+
+    // Check if token is specifically blacklisted
+    if (
+      accessTokenPayload.sessionId &&
+      (await isTokenBlacklisted(accessTokenPayload.sessionId))
+    ) {
+      return null;
+    }
+
+    // Check if token was issued before a global user invalidation
+    if (
+      accessTokenPayload.iat &&
+      (await isTokenIssuedBeforeBlacklist(
+        accessTokenPayload.id,
+        accessTokenPayload.iat * 1000,
+      ))
+    ) {
+      return null;
+    }
+
+    return accessTokenPayload;
   } catch {
     return null;
   }
@@ -76,7 +106,28 @@ export async function verifyRefreshToken(
       return null;
     }
 
-    return payload as RefreshTokenPayload;
+    const refreshTokenPayload = payload as RefreshTokenPayload;
+
+    // Check if token is specifically blacklisted
+    if (
+      refreshTokenPayload.sessionId &&
+      (await isTokenBlacklisted(refreshTokenPayload.sessionId))
+    ) {
+      return null;
+    }
+
+    // Check if token was issued before a global user invalidation
+    if (
+      refreshTokenPayload.iat &&
+      (await isTokenIssuedBeforeBlacklist(
+        refreshTokenPayload.id,
+        refreshTokenPayload.iat * 1000,
+      ))
+    ) {
+      return null;
+    }
+
+    return refreshTokenPayload;
   } catch {
     return null;
   }

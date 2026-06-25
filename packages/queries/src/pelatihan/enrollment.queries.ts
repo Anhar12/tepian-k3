@@ -450,9 +450,15 @@ const enrollmentQueries = {
               eq(pelatihanEnrollments.userId, userId),
             ),
             with: {
+              progresses: true,
               pelatihan: {
                 with: {
-                  materials: true,
+                  materials: {
+                    orderBy: (materials, { asc }) => [
+                      asc(materials.orderIndex),
+                    ],
+                  },
+                  assessments: true,
                 },
               },
             },
@@ -477,6 +483,37 @@ const enrollmentQueries = {
             message: "Pelatihan tidak ditemukan",
           }),
         );
+      }
+
+      // 1.5. Sequential lock validation
+      const materials = enrollment.pelatihan.materials;
+      const targetMaterialIndex = materials.findIndex(
+        (m) => m.id === materialId,
+      );
+
+      if (targetMaterialIndex === -1) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Materi tidak ditemukan dalam pelatihan ini",
+          }),
+        );
+      }
+
+      if (targetMaterialIndex > 0) {
+        const previousMaterial = materials[targetMaterialIndex - 1];
+        const isPreviousCompleted = enrollment.progresses.some(
+          (p) => p.materialId === previousMaterial?.id && p.completed,
+        );
+
+        if (!isPreviousCompleted) {
+          return yield* Effect.fail(
+            new TRPCError({
+              code: "FORBIDDEN",
+              message: "Materi sebelumnya belum diselesaikan",
+            }),
+          );
+        }
       }
 
       // 2. Upsert progress (manual check to avoid partial unique index ON CONFLICT mismatch)
@@ -546,6 +583,11 @@ const enrollmentQueries = {
         (completedMaterialsCount / totalMaterials) * 100,
       );
 
+      const hasPostTest =
+        enrollment.pelatihan.assessments?.some((a) => a.type === "post_test") ??
+        false;
+      const isCompleted = percentage === 100 && !hasPostTest;
+
       // 4. Update enrollment progress
       yield* Effect.tryPromise({
         try: () =>
@@ -553,8 +595,8 @@ const enrollmentQueries = {
             .update(pelatihanEnrollments)
             .set({
               progressPercentage: percentage,
-              status: percentage === 100 ? "completed" : "in_progress",
-              completedAt: percentage === 100 ? new Date().toISOString() : null,
+              status: isCompleted ? "completed" : "in_progress",
+              completedAt: isCompleted ? new Date().toISOString() : null,
             })
             .where(eq(pelatihanEnrollments.id, enrollmentId)),
         catch: (error) => {
@@ -653,9 +695,9 @@ const enrollmentQueries = {
               isNull(pelatihanEnrollments.deletedAt),
             ),
           }),
-      // ##################
-      // end authored
-      // ##################
+        // ##################
+        // end authored
+        // ##################
         catch: (error) => {
           logError(
             "enrollmentQueries.enrollFreePelatihan",
@@ -675,43 +717,67 @@ const enrollmentQueries = {
 
       // 3. Query user training profile & documents to snapshot
       const userProfile = yield* Effect.tryPromise({
-        try: () => db.query.userTrainingProfiles.findFirst({
-          where: eq(userTrainingProfiles.userId, userId)
-        }),
+        try: () =>
+          db.query.userTrainingProfiles.findFirst({
+            where: eq(userTrainingProfiles.userId, userId),
+          }),
         catch: (error) => {
-          logError("enrollmentQueries.enrollFreePelatihan", "Failed to fetch user training profile", { error, userId });
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Gagal memproses profil pendaftaran" });
-        }
+          logError(
+            "enrollmentQueries.enrollFreePelatihan",
+            "Failed to fetch user training profile",
+            { error, userId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memproses profil pendaftaran",
+          });
+        },
       });
 
       const userDocs = yield* Effect.tryPromise({
-        try: () => db.query.documents.findMany({
-          where: and(
-            eq(documents.entityType, "user"),
-            eq(documents.entityId, userId),
-            isNull(documents.deletedAt)
-          )
-        }),
+        try: () =>
+          db.query.documents.findMany({
+            where: and(
+              eq(documents.entityType, "user"),
+              eq(documents.entityId, userId),
+              isNull(documents.deletedAt),
+            ),
+          }),
         catch: (error) => {
-          logError("enrollmentQueries.enrollFreePelatihan", "Failed to fetch user documents", { error, userId });
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Gagal memproses berkas pendaftaran" });
-        }
+          logError(
+            "enrollmentQueries.enrollFreePelatihan",
+            "Failed to fetch user documents",
+            { error, userId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memproses berkas pendaftaran",
+          });
+        },
       });
 
       const userRecord = yield* Effect.tryPromise({
-        try: () => db.query.users.findFirst({
-          where: eq(users.id, userId)
-        }),
+        try: () =>
+          db.query.users.findFirst({
+            where: eq(users.id, userId),
+          }),
         catch: (error) => {
-          logError("enrollmentQueries.enrollFreePelatihan", "Failed to fetch user", { error, userId });
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Gagal memproses data user" });
-        }
+          logError(
+            "enrollmentQueries.enrollFreePelatihan",
+            "Failed to fetch user",
+            { error, userId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memproses data user",
+          });
+        },
       });
 
-      const empLetter = userDocs.find(d => d.type === "employment_letter");
-      const conLetter = userDocs.find(d => d.type === "employment_contract");
-      const diplomaDoc = userDocs.find(d => d.type === "diploma");
-      const passPhotoDoc = userDocs.find(d => d.type === "pass_photo");
+      const empLetter = userDocs.find((d) => d.type === "employment_letter");
+      const conLetter = userDocs.find((d) => d.type === "employment_contract");
+      const diplomaDoc = userDocs.find((d) => d.type === "diploma");
+      const passPhotoDoc = userDocs.find((d) => d.type === "pass_photo");
 
       // 4. Create the enrollment
       const [newEnrollment] = yield* Effect.tryPromise({
@@ -724,13 +790,15 @@ const enrollmentQueries = {
               status: "enrolled",
               enrolledAt: new Date().toISOString(),
               verificationStatus: "pending",
-              
-              participantName: userProfile?.participantName || userRecord?.name || null,
+
+              participantName:
+                userProfile?.participantName || userRecord?.name || null,
               participantNik: userProfile?.participantNik || null,
               participantBirthPlace: userProfile?.participantBirthPlace || null,
               participantBirthDate: userProfile?.participantBirthDate || null,
               participantEmail: userRecord?.email || null,
-              participantPhone: userProfile?.participantPhone || userRecord?.phone || null,
+              participantPhone:
+                userProfile?.participantPhone || userRecord?.phone || null,
               participantAddress: userProfile?.participantAddress || null,
 
               companyName: userProfile?.companyName || null,
@@ -788,8 +856,27 @@ const enrollmentQueries = {
         newEnrollment as any,
         userId,
         userEmail,
-        { description: `User mendaftar pelatihan gratis: ${targetPelatihan.title}` },
+        {
+          description: `User mendaftar pelatihan gratis: ${targetPelatihan.title}`,
+        },
       );
+
+      const notificationsQueries = yield* Effect.promise(() =>
+        import("../platform/notifications.queries").then(
+          (m) => m.notificationsQueries,
+        ),
+      );
+
+      yield* notificationsQueries.create({
+        userId,
+        title: "Selamat Bergabung di Pelatihan",
+        message: `Pendaftaran Anda untuk pelatihan gratis "${targetPelatihan.title}" telah berhasil. Selamat belajar!`,
+        type: "general",
+        metadata: {
+          enrollmentId: newEnrollment.id,
+          pelatihanId,
+        },
+      });
 
       return newEnrollment;
     });
@@ -949,7 +1036,7 @@ const enrollmentQueries = {
         newEnrollment as any,
         userId,
         input.participantEmail,
-        { description: `User mendaftar Bimtek: ${targetPelatihan.title}` }
+        { description: `User mendaftar Bimtek: ${targetPelatihan.title}` },
       );
 
       return newEnrollment;
@@ -1051,7 +1138,7 @@ const enrollmentQueries = {
         updated as any,
         userId,
         existing.participantEmail || undefined,
-        { description: "User memperbarui berkas persyaratan Bimtek" }
+        { description: "User memperbarui berkas persyaratan Bimtek" },
       );
 
       return updated;
@@ -1118,7 +1205,10 @@ const enrollmentQueries = {
               pelatihanType: pelatihan.type,
             })
             .from(pelatihanEnrollments)
-            .innerJoin(pelatihan, eq(pelatihanEnrollments.pelatihanId, pelatihan.id))
+            .innerJoin(
+              pelatihan,
+              eq(pelatihanEnrollments.pelatihanId, pelatihan.id),
+            )
             .where(whereCondition)
             .orderBy(desc(pelatihanEnrollments.enrolledAt))
             .limit(limit)
@@ -1126,7 +1216,10 @@ const enrollmentQueries = {
           db
             .select({ count: count() })
             .from(pelatihanEnrollments)
-            .innerJoin(pelatihan, eq(pelatihanEnrollments.pelatihanId, pelatihan.id))
+            .innerJoin(
+              pelatihan,
+              eq(pelatihanEnrollments.pelatihanId, pelatihan.id),
+            )
             .where(whereCondition),
         ]);
 
@@ -1231,7 +1324,10 @@ const enrollmentQueries = {
               pelatihanType: pelatihan.type,
             })
             .from(pelatihanEnrollments)
-            .innerJoin(pelatihan, eq(pelatihanEnrollments.pelatihanId, pelatihan.id))
+            .innerJoin(
+              pelatihan,
+              eq(pelatihanEnrollments.pelatihanId, pelatihan.id),
+            )
             .where(whereCondition)
             .orderBy(desc(pelatihanEnrollments.completedAt))
             .limit(limit)
@@ -1239,7 +1335,10 @@ const enrollmentQueries = {
           db
             .select({ count: count() })
             .from(pelatihanEnrollments)
-            .innerJoin(pelatihan, eq(pelatihanEnrollments.pelatihanId, pelatihan.id))
+            .innerJoin(
+              pelatihan,
+              eq(pelatihanEnrollments.pelatihanId, pelatihan.id),
+            )
             .where(whereCondition),
         ]);
 
@@ -1337,12 +1436,20 @@ const enrollmentQueries = {
       const now = new Date().toISOString();
 
       // Default status update
-      let statusUpdate: "in_progress" | "enrolled" | "failed" | "completed" | "expired" = enrollment.status;
+      let statusUpdate:
+        | "in_progress"
+        | "enrolled"
+        | "failed"
+        | "completed"
+        | "expired" = enrollment.status;
       let startedAtUpdate: string | null = enrollment.startedAt;
 
       // Sesuai requirement: "If status is 'verified' and training is 'elearning' or 'webinar', update enrollment status = 'in_progress' and startedAt = now"
       if (isVerified) {
-        if (enrollment.pelatihan.type === "elearning" || enrollment.pelatihan.type === "webinar") {
+        if (
+          enrollment.pelatihan.type === "elearning" ||
+          enrollment.pelatihan.type === "webinar"
+        ) {
           statusUpdate = "in_progress";
           startedAtUpdate = now;
         }
@@ -1354,7 +1461,9 @@ const enrollmentQueries = {
             .update(pelatihanEnrollments)
             .set({
               verificationStatus: input.status,
-              rejectionReason: isVerified ? null : (input.rejectionReason ?? null),
+              rejectionReason: isVerified
+                ? null
+                : (input.rejectionReason ?? null),
               verifiedAt: now,
               verifiedBy: adminId,
               status: statusUpdate,
@@ -1397,6 +1506,37 @@ const enrollmentQueries = {
           description: `Admin ${isVerified ? "menyetujui" : "menolak"} pendaftaran peserta ${enrollment.participantName || ""} untuk pelatihan: ${enrollment.pelatihan.title}`,
         },
       );
+
+      const notificationsQueries = yield* Effect.promise(() =>
+        import("../platform/notifications.queries").then(
+          (m) => m.notificationsQueries,
+        ),
+      );
+
+      if (isVerified) {
+        yield* notificationsQueries.create({
+          userId: enrollment.userId,
+          title: "Verifikasi Berkas Disetujui",
+          message: `Berkas pendaftaran Bimtek Anda untuk pelatihan "${enrollment.pelatihan.title}" telah disetujui. Silakan masuk ke kelas untuk mulai belajar.`,
+          type: "general",
+          metadata: {
+            enrollmentId: enrollment.id,
+            status: "verified",
+          },
+        });
+      } else {
+        yield* notificationsQueries.create({
+          userId: enrollment.userId,
+          title: "Verifikasi Berkas Ditolak",
+          message: `Berkas pendaftaran Bimtek Anda untuk pelatihan "${enrollment.pelatihan.title}" ditolak karena: ${input.rejectionReason || "-"}. Silakan unggah kembali berkas yang benar.`,
+          type: "general",
+          metadata: {
+            enrollmentId: enrollment.id,
+            status: "rejected",
+            rejectionReason: input.rejectionReason,
+          },
+        });
+      }
 
       return updated;
     });

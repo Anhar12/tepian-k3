@@ -5,6 +5,17 @@
 
 ---
 
+### 2026-06-25 — Optimasi Dokumentasi, PRD, dan Gitignore untuk LLM & Junior Dev
+
+- **Pembaruan:** Mengoptimalkan seluruh dokumentasi agar ramah terhadap model AI berbiaya murah (low-resource LLMs) dan developer junior, serta menyinkronkan status modul Pelatihan (LMS) ke production:
+  - **.gitignore:** Mengecualikan berkas panduan (`AGENTS.md`, `CLAUDE.md`, `TODO.md`, `llms.txt`, dan folder `docs/`) secara eksplisit menggunakan tanda negasi (`!`) agar tidak pernah terabaikan oleh git.
+  - **llms.txt:** Melengkapi skema 15 tabel database Pelatihan, tRPC Routers Pelatihan, dan struktur routing frontend di web client/back-office, serta memetakan monorepo agar berbasis arsitektur _Modular Monolith_.
+  - **CLAUDE.md:** Memperbaiki instruksi registrasi router ke sub-router domain (`packages/api/src/routers/<domain>/index.ts`) bukan `root.ts` langsung, melengkapi daftar tRPC Routers dan Database Tables Pelatihan, serta memperbarui statistik file skema.
+  - **docs/VERSION_PLANNING.md:** Menandai seluruh checklist pengembangan Pelatihan (LMS + Admin panel) sebagai selesai (`[x]`) dan berstatus `✅ Production`.
+  - **TODO.md:** Menyinkronkan target migrasi Modular Monolith untuk folder pelatihan dan menandai semua tugas pelatihan selesai.
+
+---
+
 ### 2026-06-15 — Mengganti tag img dengan ImageWithFallback untuk mematuhi aturan linting
 
 - **Perbaikan:** Mengganti semua penggunaan tag native `<img>` di halaman utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`) dengan komponen `<ImageWithFallback />` guna memenuhi aturan linter `tepian/no-img-element` dan mencegah kegagalan commit pada pre-commit hook (husky):
@@ -58,7 +69,7 @@
 
 ### 2026-06-15 — Hapus FAQ di halaman Pelatihan
 
-- **Perbaikan:** Menghapus bagian FAQ (Frequently Asked Questions) beserta *state*, *query*, dan *imports* yang berkaitan dari halaman katalog utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`).
+- **Perbaikan:** Menghapus bagian FAQ (Frequently Asked Questions) beserta _state_, _query_, dan _imports_ yang berkaitan dari halaman katalog utama pelatihan (`apps/web/src/routes/pelatihan/index.tsx`).
 
 ---
 

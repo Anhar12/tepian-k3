@@ -25,7 +25,7 @@ interface ToolStatusProps {
   toolId: string;
 }
 
-export default function ToolStatus({ toolId }: ToolStatusProps) {
+export default function ToolStatus({ toolId }: { toolId: string }) {
   const params = useSearch({
     from: "/(core)/back-office/tools/$toolId/status/",
   });
@@ -87,10 +87,13 @@ export default function ToolStatus({ toolId }: ToolStatusProps) {
                 onCheckedChange={(checked) => {
                   navigate({
                     to: "/back-office/tools/$toolId/status",
-                    search: {
-                      ...params,
-                      showDeleted: Boolean(checked),
+                    params: {
+                      toolId,
                     },
+                    search: (prev) => ({
+                      ...prev,
+                      showDeleted: Boolean(checked),
+                    }),
                   });
                   setShowDeleted(Boolean(checked));
                 }}

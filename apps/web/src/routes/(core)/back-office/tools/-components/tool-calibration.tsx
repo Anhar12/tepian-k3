@@ -25,7 +25,7 @@ interface ToolCalibrationProps {
   toolId: string;
 }
 
-export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
+export default function ToolCalibration({ toolId }: { toolId: string }) {
   const params = useSearch({
     from: "/(core)/back-office/tools/$toolId/calibration/",
   });
@@ -87,10 +87,13 @@ export default function ToolCalibration({ toolId }: ToolCalibrationProps) {
                 onCheckedChange={(checked) => {
                   navigate({
                     to: "/back-office/tools/$toolId/calibration",
-                    search: {
-                      ...params,
-                      showDeleted: Boolean(checked),
+                    params: {
+                      toolId,
                     },
+                    search: (prev) => ({
+                      ...prev,
+                      showDeleted: Boolean(checked),
+                    }),
                   });
                   setShowDeleted(Boolean(checked));
                 }}

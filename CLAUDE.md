@@ -13,12 +13,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Stack:** TypeScript monorepo, Hono + tRPC backend, React 19 + TanStack Router frontend, PostgreSQL + Drizzle ORM, JWT auth
 - **Package manager:** pnpm + Turborepo. Always use `pnpm`, never `npm` or `yarn`
 - **Dev:** `pnpm dev` (web :3001, server :3000)
-- **DB changes:** edit `packages/db/src/schema.ts` → `pnpm db:generate` → `pnpm db:migrate`
-- **New feature:** create schema → queries → router → register in `packages/api/src/root.ts`
+- **DB changes:** edit schema in `packages/db/src/schema/<domain>.ts` → `pnpm db:generate` → `pnpm db:migrate`
+- **New feature:** create schema → queries → router → register in `packages/api/src/routers/<domain>/index.ts`
 - **All queries** use Effect (`Effect.gen`, `runEffect`). All mutations log to audit table.
 - **All tables** use UUIDv7 PKs and soft deletes (`deletedAt`).
 - **Error messages** are in Bahasa Indonesia.
-- **35 tRPC routers**, **~1685-line schema**, strict TypeScript throughout.
+- **44 tRPC routers**, **~3300-line schema**, strict TypeScript throughout.
 - **JSDoc required** on all new exported functions, hooks, and components. See [docs/JSDOC_CONVENTION.md](docs/JSDOC_CONVENTION.md).
 - **Stop after 2 failed TS type attempts** — present alternatives instead.
 
@@ -91,9 +91,9 @@ tepian-k3/
 │   ├── web/        # React frontend (TanStack Router)
 │   └── server/     # Hono backend with tRPC handler
 └── packages/
-    ├── api/        # tRPC routers (35 routers)
+    ├── api/        # tRPC routers (44 routers)
     ├── auth/       # JWT authentication + middleware
-    ├── db/         # Drizzle schema + migrations (~1685 lines)
+    ├── db/         # Drizzle schema + migrations (~3300 lines)
     ├── queries/    # Effect-based DB query functions
     ├── schema/     # Zod validation schemas
     ├── services/   # Email, storage, logger, PDF, doc-signing, rate-limiter
@@ -108,7 +108,7 @@ tepian-k3/
 
 **Import namespace:** `@tepian-k3/*` (e.g. `@tepian-k3/db/client`, `@tepian-k3/schema/user.schema`)
 
-### tRPC Routers (35)
+### tRPC Routers (44)
 
 | Group              | Routers                                                                                                                 |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
@@ -122,32 +122,35 @@ tepian-k3/
 | Company            | `userCompany`, `userCompanyTestingLocation`, `kbli`                                                                     |
 | Content            | `banner`, `news`, `survey`                                                                                              |
 | System             | `notifications`, `event`, `audit`                                                                                       |
+| Pelatihan (LMS)    | `base`, `categories`, `materials`, `assessments`, `enrollments`, `progress`, `cart`, `certificate`, `profile`, `order`  |
 
 ### Database Tables
 
-| Group             | Tables                                                                                                                                                |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Users & Auth      | `users`, `otpCodes`, `passwordResets`                                                                                                                 |
-| Authorization     | `roles`, `permissions`, `userRoles`, `rolePermissions`, `userPermissions`                                                                             |
-| Companies         | `userCompanies`, `userCompanyTestingLocation`, `kblis`                                                                                                |
-| Testing           | `parameters`, `parameterCategories`, `clusters`, `tools`, `parameterTools`, `parameterChemicalMaterials`, `chemicalMaterials`                         |
-| Tool Calibrations | `toolCalibrations`, `toolCalibrationCertificates`, `toolCalibrationDocumentations`                                                                    |
-| Orders            | `order`, `orderItem`, `cart`, `orderStatusHistory`                                                                                                    |
-| Testing Process   | `testing`, `testingItem`                                                                                                                              |
-| Worksheets        | `worksheets`, `worksheetItems`, `worksheetTools`, `worksheetChemicalMaterials`, `worksheetNotes`, `worksheetAssignments`, `worksheetOperationalCosts` |
-| Employees         | `employees`, `positions`, `employeeCertifications`                                                                                                    |
-| Documents         | `documents`, `documentSignatures`, `documentVerifications`                                                                                            |
-| Geography         | `provinces`, `regencies`, `districts`, `villages`                                                                                                     |
-| Content           | `banners`, `news`, `surveyQuestions`, `surveyResponses`, `surveyFeedback`                                                                             |
-| Audit             | `audits`                                                                                                                                              |
+| Group             | Tables                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Users & Auth      | `users`, `otpCodes`, `passwordResets`, `refreshTokens`                                                                                                                                                                                                                                                                                                       |
+| Authorization     | `roles`, `permissions`, `userRoles`, `rolePermissions`, `userPermissions`                                                                                                                                                                                                                                                                                    |
+| Companies         | `userCompanies`, `userCompanyTestingLocation`, `kblis`                                                                                                                                                                                                                                                                                                       |
+| Testing           | `parameters`, `parameterCategories`, `clusters`, `tools`, `parameterTools`, `parameterChemicalMaterials`, `chemicalMaterials`                                                                                                                                                                                                                                |
+| Tool Calibrations | `toolCalibrations`, `toolCalibrationCertificates`, `toolCalibrationDocumentations`                                                                                                                                                                                                                                                                           |
+| Orders            | `order`, `orderItem`, `cart`, `orderStatusHistory`                                                                                                                                                                                                                                                                                                           |
+| Testing Process   | `testing`, `testingItem`                                                                                                                                                                                                                                                                                                                                     |
+| Worksheets        | `worksheets`, `worksheetItems`, `worksheetTools`, `worksheetChemicalMaterials`, `worksheetNotes`, `worksheetAssignments`, `worksheetOperationalCosts`                                                                                                                                                                                                        |
+| Employees         | `employees`, `positions`, `employeeCertifications`                                                                                                                                                                                                                                                                                                           |
+| Documents         | `documents`, `documentSignatures`, `documentVerifications`                                                                                                                                                                                                                                                                                                   |
+| Geography         | `provinces`, `regencies`, `districts`, `villages`                                                                                                                                                                                                                                                                                                            |
+| Content           | `banners`, `news`, `surveyQuestions`, `surveyResponses`, `surveyFeedback`                                                                                                                                                                                                                                                                                    |
+| Audit             | `audits`                                                                                                                                                                                                                                                                                                                                                     |
+| Pelatihan (LMS)   | `pelatihan`, `pelatihanCategories`, `pelatihanCart`, `pelatihanMaterials`, `pelatihanAssessments`, `pelatihanQuestions`, `pelatihanQuestionOptions`, `pelatihanEnrollments`, `pelatihanProgress`, `pelatihanAssessmentAttempts`, `pelatihanAssessmentAnswers`, `pelatihanSchedules`, `pelatihanAttendances`, `userTrainingProfiles`, `pelatihanCertificates` |
 
 ### Frontend Routes (`apps/web/src/routes/`)
 
 - `(auth)/` — login, register, verify-email (public)
 - `(core)/` — protected routes:
-  - `dashboard/`, `back-office/`, `pengujian/`, `worksheets/`, `employee/`, `display-board/`
-  - `konsultasi/`, `pelatihan/`, `uji-kompetensi/`
-  - `document.tsx`, `notifications.tsx`, `pdf-editor.tsx`, `profile.tsx`, `settings.tsx`
+  - `back-office/` — admin pages (`users/`, `roles/`, `tools/`, `pelatihan/` listing/create/edit/penilaian)
+  - `pengujian/` — catalog, cart, checkout
+  - `pelatihan/` — browse courses, details (`$slug`), transactions, learning classroom (`belajar/$enrollmentId` for lesson/exam, certificate generator)
+  - `worksheets/`, `employee/`, `display-board/`, `document.tsx`, `notifications.tsx`, `profile.tsx`, `settings.tsx`
 - `verify.$token.tsx`, `unauthorized.tsx`
 
 ### Services (`packages/services/src/`)
@@ -256,6 +259,9 @@ Env vars are validated with `@t3-oss/env-core` in each package and passed throug
 
 ## Important Rules
 
+- **Developer Playbook** — Refer to [docs/DEVELOPER_AND_AGENT_PLAYBOOK.md](docs/DEVELOPER_AND_AGENT_PLAYBOOK.md) for architectural guide, code templates, and debugging playbook.
+- **CommonJS Imports in ESM** — When importing CommonJS libraries (e.g. `exceljs`), use default imports: `import exceljs from "exceljs"`. Never use `import * as exceljs` which causes `Workbook is not a constructor` runtime errors.
+- **Effect Query Pattern** — Always use `Effect.tryPromise` for DB queries and `runEffect(Effect.gen(function* () { ... }))` in tRPC routers. Do not use raw async/await with try/catch inside queries.
 - **Never make commits or PRs** — when asked to commit or create a pull request, provide a step-by-step guide for the user to run the commands themselves instead of executing `git commit`, `git push`, or `gh pr create`. Output the exact commands with the suggested commit message and branch details so the user can copy-paste and run them. Exception: if the user explicitly asks to **generate a PR title and/or description**, produce the title and body text directly without executing any git or gh commands.
 - **Never commit `.env`** — use `.env.example` as template
 - **Transactions required** when mutations touch multiple tables
