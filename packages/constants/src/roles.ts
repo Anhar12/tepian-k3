@@ -200,6 +200,11 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 
   // Admin: verifikasi data order, teruskan ke kaji ulang, kelola dokumen — tidak dapat setujui/tolak order
   admin: [
+    "pengujian-import-export.view",
+    "pengujian-import-export.create",
+    "pengujian-import-export.read",
+    "pengujian-import-export.update",
+    "pengujian-import-export.delete",
     "orders.view",
     "orders.read",
     "orders.update",
