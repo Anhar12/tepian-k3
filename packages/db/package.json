@@ -32,6 +32,7 @@
     "db:snapshot": "bash ./scripts/db-snapshot.sh",
     "db:restore": "bash ./scripts/db-restore.sh",
     "db:clear-cache": "pnpm with-env tsx ./src/clear-cache.ts",
+    "db:validate-migrations": "tsx ./scripts/validate-migrations.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "with-env": "dotenv -e ../../.env --"

@@ -41,6 +41,10 @@ const RESOURCE_LABELS: Record<Resource, { title: string; category: string }> = {
     title: "Izin Spesifik Pengguna",
     category: "Pengguna & Keamanan",
   },
+  "pengujian-import-export": {
+    title: "Import / Export Data Master",
+    category: "Master Data Pengujian",
+  },
 
   tools: { title: "Alat Laboratorium", category: "Inventaris & Alat Lab" },
   "tool-codes": { title: "Kode Alat Lab", category: "Inventaris & Alat Lab" },

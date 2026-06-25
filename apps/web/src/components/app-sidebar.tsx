@@ -169,6 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           "Kode Alat",
           "Alat",
           "Bahan Kimia",
+          "Import / Export",
           "KBLI",
           "Survei",
           "Spanduk",

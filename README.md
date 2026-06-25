@@ -2,6 +2,16 @@
 
 A modern, type-safe TypeScript monorepo built with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack). Powered by **Turborepo** for blazing-fast builds and **pnpm workspaces** for efficient dependency management.
 
+## 📖 Panduan Penting (Developer & AI Agent Guides)
+
+Sebelum memulai pengerjaan kode, mohon membaca panduan berikut untuk memahami alur kerja, konvensi, dan menghindari error umum:
+
+- [Developer & AI Agent Playbook](docs/DEVELOPER_AND_AGENT_PLAYBOOK.md) — Panduan lengkap alur data, debugging, coding patterns (Effect Library), dan Common Pitfalls.
+- [AGENTS.md](AGENTS.md) — Panduan aturan proyek berbahasa Indonesia untuk AI agents.
+- [CLAUDE.md](CLAUDE.md) — English project configuration & guidelines for AI agents.
+- [Frontend Design Guide](docs/FRONTEND_DESIGN_GUIDE.md) — Desain sistem UI/UX, tokens, dan layout.
+- [Permissions & Role Guide](docs/PERMISSIONS_GUIDE.md) — Dokumentasi 363 permissions granular sistem.
+
 ## ✨ Features
 
 - 🔒 **End-to-end type safety** - From database to UI with tRPC

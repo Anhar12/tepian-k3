@@ -8,6 +8,35 @@
 
 ---
 
+## Master Data Excel Import/Export (Pengujian)
+
+> **Goal:** Menyediakan fitur impor dan ekspor data master pengujian (kategori parameter, parameter, kode alat, alat, dan bahan kimia) berbasis berkas Excel (.xlsx).
+
+- [x] Konstanta metadata kolom dan sheet (`packages/constants/src/pengujian-excel.constants.ts`)
+- [x] Skema validasi baris Zod (`packages/schema/src/pengujian/pengujian-excel.schema.ts`)
+- [x] Parser Excel Service (`packages/services/src/excel/pengujian-excel.parser.ts`)
+- [x] Builder Excel Service (`packages/services/src/excel/pengujian-excel.builder.ts`)
+- [x] Query transaksi dan pencatatan audit log (`packages/queries/src/pengujian/pengujian-excel.queries.ts`)
+- [x] Router tRPC endpoint upload & download (`packages/api/src/routers/pengujian/pengujian-excel.ts`)
+- [ ] Integrasi halaman UI pengujian master data Excel di admin panel (frontend)
+
+## Pelatihan (LMS) - Sesi Aktif & Evaluasi
+
+> **Goal:** Mengembangkan fitur belajar mandiri secara sekuensial, kuis/ujian akhir, presensi kelas sinkronus, dan penilaian esai manual oleh instruktur.
+
+- [x] Kolom `attendanceToken` di tabel `pelatihanSchedules`
+- [x] Pembatasan materi kurikulum secara sekuensial (Sequential Lock) di layer query
+- [x] Logika presensi kelas sinkronus dengan token presensi
+- [x] Logika penyerahan ujian pre-test/post-test/kuis oleh pengguna
+- [x] Logika penilaian esai manual beserta perhitungan ulang nilai kuis di layer query
+- [x] Pengiriman notifikasi otomatis untuk pendaftaran kelas, hasil persetujuan berkas, dan nilai ujian
+- [x] Layout navigasi dan ruang kelas belajar (`belajar/$enrollmentId.tsx`, `belajar/$enrollmentId/index.tsx`, `materi.$materiId.tsx`, `ujian.$assessmentId.tsx`)
+- [x] Komponen peninjau hasil kuis (`quiz-result.tsx`) dan halaman cetak sertifikat (`sertifikat.$enrollmentId.tsx`)
+- [x] Halaman administrasi daftar transaksi pelatihan (`transaksi.tsx`, `transaksi.$orderId.tsx`)
+- [x] Panel instruktur back-office untuk menilai esai ujian (`penilaian.tsx`)
+
+---
+
 ## Kode Alat
 
 > **Goal:** Build a kode alat management feature in the pengujian domain, allowing lab technicians to assign unique codes to each tool for better tracking and inventory management. This includes:
@@ -68,7 +97,7 @@ tepian-k3 has 4 business domains:
 | Domain             | Status                    | Description                                         |
 | ------------------ | ------------------------- | --------------------------------------------------- |
 | **Pengujian**      | Fully built (~35 routers) | Lab testing: order → testing → worksheet → document |
-| **Pelatihan**      | Stub only (route.tsx)     | Training management                                 |
+| **Pelatihan**      | Fully built (LMS + Admin) | Training management                                 |
 | **Uji Kompetensi** | Stub only (route.tsx)     | Competency testing                                  |
 | **Konsultasi**     | Stub only (route.tsx)     | Consultation management                             |
 
@@ -116,21 +145,21 @@ packages/
   queries/src/
     platform/              <- 19 query files + index.ts (public API)
     pengujian/             <- 19 query files + index.ts (public API)
-    pelatihan/             <- index.ts (empty scaffold)
+    pelatihan/             <- 10 query files + index.ts (LMS domain queries)
     uji-kompetensi/        <- index.ts (empty scaffold)
     konsultasi/            <- index.ts (empty scaffold)
 
   schema/src/ (Zod schemas)
     platform/              <- ~20 schema files + index.ts
     pengujian/             <- ~19 schema files + index.ts
-    pelatihan/             <- index.ts (empty scaffold)
+    pelatihan/             <- 3 schema files + index.ts (LMS validation)
     uji-kompetensi/        <- index.ts (empty scaffold)
     konsultasi/            <- index.ts (empty scaffold)
 
   api/src/routers/
     platform/              <- 13 routers + index.ts (exports platformRouter)
     pengujian/             <- 14 routers + index.ts (exports pengujianRouter)
-    pelatihan/             <- index.ts (exports pelatihanRouter, empty)
+    pelatihan/             <- 9 routers + index.ts (exports pelatihanRouter, complete)
     uji-kompetensi/        <- index.ts (exports ujiKompetensiRouter, empty)
     konsultasi/            <- index.ts (exports konsultasiRouter, empty)
 

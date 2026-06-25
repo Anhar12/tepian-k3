@@ -29,6 +29,7 @@ export function TabNav({ pelatihanId }: TabNavProps) {
     { label: "Materi", to: `${base}/materi` },
     { label: "Quiz & Post Test", to: `${base}/quiz` },
     { label: "Peserta", to: `${base}/peserta` },
+    { label: "Penilaian Ujian", to: `${base}/penilaian` },
     { label: "Sertifikat", to: `${base}/sertifikat` },
   ];
 

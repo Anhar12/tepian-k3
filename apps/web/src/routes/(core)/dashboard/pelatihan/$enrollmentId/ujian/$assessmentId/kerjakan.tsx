@@ -9,6 +9,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -47,7 +48,13 @@ function RouteComponent() {
   const submitMutation = useMutation(
     trpc.pelatihan.assessment.submitAttempt.mutationOptions({
       onSuccess: (data) => {
-        toast.success(`Ujian selesai! Nilai Anda: ${data.score}`);
+        if (data.score !== null && data.score !== undefined) {
+          toast.success(`Ujian selesai! Nilai Anda: ${data.score}`);
+        } else {
+          toast.success(
+            "Ujian selesai dikerjakan! Menunggu penilaian manual dari instruktur.",
+          );
+        }
         navigate({
           to: "/dashboard/pelatihan/$enrollmentId/materi",
           params: { enrollmentId },
@@ -96,10 +103,25 @@ function RouteComponent() {
     });
   };
 
+  const handleEssayChange = (text: string) => {
+    setAnswers({
+      ...answers,
+      [currentQuestion.id]: text,
+    });
+  };
+
   const handleNext = () => {
-    if (!answers[currentQuestion.id]) {
-      toast.error("Silakan pilih jawaban terlebih dahulu");
-      return;
+    const currentAnswer = answers[currentQuestion.id];
+    if (currentQuestion.type === "essay") {
+      if (!currentAnswer || currentAnswer.trim() === "") {
+        toast.error("Silakan isi jawaban esai terlebih dahulu");
+        return;
+      }
+    } else {
+      if (!currentAnswer) {
+        toast.error("Silakan pilih jawaban terlebih dahulu");
+        return;
+      }
     }
 
     if (currentQuestionIndex < questions.length - 1) {
@@ -137,30 +159,51 @@ function RouteComponent() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-1">
-          <RadioGroup
-            value={answers[currentQuestion.id] || ""}
-            onValueChange={handleOptionChange}
-            className="space-y-3"
-          >
-            {currentQuestion.options.map((option) => (
-              <div
-                key={option.id}
-                className={`flex items-center space-x-3 rounded-md border p-4 transition-colors ${
-                  answers[currentQuestion.id] === option.id
-                    ? "border-primary bg-primary/5"
-                    : "hover:bg-muted/50"
-                }`}
+          {currentQuestion.type === "essay" ? (
+            <div className="space-y-2">
+              <Label
+                htmlFor="essay-answer"
+                className="text-sm text-muted-foreground"
               >
-                <RadioGroupItem value={option.id} id={`option-${option.id}`} />
-                <Label
-                  htmlFor={`option-${option.id}`}
-                  className="flex-1 cursor-pointer text-base leading-relaxed"
+                Tulis jawaban Anda di bawah ini:
+              </Label>
+              <Textarea
+                id="essay-answer"
+                placeholder="Ketik jawaban lengkap Anda di sini..."
+                value={answers[currentQuestion.id] || ""}
+                onChange={(e) => handleEssayChange(e.target.value)}
+                className="min-h-[200px] p-4 text-base leading-relaxed"
+              />
+            </div>
+          ) : (
+            <RadioGroup
+              value={answers[currentQuestion.id] || ""}
+              onValueChange={handleOptionChange}
+              className="space-y-3"
+            >
+              {currentQuestion.options.map((option) => (
+                <div
+                  key={option.id}
+                  className={`flex items-center space-x-3 rounded-md border p-4 transition-colors ${
+                    answers[currentQuestion.id] === option.id
+                      ? "border-primary bg-primary/5"
+                      : "hover:bg-muted/50"
+                  }`}
                 >
-                  {option.optionText}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+                  <RadioGroupItem
+                    value={option.id}
+                    id={`option-${option.id}`}
+                  />
+                  <Label
+                    htmlFor={`option-${option.id}`}
+                    className="flex-1 cursor-pointer text-base leading-relaxed"
+                  >
+                    {option.optionText}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between border-t p-6">
           <Button

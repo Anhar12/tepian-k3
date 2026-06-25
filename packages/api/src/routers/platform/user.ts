@@ -85,10 +85,20 @@ export const userRouter = createTRPCRouter({
 
   updateUser: withPermission("users.update")
     .input(userSchema.adminUpdateUserSchema)
-    .mutation(
-      async ({ input }) =>
-        await runEffect(usersQueries.updateUser(input, input.id)),
-    ),
+    .mutation(async ({ input }) => {
+      const result = await runEffect(usersQueries.updateUser(input, input.id));
+
+      // If roles were changed, blacklist all existing tokens for this user
+      if (
+        (input.deletedRoleIds && input.deletedRoleIds.length > 0) ||
+        (input.newRoleIds && input.newRoleIds.length > 0)
+      ) {
+        const { blacklistAllUserTokens } = await import("@tepian-k3/auth");
+        await blacklistAllUserTokens(input.id);
+      }
+
+      return result;
+    }),
 
   updateProfile: withProtectedRateLimit(rateLimiters.moderate())
     .input(userSchema.updateUserSchema)

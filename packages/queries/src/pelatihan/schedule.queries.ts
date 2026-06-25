@@ -23,7 +23,7 @@ export const getBimtekSchedules = (enrollmentId: string, userId: string) =>
             where: and(
               eq(pelatihanEnrollments.id, enrollmentId),
               eq(pelatihanEnrollments.userId, userId),
-              isNull(pelatihanEnrollments.deletedAt)
+              isNull(pelatihanEnrollments.deletedAt),
             ),
             with: {
               pelatihan: true,
@@ -33,7 +33,8 @@ export const getBimtekSchedules = (enrollmentId: string, userId: string) =>
           if (!enrollment) {
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: "Pendaftaran pelatihan tidak ditemukan atau Anda tidak memiliki akses",
+              message:
+                "Pendaftaran pelatihan tidak ditemukan atau Anda tidak memiliki akses",
             });
           }
 
@@ -41,7 +42,7 @@ export const getBimtekSchedules = (enrollmentId: string, userId: string) =>
           const schedules = await tx.query.pelatihanSchedules.findMany({
             where: and(
               eq(pelatihanSchedules.pelatihanId, enrollment.pelatihanId),
-              isNull(pelatihanSchedules.deletedAt)
+              isNull(pelatihanSchedules.deletedAt),
             ),
             orderBy: [
               asc(pelatihanSchedules.sessionDate),
@@ -53,15 +54,25 @@ export const getBimtekSchedules = (enrollmentId: string, userId: string) =>
           const attendances = await tx.query.pelatihanAttendances.findMany({
             where: and(
               eq(pelatihanAttendances.enrollmentId, enrollmentId),
-              isNull(pelatihanAttendances.deletedAt)
+              isNull(pelatihanAttendances.deletedAt),
             ),
           });
 
           // 4. Map schedules with user's attendance status
           const schedulesWithAttendance = schedules.map((schedule) => {
             const att = attendances.find((a) => a.scheduleId === schedule.id);
+            const {
+              attendanceToken,
+              attendanceTokenExpiredAt,
+              ...safeSchedule
+            } = schedule;
+            const isExpired = attendanceTokenExpiredAt
+              ? new Date() > new Date(attendanceTokenExpiredAt)
+              : false;
             return {
-              ...schedule,
+              ...safeSchedule,
+              requiresAttendanceToken: !!attendanceToken,
+              isAttendanceTokenExpired: isExpired,
               attendance: att
                 ? {
                     id: att.id,
@@ -75,7 +86,7 @@ export const getBimtekSchedules = (enrollmentId: string, userId: string) =>
           // 5. Calculate statistics
           const totalSchedules = schedules.length;
           const attendedSessions = attendances.filter(
-            (a) => a.status === "present" || a.status === "excused"
+            (a) => a.status === "present" || a.status === "excused",
           );
           const attendedCount = attendedSessions.length;
           const attendancePercentage =
@@ -95,11 +106,15 @@ export const getBimtekSchedules = (enrollmentId: string, userId: string) =>
         }),
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("scheduleQueries.getBimtekSchedules", "Failed to fetch schedules", {
-          error,
-          enrollmentId,
-          userId,
-        });
+        logError(
+          "scheduleQueries.getBimtekSchedules",
+          "Failed to fetch schedules",
+          {
+            error,
+            enrollmentId,
+            userId,
+          },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil jadwal dan presensi",
@@ -113,8 +128,9 @@ export const getBimtekSchedules = (enrollmentId: string, userId: string) =>
 export const checkInBimtek = (
   enrollmentId: string,
   scheduleId: string,
-  status: "present" | "excused",
-  userId: string
+  status: "present",
+  userId: string,
+  attendanceToken: string,
 ) =>
   Effect.gen(function* () {
     const result = yield* Effect.tryPromise({
@@ -125,14 +141,15 @@ export const checkInBimtek = (
             where: and(
               eq(pelatihanEnrollments.id, enrollmentId),
               eq(pelatihanEnrollments.userId, userId),
-              isNull(pelatihanEnrollments.deletedAt)
+              isNull(pelatihanEnrollments.deletedAt),
             ),
           });
 
           if (!enrollment) {
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: "Pendaftaran pelatihan tidak ditemukan atau Anda tidak memiliki akses",
+              message:
+                "Pendaftaran pelatihan tidak ditemukan atau Anda tidak memiliki akses",
             });
           }
 
@@ -141,15 +158,40 @@ export const checkInBimtek = (
             where: and(
               eq(pelatihanSchedules.id, scheduleId),
               eq(pelatihanSchedules.pelatihanId, enrollment.pelatihanId),
-              isNull(pelatihanSchedules.deletedAt)
+              isNull(pelatihanSchedules.deletedAt),
             ),
           });
 
           if (!schedule) {
             throw new TRPCError({
               code: "BAD_REQUEST",
-              message: "Jadwal sesi tidak valid atau tidak sesuai dengan kelas pelatihan ini",
+              message:
+                "Jadwal sesi tidak valid atau tidak sesuai dengan kelas pelatihan ini",
             });
+          }
+
+          // 2.5 Verify attendance token if required
+          if (schedule.attendanceToken) {
+            if (
+              !attendanceToken ||
+              schedule.attendanceToken !== attendanceToken
+            ) {
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "Kode akses presensi tidak valid.",
+              });
+            }
+
+            if (schedule.attendanceTokenExpiredAt) {
+              const now = new Date();
+              const expiredAt = new Date(schedule.attendanceTokenExpiredAt);
+              if (now > expiredAt) {
+                throw new TRPCError({
+                  code: "FORBIDDEN",
+                  message: "Kode akses presensi telah kedaluwarsa.",
+                });
+              }
+            }
           }
 
           // 3. Insert or update attendance log
@@ -157,7 +199,7 @@ export const checkInBimtek = (
             where: and(
               eq(pelatihanAttendances.enrollmentId, enrollmentId),
               eq(pelatihanAttendances.scheduleId, scheduleId),
-              isNull(pelatihanAttendances.deletedAt)
+              isNull(pelatihanAttendances.deletedAt),
             ),
           });
 
@@ -185,13 +227,17 @@ export const checkInBimtek = (
         }),
       catch: (error) => {
         if (error instanceof TRPCError) throw error;
-        logError("scheduleQueries.checkInBimtek", "Failed to check-in attendance", {
-          error,
-          enrollmentId,
-          scheduleId,
-          status,
-          userId,
-        });
+        logError(
+          "scheduleQueries.checkInBimtek",
+          "Failed to check-in attendance",
+          {
+            error,
+            enrollmentId,
+            scheduleId,
+            status,
+            userId,
+          },
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menyimpan presensi Anda",

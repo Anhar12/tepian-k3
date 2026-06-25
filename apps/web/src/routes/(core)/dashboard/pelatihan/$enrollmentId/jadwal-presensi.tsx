@@ -66,9 +66,9 @@ function RouteComponent() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedScheduleForAbsen, setSelectedScheduleForAbsen] =
     useState<any>(null);
-  const [attendanceStatus, setAttendanceStatus] = useState<
-    "present" | "excused"
-  >("present");
+  const [attendanceStatus, setAttendanceStatus] =
+    useState<"present">("present");
+  const [attendanceTokenStr, setAttendanceTokenStr] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -149,6 +149,7 @@ function RouteComponent() {
   const openPresensiModal = (schedule: any) => {
     setSelectedScheduleForAbsen(schedule);
     setAttendanceStatus("present"); // default option
+    setAttendanceTokenStr("");
     setIsDialogOpen(true);
   };
 
@@ -160,7 +161,8 @@ function RouteComponent() {
       await checkInMutation.mutateAsync({
         enrollmentId,
         scheduleId: selectedScheduleForAbsen.id,
-        status: attendanceStatus,
+        status: "present",
+        attendanceToken: attendanceTokenStr,
       });
       await refetch();
       setIsDialogOpen(false);
@@ -566,31 +568,26 @@ function RouteComponent() {
               </div>
             </button>
 
-            {/* Izin option button card */}
-            <button
-              type="button"
-              onClick={() => setAttendanceStatus("excused")}
-              className={cn(
-                "flex w-full items-center justify-between rounded-2xl border p-4 transition-all outline-none",
-                attendanceStatus === "excused"
-                  ? "border-[#D79200] bg-[#FFECC3] text-[#D79200]"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+            {/* Attendance Token Input */}
+            {selectedScheduleForAbsen?.requiresAttendanceToken &&
+              attendanceStatus === "present" && (
+                <div className="mt-4 space-y-2 border-t pt-2">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Kode Presensi
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Masukkan kode unik (contoh: 84B9X)"
+                    value={attendanceTokenStr}
+                    onChange={(e) => setAttendanceTokenStr(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#1061D6] focus:ring-1 focus:ring-[#1061D6]"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Minta kode ini kepada instruktur Anda untuk mengisi
+                    kehadiran.
+                  </p>
+                </div>
               )}
-            >
-              <span className="text-base font-bold">Izin</span>
-              <div
-                className={cn(
-                  "flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all",
-                  attendanceStatus === "excused"
-                    ? "border-[#D79200] bg-[#D79200] text-white"
-                    : "border-slate-300 bg-transparent",
-                )}
-              >
-                {attendanceStatus === "excused" && (
-                  <Check className="h-3.5 w-3.5 stroke-[3]" />
-                )}
-              </div>
-            </button>
           </div>
 
           {/* Submit action */}

@@ -30,6 +30,7 @@ import { timeout } from "./middleware/timeout";
 import { setDefaultOptions } from "date-fns";
 import { id } from "date-fns/locale";
 import { registerEmailWorker } from "./workers/email.worker";
+import { registerCleanupWorker } from "./workers/cleanup.worker";
 import { queueService } from "@tepian-k3/services/queue";
 
 const redisConfig = {
@@ -53,6 +54,7 @@ setDefaultOptions({ locale: id });
 
 // Register Workers
 registerEmailWorker();
+registerCleanupWorker();
 
 const app = new Hono();
 

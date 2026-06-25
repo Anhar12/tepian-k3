@@ -7,6 +7,7 @@ export const QueueName = {
   PDF: "pdf",
   AUDIT: "audit",
   NOTIFICATION: "notification",
+  CLEANUP: "cleanup",
 } as const;
 
 export type QueueName = (typeof QueueName)[keyof typeof QueueName];
@@ -72,6 +73,11 @@ export interface QueueJobDataMap {
       testingId: string;
       progress: number;
       userId: string;
+    };
+  };
+  [QueueName.CLEANUP]: {
+    "delete-file": {
+      key: string;
     };
   };
 }

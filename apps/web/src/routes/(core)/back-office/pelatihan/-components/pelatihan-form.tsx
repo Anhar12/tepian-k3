@@ -26,6 +26,8 @@ import pelatihanSchema from "@tepian-k3/schema/pelatihan/pelatihan.schema";
 import type z from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
+import SingleImageUpload from "@/components/ui/single-image-upload";
+import { getPublicUrl } from "@/utils/url";
 
 type CreatePelatihanValues = z.infer<
   typeof pelatihanSchema.createPelatihanSchema
@@ -135,6 +137,18 @@ export function PelatihanForm({ initialData, isEdit }: PelatihanFormProps) {
       },
       onError: (error) => {
         globalErrorToast(`Gagal: ${error.message}`);
+      },
+    }),
+  );
+
+  const uploadMutation = useMutation(
+    trpc.pelatihan.base.uploadThumbnail.mutationOptions({
+      onSuccess: (data) => {
+        form.setValue("thumbnailUrl", data.key, { shouldValidate: true });
+        globalSuccessToast("Thumbnail berhasil diunggah");
+      },
+      onError: (error) => {
+        globalErrorToast(`Gagal mengunggah thumbnail: ${error.message}`);
       },
     }),
   );
@@ -461,19 +475,39 @@ export function PelatihanForm({ initialData, isEdit }: PelatihanFormProps) {
             <FormField
               control={form.control}
               name="thumbnailUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL Thumbnail</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="https://..."
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const resolvedUrl = field.value
+                  ? field.value.startsWith("http") ||
+                    field.value.startsWith("data:")
+                    ? field.value
+                    : getPublicUrl(field.value)
+                  : "";
+
+                return (
+                  <FormItem>
+                    <FormLabel>Thumbnail</FormLabel>
+                    <FormControl>
+                      <SingleImageUpload
+                        onChange={(file) => {
+                          if (file) {
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            uploadMutation.mutate(formData);
+                          } else {
+                            field.onChange("");
+                          }
+                        }}
+                        value={resolvedUrl || null}
+                        disabled={uploadMutation.isPending}
+                        targetWidth={1280}
+                        targetHeight={720}
+                        aspectRatio={16 / 9}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
 
             <div className="grid grid-cols-2 gap-4">
