@@ -69,8 +69,8 @@ beta
 
 ### v2.0.0 - Pelatihan (Training) Module
 
-**Status:** 🚧 In Progress
-**Target:** TBD
+**Status:** ✅ Production
+**Target:** Released
 **Branch:** `feat/pelatihan`
 
 #### Why Major Version?
@@ -109,19 +109,19 @@ beta
 - [x] Cart system for paid trainings
 - [x] Free enrollment flow
 - [x] Order system integration (payment → auto-enrollment)
-- [ ] Certificate generation service
+- [x] Certificate generation service
 - [x] Permission seeding
 
 **Beta Phase (Frontend)**
 
-- [ ] Browse trainings page (public)
-- [ ] Training detail page (public)
-- [ ] Cart page + checkout flow
-- [ ] My trainings dashboard
-- [ ] Material viewer (PPT, PDF)
-- [ ] Pre-test / post-test interface
-- [ ] Progress tracking UI
-- [ ] Certificate viewer + download
+- [x] Browse trainings page (public)
+- [x] Training detail page (public)
+- [x] Cart page + checkout flow
+- [x] My trainings dashboard
+- [x] Material viewer (PPT, PDF)
+- [x] Pre-test / post-test interface
+- [x] Progress tracking UI
+- [x] Certificate viewer + download
 - [x] Admin: training list + filters (`back-office/pelatihan/`)
 - [x] Admin: training create form (`back-office/pelatihan/create`)
 - [x] Admin: training edit form (`back-office/pelatihan/$id/edit`)
@@ -133,12 +133,12 @@ beta
 
 **RC Phase (Quality)**
 
-- [ ] End-to-end flow testing (free + paid)
-- [ ] Mobile responsiveness
-- [ ] Permission checks on all routes
-- [ ] Audit logging for all mutations
-- [ ] Error handling and edge cases
-- [ ] Performance review (pagination, lazy loading)
+- [x] End-to-end flow testing (free + paid)
+- [x] Mobile responsiveness
+- [x] Permission checks on all routes
+- [x] Audit logging for all mutations
+- [x] Error handling and edge cases
+- [x] Performance review (pagination, lazy loading)
 
 ## Git Branching Strategy
 

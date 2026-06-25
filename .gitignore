@@ -102,6 +102,11 @@ playwright-report/
 *.tgz
 *.zip
 tmp/
+report.json
+report.html
+test.ts
+test-query.ts
+scratch/
 
 # =============================================================================
 # AI Agent Artifacts (lokal saja, tidak perlu di repo)
@@ -113,15 +118,15 @@ tmp/
 .copilot/
 
 # =============================================================================
-# Dokumen Lokal (tidak relevan untuk kolaborasi GitHub)
+# Dokumen Panduan Pengembang & AI (WAJIB di-commit agar bisa dibaca AI/Junior Dev)
 # =============================================================================
-AGENTS.md
-DESIGN.md
-TODO.md
-AGENT_CHANGELOG.md
-docs/PRICING_SUMMARY.md
-docs/AI_AGENT_RULES.md
-docs/FRONTEND_DESIGN_GUIDE.md
+!AGENTS.md
+!CLAUDE.md
+!TODO.md
+!llms.txt
+!docs/
+!docs/*.md
+!docs/**/*.md
 
 # =============================================================================
 # Arsip & File Distribusi

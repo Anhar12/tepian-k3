@@ -33,6 +33,7 @@
     "@trpc/server": "catalog:",
     "dotenv": "catalog:",
     "effect": "catalog:",
+    "exceljs": "^4.4.0",
     "hono": "catalog:",
     "superjson": "^2.2.6",
     "ua-parser-js": "^2.0.8",

@@ -47,7 +47,7 @@ Lab testing domain: order → testing → worksheet → document.
 
 **Contains:** parameters, tools, clusters, chemical materials, cart, order, testing, worksheets, survey, kbli, user companies.
 
-### pelatihan — 🚧 In Progress
+### pelatihan — ✅ Production
 
 LMS/Training domain: browse → enroll → learn → assess → certificate.
 

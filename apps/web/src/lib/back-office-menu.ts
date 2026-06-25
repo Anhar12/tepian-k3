@@ -150,6 +150,12 @@ export const backOfficeMenu: {
       permission: "chemical-materials.view",
     },
     {
+      title: "Import / Export",
+      url: `${urlStarter}/pengujian/import-export`,
+      icon: IconBook, // we can use another icon like IconFileImport later
+      permission: "pengujian-import-export.read",
+    },
+    {
       title: "KBLI",
       url: `${urlStarter}/kblis`,
       icon: IconBook,

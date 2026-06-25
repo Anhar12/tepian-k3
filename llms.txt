@@ -135,8 +135,7 @@ tepian-k3/
 │   │   │   │       ├── route.tsx         # Core layout with sidebar
 │   │   │   │       ├── profile.tsx       # User profile
 │   │   │   │       ├── settings.tsx      # User settings
-│   │   │   │       ├── dashboard/        # Dashboard pages
-│   │   │   │       ├── back-office/      # Admin pages
+│   │   │   │       ├── back-office/      # Admin back-office pages
 │   │   │   │       │   ├── route.tsx     # Back-office layout
 │   │   │   │       │   ├── index.tsx     # Admin dashboard
 │   │   │   │       │   ├── users/        # User management
@@ -145,15 +144,30 @@ tepian-k3/
 │   │   │   │       │   ├── parameters/   # Testing parameters
 │   │   │   │       │   ├── parameter-categories/
 │   │   │   │       │   ├── tools/        # Testing tools/equipment
-│   │   │   │       │   └── kblis/        # KBLI codes
-│   │   │   │       ├── pengujian/        # Testing module
+│   │   │   │       │   ├── kblis/        # KBLI codes
+│   │   │   │       │   └── pelatihan/    # Pelatihan management panel
+│   │   │   │       │       ├── index.tsx            # Course list
+│   │   │   │       │       ├── create.tsx           # Create course form
+│   │   │   │       │       ├── penilaian.tsx        # Essay exam grading panel
+│   │   │   │       │       ├── $pelatihanId.tsx     # Course dashboard layout
+│   │   │   │       │       └── $pelatihanId/        # Tabs (overview, materi, quiz, peserta, edit)
+│   │   │   │       ├── pengujian/        # Testing module (client-side catalog, cart, checkout)
 │   │   │   │       │   ├── route.tsx
-│   │   │   │       │   ├── index.tsx     # Testing list
-│   │   │   │       │   ├── checkout.tsx  # Checkout page
-│   │   │   │       │   └── -components/  # Testing components
-│   │   │   │       ├── konsultasi/       # Consultation module
-│   │   │   │       ├── pelatihan/        # Training module
-│   │   │   │       └── uji-kompetensi/   # Competency testing
+│   │   │   │       │   ├── index.tsx
+│   │   │   │       │   └── checkout.tsx
+│   │   │   │       ├── pelatihan/        # LMS/Training module (client-side workspace)
+│   │   │   │       │   ├── index.tsx            # Browse trainings catalog
+│   │   │   │       │   ├── $slug.tsx            # Course detail & enrollment
+│   │   │   │       │   ├── transaksi.tsx        # Training orders list
+│   │   │   │       │   ├── transaksi.$orderId.tsx # Training order detail
+│   │   │   │       │   ├── sertifikat.$enrollmentId.tsx # Certificate viewer & printing
+│   │   │   │       │   └── belajar/             # LMS Classroom
+│   │   │   │       │       ├── $enrollmentId.tsx    # Sequential class study layout
+│   │   │   │       │       ├── $enrollmentId/index.tsx # Course syllabus & intro
+│   │   │   │       │       ├── $enrollmentId/materi.$materiId.tsx # Lesson viewer
+│   │   │   │       │       └── $enrollmentId/ujian.$assessmentId.tsx # Assessment UI (pre-test/post-test/quiz)
+│   │   │   │       ├── konsultasi/       # Consultation module (planned stub)
+│   │   │   │       └── uji-kompetensi/   # Competency testing (planned stub)
 │   │   │   ├── stores/
 │   │   │   │   ├── cart.stores.ts        # Cart state
 │   │   │   │   ├── cart-sheet.stores.tsx # Cart sheet state
@@ -192,27 +206,10 @@ tepian-k3/
 │   │   │   ├── index.ts                  # API exports
 │   │   │   ├── root.ts                   # Root router aggregation
 │   │   │   ├── utils/                    # API utilities
-│   │   │   └── routers/                  # Feature routers
-│   │   │       ├── auth.ts               # Authentication procedures
-│   │   │       ├── user.ts               # User management
-│   │   │       ├── role.ts               # Role management
-│   │   │       ├── permission.ts         # Permission management
-│   │   │       ├── cluster.ts            # Testing clusters
-│   │   │       ├── parameter.ts          # Testing parameters
-│   │   │       ├── parameter-categories.ts
-│   │   │       ├── parameter-tool.ts     # Parameter-tool relations
-│   │   │       ├── tool.ts               # Testing equipment
-│   │   │       ├── kbli.ts               # Business classification
-│   │   │       ├── user-company.ts       # User companies
-│   │   │       ├── user-company-testing-location.ts
-│   │   │       ├── cart.ts               # Shopping cart
-│   │   │       ├── order.ts              # Order management
-│   │   │       ├── event.ts              # SSE events
-│   │   │       ├── province.ts           # Location data
-│   │   │       ├── regency.ts
-│   │   │       ├── district.ts
-│   │   │       ├── village.ts
-│   │   │       └── test.ts               # Test endpoints
+│   │   │   └── routers/                  # Modular tRPC routers
+│   │   │       ├── platform/             # Platform procedures (auth, users, roles, employees, notifications, etc.)
+│   │   │       ├── pengujian/            # Lab testing procedures (parameters, tools, orders, worksheets, etc.)
+│   │   │       └── pelatihan/            # LMS/Training procedures (materials, enrollments, assessments, progress, certificates)
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
@@ -230,7 +227,10 @@ tepian-k3/
 │   │   ├── src/
 │   │   │   ├── index.ts                  # DB exports
 │   │   │   ├── client.ts                 # Drizzle client instance
-│   │   │   ├── schema.ts                 # All table definitions (758 lines)
+│   │   │   ├── schema/                   # Modular schema definitions
+│   │   │   │   ├── platform.ts           # Platform tables (users, roles, employees, notifications, audits, documents)
+│   │   │   │   ├── pengujian.ts          # Pengujian tables (parameters, tools, orders, worksheets)
+│   │   │   │   └── pelatihan.ts          # Pelatihan tables (materials, assessments, enrollments, progress, certificates)
 │   │   │   ├── relations.ts              # Table relations
 │   │   │   ├── utils.ts                  # DB utilities, timestamps helper
 │   │   │   ├── migrations/               # SQL migration files
@@ -245,58 +245,18 @@ tepian-k3/
 │   │
 │   ├── queries/                          # Reusable database queries
 │   │   ├── src/
-│   │   │   ├── users.queries.ts          # User CRUD operations
-│   │   │   ├── roles.queries.ts          # Role operations
-│   │   │   ├── permission.queries.ts     # Permission operations
-│   │   │   ├── user-roles.queries.ts     # User-role assignments
-│   │   │   ├── user-permission.queries.ts
-│   │   │   ├── clusters.queries.ts       # Cluster operations
-│   │   │   ├── parameter.queries.ts      # Parameter operations
-│   │   │   ├── parameter-categories.queries.ts
-│   │   │   ├── parameter-tool.queries.ts
-│   │   │   ├── tools.queries.ts          # Equipment operations
-│   │   │   ├── kbli.queries.ts           # KBLI operations
-│   │   │   ├── user-company.queries.ts   # Company operations
-│   │   │   ├── user-company-testing-location.queries.ts
-│   │   │   ├── cart.queries.ts           # Cart operations
-│   │   │   ├── order.queries.ts          # Order operations
-│   │   │   ├── order-item.queries.ts
-│   │   │   ├── order-status-history.queries.ts
-│   │   │   ├── otp.queries.ts            # OTP operations
-│   │   │   ├── password-resets.queries.ts
-│   │   │   ├── province.queries.ts       # Location queries
-│   │   │   ├── regency.queries.ts
-│   │   │   ├── district.queries.ts
-│   │   │   └── village.queries.ts
+│   │   │   ├── platform/                 # Platform domain queries (users, roles, employees, notifications, etc.)
+│   │   │   ├── pengujian/                # Pengujian domain queries (orders, parameters, worksheets, tools, etc.)
+│   │   │   └── pelatihan/                # Pelatihan domain queries (materials, enrollments, assessments, progress, certificates)
 │   │   ├── TRANSACTION-TODO.md           # Transaction handling notes
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
 │   ├── schema/                           # Zod validation schemas
 │   │   ├── src/
-│   │   │   ├── auth.schema.ts            # Login, register, password schemas
-│   │   │   ├── users.schema.ts           # User validation
-│   │   │   ├── role.schema.ts            # Role validation
-│   │   │   ├── cluster.schema.ts         # Cluster validation
-│   │   │   ├── parameter.schema.ts       # Parameter validation
-│   │   │   ├── parameter-categories.schema.ts
-│   │   │   ├── parameter-tool.schema.ts
-│   │   │   ├── tools.schema.ts           # Tools validation
-│   │   │   ├── kbli.schema.ts
-│   │   │   ├── user-company.schema.ts    # Company validation
-│   │   │   ├── user-company-testing-location.schema.ts
-│   │   │   ├── cart.schema.ts            # Cart validation
-│   │   │   ├── order.schema.ts           # Order validation
-│   │   │   ├── order-item.schema.ts
-│   │   │   ├── testing.schema.ts         # Testing validation
-│   │   │   ├── testing-item.schema.ts
-│   │   │   ├── otp.schema.ts
-│   │   │   ├── filter.schema.ts          # Data table filter schemas
-│   │   │   ├── province.schema.ts        # Location schemas
-│   │   │   ├── regency.schema.ts
-│   │   │   ├── district.schema.ts
-│   │   │   ├── village.schema.ts
-│   │   │   └── event.schema.ts           # SSE event schemas
+│   │   │   ├── platform/                 # Platform Zod schemas (auth, user, role, geography, etc.)
+│   │   │   ├── pengujian/                # Pengujian Zod schemas (orders, parameters, worksheets, etc.)
+│   │   │   └── pelatihan/                # Pelatihan Zod schemas (materials, assessments, schedules, progress)
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
@@ -332,30 +292,9 @@ tepian-k3/
 │   │
 │   ├── types/                            # Shared TypeScript types
 │   │   ├── src/
-│   │   │   ├── auth.types.ts             # Auth types, JWT payload
-│   │   │   ├── users.types.ts            # User types
-│   │   │   ├── roles.types.ts            # Role types
-│   │   │   ├── permission.types.ts       # Permission types
-│   │   │   ├── clusters.types.ts         # Cluster types
-│   │   │   ├── parameters.types.ts       # Parameter types
-│   │   │   ├── parameter-categories.types.ts
-│   │   │   ├── parameter-tool.types.ts
-│   │   │   ├── tools.types.ts            # Tool types
-│   │   │   ├── kbli.types.ts
-│   │   │   ├── user-company.types.ts     # Company types
-│   │   │   ├── user-company-testing-location.types.ts
-│   │   │   ├── cart.types.ts             # Cart types
-│   │   │   ├── order.types.ts            # Order types
-│   │   │   ├── order-item.types.ts
-│   │   │   ├── order-status-history.types.ts
-│   │   │   ├── testing.types.ts          # Testing types
-│   │   │   ├── testing-item.types.ts
-│   │   │   ├── data-table.types.ts       # TanStack Table types
-│   │   │   ├── provinces.types.ts        # Location types
-│   │   │   ├── regencies.types.ts
-│   │   │   ├── districts.types.ts
-│   │   │   ├── villages.types.ts
-│   │   │   └── utils.types.ts            # Utility types
+│   │   │   ├── platform/                 # Platform TypeScript types (auth, user, role, employee, etc.)
+│   │   │   ├── pengujian/                # Pengujian TypeScript types (orders, tools, parameters, etc.)
+│   │   │   └── pelatihan/                # Pelatihan TypeScript types (assessments, materials, enrollments, etc.)
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
@@ -457,12 +396,33 @@ tepian-k3/
 |-------|-------------|
 | `audits` | Complete audit trail with field-level changes |
 
+### Pelatihan (LMS) Domain
+
+| Table | Description |
+|-------|-------------|
+| `pelatihan` | Training courses (free or paid) |
+| `pelatihan_categories` | Categories for training courses |
+| `pelatihan_cart` | Shopping cart for paid trainings |
+| `pelatihan_materials` | Learning materials (PDF, PPT, video, etc.) |
+| `pelatihan_assessments` | Tests/quizzes (pre-test, post-test, quiz) |
+| `pelatihan_questions` | Question pool for assessments |
+| `pelatihan_question_options` | Options for multiple-choice questions |
+| `pelatihan_enrollments` | Enrolled users in courses with progress status |
+| `pelatihan_progress` | Material completion tracking per user |
+| `pelatihan_assessment_attempts` | Assessment attempts (answers & scores) |
+| `pelatihan_assessment_answers` | Detailed answers submitted for attempts |
+| `pelatihan_schedules` | Live/synchronous class sessions |
+| `pelatihan_attendances` | Attendance records with verification tokens |
+| `user_training_profiles` | Additional profiles for trainees |
+| `pelatihan_certificates` | Earned certificates with QR code verification |
+
 ### Authentication
 
 | Table | Description |
 |-------|-------------|
-| `otp_codes` | Email verification OTPs |
+| `otp_codes` | Email verification OTPs (temporarily disabled) |
 | `password_resets` | Password reset tokens |
+| `refresh_tokens` | Session refresh tokens |
 
 ### Key Schema Features
 
@@ -1295,6 +1255,40 @@ const [search, setSearch] = useQueryState('search');
 ### Event Router (`event`)
 - `subscribe` - Subscribe to SSE events
 - `publish` - Publish event to Redis
+
+### Pelatihan Router Namespace (`pelatihan`)
+- **Base Router** (`base`)
+  - `getAllPelatihan` - Get all training courses (paginated, filterable)
+  - `getPelatihanById` - Get training course details
+  - `createPelatihan` - Create new training course
+  - `updatePelatihan` - Update training course details
+  - `deletePelatihan` - Soft delete training course
+- **Category Router** (`categories`)
+  - `getAllCategories` - Get all training categories
+  - `createCategory` - Create training category
+- **Material Router** (`materials`)
+  - `getMaterialsByPelatihanId` - Get curriculum materials for course
+  - `createMaterial` - Add learning material (video, pdf, ppt, etc.)
+  - `deleteMaterial` - Remove learning material
+- **Assessment Router** (`assessments`)
+  - `getAssessmentsByPelatihanId` - Get course assessments
+  - `startAttempt` - Start a pre-test / post-test attempt
+  - `submitAttempt` - Submit answers for scoring
+  - `gradeEssayAnswers` - Grade manual essay answers (admin)
+- **Enrollment Router** (`enrollments`)
+  - `getMyEnrollments` - Get user's enrolled courses with progress
+  - `enrollFree` - Direct enroll to free course
+  - `updateProgress` - Update user's progress percentage
+- **Cart Router** (`cart`)
+  - `getMyCart` - Get training shopping cart items
+  - `addToCart` - Add training to cart
+  - `removeFromCart` - Remove item from cart
+- **Certificate Router** (`certificate`)
+  - `getMyCertificates` - Get earned certificates
+  - `getCertificateById` - Get details of a certificate
+- **Profile Router** (`profile`)
+  - `getTrainingProfile` - Get trainee profile info
+  - `updateTrainingProfile` - Update trainee profile
 
 ### Procedure Types
 - **`publicProcedure`** - No authentication required

@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
-import { Route as TestRouteImport } from './routes/test'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as KatalogRouteImport } from './routes/katalog'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
@@ -45,13 +44,13 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as coreWorksheetsRouteRouteImport } from './routes/(core)/worksheets/route'
 import { Route as coreUjiKompetensiRouteRouteImport } from './routes/(core)/uji-kompetensi/route'
 import { Route as corePengujianRouteRouteImport } from './routes/(core)/pengujian/route'
+import { Route as corePelatihanRouteRouteImport } from './routes/(core)/pelatihan/route'
 import { Route as coreKonsultasiRouteRouteImport } from './routes/(core)/konsultasi/route'
 import { Route as coreEmployeeRouteRouteImport } from './routes/(core)/employee/route'
 import { Route as coreDisplayBoardRouteRouteImport } from './routes/(core)/display-board/route'
 import { Route as coreDashboardRouteRouteImport } from './routes/(core)/dashboard/route'
 import { Route as coreBackOfficeRouteRouteImport } from './routes/(core)/back-office/route'
 import { Route as PpidSetiapSaatIndexRouteImport } from './routes/ppid/setiap-saat/index'
-import { Route as PelatihanTransaksiIndexRouteImport } from './routes/pelatihan/transaksi/index'
 import { Route as coreWorksheetsIndexRouteImport } from './routes/(core)/worksheets/index'
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
 import { Route as coreEmployeeIndexRouteImport } from './routes/(core)/employee/index'
@@ -62,7 +61,6 @@ import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-of
 import { Route as VerifyCertificateTokenRouteImport } from './routes/verify.certificate.$token'
 import { Route as PpidSetiapSaatRegulasiRouteImport } from './routes/ppid/setiap-saat/regulasi'
 import { Route as PpidSetiapSaatDocumentIdRouteImport } from './routes/ppid/setiap-saat/$documentId'
-import { Route as PelatihanTransaksiOrderIdRouteImport } from './routes/pelatihan/transaksi/$orderId'
 import { Route as coreWorksheetsJadwalPersonelRouteImport } from './routes/(core)/worksheets/jadwal-personel'
 import { Route as coreWorksheetsDetailTransaksiRouteImport } from './routes/(core)/worksheets/detail-transaksi'
 import { Route as corePengujianTransaksiRouteImport } from './routes/(core)/pengujian/transaksi'
@@ -70,6 +68,7 @@ import { Route as corePengujianSurveyKepuasanRouteImport } from './routes/(core)
 import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
 import { Route as corePengujianSertifikatRouteImport } from './routes/(core)/pengujian/sertifikat'
 import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
+import { Route as corePelatihanTransaksiRouteImport } from './routes/(core)/pelatihan/transaksi'
 import { Route as coreEmployeeWorksheetsIndexRouteImport } from './routes/(core)/employee/worksheets/index'
 import { Route as coreEmployeeToolsIndexRouteImport } from './routes/(core)/employee/tools/index'
 import { Route as coreEmployeeTestingsIndexRouteImport } from './routes/(core)/employee/testings/index'
@@ -101,6 +100,9 @@ import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)
 import { Route as coreBackOfficeChemicalMaterialsIndexRouteImport } from './routes/(core)/back-office/chemical-materials/index'
 import { Route as coreBackOfficeBannersIndexRouteImport } from './routes/(core)/back-office/banners/index'
 import { Route as coreBackOfficeAuditsIndexRouteImport } from './routes/(core)/back-office/audits/index'
+import { Route as corePelatihanTransaksiOrderIdRouteImport } from './routes/(core)/pelatihan/transaksi.$orderId'
+import { Route as corePelatihanSertifikatEnrollmentIdRouteImport } from './routes/(core)/pelatihan/sertifikat.$enrollmentId'
+import { Route as corePelatihanBelajarEnrollmentIdRouteImport } from './routes/(core)/pelatihan/belajar/$enrollmentId'
 import { Route as coreDashboardPelatihanEnrollmentIdRouteImport } from './routes/(core)/dashboard/pelatihan/$enrollmentId'
 import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/dashboard/company/create'
 import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
@@ -121,6 +123,8 @@ import { Route as coreBackOfficeClustersCreateRouteImport } from './routes/(core
 import { Route as coreBackOfficeChemicalMaterialsCreateRouteImport } from './routes/(core)/back-office/chemical-materials/create'
 import { Route as coreBackOfficeBannersCreateRouteImport } from './routes/(core)/back-office/banners/create'
 import { Route as coreBackOfficeAuditsAuditIdRouteImport } from './routes/(core)/back-office/audits/$auditId'
+import { Route as corePelatihanBelajarEnrollmentIdIndexRouteImport } from './routes/(core)/pelatihan/belajar/$enrollmentId/index'
+import { Route as coreBackOfficePengujianImportExportIndexRouteImport } from './routes/(core)/back-office/pengujian/import-export/index'
 import { Route as coreEmployeeToolsWorksheetIdReturnRouteImport } from './routes/(core)/employee/tools/$worksheetId.return'
 import { Route as coreEmployeeToolsWorksheetIdDetailRouteImport } from './routes/(core)/employee/tools/$worksheetId.detail'
 import { Route as coreDashboardPelatihanEnrollmentIdTesDanQuizRouteImport } from './routes/(core)/dashboard/pelatihan/$enrollmentId/tes-dan-quiz'
@@ -140,6 +144,7 @@ import { Route as coreBackOfficePositionsPositionIdEditRouteImport } from './rou
 import { Route as coreBackOfficePelatihanPelatihanIdSertifikatRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/sertifikat'
 import { Route as coreBackOfficePelatihanPelatihanIdQuizRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/quiz'
 import { Route as coreBackOfficePelatihanPelatihanIdPesertaRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/peserta'
+import { Route as coreBackOfficePelatihanPelatihanIdPenilaianRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/penilaian'
 import { Route as coreBackOfficePelatihanPelatihanIdOverviewRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/overview'
 import { Route as coreBackOfficePelatihanPelatihanIdMateriRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/materi'
 import { Route as coreBackOfficePelatihanPelatihanIdEditRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId.edit'
@@ -157,6 +162,8 @@ import { Route as coreBackOfficeBannersBannerIdEditRouteImport } from './routes/
 import { Route as coreDashboardPelatihanEnrollmentIdMateriIndexRouteImport } from './routes/(core)/dashboard/pelatihan/$enrollmentId/materi/index'
 import { Route as coreBackOfficeToolsToolIdStatusIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.status.index'
 import { Route as coreBackOfficeToolsToolIdCalibrationIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.index'
+import { Route as corePelatihanBelajarEnrollmentIdUjianAssessmentIdRouteImport } from './routes/(core)/pelatihan/belajar/$enrollmentId/ujian.$assessmentId'
+import { Route as corePelatihanBelajarEnrollmentIdMateriMateriIdRouteImport } from './routes/(core)/pelatihan/belajar/$enrollmentId/materi.$materiId'
 import { Route as coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRouteImport } from './routes/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId'
 import { Route as coreDashboardPelatihanEnrollmentIdMateriMaterialIdRouteImport } from './routes/(core)/dashboard/pelatihan/$enrollmentId/materi/$materialId'
 import { Route as coreBackOfficeToolsToolIdStatusCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.status.create'
@@ -169,11 +176,6 @@ import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteIm
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
   path: '/unauthorized',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TestRoute = TestRouteImport.update({
-  id: '/test',
-  path: '/test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfilRoute = ProfilRouteImport.update({
@@ -344,6 +346,11 @@ const corePengujianRouteRoute = corePengujianRouteRouteImport.update({
   path: '/pengujian',
   getParentRoute: () => coreRouteRoute,
 } as any)
+const corePelatihanRouteRoute = corePelatihanRouteRouteImport.update({
+  id: '/pelatihan',
+  path: '/pelatihan',
+  getParentRoute: () => coreRouteRoute,
+} as any)
 const coreKonsultasiRouteRoute = coreKonsultasiRouteRouteImport.update({
   id: '/konsultasi',
   path: '/konsultasi',
@@ -372,11 +379,6 @@ const coreBackOfficeRouteRoute = coreBackOfficeRouteRouteImport.update({
 const PpidSetiapSaatIndexRoute = PpidSetiapSaatIndexRouteImport.update({
   id: '/ppid/setiap-saat/',
   path: '/ppid/setiap-saat/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PelatihanTransaksiIndexRoute = PelatihanTransaksiIndexRouteImport.update({
-  id: '/pelatihan/transaksi/',
-  path: '/pelatihan/transaksi/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const coreWorksheetsIndexRoute = coreWorksheetsIndexRouteImport.update({
@@ -430,12 +432,6 @@ const PpidSetiapSaatDocumentIdRoute =
     path: '/ppid/setiap-saat/$documentId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const PelatihanTransaksiOrderIdRoute =
-  PelatihanTransaksiOrderIdRouteImport.update({
-    id: '/pelatihan/transaksi/$orderId',
-    path: '/pelatihan/transaksi/$orderId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const coreWorksheetsJadwalPersonelRoute =
   coreWorksheetsJadwalPersonelRouteImport.update({
     id: '/jadwal-personel',
@@ -473,6 +469,11 @@ const corePengujianCheckoutRoute = corePengujianCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
   getParentRoute: () => corePengujianRouteRoute,
+} as any)
+const corePelatihanTransaksiRoute = corePelatihanTransaksiRouteImport.update({
+  id: '/transaksi',
+  path: '/transaksi',
+  getParentRoute: () => corePelatihanRouteRoute,
 } as any)
 const coreEmployeeWorksheetsIndexRoute =
   coreEmployeeWorksheetsIndexRouteImport.update({
@@ -656,6 +657,24 @@ const coreBackOfficeAuditsIndexRoute =
     path: '/audits/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const corePelatihanTransaksiOrderIdRoute =
+  corePelatihanTransaksiOrderIdRouteImport.update({
+    id: '/$orderId',
+    path: '/$orderId',
+    getParentRoute: () => corePelatihanTransaksiRoute,
+  } as any)
+const corePelatihanSertifikatEnrollmentIdRoute =
+  corePelatihanSertifikatEnrollmentIdRouteImport.update({
+    id: '/sertifikat/$enrollmentId',
+    path: '/sertifikat/$enrollmentId',
+    getParentRoute: () => corePelatihanRouteRoute,
+  } as any)
+const corePelatihanBelajarEnrollmentIdRoute =
+  corePelatihanBelajarEnrollmentIdRouteImport.update({
+    id: '/belajar/$enrollmentId',
+    path: '/belajar/$enrollmentId',
+    getParentRoute: () => corePelatihanRouteRoute,
+  } as any)
 const coreDashboardPelatihanEnrollmentIdRoute =
   coreDashboardPelatihanEnrollmentIdRouteImport.update({
     id: '/pelatihan/$enrollmentId',
@@ -776,6 +795,18 @@ const coreBackOfficeAuditsAuditIdRoute =
     path: '/audits/$auditId',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const corePelatihanBelajarEnrollmentIdIndexRoute =
+  corePelatihanBelajarEnrollmentIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => corePelatihanBelajarEnrollmentIdRoute,
+  } as any)
+const coreBackOfficePengujianImportExportIndexRoute =
+  coreBackOfficePengujianImportExportIndexRouteImport.update({
+    id: '/pengujian/import-export/',
+    path: '/pengujian/import-export/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreEmployeeToolsWorksheetIdReturnRoute =
   coreEmployeeToolsWorksheetIdReturnRouteImport.update({
     id: '/tools/$worksheetId/return',
@@ -890,6 +921,12 @@ const coreBackOfficePelatihanPelatihanIdPesertaRoute =
     path: '/peserta',
     getParentRoute: () => coreBackOfficePelatihanPelatihanIdRoute,
   } as any)
+const coreBackOfficePelatihanPelatihanIdPenilaianRoute =
+  coreBackOfficePelatihanPelatihanIdPenilaianRouteImport.update({
+    id: '/penilaian',
+    path: '/penilaian',
+    getParentRoute: () => coreBackOfficePelatihanPelatihanIdRoute,
+  } as any)
 const coreBackOfficePelatihanPelatihanIdOverviewRoute =
   coreBackOfficePelatihanPelatihanIdOverviewRouteImport.update({
     id: '/overview',
@@ -992,6 +1029,18 @@ const coreBackOfficeToolsToolIdCalibrationIndexRoute =
     path: '/tools/$toolId/calibration/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute =
+  corePelatihanBelajarEnrollmentIdUjianAssessmentIdRouteImport.update({
+    id: '/ujian/$assessmentId',
+    path: '/ujian/$assessmentId',
+    getParentRoute: () => corePelatihanBelajarEnrollmentIdRoute,
+  } as any)
+const corePelatihanBelajarEnrollmentIdMateriMateriIdRoute =
+  corePelatihanBelajarEnrollmentIdMateriMateriIdRouteImport.update({
+    id: '/materi/$materiId',
+    path: '/materi/$materiId',
+    getParentRoute: () => corePelatihanBelajarEnrollmentIdRoute,
+  } as any)
 const coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRoute =
   coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRouteImport.update({
     id: '/ujian/$assessmentId',
@@ -1048,13 +1097,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/katalog': typeof KatalogRoute
   '/profil': typeof ProfilRoute
-  '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/dashboard': typeof coreDashboardRouteRouteWithChildren
   '/display-board': typeof coreDisplayBoardRouteRouteWithChildren
   '/employee': typeof coreEmployeeRouteRouteWithChildren
   '/konsultasi': typeof coreKonsultasiRouteRoute
+  '/pelatihan': typeof PelatihanIndexRoute
   '/pengujian': typeof corePengujianRouteRouteWithChildren
   '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
   '/worksheets': typeof coreWorksheetsRouteRouteWithChildren
@@ -1082,8 +1131,8 @@ export interface FileRoutesByFullPath {
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
   '/media-dan-publikasi': typeof MediaDanPublikasiIndexRoute
-  '/pelatihan': typeof PelatihanIndexRoute
   '/ppid': typeof PpidIndexRoute
+  '/pelatihan/transaksi': typeof corePelatihanTransaksiRouteWithChildren
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
@@ -1091,7 +1140,6 @@ export interface FileRoutesByFullPath {
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
-  '/pelatihan/transaksi/$orderId': typeof PelatihanTransaksiOrderIdRoute
   '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
   '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
@@ -1102,7 +1150,6 @@ export interface FileRoutesByFullPath {
   '/employee/': typeof coreEmployeeIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
   '/worksheets/': typeof coreWorksheetsIndexRoute
-  '/pelatihan/transaksi': typeof PelatihanTransaksiIndexRoute
   '/ppid/setiap-saat': typeof PpidSetiapSaatIndexRoute
   '/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
@@ -1124,6 +1171,9 @@ export interface FileRoutesByFullPath {
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
   '/dashboard/pelatihan/$enrollmentId': typeof coreDashboardPelatihanEnrollmentIdRouteWithChildren
+  '/pelatihan/belajar/$enrollmentId': typeof corePelatihanBelajarEnrollmentIdRouteWithChildren
+  '/pelatihan/sertifikat/$enrollmentId': typeof corePelatihanSertifikatEnrollmentIdRoute
+  '/pelatihan/transaksi/$orderId': typeof corePelatihanTransaksiOrderIdRoute
   '/back-office/audits': typeof coreBackOfficeAuditsIndexRoute
   '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
@@ -1169,6 +1219,7 @@ export interface FileRoutesByFullPath {
   '/back-office/pelatihan/$pelatihanId/edit': typeof coreBackOfficePelatihanPelatihanIdEditRoute
   '/back-office/pelatihan/$pelatihanId/materi': typeof coreBackOfficePelatihanPelatihanIdMateriRoute
   '/back-office/pelatihan/$pelatihanId/overview': typeof coreBackOfficePelatihanPelatihanIdOverviewRoute
+  '/back-office/pelatihan/$pelatihanId/penilaian': typeof coreBackOfficePelatihanPelatihanIdPenilaianRoute
   '/back-office/pelatihan/$pelatihanId/peserta': typeof coreBackOfficePelatihanPelatihanIdPesertaRoute
   '/back-office/pelatihan/$pelatihanId/quiz': typeof coreBackOfficePelatihanPelatihanIdQuizRoute
   '/back-office/pelatihan/$pelatihanId/sertifikat': typeof coreBackOfficePelatihanPelatihanIdSertifikatRoute
@@ -1188,10 +1239,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/pelatihan/$enrollmentId/tes-dan-quiz': typeof coreDashboardPelatihanEnrollmentIdTesDanQuizRoute
   '/employee/tools/$worksheetId/detail': typeof coreEmployeeToolsWorksheetIdDetailRoute
   '/employee/tools/$worksheetId/return': typeof coreEmployeeToolsWorksheetIdReturnRoute
+  '/back-office/pengujian/import-export': typeof coreBackOfficePengujianImportExportIndexRoute
+  '/pelatihan/belajar/$enrollmentId/': typeof corePelatihanBelajarEnrollmentIdIndexRoute
   '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   '/back-office/tools/$toolId/status/create': typeof coreBackOfficeToolsToolIdStatusCreateRoute
   '/dashboard/pelatihan/$enrollmentId/materi/$materialId': typeof coreDashboardPelatihanEnrollmentIdMateriMaterialIdRoute
   '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId': typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRouteWithChildren
+  '/pelatihan/belajar/$enrollmentId/materi/$materiId': typeof corePelatihanBelajarEnrollmentIdMateriMateriIdRoute
+  '/pelatihan/belajar/$enrollmentId/ujian/$assessmentId': typeof corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute
   '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
   '/back-office/tools/$toolId/status': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/dashboard/pelatihan/$enrollmentId/materi': typeof coreDashboardPelatihanEnrollmentIdMateriIndexRoute
@@ -1204,9 +1259,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/katalog': typeof KatalogRoute
   '/profil': typeof ProfilRoute
-  '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/konsultasi': typeof coreKonsultasiRouteRoute
+  '/pelatihan': typeof PelatihanIndexRoute
   '/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
@@ -1232,8 +1287,8 @@ export interface FileRoutesByTo {
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
   '/media-dan-publikasi': typeof MediaDanPublikasiIndexRoute
-  '/pelatihan': typeof PelatihanIndexRoute
   '/ppid': typeof PpidIndexRoute
+  '/pelatihan/transaksi': typeof corePelatihanTransaksiRouteWithChildren
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
@@ -1241,7 +1296,6 @@ export interface FileRoutesByTo {
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
-  '/pelatihan/transaksi/$orderId': typeof PelatihanTransaksiOrderIdRoute
   '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
   '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
@@ -1252,7 +1306,6 @@ export interface FileRoutesByTo {
   '/employee': typeof coreEmployeeIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
   '/worksheets': typeof coreWorksheetsIndexRoute
-  '/pelatihan/transaksi': typeof PelatihanTransaksiIndexRoute
   '/ppid/setiap-saat': typeof PpidSetiapSaatIndexRoute
   '/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
@@ -1274,6 +1327,8 @@ export interface FileRoutesByTo {
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
   '/dashboard/pelatihan/$enrollmentId': typeof coreDashboardPelatihanEnrollmentIdRouteWithChildren
+  '/pelatihan/sertifikat/$enrollmentId': typeof corePelatihanSertifikatEnrollmentIdRoute
+  '/pelatihan/transaksi/$orderId': typeof corePelatihanTransaksiOrderIdRoute
   '/back-office/audits': typeof coreBackOfficeAuditsIndexRoute
   '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
@@ -1319,6 +1374,7 @@ export interface FileRoutesByTo {
   '/back-office/pelatihan/$pelatihanId/edit': typeof coreBackOfficePelatihanPelatihanIdEditRoute
   '/back-office/pelatihan/$pelatihanId/materi': typeof coreBackOfficePelatihanPelatihanIdMateriRoute
   '/back-office/pelatihan/$pelatihanId/overview': typeof coreBackOfficePelatihanPelatihanIdOverviewRoute
+  '/back-office/pelatihan/$pelatihanId/penilaian': typeof coreBackOfficePelatihanPelatihanIdPenilaianRoute
   '/back-office/pelatihan/$pelatihanId/peserta': typeof coreBackOfficePelatihanPelatihanIdPesertaRoute
   '/back-office/pelatihan/$pelatihanId/quiz': typeof coreBackOfficePelatihanPelatihanIdQuizRoute
   '/back-office/pelatihan/$pelatihanId/sertifikat': typeof coreBackOfficePelatihanPelatihanIdSertifikatRoute
@@ -1338,10 +1394,14 @@ export interface FileRoutesByTo {
   '/dashboard/pelatihan/$enrollmentId/tes-dan-quiz': typeof coreDashboardPelatihanEnrollmentIdTesDanQuizRoute
   '/employee/tools/$worksheetId/detail': typeof coreEmployeeToolsWorksheetIdDetailRoute
   '/employee/tools/$worksheetId/return': typeof coreEmployeeToolsWorksheetIdReturnRoute
+  '/back-office/pengujian/import-export': typeof coreBackOfficePengujianImportExportIndexRoute
+  '/pelatihan/belajar/$enrollmentId': typeof corePelatihanBelajarEnrollmentIdIndexRoute
   '/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   '/back-office/tools/$toolId/status/create': typeof coreBackOfficeToolsToolIdStatusCreateRoute
   '/dashboard/pelatihan/$enrollmentId/materi/$materialId': typeof coreDashboardPelatihanEnrollmentIdMateriMaterialIdRoute
   '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId': typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRouteWithChildren
+  '/pelatihan/belajar/$enrollmentId/materi/$materiId': typeof corePelatihanBelajarEnrollmentIdMateriMateriIdRoute
+  '/pelatihan/belajar/$enrollmentId/ujian/$assessmentId': typeof corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute
   '/back-office/tools/$toolId/calibration': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
   '/back-office/tools/$toolId/status': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/dashboard/pelatihan/$enrollmentId/materi': typeof coreDashboardPelatihanEnrollmentIdMateriIndexRoute
@@ -1357,13 +1417,13 @@ export interface FileRoutesById {
   '/(core)': typeof coreRouteRouteWithChildren
   '/katalog': typeof KatalogRoute
   '/profil': typeof ProfilRoute
-  '/test': typeof TestRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/(core)/back-office': typeof coreBackOfficeRouteRouteWithChildren
   '/(core)/dashboard': typeof coreDashboardRouteRouteWithChildren
   '/(core)/display-board': typeof coreDisplayBoardRouteRouteWithChildren
   '/(core)/employee': typeof coreEmployeeRouteRouteWithChildren
   '/(core)/konsultasi': typeof coreKonsultasiRouteRoute
+  '/(core)/pelatihan': typeof corePelatihanRouteRouteWithChildren
   '/(core)/pengujian': typeof corePengujianRouteRouteWithChildren
   '/(core)/uji-kompetensi': typeof coreUjiKompetensiRouteRoute
   '/(core)/worksheets': typeof coreWorksheetsRouteRouteWithChildren
@@ -1393,6 +1453,7 @@ export interface FileRoutesById {
   '/media-dan-publikasi/': typeof MediaDanPublikasiIndexRoute
   '/pelatihan/': typeof PelatihanIndexRoute
   '/ppid/': typeof PpidIndexRoute
+  '/(core)/pelatihan/transaksi': typeof corePelatihanTransaksiRouteWithChildren
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
   '/(core)/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
@@ -1400,7 +1461,6 @@ export interface FileRoutesById {
   '/(core)/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/(core)/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/(core)/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
-  '/pelatihan/transaksi/$orderId': typeof PelatihanTransaksiOrderIdRoute
   '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
   '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
@@ -1411,7 +1471,6 @@ export interface FileRoutesById {
   '/(core)/employee/': typeof coreEmployeeIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
   '/(core)/worksheets/': typeof coreWorksheetsIndexRoute
-  '/pelatihan/transaksi/': typeof PelatihanTransaksiIndexRoute
   '/ppid/setiap-saat/': typeof PpidSetiapSaatIndexRoute
   '/(core)/back-office/audits/$auditId': typeof coreBackOfficeAuditsAuditIdRoute
   '/(core)/back-office/banners/create': typeof coreBackOfficeBannersCreateRoute
@@ -1433,6 +1492,9 @@ export interface FileRoutesById {
   '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
   '/(core)/dashboard/company/create': typeof coreDashboardCompanyCreateRoute
   '/(core)/dashboard/pelatihan/$enrollmentId': typeof coreDashboardPelatihanEnrollmentIdRouteWithChildren
+  '/(core)/pelatihan/belajar/$enrollmentId': typeof corePelatihanBelajarEnrollmentIdRouteWithChildren
+  '/(core)/pelatihan/sertifikat/$enrollmentId': typeof corePelatihanSertifikatEnrollmentIdRoute
+  '/(core)/pelatihan/transaksi/$orderId': typeof corePelatihanTransaksiOrderIdRoute
   '/(core)/back-office/audits/': typeof coreBackOfficeAuditsIndexRoute
   '/(core)/back-office/banners/': typeof coreBackOfficeBannersIndexRoute
   '/(core)/back-office/chemical-materials/': typeof coreBackOfficeChemicalMaterialsIndexRoute
@@ -1478,6 +1540,7 @@ export interface FileRoutesById {
   '/(core)/back-office/pelatihan/$pelatihanId/edit': typeof coreBackOfficePelatihanPelatihanIdEditRoute
   '/(core)/back-office/pelatihan/$pelatihanId/materi': typeof coreBackOfficePelatihanPelatihanIdMateriRoute
   '/(core)/back-office/pelatihan/$pelatihanId/overview': typeof coreBackOfficePelatihanPelatihanIdOverviewRoute
+  '/(core)/back-office/pelatihan/$pelatihanId/penilaian': typeof coreBackOfficePelatihanPelatihanIdPenilaianRoute
   '/(core)/back-office/pelatihan/$pelatihanId/peserta': typeof coreBackOfficePelatihanPelatihanIdPesertaRoute
   '/(core)/back-office/pelatihan/$pelatihanId/quiz': typeof coreBackOfficePelatihanPelatihanIdQuizRoute
   '/(core)/back-office/pelatihan/$pelatihanId/sertifikat': typeof coreBackOfficePelatihanPelatihanIdSertifikatRoute
@@ -1497,10 +1560,14 @@ export interface FileRoutesById {
   '/(core)/dashboard/pelatihan/$enrollmentId/tes-dan-quiz': typeof coreDashboardPelatihanEnrollmentIdTesDanQuizRoute
   '/(core)/employee/tools/$worksheetId/detail': typeof coreEmployeeToolsWorksheetIdDetailRoute
   '/(core)/employee/tools/$worksheetId/return': typeof coreEmployeeToolsWorksheetIdReturnRoute
+  '/(core)/back-office/pengujian/import-export/': typeof coreBackOfficePengujianImportExportIndexRoute
+  '/(core)/pelatihan/belajar/$enrollmentId/': typeof corePelatihanBelajarEnrollmentIdIndexRoute
   '/(core)/back-office/tools/$toolId/calibration/create': typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   '/(core)/back-office/tools/$toolId/status/create': typeof coreBackOfficeToolsToolIdStatusCreateRoute
   '/(core)/dashboard/pelatihan/$enrollmentId/materi/$materialId': typeof coreDashboardPelatihanEnrollmentIdMateriMaterialIdRoute
   '/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId': typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRouteWithChildren
+  '/(core)/pelatihan/belajar/$enrollmentId/materi/$materiId': typeof corePelatihanBelajarEnrollmentIdMateriMateriIdRoute
+  '/(core)/pelatihan/belajar/$enrollmentId/ujian/$assessmentId': typeof corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute
   '/(core)/back-office/tools/$toolId/calibration/': typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
   '/(core)/back-office/tools/$toolId/status/': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/(core)/dashboard/pelatihan/$enrollmentId/materi/': typeof coreDashboardPelatihanEnrollmentIdMateriIndexRoute
@@ -1515,13 +1582,13 @@ export interface FileRouteTypes {
     | '/'
     | '/katalog'
     | '/profil'
-    | '/test'
     | '/unauthorized'
     | '/back-office'
     | '/dashboard'
     | '/display-board'
     | '/employee'
     | '/konsultasi'
+    | '/pelatihan'
     | '/pengujian'
     | '/uji-kompetensi'
     | '/worksheets'
@@ -1549,8 +1616,8 @@ export interface FileRouteTypes {
     | '/verify/$token'
     | '/berita'
     | '/media-dan-publikasi'
-    | '/pelatihan'
     | '/ppid'
+    | '/pelatihan/transaksi'
     | '/pengujian/checkout'
     | '/pengujian/sertifikat'
     | '/pengujian/status'
@@ -1558,7 +1625,6 @@ export interface FileRouteTypes {
     | '/pengujian/transaksi'
     | '/worksheets/detail-transaksi'
     | '/worksheets/jadwal-personel'
-    | '/pelatihan/transaksi/$orderId'
     | '/ppid/setiap-saat/$documentId'
     | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
@@ -1569,7 +1635,6 @@ export interface FileRouteTypes {
     | '/employee/'
     | '/pengujian/'
     | '/worksheets/'
-    | '/pelatihan/transaksi'
     | '/ppid/setiap-saat'
     | '/back-office/audits/$auditId'
     | '/back-office/banners/create'
@@ -1591,6 +1656,9 @@ export interface FileRouteTypes {
     | '/back-office/users/create'
     | '/dashboard/company/create'
     | '/dashboard/pelatihan/$enrollmentId'
+    | '/pelatihan/belajar/$enrollmentId'
+    | '/pelatihan/sertifikat/$enrollmentId'
+    | '/pelatihan/transaksi/$orderId'
     | '/back-office/audits'
     | '/back-office/banners'
     | '/back-office/chemical-materials'
@@ -1636,6 +1704,7 @@ export interface FileRouteTypes {
     | '/back-office/pelatihan/$pelatihanId/edit'
     | '/back-office/pelatihan/$pelatihanId/materi'
     | '/back-office/pelatihan/$pelatihanId/overview'
+    | '/back-office/pelatihan/$pelatihanId/penilaian'
     | '/back-office/pelatihan/$pelatihanId/peserta'
     | '/back-office/pelatihan/$pelatihanId/quiz'
     | '/back-office/pelatihan/$pelatihanId/sertifikat'
@@ -1655,10 +1724,14 @@ export interface FileRouteTypes {
     | '/dashboard/pelatihan/$enrollmentId/tes-dan-quiz'
     | '/employee/tools/$worksheetId/detail'
     | '/employee/tools/$worksheetId/return'
+    | '/back-office/pengujian/import-export'
+    | '/pelatihan/belajar/$enrollmentId/'
     | '/back-office/tools/$toolId/calibration/create'
     | '/back-office/tools/$toolId/status/create'
     | '/dashboard/pelatihan/$enrollmentId/materi/$materialId'
     | '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId'
+    | '/pelatihan/belajar/$enrollmentId/materi/$materiId'
+    | '/pelatihan/belajar/$enrollmentId/ujian/$assessmentId'
     | '/back-office/tools/$toolId/calibration'
     | '/back-office/tools/$toolId/status'
     | '/dashboard/pelatihan/$enrollmentId/materi'
@@ -1671,9 +1744,9 @@ export interface FileRouteTypes {
     | '/'
     | '/katalog'
     | '/profil'
-    | '/test'
     | '/unauthorized'
     | '/konsultasi'
+    | '/pelatihan'
     | '/uji-kompetensi'
     | '/forgot-password'
     | '/login'
@@ -1699,8 +1772,8 @@ export interface FileRouteTypes {
     | '/verify/$token'
     | '/berita'
     | '/media-dan-publikasi'
-    | '/pelatihan'
     | '/ppid'
+    | '/pelatihan/transaksi'
     | '/pengujian/checkout'
     | '/pengujian/sertifikat'
     | '/pengujian/status'
@@ -1708,7 +1781,6 @@ export interface FileRouteTypes {
     | '/pengujian/transaksi'
     | '/worksheets/detail-transaksi'
     | '/worksheets/jadwal-personel'
-    | '/pelatihan/transaksi/$orderId'
     | '/ppid/setiap-saat/$documentId'
     | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
@@ -1719,7 +1791,6 @@ export interface FileRouteTypes {
     | '/employee'
     | '/pengujian'
     | '/worksheets'
-    | '/pelatihan/transaksi'
     | '/ppid/setiap-saat'
     | '/back-office/audits/$auditId'
     | '/back-office/banners/create'
@@ -1741,6 +1812,8 @@ export interface FileRouteTypes {
     | '/back-office/users/create'
     | '/dashboard/company/create'
     | '/dashboard/pelatihan/$enrollmentId'
+    | '/pelatihan/sertifikat/$enrollmentId'
+    | '/pelatihan/transaksi/$orderId'
     | '/back-office/audits'
     | '/back-office/banners'
     | '/back-office/chemical-materials'
@@ -1786,6 +1859,7 @@ export interface FileRouteTypes {
     | '/back-office/pelatihan/$pelatihanId/edit'
     | '/back-office/pelatihan/$pelatihanId/materi'
     | '/back-office/pelatihan/$pelatihanId/overview'
+    | '/back-office/pelatihan/$pelatihanId/penilaian'
     | '/back-office/pelatihan/$pelatihanId/peserta'
     | '/back-office/pelatihan/$pelatihanId/quiz'
     | '/back-office/pelatihan/$pelatihanId/sertifikat'
@@ -1805,10 +1879,14 @@ export interface FileRouteTypes {
     | '/dashboard/pelatihan/$enrollmentId/tes-dan-quiz'
     | '/employee/tools/$worksheetId/detail'
     | '/employee/tools/$worksheetId/return'
+    | '/back-office/pengujian/import-export'
+    | '/pelatihan/belajar/$enrollmentId'
     | '/back-office/tools/$toolId/calibration/create'
     | '/back-office/tools/$toolId/status/create'
     | '/dashboard/pelatihan/$enrollmentId/materi/$materialId'
     | '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId'
+    | '/pelatihan/belajar/$enrollmentId/materi/$materiId'
+    | '/pelatihan/belajar/$enrollmentId/ujian/$assessmentId'
     | '/back-office/tools/$toolId/calibration'
     | '/back-office/tools/$toolId/status'
     | '/dashboard/pelatihan/$enrollmentId/materi'
@@ -1823,13 +1901,13 @@ export interface FileRouteTypes {
     | '/(core)'
     | '/katalog'
     | '/profil'
-    | '/test'
     | '/unauthorized'
     | '/(core)/back-office'
     | '/(core)/dashboard'
     | '/(core)/display-board'
     | '/(core)/employee'
     | '/(core)/konsultasi'
+    | '/(core)/pelatihan'
     | '/(core)/pengujian'
     | '/(core)/uji-kompetensi'
     | '/(core)/worksheets'
@@ -1859,6 +1937,7 @@ export interface FileRouteTypes {
     | '/media-dan-publikasi/'
     | '/pelatihan/'
     | '/ppid/'
+    | '/(core)/pelatihan/transaksi'
     | '/(core)/pengujian/checkout'
     | '/(core)/pengujian/sertifikat'
     | '/(core)/pengujian/status'
@@ -1866,7 +1945,6 @@ export interface FileRouteTypes {
     | '/(core)/pengujian/transaksi'
     | '/(core)/worksheets/detail-transaksi'
     | '/(core)/worksheets/jadwal-personel'
-    | '/pelatihan/transaksi/$orderId'
     | '/ppid/setiap-saat/$documentId'
     | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
@@ -1877,7 +1955,6 @@ export interface FileRouteTypes {
     | '/(core)/employee/'
     | '/(core)/pengujian/'
     | '/(core)/worksheets/'
-    | '/pelatihan/transaksi/'
     | '/ppid/setiap-saat/'
     | '/(core)/back-office/audits/$auditId'
     | '/(core)/back-office/banners/create'
@@ -1899,6 +1976,9 @@ export interface FileRouteTypes {
     | '/(core)/back-office/users/create'
     | '/(core)/dashboard/company/create'
     | '/(core)/dashboard/pelatihan/$enrollmentId'
+    | '/(core)/pelatihan/belajar/$enrollmentId'
+    | '/(core)/pelatihan/sertifikat/$enrollmentId'
+    | '/(core)/pelatihan/transaksi/$orderId'
     | '/(core)/back-office/audits/'
     | '/(core)/back-office/banners/'
     | '/(core)/back-office/chemical-materials/'
@@ -1944,6 +2024,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/pelatihan/$pelatihanId/edit'
     | '/(core)/back-office/pelatihan/$pelatihanId/materi'
     | '/(core)/back-office/pelatihan/$pelatihanId/overview'
+    | '/(core)/back-office/pelatihan/$pelatihanId/penilaian'
     | '/(core)/back-office/pelatihan/$pelatihanId/peserta'
     | '/(core)/back-office/pelatihan/$pelatihanId/quiz'
     | '/(core)/back-office/pelatihan/$pelatihanId/sertifikat'
@@ -1963,10 +2044,14 @@ export interface FileRouteTypes {
     | '/(core)/dashboard/pelatihan/$enrollmentId/tes-dan-quiz'
     | '/(core)/employee/tools/$worksheetId/detail'
     | '/(core)/employee/tools/$worksheetId/return'
+    | '/(core)/back-office/pengujian/import-export/'
+    | '/(core)/pelatihan/belajar/$enrollmentId/'
     | '/(core)/back-office/tools/$toolId/calibration/create'
     | '/(core)/back-office/tools/$toolId/status/create'
     | '/(core)/dashboard/pelatihan/$enrollmentId/materi/$materialId'
     | '/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId'
+    | '/(core)/pelatihan/belajar/$enrollmentId/materi/$materiId'
+    | '/(core)/pelatihan/belajar/$enrollmentId/ujian/$assessmentId'
     | '/(core)/back-office/tools/$toolId/calibration/'
     | '/(core)/back-office/tools/$toolId/status/'
     | '/(core)/dashboard/pelatihan/$enrollmentId/materi/'
@@ -1982,7 +2067,6 @@ export interface RootRouteChildren {
   coreRouteRoute: typeof coreRouteRouteWithChildren
   KatalogRoute: typeof KatalogRoute
   ProfilRoute: typeof ProfilRoute
-  TestRoute: typeof TestRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
   BeritaNewsIdRoute: typeof BeritaNewsIdRoute
   MediaDanPublikasiNewsIdRoute: typeof MediaDanPublikasiNewsIdRoute
@@ -2000,11 +2084,9 @@ export interface RootRouteChildren {
   MediaDanPublikasiIndexRoute: typeof MediaDanPublikasiIndexRoute
   PelatihanIndexRoute: typeof PelatihanIndexRoute
   PpidIndexRoute: typeof PpidIndexRoute
-  PelatihanTransaksiOrderIdRoute: typeof PelatihanTransaksiOrderIdRoute
   PpidSetiapSaatDocumentIdRoute: typeof PpidSetiapSaatDocumentIdRoute
   PpidSetiapSaatRegulasiRoute: typeof PpidSetiapSaatRegulasiRoute
   VerifyCertificateTokenRoute: typeof VerifyCertificateTokenRoute
-  PelatihanTransaksiIndexRoute: typeof PelatihanTransaksiIndexRoute
   PpidSetiapSaatIndexRoute: typeof PpidSetiapSaatIndexRoute
 }
 
@@ -2015,13 +2097,6 @@ declare module '@tanstack/react-router' {
       path: '/unauthorized'
       fullPath: '/unauthorized'
       preLoaderRoute: typeof UnauthorizedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/test': {
-      id: '/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof TestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profil': {
@@ -2262,6 +2337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof corePengujianRouteRouteImport
       parentRoute: typeof coreRouteRoute
     }
+    '/(core)/pelatihan': {
+      id: '/(core)/pelatihan'
+      path: '/pelatihan'
+      fullPath: '/pelatihan'
+      preLoaderRoute: typeof corePelatihanRouteRouteImport
+      parentRoute: typeof coreRouteRoute
+    }
     '/(core)/konsultasi': {
       id: '/(core)/konsultasi'
       path: '/konsultasi'
@@ -2302,13 +2384,6 @@ declare module '@tanstack/react-router' {
       path: '/ppid/setiap-saat'
       fullPath: '/ppid/setiap-saat'
       preLoaderRoute: typeof PpidSetiapSaatIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pelatihan/transaksi/': {
-      id: '/pelatihan/transaksi/'
-      path: '/pelatihan/transaksi'
-      fullPath: '/pelatihan/transaksi'
-      preLoaderRoute: typeof PelatihanTransaksiIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)/worksheets/': {
@@ -2381,13 +2456,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PpidSetiapSaatDocumentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pelatihan/transaksi/$orderId': {
-      id: '/pelatihan/transaksi/$orderId'
-      path: '/pelatihan/transaksi/$orderId'
-      fullPath: '/pelatihan/transaksi/$orderId'
-      preLoaderRoute: typeof PelatihanTransaksiOrderIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(core)/worksheets/jadwal-personel': {
       id: '/(core)/worksheets/jadwal-personel'
       path: '/jadwal-personel'
@@ -2436,6 +2504,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pengujian/checkout'
       preLoaderRoute: typeof corePengujianCheckoutRouteImport
       parentRoute: typeof corePengujianRouteRoute
+    }
+    '/(core)/pelatihan/transaksi': {
+      id: '/(core)/pelatihan/transaksi'
+      path: '/transaksi'
+      fullPath: '/pelatihan/transaksi'
+      preLoaderRoute: typeof corePelatihanTransaksiRouteImport
+      parentRoute: typeof corePelatihanRouteRoute
     }
     '/(core)/employee/worksheets/': {
       id: '/(core)/employee/worksheets/'
@@ -2654,6 +2729,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeAuditsIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/pelatihan/transaksi/$orderId': {
+      id: '/(core)/pelatihan/transaksi/$orderId'
+      path: '/$orderId'
+      fullPath: '/pelatihan/transaksi/$orderId'
+      preLoaderRoute: typeof corePelatihanTransaksiOrderIdRouteImport
+      parentRoute: typeof corePelatihanTransaksiRoute
+    }
+    '/(core)/pelatihan/sertifikat/$enrollmentId': {
+      id: '/(core)/pelatihan/sertifikat/$enrollmentId'
+      path: '/sertifikat/$enrollmentId'
+      fullPath: '/pelatihan/sertifikat/$enrollmentId'
+      preLoaderRoute: typeof corePelatihanSertifikatEnrollmentIdRouteImport
+      parentRoute: typeof corePelatihanRouteRoute
+    }
+    '/(core)/pelatihan/belajar/$enrollmentId': {
+      id: '/(core)/pelatihan/belajar/$enrollmentId'
+      path: '/belajar/$enrollmentId'
+      fullPath: '/pelatihan/belajar/$enrollmentId'
+      preLoaderRoute: typeof corePelatihanBelajarEnrollmentIdRouteImport
+      parentRoute: typeof corePelatihanRouteRoute
+    }
     '/(core)/dashboard/pelatihan/$enrollmentId': {
       id: '/(core)/dashboard/pelatihan/$enrollmentId'
       path: '/pelatihan/$enrollmentId'
@@ -2794,6 +2890,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeAuditsAuditIdRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/pelatihan/belajar/$enrollmentId/': {
+      id: '/(core)/pelatihan/belajar/$enrollmentId/'
+      path: '/'
+      fullPath: '/pelatihan/belajar/$enrollmentId/'
+      preLoaderRoute: typeof corePelatihanBelajarEnrollmentIdIndexRouteImport
+      parentRoute: typeof corePelatihanBelajarEnrollmentIdRoute
+    }
+    '/(core)/back-office/pengujian/import-export/': {
+      id: '/(core)/back-office/pengujian/import-export/'
+      path: '/pengujian/import-export'
+      fullPath: '/back-office/pengujian/import-export'
+      preLoaderRoute: typeof coreBackOfficePengujianImportExportIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/employee/tools/$worksheetId/return': {
       id: '/(core)/employee/tools/$worksheetId/return'
       path: '/tools/$worksheetId/return'
@@ -2927,6 +3037,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficePelatihanPelatihanIdPesertaRouteImport
       parentRoute: typeof coreBackOfficePelatihanPelatihanIdRoute
     }
+    '/(core)/back-office/pelatihan/$pelatihanId/penilaian': {
+      id: '/(core)/back-office/pelatihan/$pelatihanId/penilaian'
+      path: '/penilaian'
+      fullPath: '/back-office/pelatihan/$pelatihanId/penilaian'
+      preLoaderRoute: typeof coreBackOfficePelatihanPelatihanIdPenilaianRouteImport
+      parentRoute: typeof coreBackOfficePelatihanPelatihanIdRoute
+    }
     '/(core)/back-office/pelatihan/$pelatihanId/overview': {
       id: '/(core)/back-office/pelatihan/$pelatihanId/overview'
       path: '/overview'
@@ -3046,6 +3163,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/pelatihan/belajar/$enrollmentId/ujian/$assessmentId': {
+      id: '/(core)/pelatihan/belajar/$enrollmentId/ujian/$assessmentId'
+      path: '/ujian/$assessmentId'
+      fullPath: '/pelatihan/belajar/$enrollmentId/ujian/$assessmentId'
+      preLoaderRoute: typeof corePelatihanBelajarEnrollmentIdUjianAssessmentIdRouteImport
+      parentRoute: typeof corePelatihanBelajarEnrollmentIdRoute
+    }
+    '/(core)/pelatihan/belajar/$enrollmentId/materi/$materiId': {
+      id: '/(core)/pelatihan/belajar/$enrollmentId/materi/$materiId'
+      path: '/materi/$materiId'
+      fullPath: '/pelatihan/belajar/$enrollmentId/materi/$materiId'
+      preLoaderRoute: typeof corePelatihanBelajarEnrollmentIdMateriMateriIdRouteImport
+      parentRoute: typeof corePelatihanBelajarEnrollmentIdRoute
+    }
     '/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId': {
       id: '/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId'
       path: '/ujian/$assessmentId'
@@ -3129,6 +3260,7 @@ interface coreBackOfficePelatihanPelatihanIdRouteChildren {
   coreBackOfficePelatihanPelatihanIdEditRoute: typeof coreBackOfficePelatihanPelatihanIdEditRoute
   coreBackOfficePelatihanPelatihanIdMateriRoute: typeof coreBackOfficePelatihanPelatihanIdMateriRoute
   coreBackOfficePelatihanPelatihanIdOverviewRoute: typeof coreBackOfficePelatihanPelatihanIdOverviewRoute
+  coreBackOfficePelatihanPelatihanIdPenilaianRoute: typeof coreBackOfficePelatihanPelatihanIdPenilaianRoute
   coreBackOfficePelatihanPelatihanIdPesertaRoute: typeof coreBackOfficePelatihanPelatihanIdPesertaRoute
   coreBackOfficePelatihanPelatihanIdQuizRoute: typeof coreBackOfficePelatihanPelatihanIdQuizRoute
   coreBackOfficePelatihanPelatihanIdSertifikatRoute: typeof coreBackOfficePelatihanPelatihanIdSertifikatRoute
@@ -3142,6 +3274,8 @@ const coreBackOfficePelatihanPelatihanIdRouteChildren: coreBackOfficePelatihanPe
       coreBackOfficePelatihanPelatihanIdMateriRoute,
     coreBackOfficePelatihanPelatihanIdOverviewRoute:
       coreBackOfficePelatihanPelatihanIdOverviewRoute,
+    coreBackOfficePelatihanPelatihanIdPenilaianRoute:
+      coreBackOfficePelatihanPelatihanIdPenilaianRoute,
     coreBackOfficePelatihanPelatihanIdPesertaRoute:
       coreBackOfficePelatihanPelatihanIdPesertaRoute,
     coreBackOfficePelatihanPelatihanIdQuizRoute:
@@ -3219,6 +3353,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute
   coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
   coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
+  coreBackOfficePengujianImportExportIndexRoute: typeof coreBackOfficePengujianImportExportIndexRoute
   coreBackOfficeToolsToolIdCalibrationCreateRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
   coreBackOfficeToolsToolIdStatusCreateRoute: typeof coreBackOfficeToolsToolIdStatusCreateRoute
   coreBackOfficeToolsToolIdCalibrationIndexRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
@@ -3318,6 +3453,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeToolsToolIdDetailRoute: coreBackOfficeToolsToolIdDetailRoute,
   coreBackOfficeToolsToolIdEditRoute: coreBackOfficeToolsToolIdEditRoute,
   coreBackOfficeUsersUserIdEditRoute: coreBackOfficeUsersUserIdEditRoute,
+  coreBackOfficePengujianImportExportIndexRoute:
+    coreBackOfficePengujianImportExportIndexRoute,
   coreBackOfficeToolsToolIdCalibrationCreateRoute:
     coreBackOfficeToolsToolIdCalibrationCreateRoute,
   coreBackOfficeToolsToolIdStatusCreateRoute:
@@ -3448,6 +3585,58 @@ const coreEmployeeRouteRouteChildren: coreEmployeeRouteRouteChildren = {
 const coreEmployeeRouteRouteWithChildren =
   coreEmployeeRouteRoute._addFileChildren(coreEmployeeRouteRouteChildren)
 
+interface corePelatihanTransaksiRouteChildren {
+  corePelatihanTransaksiOrderIdRoute: typeof corePelatihanTransaksiOrderIdRoute
+}
+
+const corePelatihanTransaksiRouteChildren: corePelatihanTransaksiRouteChildren =
+  {
+    corePelatihanTransaksiOrderIdRoute: corePelatihanTransaksiOrderIdRoute,
+  }
+
+const corePelatihanTransaksiRouteWithChildren =
+  corePelatihanTransaksiRoute._addFileChildren(
+    corePelatihanTransaksiRouteChildren,
+  )
+
+interface corePelatihanBelajarEnrollmentIdRouteChildren {
+  corePelatihanBelajarEnrollmentIdIndexRoute: typeof corePelatihanBelajarEnrollmentIdIndexRoute
+  corePelatihanBelajarEnrollmentIdMateriMateriIdRoute: typeof corePelatihanBelajarEnrollmentIdMateriMateriIdRoute
+  corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute: typeof corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute
+}
+
+const corePelatihanBelajarEnrollmentIdRouteChildren: corePelatihanBelajarEnrollmentIdRouteChildren =
+  {
+    corePelatihanBelajarEnrollmentIdIndexRoute:
+      corePelatihanBelajarEnrollmentIdIndexRoute,
+    corePelatihanBelajarEnrollmentIdMateriMateriIdRoute:
+      corePelatihanBelajarEnrollmentIdMateriMateriIdRoute,
+    corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute:
+      corePelatihanBelajarEnrollmentIdUjianAssessmentIdRoute,
+  }
+
+const corePelatihanBelajarEnrollmentIdRouteWithChildren =
+  corePelatihanBelajarEnrollmentIdRoute._addFileChildren(
+    corePelatihanBelajarEnrollmentIdRouteChildren,
+  )
+
+interface corePelatihanRouteRouteChildren {
+  corePelatihanTransaksiRoute: typeof corePelatihanTransaksiRouteWithChildren
+  corePelatihanBelajarEnrollmentIdRoute: typeof corePelatihanBelajarEnrollmentIdRouteWithChildren
+  corePelatihanSertifikatEnrollmentIdRoute: typeof corePelatihanSertifikatEnrollmentIdRoute
+}
+
+const corePelatihanRouteRouteChildren: corePelatihanRouteRouteChildren = {
+  corePelatihanTransaksiRoute: corePelatihanTransaksiRouteWithChildren,
+  corePelatihanBelajarEnrollmentIdRoute:
+    corePelatihanBelajarEnrollmentIdRouteWithChildren,
+  corePelatihanSertifikatEnrollmentIdRoute:
+    corePelatihanSertifikatEnrollmentIdRoute,
+}
+
+const corePelatihanRouteRouteWithChildren =
+  corePelatihanRouteRoute._addFileChildren(corePelatihanRouteRouteChildren)
+
 interface corePengujianRouteRouteChildren {
   corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute
   corePengujianSertifikatRoute: typeof corePengujianSertifikatRoute
@@ -3490,6 +3679,7 @@ interface coreRouteRouteChildren {
   coreDisplayBoardRouteRoute: typeof coreDisplayBoardRouteRouteWithChildren
   coreEmployeeRouteRoute: typeof coreEmployeeRouteRouteWithChildren
   coreKonsultasiRouteRoute: typeof coreKonsultasiRouteRoute
+  corePelatihanRouteRoute: typeof corePelatihanRouteRouteWithChildren
   corePengujianRouteRoute: typeof corePengujianRouteRouteWithChildren
   coreUjiKompetensiRouteRoute: typeof coreUjiKompetensiRouteRoute
   coreWorksheetsRouteRoute: typeof coreWorksheetsRouteRouteWithChildren
@@ -3507,6 +3697,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreDisplayBoardRouteRoute: coreDisplayBoardRouteRouteWithChildren,
   coreEmployeeRouteRoute: coreEmployeeRouteRouteWithChildren,
   coreKonsultasiRouteRoute: coreKonsultasiRouteRoute,
+  corePelatihanRouteRoute: corePelatihanRouteRouteWithChildren,
   corePengujianRouteRoute: corePengujianRouteRouteWithChildren,
   coreUjiKompetensiRouteRoute: coreUjiKompetensiRouteRoute,
   coreWorksheetsRouteRoute: coreWorksheetsRouteRouteWithChildren,
@@ -3528,7 +3719,6 @@ const rootRouteChildren: RootRouteChildren = {
   coreRouteRoute: coreRouteRouteWithChildren,
   KatalogRoute: KatalogRoute,
   ProfilRoute: ProfilRoute,
-  TestRoute: TestRoute,
   UnauthorizedRoute: UnauthorizedRoute,
   BeritaNewsIdRoute: BeritaNewsIdRoute,
   MediaDanPublikasiNewsIdRoute: MediaDanPublikasiNewsIdRoute,
@@ -3546,11 +3736,9 @@ const rootRouteChildren: RootRouteChildren = {
   MediaDanPublikasiIndexRoute: MediaDanPublikasiIndexRoute,
   PelatihanIndexRoute: PelatihanIndexRoute,
   PpidIndexRoute: PpidIndexRoute,
-  PelatihanTransaksiOrderIdRoute: PelatihanTransaksiOrderIdRoute,
   PpidSetiapSaatDocumentIdRoute: PpidSetiapSaatDocumentIdRoute,
   PpidSetiapSaatRegulasiRoute: PpidSetiapSaatRegulasiRoute,
   VerifyCertificateTokenRoute: VerifyCertificateTokenRoute,
-  PelatihanTransaksiIndexRoute: PelatihanTransaksiIndexRoute,
   PpidSetiapSaatIndexRoute: PpidSetiapSaatIndexRoute,
 }
 export const routeTree = rootRouteImport

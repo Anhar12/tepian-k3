@@ -53,4 +53,17 @@ export const queuePresets: Record<QueueName, QueuePreset> = {
       concurrency: 5,
     },
   },
+
+  [QueueName.CLEANUP]: {
+    name: QueueName.CLEANUP,
+    defaultJobOptions: {
+      attempts: 5,
+      backoff: { type: "exponential", delay: 5000 },
+      removeOnComplete: { count: 100 },
+      removeOnFail: { count: 500 },
+    },
+    workerOptions: {
+      concurrency: 2,
+    },
+  },
 };

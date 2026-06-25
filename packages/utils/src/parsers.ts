@@ -22,7 +22,7 @@ export const getSortingStateParser = <TData>(
     : null;
 
   return createParser({
-    parse: (value) => {
+    parse: (value: string) => {
       try {
         const parsed = JSON.parse(value);
         const result = z.array(sortingItemSchema).safeParse(parsed);
@@ -38,8 +38,8 @@ export const getSortingStateParser = <TData>(
         return null;
       }
     },
-    serialize: (value) => JSON.stringify(value),
-    eq: (a, b) =>
+    serialize: (value: ExtendedColumnSort<TData>[]) => JSON.stringify(value),
+    eq: (a: ExtendedColumnSort<TData>[], b: ExtendedColumnSort<TData>[]) =>
       a.length === b.length &&
       a.every(
         (item, index) =>
@@ -69,7 +69,7 @@ export const getFiltersStateParser = <TData>(
     : null;
 
   return createParser({
-    parse: (value) => {
+    parse: (value: string) => {
       try {
         const parsed = JSON.parse(value);
         const result = z.array(filterItemSchema).safeParse(parsed);
@@ -85,8 +85,8 @@ export const getFiltersStateParser = <TData>(
         return null;
       }
     },
-    serialize: (value) => JSON.stringify(value),
-    eq: (a, b) =>
+    serialize: (value: ExtendedColumnFilter<TData>[]) => JSON.stringify(value),
+    eq: (a: ExtendedColumnFilter<TData>[], b: ExtendedColumnFilter<TData>[]) =>
       a.length === b.length &&
       a.every(
         (filter, index) =>

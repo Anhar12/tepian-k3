@@ -503,6 +503,143 @@ export const pelatihanCertificates = createTable(
 );
 ```
 
+#### 13. `pelatihan_schedules` (Training Class Schedules)
+
+```typescript
+export const pelatihanSchedules = createTable("pelatihan_schedules", {
+  id: uuid("id")
+    .primaryKey()
+    .notNull()
+    .$default(() => uuidv7()),
+  pelatihanId: uuid("pelatihan_id")
+    .notNull()
+    .references(() => pelatihan.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 250 }).notNull(),
+  description: text("description"),
+  sessionDate: timestamp("session_date", {
+    withTimezone: true,
+    mode: "string",
+  }).notNull(),
+  startTime: varchar("start_time", { length: 50 }).notNull(),
+  endTime: varchar("end_time", { length: 50 }).notNull(),
+  room: varchar("room", { length: 250 }),
+  category: varchar("category", { length: 100 }),
+  materialUrl: varchar("material_url", { length: 500 }),
+  meetUrl: varchar("meet_url", { length: 500 }),
+  attendanceToken: varchar("attendance_token", { length: 10 }), // 10 characters token for verification
+  ...timestamps,
+});
+```
+
+#### 14. `pelatihan_attendances` (Participant Attendance Records)
+
+```typescript
+export const pelatihanAttendances = createTable(
+  "pelatihan_attendances",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    enrollmentId: uuid("enrollment_id")
+      .notNull()
+      .references(() => pelatihanEnrollments.id, { onDelete: "cascade" }),
+    scheduleId: uuid("schedule_id")
+      .notNull()
+      .references(() => pelatihanSchedules.id, { onDelete: "cascade" }),
+    status: attendanceStatusEnum("status").notNull().default("present"),
+    checkedInAt: timestamp("checked_in_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .notNull()
+      .defaultNow(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("attendance_enrollment_schedule_idx")
+      .on(table.enrollmentId, table.scheduleId)
+      .where(sql`${table.deletedAt} IS NULL`),
+  ],
+);
+```
+
+#### 15. `user_training_profiles` (Participant & Company Profiles)
+
+```typescript
+export const userTrainingProfiles = createTable(
+  "user_training_profiles",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    userId: uuid("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    // Company Information
+    companyName: varchar("company_name", { length: 250 }),
+    companyAddress: text("company_address"),
+    companyProvinceId: uuid("company_province_id").references(
+      () => provinces.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    companyRegencyId: uuid("company_regency_id").references(
+      () => regencies.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    companyDistrictId: uuid("company_district_id").references(
+      () => districts.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    companyKbli: varchar("company_kbli", { length: 250 }),
+
+    // Participant Information
+    participantName: varchar("participant_name", { length: 250 }),
+    participantNik: varchar("participant_nik", { length: 50 }),
+    participantBirthPlace: varchar("participant_birth_place", { length: 250 }),
+    participantBirthDate: timestamp("participant_birth_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    participantPhone: varchar("participant_phone", { length: 50 }),
+    participantAddress: text("participant_address"),
+    participantBloodType: varchar("participant_blood_type", { length: 10 }),
+    participantProvinceId: uuid("participant_province_id").references(
+      () => provinces.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    participantRegencyId: uuid("participant_regency_id").references(
+      () => regencies.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+    participantDistrictId: uuid("participant_district_id").references(
+      () => districts.id,
+      {
+        onDelete: "set null",
+      },
+    ),
+
+    ...timestamps,
+  },
+  (table) => [
+    index("user_training_profile_user_id_idx").using("btree", table.userId),
+  ],
+);
+```
+
 ## API Structure
 
 ### tRPC Routers

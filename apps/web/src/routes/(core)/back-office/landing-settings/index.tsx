@@ -462,6 +462,9 @@ function LandingSettingsComponent() {
                       uploadImageMutation.isPending ||
                       setSettingMutation.isPending
                     }
+                    targetWidth={500}
+                    targetHeight={550}
+                    aspectRatio={500 / 550}
                   />
                   {uploadImageMutation.isPending && (
                     <p className="flex items-center gap-1.5 text-xs font-bold text-blue-600">
@@ -527,6 +530,9 @@ function LandingSettingsComponent() {
                       uploadImageMutation.isPending ||
                       setSettingMutation.isPending
                     }
+                    targetWidth={640}
+                    targetHeight={480}
+                    aspectRatio={640 / 480}
                   />
                   {uploadImageMutation.isPending && (
                     <p className="flex items-center gap-1.5 text-xs font-bold text-blue-600">
@@ -615,6 +621,9 @@ function LandingSettingsComponent() {
                       uploadImageMutation.isPending ||
                       setSettingMutation.isPending
                     }
+                    targetWidth={1440}
+                    targetHeight={900}
+                    aspectRatio={1440 / 900}
                   />
                   {uploadImageMutation.isPending && (
                     <p className="flex items-center gap-1.5 text-xs font-bold text-blue-600">
@@ -752,6 +761,9 @@ function LandingSettingsComponent() {
                           uploadImageMutation.isPending ||
                           setSettingMutation.isPending
                         }
+                        targetWidth={1200}
+                        targetHeight={450}
+                        aspectRatio={1200 / 450}
                       />
                       {uploadImageMutation.isPending && (
                         <p className="flex items-center gap-1.5 text-xs font-bold text-blue-600">

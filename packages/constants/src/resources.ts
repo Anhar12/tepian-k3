@@ -32,6 +32,9 @@ export const RESOURCES = [
   { key: "role-permissions" },
   { key: "user-permissions" },
 
+  // ==================== IMPORT / EXPORT ====================
+  { key: "pengujian-import-export" },
+
   // ==================== TOOLS ====================
   { key: "tool-codes" },
   { key: "tools" },

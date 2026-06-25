@@ -13,7 +13,6 @@ import {
 } from "@tepian-k3/auth";
 import userSchema from "@tepian-k3/schema/platform/users.schema";
 import otpSchema from "@tepian-k3/schema/platform/otp.schema";
-import { OTPService } from "@tepian-k3/auth/services/otp";
 import { Effect } from "effect";
 import permissionQueries from "@tepian-k3/queries/platform/permission.queries";
 import { storageService } from "@tepian-k3/services/storage";
@@ -90,12 +89,15 @@ export const authRouter = createTRPCRouter({
             const permission = yield* permissionQueries.getUserWithPermissions(
               user.id,
             );
+            // Generate a single session ID to use for both access and refresh tokens
+            const sessionId = uuidv7();
 
             // Create access token with short expiry
             const accessToken = yield* Effect.tryPromise({
               try: () =>
                 createAccessToken({
                   id: user.id,
+                  sessionId,
                   email: user.email,
                   roles: permission?.roles.map((role) => role.name) || [],
                   createdAt: user.createdAt,
@@ -115,7 +117,6 @@ export const authRouter = createTRPCRouter({
             });
 
             // Create refresh token with long expiry
-            const sessionId = uuidv7();
             const refreshTokenJWT = yield* Effect.tryPromise({
               try: () =>
                 createRefreshToken({
@@ -190,8 +191,6 @@ export const authRouter = createTRPCRouter({
         }),
       );
 
-      await OTPService.createOTP({ email: input.email });
-
       return user;
       // ##################
       // end authored
@@ -200,52 +199,32 @@ export const authRouter = createTRPCRouter({
 
   sendOTP: withRateLimit(rateLimiters.otp())
     .input(otpSchema.createOtpSchema)
-    .mutation(async ({ input }) => {
-      const result = await OTPService.createOTP(input);
-
-      if (!result.success) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: result.message,
-        });
-      }
-
-      return result;
+    .mutation(() => {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "Fitur OTP dinonaktifkan sementara. Verifikasi harus disetujui oleh Administrator.",
+      });
     }),
 
   resendOTP: withRateLimit(rateLimiters.otp())
     .input(otpSchema.createOtpSchema)
-    .mutation(async ({ input }) => {
-      const result = await OTPService.resendOTP(input);
-
-      if (!result.success) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: result.message,
-        });
-      }
-
-      return result;
+    .mutation(() => {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "Fitur OTP dinonaktifkan sementara. Verifikasi harus disetujui oleh Administrator.",
+      });
     }),
 
   verifyOTP: withRateLimit(rateLimiters.otp())
     .input(otpSchema.verifyOtpSchema)
-    .mutation(async ({ input, ctx }) => {
-      const result = await OTPService.verifyOTP(input, {
-        userAgent: ctx.userAgent,
-        ipAddress: ctx.ip,
-        os: ctx.osName,
-        version: ctx.osVersion,
+    .mutation(() => {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "Fitur OTP dinonaktifkan sementara. Verifikasi harus disetujui oleh Administrator.",
       });
-
-      if (!result.success) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: result.message,
-        });
-      }
-
-      return result;
     }),
 
   requestPasswordReset: withRateLimit(rateLimiters.email())
@@ -429,12 +408,15 @@ export const authRouter = createTRPCRouter({
                 }),
               );
             }
+            // Generate a single session ID for the new tokens
+            const sessionId = uuidv7();
 
             // Create new access token
             const accessToken = yield* Effect.tryPromise({
               try: () =>
                 createAccessToken({
                   id: permission.id,
+                  sessionId,
                   email: permission.email,
                   roles: permission.roles.map((role) => role.name),
                   createdAt: permission.createdAt,
@@ -449,7 +431,6 @@ export const authRouter = createTRPCRouter({
             });
 
             // Create new refresh token (rotation)
-            const sessionId = uuidv7();
             const newRefreshTokenJWT = yield* Effect.tryPromise({
               try: () =>
                 createRefreshToken({

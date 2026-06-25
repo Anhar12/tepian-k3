@@ -47,6 +47,9 @@
     },
     "./idempotency": {
       "default": "./src/idempotency/index.ts"
+    },
+    "./excel": {
+      "default": "./src/excel/index.ts"
     }
   },
   "dependencies": {
@@ -58,6 +61,7 @@
     "bullmq": "^5.67.2",
     "clsx": "^2.1.1",
     "date-fns": "catalog:",
+    "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "file-type": "^21.3.0",
     "ioredis": "^5.9.1",

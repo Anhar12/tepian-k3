@@ -268,7 +268,11 @@ function RouteComponent() {
     trpc.pelatihan.enrollment.enrollFreePelatihan.mutationOptions({
       onSuccess: (enrollment: any) => {
         toast.success("Berhasil mendaftar pelatihan!");
-        navigate({ to: `/dashboard/pelatihan/${enrollment.id}` });
+        if (data?.type === "elearning") {
+          navigate({ to: `/pelatihan/belajar/${enrollment.id}` });
+        } else {
+          navigate({ to: `/dashboard/pelatihan/${enrollment.id}` });
+        }
       },
       onError: (error: any) => {
         toast.error(error.message || "Gagal mendaftar pelatihan.");
@@ -1694,6 +1698,10 @@ function RouteComponent() {
                             currentEnrollment.verificationStatus === "rejected"
                           ) {
                             navigate({ to: "/profile" });
+                          } else if (data?.type === "elearning") {
+                            navigate({
+                              to: `/pelatihan/belajar/${currentEnrollment.id}`,
+                            });
                           } else {
                             navigate({
                               to: `/dashboard/pelatihan/${currentEnrollment.id}`,

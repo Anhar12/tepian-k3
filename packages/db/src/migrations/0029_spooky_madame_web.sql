@@ -1,0 +1,1 @@
+ALTER TABLE "pelatihan_schedules" ADD COLUMN "attendance_token" varchar(10);

@@ -233,7 +233,7 @@ export const toolCalibrationDocumentationRelations = relations(
   }),
 );
 
-export const clustersRelations = relations(users, ({ many }) => ({
+export const clustersRelations = relations(clusters, ({ many }) => ({
   parameterCategories: many(parameterCategories),
   parameters: many(parameters),
 }));
@@ -971,5 +971,3 @@ export const userTrainingProfileRelations = relations(
 // ##################
 // end authored
 // ##################
-
-

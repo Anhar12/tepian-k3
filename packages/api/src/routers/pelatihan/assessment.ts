@@ -5,6 +5,7 @@ import {
   createPelatihanAssessmentSchema,
   updatePelatihanAssessmentSchema,
   addQuestionSchema,
+  gradeEssayAnswersSchema,
 } from "@tepian-k3/schema/pelatihan/pelatihan.schema";
 
 // ##################
@@ -151,9 +152,7 @@ export const assessmentRouter = createTRPCRouter({
         await import("@tepian-k3/queries/pelatihan/assessment.queries").then(
           (m) => m.default,
         );
-      return await runEffect(
-        assessmentQueries.addQuestion(ctx.user.id, input),
-      );
+      return await runEffect(assessmentQueries.addQuestion(ctx.user.id, input));
     }),
 
   deleteQuestion: withPermission("pelatihan.delete")
@@ -165,6 +164,50 @@ export const assessmentRouter = createTRPCRouter({
         );
       return await runEffect(
         assessmentQueries.deleteQuestion(ctx.user.id, input.id),
+      );
+    }),
+
+  getAttemptsForGrading: withPermission("pelatihan-enrollments.read")
+    .input(
+      z.object({
+        pelatihanId: z.string().uuid(),
+        status: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const assessmentQueries =
+        await import("@tepian-k3/queries/pelatihan/assessment.queries").then(
+          (m) => m.default,
+        );
+      return await runEffect(
+        assessmentQueries.getAttemptsForGrading(
+          input.pelatihanId,
+          input.status,
+        ),
+      );
+    }),
+
+  getAttemptDetails: withPermission("pelatihan-enrollments.read")
+    .input(z.object({ attemptId: z.string().uuid() }))
+    .query(async ({ input }) => {
+      const assessmentQueries =
+        await import("@tepian-k3/queries/pelatihan/assessment.queries").then(
+          (m) => m.default,
+        );
+      return await runEffect(
+        assessmentQueries.getAttemptDetails(input.attemptId),
+      );
+    }),
+
+  gradeEssayAnswers: withPermission("pelatihan.update")
+    .input(gradeEssayAnswersSchema)
+    .mutation(async ({ ctx, input }) => {
+      const assessmentQueries =
+        await import("@tepian-k3/queries/pelatihan/assessment.queries").then(
+          (m) => m.default,
+        );
+      return await runEffect(
+        assessmentQueries.gradeEssayAnswers(ctx.user.id, ctx.user.email, input),
       );
     }),
 });
