@@ -16,5 +16,6 @@ if [ -z "$POSTGRES_URL" ]; then
 fi
 
 echo "Running database migrations..."
-/app/packages/db/node_modules/.bin/drizzle-kit migrate --config=/app/packages/db/drizzle.config.ts
+cd /app/packages/db
+./node_modules/.bin/drizzle-kit migrate --config=drizzle.config.ts
 echo "Migrations complete."
