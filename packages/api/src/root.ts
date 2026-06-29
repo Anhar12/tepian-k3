@@ -1,9 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from ".";
-import { konsultasiRouter } from "./routers/konsultasi";
 import { pelatihanRouter } from "./routers/pelatihan";
 import { pengujianRouter } from "./routers/pengujian";
 import { platformRouter } from "./routers/platform";
-import { ujiKompetensiRouter } from "./routers/uji-kompetensi";
 
 /**
  * This is the primary router for your server.
@@ -14,8 +12,6 @@ export const appRouter = createTRPCRouter({
   platform: platformRouter,
   pengujian: pengujianRouter,
   pelatihan: pelatihanRouter,
-  konsultasi: konsultasiRouter,
-  ujiKompetensi: ujiKompetensiRouter,
 });
 
 // export type definition of API
