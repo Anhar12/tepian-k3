@@ -17,7 +17,8 @@ import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import { createTRPCRouter, withPermission } from "../..";
 import { runEffect } from "../../utils/run-effect";
-import { tryPromise } from "../../utils/try-promise";
+import { handleTRPCError } from "@tepian-k3/utils/handle-trpc-error";
+import { logError } from "@tepian-k3/services/logger";
 // import { storageService } from "@tepian-k3/services/storage";
 
 export const generateDocumentRouter = createTRPCRouter({
@@ -47,8 +48,8 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            const offeringLetterHeader = yield* tryPromise(
-              () =>
+            const offeringLetterHeader = yield* Effect.tryPromise({
+              try: () =>
                 generateOfferingLetterHeaderPdf({
                   companyName: company.name,
                   regencyName: company.regency.name,
@@ -58,11 +59,22 @@ export const generateDocumentRouter = createTRPCRouter({
                   adminEmail: input.adminEmail,
                   adminContact: input.adminContact,
                 }),
-              "Gagal menghasilkan header surat penawaran",
-            );
+              catch: (error) => {
+                logError(
+                  "generateOfferingLetterHeaderPdf",
+                  "Gagal menghasilkan header surat penawaran",
+                  { error },
+                );
+                return handleTRPCError(
+                  error,
+                  "Gagal menghasilkan header surat penawaran",
+                  "INTERNAL_SERVER_ERROR",
+                );
+              },
+            });
 
-            const offeringLetter = yield* tryPromise(
-              () =>
+            const offeringLetter = yield* Effect.tryPromise({
+              try: () =>
                 generateOfferingLetterPdf({
                   worksheet,
                   companyName: company.name,
@@ -71,8 +83,19 @@ export const generateDocumentRouter = createTRPCRouter({
                   companyBankAccount: company.companyBankAccount,
                   companyBankAccountName: company.companyBankAccountName,
                 }),
-              "Gagal menghasilkan surat penawaran",
-            );
+              catch: (error) => {
+                logError(
+                  "generateOfferingLetterPdf",
+                  "Gagal menghasilkan surat penawaran",
+                  { error },
+                );
+                return handleTRPCError(
+                  error,
+                  "Gagal menghasilkan surat penawaran",
+                  "INTERNAL_SERVER_ERROR",
+                );
+              },
+            });
 
             // Merge using the service
             const mergedPdf = yield* addCoverPage(
@@ -133,8 +156,8 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            const spk = yield* tryPromise(
-              () =>
+            const spk = yield* Effect.tryPromise({
+              try: () =>
                 generateSpkPdf({
                   worksheet,
                   agreementDate: input.agreementDate,
@@ -150,8 +173,17 @@ export const generateDocumentRouter = createTRPCRouter({
                   letterNumber: input.letterNumber,
                   companyName: company.name,
                 }),
-              "Gagal menghasilkan dokumen SPK",
-            );
+              catch: (error) => {
+                logError("generateSpkPdf", "Gagal menghasilkan dokumen SPK", {
+                  error,
+                });
+                return handleTRPCError(
+                  error,
+                  "Gagal menghasilkan dokumen SPK",
+                  "INTERNAL_SERVER_ERROR",
+                );
+              },
+            });
 
             // const uploadedSpk = yield* storageService.upload(spk as Buffer, {
             //   filename: `spk-${input.letterNumber}.pdf`,
@@ -215,8 +247,8 @@ export const generateDocumentRouter = createTRPCRouter({
               0,
             );
 
-            const tagihan = yield* tryPromise(
-              () =>
+            const tagihan = yield* Effect.tryPromise({
+              try: () =>
                 generateTagihanPdf({
                   companyRegency: company.regency.name,
                   letterNumber: input.letterNumber,
@@ -228,8 +260,19 @@ export const generateDocumentRouter = createTRPCRouter({
                   billingExpiryDate: input.billingExpiryDate,
                   companyName: company.name,
                 }),
-              "Gagal menghasilkan dokumen tagihan",
-            );
+              catch: (error) => {
+                logError(
+                  "generateTagihanPdf",
+                  "Gagal menghasilkan dokumen tagihan",
+                  { error },
+                );
+                return handleTRPCError(
+                  error,
+                  "Gagal menghasilkan dokumen tagihan",
+                  "INTERNAL_SERVER_ERROR",
+                );
+              },
+            });
 
             // const uploadedTagihan = yield* storageService.upload(
             //   tagihan as Buffer,
@@ -291,8 +334,8 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            const assignmentLetter = yield* tryPromise(
-              () =>
+            const assignmentLetter = yield* Effect.tryPromise({
+              try: () =>
                 generateAssignmentLetterPdf({
                   companyName: company.name,
                   companyRegency: company.regency.name,
@@ -312,8 +355,19 @@ export const generateDocumentRouter = createTRPCRouter({
                     },
                   })),
                 }),
-              "Gagal menghasilkan surat tugas",
-            );
+              catch: (error) => {
+                logError(
+                  "generateAssignmentLetterPdf",
+                  "Gagal menghasilkan surat tugas",
+                  { error },
+                );
+                return handleTRPCError(
+                  error,
+                  "Gagal menghasilkan surat tugas",
+                  "INTERNAL_SERVER_ERROR",
+                );
+              },
+            });
 
             return {
               base64: Buffer.from(assignmentLetter as Buffer).toString(

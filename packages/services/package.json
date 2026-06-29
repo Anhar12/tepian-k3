@@ -62,7 +62,6 @@
     "clsx": "^2.1.1",
     "date-fns": "catalog:",
     "exceljs": "^4.4.0",
-    "file-saver": "^2.0.5",
     "file-type": "^21.3.0",
     "ioredis": "^5.9.1",
     "jose": "catalog:",

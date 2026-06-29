@@ -7,14 +7,9 @@ export class TRPCError extends Data.TaggedError("TRPCError")<{
   cause?: unknown;
 }> {}
 
-export class NotFoundError extends Data.TaggedError("NotFoundError")<{
-  code: "NOT_FOUND";
-  message: string;
-  cause?: unknown;
-}> {}
-
-export class UnauthorizedError extends Data.TaggedError("UnauthorizedError")<{
-  code: "UNAUTHORIZED";
-  message: string;
-  cause?: unknown;
+export class ExternalServiceError extends Data.TaggedError(
+  "ExternalServiceError",
+)<{
+  readonly message: string;
+  readonly cause: unknown;
 }> {}
