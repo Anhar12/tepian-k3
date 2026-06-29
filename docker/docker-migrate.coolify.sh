@@ -17,5 +17,12 @@ fi
 
 echo "Running database migrations..."
 cd /app/packages/db
+
+echo "=== DEBUG: Listing /app/packages/db/src/migrations ==="
+ls -la src/migrations || echo "src/migrations directory does not exist!"
+echo "=== DEBUG: Listing src/migrations/meta ==="
+ls -la src/migrations/meta || echo "src/migrations/meta directory does not exist!"
+echo "======================================================"
+
 ./node_modules/.bin/drizzle-kit migrate --config=drizzle.config.ts
 echo "Migrations complete."
