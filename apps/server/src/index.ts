@@ -193,6 +193,13 @@ app.get("/health", async (c) => {
   return c.json(response, overallStatus === "healthy" ? 200 : 503);
 });
 
+app.get("/api/version", (c) => {
+  return c.json({
+    version: process.env.BUILD_VERSION ?? "unknown",
+    buildTime: process.env.BUILD_TIME ?? new Date().toISOString(),
+  });
+});
+
 app.get("/api/public/*", async (c) => {
   // Get the full path after /api/public/
   // ##################

@@ -81,6 +81,11 @@ RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh /usr/local/bin/docker-m
 
 USER server
 
+ARG BUILD_VERSION
+ENV BUILD_VERSION=$BUILD_VERSION
+ARG BUILD_TIME
+ENV BUILD_TIME=$BUILD_TIME
+
 ENV NODE_ENV=production
 EXPOSE 3000
 
