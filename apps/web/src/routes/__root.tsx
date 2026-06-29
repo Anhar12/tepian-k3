@@ -41,6 +41,37 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   }),
 });
 
+import { useAppVersionCheck } from "@/hooks/use-app-version";
+import { X } from "lucide-react";
+
+function AppVersionBanner() {
+  const { updateAvailable, reloadApp, setUpdateAvailable } =
+    useAppVersionCheck();
+
+  if (!updateAvailable) return null;
+
+  return (
+    <div className="sticky top-0 z-50 flex items-center justify-between bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-md">
+      <div className="flex items-center gap-2">
+        <span>🚀 Versi baru aplikasi tersedia!</span>
+        <button
+          onClick={reloadApp}
+          className="rounded-md bg-white/20 px-3 py-1 text-xs transition-colors hover:bg-white/30"
+        >
+          Perbarui Sekarang
+        </button>
+      </div>
+      <button
+        onClick={() => setUpdateAvailable(false)}
+        className="rounded-full p-1 transition-colors hover:bg-white/20"
+        aria-label="Tutup"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 function RootComponent() {
   return (
     <>
@@ -52,6 +83,7 @@ function RootComponent() {
         storageKey="vite-ui-theme"
       >
         <div className="min-h-screen">
+          <AppVersionBanner />
           <NuqsAdapter>
             <Outlet />
           </NuqsAdapter>
