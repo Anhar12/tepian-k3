@@ -59,7 +59,7 @@ function RouteComponent() {
     initialState: {
       sorting: [{ id: "createdAt", desc: false }],
     },
-    getRowId: (row) => row.id,
+    getRowId: (row: any) => row.id,
   });
 
   return (

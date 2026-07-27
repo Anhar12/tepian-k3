@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -30,7 +31,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Car, Hotel, Loader2, Plane, Ship, Wallet, Wrench } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export const Route = createFileRoute("/(core)/pengujian/checkout")({
   head: () => pageHead("Pengujian - Checkout"),
@@ -57,6 +58,11 @@ const optionalItems = [
     id: "udara",
     icon: <Plane className="h-4 w-4 text-blue-500" />,
     label: "Transportasi Udara (PP)",
+  },
+  {
+    id: "bagasi-pesawat",
+    icon: <Plane className="h-4 w-4 text-blue-500" />,
+    label: "Bagasi Pesawat (PP)",
   },
   {
     id: "laut",
@@ -107,6 +113,39 @@ function RouteComponent() {
   const [optionalSelections, setOptionalSelections] = useState<Set<string>>(
     new Set(),
   );
+
+  const groupedMappedItems = useMemo(() => {
+    const items = mappedItems.flatMap((cluster) => cluster.items);
+    
+    const utamaItems = items.filter((item) => item.parameter.serviceType === "utama");
+    const tambahanItems = items.filter((item) => item.parameter.serviceType === "tambahan");
+    const noneItems = items.filter((item) => !item.parameter.serviceType);
+
+    const result = [];
+    if (utamaItems.length > 0) {
+      result.push({
+        id: "utama",
+        name: "Layanan Utama",
+        items: utamaItems,
+      });
+    }
+    if (tambahanItems.length > 0) {
+      result.push({
+        id: "tambahan",
+        name: "Layanan Tambahan",
+        items: tambahanItems,
+      });
+    }
+    if (noneItems.length > 0) {
+      result.push({
+        id: "none",
+        name: "Lainnya",
+        items: noneItems,
+      });
+    }
+    return result;
+  }, [mappedItems]);
+  const [fundingType, setFundingType] = useState<"pnbp" | "dipa">("pnbp");
   const [note, setNote] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
@@ -215,11 +254,13 @@ function RouteComponent() {
 
     createOrderMutation.mutate({
       coverFlightIncluded: optionalSelections.has("udara"),
+      coverBaggageIncluded: optionalSelections.has("bagasi-pesawat"),
       coverGroundTransportationIncluded: optionalSelections.has("darat"),
       coverGroundTransportationToAirportOrHarbour:
         optionalSelections.has("darat-bandara"),
       coverLodgingIncluded: optionalSelections.has("penginapan"),
       coverWaterTransportationIncluded: optionalSelections.has("laut"),
+      fundingType,
       customerNote: note,
       data: orderItems,
     });
@@ -277,7 +318,7 @@ function RouteComponent() {
         <Card className="flex flex-1 flex-col space-y-6">
           <CardContent className="h-full space-y-6">
             <CartItemsList
-              mappedItems={mappedItems}
+              mappedItems={groupedMappedItems}
               loadingItems={loadingItems}
               deleteLoadingItems={deleteLoadingItems}
               onIncrement={(id) =>
@@ -400,6 +441,59 @@ function RouteComponent() {
                     })}
                   </div>
 
+                  {/* Jenis Pengujian (Pendanaan) */}
+                  <div className="space-y-3">
+                    <p className="px-1 text-sm font-bold text-gray-700">
+                      Jenis Pengujian (Pendanaan)
+                    </p>
+                    <RadioGroup
+                      value={fundingType}
+                      onValueChange={(val) =>
+                        setFundingType(val as "pnbp" | "dipa")
+                      }
+                      className="flex flex-col gap-3"
+                    >
+                      <label
+                        htmlFor="pnbp"
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all",
+                          fundingType === "pnbp"
+                            ? "border-blue-300 bg-blue-50"
+                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50",
+                        )}
+                      >
+                        <RadioGroupItem value="pnbp" id="pnbp" />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">
+                            PNBP
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Penerimaan Negara Bukan Pajak
+                          </p>
+                        </div>
+                      </label>
+                      <label
+                        htmlFor="dipa"
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all",
+                          fundingType === "dipa"
+                            ? "border-blue-300 bg-blue-50"
+                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50",
+                        )}
+                      >
+                        <RadioGroupItem value="dipa" id="dipa" />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">
+                            DIPA
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Daftar Isian Pelaksanaan Anggaran
+                          </p>
+                        </div>
+                      </label>
+                    </RadioGroup>
+                  </div>
+
                   {/* Catatan */}
                   <div>
                     <p className="mb-2 text-sm font-bold text-gray-800">
@@ -436,20 +530,33 @@ function RouteComponent() {
             </CardContent>
 
             <CardFooter className="flex-col items-stretch gap-4 p-0">
-              <div className="space-y-4">
+              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+                  <span className="text-sm font-medium text-slate-600">Subtotal Pengujian</span>
+                  <span className="text-sm font-semibold text-slate-900 tabular-nums">Rp {totalPrice.toLocaleString("id-ID")}</span>
+                </div>
+                
                 {optionalSelections.size > 0 && (
-                  <div className="text-sm text-gray-600">
-                    * Total biaya akan diupdate pada saat penawaran dikirimkan
+                  <div className="flex justify-between items-start pb-3 border-b border-slate-200">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-slate-600">Akomodasi & Transportasi</span>
+                      <span className="text-xs text-amber-600 font-medium mt-1">
+                        * Dihitung saat penawaran (Sesuai SBM)
+                      </span>
+                    </div>
+                    <span className="text-sm font-semibold text-slate-500">TBD</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-600">Total :</span>
-                  <span className="text-lg font-semibold text-gray-900 tabular-nums">
+                
+                <div className="flex items-center justify-between pt-1">
+                  <span className="font-bold text-slate-800">Total Estimasi</span>
+                  <span className="text-xl font-bold text-blue-600 tabular-nums">
                     Rp {totalPrice.toLocaleString("id-ID")}
+                    {optionalSelections.size > 0 && <span className="text-sm font-normal text-slate-500 ml-1">+</span>}
                   </span>
                 </div>
                 <Button
-                  className="h-auto w-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
+                  className="h-11 w-full bg-blue-600 font-semibold text-white hover:bg-blue-700 shadow-sm"
                   disabled={
                     mappedItems.length === 0 ||
                     !confirmed ||
@@ -460,7 +567,7 @@ function RouteComponent() {
                   {createOrderMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
-                  Order
+                  Buat Pesanan
                 </Button>
               </div>
             </CardFooter>

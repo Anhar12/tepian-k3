@@ -77,6 +77,7 @@ export type WorksheetDetail = InferQueryModel<
           user: true;
         };
       };
+      proposedDates: true;
       createdBy: true;
     };
   }

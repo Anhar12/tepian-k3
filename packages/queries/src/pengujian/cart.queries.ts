@@ -32,6 +32,7 @@ const cartQueries = {
                 columns: {
                   id: true,
                   name: true,
+                  serviceType: true,
                 },
                 with: {
                   category: {

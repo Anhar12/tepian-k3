@@ -3,7 +3,7 @@ import type { Audit } from "@tepian-k3/types/platform/audit.types";
 import { AUDIT_ENTITY_TYPE_LABELS } from "@tepian-k3/constants";
 import {
   createActionColumn,
-  createDateColumn,
+  createCompactDateColumn,
   createNumberColumn,
   createTextColumn,
 } from "@/lib/column-helpers";
@@ -33,30 +33,31 @@ export default function getAuditsColumns({
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title="Tipe Entitas"
-          label="Tipe Entitas"
+          title="Tipe / ID Entitas"
+          label="Tipe / ID Entitas"
         />
       ),
       cell: ({ row }) => {
         const entityType = row.getValue("entityType") as string;
+        const entityId = row.original.entityId;
         const label =
           (AUDIT_ENTITY_TYPE_LABELS as Record<string, string>)[entityType] ??
           entityType;
         return (
-          <div className="w-40">
-            <Badge variant="secondary">{label}</Badge>
+          <div className="flex flex-col gap-1 w-40">
+            <Badge variant="secondary" className="w-fit">{label}</Badge>
+            <span className="text-xs text-muted-foreground truncate" title={entityId}>{entityId}</span>
           </div>
         );
       },
-      meta: { label: "Tipe Entitas" },
+      meta: { label: "Tipe / ID Entitas" },
     },
-    createTextColumn<Audit>("entityId", "ID Entitas", { width: "w-32" }),
     createTextColumn<Audit>("userEmail", "Email Pengguna", {
       width: "w-52",
     }),
     createTextColumn<Audit>("description", "Deskripsi", { width: "w-72" }),
-    createDateColumn<Audit>("createdAt", "Waktu", {
-      format: "dd/MM/yyyy HH:mm",
+    createCompactDateColumn<Audit>("createdAt", "Waktu", {
+      format: "dd MMM yy HH:mm",
     }),
     createActionColumn<Audit>(({ row }) => (
       <Link

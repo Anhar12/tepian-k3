@@ -40,6 +40,23 @@ export const pelatihanBaseRouter = createTRPCRouter({
       );
     }),
 
+  updateThumbnail: withPermission("pelatihan.update")
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        thumbnailUrl: z.string().nullable(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await runEffect(
+        pelatihanQueries.updateThumbnail(
+          ctx.user.id,
+          input.id,
+          input.thumbnailUrl,
+        ),
+      );
+    }),
+
   deletePelatihan: withPermission("pelatihan.delete")
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {

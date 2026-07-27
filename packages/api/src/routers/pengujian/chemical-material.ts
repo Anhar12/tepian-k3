@@ -14,6 +14,23 @@ export const chemicalMaterialRouter = createTRPCRouter({
   ),
 
   /**
+   * Get global summary of chemical materials
+   */
+  getSummary: withPermission("chemical-materials.view").query(
+    async () => await runEffect(chemicalMaterialQueries.getSummary()),
+  ),
+
+  /**
+   * Get detailed per-material stock summary
+   */
+  getStockSummary: withPermission("chemical-materials.view").query(
+    async () =>
+      await runEffect(
+        chemicalMaterialQueries.getChemicalMaterialStockSummary(),
+      ),
+  ),
+
+  /**
    * Get paginated chemical materials
    */
   getPaginated: withPermission("chemical-materials.view")

@@ -313,7 +313,7 @@ function RouteComponent() {
               disabled={approveMutation.isPending}
               onClick={handleApprove}
             >
-              {approveMutation.isPending ? "Memproses..." : "Setujui Order"}
+              {approveMutation.isPending ? "Memproses..." : "Approve"}
             </Button>
           </div>
         </div>

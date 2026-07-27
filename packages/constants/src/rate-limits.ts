@@ -48,6 +48,7 @@ export const ROLE_RATE_LIMIT_TIERS: Record<Role, RateLimitTier> = {
   petugas_laboratorium: "premium",
   kepala_balai: "premium",
   koordinator_administrasi: "premium",
+  kepala_koordinator_administrasi: "premium",
   bendahara: "premium",
   penyelia: "premium",
   koordinator_mutu: "premium",

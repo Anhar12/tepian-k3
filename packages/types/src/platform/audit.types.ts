@@ -4,7 +4,7 @@ export type Audit = typeof audits.$inferSelect;
 
 export type InsertAudit = typeof audits.$inferInsert;
 
-export type AuditAction = "create" | "update" | "delete" | "status_change";
+export type AuditAction = "create" | "update" | "delete" | "status_change" | "read";
 
 export type AuditEntityType =
   | "order"
@@ -30,7 +30,11 @@ export type AuditEntityType =
   | "faq"
   | "setting"
   | "ppid_documents"
-  | "ppid_submissions";
+  | "ppid_submissions"
+  | "position"
+  | "employee"
+  | "employee_certification"
+  | "chatbot_knowledge_base";
 
 export interface AuditMetadata {
   ipAddress?: string;

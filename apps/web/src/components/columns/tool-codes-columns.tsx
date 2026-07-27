@@ -1,11 +1,11 @@
 import {
-  createActionColumn,
   createDateColumn,
   createNumberColumn,
   createStatusColumn,
   createTextColumn,
 } from "@/lib/column-helpers";
-import { createCrudActionCell } from "@/lib/create-crud-action-cell";
+import type { CrudActionCellConfig } from "@/components/crud-row-actions";
+import { ToolCodeModal } from "@/components/modals/tool-code-modal";
 import { Route } from "@/routes/(core)/back-office/tool-codes";
 import { trpc } from "@/utils/trpc";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -16,11 +16,11 @@ interface ToolCodesColumnsProps {
   perPage: number;
 }
 
-const ActionCell = createCrudActionCell<
+export const toolCodeActionConfig: CrudActionCellConfig<
   ToolCodes,
   (typeof Route)["types"]["searchSchema"]
->({
-  resourceName: "tool-code",
+> = {
+  resourceName: "kode alat",
   resourcePath: "tool-codes",
   permissionPrefix: "tool-codes",
   deleteMutation: trpc.pengujian.toolCode.deleteToolCode,
@@ -30,7 +30,8 @@ const ActionCell = createCrudActionCell<
     trpc.pengujian.toolCode.getPaginatedToolCodes.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
-});
+  editModal: ToolCodeModal,
+};
 
 export default function getToolCodesColumns({
   currentPage,
@@ -56,6 +57,5 @@ export default function getToolCodesColumns({
     }),
     createDateColumn<ToolCodes>("createdAt", "Dibuat"),
     createDateColumn<ToolCodes>("updatedAt", "Diubah", { nullable: true }),
-    createActionColumn<ToolCodes>(({ row }) => <ActionCell row={row} />),
   ];
 }

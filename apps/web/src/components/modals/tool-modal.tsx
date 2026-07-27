@@ -1,0 +1,555 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import ComboBox from "@/components/ui/combobox";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import useDialogs from "@/hooks/use-dialog";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { queryClient, trpc } from "@/utils/trpc";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  TOOLS_AVAILABILITY,
+  TOOLS_AVAILABILITY_LABELS,
+  TOOLS_CONDITIONS,
+  TOOLS_CONDITIONS_LABELS,
+} from "@tepian-k3/constants";
+import toolsSchema from "@tepian-k3/schema/pengujian/tools.schema";
+import { LoaderCircle } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import type { Tools } from "@tepian-k3/types/pengujian/tools.types";
+
+export function ToolModal({
+  row,
+  open,
+  onOpenChange,
+}: {
+  row: Tools;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Perbarui Alat & Perlengkapan</DialogTitle>
+          <DialogDescription>
+            Perbarui informasi alat & perlengkapan di bawah ini.
+          </DialogDescription>
+        </DialogHeader>
+        {open && <ToolForm toolId={row.id} setOpen={onOpenChange} />}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ToolForm({
+  toolId,
+  setOpen,
+}: {
+  toolId: string;
+  setOpen: (open: boolean) => void;
+}) {
+  const dialogs = useDialogs({
+    toolCode: null,
+  });
+
+  const { data: tool } = useSuspenseQuery(
+    trpc.pengujian.tool.getToolDetails.queryOptions({
+      id: toolId,
+    }),
+  );
+
+  const form = useForm<z.infer<typeof toolsSchema.createToolSchema>>({
+    resolver: zodResolver(toolsSchema.createToolSchema),
+    defaultValues: {
+      toolCodeId: tool.toolCodeId,
+      toolUniqueCode: tool.toolUniqueCode ?? undefined,
+      toolName: tool.toolName,
+      function: tool.function ?? undefined,
+      location: tool.location ?? undefined,
+      shelf: tool.shelf ?? undefined,
+      BMNnumber: tool.BMNnumber ?? undefined,
+      NUPnumber: tool.NUPnumber ?? undefined,
+      brand: tool.brand ?? undefined,
+      type: tool.type ?? undefined,
+      serialNumber: tool.serialNumber ?? undefined,
+      originOfAcquisition: tool.originOfAcquisition ?? undefined,
+      correction: tool.correction ?? undefined,
+      condition: tool.condition ?? undefined,
+      availability: tool.availability ?? undefined,
+      information: tool.information ?? undefined,
+      acquisitionYear: tool.acquisitionYear ?? undefined,
+    },
+  });
+
+  const updateToolMutation = useMutation(
+    trpc.pengujian.tool.updateTool.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.pengujian.tool.getToolPaginated.queryOptions({}),
+        );
+        globalSuccessToast("Alat berhasil diperbarui");
+        setOpen(false);
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal memperbarui alat: " + error.message);
+      },
+    }),
+  );
+
+  function handleSubmit(data: z.infer<typeof toolsSchema.createToolSchema>) {
+    updateToolMutation.mutate({ id: toolId, ...data });
+  }
+
+  const { data: toolCode, isLoading: isToolCodeLoading } = useQuery(
+    trpc.pengujian.toolCode.getAllFlattenedToolCodes.queryOptions(),
+  );
+
+  return (
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4 py-4">
+      <FieldGroup>
+        <div className="flex flex-row gap-4">
+          <Controller
+            control={form.control}
+            name="toolCodeId"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Kode Alat
+                </FieldLabel>
+                <ComboBox
+                  options={
+                    toolCode?.map((code) => ({
+                      id: code.id,
+                      name: code.code,
+                    })) ?? []
+                  }
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  placeholder="Pilih kode alat..."
+                  searchPlaceholder="Cari kode alat..."
+                  emptyMessage="Tidak ada kode alat yang ditemukan."
+                  open={dialogs.isOpen("toolCode")}
+                  onOpenChange={(open) =>
+                    open
+                      ? dialogs.open("toolCode")
+                      : dialogs.close("toolCode")
+                  }
+                  invalid={fieldState.invalid}
+                  isLoading={isToolCodeLoading}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="toolUniqueCode"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Kode Unik Alat
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan kode unik alat"
+                  className="h-10 text-sm"
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
+        <Controller
+          control={form.control}
+          name="toolName"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="space-y-1">
+              <FieldLabel className="ml-1 text-sm font-bold">
+                Nama Alat
+              </FieldLabel>
+              <Input
+                type="text"
+                placeholder="Masukkan nama alat"
+                className="h-10 text-sm"
+                {...field}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
+
+        <Controller
+          control={form.control}
+          name="function"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="space-y-1">
+              <FieldLabel className="ml-1 text-sm font-bold">
+                Fungsi Alat
+              </FieldLabel>
+              <Textarea
+                placeholder="Masukkan fungsi alat (opsional)"
+                className="h-10 text-sm"
+                {...field}
+                value={field.value ?? ""}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
+
+        <div className="flex flex-row gap-4">
+          <Controller
+            control={form.control}
+            name="location"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Lokasi Alat
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan lokasi alat (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="shelf"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Rak Alat
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan rak alat (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
+        <div className="flex flex-row gap-4">
+          <Controller
+            control={form.control}
+            name="BMNnumber"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Nomor BMN
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan nomor BMN (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="NUPnumber"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Nomor NUP
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan nomor NUP (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
+        <div className="flex flex-row gap-4">
+          <Controller
+            control={form.control}
+            name="brand"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Brand Alat
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan brand alat (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="type"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Tipe Alat
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan tipe alat (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
+        <div className="flex flex-row gap-4">
+          <Controller
+            control={form.control}
+            name="serialNumber"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Serial Number Alat
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan serial number alat (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="originOfAcquisition"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Asal Perolehan Alat
+                </FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Masukkan asal perolehan alat (opsional)"
+                  className="h-10 text-sm"
+                  {...field}
+                  value={field.value ?? ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
+        <Controller
+          control={form.control}
+          name="correction"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="space-y-1">
+              <FieldLabel className="ml-1 text-sm font-bold">
+                Koreksi Alat
+              </FieldLabel>
+              <Textarea
+                placeholder="Masukkan koreksi alat (opsional)"
+                className="h-10 text-sm"
+                {...field}
+                value={field.value ?? ""}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
+
+        <div className="flex flex-row gap-4">
+          <Controller
+            control={form.control}
+            name="condition"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Kondisi Alat
+                </FieldLabel>
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    aria-invalid={fieldState.invalid}
+                  >
+                    <SelectValue placeholder="Pilih Kondisi Alat" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TOOLS_CONDITIONS.map((condition) => (
+                      <SelectItem key={condition} value={condition}>
+                        {TOOLS_CONDITIONS_LABELS[condition]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="availability"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid} className="w-1/2 space-y-1">
+                <FieldLabel className="ml-1 text-sm font-bold">
+                  Ketersediaan Alat
+                </FieldLabel>
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    aria-invalid={fieldState.invalid}
+                  >
+                    <SelectValue placeholder="Pilih Kondisi Alat" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TOOLS_AVAILABILITY.map((availability) => (
+                      <SelectItem key={availability} value={availability}>
+                        {TOOLS_AVAILABILITY_LABELS[availability]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+        </div>
+
+        <Controller
+          control={form.control}
+          name="information"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="space-y-1">
+              <FieldLabel className="ml-1 text-sm font-bold">
+                Informasi Alat
+              </FieldLabel>
+              <Textarea
+                placeholder="Masukkan informasi alat (opsional)"
+                className="h-10 text-sm"
+                {...field}
+                value={field.value ?? ""}
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && (
+                <FieldError errors={[fieldState.error]} />
+              )}
+            </Field>
+          )}
+        />
+
+        <Button
+          type="submit"
+          className="mt-2 h-10 w-full text-sm"
+          disabled={updateToolMutation.isPending}
+        >
+          {updateToolMutation.isPending ? (
+            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+          ) : null}
+          Perbarui Alat
+        </Button>
+      </FieldGroup>
+    </form>
+  );
+}

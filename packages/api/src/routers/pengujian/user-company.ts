@@ -7,6 +7,7 @@ import {
   withProtectedRateLimit,
 } from "../..";
 import userCompanyQueries from "@tepian-k3/queries/pengujian/user-company.queries";
+import auditQueries from "@tepian-k3/queries/platform/audit.queries";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
 import { storageService } from "@tepian-k3/services/storage";
@@ -70,6 +71,44 @@ export const userCompanyRouter = createTRPCRouter({
       }
 
       return userCompany;
+    }),
+
+  getUnmaskedUserCompanyById: withPermission("user-company.read")
+    .input(
+      z.object({
+        id: z.uuidv7(),
+      }),
+    )
+    .query(async ({ input, ctx: { user } }) => {
+      const userCompany = await runEffect(
+        userCompanyQueries.getUserCompanyById(input.id, { unmask: true }),
+      );
+
+      if (!userCompany) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "UserCompany tidak ditemukan",
+        });
+      }
+
+      await runEffect(
+        auditQueries.createAuditLog({
+          userId: user.id,
+          action: "read",
+          entityType: "user_company",
+          entityId: input.id,
+          metadata: {
+            reason: "User requested unmasked sensitive data",
+          },
+        }),
+      );
+
+      return {
+        ...userCompany,
+        companyPictureUrl: userCompany.companyPictureUrl
+          ? storageService.getPublicUrl(userCompany.companyPictureUrl)
+          : null,
+      };
     }),
 
   getUserCompanyByIdAndUserId: withProtectedRateLimit(rateLimiters.moderate())

@@ -7,11 +7,12 @@ import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { OrderStatus } from "@tepian-k3/constants";
 import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
+import worksheetSchema from "@tepian-k3/schema/pengujian/worksheet.schema";
 import type { OrderDetailWithStatus } from "@tepian-k3/types/pengujian/order.types";
 import type { Document } from "@tepian-k3/types/platform/document.types";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { format } from "date-fns";
+import { format, differenceInDays, differenceInHours, parseISO, isPast } from "date-fns";
 import {
   AlertCircle,
   Ban,
@@ -30,13 +31,23 @@ import {
 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Calendar as CalendarComponent } from "./ui/calendar";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Spinner } from "./ui/spinner";
-
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+import { ActionPanel } from "./action-panel";
+import { Textarea } from "./ui/textarea";
 // ---------------------------------------------------------------------------
 // CVA variant definitions
 // ---------------------------------------------------------------------------
@@ -521,23 +532,25 @@ export function StatusStateWaitingForRevision({
         dokumen penawaran.
       </p>
 
-      <StatusInfoBanner
-        icon={Clock}
+      <ActionPanel
         title="Menunggu Revisi Dokumen"
-        description="Admin sedang memproses permintaan revisi Anda."
-        colorScheme="amber"
-      >
-        {revisionHistory?.note && (
-          <div className="mt-3 rounded-lg border border-amber-200 bg-white p-3">
-            <p className="text-xs font-medium text-muted-foreground">
-              Catatan Revisi:
-            </p>
-            <p className="mt-1 text-sm text-foreground">
-              {revisionHistory.note}
-            </p>
+        description={
+          <div className="space-y-3">
+            <p>Admin sedang memproses permintaan revisi Anda.</p>
+            {revisionHistory?.note && (
+              <div className="rounded-lg bg-amber-100/50 p-3">
+                <p className="text-xs font-medium text-amber-800">
+                  Catatan Revisi:
+                </p>
+                <p className="mt-1 text-sm text-amber-900">
+                  {revisionHistory.note}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-      </StatusInfoBanner>
+        }
+        type="warning"
+      />
     </StateLayout>
   );
 }
@@ -568,46 +581,52 @@ export function StatusStateContactRevisionRequested({
       </h2>
       <p className="mb-6 text-sm text-muted-foreground">
         Admin meminta Anda memperbaiki data kontak perusahaan sebelum order
-        dapat diproses lebih lanjut.
+        dapat diproses lebih lanjut
       </p>
-
-      <StatusInfoBanner
-        icon={AlertCircle}
+      <ActionPanel
         title="Koreksi Data Kontak Diperlukan"
-        description="Perbaiki data kontak perusahaan Anda (email atau nama contact person), lalu kirim ulang order ini."
-        colorScheme="amber"
-      >
-        {orderDetail.revisionNotes && (
-          <div className="mt-3 rounded-lg border border-amber-200 bg-white p-3">
-            <p className="text-xs font-medium text-muted-foreground">
-              Catatan dari Admin:
+        description={
+          <div className="space-y-3">
+            <p>
+              Perbaiki data kontak perusahaan Anda (email atau nama contact person), lalu kirim ulang order ini.
             </p>
-            <p className="mt-1 text-sm text-foreground">
-              {orderDetail.revisionNotes}
-            </p>
-          </div>
-        )}
-        <div className="mt-4 flex flex-row justify-end gap-2">
-          <Link
-            to="/dashboard/company/$companyId/edit"
-            params={{ companyId: orderDetail.company?.id ?? "" }}
-            className={cn(Button({ variant: "outline", size: "sm" }))}
-          >
-            Edit Data Kontak
-          </Link>
-
-          <Button
-            onClick={() => resubmitMutation.mutate({ orderId: orderDetail.id })}
-            disabled={resubmitMutation.isPending}
-            className="bg-amber-500 text-white hover:bg-amber-600"
-          >
-            {resubmitMutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {orderDetail.revisionNotes && (
+              <div className="rounded-lg bg-amber-100/50 p-3">
+                <p className="text-xs font-medium text-amber-800">
+                  Catatan dari Admin:
+                </p>
+                <p className="mt-1 text-sm text-amber-900">
+                  {orderDetail.revisionNotes}
+                </p>
+              </div>
             )}
-            Sudah Diperbaiki, Kirim Ulang
-          </Button>
-        </div>
-      </StatusInfoBanner>
+          </div>
+        }
+        type="warning"
+        actionButton={
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Link
+              to="/dashboard/company/$companyId/edit"
+              params={{ companyId: orderDetail.company?.id ?? "" }}
+              className={cn(Button({ variant: "outline", size: "sm" }), "bg-white/50 border-amber-300 hover:bg-amber-100 text-amber-900")}
+            >
+              Edit Data Kontak
+            </Link>
+
+            <Button
+              onClick={() => resubmitMutation.mutate({ orderId: orderDetail.id })}
+              size="sm"
+              disabled={resubmitMutation.isPending}
+              className="bg-amber-600 text-white hover:bg-amber-700"
+            >
+              {resubmitMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Sudah Diperbaiki, Kirim Ulang
+            </Button>
+          </div>
+        }
+      />
     </StateLayout>
   );
 }
@@ -625,23 +644,25 @@ export function StatusStateRequestReview({
         perbaikan Anda.
       </p>
 
-      <StatusInfoBanner
-        icon={AlertCircle}
+      <ActionPanel
         title="Koreksi Sedang Diperiksa"
-        description="Admin akan memeriksa perbaikan data Anda dan mengembalikan order ke antrean jika sudah sesuai."
-        colorScheme="amber"
-      >
-        {orderDetail.revisionNotes && (
-          <div className="mt-3 rounded-lg border border-amber-200 bg-white p-3">
-            <p className="text-xs font-medium text-muted-foreground">
-              Catatan dari Admin:
-            </p>
-            <p className="mt-1 text-sm text-foreground">
-              {orderDetail.revisionNotes}
-            </p>
+        description={
+          <div className="space-y-3">
+            <p>Admin akan memeriksa perbaikan data Anda dan mengembalikan order ke antrean jika sudah sesuai.</p>
+            {orderDetail.revisionNotes && (
+              <div className="rounded-lg bg-amber-100/50 p-3">
+                <p className="text-xs font-medium text-amber-800">
+                  Catatan dari Admin:
+                </p>
+                <p className="mt-1 text-sm text-amber-900">
+                  {orderDetail.revisionNotes}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-      </StatusInfoBanner>
+        }
+        type="warning"
+      />
     </StateLayout>
   );
 }
@@ -658,6 +679,29 @@ export function StatusStatePendingReview({
         Order pengujian telah diterima. Admin sedang melakukan kaji ulang teknis
         untuk menentukan parameter, alat, dan estimasi waktu pengujian.
       </p>
+
+      {/* Estimasi Tanggal Tanda Tangan */}
+      <div className="mb-8 flex w-full max-w-sm items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 self-center">
+        <CalendarIcon className="mt-0.5 size-5 flex-shrink-0 text-blue-600" />
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-blue-800">
+            Estimasi Surat Penawaran
+          </p>
+          <p className="mt-1 text-sm font-medium text-blue-900">
+            {format(
+              new Date(
+                new Date(orderDetail.createdAt).getTime() +
+                  3 * 24 * 60 * 60 * 1000,
+              ),
+              "dd MMMM yyyy",
+            )}
+          </p>
+          <p className="mt-1 text-xs text-blue-700/80">
+            *Estimasi ini berdasarkan target SLA 3 hari kerja.
+          </p>
+        </div>
+      </div>
+
       <StatusIllustration
         icon={FileCheckIcon}
         colorScheme="slate"
@@ -698,6 +742,28 @@ export function StatusStateWorksheetInReview({
         Tim kami sedang melakukan kaji ulang teknis untuk order pengujian Anda.
       </p>
 
+      {/* Estimasi Tanggal Tanda Tangan */}
+      <div className="mb-8 flex w-full max-w-sm items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 self-center">
+        <CalendarIcon className="mt-0.5 size-5 flex-shrink-0 text-blue-600" />
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-blue-800">
+            Estimasi Surat Penawaran
+          </p>
+          <p className="mt-1 text-sm font-medium text-blue-900">
+            {format(
+              new Date(
+                new Date(orderDetail.createdAt).getTime() +
+                  3 * 24 * 60 * 60 * 1000,
+              ),
+              "dd MMMM yyyy",
+            )}
+          </p>
+          <p className="mt-1 text-xs text-blue-700/80">
+            *Estimasi ini berdasarkan target SLA 3 hari kerja.
+          </p>
+        </div>
+      </div>
+
       <StatusIllustration
         icon={FileText}
         overlayIcon={Clock}
@@ -707,7 +773,135 @@ export function StatusStateWorksheetInReview({
         colorScheme={colorScheme}
         className="h-full w-full self-center"
       />
+
+      {orderDetail.worksheet && (
+        <FormUsulanTanggal orderId={orderDetail.id} worksheetId={orderDetail.worksheet.id} proposedDates={orderDetail.worksheet.proposedDates ?? []} />
+      )}
     </StateLayout>
+  );
+}
+
+function FormUsulanTanggal({ orderId, worksheetId, proposedDates }: { orderId: string, worksheetId: string, proposedDates: any[] }) {
+  const form = useForm<z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>>({
+    resolver: zodResolver(worksheetSchema.proposeWorksheetDateSchema),
+    defaultValues: {
+      worksheetId,
+      proposedStartDate: "",
+      proposedEndDate: "",
+      note: "",
+    },
+  });
+
+  const proposeDateMutation = useMutation(
+    trpc.pengujian.worksheet.proposeDate.mutationOptions({
+      onSuccess: async () => {
+        globalSuccessToast("Usulan tanggal berhasil dikirim.");
+        form.reset();
+        await queryClient.invalidateQueries(
+          trpc.pengujian.order.getOrderWithDocuments.queryOptions({ orderId }),
+        );
+      },
+      onError: (error) => {
+        globalErrorToast("Gagal mengirim usulan tanggal: " + error.message);
+      },
+    }),
+  );
+
+  const onSubmit = (data: z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>) => {
+    proposeDateMutation.mutate(data);
+  };
+
+  return (
+    <div className="mt-8">
+      <h3 className="mb-4 text-lg font-semibold text-foreground">Histori Usulan Tanggal</h3>
+      {proposedDates.length > 0 ? (
+        <div className="mb-8 overflow-hidden rounded-md border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tanggal Pengajuan</TableHead>
+                <TableHead>Mulai</TableHead>
+                <TableHead>Selesai</TableHead>
+                <TableHead>Catatan</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {proposedDates.map((pd) => (
+                <TableRow key={pd.id}>
+                  <TableCell>{format(new Date(pd.createdAt), "dd MMM yyyy HH:mm")}</TableCell>
+                  <TableCell>{format(new Date(pd.proposedStartDate), "dd MMM yyyy")}</TableCell>
+                  <TableCell>{format(new Date(pd.proposedEndDate), "dd MMM yyyy")}</TableCell>
+                  <TableCell>{pd.note || "-"}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        pd.status === "approved"
+                          ? "default"
+                          : pd.status === "rejected"
+                            ? "destructive"
+                            : "secondary"
+                      }
+                    >
+                      {pd.status === "approved"
+                        ? "Disetujui"
+                        : pd.status === "rejected"
+                          ? "Ditolak"
+                          : "Menunggu"}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <p className="mb-8 text-sm text-muted-foreground">Belum ada usulan tanggal.</p>
+      )}
+
+      <h3 className="mb-4 text-lg font-semibold text-foreground">Usulkan Tanggal Baru</h3>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 rounded-md border border-border p-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FieldGroup>
+            <FieldLabel>Tanggal Mulai</FieldLabel>
+            <Controller
+              control={form.control}
+              name="proposedStartDate"
+              render={({ field }) => (
+                <Input type="date" {...field} />
+              )}
+            />
+            <FieldError errors={[form.formState.errors.proposedStartDate]} />
+          </FieldGroup>
+          <FieldGroup>
+            <FieldLabel>Tanggal Selesai</FieldLabel>
+            <Controller
+              control={form.control}
+              name="proposedEndDate"
+              render={({ field }) => (
+                <Input type="date" {...field} />
+              )}
+            />
+            <FieldError errors={[form.formState.errors.proposedEndDate]} />
+          </FieldGroup>
+        </div>
+        <FieldGroup>
+          <FieldLabel>Catatan (Opsional)</FieldLabel>
+          <Controller
+            control={form.control}
+            name="note"
+            render={({ field }) => (
+              <Textarea placeholder="Alasan atau catatan tambahan..." {...field} />
+            )}
+          />
+          <FieldError errors={[form.formState.errors.note]} />
+        </FieldGroup>
+        <Button type="submit" disabled={proposeDateMutation.isPending}>
+          {proposeDateMutation.isPending && <Spinner className="mr-2 h-4 w-4" />}
+          Kirim Usulan
+        </Button>
+      </form>
+    </div>
   );
 }
 
@@ -732,9 +926,14 @@ export function StatusStateWorksheetVerified({
         colorScheme="emerald"
         className="h-full w-full self-center"
       />
+
+      {orderDetail.worksheet && (
+        <FormUsulanTanggal orderId={orderDetail.id} worksheetId={orderDetail.worksheet.id} proposedDates={orderDetail.worksheet.proposedDates ?? []} />
+      )}
     </StateLayout>
   );
 }
+
 
 interface StatusStateOfferPublishedProps extends SharedStatusStateProps {
   offeringDoc: Document | undefined;
@@ -744,15 +943,67 @@ export function StatusStateOfferPublished({
   orderDetail,
   offeringDoc,
 }: StatusStateOfferPublishedProps) {
+  const deadline = orderDetail.worksheet?.estimatedSigningDeadline;
+  const isExpired = deadline ? isPast(parseISO(deadline)) : false;
+  
+  let countdownText = "";
+  let isWarning = false;
+  
+  if (deadline && !isExpired) {
+    const parsedDeadline = parseISO(deadline);
+    const daysLeft = differenceInDays(parsedDeadline, new Date());
+    
+    if (daysLeft > 0) {
+      countdownText = `${daysLeft} hari lagi`;
+    } else {
+      const hoursLeft = differenceInHours(parsedDeadline, new Date());
+      countdownText = `${hoursLeft} jam lagi`;
+      isWarning = true;
+    }
+  }
+
   return (
     <StateLayout>
-      <h2 className="mb-2 text-xl font-semibold text-foreground">
-        {`Order #${orderDetail.orderNumber} - Penawaran Diterbitkan`}
-      </h2>
-      <p className="mb-6 text-sm text-muted-foreground">
-        Penawaran telah diterbitkan, setujui penawaran untuk melanjutkan ke
-        tahap pembayaran.
-      </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+          <h2 className="mb-2 text-xl font-semibold text-foreground">
+            {`Order #${orderDetail.orderNumber} - Penawaran Diterbitkan`}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Penawaran telah diterbitkan, setujui penawaran untuk melanjutkan ke
+            tahap pembayaran.
+          </p>
+        </div>
+        
+        {deadline && (
+          <div className="flex flex-col items-end shrink-0">
+            <span className="text-xs font-semibold uppercase text-slate-500 mb-1">Batas Waktu Persetujuan</span>
+            {isExpired ? (
+              <Badge variant="destructive" className="px-3 py-1">
+                Waktu Habis
+              </Badge>
+            ) : (
+              <Badge 
+                variant="outline" 
+                className={isWarning 
+                  ? "bg-amber-50 text-amber-600 border-amber-200 px-3 py-1" 
+                  : "bg-blue-50 text-blue-600 border-blue-200 px-3 py-1"}
+              >
+                {countdownText}
+              </Badge>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {isWarning && !isExpired && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-medium text-amber-800">
+            <AlertCircle className="inline-block mr-2 h-4 w-4" />
+            Segera setujui penawaran ini sebelum waktu habis.
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <DocumentCard title="Surat Penawaran" fileUrl={offeringDoc?.fileUrl} />
@@ -776,50 +1027,52 @@ export function StatusStateUploadApproval({
 }: StatusStateUploadApprovalProps) {
   return (
     <StateLayout>
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">
-          Upload Surat Persetujuan
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          Silakan unggah surat persetujuan yang telah ditandatangani untuk
-          melanjutkan ke tahap berikutnya.
-        </p>
-
-        <FileUploadCard
-          id="approval-letter-input"
-          title="Surat Persetujuan"
-          file={approvalLetterFile}
-          onFileSelect={(file) => {
-            if (file.type !== "application/pdf") {
-              globalErrorToast("Format file harus PDF");
-              return;
-            }
-            setApprovalLetterFile(file);
-          }}
-          accept=".pdf"
-          selectedContent={
-            <Button
-              size="sm"
-              className="shrink-0 rounded-lg bg-blue-500 hover:bg-blue-600"
-              onClick={handleUploadApprovalLetter}
-              disabled={uploadingApprovalLetter}
-            >
-              {uploadingApprovalLetter ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Upload className="mr-2 h-4 w-4" />
-              )}
-              Upload
-            </Button>
-          }
-        />
-
-        {approvalLetterFile && (
-          <p className="text-sm text-muted-foreground">
-            File terpilih: {approvalLetterFile.name}
-          </p>
-        )}
-      </div>
+      <ActionPanel
+        title="Upload Surat Persetujuan"
+        description={
+          <div className="space-y-4">
+            <p>
+              Silakan unggah surat persetujuan yang telah ditandatangani untuk melanjutkan ke tahap berikutnya.
+            </p>
+            <div className="bg-white/60 rounded-xl">
+              <FileUploadCard
+                id="approval-letter-input"
+                title="Surat Persetujuan"
+                file={approvalLetterFile}
+                onFileSelect={(file) => {
+                  if (file.type !== "application/pdf") {
+                    globalErrorToast("Format file harus PDF");
+                    return;
+                  }
+                  setApprovalLetterFile(file);
+                }}
+                accept=".pdf"
+                selectedContent={
+                  <Button
+                    size="sm"
+                    className="shrink-0 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={handleUploadApprovalLetter}
+                    disabled={uploadingApprovalLetter}
+                  >
+                    {uploadingApprovalLetter ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="mr-2 h-4 w-4" />
+                    )}
+                    Upload Sekarang
+                  </Button>
+                }
+              />
+            </div>
+            {approvalLetterFile && (
+              <p className="text-sm font-medium">
+                File terpilih: {approvalLetterFile.name}
+              </p>
+            )}
+          </div>
+        }
+        type="info"
+      />
     </StateLayout>
   );
 }
@@ -866,14 +1119,13 @@ export function StatusStateUploadPayment({
   return (
     <StateLayout>
       {rejectionReason != null ? (
-        <StatusInfoBanner
-          icon={AlertCircle}
+        <ActionPanel
           title="Pembayaran Ditolak"
           description={
             rejectionReason ||
             "Bukti pembayaran Anda ditolak. Silakan unggah ulang dokumen yang benar."
           }
-          colorScheme="amber"
+          type="warning"
           className="mb-6"
         />
       ) : (
@@ -961,12 +1213,55 @@ export function StatusStateUploadPayment({
 interface StatusStatePendingPaymentVerificationProps {
   paymentProofDoc: Document | undefined;
   cooperationAgreementUserDoc: Document | undefined;
+  orderDetail: OrderDetailWithStatus;
 }
 
 export function StatusStatePendingPaymentVerification({
   cooperationAgreementUserDoc,
   paymentProofDoc,
+  orderDetail,
 }: StatusStatePendingPaymentVerificationProps) {
+  const form = useForm<
+    z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>
+  >({
+    resolver: zodResolver(worksheetSchema.proposeWorksheetDateSchema),
+    defaultValues: {
+      worksheetId: orderDetail.worksheet?.id ?? "",
+      proposedStartDate: "",
+      proposedEndDate: "",
+      note: "",
+    },
+  });
+
+  const proposeDateMutation = useMutation({
+    ...trpc.pengujian.worksheet.proposeDate.mutationOptions(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(
+        trpc.pengujian.order.getOrderWithDocuments.queryOptions({
+          orderId: orderDetail.id,
+        }),
+      );
+      globalSuccessToast("Usulan tanggal pengujian berhasil dikirim.");
+      form.reset();
+    },
+    onError: (error) => {
+      globalErrorToast("Gagal mengirim usulan tanggal: " + error.message);
+    },
+  });
+
+  const onSubmit = (
+    data: z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>,
+  ) => {
+    proposeDateMutation.mutate({
+      ...data,
+      proposedStartDate: new Date(data.proposedStartDate).toISOString(),
+      proposedEndDate: new Date(data.proposedEndDate).toISOString(),
+    });
+  };
+
+  const proposedDates = orderDetail.worksheet?.proposedDates ?? [];
+  const hasPendingProposal = proposedDates.some(p => p.status === "pending");
+
   return (
     <StateLayout>
       <StatusIllustration
@@ -977,7 +1272,7 @@ export function StatusStatePendingPaymentVerification({
         colorScheme="amber"
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4 mb-6">
         {paymentProofDoc && (
           <DocumentCard
             title="Bukti Pembayaran"
@@ -993,11 +1288,166 @@ export function StatusStatePendingPaymentVerification({
           />
         )}
       </div>
+
+      <div className="border-t pt-6 mt-6">
+        <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50/50 p-4">
+          <div className="flex gap-3">
+            <Calendar className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-blue-900 text-sm">
+                Ajukan Usulan Tanggal Pelaksanaan
+              </h4>
+              <p className="text-xs text-blue-700 mt-1">
+                Pembayaran Anda sedang dalam proses verifikasi. Untuk mempercepat proses penjadwalan, Anda sudah dapat mengajukan usulan tanggal pelaksanaan pengujian melalui form di bawah ini.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <h3 className="text-lg font-semibold text-foreground">
+          Usulan Tanggal Pengujian (Opsional)
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Anda dapat memberikan usulan tanggal pelaksanaan pengujian. Tim kami akan
+          mempertimbangkan usulan Anda dalam penyusunan jadwal.
+        </p>
+
+        {proposedDates.length > 0 && (
+          <div className="mb-6 space-y-3">
+            <h4 className="text-sm font-medium">Riwayat Usulan:</h4>
+            <div className="grid gap-3">
+              {proposedDates.map((pd) => (
+                <div
+                  key={pd.id}
+                  className="rounded-lg border p-4 bg-slate-50/50 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      {format(new Date(pd.proposedStartDate), "dd MMM yyyy HH:mm")} - {format(new Date(pd.proposedEndDate), "dd MMM yyyy HH:mm")}
+                    </span>
+                    <Badge
+                      variant={pd.status === "approved" ? "default" : pd.status === "rejected" ? "destructive" : "secondary"}
+                    >
+                      {pd.status === "approved" ? "Disetujui" : pd.status === "rejected" ? "Ditolak" : "Menunggu"}
+                    </Badge>
+                  </div>
+                  {pd.note && (
+                    <p className="text-sm text-slate-600">Catatan: {pd.note}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!hasPendingProposal && (
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field>
+                <FieldLabel>Usulan Tanggal Mulai</FieldLabel>
+                <Input
+                  type="datetime-local"
+                  {...form.register("proposedStartDate")}
+                  className={form.formState.errors.proposedStartDate ? "border-destructive" : ""}
+                />
+                {form.formState.errors.proposedStartDate && (
+                  <FieldError>{form.formState.errors.proposedStartDate.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel>Usulan Tanggal Selesai</FieldLabel>
+                <Input
+                  type="datetime-local"
+                  {...form.register("proposedEndDate")}
+                  className={form.formState.errors.proposedEndDate ? "border-destructive" : ""}
+                />
+                {form.formState.errors.proposedEndDate && (
+                  <FieldError>{form.formState.errors.proposedEndDate.message}</FieldError>
+                )}
+              </Field>
+            </div>
+
+            <Field>
+              <FieldLabel>Catatan / Alasan</FieldLabel>
+              <Textarea
+                {...form.register("note")}
+                placeholder="Tambahkan catatan mengapa Anda mengusulkan tanggal ini..."
+                className={`min-h-[100px] resize-y ${form.formState.errors.note ? "border-destructive" : ""}`}
+              />
+              {form.formState.errors.note && (
+                <FieldError>{form.formState.errors.note.message}</FieldError>
+              )}
+            </Field>
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={proposeDateMutation.isPending || !form.formState.isValid}
+                className="w-full sm:w-auto"
+              >
+                {proposeDateMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Mengirim...
+                  </>
+                ) : (
+                  "Kirim Usulan Tanggal"
+                )}
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
     </StateLayout>
   );
 }
 
-export function StatusStateAwaitingSchedule() {
+export function StatusStateAwaitingSchedule({
+  orderDetail,
+}: SharedStatusStateProps) {
+  const form = useForm<
+    z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>
+  >({
+    resolver: zodResolver(worksheetSchema.proposeWorksheetDateSchema),
+    defaultValues: {
+      worksheetId: orderDetail.worksheet?.id ?? "",
+      proposedStartDate: "",
+      proposedEndDate: "",
+      note: "",
+    },
+  });
+
+  const proposeDateMutation = useMutation({
+    ...trpc.pengujian.worksheet.proposeDate.mutationOptions(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(
+        trpc.pengujian.order.getOrderWithDocuments.queryOptions({
+          orderId: orderDetail.id,
+        }),
+      );
+      globalSuccessToast("Usulan tanggal pengujian berhasil dikirim.");
+      form.reset();
+    },
+    onError: (error) => {
+      globalErrorToast("Gagal mengirim usulan tanggal: " + error.message);
+    },
+  });
+
+  const onSubmit = (
+    data: z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>,
+  ) => {
+    // Add timezone if using input type="datetime-local"
+    proposeDateMutation.mutate({
+      ...data,
+      proposedStartDate: new Date(data.proposedStartDate).toISOString(),
+      proposedEndDate: new Date(data.proposedEndDate).toISOString(),
+    });
+  };
+
+  const proposedDates = orderDetail.worksheet?.proposedDates ?? [];
+  const hasPendingProposal = proposedDates.some(p => p.status === "pending");
+
   return (
     <StateLayout>
       <StatusIllustration
@@ -1014,6 +1464,103 @@ export function StatusStateAwaitingSchedule() {
         description="Pembayaran Anda telah dikonfirmasi oleh admin."
         colorScheme="emerald"
       />
+
+      <div className="mt-8 space-y-4">
+        <h3 className="text-lg font-semibold text-foreground">
+          Usulan Tanggal Pengujian (Opsional)
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Anda dapat memberikan usulan tanggal pelaksanaan pengujian. Tim kami akan
+          mempertimbangkan usulan Anda dalam penyusunan jadwal.
+        </p>
+
+        {proposedDates.length > 0 && (
+          <div className="mb-6 space-y-3">
+            <h4 className="text-sm font-medium">Riwayat Usulan:</h4>
+            <div className="grid gap-3">
+              {proposedDates.map((pd) => (
+                <div
+                  key={pd.id}
+                  className="rounded-lg border p-4 bg-slate-50/50 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      {format(new Date(pd.proposedStartDate), "dd MMM yyyy HH:mm")} - {format(new Date(pd.proposedEndDate), "dd MMM yyyy HH:mm")}
+                    </span>
+                    <Badge
+                      variant={pd.status === "approved" ? "default" : pd.status === "rejected" ? "destructive" : "secondary"}
+                    >
+                      {pd.status === "approved" ? "Disetujui" : pd.status === "rejected" ? "Ditolak" : "Menunggu"}
+                    </Badge>
+                  </div>
+                  {pd.note && (
+                    <p className="text-sm text-slate-600">Catatan: {pd.note}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!hasPendingProposal && (
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field>
+                <FieldLabel>Usulan Tanggal Mulai</FieldLabel>
+                <Input
+                  type="datetime-local"
+                  {...form.register("proposedStartDate")}
+                  className={form.formState.errors.proposedStartDate ? "border-destructive" : ""}
+                />
+                {form.formState.errors.proposedStartDate && (
+                  <FieldError>{form.formState.errors.proposedStartDate.message}</FieldError>
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel>Usulan Tanggal Selesai</FieldLabel>
+                <Input
+                  type="datetime-local"
+                  {...form.register("proposedEndDate")}
+                  className={form.formState.errors.proposedEndDate ? "border-destructive" : ""}
+                />
+                {form.formState.errors.proposedEndDate && (
+                  <FieldError>{form.formState.errors.proposedEndDate.message}</FieldError>
+                )}
+              </Field>
+            </div>
+
+            <Field>
+              <FieldLabel>Catatan / Alasan</FieldLabel>
+              <Textarea
+                {...form.register("note")}
+                placeholder="Tambahkan catatan mengapa Anda mengusulkan tanggal ini..."
+                className={`min-h-[100px] resize-y ${form.formState.errors.note ? "border-destructive" : ""}`}
+              />
+              {form.formState.errors.note && (
+                <FieldError>{form.formState.errors.note.message}</FieldError>
+              )}
+            </Field>
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={proposeDateMutation.isPending || !form.formState.isValid}
+                className="w-full sm:w-auto"
+              >
+                {proposeDateMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Mengirim...
+                  </>
+                ) : (
+                  "Kirim Usulan Tanggal"
+                )}
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
     </StateLayout>
   );
 }

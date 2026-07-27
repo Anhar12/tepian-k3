@@ -24,12 +24,14 @@ import {
   ORDER_STATUS_LABELS,
   type OrderStatus,
 } from "@tepian-k3/constants";
+import { RoleDashboardWidget } from "./role-dashboard-widget";
 
 interface PengujianDashboardProps {
   profileName: string;
+  roles?: any[];
 }
 
-export function PengujianDashboard({ profileName }: PengujianDashboardProps) {
+export function PengujianDashboard({ profileName, roles }: PengujianDashboardProps) {
   const [lastUpdated, setLastUpdated] = useState<string>("2 menit lalu");
 
   const { data: testingOrdersData, refetch: refetchTestingOrders } = useQuery(
@@ -469,128 +471,8 @@ export function PengujianDashboard({ profileName }: PengujianDashboardProps) {
         </Link>
       </div>
 
-      {/* Middle Block: Antrian Pengkajian Ulang Pesanan */}
-      <Card className="mb-8 overflow-hidden border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-xl font-semibold tracking-tight text-neutral-600">
-            Antrian Pengkajian Ulang Pesanan
-          </h2>
-
-          <div className="flex items-center gap-3">
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white font-['Poppins'] font-medium text-neutral-600 shadow-sm hover:bg-slate-50"
-            >
-              <Link
-                to="/back-office/orders"
-                search={{
-                  page: 1,
-                  perPage: 10,
-                  sort: [{ id: "createdAt" as const, desc: true }],
-                  createdAt: [],
-                  filters: [],
-                  joinOperator: "and" as const,
-                  showDeleted: false,
-                  search: "",
-                  status: "pending" as OrderStatus,
-                }}
-              >
-                Lihat semua
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M6 12L10 8L6 4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        <CardContent className="overflow-x-auto p-0">
-          <table className="w-full min-w-[700px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="px-6 py-4 text-sm font-semibold text-neutral-600">
-                  Nomor Order
-                </th>
-                <th className="px-6 py-4 text-sm font-semibold text-neutral-600">
-                  Perusahaan
-                </th>
-                <th className="px-6 py-4 text-sm font-semibold text-neutral-600">
-                  Tanggal Order
-                </th>
-                <th className="px-6 py-4 text-sm font-semibold text-neutral-600">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-600">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {displayedTestingQueue.map((row) => (
-                <tr
-                  key={row.id}
-                  className="transition-colors hover:bg-slate-50/50"
-                >
-                  <td className="px-6 py-4 text-xs font-semibold whitespace-nowrap text-neutral-600">
-                    {row.orderNumber}
-                  </td>
-                  <td className="px-6 py-4 text-xs font-medium whitespace-nowrap text-neutral-500">
-                    {row.company?.name || "-"}
-                  </td>
-                  <td className="px-6 py-4 text-xs font-medium whitespace-nowrap text-neutral-500">
-                    {new Date(row.createdAt).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Badge
-                      className={cn(
-                        "px-2.5 py-0.5 text-[10px] font-semibold",
-                        ORDER_STATUS_COLORS[row.status as OrderStatus] ||
-                          "bg-gray-100 text-gray-800",
-                      )}
-                    >
-                      {ORDER_STATUS_LABELS[row.status as OrderStatus] ||
-                        row.status}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap">
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-primary-focus cursor-pointer text-primary"
-                    >
-                      <Link
-                        to="/back-office/orders/$orderId/detail"
-                        params={{ orderId: row.id }}
-                      >
-                        Proses
-                      </Link>
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+      {/* Middle Block: Role-Aware Dashboard Widget */}
+      <RoleDashboardWidget roles={roles} orders={orders} />
 
       {/* Bottom Block: Status Pesanan & Kondisi Alat Charts */}
       <div className="grid gap-6 md:grid-cols-2">

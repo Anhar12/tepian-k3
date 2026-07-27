@@ -1,0 +1,1 @@
+ALTER TABLE "worksheets" ADD COLUMN "estimated_signing_deadline" timestamp with time zone;

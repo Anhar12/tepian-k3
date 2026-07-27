@@ -124,4 +124,13 @@ export const employeeRouter = createTRPCRouter({
       async ({ input }) =>
         await runEffect(employeeQueries.hardDeleteEmployee(input.id)),
     ),
+
+  getAvailable: withPermission("employees.view")
+    .input(employeeSchema.getAvailableEmployeesSchema)
+    .query(async ({ input }) => {
+      const employees = await runEffect(
+        employeeQueries.getAvailableEmployees(input.startDate, input.endDate),
+      );
+      return employees;
+    }),
 });

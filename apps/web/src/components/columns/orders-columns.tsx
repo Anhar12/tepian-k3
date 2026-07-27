@@ -1,9 +1,9 @@
 import { PermissionGate } from "@/components/permission-gate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MaskedText } from "@/components/ui/masked-text";
 import {
-  createActionColumn,
-  createDateColumn,
+  createCompactDateColumn,
   createNumberColumn,
   createTextColumn,
 } from "@/lib/column-helpers";
@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { PaginatedOrder } from "@tepian-k3/types/pengujian/order.types";
-import { Eye } from "lucide-react";
 
 interface OrdersColumnsProps {
   currentPage: number;
@@ -92,53 +91,42 @@ export default function getOrdersColumns({
       ),
     }),
     {
-      accessorKey: "company.name",
-      header: "Perusahaan",
-      cell: ({ row }) => (
-        <div className="w-48 truncate">{row.original.company?.name || "-"}</div>
-      ),
+      id: "company_customer",
+      header: "Perusahaan / Customer",
+      cell: ({ row }) => {
+        const companyName = row.original.company?.name;
+        const userName = row.original.user.name;
+        const userEmail = row.original.user.email;
+        
+        return (
+          <div className="flex flex-col min-w-0 w-48">
+            <span className="font-medium truncate" title={companyName || userName}>
+              {companyName || userName}
+            </span>
+            <MaskedText 
+              value={companyName ? userName : userEmail} 
+              maskType={companyName ? "name" : "email"}
+              className="text-xs text-muted-foreground w-full" 
+            />
+          </div>
+        );
+      },
     },
     {
-      accessorKey: "user.name",
-      header: "Customer",
-      cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="font-medium">{row.original.user.name}</span>
-          <span className="text-sm text-muted-foreground">
-            {row.original.user.email}
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "status",
+      id: "status_lengkap",
       header: "Status",
       cell: ({ row }) => (
-        <Badge className={cn(getStatusColor(row.original.status))}>
-          {getStatusLabel(row.original.status)}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "approvalStatus",
-      header: "Approval",
-      cell: ({ row }) => (
-        <Badge
-          className={cn(getApprovalStatusColor(row.original.approvalStatus))}
-        >
-          {getStatusLabel(row.original.approvalStatus)}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "paymentStatus",
-      header: "Pembayaran",
-      cell: ({ row }) => (
-        <Badge
-          className={cn(getPaymentStatusColor(row.original.paymentStatus))}
-        >
-          {getStatusLabel(row.original.paymentStatus)}
-        </Badge>
+        <div className="flex flex-col gap-1 w-32">
+          <Badge className={cn(getStatusColor(row.original.status), "w-fit text-[10px] px-1.5 py-0 uppercase tracking-wider")}>
+            {getStatusLabel(row.original.status)}
+          </Badge>
+          <Badge className={cn(getApprovalStatusColor(row.original.approvalStatus), "w-fit text-[10px] px-1.5 py-0 uppercase tracking-wider")}>
+            APRV: {getStatusLabel(row.original.approvalStatus)}
+          </Badge>
+          <Badge className={cn(getPaymentStatusColor(row.original.paymentStatus), "w-fit text-[10px] px-1.5 py-0 uppercase tracking-wider")}>
+            PAY: {getStatusLabel(row.original.paymentStatus)}
+          </Badge>
+        </div>
       ),
     },
     // {
@@ -178,24 +166,6 @@ export default function getOrdersColumns({
         </div>
       ),
     },
-    createDateColumn<PaginatedOrder>("worksheet.startDate", "Tanggal Mulai", {
-      nullable: true,
-    }),
-    createDateColumn<PaginatedOrder>("worksheet.endDate", "Tanggal Selesai", {
-      nullable: true,
-    }),
-    createDateColumn<PaginatedOrder>("createdAt", "Tanggal Order"),
-    createActionColumn<PaginatedOrder>(({ row }) => (
-      <PermissionGate permission="orders.read">
-        <Link
-          to="/back-office/orders/$orderId/detail"
-          params={{ orderId: row.original.id }}
-        >
-          <Button variant="ghost" size="sm">
-            <Eye className="h-4 w-4" />
-          </Button>
-        </Link>
-      </PermissionGate>
-    )),
+    createCompactDateColumn<PaginatedOrder>("createdAt", "Tanggal Order"),
   ];
 }

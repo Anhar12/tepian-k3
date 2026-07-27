@@ -1,4 +1,5 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BatchReturnToolsDialog } from "./-components/batch-return-tools-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -397,7 +398,7 @@ function RouteComponent() {
       quantity: item.quantity,
       note: item.note,
       isReady: item.isReady,
-      locationName: item.location?.name ?? "Unknown",
+      locationName: item.location ? `${item.location.name}${item.location.district ? `, ${item.location.district.name}` : ""}${item.location.regency ? `, ${item.location.regency.name}` : ""}` : "Unknown",
       reference: item.parameter?.reference ?? null,
     }));
   }, [worksheet?.items]);
@@ -1374,7 +1375,7 @@ function RouteComponent() {
 
             {isEditable && (
               <PermissionGate permission="worksheet-tools.update">
-                <div className="mb-4 flex justify-end">
+                <div className="mb-4 flex justify-end gap-2">
                   <Button
                     onClick={handleSaveTools}
                     disabled={assignToolsMutation.isPending}
@@ -1385,6 +1386,14 @@ function RouteComponent() {
                     )}
                     Simpan Alat ({selectedToolsCount})
                   </Button>
+                </div>
+              </PermissionGate>
+            )}
+            
+            {!isEditable && (
+              <PermissionGate permission="worksheet-tools.update">
+                <div className="mb-4 flex justify-end gap-2">
+                  <BatchReturnToolsDialog worksheetId={worksheetId} />
                 </div>
               </PermissionGate>
             )}

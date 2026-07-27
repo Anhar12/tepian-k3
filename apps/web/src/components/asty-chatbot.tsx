@@ -30,83 +30,6 @@ const FLOATING_AVATARS = [
   "/assets/asty_2.png",
 ];
 
-const KB = [
-  {
-    keys: [
-      "jadwal",
-      "pelatihan",
-      "training",
-      "kapan",
-      "safety talk",
-      "k3 dasar",
-      "seminar",
-      "goes to campus",
-    ],
-    response:
-      "Berdasarkan Rencana Kegiatan 2026, berikut adalah jadwal pelatihan Balai K3 Samarinda:\n\n1. 🎓 K3 Dasar: 20 Mei, 9 Juni, 23 Juni, & 7 Okt 2026\n2. 💻 Safety Talk (Daring): Digelar rutin setiap bulan (Februari - September 2026)\n3. 🏫 Goes to Campus: Mulai 16 April hingga 9 September 2026\n\nAda jadwal pelatihan spesifik yang ingin Anda ikuti?",
-  },
-  {
-    keys: [
-      "profil",
-      "wilayah kerja",
-      "akreditasi",
-      "tentang",
-      "tepian",
-      "aplikasi",
-      "sertifikat",
-      "iso",
-    ],
-    response:
-      "Balai K3 Samarinda merupakan Unit Pelaksana Teknis Pusat (UPTP) Kemnaker RI.\n\n🌍 Wilayah Kerja: Seluruh Kalimantan, Provinsi Bali, dan Jawa Timur.\n🏆 Akreditasi: KAN (SNI ISO/IEC 17025:2017), ISO 9001:2015, & Lab Lingkungan KLHK.\n📱 Inovasi: Kami memiliki ekosistem layanan digital bernama 'TEPIAN K3' untuk kemudahan pendaftaran uji dan pelatihan.",
-  },
-  {
-    keys: [
-      "layanan",
-      "daftar layanan",
-      "apa saja layanan",
-      "pengujian",
-      "uji kompetensi",
-    ],
-    response:
-      "Balai K3 Samarinda menyediakan berbagai layanan unggulan, antara lain:\n1. 🧪 Pengujian Lingkungan Kerja (Faktor Fisik, Kimia, Biologi, Emisi)\n2. 🩺 Pemeriksaan Kesehatan Tenaga Kerja & Ergonomi\n3. 🎓 Pelatihan & Sertifikasi K3 (Hiperkes, P3K, Ahli K3)\n4. 🏅 Uji Kompetensi K3\n\nLayanan mana yang ingin Anda ketahui lebih detail?",
-  },
-  {
-    keys: ["jam", "operasional", "buka", "tutup"],
-    response:
-      "Jam operasional Balai K3 Samarinda adalah:\n📅 Senin - Kamis: 08.00 - 16.00 WITA\n📅 Jumat: 08.00 - 16.30 WITA\n📅 Sabtu, Minggu & Hari Libur Nasional: Tutup",
-  },
-  {
-    keys: ["biaya", "harga", "tarif", "bayar", "pnbp"],
-    response:
-      "Biaya layanan pengujian dan pemeriksaan di Balai K3 Samarinda mengacu pada tarif resmi PNBP (Penerimaan Negara Bukan Pajak) sesuai peraturan perundang-undangan Kementerian Ketenagakerjaan yang berlaku. Pembayaran dilakukan melalui e-billing SIMPONI.",
-  },
-  {
-    keys: ["syarat", "persyaratan", "berkas", "dokumen", "permohonan"],
-    response:
-      "Secara umum, persyaratan untuk mengajukan layanan kami adalah:\n- Surat Permohonan resmi dari Perusahaan\n- Profil singkat / Data Perusahaan (NIB/NPWP)\n- Rincian objek yang akan diuji/diperiksa\n\nPengajuan layanan kini lebih mudah melalui ekosistem digital 'TEPIAN K3'.",
-  },
-  {
-    keys: ["lokasi", "alamat", "dimana"],
-    response:
-      "Balai K3 Samarinda berlokasi di Jl. Sentosa No. 09, Samarinda, Provinsi Kalimantan Timur. Fasilitas kami dilengkapi dengan Gedung Lab 3-4 Lantai dan Safety Emergency Response Training Ground.",
-  },
-  {
-    keys: ["halo", "hai", "pagi", "siang", "sore", "malam", "asty"],
-    response:
-      "Halo! Safety First! 👷 Ada yang bisa Asty bantu terkait layanan Balai K3 Samarinda, jadwal pelatihan 2026, atau info seputar keselamatan kerja?",
-  },
-  {
-    keys: ["terima kasih", "makasih", "thanks", "ok", "oke"],
-    response:
-      "Sama-sama! 😊 Ingat selalu untuk mengutamakan Keselamatan dan Kesehatan Kerja. Jika butuh info lain, sapa saya lagi ya!",
-  },
-  {
-    keys: ["bantuan", "help", "panduan"],
-    response:
-      "Anda bisa bertanya tentang layanan Balai K3, misalnya:\n- 'Kapan jadwal pelatihan K3 Dasar?'\n- 'Apa itu aplikasi Tepian K3?'\n- 'Apa saja layanan pengujiannya?'\n- 'Di mana wilayah kerja Balai K3?'",
-  },
-];
-
 const badgeTexts = ["Hai,\nASTY\ndisini!", "Asisten\nSafety\nKamu!"];
 
 /**
@@ -119,18 +42,10 @@ const getCurrentTime = (): string => {
   });
 };
 
-/**
- * Mencocokkan input user dengan respons dari knowledge base.
- */
-const getBotResponse = (input: string): string => {
-  const query = input.toLowerCase();
-  for (const item of KB) {
-    if (item.keys.some((k) => query.includes(k))) {
-      return item.response;
-    }
-  }
-  return "Terima kasih atas pertanyaannya. Untuk informasi lebih lanjut, silakan hubungi Balai K3 Samarinda atau kunjungi ekosistem digital 'TEPIAN K3'. Safety First! 👷";
-};
+import { formatWaNumber, getBotResponse } from "@/utils/chatbot-utils";
+import { trpc } from "@/utils/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { authMeQueryOptions } from "@/utils/auth-query";
 
 /**
  * Komponen Floating Chatbot Asty untuk membantu pengguna.
@@ -163,6 +78,32 @@ export function AstyChatbot() {
     pathname.startsWith("/worksheets");
 
   const shouldShow = isAllowed && !isInternal;
+
+  const { data: kbData } = useQuery({
+    ...trpc.platform.chatbot.getAll.queryOptions(),
+    enabled: shouldShow,
+  });
+
+  const { data: user } = useQuery({
+    ...authMeQueryOptions(),
+    enabled: shouldShow,
+  });
+
+  const { data: myOrders } = useQuery({
+    ...trpc.pengujian.order.getAllOrders.queryOptions({ status: "all" }),
+    enabled: !!user?.id && shouldShow,
+  });
+
+  const latestOrder = myOrders?.[0];
+
+  const { data: waSetting } = useQuery({
+    ...trpc.platform.setting.getByKey.queryOptions({ key: "chatbot_wa_number" }),
+    enabled: shouldShow,
+  });
+
+  const askMutation = useMutation(
+    trpc.platform.chatbot.ask.mutationOptions(),
+  );
 
   // State Management
   const [isOpen, setIsOpen] = useState<boolean>(() => {
@@ -258,18 +199,42 @@ export function AstyChatbot() {
     setInputText("");
     setIsTyping(true);
 
-    // Simulasi delay mengetik 1.2 detik
-    setTimeout(() => {
-      const botResponseText = getBotResponse(text);
-      const botMsg: Message = {
-        id: `msg-${Date.now() + 1}`,
-        sender: "bot",
-        text: botResponseText,
-        timestamp: getCurrentTime(),
-      };
-      setMessages((prev) => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 1200);
+    const history = messages
+      .filter((m) => m.id !== "welcome")
+      .map((m) => ({
+        role: (m.sender === "user" ? "user" : "model") as "user" | "model",
+        text: m.text,
+      }));
+
+    askMutation.mutate(
+      {
+        message: text.trim(),
+        history,
+      },
+      {
+        onSuccess: (data: { text: string }) => {
+          const botMsg: Message = {
+            id: `msg-${Date.now() + 1}`,
+            sender: "bot",
+            text: data.text,
+            timestamp: getCurrentTime(),
+          };
+          setMessages((prev) => [...prev, botMsg]);
+          setIsTyping(false);
+        },
+        onError: () => {
+          const botResponseText = getBotResponse(text, kbData ?? [], waSetting?.value, latestOrder);
+          const botMsg: Message = {
+            id: `msg-${Date.now() + 1}`,
+            sender: "bot",
+            text: botResponseText,
+            timestamp: getCurrentTime(),
+          };
+          setMessages((prev) => [...prev, botMsg]);
+          setIsTyping(false);
+        },
+      }
+    );
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {

@@ -22,6 +22,7 @@ export const ROLES = [
   "kaji_ulang", // Kaji Ulang
   "kepala_balai", // Kepala Balai
   "koordinator_administrasi", // Koordinator Administrasi
+  "kepala_koordinator_administrasi", // Kepala Koordinator Administrasi
   "bendahara", // Bendahara Penerimaan
   "tim_penjadwalan", // Tim Penjadwalan
   "tim_peralatan", // Tim Peralatan
@@ -108,6 +109,9 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
 
   koordinator_administrasi:
     "Koordinator Administrasi yang menangani penawaran, SPK/tagihan, biaya operasional, dan verifikasi dokumen administrasi",
+
+  kepala_koordinator_administrasi:
+    "Kepala Koordinator Administrasi yang memverifikasi dan berhak meng-override rincian biaya operasional",
 
   bendahara:
     "Bendahara Penerimaan yang menerbitkan kode billing SIMPONI, memvalidasi pembayaran, dan mengelola dokumen keuangan",
@@ -205,6 +209,11 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "pengujian-import-export.read",
     "pengujian-import-export.update",
     "pengujian-import-export.delete",
+    "kepegawaian-import-export.view",
+    "kepegawaian-import-export.create",
+    "kepegawaian-import-export.read",
+    "kepegawaian-import-export.update",
+    "kepegawaian-import-export.delete",
     "orders.view",
     "orders.read",
     "orders.update",
@@ -863,6 +872,53 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "worksheets-transaction-details.update",
     "worksheets-transaction-details.review",
     "worksheets-transaction-details.verify",
+    "worksheet-notes.view",
+    "worksheet-notes.create",
+    "worksheet-notes.read",
+    "worksheet-notes.update",
+    "employees.view",
+    "employees.read",
+    "positions.view",
+    "positions.read",
+    "parameters.view",
+    "parameters.read",
+    "tools.view",
+    "tools.read",
+    "notifications.view",
+    "notifications.read",
+    "notifications.update",
+    "audits.view",
+    "audits.read",
+  ],
+
+  // Kepala Koordinator Administrasi: penawaran, SPK/tagihan, verifikasi & override biaya operasional
+  kepala_koordinator_administrasi: [
+    "orders.view",
+    "orders.read",
+    "orders.update",
+    "orders.review",
+    "orders.verify",
+    "orders-approval.view",
+    "orders-approval.read",
+    "orders-approval.reject",
+    "order-items.view",
+    "order-items.read",
+    "order-status-history.view",
+    "order-status-history.create",
+    "order-status-history.read",
+    "worksheets.view",
+    "worksheets.read",
+    "worksheets-status.view",
+    "worksheets-status.read",
+    "worksheets-status.update",
+    "worksheets-status.verify",
+    "worksheets-transaction-details.view",
+    "worksheets-transaction-details.create",
+    "worksheets-transaction-details.read",
+    "worksheets-transaction-details.update",
+    "worksheets-transaction-details.review",
+    "worksheets-transaction-details.verify",
+    "worksheets-transaction-details.approve",
     "worksheet-notes.view",
     "worksheet-notes.create",
     "worksheet-notes.read",

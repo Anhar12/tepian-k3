@@ -251,7 +251,7 @@ export function DataTableFilterMenu<TData>({
       ))}
       {filters.length > 0 && (
         <Button
-          aria-label="Reset all filters"
+          aria-label="Hapus semua filter"
           variant="outline"
           size="icon"
           className="size-8"
@@ -263,7 +263,7 @@ export function DataTableFilterMenu<TData>({
       <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <Button
-            aria-label="Open filter command menu"
+            aria-label="Buka menu penyaringan"
             variant="outline"
             size={filters.length > 0 ? "icon" : "sm"}
             className={cn(filters.length > 0 && "size-8", "h-8 font-normal")}
@@ -272,7 +272,7 @@ export function DataTableFilterMenu<TData>({
             disabled={disabled}
           >
             <ListFilter className="text-muted-foreground" />
-            {filters.length > 0 ? null : "Filter"}
+            {filters.length > 0 ? null : "Penyaringan"}
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -285,7 +285,7 @@ export function DataTableFilterMenu<TData>({
               placeholder={
                 selectedColumn
                   ? (selectedColumn.columnDef.meta?.label ?? selectedColumn.id)
-                  : "Search fields..."
+                  : "Cari kolom..."
               }
               value={inputValue}
               onValueChange={setInputValue}
@@ -295,7 +295,7 @@ export function DataTableFilterMenu<TData>({
               {selectedColumn ? (
                 <>
                   {selectedColumn.columnDef.meta?.options && (
-                    <CommandEmpty>No options found.</CommandEmpty>
+                    <CommandEmpty>Opsi tidak ditemukan.</CommandEmpty>
                   )}
                   <FilterValueSelector
                     column={selectedColumn}
@@ -305,7 +305,7 @@ export function DataTableFilterMenu<TData>({
                 </>
               ) : (
                 <>
-                  <CommandEmpty>No fields found.</CommandEmpty>
+                  <CommandEmpty>Kolom tidak ditemukan.</CommandEmpty>
                   <CommandGroup>
                     {columns.map((column) => (
                       <CommandItem
@@ -422,9 +422,9 @@ function DataTableFilterItem<TData>({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-48 p-0">
             <Command loop>
-              <CommandInput placeholder="Search fields..." />
+              <CommandInput placeholder="Cari kolom..." />
               <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
+                <CommandEmpty>Kolom tidak ditemukan.</CommandEmpty>
                 <CommandGroup>
                   {columns.map((column) => (
                     <CommandItem
@@ -589,12 +589,12 @@ function FilterValueSelector<TData>({
             {isEmpty ? (
               <>
                 <Text />
-                <span>Type to add filter...</span>
+                <span>Ketik untuk menyaring...</span>
               </>
             ) : (
               <>
                 <BadgeCheck />
-                <span className="truncate">Filter by &quot;{value}&quot;</span>
+                <span className="truncate">Saring dengan &quot;{value}&quot;</span>
               </>
             )}
           </CommandItem>
@@ -627,8 +627,8 @@ function onFilterInputRender<TData>({
       <div
         id={inputId}
         role="status"
-        aria-label={`${column.columnDef.meta?.label} filter is ${
-          filter.operator === "isEmpty" ? "empty" : "not empty"
+        aria-label={`Filter ${column.columnDef.meta?.label} adalah ${
+          filter.operator === "isEmpty" ? "kosong" : "tidak kosong"
         }`}
         aria-live="polite"
         className="h-full w-16 rounded-none border bg-transparent px-1.5 py-0.5 text-muted-foreground dark:bg-input/30"
@@ -663,7 +663,7 @@ function onFilterInputRender<TData>({
           id={inputId}
           type={isNumber ? "number" : "text"}
           inputMode={isNumber ? "numeric" : undefined}
-          placeholder={column.columnDef.meta?.placeholder ?? "Enter value..."}
+          placeholder={column.columnDef.meta?.placeholder ?? "Masukkan nilai..."}
           className="h-full w-24 rounded-none px-1.5"
           defaultValue={typeof filter.value === "string" ? filter.value : ""}
           onChange={(event) =>
@@ -725,9 +725,9 @@ function onFilterInputRender<TData>({
             >
               {selectedOptions.length === 0 ? (
                 filter.variant === "multiSelect" ? (
-                  "Select options..."
+                  "Pilih opsi..."
                 ) : (
-                  "Select option..."
+                  "Pilih opsi..."
                 )
               ) : (
                 <>
@@ -745,7 +745,7 @@ function onFilterInputRender<TData>({
                   </div>
                   <span className="truncate">
                     {selectedOptions.length > 1
-                      ? `${selectedOptions.length} selected`
+                      ? `${selectedOptions.length} dipilih`
                       : selectedOptions[0]?.label}
                   </span>
                 </>
@@ -758,9 +758,9 @@ function onFilterInputRender<TData>({
             className="w-48 p-0"
           >
             <Command>
-              <CommandInput placeholder="Search options..." />
+              <CommandInput placeholder="Cari opsi..." />
               <CommandList>
-                <CommandEmpty>No options found.</CommandEmpty>
+                <CommandEmpty>Opsi tidak ditemukan.</CommandEmpty>
                 <CommandGroup>
                   {options.map((option) => (
                     <CommandItem

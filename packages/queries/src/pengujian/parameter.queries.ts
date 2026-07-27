@@ -354,6 +354,8 @@ const parameterQueries = {
                 existingParameter.parameterCategoryId,
               price: data.price ?? existingParameter.price,
               reference: data.reference ?? existingParameter.reference,
+              serviceType: data.serviceType ?? existingParameter.serviceType,
+              unit: data.unit ?? existingParameter.unit,
             })
             .where(eq(parameters.id, data.id))
             .returning(),

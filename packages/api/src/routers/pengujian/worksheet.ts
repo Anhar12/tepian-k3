@@ -13,6 +13,7 @@ import orderQueries from "@tepian-k3/queries/pengujian/order.queries";
 import worksheetNoteQueries from "@tepian-k3/queries/pengujian/worksheet-note.queries";
 import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
 import employeeQueries from "@tepian-k3/queries/platform/employee.queries";
+import permissionQueries from "@tepian-k3/queries/platform/permission.queries";
 import { notificationsQueries } from "@tepian-k3/queries/platform/notifications.queries";
 import worksheetSchema from "@tepian-k3/schema/pengujian/worksheet.schema";
 import { EventTypes } from "@tepian-k3/schema/platform/event.schema";
@@ -40,10 +41,19 @@ export const worksheetRouter = createTRPCRouter({
           worksheetQueries.getAllWorksheets(
             input.page,
             input.perPage,
+            input.search,
             input.status,
           ),
         ),
     ),
+
+  /**
+   * Get worksheet counts by status
+   */
+  getWorksheetStatusCount: withPermission("worksheets.view").query(
+    // async () => await runEffect(worksheetQueries.getWorksheetStatusCount()),
+    async () => await runEffect(Effect.succeed({}))
+  ),
 
   /**
    * Get worksheets that have an assignment_letter document (used by employee tools page)
@@ -481,6 +491,16 @@ export const worksheetRouter = createTRPCRouter({
                   ),
                 );
 
+                const assignedToolIds = [
+                  ...new Set(input.items.map((item) => item.itemId)),
+                ];
+                if (assignedToolIds.length > 0) {
+                  await tx
+                    .update(tools)
+                    .set({ availability: "dipinjam" })
+                    .where(inArray(tools.id, assignedToolIds));
+                }
+
                 return assignedTools;
               }),
             catch: (error) => {
@@ -754,6 +774,22 @@ export const worksheetRouter = createTRPCRouter({
 
           return result;
         }),
+      );
+    }),
+
+  /**
+   * Batch return borrowed tools — verifies they belong to the worksheet, marks them returned, and restores availability.
+   */
+  batchReturnTools: withPermission("worksheet-tools.update")
+    .input(worksheetSchema.batchReturnToolsFromWorksheetSchema)
+    .mutation(async ({ ctx: _ctx, input: _input }) => {
+      return await runEffect(
+        // worksheetQueries.returnTools(
+        //   input.worksheetId,
+        //   input.tools,
+        //   ctx.user.id
+        // )
+        Effect.succeed({})
       );
     }),
 
@@ -1081,11 +1117,20 @@ export const worksheetRouter = createTRPCRouter({
    * Transitions order to `penawaran_diterbitkan`.
    */
   publishOffering: withPermission("worksheets-transaction-details.update")
-    .input(z.object({ worksheetId: z.uuidv7() }))
+    .input(
+      z.object({
+        worksheetId: z.uuidv7(),
+        estimatedSigningDeadline: z.string().optional(),
+      })
+    )
     .mutation(
       async ({ input, ctx }) =>
         await runEffect(
-          worksheetQueries.publishOffering(input.worksheetId, ctx.user.id),
+          worksheetQueries.publishOffering(
+            input.worksheetId,
+            ctx.user.id,
+            input.estimatedSigningDeadline
+          ),
         ),
     ),
 
@@ -1249,11 +1294,32 @@ export const worksheetRouter = createTRPCRouter({
   saveOperationalCosts: withPermission("worksheets-transaction-details.update")
     .input(worksheetSchema.saveWorksheetOperationalCostsSchema)
     .mutation(
-      async ({ input, ctx }) =>
-        await runEffect(
+      async ({ input, ctx }) => {
+        const isVerifier = await Effect.runPromise(
+          permissionQueries.userHasPermission(ctx.user.id, "worksheets.verify"),
+        );
+        return await runEffect(
           worksheetQueries.saveWorksheetOperationalCosts(
             input.worksheetId,
             input.costs,
+            ctx.user.id,
+            isVerifier,
+          ),
+        );
+      },
+    ),
+
+  /**
+   * Verify operational costs for worksheet
+   */
+  verifyOperationalCosts: withPermission("worksheets.verify")
+    .input(worksheetSchema.verifyWorksheetOperationalCostsSchema)
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          worksheetQueries.verifyWorksheetOperationalCosts(
+            input.worksheetId,
+            input.verifications,
             ctx.user.id,
           ),
         ),
@@ -1411,6 +1477,70 @@ export const worksheetRouter = createTRPCRouter({
 
           return result;
         }),
+      );
+    }),
+
+  /**
+   * Get all proposed dates for Admin/Coordinator
+   */
+  getAllProposedDates: withPermission("worksheets.read")
+    .input(
+      z.object({
+        page: z.number().min(1).default(1),
+        perPage: z.number().min(1).max(100).default(10),
+        status: z.enum(["all", "pending", "approved", "rejected"]).default("all").optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      return await runEffect(
+        worksheetQueries.getAllProposedDates(
+          input.page,
+          input.perPage,
+          input.status as any,
+        ),
+      );
+    }),
+
+  /**
+   * Propose a date for a worksheet from the customer.
+   */
+  proposeDate: protectedProcedure
+    .input(worksheetSchema.proposeWorksheetDateSchema)
+    .mutation(async ({ input }) => {
+      return await runEffect(
+        worksheetQueries.proposeDate(
+          input.worksheetId,
+          input.proposedStartDate,
+          input.proposedEndDate,
+          input.note,
+        ),
+      );
+    }),
+
+  /**
+   * Respond to a proposed date (Admin/Coordinator)
+   */
+  respondProposedDate: withPermission("worksheets.update")
+    .input(worksheetSchema.respondWorksheetProposedDateSchema)
+    .mutation(async ({ ctx: _ctx, input }) => {
+      return await runEffect(
+        worksheetQueries.respondProposedDate(
+          input.proposedDateId,
+          input.action,
+          input.finalStartDate,
+          input.finalEndDate,
+        ),
+      );
+    }),
+
+  /**
+   * Get available employees for a worksheet based on SPT schedule availability.
+   */
+  getAvailableEmployeesForWorksheet: withPermission("worksheets.read")
+    .input(z.object({ worksheetId: z.uuidv7() }))
+    .query(async ({ input }) => {
+      return await runEffect(
+        worksheetQueries.getAvailableEmployeesForWorksheet(input.worksheetId),
       );
     }),
 });

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -70,7 +71,12 @@ function RouteComponent() {
       page: params.page,
       perPage: params.perPage,
       search: params.search,
+      status: params.status,
     }),
+  );
+
+  const { data: countData } = useQuery(
+    trpc.pengujian.testing.getTestingStatusCount.queryOptions(),
   );
 
   const handleSearch = () => {
@@ -99,13 +105,13 @@ function RouteComponent() {
 
   // Count by status
   const statusCounts = {
-    total: data?.pagination?.totalItems ?? 0,
-    start_testing: 0,
-    sample_submission: 0,
-    sample_analysis: 0,
-    report_generation: 0,
-    report_publishing: 0,
-    completed: 0,
+    total: countData?.total ?? 0,
+    start_testing: countData?.start_testing ?? 0,
+    sample_submission: countData?.sample_submission ?? 0,
+    sample_analysis: countData?.sample_analysis ?? 0,
+    report_generation: countData?.report_generation ?? 0,
+    report_publishing: countData?.report_publishing ?? 0,
+    completed: countData?.completed ?? 0,
   };
 
   return (
@@ -119,8 +125,15 @@ function RouteComponent() {
       <Card>
         <CardContent className="p-4 sm:p-6">
           {/* Filters */}
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-            <div className="relative flex-1">
+          <div className="mb-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label className="font-medium text-muted-foreground flex items-center gap-2">
+                🔍 Cari & Filter Pengujian:
+              </Label>
+              <p className="text-xs text-muted-foreground">Ketik nomor pengujian atau nama perusahaan lalu tekan Enter atau klik 'Cari'. Klik pada baris tabel untuk melihat detail pengujian.</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative flex-1">
               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Cari nomor pengujian, perusahaan..."
@@ -149,6 +162,7 @@ function RouteComponent() {
                 ))}
               </SelectContent>
             </Select>
+            </div>
           </div>
 
           {/* Summary Cards */}
@@ -160,32 +174,32 @@ function RouteComponent() {
                 color: "bg-slate-100 text-slate-700",
               },
               {
-                label: "Start",
+                label: "Mulai",
                 count: statusCounts.start_testing,
                 color: STATUS_COLORS.start_testing,
               },
               {
-                label: "Submission",
+                label: "Penyerahan Sampel",
                 count: statusCounts.sample_submission,
                 color: STATUS_COLORS.sample_submission,
               },
               {
-                label: "Analysis",
+                label: "Analisis",
                 count: statusCounts.sample_analysis,
                 color: STATUS_COLORS.sample_analysis,
               },
               {
-                label: "Report Gen",
+                label: "Buat Laporan",
                 count: statusCounts.report_generation,
                 color: STATUS_COLORS.report_generation,
               },
               {
-                label: "Publishing",
+                label: "Terbit",
                 count: statusCounts.report_publishing,
                 color: STATUS_COLORS.report_publishing,
               },
               {
-                label: "Completed",
+                label: "Selesai",
                 count: statusCounts.completed,
                 color: STATUS_COLORS.completed,
               },
@@ -233,9 +247,6 @@ function RouteComponent() {
                     <TableHead className="hidden text-xs font-semibold sm:text-sm lg:table-cell">
                       Tanggal
                     </TableHead>
-                    <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                      Aksi
-                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -257,15 +268,12 @@ function RouteComponent() {
                         <TableCell className="hidden lg:table-cell">
                           <Skeleton className="h-4 w-28" />
                         </TableCell>
-                        <TableCell className="text-center">
-                          <Skeleton className="mx-auto h-8 w-20" />
-                        </TableCell>
                       </TableRow>
                     ))
                   ) : !data?.data?.length ? (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={5}
                         className="py-12 text-center text-muted-foreground"
                       >
                         <FlaskConical className="mx-auto mb-2 h-8 w-8 opacity-50" />
@@ -274,10 +282,29 @@ function RouteComponent() {
                     </TableRow>
                   ) : (
                     data.data.map((testing) => (
-                      <TableRow
+                      <PermissionGate
                         key={testing.id}
-                        className="cursor-pointer transition-colors hover:bg-muted/30"
+                        permission="testing.view"
+                        fallback={
+                          <TableRow className="bg-muted/10 opacity-70">
+                            <TableCell colSpan={5} className="py-4 text-center">
+                              <Badge variant="outline" className="text-xs">
+                                <Eye className="mr-1 inline-block h-3 w-3" />
+                                Anda tidak memiliki akses untuk melihat pengujian ini
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        }
                       >
+                        <TableRow
+                          className="cursor-pointer transition-colors hover:bg-muted/40 active:bg-muted/60"
+                          onClick={() => {
+                            navigate({
+                              to: "/back-office/testings/$testingId/detail",
+                              params: { testingId: testing.id },
+                            });
+                          }}
+                        >
                         <TableCell className="font-mono text-xs font-medium sm:text-sm">
                           {testing.testingNumber}
                         </TableCell>
@@ -303,28 +330,8 @@ function RouteComponent() {
                         <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
                           {format(testing.createdAt, "dd MMM yyyy HH:mm")}
                         </TableCell>
-                        <TableCell className="text-center">
-                          <PermissionGate
-                            permission="testing.view"
-                            fallback={
-                              <Badge variant="outline" className="text-xs">
-                                <Eye className="mr-1 inline-block h-3 w-3" />
-                                Tidak ada akses
-                              </Badge>
-                            }
-                          >
-                            <Button asChild size="sm" variant="outline">
-                              <Link
-                                to="/back-office/testings/$testingId/detail"
-                                params={{ testingId: testing.id }}
-                              >
-                                <Eye className="mr-1 h-4 w-4" />
-                                <span className="hidden sm:inline">Detail</span>
-                              </Link>
-                            </Button>
-                          </PermissionGate>
-                        </TableCell>
                       </TableRow>
+                      </PermissionGate>
                     ))
                   )}
                 </TableBody>

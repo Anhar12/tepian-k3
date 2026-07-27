@@ -11,6 +11,9 @@ import {
   TOOLS_CONDITIONS,
   WORKSHEET_NOTE_STATUS,
   WORKSHEET_STATUS,
+  PARAMETER_SERVICE_TYPES,
+  ORDER_FUNDING_TYPES,
+  WORKSHEET_PROPOSED_DATE_STATUS,
 } from "@tepian-k3/constants";
 import { sql } from "drizzle-orm";
 import {
@@ -58,12 +61,38 @@ export const paymentStatusEnum = pgEnum(
   ORDER_PAYMENT_STATUSES,
 );
 
+export const worksheetProposedDateStatusEnum = pgEnum(
+  "worksheet_proposed_date_status",
+  WORKSHEET_PROPOSED_DATE_STATUS,
+);
+
 export const ToolsAvailabilityEnum = pgEnum(
   "tools_availability",
   TOOLS_AVAILABILITY,
 );
 
 export const BahanUnitEnum = pgEnum("bahan_unit", BAHAN_UNITS);
+
+export const parameterServiceTypeEnum = pgEnum(
+  "parameter_service_type",
+  PARAMETER_SERVICE_TYPES,
+);
+
+export const orderFundingTypeEnum = pgEnum(
+  "order_funding_type",
+  ORDER_FUNDING_TYPES,
+);
+
+export const OPERATIONAL_COST_VERIFICATION_STATUS = [
+  "draft",
+  "submitted",
+  "verified",
+  "revised",
+] as const;
+export const operationalCostVerificationStatusEnum = pgEnum(
+  "operational_cost_verification_status",
+  OPERATIONAL_COST_VERIFICATION_STATUS,
+);
 
 export const BahanStatusEnum = pgEnum("bahan_status", BAHAN_STATUS);
 
@@ -384,6 +413,9 @@ export const parameters = createTable(
     reference: text("reference"),
     price: integer("price").notNull(),
     unit: varchar("unit", { length: 255 }).notNull(),
+    serviceType: parameterServiceTypeEnum("service_type")
+      .notNull()
+      .default("utama"),
     ...timestamps,
   },
   (table) => [
@@ -540,6 +572,9 @@ export const order = createTable(
       .notNull()
       .default("unpaid"),
     paymentRejectedReason: text("payment_rejected_reason"),
+    fundingType: orderFundingTypeEnum("funding_type")
+      .notNull()
+      .default("pnbp"),
 
     // Revision tracking
     revisionCount: integer("revision_count").notNull().default(0),
@@ -547,6 +582,7 @@ export const order = createTable(
 
     // Boolean flags
     coverFlightIncluded: boolean("cover_flight_included").default(false),
+    coverBaggageIncluded: boolean("cover_baggage_included").default(false),
     coverGroundTransportationIncluded: boolean(
       "cover_ground_transportation_included",
     ).default(false),
@@ -582,6 +618,12 @@ export const order = createTable(
       mode: "string",
     }),
     departureDate: timestamp("departure_date", {
+      withTimezone: true,
+      mode: "string",
+    }),
+
+    // Estimated signature date by Penjadwalan
+    estimatedSignatureDate: timestamp("estimated_signature_date", {
       withTimezone: true,
       mode: "string",
     }),
@@ -670,6 +712,7 @@ export const worksheets = createTable(
 
     // Boolean flags for included costs in order, to be used in calculation and invoice generation
     coverFlightIncluded: boolean("cover_flight_included").default(false),
+    coverBaggageIncluded: boolean("cover_baggage_included").default(false),
     coverGroundTransportationIncluded: boolean(
       "cover_ground_transportation_included",
     ).default(false),
@@ -689,6 +732,10 @@ export const worksheets = createTable(
       .notNull()
       .default(false),
     revisionNotes: text("revision_notes"),
+    estimatedSigningDeadline: timestamp("estimated_signing_deadline", {
+      withTimezone: true,
+      mode: "string",
+    }),
     // Set when Admin generates (Cetak) the offering PDF; Invoice uses these as reference
     offeringLetterNumber: varchar("offering_letter_number", { length: 250 }),
     offeringLetterDate: timestamp("offering_letter_date", {
@@ -913,6 +960,13 @@ export const worksheetOperationalCosts = createTable(
     unitCost: integer("unit_cost"),
     note: text("note"),
     sortOrder: integer("sort_order").notNull().default(0),
+    verificationStatus: operationalCostVerificationStatusEnum("verification_status")
+      .notNull()
+      .default("draft"),
+    verifiedBy: uuid("verified_by").references(() => users.id, { onDelete: "set null" }),
+    verifiedAt: timestamp("verified_at", { withTimezone: true, mode: "string" }),
+    verificationNote: text("verification_note"),
+    sbmYear: integer("sbm_year"),
     ...timestamps,
   },
   (table) => [
@@ -1094,5 +1148,37 @@ export const surveyFeedback = createTable(
   (table) => [
     index("survey_feedback_id_idx").using("btree", table.id),
     index("survey_feedback_order_id_idx").using("btree", table.orderId),
+  ],
+);
+
+export const worksheetProposedDates = createTable(
+  "worksheet_proposed_dates",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    worksheetId: uuid("worksheet_id")
+      .notNull()
+      .references(() => worksheets.id, { onDelete: "cascade" }),
+    proposedStartDate: timestamp("proposed_start_date", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    proposedEndDate: timestamp("proposed_end_date", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    note: text("note"),
+    status: worksheetProposedDateStatusEnum("status")
+      .notNull()
+      .default("pending"),
+    ...timestamps,
+  },
+  (table) => [
+    index("worksheet_proposed_dates_worksheet_id_idx").using(
+      "btree",
+      table.worksheetId,
+    ),
   ],
 );

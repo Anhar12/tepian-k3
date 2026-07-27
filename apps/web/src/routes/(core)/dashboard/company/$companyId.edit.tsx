@@ -199,6 +199,119 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
+              <div className="flex w-full flex-row gap-4 mb-4">
+                <div className="flex size-12 items-center justify-center rounded-xl bg-primary/30">
+                  <MapPin className="text-primary" />
+                </div>
+                <div className="flex flex-col items-start justify-start">
+                  <p className="text- text-xl font-medium">
+                    Informasi WLKP Online
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Lengkapi data WLKP
+                  </p>
+                </div>
+              </div>
+
+              <Controller
+                name="wlkpStatus"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <FieldSet data-invalid={fieldState.invalid}>
+                    <FieldLegend>Status WLKP Online *</FieldLegend>
+                    <FieldDescription>
+                      WLKP (Wajib Lapor Ketenagakerjaan di Perusahaan) adalah
+                      kewajiban perusahaan untuk melaporkan data ketenagakerjaan
+                      kepada pemerintah sesuai UU No. 7 Tahun 1981. Apakah
+                      perusahaan Anda memiliki status WLKP online?
+                    </FieldDescription>
+                    <RadioGroup
+                      name={field.name}
+                      value={String(field.value)}
+                      onValueChange={(value) => {
+                        field.onChange(value === "true");
+                        if (value === "false") {
+                          form.setValue("wlkp", "");
+                        }
+                      }}
+                      aria-invalid={fieldState.invalid}
+                      className="flex flex-row"
+                    >
+                      <FieldLabel htmlFor={`form-wlkp-radiogroup-no`}>
+                        <Field
+                          orientation="horizontal"
+                          data-invalid={fieldState.invalid}
+                        >
+                          <FieldContent>
+                            <FieldTitle>Tidak</FieldTitle>
+                            <FieldDescription>
+                              Perusahaan tidak memiliki status WLKP.
+                            </FieldDescription>
+                          </FieldContent>
+                          <RadioGroupItem
+                            value="false"
+                            id={`form-wlkp-radiogroup-no`}
+                            aria-invalid={fieldState.invalid}
+                          />
+                        </Field>
+                      </FieldLabel>
+                      <FieldLabel htmlFor={`form-wlkp-radiogroup-yes`}>
+                        <Field
+                          orientation="horizontal"
+                          data-invalid={fieldState.invalid}
+                        >
+                          <FieldContent>
+                            <FieldTitle>Ya</FieldTitle>
+                            <FieldDescription>
+                              Perusahaan memiliki status WLKP.
+                            </FieldDescription>
+                          </FieldContent>
+                          <RadioGroupItem
+                            value="true"
+                            id={`form-wlkp-radiogroup-yes`}
+                            aria-invalid={fieldState.invalid}
+                          />
+                        </Field>
+                      </FieldLabel>
+                    </RadioGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </FieldSet>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="wlkp"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Nomor WLKP Online *
+                    </FieldLabel>
+                    <NumberInput
+                      placeholder="Masukkan nomor WLKP perusahaan"
+                      className="h-10 text-sm"
+                      value={field.value ?? ""}
+                      onChange={(value) => field.onChange(String(value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                      aria-invalid={fieldState.invalid}
+                      disabled={!wlkpStatus}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <hr className="my-6 border-t border-slate-200" />
+
               <div className="flex justify-start">
                 {company.companyPictureUrl ? (
                   <ImageWithFallback
@@ -588,113 +701,6 @@ function RouteComponent() {
                 )}
               />
 
-              <div className="flex w-full flex-row gap-4">
-                <div className="flex size-12 items-center justify-center rounded-xl bg-primary/30">
-                  <MapPin className="text-primary" />
-                </div>
-                <div className="flex flex-col items-start justify-start">
-                  <p className="text- text-xl font-medium">
-                    Informasi WLKP Online
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Lengkapi data WLKP
-                  </p>
-                </div>
-              </div>
-
-              <Controller
-                name="wlkpStatus"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <FieldSet data-invalid={fieldState.invalid}>
-                    <FieldLegend>Status WLKP Online *</FieldLegend>
-                    <FieldDescription>
-                      WLKP (Wajib Lapor Ketenagakerjaan di Perusahaan) adalah
-                      kewajiban perusahaan untuk melaporkan data ketenagakerjaan
-                      kepada pemerintah sesuai UU No. 7 Tahun 1981. Apakah
-                      perusahaan Anda memiliki status WLKP online?
-                    </FieldDescription>
-                    <RadioGroup
-                      name={field.name}
-                      value={String(field.value)}
-                      onValueChange={(value) => {
-                        field.onChange(value === "true");
-                      }}
-                      aria-invalid={fieldState.invalid}
-                      className="flex flex-row"
-                    >
-                      <FieldLabel htmlFor={`form-wlkp-radiogroup-no`}>
-                        <Field
-                          orientation="horizontal"
-                          data-invalid={fieldState.invalid}
-                        >
-                          <FieldContent>
-                            <FieldTitle>Tidak</FieldTitle>
-                            <FieldDescription>
-                              Perusahaan tidak memiliki status WLKP.
-                            </FieldDescription>
-                          </FieldContent>
-                          <RadioGroupItem
-                            value="false"
-                            id={`form-wlkp-radiogroup-no`}
-                            aria-invalid={fieldState.invalid}
-                          />
-                        </Field>
-                      </FieldLabel>
-                      <FieldLabel htmlFor={`form-wlkp-radiogroup-yes`}>
-                        <Field
-                          orientation="horizontal"
-                          data-invalid={fieldState.invalid}
-                        >
-                          <FieldContent>
-                            <FieldTitle>Ya</FieldTitle>
-                            <FieldDescription>
-                              Perusahaan memiliki status WLKP.
-                            </FieldDescription>
-                          </FieldContent>
-                          <RadioGroupItem
-                            value="true"
-                            id={`form-wlkp-radiogroup-yes`}
-                            aria-invalid={fieldState.invalid}
-                          />
-                        </Field>
-                      </FieldLabel>
-                    </RadioGroup>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </FieldSet>
-                )}
-              />
-
-              <Controller
-                control={form.control}
-                name="wlkp"
-                render={({ field, fieldState }) => (
-                  <Field
-                    data-invalid={fieldState.invalid}
-                    className="space-y-1"
-                  >
-                    <FieldLabel className="ml-1 text-sm font-bold">
-                      Nomor WLKP Online *
-                    </FieldLabel>
-                    <NumberInput
-                      placeholder="Masukkan nomor WLKP perusahaan"
-                      className="h-10 text-sm"
-                      value={field.value ?? ""}
-                      onChange={(value) => field.onChange(String(value))}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      ref={field.ref}
-                      aria-invalid={fieldState.invalid}
-                      disabled={!wlkpStatus}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
 
               <div className="flex w-full flex-row gap-4">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-primary/30">

@@ -8,7 +8,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { toWaLink } from "@/utils/wa-link";
 import {
   Calendar,
   ClipboardList,
@@ -185,9 +187,14 @@ export function WorksheetSidebar({
               {company?.responsibleTestingPersonPhone && (
                 <div className="flex gap-3">
                   <PhoneCall className="size-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
+                  <a
+                    href={toWaLink(company.responsibleTestingPersonPhone) ?? "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-green-600 hover:underline"
+                  >
                     {company.responsibleTestingPersonPhone}
-                  </span>
+                  </a>
                 </div>
               )}
 

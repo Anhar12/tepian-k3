@@ -1,78 +1,187 @@
 import { type Icon } from "@tabler/icons-react";
+import { ChevronRight } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { Permission } from "@tepian-k3/constants";
+import React from "react";
 
-export interface NavMainProps {
-  items: {
+export interface NavItem {
+  title: string;
+  url?: string;
+  icon?: Icon;
+  permission?: Permission | string;
+  items?: {
     title: string;
     url: string;
     icon?: Icon;
-    permission?: Permission;
+    permission?: Permission | string;
   }[];
+}
+
+export interface NavMainProps {
+  items: NavItem[];
 }
 
 export function NavMain({ items }: NavMainProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Find the most specific matching item (longest URL that matches, respecting search params)
-  const activeItem = items.reduce<string | null>((best, item) => {
-    const itemUrlPath = item.url.split("?")[0] || "";
-    const itemUrlParams = item.url.split("?")[1];
+  // Flatten items for active state calculation
+  const allUrls = React.useMemo(() => {
+    const urls: { url: string; isParent: boolean }[] = [];
+    items.forEach((item) => {
+      if (item.url) urls.push({ url: item.url, isParent: true });
+      if (item.items) {
+        item.items.forEach((subItem) => {
+          urls.push({ url: subItem.url, isParent: false });
+        });
+      }
+    });
+    return urls;
+  }, [items]);
 
-    let isMatch = false;
-    if (itemUrlParams) {
-      const currentSearchParams = new URLSearchParams(
-        typeof window !== "undefined" ? window.location.search : "",
-      );
-      const targetSearchParams = new URLSearchParams(itemUrlParams);
+  // Find the most specific matching item
+  const activeItemUrl = React.useMemo(() => {
+    return allUrls.reduce<string | null>((best, item) => {
+      const itemUrlPath = item.url.split("?")[0] || "";
+      const itemUrlParams = item.url.split("?")[1];
 
-      const paramsMatch = Array.from(targetSearchParams.entries()).every(
-        ([key, val]) => currentSearchParams.get(key) === val,
-      );
+      let isMatch = false;
+      if (itemUrlParams) {
+        const currentSearchParams = new URLSearchParams(
+          typeof window !== "undefined" ? window.location.search : "",
+        );
+        const targetSearchParams = new URLSearchParams(itemUrlParams);
 
-      isMatch = location.pathname === itemUrlPath && paramsMatch;
-    } else {
-      isMatch =
-        location.pathname === item.url ||
-        location.pathname.startsWith(`${item.url}/`);
+        const paramsMatch = Array.from(targetSearchParams.entries()).every(
+          ([key, val]) => currentSearchParams.get(key) === val,
+        );
+
+        isMatch = location.pathname === itemUrlPath && paramsMatch;
+      } else {
+        isMatch =
+          location.pathname === item.url ||
+          location.pathname.startsWith(`${item.url}/`);
+      }
+
+      if (isMatch && (!best || item.url.length > best.length)) {
+        return item.url;
+      }
+      return best;
+    }, null);
+  }, [allUrls, location.pathname]);
+
+  const [openItem, setOpenItem] = React.useState<string | null>(null);
+
+  // Sync open state with active route
+  React.useEffect(() => {
+    const parentWithActiveItem = items.find(
+      (item) => item.items && item.items.some((subItem) => activeItemUrl === subItem.url)
+    );
+    if (parentWithActiveItem) {
+      setOpenItem(parentWithActiveItem.title);
     }
-
-    if (isMatch && (!best || item.url.length > best.length)) {
-      return item.url;
-    }
-    return best;
-  }, null);
+  }, [activeItemUrl, items]);
 
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                tooltip={item.title}
-                onClick={() => navigate({ to: item.url })}
-                className={cn(
-                  "flex h-12 w-full items-center gap-3.5 rounded-none text-sm transition-all duration-200",
-                  activeItem === item.url
-                    ? "border-l-[3.5px] border-white bg-[#1061d6] pr-6 pl-5 font-semibold text-white hover:bg-[#1061d6] hover:text-white [&>svg]:stroke-white [&>svg]:stroke-[2px] [&>svg]:text-white"
-                    : "bg-transparent pr-6 pl-6 text-[#dce7ff] hover:bg-white/10 hover:text-white [&>svg]:stroke-[#dce7ff] [&>svg]:stroke-[1.8px] [&>svg]:text-[#dce7ff]",
-                )}
+          {items.map((item) => {
+            const hasSubMenu = item.items && item.items.length > 0;
+            const isSubMenuActive =
+              hasSubMenu &&
+              item.items!.some((subItem) => activeItemUrl === subItem.url);
+
+            if (!hasSubMenu && item.url) {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    onClick={() => navigate({ to: item.url! })}
+                    className={cn(
+                      "flex h-12 w-full items-center gap-3.5 rounded-none text-sm transition-all duration-200",
+                      activeItemUrl === item.url
+                        ? "border-l-[3.5px] border-white bg-[#1061d6] pr-6 pl-5 font-semibold text-white hover:bg-[#1061d6] hover:text-white [&>svg]:stroke-white [&>svg]:stroke-[2px] [&>svg]:text-white"
+                        : "bg-transparent pr-6 pl-6 text-[#dce7ff] hover:bg-white/10 hover:text-white [&>svg]:stroke-[#dce7ff] [&>svg]:stroke-[1.8px] [&>svg]:text-[#dce7ff]",
+                    )}
+                  >
+                    {item.icon && <item.icon className="size-5 shrink-0" />}
+                    <span className="truncate">{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            }
+
+            const isOpen = openItem === item.title;
+
+            return (
+              <Collapsible
+                key={item.title}
+                asChild
+                open={isOpen}
+                onOpenChange={(open) => setOpenItem(open ? item.title : null)}
+                className="group/collapsible"
               >
-                {item.icon && <item.icon className="size-5 shrink-0" />}
-                <span className="truncate">{item.title}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      className={cn(
+                        "flex h-12 w-full items-center gap-3.5 rounded-none text-sm transition-all duration-200",
+                        isSubMenuActive
+                          ? "bg-transparent pr-6 pl-6 font-semibold text-white hover:bg-white/10 hover:text-white [&>svg]:stroke-white [&>svg]:stroke-[2px] [&>svg]:text-white"
+                          : "bg-transparent pr-6 pl-6 text-[#dce7ff] hover:bg-white/10 hover:text-white [&>svg]:stroke-[#dce7ff] [&>svg]:stroke-[1.8px] [&>svg]:text-[#dce7ff]",
+                      )}
+                    >
+                      {item.icon && <item.icon className="size-5 shrink-0" />}
+                      <span className="truncate">{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub className="mx-6 border-l border-white/20 px-2 py-1">
+                      {item.items?.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton
+                            asChild
+                            className={cn(
+                              "h-10 cursor-pointer rounded-md text-sm font-normal text-[#dce7ff] transition-all hover:bg-white/10 hover:text-white",
+                              activeItemUrl === subItem.url &&
+                                "bg-white/20 font-semibold text-white hover:bg-white/20",
+                            )}
+                            onClick={() => navigate({ to: subItem.url })}
+                          >
+                            <span>
+                              {subItem.icon && (
+                                <subItem.icon className="mr-2 size-4 shrink-0 inline-block opacity-70" />
+                              )}
+                              {subItem.title}
+                            </span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

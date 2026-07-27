@@ -32,6 +32,21 @@ const clusterColors = [
     color: "bg-linear-to-br from-blue-400 to-blue-600",
     icon: Globe2,
   },
+  {
+    label: "Layanan Utama",
+    color: "bg-linear-to-br from-blue-500 to-blue-700",
+    icon: Building2,
+  },
+  {
+    label: "Layanan Tambahan",
+    color: "bg-linear-to-br from-gray-500 to-gray-700",
+    icon: Building2,
+  },
+  {
+    label: "Lainnya",
+    color: "bg-linear-to-br from-slate-400 to-slate-600",
+    icon: Building2,
+  },
 ];
 
 export function getClusterColor(label: string) {

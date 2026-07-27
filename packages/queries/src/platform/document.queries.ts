@@ -180,6 +180,42 @@ const documentQueries = {
     }),
 
   /**
+   * Update document signed status
+   */
+  updateDocumentSignedStatus: (documentId: string, data: {
+    status: "signed";
+    signatureData: string;
+    verificationToken: string;
+    verificationUrl: string;
+    qrCodeUrl: string;
+    signedByUserId: string;
+    signedAt: string;
+  }, tx: DBorTx = db) =>
+    Effect.gen(function* () {
+      const results = yield* Effect.tryPromise({
+        try: () =>
+          tx
+            .update(documents)
+            .set(data)
+            .where(eq(documents.id, documentId))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "documentQueries.updateDocumentSignedStatus",
+            "Error updating document",
+            { documentId, data, error },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal menyimpan data TTE",
+            cause: error,
+          });
+        },
+      });
+      return results[0];
+    }),
+
+  /**
    * Sign a document with JWT and generate QR code
    */
   signDocumentWithJWT: (

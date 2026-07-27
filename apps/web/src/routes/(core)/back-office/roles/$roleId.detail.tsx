@@ -45,6 +45,10 @@ const RESOURCE_LABELS: Record<Resource, { title: string; category: string }> = {
     title: "Import / Export Data Master",
     category: "Master Data Pengujian",
   },
+  "kepegawaian-import-export": {
+    title: "Import / Export Kepegawaian",
+    category: "Master Data Kepegawaian",
+  },
 
   tools: { title: "Alat Laboratorium", category: "Inventaris & Alat Lab" },
   "tool-codes": { title: "Kode Alat Lab", category: "Inventaris & Alat Lab" },

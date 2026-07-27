@@ -164,11 +164,33 @@ export const pengujianExcelRouter = createTRPCRouter({
                 ctx.user.email,
               );
 
+            if (importResult.errors.length > 0) {
+              const errorBuffer = yield* Effect.tryPromise({
+                try: () => buildImportReportWorkbook({
+                  summary: importResult.summary,
+                  errors: importResult.errors,
+                }),
+                catch: (e) => new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Failed to build error report for db errors",
+                  cause: e,
+                }),
+              });
+
+              return {
+                success: false,
+                hasErrors: true,
+                errorCount: importResult.errors.length,
+                errorReportBase64: errorBuffer.toString("base64"),
+                summary: importResult.summary,
+              };
+            }
+
             return {
               success: true,
               hasErrors: false,
               errorCount: 0,
-              summary: importResult,
+              summary: importResult.summary,
             };
           }),
         ),

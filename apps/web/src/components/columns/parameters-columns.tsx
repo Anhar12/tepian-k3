@@ -3,23 +3,29 @@ import type { PaginatedParameters } from "@tepian-k3/types/pengujian/parameters.
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/parameters";
 import {
+  createCompactDateColumn,
   createNumberColumn,
+  createMergedTextColumn,
   createTextColumn,
-  createDateColumn,
-  createActionColumn,
   createPriceColumn,
+  createStatusColumn,
 } from "@/lib/column-helpers";
-import { createCrudActionCell } from "@/lib/create-crud-action-cell";
+import {
+  PARAMETER_SERVICE_TYPE_LABELS,
+  PARAMETER_SERVICE_TYPE_COLORS,
+} from "@tepian-k3/constants";
+import type { CrudActionCellConfig } from "@/components/crud-row-actions";
+import { ParameterModal } from "@/components/modals/parameter-modal";
 
 interface PaginatedParametersColumnsProps {
   currentPage: number;
   perPage: number;
 }
 
-const ActionCell = createCrudActionCell<
+export const parameterActionConfig: CrudActionCellConfig<
   PaginatedParameters,
   (typeof Route)["types"]["searchSchema"]
->({
+> = {
   resourceName: "parameter",
   resourcePath: "parameters",
   permissionPrefix: "parameters",
@@ -30,7 +36,8 @@ const ActionCell = createCrudActionCell<
     trpc.pengujian.parameter.getPaginatedParameters.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
-});
+  editModal: ParameterModal,
+};
 
 export default function getPaginatedParametersColumns({
   currentPage,
@@ -38,13 +45,11 @@ export default function getPaginatedParametersColumns({
 }: PaginatedParametersColumnsProps): ColumnDef<PaginatedParameters>[] {
   return [
     createNumberColumn<PaginatedParameters>(currentPage, perPage),
-    createTextColumn<PaginatedParameters>("category.name", "Kategori", {
+    createMergedTextColumn<PaginatedParameters>("name", "Nama Parameter", {
       width: "w-64",
-    }),
-    createTextColumn<PaginatedParameters>("name", "Nama Parameter", {
-      width: "w-48",
       enableFilter: true,
       placeholder: "Cari nama parameter...",
+      secondaryId: "category.name",
     }),
     createTextColumn<PaginatedParameters>("unit", "Satuan", {
       width: "w-32",
@@ -52,12 +57,21 @@ export default function getPaginatedParametersColumns({
     createPriceColumn<PaginatedParameters>("price", "Harga", {
       width: "w-32",
     }),
-    createDateColumn<PaginatedParameters>("createdAt", "Dibuat"),
-    createDateColumn<PaginatedParameters>("updatedAt", "Diubah", {
-      nullable: true,
+    createStatusColumn<PaginatedParameters>("serviceType", "Layanan", {
+      width: "w-32",
+      enableFilter: true,
+      variant: "select",
+      statusMap: {
+        utama: {
+          text: PARAMETER_SERVICE_TYPE_LABELS.utama,
+          customColors: PARAMETER_SERVICE_TYPE_COLORS.utama,
+        },
+        tambahan: {
+          text: PARAMETER_SERVICE_TYPE_LABELS.tambahan,
+          customColors: PARAMETER_SERVICE_TYPE_COLORS.tambahan,
+        },
+      },
     }),
-    createActionColumn<PaginatedParameters>(({ row }) => (
-      <ActionCell row={row} />
-    )),
+    createCompactDateColumn<PaginatedParameters>("createdAt", "Dibuat"),
   ];
 }

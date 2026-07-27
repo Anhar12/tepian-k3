@@ -1,5 +1,6 @@
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
+import { MaskedText } from "@/components/ui/masked-text";
 import type {
   ColumnDef,
   ColumnMeta,
@@ -235,6 +236,10 @@ export function createStatusColumn<T extends RowData>(
         placeholder,
         variant,
         icon,
+        options: Object.entries(statusMap).map(([value, config]) => ({
+          label: config.text,
+          value,
+        })),
       }
     : { label };
 
@@ -373,5 +378,116 @@ export function createActionColumn<T>(
       <DataTableColumnHeader column={column} title="Aksi" label="Aksi" />
     ),
     cell: ({ row }) => cellRenderer({ row }),
+  };
+}
+
+/**
+ * Creates a compact date column
+ */
+export function createCompactDateColumn<T extends RowData>(
+  id: Extract<NestedKeyOf<T>, string>,
+  label: string,
+  options: DateColumnOptions = {},
+): ColumnDef<T> {
+  const { nullable = false, format: dateFormat = "dd MMM yy" } = options;
+
+  return {
+    id,
+    accessorKey: id,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={label} label={label} />
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue(id);
+      if (!value && nullable) return <span className="text-muted-foreground">-</span>;
+      return <span className="text-xs whitespace-nowrap">{format(new Date(value as string), dateFormat)}</span>;
+    },
+    meta: { label },
+  };
+}
+
+interface MergedTextColumnOptions<T> extends TextColumnOptions<T> {
+  /** The secondary accessor key to display below the primary value */
+  secondaryId: Extract<NestedKeyOf<T>, string>;
+  /** Custom renderer for secondary value if needed */
+  secondaryRenderer?: (
+    value: unknown,
+    row: Row<T>,
+  ) => React.ReactNode;
+  /** Apply masking to the secondary value */
+  secondaryMaskType?: "email" | "phone" | "name" | "company";
+}
+
+/**
+ * Creates a column that merges two text values (primary and secondary)
+ */
+export function createMergedTextColumn<T extends RowData>(
+  id: Extract<NestedKeyOf<T>, string>,
+  label: string,
+  options: MergedTextColumnOptions<T>,
+): ColumnDef<T> {
+  const {
+    width = "min-w-0",
+    enableFilter = false,
+    placeholder = `Cari ${label.toLowerCase()}...`,
+    variant = "text",
+    icon = Text,
+    nullable = false,
+    secondaryId,
+    secondaryRenderer,
+    secondaryMaskType,
+  } = options;
+
+  const meta: ColumnMeta<T, unknown> = enableFilter
+    ? {
+        label,
+        placeholder,
+        variant,
+        icon,
+      }
+    : { label };
+
+  return {
+    id,
+    accessorKey: id,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={label} label={label} />
+    ),
+    cell: ({ row }) => {
+      const primaryValue = row.getValue(id) as string | null | undefined;
+      const displayPrimary = primaryValue ?? (nullable ? "-" : "");
+      
+      const secondaryValue = row.getValue(secondaryId);
+      const stringVal = String(secondaryValue ?? (nullable ? "-" : ""));
+      
+      let secondaryContent: React.ReactNode;
+      
+      if (secondaryRenderer) {
+        secondaryContent = secondaryRenderer(secondaryValue, row);
+      } else if (secondaryMaskType) {
+        secondaryContent = (
+          <MaskedText 
+            value={stringVal} 
+            maskType={secondaryMaskType} 
+            className="text-xs text-muted-foreground w-full"
+          />
+        );
+      } else {
+        secondaryContent = (
+          <span className="text-xs text-muted-foreground truncate">
+            {stringVal}
+          </span>
+        );
+      }
+
+      return (
+        <div className={`flex flex-col ${width}`}>
+          <span className="font-medium truncate">{displayPrimary}</span>
+          {secondaryContent}
+        </div>
+      );
+    },
+    meta,
+    enableColumnFilter: enableFilter,
   };
 }

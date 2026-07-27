@@ -157,50 +157,47 @@ export const pengujianExcelQueries = {
           dbChemicalMaterials.map((cm) => [cm.code, cm]),
         );
 
-        return await db.transaction(async (tx) => {
-          const summary = {
-            kategoriParameter: { insert: 0, update: 0 },
-            parameter: { insert: 0, update: 0 },
-            kodeAlat: { insert: 0, update: 0 },
-            alat: { insert: 0, update: 0 },
-            bahanKimia: { insert: 0, update: 0 },
-          };
+        const summary = {
+          parameterCategories: { processed: parsed.parameterCategories.length, success: 0, failed: 0 },
+          parameters: { processed: parsed.parameters.length, success: 0, failed: 0 },
+          toolCodes: { processed: parsed.toolCodes.length, success: 0, failed: 0 },
+          tools: { processed: parsed.tools.length, success: 0, failed: 0 },
+          chemicalMaterials: { processed: parsed.chemicalMaterials.length, success: 0, failed: 0 },
+        };
 
+        const remainingErrors = [...parsed.parseErrors];
+
+        await db.transaction(async (tx) => {
           // 1. Kategori Parameter
           for (const row of parsed.parameterCategories) {
-            const item = row.data;
-            const existing = categoryMap.get(item.nama);
+            try {
+              const item = row.data;
+              const existing = categoryMap.get(item.nama);
 
-            // Find cluster
-            let clusterId = existing?.clusterId;
-            if (item.cluster) {
-              const clusterIdFromMap = clusterMap.get(item.cluster);
-              if (clusterIdFromMap) clusterId = clusterIdFromMap;
-            }
+              // Find cluster
+              let clusterId = existing?.clusterId;
+              if (item.cluster) {
+                const clusterIdFromMap = clusterMap.get(item.cluster);
+                if (clusterIdFromMap) clusterId = clusterIdFromMap;
+              }
 
-            if (!clusterId) {
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: `Cluster tidak ditemukan untuk Kategori Parameter: ${item.nama}`,
-              });
-            }
+              if (!clusterId) {
+                throw new Error(`Cluster "${item.cluster}" tidak ditemukan.`);
+              }
 
-            if (existing) {
-              const [updated] = await tx
-                .update(parameterCategories)
-                .set({
-                  description: item.deskripsi,
-                  clusterId,
-                })
-                .where(eq(parameterCategories.id, existing.id))
-                .returning();
+              if (existing) {
+                const [updated] = await tx
+                  .update(parameterCategories)
+                  .set({
+                    description: item.deskripsi,
+                    clusterId,
+                  })
+                  .where(eq(parameterCategories.id, existing.id))
+                  .returning();
 
-              if (updated) {
-                // Keep memory Map updated for consecutive lookups
-                categoryMap.set(updated.name, updated as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (updated) {
+                  categoryMap.set(updated.name, updated as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "parameter_category",
                     entityId: updated.id,
                     action: "update",
@@ -209,70 +206,69 @@ export const pengujianExcelQueries = {
                     oldValues: existing,
                     newValues: updated,
                     description: `Memperbarui Kategori Parameter dari Excel: ${updated.name}`,
+                  });
+                }
+              } else {
+                const [inserted] = await tx
+                  .insert(parameterCategories)
+                  .values({
+                    name: item.nama,
+                    description: item.deskripsi,
+                    clusterId,
                   })
-                  .pipe(Effect.runPromise);
-                summary.kategoriParameter.update++;
-              }
-            } else {
-              const [inserted] = await tx
-                .insert(parameterCategories)
-                .values({
-                  name: item.nama,
-                  description: item.deskripsi,
-                  clusterId,
-                })
-                .returning();
+                  .returning();
 
-              if (inserted) {
-                // Keep memory Map updated for consecutive lookups
-                categoryMap.set(inserted.name, inserted as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (inserted) {
+                  categoryMap.set(inserted.name, inserted as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "parameter_category",
                     entityId: inserted.id,
                     action: "create",
                     userId,
                     userEmail,
+                    oldValues: null,
                     newValues: inserted,
                     description: `Membuat Kategori Parameter dari Excel: ${inserted.name}`,
-                  })
-                  .pipe(Effect.runPromise);
-                summary.kategoriParameter.insert++;
+                  });
+                }
               }
+              summary.parameterCategories.success++;
+            } catch (err: any) {
+              summary.parameterCategories.failed++;
+              remainingErrors.push({
+                sheet: "KategoriParameter",
+                row: row.rowNumber,
+                message: err.message || "Gagal menyimpan ke database",
+              });
             }
           }
 
           // 2. Parameter
           for (const row of parsed.parameters) {
-            const item = row.data;
-            const existing = parameterMap.get(item.nama);
-            const category = categoryMap.get(item.kategori);
+            try {
+              const item = row.data;
+              const existing = parameterMap.get(item.nama);
+              const category = categoryMap.get(item.kategori);
 
-            if (!category) {
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: `Kategori Parameter '${item.kategori}' tidak ditemukan untuk Parameter: ${item.nama}`,
-              });
-            }
+              if (!category) {
+                throw new Error(`Kategori Parameter "${item.kategori}" tidak ditemukan.`);
+              }
 
-            if (existing) {
-              const [updated] = await tx
-                .update(parameters)
-                .set({
-                  parameterCategoryId: category.id,
-                  price: Number(item.harga) || 0,
-                  unit: item.satuan,
-                  reference: item.referensi,
-                })
-                .where(eq(parameters.id, existing.id))
-                .returning();
+              if (existing) {
+                const [updated] = await tx
+                  .update(parameters)
+                  .set({
+                    parameterCategoryId: category.id,
+                    price: Number(item.harga) || 0,
+                    unit: item.satuan,
+                    reference: item.referensi,
+                  })
+                  .where(eq(parameters.id, existing.id))
+                  .returning();
 
-              if (updated) {
-                parameterMap.set(updated.name, updated as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (updated) {
+                  parameterMap.set(updated.name, updated as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "parameter",
                     entityId: updated.id,
                     action: "update",
@@ -281,61 +277,64 @@ export const pengujianExcelQueries = {
                     oldValues: existing,
                     newValues: updated,
                     description: `Memperbarui Parameter dari Excel: ${updated.name}`,
+                  });
+                }
+              } else {
+                const [inserted] = await tx
+                  .insert(parameters)
+                  .values({
+                    name: item.nama,
+                    parameterCategoryId: category.id,
+                    price: Number(item.harga) || 0,
+                    unit: item.satuan,
+                    reference: item.referensi,
                   })
-                  .pipe(Effect.runPromise);
-                summary.parameter.update++;
-              }
-            } else {
-              const [inserted] = await tx
-                .insert(parameters)
-                .values({
-                  name: item.nama,
-                  parameterCategoryId: category.id,
-                  price: Number(item.harga) || 0,
-                  unit: item.satuan,
-                  reference: item.referensi,
-                })
-                .returning();
+                  .returning();
 
-              if (inserted) {
-                parameterMap.set(inserted.name, inserted as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (inserted) {
+                  parameterMap.set(inserted.name, inserted as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "parameter",
                     entityId: inserted.id,
                     action: "create",
                     userId,
                     userEmail,
+                    oldValues: null,
                     newValues: inserted,
                     description: `Membuat Parameter dari Excel: ${inserted.name}`,
-                  })
-                  .pipe(Effect.runPromise);
-                summary.parameter.insert++;
+                  });
+                }
               }
+              summary.parameters.success++;
+            } catch (err: any) {
+              summary.parameters.failed++;
+              remainingErrors.push({
+                sheet: "Parameter",
+                row: row.rowNumber,
+                message: err.message || "Gagal menyimpan ke database",
+              });
             }
           }
 
           // 3. Kode Alat
           for (const row of parsed.toolCodes) {
-            const item = row.data;
-            const existing = toolCodeMap.get(item.kode);
+            try {
+              const item = row.data;
+              const existing = toolCodeMap.get(item.kode);
 
-            if (existing) {
-              const [updated] = await tx
-                .update(toolCodes)
-                .set({
-                  description: item.deskripsi,
-                  isActive: item.aktif === "ya" ? true : false,
-                })
-                .where(eq(toolCodes.id, existing.id))
-                .returning();
+              if (existing) {
+                const [updated] = await tx
+                  .update(toolCodes)
+                  .set({
+                    description: item.deskripsi,
+                    isActive: item.aktif === "ya",
+                  })
+                  .where(eq(toolCodes.id, existing.id))
+                  .returning();
 
-              if (updated) {
-                toolCodeMap.set(updated.code, updated as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (updated) {
+                  toolCodeMap.set(updated.code, updated as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "tool_code",
                     entityId: updated.id,
                     action: "update",
@@ -344,78 +343,78 @@ export const pengujianExcelQueries = {
                     oldValues: existing,
                     newValues: updated,
                     description: `Memperbarui Kode Alat dari Excel: ${updated.code}`,
+                  });
+                }
+              } else {
+                const [inserted] = await tx
+                  .insert(toolCodes)
+                  .values({
+                    code: item.kode,
+                    description: item.deskripsi,
+                    isActive: item.aktif === "ya",
                   })
-                  .pipe(Effect.runPromise);
-                summary.kodeAlat.update++;
-              }
-            } else {
-              const [inserted] = await tx
-                .insert(toolCodes)
-                .values({
-                  code: item.kode,
-                  description: item.deskripsi,
-                  isActive: item.aktif === "ya" ? true : false,
-                })
-                .returning();
+                  .returning();
 
-              if (inserted) {
-                toolCodeMap.set(inserted.code, inserted as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (inserted) {
+                  toolCodeMap.set(inserted.code, inserted as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "tool_code",
                     entityId: inserted.id,
                     action: "create",
                     userId,
                     userEmail,
+                    oldValues: null,
                     newValues: inserted,
                     description: `Membuat Kode Alat dari Excel: ${inserted.code}`,
-                  })
-                  .pipe(Effect.runPromise);
-                summary.kodeAlat.insert++;
+                  });
+                }
               }
+              summary.toolCodes.success++;
+            } catch (err: any) {
+              summary.toolCodes.failed++;
+              remainingErrors.push({
+                sheet: "KodeAlat",
+                row: row.rowNumber,
+                message: err.message || "Gagal menyimpan ke database",
+              });
             }
           }
 
           // 4. Alat
           for (const row of parsed.tools) {
-            const item = row.data;
-            const existing = toolMap.get(item.kodeFisik);
-            const toolCode = toolCodeMap.get(item.kodeAlat);
+            try {
+              const item = row.data;
+              const existing = toolMap.get(item.kodeFisik);
+              const toolCode = toolCodeMap.get(item.kodeAlat);
 
-            if (!toolCode) {
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: `Kode Alat '${item.kodeAlat}' tidak ditemukan untuk Alat: ${item.kodeFisik}`,
-              });
-            }
+              if (!toolCode) {
+                throw new Error(`Kode Alat "${item.kodeAlat}" tidak ditemukan.`);
+              }
 
-            if (existing) {
-              const [updated] = await tx
-                .update(tools)
-                .set({
-                  toolCodeId: toolCode.id,
-                  toolName: item.namaAlat,
-                  function: item.fungsi,
-                  location: item.lokasi,
-                  shelf: item.rak,
-                  BMNnumber: item.nomorBMN,
-                  NUPnumber: item.nomorNUP,
-                  brand: item.merek,
-                  type: item.tipe,
-                  serialNumber: item.nomorSeri,
-                  acquisitionYear: item.tahunPerolehan,
-                  condition: item.kondisi as any,
-                  availability: item.ketersediaan as any,
-                })
-                .where(eq(tools.id, existing.id))
-                .returning();
+              if (existing) {
+                const [updated] = await tx
+                  .update(tools)
+                  .set({
+                    toolCodeId: toolCode.id,
+                    toolName: item.namaAlat,
+                    function: item.fungsi,
+                    location: item.lokasi,
+                    shelf: item.rak,
+                    BMNnumber: item.nomorBMN,
+                    NUPnumber: item.nomorNUP,
+                    brand: item.merek,
+                    type: item.tipe,
+                    serialNumber: item.nomorSeri,
+                    acquisitionYear: item.tahunPerolehan,
+                    condition: item.kondisi as any,
+                    availability: item.ketersediaan as any,
+                  })
+                  .where(eq(tools.id, existing.id))
+                  .returning();
 
-              if (updated) {
-                toolMap.set(updated.toolUniqueCode, updated as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (updated) {
+                  toolMap.set(updated.toolUniqueCode, updated as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "tool",
                     entityId: updated.id,
                     action: "update",
@@ -424,80 +423,83 @@ export const pengujianExcelQueries = {
                     oldValues: existing,
                     newValues: updated,
                     description: `Memperbarui Alat dari Excel: ${updated.toolUniqueCode}`,
+                  });
+                }
+              } else {
+                const [inserted] = await tx
+                  .insert(tools)
+                  .values({
+                    toolUniqueCode: item.kodeFisik,
+                    toolCodeId: toolCode.id,
+                    toolName: item.namaAlat,
+                    function: item.fungsi,
+                    location: item.lokasi,
+                    shelf: item.rak,
+                    BMNnumber: item.nomorBMN,
+                    NUPnumber: item.nomorNUP,
+                    brand: item.merek,
+                    type: item.tipe,
+                    serialNumber: item.nomorSeri,
+                    acquisitionYear: item.tahunPerolehan,
+                    condition: item.kondisi as any,
+                    availability: item.ketersediaan as any,
                   })
-                  .pipe(Effect.runPromise);
-                summary.alat.update++;
-              }
-            } else {
-              const [inserted] = await tx
-                .insert(tools)
-                .values({
-                  toolUniqueCode: item.kodeFisik,
-                  toolCodeId: toolCode.id,
-                  toolName: item.namaAlat,
-                  function: item.fungsi,
-                  location: item.lokasi,
-                  shelf: item.rak,
-                  BMNnumber: item.nomorBMN,
-                  NUPnumber: item.nomorNUP,
-                  brand: item.merek,
-                  type: item.tipe,
-                  serialNumber: item.nomorSeri,
-                  acquisitionYear: item.tahunPerolehan,
-                  condition: item.kondisi as any,
-                  availability: item.ketersediaan as any,
-                })
-                .returning();
+                  .returning();
 
-              if (inserted) {
-                toolMap.set(inserted.toolUniqueCode, inserted as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (inserted) {
+                  toolMap.set(inserted.toolUniqueCode, inserted as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "tool",
                     entityId: inserted.id,
                     action: "create",
                     userId,
                     userEmail,
+                    oldValues: null,
                     newValues: inserted,
                     description: `Membuat Alat dari Excel: ${inserted.toolUniqueCode}`,
-                  })
-                  .pipe(Effect.runPromise);
-                summary.alat.insert++;
+                  });
+                }
               }
+              summary.tools.success++;
+            } catch (err: any) {
+              summary.tools.failed++;
+              remainingErrors.push({
+                sheet: "Alat",
+                row: row.rowNumber,
+                message: err.message || "Gagal menyimpan ke database",
+              });
             }
           }
 
           // 5. Bahan Kimia
           for (const row of parsed.chemicalMaterials) {
-            const item = row.data;
-            const existing = chemicalMaterialMap.get(item.kode);
+            try {
+              const item = row.data;
+              const existing = chemicalMaterialMap.get(item.kode);
 
-            if (existing) {
-              const [updated] = await tx
-                .update(chemicalMaterials)
-                .set({
-                  catalogNumber: item.nomorKatalog,
-                  chemicalFormula: item.rumusKimia,
-                  name: item.nama,
-                  usedStock: item.stokTerpakai,
-                  usedStockUnit: item.unitStokTerpakai as any,
-                  sealedStock: item.stokTersegel,
-                  sealedStockUnit: item.unitStokTersegel as any,
-                  monthlyUsage: item.penggunaanBulanan,
-                  monthlyUsageUnit: item.unitPenggunaan as any,
-                  expiredDate: item.tanggalKadaluarsa,
-                  status: item.status as any,
-                  incomingMaterialNote: item.catatanMasuk,
-                })
-                .where(eq(chemicalMaterials.id, existing.id))
-                .returning();
+              if (existing) {
+                const [updated] = await tx
+                  .update(chemicalMaterials)
+                  .set({
+                    catalogNumber: item.nomorKatalog,
+                    chemicalFormula: item.rumusKimia,
+                    name: item.nama,
+                    usedStock: item.stokTerpakai,
+                    usedStockUnit: item.unitStokTerpakai as any,
+                    sealedStock: item.stokTersegel,
+                    sealedStockUnit: item.unitStokTersegel as any,
+                    monthlyUsage: item.penggunaanBulanan,
+                    monthlyUsageUnit: item.unitPenggunaan as any,
+                    expiredDate: item.tanggalKadaluarsa,
+                    status: item.status as any,
+                    incomingMaterialNote: item.catatanMasuk,
+                  })
+                  .where(eq(chemicalMaterials.id, existing.id))
+                  .returning();
 
-              if (updated) {
-                chemicalMaterialMap.set(updated.code, updated as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (updated) {
+                  chemicalMaterialMap.set(updated.code, updated as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "chemical_material",
                     entityId: updated.id,
                     action: "update",
@@ -506,51 +508,55 @@ export const pengujianExcelQueries = {
                     oldValues: existing,
                     newValues: updated,
                     description: `Memperbarui Bahan Kimia dari Excel: ${updated.code}`,
+                  });
+                }
+              } else {
+                const [inserted] = await tx
+                  .insert(chemicalMaterials)
+                  .values({
+                    code: item.kode,
+                    catalogNumber: item.nomorKatalog,
+                    chemicalFormula: item.rumusKimia,
+                    name: item.nama,
+                    usedStock: item.stokTerpakai,
+                    usedStockUnit: item.unitStokTerpakai as any,
+                    sealedStock: item.stokTersegel,
+                    sealedStockUnit: item.unitStokTersegel as any,
+                    monthlyUsage: item.penggunaanBulanan,
+                    monthlyUsageUnit: item.unitPenggunaan as any,
+                    expiredDate: item.tanggalKadaluarsa,
+                    status: item.status as any,
+                    incomingMaterialNote: item.catatanMasuk,
                   })
-                  .pipe(Effect.runPromise);
-                summary.bahanKimia.update++;
-              }
-            } else {
-              const [inserted] = await tx
-                .insert(chemicalMaterials)
-                .values({
-                  code: item.kode,
-                  catalogNumber: item.nomorKatalog,
-                  chemicalFormula: item.rumusKimia,
-                  name: item.nama,
-                  usedStock: item.stokTerpakai,
-                  usedStockUnit: item.unitStokTerpakai as any,
-                  sealedStock: item.stokTersegel,
-                  sealedStockUnit: item.unitStokTersegel as any,
-                  monthlyUsage: item.penggunaanBulanan,
-                  monthlyUsageUnit: item.unitPenggunaan as any,
-                  expiredDate: item.tanggalKadaluarsa,
-                  status: item.status as any,
-                  incomingMaterialNote: item.catatanMasuk,
-                })
-                .returning();
+                  .returning();
 
-              if (inserted) {
-                chemicalMaterialMap.set(inserted.code, inserted as any);
-
-                await auditQueries
-                  .createAuditLog({
+                if (inserted) {
+                  chemicalMaterialMap.set(inserted.code, inserted as any);
+                  await auditQueries.createAuditLogTx(tx, {
                     entityType: "chemical_material",
                     entityId: inserted.id,
                     action: "create",
                     userId,
                     userEmail,
+                    oldValues: null,
                     newValues: inserted,
                     description: `Membuat Bahan Kimia dari Excel: ${inserted.code}`,
-                  })
-                  .pipe(Effect.runPromise);
-                summary.bahanKimia.insert++;
+                  });
+                }
               }
+              summary.chemicalMaterials.success++;
+            } catch (err: any) {
+              summary.chemicalMaterials.failed++;
+              remainingErrors.push({
+                sheet: "BahanKimia",
+                row: row.rowNumber,
+                message: err.message || "Gagal menyimpan ke database",
+              });
             }
           }
-
-          return summary;
         });
+
+        return { summary, errors: remainingErrors };
       },
       catch: (error: any) => {
         logError(
@@ -558,10 +564,7 @@ export const pengujianExcelQueries = {
           "Failed to import from parsed data",
           { error },
         );
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-        throw new TRPCError({
+        return new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengimpor data dari Excel.",
           cause: error,

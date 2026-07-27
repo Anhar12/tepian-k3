@@ -1,0 +1,1 @@
+ALTER TABLE "orders" ADD COLUMN "estimated_signature_date" timestamp with time zone;

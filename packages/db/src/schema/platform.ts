@@ -897,6 +897,23 @@ export const mediaPublications = createTable(
   ],
 );
 
+export const chatbotKnowledgeBase = createTable("chatbot_knowledge_base", {
+  id: uuid("id")
+    .primaryKey()
+    .notNull()
+    .$default(() => uuidv7()),
+  topic: text("topic").notNull(),
+  keywords: text("keywords").array().notNull().default([]),
+  answer: text("answer").notNull(),
+  sourceType: text("source_type", { enum: ["manual", "pdf"] })
+    .notNull()
+    .default("manual"),
+  pdfFileKey: text("pdf_file_key"),
+  pdfFileName: text("pdf_file_name"),
+  isActive: boolean("is_active").notNull().default(true),
+  ...timestamps,
+});
+
 // ##################
 // end authored
 // ##################

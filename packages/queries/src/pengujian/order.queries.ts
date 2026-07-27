@@ -12,6 +12,7 @@ import {
   gte,
   ilike,
   inArray,
+  notInArray,
   isNotNull,
   isNull,
   lte,
@@ -26,6 +27,8 @@ import {
   userCompanies,
   userCompanyTestingLocation,
   worksheets,
+  worksheetTools,
+  tools,
 } from "@tepian-k3/db/schema";
 import { generateOrderNumberWithSequence } from "@tepian-k3/db/utils";
 import orderItemSchema from "@tepian-k3/schema/pengujian/order-item.schema";
@@ -36,7 +39,8 @@ import { filterColumns } from "@tepian-k3/utils/filter-column";
 import { TRPCError } from "@trpc/server";
 import { Cause, Effect, Exit } from "effect";
 import { z } from "zod";
-import { logCreate } from "../helpers/audit.helpers";
+import { logCreate, logUpdate, logStatusChange } from "../helpers/audit.helpers";
+import { maskUserCompany } from "../helpers/mask.helpers";
 import orderItemQueries from "./order-item.queries";
 import orderStatusHistoryQueries from "./order-status-history.queries";
 import testingQueries from "./testing.queries";
@@ -130,6 +134,7 @@ const orderQueries = {
             input.showDeleted
               ? isNotNull(order.deletedAt)
               : isNull(order.deletedAt),
+            input.fundingType ? eq(order.fundingType, input.fundingType) : undefined,
           );
 
       const orderBy =
@@ -248,7 +253,11 @@ const orderQueries = {
     });
   },
 
-  getOrderWithCompanyAndItems(orderId: string, userId: string) {
+  getOrderWithCompanyAndItems(
+    orderId: string,
+    userId: string,
+    options?: { unmask?: boolean }
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.order.findFirst({
@@ -299,6 +308,12 @@ const orderQueries = {
               },
             },
           },
+        }).then((data) => {
+          if (!data) return data;
+          if (!options?.unmask && data.company) {
+            data.company = maskUserCompany(data.company) as any;
+          }
+          return data;
         }),
       catch: (error) => {
         logError("orderQueries.getOrderById", "Failed to fetch order by ID", {
@@ -314,7 +329,11 @@ const orderQueries = {
     });
   },
 
-  getOrderWithDocuments(orderId: string, userId: string) {
+  getOrderWithDocuments(
+    orderId: string,
+    userId: string,
+    options?: { unmask?: boolean }
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.order.findFirst({
@@ -357,6 +376,10 @@ const orderQueries = {
                     id: true,
                     name: true,
                   },
+                  with: {
+                    regency: true,
+                    district: true,
+                  },
                 },
                 pelatihan: {
                   columns: {
@@ -367,7 +390,11 @@ const orderQueries = {
               },
             },
             testing: true,
-            worksheet: true,
+            worksheet: {
+              with: {
+                proposedDates: true,
+              },
+            },
             statusHistory: {
               orderBy: (statusHistory, { desc }) => [
                 desc(statusHistory.createdAt),
@@ -377,6 +404,12 @@ const orderQueries = {
               orderBy: (documents, { desc }) => [desc(documents.createdAt)],
             },
           },
+        }).then((data) => {
+          if (!data) return data;
+          if (!options?.unmask && data.company) {
+            data.company = maskUserCompany(data.company) as any;
+          }
+          return data;
         }),
       catch: (error) => {
         logError(
@@ -396,7 +429,10 @@ const orderQueries = {
     });
   },
 
-  getOrderWithDocumentsAdmin(orderId: string) {
+  getOrderWithDocumentsAdmin(
+    orderId: string,
+    options?: { unmask?: boolean }
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.order.findFirst({
@@ -446,6 +482,10 @@ const orderQueries = {
                     id: true,
                     name: true,
                   },
+                  with: {
+                    regency: true,
+                    district: true,
+                  },
                 },
                 pelatihan: {
                   columns: {
@@ -469,6 +509,12 @@ const orderQueries = {
               orderBy: (documents, { desc }) => [desc(documents.createdAt)],
             },
           },
+        }).then((data) => {
+          if (!data) return data;
+          if (!options?.unmask && data.company) {
+            data.company = maskUserCompany(data.company) as any;
+          }
+          return data;
         }),
       catch: (error) => {
         logError(
@@ -518,10 +564,12 @@ const orderQueries = {
   createOrder(
     userId: string,
     coverFlightIncluded: boolean,
+    coverBaggageIncluded: boolean,
     coverGroundTransportationIncluded: boolean,
     coverGroundTransportationToAirportOrHarbour: boolean,
     coverLodgingIncluded: boolean,
     coverWaterTransportationIncluded: boolean,
+    fundingType: "pnbp" | "dipa",
     customerNote: string | undefined,
     orderData: z.infer<typeof orderSchema.createOrderSchema>,
     orderItems: z.infer<typeof orderItemSchema.createOrderItem>[],
@@ -635,10 +683,12 @@ const orderQueries = {
                 approvalStatus: "pending",
                 paymentStatus: "unpaid",
                 coverFlightIncluded,
+                coverBaggageIncluded,
                 coverGroundTransportationIncluded,
                 coverGroundTransportationToAirportOrHarbour,
                 coverLodgingIncluded,
                 coverWaterTransportationIncluded,
+                fundingType,
                 customerNote,
               })
               .returning();
@@ -683,6 +733,11 @@ const orderQueries = {
                 userId,
                 "Order created and is pending approval",
               ),
+            );
+
+            // Log creation
+            await Effect.runPromise(
+              logCreate("order", newOrder.id, newOrder, userId)
             );
 
             return { order: newOrder, items };
@@ -863,6 +918,16 @@ const orderQueries = {
         );
       }
 
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "order",
+          data.orderId,
+          {},
+          updateData as Record<string, unknown>,
+          userId
+        )
+      );
+
       return updatedOrder;
     });
   },
@@ -978,6 +1043,20 @@ const orderQueries = {
         "upload_surat_persetujuan",
         userId,
         "Offer accepted by customer",
+      );
+
+      yield* Effect.forkDaemon(
+        logStatusChange("order", orderId, "ditawarkan", "upload_surat_persetujuan", userId)
+      );
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "order",
+          orderId,
+          { status: "penawaran_diterbitkan" },
+          { status: "upload_surat_persetujuan", approvedAt: updatedOrder.approvedAt },
+          userId,
+        )
       );
 
       return updatedOrder;
@@ -1140,6 +1219,125 @@ const orderQueries = {
 
       // status history is written inside the transaction above; no second write here
 
+      yield* Effect.forkDaemon(
+        logStatusChange("order", orderId, "menunggu_revisi", "revisi_ditawarkan", userId)
+      );
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "order",
+          orderId,
+          { status: "menunggu_revisi" },
+          { status: "revisi_ditawarkan", revisionNotes: revisionNote, revisionCount: (orderToRevise.revisionCount ?? 0) + 1 },
+          userId,
+        )
+      );
+
+      return updatedOrder;
+    });
+  },
+
+  submitOrderRevisionByUser(orderId: string, userId: string, revisionNote: string) {
+    return Effect.gen(function* () {
+      // check if order exists and is not yet completed/published
+      const orderToRevise = yield* Effect.tryPromise({
+        try: () =>
+          db.query.order.findFirst({
+            where: and(
+              eq(order.id, orderId),
+              eq(order.userId, userId),
+              notInArray(order.status, ["laporan_diterbitkan", "completed", "rejected", "cancelled"]),
+            ),
+          }),
+        catch: (error) => {
+          logError("orderQueries.submitOrderRevisionByUser", "Failed to fetch order", {
+            error,
+            orderId,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil pesanan",
+          });
+        },
+      });
+
+      if (!orderToRevise) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Pesanan tidak ditemukan atau sudah tidak dapat direvisi",
+          }),
+        );
+      }
+
+      // update order status to revision
+      const updatedOrder = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const [updatedOrders] = await tx
+              .update(order)
+              .set({
+                status: "revision",
+                revisionNotes: revisionNote,
+                revisionCount: sql`revision_count + 1`,
+              })
+              .where(eq(order.id, orderId))
+              .returning();
+
+            if (!updatedOrders) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal memperbarui pesanan",
+              });
+            }
+
+            // update worksheet status to revision
+            await tx
+              .update(worksheets)
+              .set({ status: "revision", updatedAt: new Date().toISOString() })
+              .where(eq(worksheets.orderId, orderId));
+
+            // add status history
+            await Effect.runPromise(
+              orderStatusHistoryQueries.createOrderStatusHistory(
+                tx,
+                orderId,
+                "revision",
+                userId,
+                `User mengajukan revisi layanan pengujian. Catatan: ${revisionNote}`,
+              ),
+            );
+
+            return updatedOrders;
+          }),
+        catch: (error) => {
+          logError("orderQueries.submitOrderRevisionByUser", "Failed to update order", {
+            error,
+            orderId,
+            userId,
+          });
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui pesanan",
+          });
+        },
+      });
+
+      yield* Effect.forkDaemon(
+        logStatusChange("order", orderId, orderToRevise.status, "revision", userId)
+      );
+
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "order",
+          orderId,
+          { status: orderToRevise.status },
+          { status: "revision", revisionNotes: revisionNote, revisionCount: (orderToRevise.revisionCount ?? 0) + 1 },
+          userId,
+        )
+      );
+
       return updatedOrder;
     });
   },
@@ -1216,6 +1414,10 @@ const orderQueries = {
         "cancelled",
         userId,
         "Order cancelled by customer",
+      );
+
+      yield* Effect.forkDaemon(
+        logStatusChange("order", orderId, "any", "dibatalkan", userId)
       );
 
       return updatedOrder;
@@ -1310,6 +1512,10 @@ const orderQueries = {
           }),
         );
       }
+
+      yield* Effect.forkDaemon(
+        logUpdate("order", orderId, { approvalStatus: "pending" }, { approvalStatus: "approved" }, "system")
+      );
 
       return {
         ...updatedOrder,
@@ -1410,6 +1616,10 @@ const orderQueries = {
         `Order approval rejected by admin. Reason: ${reason}`,
       );
 
+      yield* Effect.forkDaemon(
+        logUpdate("order", orderId, { approvalStatus: "pending" }, { approvalStatus: "rejected" }, "system")
+      );
+
       return { ...updatedOrder, user: orderToReject.user };
     });
   },
@@ -1492,6 +1702,10 @@ const orderQueries = {
         "pending",
         adminId,
         `Admin meminta koreksi data kontak. Catatan: ${revisionNote}`,
+      );
+
+      yield* Effect.forkDaemon(
+        logUpdate("order", orderId, { approvalStatus: "any" }, { approvalStatus: "revision_requested" }, "system")
       );
 
       return { ...updatedOrder, user: orderToRevise.user };
@@ -1657,6 +1871,10 @@ const orderQueries = {
         "Admin mengembalikan pesanan ke status menunggu persetujuan",
       );
 
+      yield* Effect.forkDaemon(
+        logUpdate("order", orderId, { approvalStatus: "any" }, { approvalStatus: "pending" }, "system")
+      );
+
       return { ...updatedOrder, user: orderToRevert.user };
     });
   },
@@ -1736,6 +1954,10 @@ const orderQueries = {
         "Order payment verified by admin",
       );
 
+      yield* Effect.forkDaemon(
+        logUpdate("order", orderId, { paymentStatus: "unpaid" }, { paymentStatus: "paid" }, "system")
+      );
+
       return { ...updatedOrder, user: orderToVerify.user };
     });
   },
@@ -1807,12 +2029,22 @@ const orderQueries = {
       yield* orderStatusHistoryQueries.createOrderStatusHistory(
         db,
         orderId,
-        "rejected",
+        orderToReject.status, // order status is unchanged
         adminId,
-        `Order payment rejected by admin. Reason: ${reason}`,
+        `Pembayaran ditolak: ${reason}`,
       );
 
-      return { ...orderToReject };
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "order",
+          orderId,
+          { paymentStatus: "unpaid" },
+          { paymentStatus: "rejected", paymentRejectedReason: reason },
+          adminId
+        )
+      );
+
+      return { ...updatedOrder, user: orderToReject.user };
     });
   },
 
@@ -1855,6 +2087,36 @@ const orderQueries = {
         );
       }
 
+      // ITEM 29: Automate Tool Status (Worksheet checkout/return)
+      if (status === "completed" || status === "cancelled") {
+        yield* Effect.tryPromise({
+          try: async () => {
+            const worksheet = await tx.query.worksheets.findFirst({
+              where: eq(worksheets.orderId, orderId),
+              with: { tools: true },
+            });
+
+            if (worksheet && worksheet.tools.length > 0) {
+              const toolIds = worksheet.tools.map((wt) => wt.toolId);
+
+              // Update tools to 'tersedia'
+              await tx
+                .update(tools)
+                .set({ availability: "ready" })
+                .where(inArray(tools.id, toolIds));
+            }
+          },
+          catch: (error) => {
+            logError(
+              "orderQueries.updateOrderStatus",
+              "Failed to automate tool return on order completion",
+              { error, orderId, status }
+            );
+            // Non-fatal error, we don't throw to prevent blocking the status update
+          },
+        });
+      }
+
       // Create order status history
       yield* orderStatusHistoryQueries.createOrderStatusHistory(
         db,
@@ -1862,6 +2124,10 @@ const orderQueries = {
         status,
         updatedOrder.userId,
         `Order status updated to ${status}`,
+      );
+
+      yield* Effect.forkDaemon(
+        logStatusChange("order", orderId, "any", status, "system")
       );
 
       return updatedOrder;
@@ -1939,6 +2205,10 @@ const orderQueries = {
         "penawaran_diterbitkan",
         userId,
         "Penawaran disetujui oleh Kepala Balai",
+      );
+
+      yield* Effect.forkDaemon(
+        logStatusChange("order", orderId, "any", "diterima", "system")
       );
 
       return updatedOrder;
@@ -2022,6 +2292,10 @@ const orderQueries = {
         `Penawaran dikembalikan oleh Kepala Balai untuk revisi. Catatan: ${revisionNote}`,
       );
 
+      yield* Effect.forkDaemon(
+        logStatusChange("order", orderId, "ditawarkan", "menunggu_revisi", "system")
+      );
+
       return updatedOrder;
     });
   },
@@ -2069,6 +2343,10 @@ const orderQueries = {
           }),
         );
       }
+      yield* Effect.forkDaemon(
+        logUpdate("order", orderId, {}, { paymentStatus: paymentStatus }, "system")
+      );
+
       return updatedOrder;
     });
   },

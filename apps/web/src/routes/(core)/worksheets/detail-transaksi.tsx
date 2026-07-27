@@ -23,6 +23,7 @@ import {
 import useDialogs from "@/hooks/use-dialog";
 import { usePagination } from "@/lib/pagination";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { usePermissions } from "@/hooks/use-permissions";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
@@ -34,6 +35,9 @@ import {
   type OrderStatus,
   WORKSHEET_DAILY_ALLOWANCE_ITEM,
   WORKSHEET_FIELD_OPERATIONAL_ITEM,
+  OPERATIONAL_COST_VERIFICATION_STATUS_LABELS,
+  OPERATIONAL_COST_VERIFICATION_STATUS_COLORS,
+  OPERATIONAL_COST_VERIFICATION_STATUS,
 } from "@tepian-k3/constants";
 import {
   addBusinessDays,
@@ -44,6 +48,7 @@ import {
   parseISO,
 } from "date-fns";
 import { id } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import {
   AlertCircle,
   Calendar,
@@ -80,6 +85,9 @@ interface OperationalCostItem {
   unitCost: number | null;
   note: string | null;
   sortOrder: number;
+  sbmYear?: number | null;
+  verificationStatus?: "draft" | "submitted" | "verified" | "revised";
+  verificationNote?: string | null;
 }
 
 function formatCurrency(value: number | null | undefined): string {
@@ -191,6 +199,20 @@ function RouteComponent() {
     }),
   );
 
+  const verifyOperationalCostsMutation = useMutation(
+    trpc.pengujian.worksheet.verifyOperationalCosts.mutationOptions({
+      onSuccess: () => {
+        globalSuccessToast("Status verifikasi berhasil diperbarui.");
+        refetch();
+      },
+      onError: (error: { message?: string }) => {
+        globalErrorToast(
+          `Gagal memperbarui verifikasi: ${error.message ?? "Silahkan coba lagi."}`,
+        );
+      },
+    }),
+  );
+
   // Reset state when switching worksheets so stale data doesn't linger during loading
   useEffect(() => {
     setOperationalCosts([]);
@@ -211,6 +233,9 @@ function RouteComponent() {
           unitCost: cost.unitCost,
           note: cost.note,
           sortOrder: cost.sortOrder,
+          sbmYear: cost.sbmYear,
+          verificationStatus: cost.verificationStatus,
+          verificationNote: cost.verificationNote,
         })),
       );
     } else if (worksheet && worksheet.operationalCosts?.length === 0) {
@@ -228,6 +253,7 @@ function RouteComponent() {
           unitCost: 0,
           note: null,
           sortOrder: 0,
+          verificationStatus: "draft",
         },
       ];
 
@@ -245,6 +271,22 @@ function RouteComponent() {
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
+          verificationStatus: "draft",
+        });
+      }
+
+      if (worksheet.coverBaggageIncluded) {
+        defaultCosts.push({
+          item: "Bagasi Pesawat (PP)",
+          unitCount:
+            worksheet.estimatedAmountOfMembers > 0
+              ? worksheet.estimatedAmountOfMembers
+              : 1,
+          days: 1, // Usually baggage is per trip/person, not per day
+          unitCost: 0,
+          note: null,
+          sortOrder: defaultCosts.length,
+          verificationStatus: "draft",
         });
       }
 
@@ -262,6 +304,7 @@ function RouteComponent() {
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
+          verificationStatus: "draft",
         });
       }
 
@@ -279,6 +322,7 @@ function RouteComponent() {
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
+          verificationStatus: "draft",
         });
       }
 
@@ -296,6 +340,7 @@ function RouteComponent() {
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
+          verificationStatus: "draft",
         });
       }
 
@@ -313,8 +358,10 @@ function RouteComponent() {
           unitCost: 0,
           note: null,
           sortOrder: defaultCosts.length,
+          verificationStatus: "draft",
         });
       }
+
 
       // Field operational statement — always the last row. This is a fixed note
       // (no charge) indicating transport/field operations are covered by the
@@ -332,6 +379,7 @@ function RouteComponent() {
         unitCost: 0,
         note: null,
         sortOrder: defaultCosts.length,
+        verificationStatus: "draft",
       });
 
       setOperationalCosts(defaultCosts);
@@ -347,6 +395,9 @@ function RouteComponent() {
     if (!worksheet?.items) return [];
     return worksheet.items.filter((item) => !item.isReady);
   }, [worksheet?.items]);
+
+  const { hasPermission } = usePermissions();
+  const isVerifier = hasPermission("worksheets.verify");
 
   // Check if worksheet is editable (only allow edits in "verified" status for now, since that's the only time operational costs are shown and editable in this view, but this can be expanded in the future if needed)
   const isEditable = useMemo(() => {
@@ -497,6 +548,35 @@ function RouteComponent() {
   const grandTotal =
     parameterTotal + (showOperationalCosts ? operationalTotal : 0);
 
+  const hasBaggageCost = useMemo(() => {
+    return operationalCosts.some(
+      (c) =>
+        c.item === "Bagasi Pesawat (PP)" ||
+        c.item === "Biaya Bagasi Pesawat",
+    );
+  }, [operationalCosts]);
+
+  const handleAddBaggageCost = useCallback(() => {
+    setOperationalCosts((prev) => [
+      ...prev,
+      {
+        item: "Bagasi Pesawat (PP)",
+        unitCount:
+          worksheet && worksheet.estimatedAmountOfMembers > 0
+            ? worksheet.estimatedAmountOfMembers
+            : 1,
+        days: 1,
+        unitCost: 0,
+        note: null,
+        sortOrder: prev.length,
+        sbmYear: null,
+        verificationStatus: "draft",
+        verificationNote: null,
+      },
+    ]);
+    setIsDirty(true);
+  }, [worksheet]);
+
   const handleAddOperationalCost = useCallback(() => {
     setOperationalCosts((prev) => [
       ...prev,
@@ -507,6 +587,9 @@ function RouteComponent() {
         unitCost: 0,
         note: null,
         sortOrder: prev.length,
+        sbmYear: null,
+        verificationStatus: "draft",
+        verificationNote: null,
       },
     ]);
     setIsDirty(true);
@@ -544,6 +627,44 @@ function RouteComponent() {
       })),
     });
   }, [worksheetId, operationalCosts, saveOperationalCostsMutation]);
+
+  const handleVerify = useCallback(
+    (status: "submitted" | "verified" | "revised") => {
+      if (!worksheetId) return;
+
+      const itemsToVerify = operationalCosts
+        .filter((c) => c.id) // Only saved items
+        .filter((c) => {
+          if (status === "submitted")
+            return (
+              c.verificationStatus === "draft" ||
+              c.verificationStatus === "revised"
+            );
+          if (status === "verified" || status === "revised")
+            return c.verificationStatus === "submitted";
+          return false;
+        });
+
+      if (itemsToVerify.length === 0) {
+        globalErrorToast(
+          "Tidak ada item yang bisa diproses. Pastikan data sudah disimpan.",
+        );
+        return;
+      }
+
+      verifyOperationalCostsMutation.mutate({
+        worksheetId,
+        verifications: itemsToVerify.map((c) => ({
+          id: c.id!,
+          verificationStatus: status,
+          verificationNote:
+            status === "revised" ? c.verificationNote || "-" : null,
+          sbmYear: c.sbmYear,
+        })),
+      });
+    },
+    [worksheetId, operationalCosts, verifyOperationalCostsMutation],
+  );
 
   if (!worksheetId) {
     return (
@@ -782,6 +903,17 @@ function RouteComponent() {
                   <p className="text-sm font-medium wrap-break-word text-primary">
                     {dateRange}
                   </p>
+                  {worksheet.order?.estimatedSignatureDate && (
+                    <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-600">
+                      <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span>
+                        Est. TTD:{" "}
+                        <strong>
+                          {format(parseISO(worksheet.order.estimatedSignatureDate), "dd MMM yyyy", { locale: id })}
+                        </strong>
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </InfoCard>
@@ -1047,17 +1179,32 @@ function RouteComponent() {
                 <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
                 Rincian Operasional
               </CardTitle>
-              <PermissionGate permission="worksheets-transaction-details.update">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddOperationalCost}
-                  disabled={!isEditable}
-                >
-                  <Plus className="mr-1 h-4 w-4" />
-                  Tambah Item
-                </Button>
-              </PermissionGate>
+              <div className="flex gap-2">
+                {worksheet?.coverFlightIncluded && !hasBaggageCost && (
+                  <PermissionGate permission="worksheets-transaction-details.update">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddBaggageCost}
+                      disabled={!isEditable}
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Tambah Biaya Bagasi
+                    </Button>
+                  </PermissionGate>
+                )}
+                <PermissionGate permission="worksheets-transaction-details.update">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddOperationalCost}
+                    disabled={!isEditable}
+                  >
+                    <Plus className="mr-1 h-4 w-4" />
+                    Tambah Item
+                  </Button>
+                </PermissionGate>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -1077,11 +1224,17 @@ function RouteComponent() {
                     <TableHead className="hidden text-center text-xs font-semibold sm:text-sm md:table-cell">
                       Keterangan
                     </TableHead>
+                    <TableHead className="hidden text-center text-xs font-semibold sm:text-sm md:table-cell">
+                      Tahun SBM
+                    </TableHead>
                     <TableHead className="hidden text-right text-xs font-semibold sm:table-cell sm:text-sm">
                       Biaya/Unit
                     </TableHead>
                     <TableHead className="text-right text-xs font-semibold sm:text-sm">
                       Total
+                    </TableHead>
+                    <TableHead className="text-center text-xs font-semibold sm:text-sm">
+                      Status Verifikasi
                     </TableHead>
                     <TableHead className="w-10"></TableHead>
                   </TableRow>
@@ -1102,7 +1255,7 @@ function RouteComponent() {
                           className="bg-muted/20 hover:bg-muted/30"
                         >
                           <TableCell
-                            colSpan={5}
+                            colSpan={6}
                             className="text-xs text-muted-foreground italic sm:text-sm"
                           >
                             {item.item}
@@ -1110,7 +1263,7 @@ function RouteComponent() {
                           <TableCell className="text-right text-xs font-medium sm:text-sm">
                             -
                           </TableCell>
-                          <TableCell />
+                          <TableCell colSpan={2} />
                         </TableRow>
                       );
                     }
@@ -1173,17 +1326,37 @@ function RouteComponent() {
                             disabled={!isEditable}
                           />
                         </TableCell>
+                        <TableCell className="hidden text-center text-xs sm:text-sm md:table-cell">
+                          <Input
+                            type="number"
+                            min={2000}
+                            value={item.sbmYear ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              handleUpdateOperationalCost(
+                                index,
+                                "sbmYear",
+                                val === "" ? null : parseInt(val, 10),
+                              );
+                            }}
+                            placeholder="Tahun"
+                            className="h-8 w-16 text-center text-xs sm:text-sm"
+                            disabled={!isEditable}
+                          />
+                        </TableCell>
                         <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
-                          <NumberInput
+                          <Input
+                            type="number"
                             min={0}
-                            value={item.unitCost ?? 0}
-                            onChange={(value) =>
+                            value={item.unitCost ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
                               handleUpdateOperationalCost(
                                 index,
                                 "unitCost",
-                                value,
-                              )
-                            }
+                                val === "" ? null : parseInt(val, 10),
+                              );
+                            }}
                             placeholder="-"
                             className="h-8 w-24 text-right text-xs sm:text-sm"
                             disabled={!isEditable}
@@ -1191,6 +1364,60 @@ function RouteComponent() {
                         </TableCell>
                         <TableCell className="text-right text-xs font-medium sm:text-sm">
                           {itemTotal !== null ? formatCurrency(itemTotal) : "-"}
+                        </TableCell>
+                        <TableCell className="text-center text-xs sm:text-sm">
+                          {isEditable && isVerifier && item.verificationStatus === "submitted" ? (
+                            <div className="flex flex-col gap-1 items-center">
+                              <select
+                                value={item.verificationStatus || "submitted"}
+                                onChange={(e) =>
+                                  handleUpdateOperationalCost(
+                                    index,
+                                    "verificationStatus",
+                                    e.target.value
+                                  )
+                                }
+                                className="h-8 w-28 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none"
+                              >
+                                <option value="submitted">Terkirim</option>
+                                <option value="verified">Verified</option>
+                                <option value="revised">Revisi</option>
+                              </select>
+                              {operationalCosts[index]?.verificationStatus === "revised" && (
+                                <Input
+                                  value={item.verificationNote || ""}
+                                  onChange={(e) =>
+                                    handleUpdateOperationalCost(
+                                      index,
+                                      "verificationNote",
+                                      e.target.value || null
+                                    )
+                                  }
+                                  placeholder="Catatan revisi"
+                                  className="h-6 w-28 text-[10px]"
+                                />
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1">
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  "whitespace-nowrap rounded-md px-1.5 py-0 text-[10px] font-medium leading-4 tracking-wide shadow-none",
+                                  item.verificationStatus
+                                    ? OPERATIONAL_COST_VERIFICATION_STATUS_COLORS[item.verificationStatus]
+                                    : OPERATIONAL_COST_VERIFICATION_STATUS_COLORS["draft"]
+                                )}
+                              >
+                                {item.verificationStatus
+                                  ? OPERATIONAL_COST_VERIFICATION_STATUS_LABELS[item.verificationStatus]
+                                  : OPERATIONAL_COST_VERIFICATION_STATUS_LABELS["draft"]}
+                              </Badge>
+                              {item.verificationStatus === "revised" && item.verificationNote && (
+                                <span className="text-[10px] text-muted-foreground">{item.verificationNote}</span>
+                              )}
+                            </div>
+                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           <PermissionGate permission="worksheets-transaction-details.update">
@@ -1211,11 +1438,10 @@ function RouteComponent() {
                   {operationalCosts.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
-                        className="py-8 text-center text-muted-foreground"
+                        colSpan={9}
+                        className="h-24 text-center text-muted-foreground"
                       >
-                        Belum ada biaya operasional. Klik &quot;Tambah
-                        Item&quot; untuk menambahkan.
+                        Belum ada biaya operasional
                       </TableCell>
                     </TableRow>
                   )}
@@ -1292,6 +1518,79 @@ function RouteComponent() {
                 )}
                 Simpan
               </Button>
+              {hasSavedOperationalCosts &&
+                isEditable &&
+                !isDirty &&
+                operationalCosts.some(
+                  (c) =>
+                    c.verificationStatus === "draft" ||
+                    c.verificationStatus === "revised",
+                ) && (
+                  <PermissionGate permission="worksheets-transaction-details.update">
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-2 sm:flex-initial"
+                      onClick={() => handleVerify("submitted")}
+                      disabled={verifyOperationalCostsMutation.isPending}
+                    >
+                      Ajukan Verifikasi (Admin)
+                    </Button>
+                  </PermissionGate>
+                )}
+              {hasSavedOperationalCosts &&
+                isEditable &&
+                !isDirty &&
+                operationalCosts.some(
+                  (c) => c.verificationStatus === "submitted",
+                ) && (
+                  <PermissionGate permission="worksheets-transaction-details.verify">
+                    <Button
+                      className="flex-1 gap-2 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white"
+                      onClick={() => {
+                        const itemsToVerify = operationalCosts.filter(
+                          (c) =>
+                            c.verificationStatus === "verified" ||
+                            c.verificationStatus === "revised",
+                        );
+                        if (itemsToVerify.length === 0) {
+                          globalErrorToast(
+                            "Ubah status ke Verified atau Revisi terlebih dahulu",
+                          );
+                          return;
+                        }
+                        verifyOperationalCostsMutation.mutate({
+                          worksheetId,
+                          verifications: itemsToVerify.map((c) => ({
+                            id: c.id!,
+                            verificationStatus: c.verificationStatus as
+                              | "verified"
+                              | "revised",
+                            verificationNote: c.verificationNote || null,
+                            sbmYear: c.sbmYear,
+                          })),
+                        });
+                      }}
+                      disabled={verifyOperationalCostsMutation.isPending}
+                    >
+                      Simpan Verifikasi Koordinator
+                    </Button>
+                  </PermissionGate>
+                )}
+              {hasSavedOperationalCosts && (
+                <PermissionGate permission="worksheets-transaction-details.approve">
+                  <Button
+                    variant="secondary"
+                    className="flex-1 gap-2 sm:flex-initial bg-purple-600 text-white hover:bg-purple-700"
+                    onClick={() => {
+                      // Override action by Kepala Koordinator Administrasi
+                      handleSave();
+                    }}
+                    disabled={saveOperationalCostsMutation.isPending}
+                  >
+                    Override / Edit Final (Kepala Koordinator)
+                  </Button>
+                </PermissionGate>
+              )}
             </PermissionGate>
           )}
         </div>

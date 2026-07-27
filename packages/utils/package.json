@@ -24,6 +24,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@tepian-k3/config": "workspace:*"
+    "@tepian-k3/config": "workspace:*",
+    "drizzle-orm": "^0.45.1"
   }
 }

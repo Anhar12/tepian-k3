@@ -2,11 +2,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { Tools } from "@tepian-k3/types/pengujian/tools.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/tools";
-import { createCrudActionCell } from "@/lib/create-crud-action-cell";
+import type { CrudActionCellConfig } from "@/components/crud-row-actions";
+import { ToolModal } from "@/components/modals/tool-modal";
 import {
-  createActionColumn,
-  createDateColumn,
+  createCompactDateColumn,
   createNumberColumn,
+  createMergedTextColumn,
   createTextColumn,
 } from "@/lib/column-helpers";
 
@@ -15,11 +16,11 @@ interface ToolsColumnsProps {
   perPage: number;
 }
 
-const ActionCell = createCrudActionCell<
+export const toolActionConfig: CrudActionCellConfig<
   Tools,
   (typeof Route)["types"]["searchSchema"]
->({
-  resourceName: "tool",
+> = {
+  resourceName: "alat",
   resourcePath: "tools",
   permissionPrefix: "tools",
   deleteMutation: trpc.pengujian.tool.deleteTool,
@@ -29,7 +30,8 @@ const ActionCell = createCrudActionCell<
     trpc.pengujian.tool.getToolPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
   showDetail: true,
-});
+  editModal: ToolModal,
+};
 
 export default function getToolsColumns({
   currentPage,
@@ -37,19 +39,15 @@ export default function getToolsColumns({
 }: ToolsColumnsProps): ColumnDef<Tools>[] {
   return [
     createNumberColumn<Tools>(currentPage, perPage),
-    createTextColumn<Tools>("toolName", "Nama Alat", {
-      width: "w-48",
+    createMergedTextColumn<Tools>("toolName", "Nama Alat", {
+      width: "w-64",
       enableFilter: true,
       placeholder: "Cari nama alat...",
-    }),
-    createTextColumn<Tools>("toolCode.code", "Kode Alat", {
-      width: "w-64",
+      secondaryId: "toolCode.code",
     }),
     createTextColumn<Tools>("toolUniqueCode", "Kode Unik", {
       width: "w-64",
     }),
-    createDateColumn<Tools>("createdAt", "Dibuat"),
-    createDateColumn<Tools>("updatedAt", "Diubah", { nullable: true }),
-    createActionColumn<Tools>(({ row }) => <ActionCell row={row} />),
+    createCompactDateColumn<Tools>("createdAt", "Dibuat"),
   ];
 }

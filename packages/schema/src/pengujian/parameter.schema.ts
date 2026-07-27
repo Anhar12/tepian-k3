@@ -2,6 +2,7 @@ import { parameters } from "@tepian-k3/db/schema";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import z from "zod";
 import { createPaginationSchema } from "../platform/pagination.schema";
+import { PARAMETER_SERVICE_TYPES } from "@tepian-k3/constants";
 
 export const SORTABLE_PARAMETER_FIELDS = [
   "name",
@@ -32,6 +33,7 @@ const createParameterSchema = createInsertSchema(parameters, {
   price: z.number().min(0),
   unit: z.string().min(1).max(255),
   reference: z.string().min(1).max(512),
+  serviceType: z.enum(PARAMETER_SERVICE_TYPES),
 });
 
 const updateParameterSchema = createUpdateSchema(parameters, {
@@ -41,6 +43,7 @@ const updateParameterSchema = createUpdateSchema(parameters, {
   price: z.number().min(0),
   unit: z.string().min(1).max(255),
   reference: z.string().min(1).max(512),
+  serviceType: z.enum(PARAMETER_SERVICE_TYPES),
 });
 
 const parameterSchema = {

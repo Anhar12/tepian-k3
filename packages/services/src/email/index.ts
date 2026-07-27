@@ -6,6 +6,7 @@ import type { SendEmailOptions } from "./providers/nodemailer";
 import { OTPEmail } from "./templates/otp";
 import { WelcomeEmail } from "./templates/welcome";
 import { PasswordResetEmail } from "./templates/password-reset";
+import { TTERequestEmail } from "./templates/tte-request";
 
 export class EmailService {
   private provider = emailProvider;
@@ -46,6 +47,23 @@ export class EmailService {
       to: email,
       subject: "Reset Your Password",
       react: PasswordResetEmail({ resetLink, expiresInMinutes }),
+    });
+  }
+
+  async sendTTERequest(data: {
+    email: string;
+    signerName: string;
+    documentName: string;
+    tteLink: string;
+  }) {
+    return await this.send({
+      to: data.email,
+      subject: "Permohonan Tanda Tangan Elektronik (TTE)",
+      react: TTERequestEmail({
+        signerName: data.signerName,
+        documentName: data.documentName,
+        tteLink: data.tteLink,
+      }),
     });
   }
 
