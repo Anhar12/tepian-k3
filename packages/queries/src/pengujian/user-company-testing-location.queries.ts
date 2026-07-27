@@ -380,13 +380,26 @@ const userCompanyTestingLocationQueries = {
       const { data, total } = yield* Effect.tryPromise({
         try: () =>
           db.transaction(async (tx) => {
-            const data = await tx
-              .select()
-              .from(userCompanyTestingLocation)
-              .limit(input.perPage)
-              .offset(offset)
-              .where(where)
-              .orderBy(...orderBy);
+            const data = await tx.query.userCompanyTestingLocation.findMany({
+              limit: input.perPage,
+              offset: offset,
+              where: where,
+              orderBy: orderBy,
+              with: {
+                regency: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+                district: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            });
 
             const total = await tx
               .select({
@@ -487,13 +500,26 @@ const userCompanyTestingLocationQueries = {
       const { data, total } = yield* Effect.tryPromise({
         try: () =>
           db.transaction(async (tx) => {
-            const data = await tx
-              .select()
-              .from(userCompanyTestingLocation)
-              .limit(input.perPage)
-              .offset(offset)
-              .where(where)
-              .orderBy(...orderBy);
+            const data = await tx.query.userCompanyTestingLocation.findMany({
+              limit: input.perPage,
+              offset: offset,
+              where: where,
+              orderBy: orderBy,
+              with: {
+                regency: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+                district: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            });
 
             const total = await tx
               .select({

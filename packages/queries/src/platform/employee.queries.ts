@@ -12,7 +12,7 @@ import {
   isNotNull,
   isNull,
 } from "@tepian-k3/db";
-import { employees, positions, users } from "@tepian-k3/db/schema";
+import { employees, positions, users, worksheets, worksheetAssignments } from "@tepian-k3/db/schema";
 import { z } from "zod";
 import employeeSchema from "@tepian-k3/schema/platform/employee.schema";
 import { Effect } from "effect";
@@ -481,6 +481,76 @@ const employeeQueries = {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus permanen karyawan",
+        });
+      },
+    }),
+
+  getAvailableEmployees: (startDate: string, endDate: string) =>
+    Effect.tryPromise({
+      try: async () => {
+        const overlappingWorksheets = await db.query.worksheets.findMany({
+          columns: { id: true },
+          where: (ws, { and, isNull, isNotNull, lte, gte }) =>
+            and(
+              isNull(ws.deletedAt),
+              isNotNull(ws.startDate),
+              isNotNull(ws.endDate),
+              lte(ws.startDate, endDate),
+              gte(ws.endDate, startDate),
+            ),
+        });
+
+        const overlappingWorksheetIds = overlappingWorksheets.map((w) => w.id);
+
+        if (overlappingWorksheetIds.length === 0) {
+          return db.query.employees.findMany({
+            where: isNull(employees.deletedAt),
+            with: {
+              position: true,
+              user: true,
+            },
+          });
+        }
+
+        const busyAssignments = await db.query.worksheetAssignments.findMany({
+          columns: { employeeId: true },
+          where: (wa, { inArray }) => inArray(wa.worksheetId, overlappingWorksheetIds),
+        });
+
+        const busyEmployeeIds = busyAssignments.map((a) => a.employeeId).filter(Boolean);
+
+        if (busyEmployeeIds.length === 0) {
+          return db.query.employees.findMany({
+            where: isNull(employees.deletedAt),
+            with: {
+              position: true,
+              user: true,
+            },
+          });
+        }
+
+        return db.query.employees.findMany({
+          where: (emp, { and, isNull, notInArray }) =>
+            and(
+              isNull(emp.deletedAt),
+              notInArray(emp.id, busyEmployeeIds),
+            ),
+          with: {
+            position: true,
+            user: true,
+          },
+        });
+      },
+      catch: (error) => {
+        logError(
+          "employeeQueries.getAvailableEmployees",
+          "Failed to get available employees",
+          { startDate, endDate, error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Gagal mengambil data pegawai tersedia.`,
+          cause: error,
         });
       },
     }),

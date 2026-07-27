@@ -319,6 +319,36 @@ const pelatihanQueries = {
     });
   },
 
+  updateThumbnail(userId: string, id: string, thumbnailUrl: string | null) {
+    return Effect.gen(function* () {
+      const [updated] = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .update(pelatihan)
+            .set({ thumbnailUrl, updatedAt: new Date().toISOString() })
+            .where(eq(pelatihan.id, id))
+            .returning(),
+        catch: (error) => {
+          logError(
+            "pelatihanQueries.updateThumbnail",
+            "Failed to update thumbnail",
+            {
+              error,
+              id,
+              userId,
+            },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui sampul pelatihan",
+          });
+        },
+      });
+
+      return updated;
+    });
+  },
+
   deletePelatihan(userId: string, id: string) {
     return Effect.gen(function* () {
       const [deleted] = yield* Effect.tryPromise({

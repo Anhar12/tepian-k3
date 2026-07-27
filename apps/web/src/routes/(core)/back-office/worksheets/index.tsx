@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -49,6 +50,7 @@ import z from "zod";
 const searchSchema = z.object({
   page: z.number().min(1).default(1),
   perPage: z.number().min(1).max(100).default(10),
+  search: z.string().optional(),
   status: z.enum(WORKSHEET_STATUS).optional(),
 });
 
@@ -70,13 +72,18 @@ function RouteComponent() {
     trpc.pengujian.worksheet.getAllWorksheets.queryOptions({
       page: params.page,
       perPage: params.perPage,
+      search: params.search,
       status: params.status,
     }),
   );
 
+  const { data: countData } = useQuery(
+    trpc.pengujian.worksheet.getWorksheetStatusCount.queryOptions(),
+  );
+
   const handleSearch = () => {
     navigate({
-      search: { ...params, page: 1 },
+      search: { ...params, search: searchInput || undefined, page: 1 },
     });
   };
 
@@ -109,8 +116,15 @@ function RouteComponent() {
       <Card>
         <CardContent className="p-4 sm:p-6">
           {/* Filters */}
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-            <div className="relative flex-1">
+          <div className="mb-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label className="font-medium text-muted-foreground flex items-center gap-2">
+                🔍 Cari & Filter Lembar Kerja:
+              </Label>
+              <p className="text-xs text-muted-foreground">Ketik nomor lembar kerja atau perusahaan lalu tekan Enter atau klik 'Cari'. Klik pada baris tabel untuk melihat detail lembar kerja.</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative flex-1">
               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Cari nomor testing, perusahaan..."
@@ -139,6 +153,7 @@ function RouteComponent() {
                 ))}
               </SelectContent>
             </Select>
+            </div>
           </div>
 
           {/* Summary Cards */}
@@ -146,32 +161,32 @@ function RouteComponent() {
             {[
               {
                 label: "Total",
-                count: data?.pagination?.totalItems ?? 0,
+                count: (countData as any)?.total ?? 0,
                 color: "bg-slate-100 text-slate-700",
               },
               {
                 label: "Draft",
-                count: 0,
+                count: (countData as any)?.draft ?? 0,
                 color: WORKSHEET_STATUS_COLORS["draft"],
               },
               {
                 label: "In Progress",
-                count: 0,
+                count: (countData as any)?.in_progress ?? 0,
                 color: WORKSHEET_STATUS_COLORS["in_progress"],
               },
               {
                 label: "Completed",
-                count: 0,
+                count: (countData as any)?.completed ?? 0,
                 color: WORKSHEET_STATUS_COLORS["completed"],
               },
               {
                 label: "Verified",
-                count: 0,
+                count: (countData as any)?.verified ?? 0,
                 color: WORKSHEET_STATUS_COLORS["verified"],
               },
               {
                 label: "Rejected",
-                count: 0,
+                count: (countData as any)?.rejected ?? 0,
                 color: WORKSHEET_STATUS_COLORS["rejected"],
               },
             ].map((stat) => (
@@ -221,9 +236,6 @@ function RouteComponent() {
                         Tanggal
                       </div>
                     </TableHead>
-                    <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                      Aksi
-                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -245,15 +257,12 @@ function RouteComponent() {
                         <TableCell className="hidden lg:table-cell">
                           <Skeleton className="h-4 w-28" />
                         </TableCell>
-                        <TableCell className="text-center">
-                          <Skeleton className="mx-auto h-8 w-20" />
-                        </TableCell>
                       </TableRow>
                     ))
                   ) : !data?.data?.length ? (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={5}
                         className="py-12 text-center text-muted-foreground"
                       >
                         <ClipboardList className="mx-auto mb-2 h-8 w-8 opacity-50" />
@@ -262,96 +271,91 @@ function RouteComponent() {
                     </TableRow>
                   ) : (
                     data.data.map((worksheet) => (
-                      <TableRow
+                      <PermissionGate
                         key={worksheet.id}
-                        className="cursor-pointer transition-colors hover:bg-muted/30"
-                      >
-                        <TableCell className="font-mono text-xs font-medium sm:text-sm">
-                          {worksheet.testing?.testingNumber || "-"}
-                        </TableCell>
-                        <TableCell className="text-xs sm:text-sm">
-                          <div className="max-w-50 truncate">
-                            {worksheet.testing?.order?.company?.name || "-"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden text-xs md:table-cell">
-                          {worksheet.mainSupervisor?.user?.name || "-"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            className={`${WORKSHEET_STATUS_COLORS[worksheet.status as WorksheetStatus]} text-xs`}
-                          >
-                            {
-                              WORKSHEET_STATUS_LABELS[
-                                worksheet.status as WorksheetStatus
-                              ]
-                            }
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
-                          <div className="flex flex-col">
-                            <span>
-                              Mulai:{" "}
-                              {worksheet.startDate
-                                ? format(worksheet.startDate, "dd MMM yyyy")
-                                : "-"}
-                            </span>
-                            {worksheet.endDate && (
-                              <span>
-                                Selesai:{" "}
-                                {worksheet.endDate
-                                  ? format(worksheet.endDate, "dd MMM yyyy")
-                                  : "-"}
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <PermissionGate
-                            permission="worksheets.view"
-                            fallback={
+                        permission="worksheets.view"
+                        fallback={
+                          <TableRow className="bg-muted/10 opacity-70">
+                            <TableCell colSpan={5} className="py-4 text-center">
                               <Badge variant="outline" className="text-xs">
                                 <Eye className="mr-1 inline-block h-3 w-3" />
-                                Tidak ada akses
+                                Anda tidak memiliki akses untuk melihat worksheet ini
                               </Badge>
+                            </TableCell>
+                          </TableRow>
+                        }
+                      >
+                        <TableRow
+                          className="cursor-pointer transition-colors hover:bg-muted/40 active:bg-muted/60"
+                          onClick={() => {
+                            if (
+                              hasPermission(
+                                "worksheets-transaction-details.read",
+                              )
+                            ) {
+                              navigate({
+                                to: "/worksheets/detail-transaksi",
+                                search: { worksheetId: worksheet.id },
+                              });
+                            } else if (
+                              hasPermission(
+                                "worksheets-personnel-assignments.read",
+                              )
+                            ) {
+                              navigate({
+                                to: "/worksheets/jadwal-personel",
+                                search: { worksheetId: worksheet.id },
+                              });
+                            } else {
+                              navigate({
+                                to: "/worksheets",
+                                search: { worksheetId: worksheet.id },
+                              });
                             }
-                          >
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                if (
-                                  hasPermission(
-                                    "worksheets-transaction-details.read",
-                                  )
-                                ) {
-                                  navigate({
-                                    to: "/worksheets/detail-transaksi",
-                                    search: { worksheetId: worksheet.id },
-                                  });
-                                } else if (
-                                  hasPermission(
-                                    "worksheets-personnel-assignments.read",
-                                  )
-                                ) {
-                                  navigate({
-                                    to: "/worksheets/jadwal-personel",
-                                    search: { worksheetId: worksheet.id },
-                                  });
-                                } else {
-                                  navigate({
-                                    to: "/worksheets",
-                                    search: { worksheetId: worksheet.id },
-                                  });
-                                }
-                              }}
+                          }}
+                        >
+                          <TableCell className="font-mono text-xs font-medium sm:text-sm">
+                            {worksheet.testing?.testingNumber || "-"}
+                          </TableCell>
+                          <TableCell className="text-xs sm:text-sm">
+                            <div className="max-w-50 truncate">
+                              {worksheet.testing?.order?.company?.name || "-"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden text-xs md:table-cell">
+                            {worksheet.mainSupervisor?.user?.name || "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              className={`${WORKSHEET_STATUS_COLORS[worksheet.status as WorksheetStatus]} text-xs`}
                             >
-                              <Eye className="mr-1 h-4 w-4" />
-                              <span className="hidden sm:inline">Detail</span>
-                            </Button>
-                          </PermissionGate>
-                        </TableCell>
-                      </TableRow>
+                              {
+                                WORKSHEET_STATUS_LABELS[
+                                  worksheet.status as WorksheetStatus
+                                ]
+                              }
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
+                            <div className="flex flex-col">
+                              <span>
+                                Mulai:{" "}
+                                {worksheet.startDate
+                                  ? format(worksheet.startDate, "dd MMM yyyy")
+                                  : "-"}
+                              </span>
+                              {worksheet.endDate && (
+                                <span>
+                                  Selesai:{" "}
+                                  {worksheet.endDate
+                                    ? format(worksheet.endDate, "dd MMM yyyy")
+                                    : "-"}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </PermissionGate>
                     ))
                   )}
                 </TableBody>

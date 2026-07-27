@@ -52,12 +52,159 @@ const chemicalMaterialQueries = {
   },
 
   /**
+   * Get global summary of chemical materials stock
+   */
+  getSummary() {
+    return Effect.tryPromise({
+      try: async () => {
+        const pendingStatuses = [
+          "draft",
+          "pending_verification",
+          "revision",
+          "in_progress",
+        ] as const;
+
+        const pendingResult = await db
+          .select({
+            totalPending: sum(worksheetChemicalMaterials.required),
+          })
+          .from(worksheetChemicalMaterials)
+          .innerJoin(
+            worksheets,
+            eq(worksheetChemicalMaterials.worksheetId, worksheets.id),
+          )
+          .where(
+            and(
+              inArray(worksheets.status, pendingStatuses),
+              isNull(worksheets.deletedAt),
+            ),
+          );
+
+        const totalPending = Number(pendingResult[0]?.totalPending || 0);
+
+        const fisikResult = await db
+          .select({
+            totalUsed: sum(chemicalMaterials.usedStock),
+            totalSealed: sum(chemicalMaterials.sealedStock),
+          })
+          .from(chemicalMaterials)
+          .where(isNull(chemicalMaterials.deletedAt));
+
+        const totalFisik =
+          Number(fisikResult[0]?.totalUsed || 0) +
+          Number(fisikResult[0]?.totalSealed || 0);
+
+        return {
+          totalFisik,
+          totalPending,
+          totalAvailable: totalFisik - totalPending,
+        };
+      },
+      catch: (error) => {
+        logError(
+          "chemicalMaterialQueries.getSummary",
+          "Error fetching chemical material summary",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil ringkasan data bahan kimia",
+        });
+      },
+    });
+  },
+
+  /**
+   * Get detailed per-material stock summary (total, booked across active worksheets, remaining)
+   */
+  getChemicalMaterialStockSummary() {
+    return Effect.tryPromise({
+      try: async () => {
+        const pendingStatuses = [
+          "draft",
+          "pending_verification",
+          "revision",
+          "in_progress",
+        ] as const;
+
+        const allMaterials = await db
+          .select({
+            id: chemicalMaterials.id,
+            name: chemicalMaterials.name,
+            code: chemicalMaterials.code,
+            usedStock: chemicalMaterials.usedStock,
+            usedStockUnit: chemicalMaterials.usedStockUnit,
+            sealedStock: chemicalMaterials.sealedStock,
+            sealedStockUnit: chemicalMaterials.sealedStockUnit,
+            status: chemicalMaterials.status,
+          })
+          .from(chemicalMaterials)
+          .where(isNull(chemicalMaterials.deletedAt))
+          .orderBy(asc(chemicalMaterials.name));
+
+        const bookedPerMaterial = await db
+          .select({
+            chemicalMaterialId: worksheetChemicalMaterials.chemicalMaterialId,
+            totalBooked: sum(worksheetChemicalMaterials.required),
+          })
+          .from(worksheetChemicalMaterials)
+          .innerJoin(
+            worksheets,
+            eq(worksheetChemicalMaterials.worksheetId, worksheets.id),
+          )
+          .where(
+            and(
+              inArray(worksheets.status, pendingStatuses),
+              isNull(worksheets.deletedAt),
+            ),
+          )
+          .groupBy(worksheetChemicalMaterials.chemicalMaterialId);
+
+        const bookedMap = new Map<string, number>();
+        for (const row of bookedPerMaterial) {
+          if (row.chemicalMaterialId) {
+            bookedMap.set(row.chemicalMaterialId, Number(row.totalBooked || 0));
+          }
+        }
+
+        return allMaterials.map((mat) => {
+          const totalStock = Number(mat.usedStock || 0) + Number(mat.sealedStock || 0);
+          const bookedAmount = bookedMap.get(mat.id) || 0;
+          const remainingStock = Math.max(0, totalStock - bookedAmount);
+
+          return {
+            id: mat.id,
+            name: mat.name,
+            code: mat.code,
+            totalStock,
+            bookedAmount,
+            remainingStock,
+            unit: mat.usedStockUnit || mat.sealedStockUnit || "pcs",
+            status: mat.status,
+          };
+        });
+      },
+      catch: (error) => {
+        logError(
+          "chemicalMaterialQueries.getChemicalMaterialStockSummary",
+          "Error fetching detailed chemical material stock summary",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data perincian stok bahan kimia",
+        });
+      },
+    });
+  },
+
+  /**
    * Get chemical material by ID
    */
   getChemicalMaterialById(id: string) {
     return Effect.tryPromise({
-      try: () =>
-        db.query.chemicalMaterials.findFirst({
+      try: async () => {
+        const material = await db.query.chemicalMaterials.findFirst({
           where: and(
             eq(chemicalMaterials.id, id),
             isNull(chemicalMaterials.deletedAt),
@@ -77,7 +224,41 @@ const chemicalMaterialQueries = {
               },
             },
           },
-        }),
+        });
+
+        if (!material) return null;
+
+        const pendingStatuses = [
+          "draft",
+          "pending_verification",
+          "revision",
+          "in_progress",
+        ] as const;
+
+        const pendingStockResult = await db
+          .select({
+            pendingStock: sum(worksheetChemicalMaterials.required),
+          })
+          .from(worksheetChemicalMaterials)
+          .innerJoin(
+            worksheets,
+            eq(worksheetChemicalMaterials.worksheetId, worksheets.id),
+          )
+          .where(
+            and(
+              eq(worksheetChemicalMaterials.chemicalMaterialId, id),
+              inArray(worksheets.status, pendingStatuses),
+              isNull(worksheets.deletedAt),
+            ),
+          );
+
+        const pendingStock = Number(pendingStockResult[0]?.pendingStock || 0);
+
+        return {
+          ...material,
+          pendingStock,
+        };
+      },
       catch: (error) => {
         logError(
           "chemicalMaterialQueries.getChemicalMaterialById",
@@ -176,23 +357,83 @@ const chemicalMaterialQueries = {
   getOffsetPaginatedChemicalMaterials(
     input: z.infer<typeof chemicalMaterialSchema.getAllChemicalMaterialsSchema>,
   ) {
-    return getOffsetPaginated({
-      table: chemicalMaterials,
-      input,
-      searchConditions: [
-        input.name
-          ? ilike(chemicalMaterials.name, `%${input.name}%`)
-          : undefined,
-        input.code
-          ? ilike(chemicalMaterials.code, `%${input.code}%`)
-          : undefined,
-        input.status ? eq(chemicalMaterials.status, input.status) : undefined,
-      ],
-      errorContext: {
-        queryName:
-          "chemicalMaterialQueries.getOffsetPaginatedChemicalMaterials",
-        errorMessage: "Gagal mengambil data bahan kimia",
-      },
+    return Effect.gen(function* () {
+      const result = yield* getOffsetPaginated({
+        table: chemicalMaterials,
+        input,
+        searchConditions: [
+          input.name
+            ? ilike(chemicalMaterials.name, `%${input.name}%`)
+            : undefined,
+          input.code
+            ? ilike(chemicalMaterials.code, `%${input.code}%`)
+            : undefined,
+          input.status ? eq(chemicalMaterials.status, input.status) : undefined,
+        ],
+        errorContext: {
+          queryName:
+            "chemicalMaterialQueries.getOffsetPaginatedChemicalMaterials",
+          errorMessage: "Gagal mengambil data bahan kimia",
+        },
+      });
+
+      if (result.data.length === 0) return result;
+
+      const materialIds = result.data.map((m) => (m as any).id);
+      const pendingStatuses = [
+        "draft",
+        "pending_verification",
+        "revision",
+        "in_progress",
+      ] as const;
+
+      const pendingStockResults = yield* Effect.tryPromise({
+        try: () =>
+          db
+            .select({
+              chemicalMaterialId: worksheetChemicalMaterials.chemicalMaterialId,
+              pendingStock: sum(worksheetChemicalMaterials.required),
+            })
+            .from(worksheetChemicalMaterials)
+            .innerJoin(
+              worksheets,
+              eq(worksheetChemicalMaterials.worksheetId, worksheets.id),
+            )
+            .where(
+              and(
+                inArray(
+                  worksheetChemicalMaterials.chemicalMaterialId,
+                  materialIds,
+                ),
+                inArray(worksheets.status, pendingStatuses),
+                isNull(worksheets.deletedAt),
+              ),
+            )
+            .groupBy(worksheetChemicalMaterials.chemicalMaterialId),
+        catch: (error) => {
+          logError(
+            "chemicalMaterialQueries.getOffsetPaginatedChemicalMaterials",
+            "Error fetching pending stock for paginated data",
+            { error },
+          );
+          return [];
+        },
+      });
+
+      const pendingMap = new Map(
+        pendingStockResults.map((r) => [
+          r.chemicalMaterialId,
+          Number(r.pendingStock) || 0,
+        ]),
+      );
+
+      return {
+        ...result,
+        data: result.data.map((m) => ({
+          ...m,
+          pendingStock: pendingMap.get((m as any).id) ?? 0,
+        })),
+      };
     });
   },
 

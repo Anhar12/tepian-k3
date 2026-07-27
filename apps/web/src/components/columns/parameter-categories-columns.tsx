@@ -6,20 +6,20 @@ import {
   createNumberColumn,
   createTextColumn,
   createDateColumn,
-  createActionColumn,
 } from "@/lib/column-helpers";
-import { createCrudActionCell } from "@/lib/create-crud-action-cell";
+import type { CrudActionCellConfig } from "@/components/crud-row-actions";
+import { ParameterCategoryModal } from "@/components/modals/parameter-category-modal";
 
 interface ParameterCategoriesColumnsProps {
   currentPage: number;
   perPage: number;
 }
 
-const ActionCell = createCrudActionCell<
+export const parameterCategoryActionConfig: CrudActionCellConfig<
   ParameterCategories,
   (typeof Route)["types"]["searchSchema"]
->({
-  resourceName: "parameter-category",
+> = {
+  resourceName: "kategori parameter",
   resourcePath: "parameter-categories",
   permissionPrefix: "parameter-categories",
   deleteMutation: trpc.pengujian.parameterCategories.deleteParameterCategory,
@@ -31,7 +31,8 @@ const ActionCell = createCrudActionCell<
       params,
     ),
   useSearchParams: () => Route.useSearch(),
-});
+  editModal: ParameterCategoryModal,
+};
 
 export default function getParameterCategoriesColumns({
   currentPage,
@@ -51,8 +52,5 @@ export default function getParameterCategoriesColumns({
     createDateColumn<ParameterCategories>("updatedAt", "Diubah", {
       nullable: true,
     }),
-    createActionColumn<ParameterCategories>(({ row }) => (
-      <ActionCell row={row} />
-    )),
   ];
 }

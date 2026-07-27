@@ -1,4 +1,5 @@
 import { OrderDetailSkeleton } from "@/components/order-detail-skeleton";
+import { StatusBadgeAwam } from "@/components/status-badge-awam";
 import { OrderTimeline } from "@/components/order-timeline";
 import {
   StatusStateAwaitingInvoice,
@@ -40,8 +41,9 @@ import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc, trpcClient } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { format } from "date-fns";
 import z from "zod";
 
 export const Route = createFileRoute("/(core)/pengujian/status")({
@@ -101,18 +103,18 @@ function RouteComponent() {
     }),
   );
 
-  const reviseOfferMutation = useMutation(
-    trpc.pengujian.order.reviseOrder.mutationOptions({
+  const submitRevisionMutation = useMutation(
+    trpc.pengujian.order.submitOrderRevision.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
           trpc.pengujian.order.getOrderWithDocuments.queryOptions({
             orderId,
           }),
         );
-        globalSuccessToast("Permintaan revisi berhasil dikirim.");
+        globalSuccessToast("Pengajuan revisi berhasil dikirim.");
       },
       onError: (error) => {
-        globalErrorToast("Gagal mengirim permintaan revisi: " + error.message);
+        globalErrorToast("Gagal mengirim pengajuan revisi: " + error.message);
       },
       onSettled: () => {
         setOpenReviseDialog(false);
@@ -275,6 +277,23 @@ function RouteComponent() {
   const isWorksheetRejected = hasWorksheet && worksheetStatus === "rejected";
   const isWorksheetVerified = hasWorksheet && worksheetStatus === "verified";
 
+  const canShowOfferButtons =
+    !isRejected &&
+    !isCancelled &&
+    !isRevisionStatus &&
+    !isApproved &&
+    !freshlySubmitted &&
+    !isWorksheetInReview &&
+    isWorksheetVerified &&
+    offeringDoc;
+
+  const canShowReviseButton =
+    !isRejected &&
+    !isCancelled &&
+    !isCompleted &&
+    !isRevisionStatus &&
+    orderDetail.status !== "laporan_diterbitkan";
+
   // Get revision notes from the latest revision status history
   const revisionHistory = orderDetail.statusHistory
     ?.filter((h) => h.status === "revision")
@@ -298,7 +317,7 @@ function RouteComponent() {
       return <StatusStateTestingInProgress orderDetail={orderDetail} />;
     }
     if (isPaymentVerified) {
-      return <StatusStateAwaitingSchedule />;
+      return <StatusStateAwaitingSchedule orderDetail={orderDetail} />;
     }
     if (isPaymentRejected) {
       return (
@@ -322,6 +341,7 @@ function RouteComponent() {
         <StatusStatePendingPaymentVerification
           cooperationAgreementUserDoc={cooperationAgreementUserDoc}
           paymentProofDoc={paymentProofDoc}
+          orderDetail={orderDetail}
         />
       );
     }
@@ -411,14 +431,47 @@ function RouteComponent() {
   return (
     <Card className="container min-h-[calc(100vh-8rem)] pt-0">
       {/* Header Badge */}
-      <div>
-        <span className="inline-block rounded-md rounded-tr-none rounded-bl-none bg-blue-500 px-5 py-2.5 text-sm font-semibold text-white">
-          Layanan Pengujian
-        </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 pt-6 md:pt-8 mb-6">
+        <div className="flex items-center gap-3">
+          <span className="inline-block rounded-md bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700">
+            Layanan Pengujian
+          </span>
+          <span className="text-slate-400">|</span>
+          <span className="font-mono text-sm font-medium text-slate-600">
+            {orderDetail?.orderNumber ?? "-"}
+          </span>
+        </div>
+        {orderDetail && (
+          <div className="flex flex-col items-end gap-1.5">
+            <StatusBadgeAwam
+              status={orderDetail.status}
+            />
+            {orderDetail.estimatedSignatureDate && (
+              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                <span className="text-slate-500">Estimasi TTD:</span>
+                <span>{format(new Date(orderDetail.estimatedSignatureDate), "dd MMM yyyy")}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
+      {orderDetail?.status === "revision" && (
+        <div className="mx-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 md:mx-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold text-amber-900">Permohonan Memerlukan Revisi</h4>
+              <p className="text-xs text-amber-700">
+                Petugas meminta revisi data atau parameter pada permohonan ini. Silakan periksa catatan revisi di bawah dan ajukan perbaikan permohonan.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Grid */}
-      <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:flex-row md:px-6">
+      <div className="flex flex-1 flex-col gap-6 px-4 pb-6 md:flex-row md:px-6">
         {/* Timeline Section - Left Side (horizontal scroll on mobile) */}
         <div className="w-full overflow-x-auto md:w-auto md:overflow-visible">
           <OrderTimeline
@@ -566,6 +619,10 @@ function RouteComponent() {
                         checked: orderDetail.coverFlightIncluded,
                       },
                       {
+                        label: "Bagasi Pesawat (PP)",
+                        checked: orderDetail.coverBaggageIncluded,
+                      },
+                      {
                         label: "Transportasi Laut/Sungai (PP)",
                         checked: orderDetail.coverWaterTransportationIncluded,
                       },
@@ -641,17 +698,10 @@ function RouteComponent() {
               </TabsContent>
             </Tabs>
 
-            {/* Action Buttons — only when offer is active and user can still respond */}
-            {!isRejected &&
-              !isCancelled &&
-              !isRevisionStatus &&
-              !isApproved &&
-              !freshlySubmitted &&
-              !isWorksheetInReview &&
-              isWorksheetVerified &&
-              offeringDoc && (
-                <div className="mt-8 flex justify-end gap-3 pt-6">
-                  {/* Batal Dialog */}
+            {/* Action Buttons */}
+            {(canShowOfferButtons || canShowReviseButton) && (
+              <div className="mt-8 flex justify-end gap-3 pt-6">
+                {canShowOfferButtons && (
                   <AlertDialog open={openCancelDialog}>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -693,8 +743,10 @@ function RouteComponent() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                )}
 
-                  {/* Revisi Dialog */}
+                {/* Revisi Dialog */}
+                {canShowReviseButton && (
                   <AlertDialog open={openReviseDialog}>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -702,25 +754,24 @@ function RouteComponent() {
                         className="min-w-30 border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
                         onClick={() => setOpenReviseDialog(true)}
                       >
-                        Revisi
+                        Ajukan Revisi
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          Revisi Order Pengujian
+                          Revisi Layanan Pengujian
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          Apakah Anda yakin ingin merevisi order pengujian ini?
-                          Tindakan ini akan mengirimkan notifikasi kepada pihak
-                          terkait.
+                          Apakah Anda yakin ingin mengajukan revisi untuk layanan pengujian ini?
+                          Tindakan ini akan mengembalikan pesanan Anda ke status revisi dan mengirimkan notifikasi kepada admin.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div className="py-4">
                         <Textarea
                           value={reviseReason}
                           onChange={(e) => setReviseReason(e.target.value)}
-                          placeholder="Tuliskan alasan revisi order pengujian... (min. 10 karakter)"
+                          placeholder="Tuliskan catatan revisi (misal: tambah parameter, ubah jumlah sampel)... (min. 10 karakter)"
                           rows={4}
                         />
                       </div>
@@ -732,27 +783,28 @@ function RouteComponent() {
                         </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
-                            reviseOfferMutation.mutate({
+                            submitRevisionMutation.mutate({
                               orderId,
                               revisionNotes: reviseReason,
                             })
                           }
                           className="border border-amber-400 bg-amber-50 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
                           disabled={
-                            reviseOfferMutation.isPending ||
+                            submitRevisionMutation.isPending ||
                             reviseReason.length < 10
                           }
                         >
-                          {reviseOfferMutation.isPending && (
+                          {submitRevisionMutation.isPending && (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           )}
-                          Revisi Order
+                          Ajukan Revisi
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                )}
 
-                  {/* Accept Dialog */}
+                {canShowOfferButtons && (
                   <AlertDialog open={openAcceptDialog}>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -797,8 +849,9 @@ function RouteComponent() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </div>
-              )}
+                )}
+              </div>
+            )}
           </div>
         </Card>
       </div>

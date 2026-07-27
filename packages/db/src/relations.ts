@@ -65,6 +65,8 @@ import {
   worksheetToolNeeded,
   worksheetTools,
   userTrainingProfiles,
+  worksheetProposedDates,
+  pelatihanCertificateTemplates,
 } from "./schema";
 
 export const userRelations = relations(users, ({ many, one }) => ({
@@ -415,7 +417,18 @@ export const worksheetRelations = relations(worksheets, ({ one, many }) => ({
   chemicalMaterials: many(worksheetChemicalMaterials),
   notes: many(worksheetNotes),
   operationalCosts: many(worksheetOperationalCosts),
+  proposedDates: many(worksheetProposedDates),
 }));
+
+export const worksheetProposedDatesRelations = relations(
+  worksheetProposedDates,
+  ({ one }) => ({
+    worksheet: one(worksheets, {
+      fields: [worksheetProposedDates.worksheetId],
+      references: [worksheets.id],
+    }),
+  }),
+);
 
 export const worksheetItemRelations = relations(worksheetItems, ({ one }) => ({
   worksheet: one(worksheets, {

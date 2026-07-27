@@ -2,9 +2,8 @@ import type { ColumnDef, Row } from "@tanstack/react-table";
 import type { ToolCheck } from "@tepian-k3/types/pengujian/tool-check.types";
 import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/tools/$toolId.status.index";
-import { createCrudActionCell } from "@/lib/create-crud-action-cell";
+import type { CrudActionCellConfig } from "@/components/crud-row-actions";
 import {
-  createActionColumn,
   createDateColumn,
   createNumberColumn,
   createStatusColumn,
@@ -13,20 +12,19 @@ import {
   TOOLS_CONDITIONS,
   TOOLS_CONDITIONS_COLORS,
 } from "@tepian-k3/constants";
+import { ToolCheckModal } from "@/components/modals/tool-check-modal";
 
 interface ToolCheckColumnsProps {
   currentPage: number;
   perPage: number;
 }
 
-function ActionCell(row: Row<ToolCheck>) {
-  const { toolId } = Route.useParams();
-
-  const ActionCell = createCrudActionCell<
-    ToolCheck,
-    (typeof Route)["types"]["searchSchema"]
-  >({
-    resourceName: "tool-check",
+export function getToolCheckActionConfig(toolId: string): CrudActionCellConfig<
+  ToolCheck,
+  (typeof Route)["types"]["searchSchema"]
+> {
+  return {
+    resourceName: "status alat",
     resourcePath: "tool-checks",
     permissionPrefix: "tool-checks",
     deleteMutation: trpc.pengujian.tool.deleteToolCheck,
@@ -38,9 +36,8 @@ function ActionCell(row: Row<ToolCheck>) {
         ...params,
       }),
     useSearchParams: () => Route.useSearch(),
-  });
-
-  return ActionCell({ row });
+    editModal: ToolCheckModal,
+  };
 }
 
 export default function getToolCheckColumns({
@@ -108,6 +105,5 @@ export default function getToolCheckColumns({
     createDateColumn<ToolCheck>("updatedAt", "Diubah", {
       nullable: true,
     }),
-    createActionColumn<ToolCheck>(({ row }) => ActionCell(row)),
   ];
 }

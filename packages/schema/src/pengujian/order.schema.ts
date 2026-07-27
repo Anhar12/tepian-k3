@@ -58,6 +58,7 @@ const getAllOrdersSchema = createPaginationSchema(SORTABLE_ORDER_FIELDS, {
   // views that should only surface orders whose worksheet is pending
   // verification). Applied as an EXISTS/IN subquery on the worksheets table.
   worksheetStatuses: z.array(z.enum(WORKSHEET_STATUS)).optional(),
+  fundingType: z.enum(["pnbp", "dipa"]).optional(),
   search: z.string().default(""),
 });
 

@@ -1,3 +1,4 @@
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import getOrdersColumns from "@/components/columns/orders-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
@@ -90,15 +91,20 @@ function RouteComponent() {
   }, [lock]);
 
   const effectiveParams = useMemo(
-    () =>
-      lock
+    () => {
+      const base = {
+        ...params,
+        fundingType: params.fundingType || "pnbp",
+      };
+      return lock
         ? {
-            ...params,
+            ...base,
             status: undefined,
             statuses: lock.statuses,
             worksheetStatuses: lock.worksheetStatuses,
           }
-        : params,
+        : base;
+    },
     [lock, params],
   );
 
@@ -133,11 +139,35 @@ function RouteComponent() {
     getRowId: (row) => row.id,
   });
 
+  const currentTab = params.fundingType || "pnbp";
+
+  const handleTabChange = (value: string) => {
+    navigate({
+      search: {
+        ...params,
+        fundingType: value as "pnbp" | "dipa",
+        page: 1,
+      },
+    });
+  };
+
   return (
-    <div className="flex flex-col">
-      <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-row items-center gap-2">
-          <Label className="whitespace-nowrap">Filter Status:</Label>
+    <div className="flex flex-col gap-4">
+      <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="grid w-80 grid-cols-2">
+          <TabsTrigger value="pnbp">PNBP</TabsTrigger>
+          <TabsTrigger value="dipa">DIPA</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="flex flex-col">
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-row items-center gap-2">
+          <div className="flex flex-col gap-1.5">
+          <Label className="whitespace-nowrap font-medium text-muted-foreground flex items-center gap-2">
+            🔍 Filter berdasarkan Status Pesanan:
+          </Label>
+          <p className="text-xs text-muted-foreground">Pilih status untuk melihat pesanan tertentu</p>
           {lockedLabels ? (
             <div className="flex flex-wrap gap-1.5">
               {lockedLabels.map((label) => (
@@ -201,6 +231,7 @@ function RouteComponent() {
             </Select>
           )}
         </div>
+        </div>
 
         {ordersData && (
           <div className="text-sm text-muted-foreground">
@@ -221,6 +252,7 @@ function RouteComponent() {
           <DataTableSortList table={table} />
         </DataTableToolbar>
       </DataTable>
+      </div>
     </div>
   );
 }

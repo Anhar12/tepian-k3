@@ -19,7 +19,10 @@ import { createTRPCRouter, withPermission } from "../..";
 import { runEffect } from "../../utils/run-effect";
 import { handleTRPCError } from "@tepian-k3/utils/handle-trpc-error";
 import { logError } from "@tepian-k3/services/logger";
-// import { storageService } from "@tepian-k3/services/storage";
+import { storageService } from "@tepian-k3/services/storage";
+import documentQueries from "@tepian-k3/queries/platform/document.queries";
+import { emailService } from "@tepian-k3/services/email";
+import { createTTERequestToken } from "@tepian-k3/services/document-signing";
 
 export const generateDocumentRouter = createTRPCRouter({
   generateOfferingLetter: withPermission("documents.create")
@@ -31,6 +34,7 @@ export const generateDocumentRouter = createTRPCRouter({
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
+                { unmask: true }
               );
 
             if (!worksheet) {
@@ -133,12 +137,13 @@ export const generateDocumentRouter = createTRPCRouter({
   generateSpkDocument: withPermission("documents.create")
     .input(generateDocumentSchema.generateSpkDocumentSchema)
     .mutation(
-      async ({ input }) =>
+      async ({ input, ctx }) =>
         await runEffect(
           Effect.gen(function* () {
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
+                { unmask: true }
               );
 
             if (!worksheet) {
@@ -185,16 +190,65 @@ export const generateDocumentRouter = createTRPCRouter({
               },
             });
 
-            // const uploadedSpk = yield* storageService.upload(spk as Buffer, {
-            //   filename: `spk-${input.letterNumber}.pdf`,
-            //   contentType: "application/pdf",
-            //   folder: "generated-documents/spks",
-            // });
+            // Convert PDF to Buffer
+            const spkBuffer = Buffer.from(spk as Buffer);
+
+            // Upload draft SPK to storage
+            const filename = `spk-draft-${input.letterNumber}-${Date.now()}.pdf`;
+            const uploadedSpk = yield* storageService.upload(spkBuffer, {
+              filename,
+              contentType: "application/pdf",
+              folder: "documents/order/spk",
+            });
+
+            // Create document record
+            const documentNumber = `SPK-${worksheet.order.orderNumber}-${Date.now()}`;
+            const document = yield* documentQueries.createDocument({
+              documentNumber,
+              type: "cooperation_agreement",
+              title: `Surat Perjanjian Kerjasama (SPK) - ${worksheet.order.orderNumber}`,
+              description: `Draft SPK untuk Order ${worksheet.order.orderNumber}`,
+              entityType: "order",
+              entityId: worksheet.orderId,
+              fileUrl: uploadedSpk.key,
+              fileName: filename,
+              fileSize: spkBuffer.length,
+              mimeType: "application/pdf",
+              uploadedByUserId: ctx.user.id,
+            });
+
+            // Generate TTE request token
+            const tteToken = yield* createTTERequestToken({
+              documentId: document.id,
+              orderId: worksheet.orderId,
+              signerName: company.headOfCompany,
+              signerRole: company.headOfCompanyPosition,
+              signerEmail: worksheet.order.user.email,
+            });
+
+            // Send TTE request email
+            const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "http://localhost:3000";
+            const tteLink = `${appUrl}/tte/sign-spk?token=${tteToken}`;
+            
+            yield* Effect.tryPromise({
+              try: () => 
+                emailService.sendTTERequest({
+                  email: worksheet.order.user.email,
+                  signerName: company.headOfCompany,
+                  documentName: document.title,
+                  tteLink,
+                }),
+              catch: (error) => {
+                logError("generateSpkDocument", "Failed to send TTE email", { error });
+                // We don't fail the request if email fails, but we log it.
+              }
+            });
 
             return {
-              base64: Buffer.from(spk as Buffer).toString("base64"),
-              filename: `spk-${input.letterNumber}.pdf`,
+              base64: spkBuffer.toString("base64"),
+              filename,
               contentType: "application/pdf",
+              message: "SPK berhasil dibuat dan email TTE telah dikirim.",
             };
           }),
         ),
@@ -209,6 +263,7 @@ export const generateDocumentRouter = createTRPCRouter({
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
+                { unmask: true }
               );
 
             if (!worksheet) {
@@ -301,6 +356,7 @@ export const generateDocumentRouter = createTRPCRouter({
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
+                { unmask: true }
               );
 
             if (!worksheet) {

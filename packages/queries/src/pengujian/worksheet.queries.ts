@@ -5,7 +5,7 @@ import type {
   WorksheetStatus,
 } from "@tepian-k3/constants";
 import { WORKSHEET_ALWAYS_ALLOWED_OPERATIONAL_ITEMS } from "@tepian-k3/constants";
-import { and, count, eq, inArray, isNull, sql } from "@tepian-k3/db";
+import { and, count, eq, inArray, isNotNull, isNull, ne, sql } from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
   chemicalMaterials,
@@ -22,12 +22,14 @@ import {
   worksheets,
   worksheetToolNeeded,
   worksheetTools,
+  worksheetProposedDates,
 } from "@tepian-k3/db/schema";
 import { logError } from "@tepian-k3/services/logger";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import { logCreate, logUpdate } from "../helpers/audit.helpers";
 import orderQueries from "./order.queries";
+import { maskUserCompany } from "../helpers/mask.helpers";
 
 /**
  * Throws a BAD_REQUEST if the worksheet has no saved operational cost rows.
@@ -69,6 +71,7 @@ const worksheetQueries = {
             order: {
               with: {
                 company: true,
+                user: true,
               },
             },
             testing: {
@@ -84,7 +87,12 @@ const worksheetQueries = {
                         },
                       },
                     },
-                    location: true,
+                    location: {
+                      with: {
+                        district: true,
+                        regency: true,
+                      },
+                    },
                   },
                 },
               },
@@ -100,7 +108,12 @@ const worksheetQueries = {
                     },
                   },
                 },
-                location: true,
+                location: {
+                  with: {
+                    district: true,
+                    regency: true,
+                  },
+                },
               },
             },
             tools: {
@@ -141,6 +154,9 @@ const worksheetQueries = {
               },
             },
             createdBy: true,
+            proposedDates: {
+              orderBy: (proposedDates, { desc }) => [desc(proposedDates.createdAt)],
+            },
           },
         }),
       catch: (error) => {
@@ -166,6 +182,7 @@ const worksheetQueries = {
   getAllWorksheets(
     page: number = 1,
     limit: number = 10,
+    _search?: string,
     status?: WorksheetStatus,
   ) {
     return Effect.gen(function* () {
@@ -420,6 +437,10 @@ const worksheetQueries = {
           orderBy: (worksheets, { desc }) => [desc(worksheets.startDate)],
           with: {
             order: {
+              columns: {
+                id: true,
+                fundingType: true,
+              },
               with: {
                 company: {
                   columns: {
@@ -1403,6 +1424,188 @@ const worksheetQueries = {
   },
 
   /**
+   * Get all proposed dates for admin/coordinator view
+   */
+  getAllProposedDates(
+    page: number = 1,
+    perPage: number = 10,
+    status?: "pending" | "approved" | "rejected" | "all",
+  ) {
+    return Effect.gen(function* () {
+      const offset = (page - 1) * perPage;
+      const conditions = [];
+
+      if (status && status !== "all") {
+        conditions.push(eq(worksheetProposedDates.status, status));
+      }
+
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const { data, count } = yield* Effect.tryPromise({
+        try: async () => {
+          const [data, totalRes] = await Promise.all([
+            db.query.worksheetProposedDates.findMany({
+              where: whereClause,
+              limit: perPage,
+              offset,
+              orderBy: (table, { desc }) => [desc(table.createdAt)],
+              with: {
+                worksheet: {
+                  with: {
+                    order: {
+                      with: {
+                        company: true,
+                        user: true,
+                      }
+                    }
+                  }
+                }
+              }
+            }),
+            db
+              .select({ count: sql<number>`count(*)` })
+              .from(worksheetProposedDates)
+              .where(whereClause),
+          ]);
+          return { data, count: totalRes[0]?.count ?? 0 };
+        },
+        catch: (error) => {
+          logError(
+            "worksheetQueries.getAllProposedDates",
+            "Failed to fetch proposed dates",
+            { error }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil daftar usulan tanggal",
+          });
+        },
+      });
+
+      return {
+        data,
+        meta: {
+          total: Number(count),
+          page,
+          perPage,
+          totalPages: Math.ceil(Number(count) / perPage),
+        },
+      };
+    });
+  },
+
+  /**
+   * Propose a date for a worksheet from the customer.
+   */
+  proposeDate(
+    worksheetId: string,
+    proposedStartDate: string,
+    proposedEndDate: string,
+    note?: string,
+  ) {
+    return Effect.gen(function* () {
+      const inserted = yield* Effect.tryPromise({
+        try: async () => {
+          const [result] = await db
+            .insert(worksheetProposedDates)
+            .values({
+              worksheetId,
+              proposedStartDate,
+              proposedEndDate,
+              note: note || null,
+              status: "pending",
+            })
+            .returning();
+
+          if (!result) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal mengajukan tanggal usulan",
+            });
+          }
+
+          return result;
+        },
+        catch: (error) => {
+          logError(
+            "worksheetQueries.proposeDate",
+            "Failed to propose date",
+            { error, worksheetId, proposedStartDate, proposedEndDate }
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Terjadi kesalahan saat mengajukan tanggal usulan",
+          });
+        },
+      });
+
+      return inserted;
+    });
+  },
+
+  /**
+   * Respond to a proposed date (Admin/Coordinator)
+   */
+  respondProposedDate(
+    proposedDateId: string,
+    action: "approved" | "rejected",
+    finalStartDate?: string,
+    finalEndDate?: string,
+  ) {
+    return Effect.gen(function* () {
+      const result = yield* Effect.tryPromise({
+        try: async () => {
+          return await db.transaction(async (tx) => {
+            const [updatedDate] = await tx
+              .update(worksheetProposedDates)
+              .set({
+                status: action,
+                updatedAt: sql`CURRENT_TIMESTAMP`,
+              })
+              .where(eq(worksheetProposedDates.id, proposedDateId))
+              .returning();
+
+            if (!updatedDate) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Usulan tanggal tidak ditemukan",
+              });
+            }
+
+            // If approved and final dates provided, update the worksheet
+            if (action === "approved" && finalStartDate && finalEndDate) {
+              await tx
+                .update(worksheets)
+                .set({
+                  startDate: finalStartDate,
+                  endDate: finalEndDate,
+                  updatedAt: sql`CURRENT_TIMESTAMP`,
+                })
+                .where(eq(worksheets.id, updatedDate.worksheetId));
+            }
+
+            return updatedDate;
+          });
+        },
+        catch: (error) => {
+          logError(
+            "worksheetQueries.respondProposedDate",
+            "Failed to respond to proposed date",
+            { error, proposedDateId, action }
+          );
+          if (error instanceof TRPCError) throw error;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Terjadi kesalahan saat merespons usulan tanggal",
+          });
+        },
+      });
+
+      return result;
+    });
+  },
+
+  /**
    * Update worksheet supervisors
    */
   updateWorksheetSupervisors(
@@ -1934,7 +2137,7 @@ const worksheetQueries = {
    * Get worksheet transaction detail for document generation
    * Returns worksheet with ready items, assignments, and operational costs
    */
-  getWorksheetTransactionDetail(worksheetId: string) {
+  getWorksheetTransactionDetail(worksheetId: string, options?: { unmask?: boolean }) {
     return Effect.tryPromise({
       try: () =>
         db.query.worksheets.findFirst({
@@ -1942,6 +2145,7 @@ const worksheetQueries = {
           with: {
             order: {
               with: {
+                user: true,
                 company: {
                   columns: {
                     id: true,
@@ -2043,7 +2247,15 @@ const worksheetQueries = {
           message: "Gagal mengambil detail transaksi worksheet",
         });
       },
-    });
+    }).pipe(
+      Effect.flatMap((worksheet) => {
+        if (!worksheet) return Effect.succeed(null);
+        if (!options?.unmask && worksheet.order?.company) {
+          worksheet.order.company = maskUserCompany(worksheet.order.company) as any;
+        }
+        return Effect.succeed(worksheet);
+      }),
+    );
   },
 
   /**
@@ -2060,8 +2272,12 @@ const worksheetQueries = {
       unitCost: number | null;
       note?: string | null;
       sortOrder: number;
+      sbmYear?: number | null;
+      verificationStatus?: "draft" | "submitted" | "verified" | "revised";
+      verificationNote?: string | null;
     }>,
     userId: string,
+    isVerifier?: boolean,
   ) {
     return Effect.gen(function* () {
       const result = yield* Effect.tryPromise({
@@ -2089,11 +2305,41 @@ const worksheetQueries = {
               });
             }
 
-            // 3. Check if operational costs are applicable
-            // Transport/accommodation cost lines are only allowed when at least
-            // one of those is covered by K3 Lab (a `cover*` flag is true). When
-            // the applicant bears everything, only the always-allowed items
-            // (daily allowance + the field-operational note) may be saved.
+            // 3. Strict Validation for Admin/Staff (non-verifier)
+            if (!isVerifier) {
+              const existingCosts = await tx.query.worksheetOperationalCosts.findMany({
+                where: eq(worksheetOperationalCosts.worksheetId, worksheetId),
+              });
+
+              for (const existing of existingCosts) {
+                if (
+                  existing.verificationStatus === "submitted" ||
+                  existing.verificationStatus === "verified"
+                ) {
+                  const newCostItem = costs.find((c) => c.id === existing.id);
+                  if (!newCostItem) {
+                    throw new TRPCError({
+                      code: "BAD_REQUEST",
+                      message: `Item "${existing.item}" yang sudah dikirim/diverifikasi tidak dapat dihapus.`,
+                    });
+                  }
+                  if (
+                    newCostItem.item !== existing.item ||
+                    newCostItem.unitCount !== existing.unitCount ||
+                    newCostItem.days !== existing.days ||
+                    newCostItem.unitCost !== existing.unitCost ||
+                    newCostItem.note !== existing.note
+                  ) {
+                    throw new TRPCError({
+                      code: "BAD_REQUEST",
+                      message: `Item "${existing.item}" yang sudah dikirim/diverifikasi tidak dapat diubah nilainya.`,
+                    });
+                  }
+                }
+              }
+            }
+
+            // 4. Check if operational costs are applicable
             const canHaveOperationalCosts =
               worksheet.coverFlightIncluded === true ||
               worksheet.coverGroundTransportationIncluded === true ||
@@ -2114,12 +2360,12 @@ const worksheetQueries = {
               });
             }
 
-            // 4. Delete existing operational costs
+            // 5. Delete existing operational costs
             await tx
               .delete(worksheetOperationalCosts)
               .where(eq(worksheetOperationalCosts.worksheetId, worksheetId));
 
-            // 5. Insert new operational costs
+            // 6. Insert new operational costs
             if (costs.length > 0) {
               const costsData = costs.map((cost, index) => ({
                 worksheetId,
@@ -2129,6 +2375,9 @@ const worksheetQueries = {
                 unitCost: cost.unitCost,
                 note: cost.note || null,
                 sortOrder: cost.sortOrder ?? index,
+                sbmYear: cost.sbmYear || null,
+                verificationStatus: cost.verificationStatus || "draft",
+                verificationNote: cost.verificationNote || null,
               }));
 
               const newCosts = await tx
@@ -2170,6 +2419,76 @@ const worksheetQueries = {
           worksheetId,
           { action: "save_operational_costs" },
           { costsCount: result.length } as Record<string, unknown>,
+          userId,
+          "operational_costs",
+        ),
+      );
+
+      return result;
+    });
+  },
+
+  /**
+   * Verify worksheet operational costs individually (advanced lifecycle approval)
+   */
+  verifyWorksheetOperationalCosts(
+    worksheetId: string,
+    verifications: Array<{
+      id: string;
+      verificationStatus: "draft" | "submitted" | "verified" | "revised";
+      verificationNote?: string | null;
+      sbmYear?: number | null;
+    }>,
+    userId: string,
+  ) {
+    return Effect.gen(function* () {
+      const result = yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            const updatedItems = [];
+            for (const v of verifications) {
+              const updated = await tx
+                .update(worksheetOperationalCosts)
+                .set({
+                  verificationStatus: v.verificationStatus,
+                  verificationNote: v.verificationNote || null,
+                  sbmYear: v.sbmYear || null,
+                  verifiedBy: userId,
+                  verifiedAt: new Date().toISOString(),
+                })
+                .where(
+                  and(
+                    eq(worksheetOperationalCosts.id, v.id),
+                    eq(worksheetOperationalCosts.worksheetId, worksheetId),
+                  ),
+                )
+                .returning();
+              if (updated.length > 0) {
+                updatedItems.push(updated[0]);
+              }
+            }
+            return updatedItems;
+          }),
+        catch: (error) => {
+          logError(
+            "worksheetQueries.verifyWorksheetOperationalCosts",
+            "Failed to verify operational costs",
+            { error, worksheetId },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal melakukan verifikasi biaya operasional",
+          });
+        },
+      });
+
+      // Log audit
+      yield* Effect.forkDaemon(
+        logUpdate(
+          "worksheet",
+          worksheetId,
+          { action: "verify_operational_costs" },
+          { verifiedCount: result.length } as Record<string, unknown>,
           userId,
           "operational_costs",
         ),
@@ -2476,7 +2795,11 @@ const worksheetQueries = {
    * Transitions the order from `kaji_ulang_disetujui` → `penawaran_diterbitkan`.
    * Requires the worksheet to be `verified` and to have saved operational costs.
    */
-  publishOffering(worksheetId: string, userId: string) {
+  publishOffering(
+    worksheetId: string, 
+    userId: string,
+    _estimatedSigningDeadline?: string
+  ) {
     return Effect.gen(function* () {
       yield* Effect.tryPromise({
         try: () =>
@@ -2747,6 +3070,83 @@ const worksheetQueries = {
           "publish_spt",
         ),
       );
+    });
+  },
+
+  /**
+   * Get available employees for a worksheet by checking SPT schedule overlap.
+   */
+  getAvailableEmployeesForWorksheet(worksheetId: string) {
+    return Effect.tryPromise({
+      try: async () => {
+        const targetWorksheet = await db.query.worksheets.findFirst({
+          where: eq(worksheets.id, worksheetId),
+          columns: { id: true, startDate: true, endDate: true },
+        });
+
+        const allEmps = await db.query.employees.findMany({
+          where: isNull(employees.deletedAt),
+          with: {
+            user: { columns: { id: true, name: true, email: true } },
+            position: { columns: { id: true, name: true } },
+          },
+        });
+
+        if (!targetWorksheet?.startDate || !targetWorksheet?.endDate) {
+          return {
+            employees: allEmps,
+            hiddenCount: 0,
+          };
+        }
+
+        const targetStart = targetWorksheet.startDate;
+        const targetEnd = targetWorksheet.endDate;
+
+        // Find active worksheet assignments that overlap with the target dates
+        const conflictingAssignments = await db
+          .select({
+            employeeId: worksheetAssignments.employeeId,
+          })
+          .from(worksheetAssignments)
+          .innerJoin(
+            worksheets,
+            eq(worksheetAssignments.worksheetId, worksheets.id),
+          )
+          .where(
+            and(
+              ne(worksheets.id, worksheetId),
+              isNull(worksheets.deletedAt),
+              ne(worksheets.status, "rejected"),
+              isNotNull(worksheets.startDate),
+              isNotNull(worksheets.endDate),
+              sql`${worksheets.startDate} <= ${targetEnd} AND ${worksheets.endDate} >= ${targetStart}`,
+            ),
+          );
+
+        const busyEmployeeIds = new Set(
+          conflictingAssignments.map((a) => a.employeeId),
+        );
+
+        const availableEmployees = allEmps.filter(
+          (emp) => !busyEmployeeIds.has(emp.id),
+        );
+
+        return {
+          employees: availableEmployees,
+          hiddenCount: busyEmployeeIds.size,
+        };
+      },
+      catch: (error) => {
+        logError(
+          "worksheetQueries.getAvailableEmployeesForWorksheet",
+          "Error fetching available employees for worksheet",
+          { error, worksheetId },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data ketersediaan personel",
+        });
+      },
     });
   },
 };

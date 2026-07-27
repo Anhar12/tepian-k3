@@ -3,6 +3,7 @@ export const AUDIT_ACTIONS = [
   "update",
   "delete",
   "status_change",
+  "read",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -12,6 +13,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   update: "Update",
   delete: "Delete",
   status_change: "Status Change",
+  read: "Read",
 };
 
 export const AUDIT_ENTITY_TYPES = [
@@ -34,6 +36,9 @@ export const AUDIT_ENTITY_TYPES = [
   "setting",
   "ppid_documents",
   "ppid_submissions",
+  "position",
+  "employee",
+  "employee_certification",
 ] as const;
 
 export type AuditEntityType = (typeof AUDIT_ENTITY_TYPES)[number];
@@ -58,4 +63,7 @@ export const AUDIT_ENTITY_TYPE_LABELS: Record<AuditEntityType, string> = {
   setting: "Pengaturan Landing Page",
   ppid_documents: "Dokumen PPID",
   ppid_submissions: "Permohonan PPID",
+  position: "Jabatan",
+  employee: "Pegawai",
+  employee_certification: "Sertifikasi Pegawai",
 };

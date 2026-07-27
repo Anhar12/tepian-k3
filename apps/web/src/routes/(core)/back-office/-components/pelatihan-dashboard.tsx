@@ -14,6 +14,7 @@ import {
 
 interface PelatihanDashboardProps {
   profileName: string;
+  roles?: any[];
 }
 
 function getRelativeTime(dateStr: string): string {

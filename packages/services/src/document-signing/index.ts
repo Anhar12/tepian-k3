@@ -21,13 +21,95 @@ type DocumentSignPayload = {
 };
 
 /**
+ * Payload structure for TTE Request
+ */
+export type TTERequestPayload = {
+  documentId: string;
+  orderId: string;
+  signerName: string;
+  signerRole: string;
+  signerEmail: string;
+};
+
+/**
  *  Result structure for verification
  */
-type VerificationResult = {
+export type VerificationResult = {
   valid: boolean;
   payload?: DocumentSignPayload;
   error?: string;
 };
+
+/**
+ * Result structure for TTE Request verification
+ */
+export type TTERequestVerificationResult = {
+  valid: boolean;
+  payload?: TTERequestPayload;
+  error?: string;
+};
+
+/**
+ * Create a secure token for TTE request
+ */
+export const createTTERequestToken = (
+  payload: TTERequestPayload,
+  expiresIn: string = "7d", // Link valid for 7 days
+) =>
+  Effect.gen(function* () {
+    const secret = new TextEncoder().encode(env.JWT_DOCUMENT_SECRET);
+
+    const jwt = yield* Effect.tryPromise({
+      try: () =>
+        new SignJWT({
+          ...payload,
+          iss: "tepian-k3",
+          aud: "tte-request",
+        })
+          .setProtectedHeader({ alg: "HS256" })
+          .setIssuedAt()
+          .setExpirationTime(expiresIn)
+          .sign(secret),
+      catch: (error) =>
+        new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create TTE request token",
+          cause: error,
+        }),
+    });
+
+    return jwt;
+  });
+
+/**
+ * Verify a TTE request token
+ */
+export const verifyTTERequestToken = (jwt: string) =>
+  Effect.gen(function* () {
+    const secret = new TextEncoder().encode(env.JWT_DOCUMENT_SECRET);
+
+    try {
+      const { payload } = yield* Effect.tryPromise({
+        try: () => jwtVerify(jwt, secret, { audience: "tte-request" }),
+        catch: (error) =>
+          new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Invalid or expired TTE request token",
+            cause: error,
+          }),
+      });
+
+      return {
+        valid: true,
+        payload: payload as unknown as TTERequestPayload,
+      } as TTERequestVerificationResult;
+    } catch (error) {
+      return {
+        valid: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      } as TTERequestVerificationResult;
+    }
+  });
 
 /**
  * Generate SHA-256 hash of file content
@@ -221,7 +303,7 @@ export const documentSigningService = {
 };
 
 // Export types
-export type { DocumentSignPayload, VerificationResult };
+export type { DocumentSignPayload };
 
 // Export Helpers
 export * from "./helpers";

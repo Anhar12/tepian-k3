@@ -5,9 +5,8 @@ import { trpc } from "@/utils/trpc";
 import parameterCategoriesSchema from "@tepian-k3/schema/pengujian/parameter-categories.schema";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import getParameterCategoriesColumns from "@/components/columns/parameter-categories-columns";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import getParameterCategoriesColumns, { parameterCategoryActionConfig } from "@/components/columns/parameter-categories-columns";
+import { SoftDeleteToggle } from "@/components/soft-delete-toggle";
 import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -17,6 +16,7 @@ import { DataTableSortList } from "@/components/data-table/data-table-sort-list"
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import type { ParameterCategories } from "@tepian-k3/types/pengujian/parameter-categories.types";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
+import { useCrudRowActions, CrudRowActionsModal } from "@/components/crud-row-actions";
 
 export const Route = createFileRoute(
   "/(core)/back-office/parameter-categories/",
@@ -46,6 +46,8 @@ function RouteComponent() {
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
+  
+  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } = useCrudRowActions<ParameterCategories>();
 
   const columns = useMemo(
     () =>
@@ -57,8 +59,8 @@ function RouteComponent() {
   );
 
   const { table } = useDataTableRouter({
-    data: parameterCategories?.data ?? [],
-    columns: columns as unknown as ParameterCategories[],
+    data: (parameterCategories?.data ?? []) as ParameterCategories[],
+    columns,
     pageCount: parameterCategories?.pageCount ?? 0,
     search: params,
     navigate: ({ search: updater }) => {
@@ -73,10 +75,9 @@ function RouteComponent() {
   return (
     <div className="flex flex-col">
       <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="flex flex-row gap-2">
-          <Checkbox
-            id="show-deleted-parameter-categories"
-            checked={showDeleted}
+        <div className="flex flex-row gap-2 items-center">
+          <SoftDeleteToggle
+            checked={showDeleted ?? false}
             onCheckedChange={(checked) => {
               navigate({
                 to: "/back-office/parameter-categories",
@@ -88,7 +89,6 @@ function RouteComponent() {
               setShowDeleted(Boolean(checked));
             }}
           />
-          <Label>Deleted Parameter Categories</Label>
         </div>
         <PermissionGate permission="parameter-categories.create">
           <Button
@@ -106,12 +106,20 @@ function RouteComponent() {
         isLoading={isLoading}
         error={error}
         emptyMessage="Tidak ada kategori parameter ditemukan."
+        onRowClick={handleRowClick}
       >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />
         </DataTableToolbar>
       </DataTable>
+      
+      <CrudRowActionsModal
+        config={parameterCategoryActionConfig}
+        row={selectedRow}
+        open={isActionsOpen}
+        onOpenChange={setIsActionsOpen}
+      />
     </div>
   );
 }

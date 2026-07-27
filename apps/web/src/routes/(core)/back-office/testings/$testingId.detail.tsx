@@ -567,9 +567,6 @@ function RouteComponent() {
                         <TableHead className="text-xs font-semibold sm:text-sm">
                           Status
                         </TableHead>
-                        <TableHead className="text-center text-xs font-semibold sm:text-sm">
-                          Aksi
-                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -579,9 +576,14 @@ function RouteComponent() {
                             <div className="flex items-center gap-2">
                               <FileText className="h-4 w-4 text-primary" />
                               <div>
-                                <p className="text-xs font-medium sm:text-sm">
+                                <a
+                                  href={doc.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-medium text-primary hover:underline sm:text-sm"
+                                >
                                   {doc.title}
-                                </p>
+                                </a>
                                 <p className="text-xs text-muted-foreground">
                                   {doc.fileName}
                                 </p>
@@ -612,34 +614,6 @@ function RouteComponent() {
                               ) : null}
                               {doc.status}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className="h-8 w-8 p-0"
-                              >
-                                <a
-                                  href={doc.fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </a>
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className="h-8 w-8 p-0"
-                              >
-                                <a href={doc.fileUrl} download>
-                                  <Download className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

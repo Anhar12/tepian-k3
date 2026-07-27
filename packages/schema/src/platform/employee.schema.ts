@@ -32,10 +32,16 @@ const updateEmployeeSchema = createUpdateSchema(employees, {
   positionId: z.uuidv7(),
 });
 
+const getAvailableEmployeesSchema = z.object({
+  startDate: z.string(),
+  endDate: z.string(),
+});
+
 const employeeSchemas = {
   getAllEmployeesSchema,
   createEmployeeSchema,
   updateEmployeeSchema,
+  getAvailableEmployeesSchema,
 };
 
 export default employeeSchemas;

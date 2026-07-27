@@ -20,6 +20,7 @@ import { Route as PelatihanIndexRouteImport } from './routes/pelatihan/index'
 import { Route as MediaDanPublikasiIndexRouteImport } from './routes/media-dan-publikasi/index'
 import { Route as BeritaIndexRouteImport } from './routes/berita/index'
 import { Route as VerifyTokenRouteImport } from './routes/verify.$token'
+import { Route as TteSignSpkRouteImport } from './routes/tte.sign-spk'
 import { Route as PpidSertaMertaRouteImport } from './routes/ppid/serta-merta'
 import { Route as PpidProfilRouteImport } from './routes/ppid/profil'
 import { Route as PpidPermohonanRouteImport } from './routes/ppid/permohonan'
@@ -61,12 +62,14 @@ import { Route as coreBackOfficeIndexRouteImport } from './routes/(core)/back-of
 import { Route as VerifyCertificateTokenRouteImport } from './routes/verify.certificate.$token'
 import { Route as PpidSetiapSaatRegulasiRouteImport } from './routes/ppid/setiap-saat/regulasi'
 import { Route as PpidSetiapSaatDocumentIdRouteImport } from './routes/ppid/setiap-saat/$documentId'
+import { Route as coreWorksheetsProposedDatesRouteImport } from './routes/(core)/worksheets/proposed-dates'
 import { Route as coreWorksheetsJadwalPersonelRouteImport } from './routes/(core)/worksheets/jadwal-personel'
 import { Route as coreWorksheetsDetailTransaksiRouteImport } from './routes/(core)/worksheets/detail-transaksi'
 import { Route as corePengujianTransaksiRouteImport } from './routes/(core)/pengujian/transaksi'
 import { Route as corePengujianSurveyKepuasanRouteImport } from './routes/(core)/pengujian/survey-kepuasan'
 import { Route as corePengujianStatusRouteImport } from './routes/(core)/pengujian/status'
 import { Route as corePengujianSertifikatRouteImport } from './routes/(core)/pengujian/sertifikat'
+import { Route as corePengujianPanduanRouteImport } from './routes/(core)/pengujian/panduan'
 import { Route as corePengujianCheckoutRouteImport } from './routes/(core)/pengujian/checkout'
 import { Route as corePelatihanTransaksiRouteImport } from './routes/(core)/pelatihan/transaksi'
 import { Route as coreEmployeeWorksheetsIndexRouteImport } from './routes/(core)/employee/worksheets/index'
@@ -98,6 +101,7 @@ import { Route as coreBackOfficeKblisIndexRouteImport } from './routes/(core)/ba
 import { Route as coreBackOfficeEmployeesIndexRouteImport } from './routes/(core)/back-office/employees/index'
 import { Route as coreBackOfficeClustersIndexRouteImport } from './routes/(core)/back-office/clusters/index'
 import { Route as coreBackOfficeChemicalMaterialsIndexRouteImport } from './routes/(core)/back-office/chemical-materials/index'
+import { Route as coreBackOfficeChatbotIndexRouteImport } from './routes/(core)/back-office/chatbot/index'
 import { Route as coreBackOfficeBannersIndexRouteImport } from './routes/(core)/back-office/banners/index'
 import { Route as coreBackOfficeAuditsIndexRouteImport } from './routes/(core)/back-office/audits/index'
 import { Route as corePelatihanTransaksiOrderIdRouteImport } from './routes/(core)/pelatihan/transaksi.$orderId'
@@ -133,9 +137,7 @@ import { Route as coreDashboardPelatihanEnrollmentIdJadwalPresensiRouteImport } 
 import { Route as coreDashboardCompanyCompanyIdEditRouteImport } from './routes/(core)/dashboard/company/$companyId.edit'
 import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './routes/(core)/dashboard/company/$companyId.detail'
 import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
-import { Route as coreBackOfficeToolsToolIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.edit'
 import { Route as coreBackOfficeToolsToolIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.detail'
-import { Route as coreBackOfficeToolCodesToolCodeIdEditRouteImport } from './routes/(core)/back-office/tool-codes/$toolCodeId.edit'
 import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
 import { Route as coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport } from './routes/(core)/back-office/survey-questions/$questionId.edit'
 import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
@@ -148,16 +150,12 @@ import { Route as coreBackOfficePelatihanPelatihanIdPenilaianRouteImport } from 
 import { Route as coreBackOfficePelatihanPelatihanIdOverviewRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/overview'
 import { Route as coreBackOfficePelatihanPelatihanIdMateriRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId/materi'
 import { Route as coreBackOfficePelatihanPelatihanIdEditRouteImport } from './routes/(core)/back-office/pelatihan/$pelatihanId.edit'
-import { Route as coreBackOfficeParametersParameterIdEditRouteImport } from './routes/(core)/back-office/parameters/$parameterId.edit'
 import { Route as coreBackOfficeParametersParameterIdDetailRouteImport } from './routes/(core)/back-office/parameters/$parameterId.detail'
-import { Route as coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport } from './routes/(core)/back-office/parameter-categories/$parameterCategoriesId.edit'
 import { Route as coreBackOfficeOrdersOrderIdDetailRouteImport } from './routes/(core)/back-office/orders/$orderId.detail'
 import { Route as coreBackOfficeNewsNewsIdEditRouteImport } from './routes/(core)/back-office/news/$newsId.edit'
 import { Route as coreBackOfficeMediaPublicationsMediaIdEditRouteImport } from './routes/(core)/back-office/media-publications/$mediaId.edit'
 import { Route as coreBackOfficeKblisKbliIdEditRouteImport } from './routes/(core)/back-office/kblis/$kbliId.edit'
 import { Route as coreBackOfficeEmployeesEmployeeIdEditRouteImport } from './routes/(core)/back-office/employees/$employeeId.edit'
-import { Route as coreBackOfficeClustersClusterIdEditRouteImport } from './routes/(core)/back-office/clusters/$clusterId.edit'
-import { Route as coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport } from './routes/(core)/back-office/chemical-materials/$chemicalMaterialId.edit'
 import { Route as coreBackOfficeBannersBannerIdEditRouteImport } from './routes/(core)/back-office/banners/$bannerId.edit'
 import { Route as coreDashboardPelatihanEnrollmentIdMateriIndexRouteImport } from './routes/(core)/dashboard/pelatihan/$enrollmentId/materi/index'
 import { Route as coreBackOfficeToolsToolIdStatusIndexRouteImport } from './routes/(core)/back-office/tools/$toolId.status.index'
@@ -169,8 +167,6 @@ import { Route as coreDashboardPelatihanEnrollmentIdMateriMaterialIdRouteImport 
 import { Route as coreBackOfficeToolsToolIdStatusCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.status.create'
 import { Route as coreBackOfficeToolsToolIdCalibrationCreateRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.create'
 import { Route as coreDashboardPelatihanEnrollmentIdUjianAssessmentIdKerjakanRouteImport } from './routes/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan'
-import { Route as coreBackOfficeToolsToolIdStatusStatusIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.status.$statusId.edit'
-import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.edit'
 import { Route as coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.calibration.$calibrationId.detail'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -224,6 +220,11 @@ const BeritaIndexRoute = BeritaIndexRouteImport.update({
 const VerifyTokenRoute = VerifyTokenRouteImport.update({
   id: '/verify/$token',
   path: '/verify/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TteSignSpkRoute = TteSignSpkRouteImport.update({
+  id: '/tte/sign-spk',
+  path: '/tte/sign-spk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PpidSertaMertaRoute = PpidSertaMertaRouteImport.update({
@@ -432,6 +433,12 @@ const PpidSetiapSaatDocumentIdRoute =
     path: '/ppid/setiap-saat/$documentId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const coreWorksheetsProposedDatesRoute =
+  coreWorksheetsProposedDatesRouteImport.update({
+    id: '/proposed-dates',
+    path: '/proposed-dates',
+    getParentRoute: () => coreWorksheetsRouteRoute,
+  } as any)
 const coreWorksheetsJadwalPersonelRoute =
   coreWorksheetsJadwalPersonelRouteImport.update({
     id: '/jadwal-personel',
@@ -463,6 +470,11 @@ const corePengujianStatusRoute = corePengujianStatusRouteImport.update({
 const corePengujianSertifikatRoute = corePengujianSertifikatRouteImport.update({
   id: '/sertifikat',
   path: '/sertifikat',
+  getParentRoute: () => corePengujianRouteRoute,
+} as any)
+const corePengujianPanduanRoute = corePengujianPanduanRouteImport.update({
+  id: '/panduan',
+  path: '/panduan',
   getParentRoute: () => corePengujianRouteRoute,
 } as any)
 const corePengujianCheckoutRoute = corePengujianCheckoutRouteImport.update({
@@ -643,6 +655,12 @@ const coreBackOfficeChemicalMaterialsIndexRoute =
   coreBackOfficeChemicalMaterialsIndexRouteImport.update({
     id: '/chemical-materials/',
     path: '/chemical-materials/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeChatbotIndexRoute =
+  coreBackOfficeChatbotIndexRouteImport.update({
+    id: '/chatbot/',
+    path: '/chatbot/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeBannersIndexRoute =
@@ -855,22 +873,10 @@ const coreBackOfficeUsersUserIdEditRoute =
     path: '/users/$userId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
-const coreBackOfficeToolsToolIdEditRoute =
-  coreBackOfficeToolsToolIdEditRouteImport.update({
-    id: '/tools/$toolId/edit',
-    path: '/tools/$toolId/edit',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
 const coreBackOfficeToolsToolIdDetailRoute =
   coreBackOfficeToolsToolIdDetailRouteImport.update({
     id: '/tools/$toolId/detail',
     path: '/tools/$toolId/detail',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
-const coreBackOfficeToolCodesToolCodeIdEditRoute =
-  coreBackOfficeToolCodesToolCodeIdEditRouteImport.update({
-    id: '/tool-codes/$toolCodeId/edit',
-    path: '/tool-codes/$toolCodeId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeTestingsTestingIdDetailRoute =
@@ -945,22 +951,10 @@ const coreBackOfficePelatihanPelatihanIdEditRoute =
     path: '/edit',
     getParentRoute: () => coreBackOfficePelatihanPelatihanIdRoute,
   } as any)
-const coreBackOfficeParametersParameterIdEditRoute =
-  coreBackOfficeParametersParameterIdEditRouteImport.update({
-    id: '/parameters/$parameterId/edit',
-    path: '/parameters/$parameterId/edit',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
 const coreBackOfficeParametersParameterIdDetailRoute =
   coreBackOfficeParametersParameterIdDetailRouteImport.update({
     id: '/parameters/$parameterId/detail',
     path: '/parameters/$parameterId/detail',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
-const coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute =
-  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport.update({
-    id: '/parameter-categories/$parameterCategoriesId/edit',
-    path: '/parameter-categories/$parameterCategoriesId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeOrdersOrderIdDetailRoute =
@@ -991,18 +985,6 @@ const coreBackOfficeEmployeesEmployeeIdEditRoute =
   coreBackOfficeEmployeesEmployeeIdEditRouteImport.update({
     id: '/employees/$employeeId/edit',
     path: '/employees/$employeeId/edit',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
-const coreBackOfficeClustersClusterIdEditRoute =
-  coreBackOfficeClustersClusterIdEditRouteImport.update({
-    id: '/clusters/$clusterId/edit',
-    path: '/clusters/$clusterId/edit',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
-const coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute =
-  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport.update({
-    id: '/chemical-materials/$chemicalMaterialId/edit',
-    path: '/chemical-materials/$chemicalMaterialId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeBannersBannerIdEditRoute =
@@ -1074,18 +1056,6 @@ const coreDashboardPelatihanEnrollmentIdUjianAssessmentIdKerjakanRoute =
         coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRoute,
     } as any,
   )
-const coreBackOfficeToolsToolIdStatusStatusIdEditRoute =
-  coreBackOfficeToolsToolIdStatusStatusIdEditRouteImport.update({
-    id: '/tools/$toolId/status/$statusId/edit',
-    path: '/tools/$toolId/status/$statusId/edit',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
-const coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute =
-  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport.update({
-    id: '/tools/$toolId/calibration/$calibrationId/edit',
-    path: '/tools/$toolId/calibration/$calibrationId/edit',
-    getParentRoute: () => coreBackOfficeRouteRoute,
-  } as any)
 const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute =
   coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRouteImport.update({
     id: '/tools/$toolId/calibration/$calibrationId/detail',
@@ -1128,18 +1098,21 @@ export interface FileRoutesByFullPath {
   '/ppid/permohonan': typeof PpidPermohonanRoute
   '/ppid/profil': typeof PpidProfilRoute
   '/ppid/serta-merta': typeof PpidSertaMertaRoute
+  '/tte/sign-spk': typeof TteSignSpkRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
   '/media-dan-publikasi': typeof MediaDanPublikasiIndexRoute
   '/ppid': typeof PpidIndexRoute
   '/pelatihan/transaksi': typeof corePelatihanTransaksiRouteWithChildren
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/pengujian/panduan': typeof corePengujianPanduanRoute
   '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
+  '/worksheets/proposed-dates': typeof coreWorksheetsProposedDatesRoute
   '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
   '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
@@ -1176,6 +1149,7 @@ export interface FileRoutesByFullPath {
   '/pelatihan/transaksi/$orderId': typeof corePelatihanTransaksiOrderIdRoute
   '/back-office/audits': typeof coreBackOfficeAuditsIndexRoute
   '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
+  '/back-office/chatbot': typeof coreBackOfficeChatbotIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
@@ -1206,16 +1180,12 @@ export interface FileRoutesByFullPath {
   '/employee/tools': typeof coreEmployeeToolsIndexRoute
   '/employee/worksheets': typeof coreEmployeeWorksheetsIndexRoute
   '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
-  '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
   '/back-office/media-publications/$mediaId/edit': typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
-  '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
-  '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/back-office/pelatihan/$pelatihanId/edit': typeof coreBackOfficePelatihanPelatihanIdEditRoute
   '/back-office/pelatihan/$pelatihanId/materi': typeof coreBackOfficePelatihanPelatihanIdMateriRoute
   '/back-office/pelatihan/$pelatihanId/overview': typeof coreBackOfficePelatihanPelatihanIdOverviewRoute
@@ -1228,9 +1198,7 @@ export interface FileRoutesByFullPath {
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
-  '/back-office/tool-codes/$toolCodeId/edit': typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
-  '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
@@ -1251,8 +1219,6 @@ export interface FileRoutesByFullPath {
   '/back-office/tools/$toolId/status': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/dashboard/pelatihan/$enrollmentId/materi': typeof coreDashboardPelatihanEnrollmentIdMateriIndexRoute
   '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
-  '/back-office/tools/$toolId/status/$statusId/edit': typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
   '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan': typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdKerjakanRoute
 }
 export interface FileRoutesByTo {
@@ -1284,18 +1250,21 @@ export interface FileRoutesByTo {
   '/ppid/permohonan': typeof PpidPermohonanRoute
   '/ppid/profil': typeof PpidProfilRoute
   '/ppid/serta-merta': typeof PpidSertaMertaRoute
+  '/tte/sign-spk': typeof TteSignSpkRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/berita': typeof BeritaIndexRoute
   '/media-dan-publikasi': typeof MediaDanPublikasiIndexRoute
   '/ppid': typeof PpidIndexRoute
   '/pelatihan/transaksi': typeof corePelatihanTransaksiRouteWithChildren
   '/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/pengujian/panduan': typeof corePengujianPanduanRoute
   '/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/pengujian/status': typeof corePengujianStatusRoute
   '/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
+  '/worksheets/proposed-dates': typeof coreWorksheetsProposedDatesRoute
   '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
   '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
@@ -1331,6 +1300,7 @@ export interface FileRoutesByTo {
   '/pelatihan/transaksi/$orderId': typeof corePelatihanTransaksiOrderIdRoute
   '/back-office/audits': typeof coreBackOfficeAuditsIndexRoute
   '/back-office/banners': typeof coreBackOfficeBannersIndexRoute
+  '/back-office/chatbot': typeof coreBackOfficeChatbotIndexRoute
   '/back-office/chemical-materials': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/back-office/clusters': typeof coreBackOfficeClustersIndexRoute
   '/back-office/employees': typeof coreBackOfficeEmployeesIndexRoute
@@ -1361,16 +1331,12 @@ export interface FileRoutesByTo {
   '/employee/tools': typeof coreEmployeeToolsIndexRoute
   '/employee/worksheets': typeof coreEmployeeWorksheetsIndexRoute
   '/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
-  '/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  '/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
   '/back-office/media-publications/$mediaId/edit': typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   '/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
-  '/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
-  '/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/back-office/pelatihan/$pelatihanId/edit': typeof coreBackOfficePelatihanPelatihanIdEditRoute
   '/back-office/pelatihan/$pelatihanId/materi': typeof coreBackOfficePelatihanPelatihanIdMateriRoute
   '/back-office/pelatihan/$pelatihanId/overview': typeof coreBackOfficePelatihanPelatihanIdOverviewRoute
@@ -1383,9 +1349,7 @@ export interface FileRoutesByTo {
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
-  '/back-office/tool-codes/$toolCodeId/edit': typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
-  '/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
@@ -1406,8 +1370,6 @@ export interface FileRoutesByTo {
   '/back-office/tools/$toolId/status': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/dashboard/pelatihan/$enrollmentId/materi': typeof coreDashboardPelatihanEnrollmentIdMateriIndexRoute
   '/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  '/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
-  '/back-office/tools/$toolId/status/$statusId/edit': typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
   '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan': typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdKerjakanRoute
 }
 export interface FileRoutesById {
@@ -1448,6 +1410,7 @@ export interface FileRoutesById {
   '/ppid/permohonan': typeof PpidPermohonanRoute
   '/ppid/profil': typeof PpidProfilRoute
   '/ppid/serta-merta': typeof PpidSertaMertaRoute
+  '/tte/sign-spk': typeof TteSignSpkRoute
   '/verify/$token': typeof VerifyTokenRoute
   '/berita/': typeof BeritaIndexRoute
   '/media-dan-publikasi/': typeof MediaDanPublikasiIndexRoute
@@ -1455,12 +1418,14 @@ export interface FileRoutesById {
   '/ppid/': typeof PpidIndexRoute
   '/(core)/pelatihan/transaksi': typeof corePelatihanTransaksiRouteWithChildren
   '/(core)/pengujian/checkout': typeof corePengujianCheckoutRoute
+  '/(core)/pengujian/panduan': typeof corePengujianPanduanRoute
   '/(core)/pengujian/sertifikat': typeof corePengujianSertifikatRoute
   '/(core)/pengujian/status': typeof corePengujianStatusRoute
   '/(core)/pengujian/survey-kepuasan': typeof corePengujianSurveyKepuasanRoute
   '/(core)/pengujian/transaksi': typeof corePengujianTransaksiRoute
   '/(core)/worksheets/detail-transaksi': typeof coreWorksheetsDetailTransaksiRoute
   '/(core)/worksheets/jadwal-personel': typeof coreWorksheetsJadwalPersonelRoute
+  '/(core)/worksheets/proposed-dates': typeof coreWorksheetsProposedDatesRoute
   '/ppid/setiap-saat/$documentId': typeof PpidSetiapSaatDocumentIdRoute
   '/ppid/setiap-saat/regulasi': typeof PpidSetiapSaatRegulasiRoute
   '/verify/certificate/$token': typeof VerifyCertificateTokenRoute
@@ -1497,6 +1462,7 @@ export interface FileRoutesById {
   '/(core)/pelatihan/transaksi/$orderId': typeof corePelatihanTransaksiOrderIdRoute
   '/(core)/back-office/audits/': typeof coreBackOfficeAuditsIndexRoute
   '/(core)/back-office/banners/': typeof coreBackOfficeBannersIndexRoute
+  '/(core)/back-office/chatbot/': typeof coreBackOfficeChatbotIndexRoute
   '/(core)/back-office/chemical-materials/': typeof coreBackOfficeChemicalMaterialsIndexRoute
   '/(core)/back-office/clusters/': typeof coreBackOfficeClustersIndexRoute
   '/(core)/back-office/employees/': typeof coreBackOfficeEmployeesIndexRoute
@@ -1527,16 +1493,12 @@ export interface FileRoutesById {
   '/(core)/employee/tools/': typeof coreEmployeeToolsIndexRoute
   '/(core)/employee/worksheets/': typeof coreEmployeeWorksheetsIndexRoute
   '/(core)/back-office/banners/$bannerId/edit': typeof coreBackOfficeBannersBannerIdEditRoute
-  '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  '/(core)/back-office/clusters/$clusterId/edit': typeof coreBackOfficeClustersClusterIdEditRoute
   '/(core)/back-office/employees/$employeeId/edit': typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   '/(core)/back-office/kblis/$kbliId/edit': typeof coreBackOfficeKblisKbliIdEditRoute
   '/(core)/back-office/media-publications/$mediaId/edit': typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   '/(core)/back-office/news/$newsId/edit': typeof coreBackOfficeNewsNewsIdEditRoute
   '/(core)/back-office/orders/$orderId/detail': typeof coreBackOfficeOrdersOrderIdDetailRoute
-  '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   '/(core)/back-office/parameters/$parameterId/detail': typeof coreBackOfficeParametersParameterIdDetailRoute
-  '/(core)/back-office/parameters/$parameterId/edit': typeof coreBackOfficeParametersParameterIdEditRoute
   '/(core)/back-office/pelatihan/$pelatihanId/edit': typeof coreBackOfficePelatihanPelatihanIdEditRoute
   '/(core)/back-office/pelatihan/$pelatihanId/materi': typeof coreBackOfficePelatihanPelatihanIdMateriRoute
   '/(core)/back-office/pelatihan/$pelatihanId/overview': typeof coreBackOfficePelatihanPelatihanIdOverviewRoute
@@ -1549,9 +1511,7 @@ export interface FileRoutesById {
   '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/(core)/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
-  '/(core)/back-office/tool-codes/$toolCodeId/edit': typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   '/(core)/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
-  '/(core)/back-office/tools/$toolId/edit': typeof coreBackOfficeToolsToolIdEditRoute
   '/(core)/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
   '/(core)/dashboard/company/$companyId/detail': typeof coreDashboardCompanyCompanyIdDetailRoute
   '/(core)/dashboard/company/$companyId/edit': typeof coreDashboardCompanyCompanyIdEditRoute
@@ -1572,8 +1532,6 @@ export interface FileRoutesById {
   '/(core)/back-office/tools/$toolId/status/': typeof coreBackOfficeToolsToolIdStatusIndexRoute
   '/(core)/dashboard/pelatihan/$enrollmentId/materi/': typeof coreDashboardPelatihanEnrollmentIdMateriIndexRoute
   '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
-  '/(core)/back-office/tools/$toolId/status/$statusId/edit': typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
   '/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan': typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdKerjakanRoute
 }
 export interface FileRouteTypes {
@@ -1613,18 +1571,21 @@ export interface FileRouteTypes {
     | '/ppid/permohonan'
     | '/ppid/profil'
     | '/ppid/serta-merta'
+    | '/tte/sign-spk'
     | '/verify/$token'
     | '/berita'
     | '/media-dan-publikasi'
     | '/ppid'
     | '/pelatihan/transaksi'
     | '/pengujian/checkout'
+    | '/pengujian/panduan'
     | '/pengujian/sertifikat'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
     | '/pengujian/transaksi'
     | '/worksheets/detail-transaksi'
     | '/worksheets/jadwal-personel'
+    | '/worksheets/proposed-dates'
     | '/ppid/setiap-saat/$documentId'
     | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
@@ -1661,6 +1622,7 @@ export interface FileRouteTypes {
     | '/pelatihan/transaksi/$orderId'
     | '/back-office/audits'
     | '/back-office/banners'
+    | '/back-office/chatbot'
     | '/back-office/chemical-materials'
     | '/back-office/clusters'
     | '/back-office/employees'
@@ -1691,16 +1653,12 @@ export interface FileRouteTypes {
     | '/employee/tools'
     | '/employee/worksheets'
     | '/back-office/banners/$bannerId/edit'
-    | '/back-office/chemical-materials/$chemicalMaterialId/edit'
-    | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
     | '/back-office/media-publications/$mediaId/edit'
     | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
-    | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
-    | '/back-office/parameters/$parameterId/edit'
     | '/back-office/pelatihan/$pelatihanId/edit'
     | '/back-office/pelatihan/$pelatihanId/materi'
     | '/back-office/pelatihan/$pelatihanId/overview'
@@ -1713,9 +1671,7 @@ export interface FileRouteTypes {
     | '/back-office/roles/$roleId/edit'
     | '/back-office/survey-questions/$questionId/edit'
     | '/back-office/testings/$testingId/detail'
-    | '/back-office/tool-codes/$toolCodeId/edit'
     | '/back-office/tools/$toolId/detail'
-    | '/back-office/tools/$toolId/edit'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
@@ -1736,8 +1692,6 @@ export interface FileRouteTypes {
     | '/back-office/tools/$toolId/status'
     | '/dashboard/pelatihan/$enrollmentId/materi'
     | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
-    | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
-    | '/back-office/tools/$toolId/status/$statusId/edit'
     | '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1769,18 +1723,21 @@ export interface FileRouteTypes {
     | '/ppid/permohonan'
     | '/ppid/profil'
     | '/ppid/serta-merta'
+    | '/tte/sign-spk'
     | '/verify/$token'
     | '/berita'
     | '/media-dan-publikasi'
     | '/ppid'
     | '/pelatihan/transaksi'
     | '/pengujian/checkout'
+    | '/pengujian/panduan'
     | '/pengujian/sertifikat'
     | '/pengujian/status'
     | '/pengujian/survey-kepuasan'
     | '/pengujian/transaksi'
     | '/worksheets/detail-transaksi'
     | '/worksheets/jadwal-personel'
+    | '/worksheets/proposed-dates'
     | '/ppid/setiap-saat/$documentId'
     | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
@@ -1816,6 +1773,7 @@ export interface FileRouteTypes {
     | '/pelatihan/transaksi/$orderId'
     | '/back-office/audits'
     | '/back-office/banners'
+    | '/back-office/chatbot'
     | '/back-office/chemical-materials'
     | '/back-office/clusters'
     | '/back-office/employees'
@@ -1846,16 +1804,12 @@ export interface FileRouteTypes {
     | '/employee/tools'
     | '/employee/worksheets'
     | '/back-office/banners/$bannerId/edit'
-    | '/back-office/chemical-materials/$chemicalMaterialId/edit'
-    | '/back-office/clusters/$clusterId/edit'
     | '/back-office/employees/$employeeId/edit'
     | '/back-office/kblis/$kbliId/edit'
     | '/back-office/media-publications/$mediaId/edit'
     | '/back-office/news/$newsId/edit'
     | '/back-office/orders/$orderId/detail'
-    | '/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/back-office/parameters/$parameterId/detail'
-    | '/back-office/parameters/$parameterId/edit'
     | '/back-office/pelatihan/$pelatihanId/edit'
     | '/back-office/pelatihan/$pelatihanId/materi'
     | '/back-office/pelatihan/$pelatihanId/overview'
@@ -1868,9 +1822,7 @@ export interface FileRouteTypes {
     | '/back-office/roles/$roleId/edit'
     | '/back-office/survey-questions/$questionId/edit'
     | '/back-office/testings/$testingId/detail'
-    | '/back-office/tool-codes/$toolCodeId/edit'
     | '/back-office/tools/$toolId/detail'
-    | '/back-office/tools/$toolId/edit'
     | '/back-office/users/$userId/edit'
     | '/dashboard/company/$companyId/detail'
     | '/dashboard/company/$companyId/edit'
@@ -1891,8 +1843,6 @@ export interface FileRouteTypes {
     | '/back-office/tools/$toolId/status'
     | '/dashboard/pelatihan/$enrollmentId/materi'
     | '/back-office/tools/$toolId/calibration/$calibrationId/detail'
-    | '/back-office/tools/$toolId/calibration/$calibrationId/edit'
-    | '/back-office/tools/$toolId/status/$statusId/edit'
     | '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan'
   id:
     | '__root__'
@@ -1932,6 +1882,7 @@ export interface FileRouteTypes {
     | '/ppid/permohonan'
     | '/ppid/profil'
     | '/ppid/serta-merta'
+    | '/tte/sign-spk'
     | '/verify/$token'
     | '/berita/'
     | '/media-dan-publikasi/'
@@ -1939,12 +1890,14 @@ export interface FileRouteTypes {
     | '/ppid/'
     | '/(core)/pelatihan/transaksi'
     | '/(core)/pengujian/checkout'
+    | '/(core)/pengujian/panduan'
     | '/(core)/pengujian/sertifikat'
     | '/(core)/pengujian/status'
     | '/(core)/pengujian/survey-kepuasan'
     | '/(core)/pengujian/transaksi'
     | '/(core)/worksheets/detail-transaksi'
     | '/(core)/worksheets/jadwal-personel'
+    | '/(core)/worksheets/proposed-dates'
     | '/ppid/setiap-saat/$documentId'
     | '/ppid/setiap-saat/regulasi'
     | '/verify/certificate/$token'
@@ -1981,6 +1934,7 @@ export interface FileRouteTypes {
     | '/(core)/pelatihan/transaksi/$orderId'
     | '/(core)/back-office/audits/'
     | '/(core)/back-office/banners/'
+    | '/(core)/back-office/chatbot/'
     | '/(core)/back-office/chemical-materials/'
     | '/(core)/back-office/clusters/'
     | '/(core)/back-office/employees/'
@@ -2011,16 +1965,12 @@ export interface FileRouteTypes {
     | '/(core)/employee/tools/'
     | '/(core)/employee/worksheets/'
     | '/(core)/back-office/banners/$bannerId/edit'
-    | '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
-    | '/(core)/back-office/clusters/$clusterId/edit'
     | '/(core)/back-office/employees/$employeeId/edit'
     | '/(core)/back-office/kblis/$kbliId/edit'
     | '/(core)/back-office/media-publications/$mediaId/edit'
     | '/(core)/back-office/news/$newsId/edit'
     | '/(core)/back-office/orders/$orderId/detail'
-    | '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
     | '/(core)/back-office/parameters/$parameterId/detail'
-    | '/(core)/back-office/parameters/$parameterId/edit'
     | '/(core)/back-office/pelatihan/$pelatihanId/edit'
     | '/(core)/back-office/pelatihan/$pelatihanId/materi'
     | '/(core)/back-office/pelatihan/$pelatihanId/overview'
@@ -2033,9 +1983,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/roles/$roleId/edit'
     | '/(core)/back-office/survey-questions/$questionId/edit'
     | '/(core)/back-office/testings/$testingId/detail'
-    | '/(core)/back-office/tool-codes/$toolCodeId/edit'
     | '/(core)/back-office/tools/$toolId/detail'
-    | '/(core)/back-office/tools/$toolId/edit'
     | '/(core)/back-office/users/$userId/edit'
     | '/(core)/dashboard/company/$companyId/detail'
     | '/(core)/dashboard/company/$companyId/edit'
@@ -2056,8 +2004,6 @@ export interface FileRouteTypes {
     | '/(core)/back-office/tools/$toolId/status/'
     | '/(core)/dashboard/pelatihan/$enrollmentId/materi/'
     | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
-    | '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
-    | '/(core)/back-office/tools/$toolId/status/$statusId/edit'
     | '/(core)/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan'
   fileRoutesById: FileRoutesById
 }
@@ -2079,6 +2025,7 @@ export interface RootRouteChildren {
   PpidPermohonanRoute: typeof PpidPermohonanRoute
   PpidProfilRoute: typeof PpidProfilRoute
   PpidSertaMertaRoute: typeof PpidSertaMertaRoute
+  TteSignSpkRoute: typeof TteSignSpkRoute
   VerifyTokenRoute: typeof VerifyTokenRoute
   BeritaIndexRoute: typeof BeritaIndexRoute
   MediaDanPublikasiIndexRoute: typeof MediaDanPublikasiIndexRoute
@@ -2167,6 +2114,13 @@ declare module '@tanstack/react-router' {
       path: '/verify/$token'
       fullPath: '/verify/$token'
       preLoaderRoute: typeof VerifyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tte/sign-spk': {
+      id: '/tte/sign-spk'
+      path: '/tte/sign-spk'
+      fullPath: '/tte/sign-spk'
+      preLoaderRoute: typeof TteSignSpkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ppid/serta-merta': {
@@ -2456,6 +2410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PpidSetiapSaatDocumentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(core)/worksheets/proposed-dates': {
+      id: '/(core)/worksheets/proposed-dates'
+      path: '/proposed-dates'
+      fullPath: '/worksheets/proposed-dates'
+      preLoaderRoute: typeof coreWorksheetsProposedDatesRouteImport
+      parentRoute: typeof coreWorksheetsRouteRoute
+    }
     '/(core)/worksheets/jadwal-personel': {
       id: '/(core)/worksheets/jadwal-personel'
       path: '/jadwal-personel'
@@ -2496,6 +2457,13 @@ declare module '@tanstack/react-router' {
       path: '/sertifikat'
       fullPath: '/pengujian/sertifikat'
       preLoaderRoute: typeof corePengujianSertifikatRouteImport
+      parentRoute: typeof corePengujianRouteRoute
+    }
+    '/(core)/pengujian/panduan': {
+      id: '/(core)/pengujian/panduan'
+      path: '/panduan'
+      fullPath: '/pengujian/panduan'
+      preLoaderRoute: typeof corePengujianPanduanRouteImport
       parentRoute: typeof corePengujianRouteRoute
     }
     '/(core)/pengujian/checkout': {
@@ -2713,6 +2681,13 @@ declare module '@tanstack/react-router' {
       path: '/chemical-materials'
       fullPath: '/back-office/chemical-materials'
       preLoaderRoute: typeof coreBackOfficeChemicalMaterialsIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/chatbot/': {
+      id: '/(core)/back-office/chatbot/'
+      path: '/chatbot'
+      fullPath: '/back-office/chatbot'
+      preLoaderRoute: typeof coreBackOfficeChatbotIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/banners/': {
@@ -2960,25 +2935,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeUsersUserIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
-    '/(core)/back-office/tools/$toolId/edit': {
-      id: '/(core)/back-office/tools/$toolId/edit'
-      path: '/tools/$toolId/edit'
-      fullPath: '/back-office/tools/$toolId/edit'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
     '/(core)/back-office/tools/$toolId/detail': {
       id: '/(core)/back-office/tools/$toolId/detail'
       path: '/tools/$toolId/detail'
       fullPath: '/back-office/tools/$toolId/detail'
       preLoaderRoute: typeof coreBackOfficeToolsToolIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tool-codes/$toolCodeId/edit': {
-      id: '/(core)/back-office/tool-codes/$toolCodeId/edit'
-      path: '/tool-codes/$toolCodeId/edit'
-      fullPath: '/back-office/tool-codes/$toolCodeId/edit'
-      preLoaderRoute: typeof coreBackOfficeToolCodesToolCodeIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/testings/$testingId/detail': {
@@ -3065,25 +3026,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficePelatihanPelatihanIdEditRouteImport
       parentRoute: typeof coreBackOfficePelatihanPelatihanIdRoute
     }
-    '/(core)/back-office/parameters/$parameterId/edit': {
-      id: '/(core)/back-office/parameters/$parameterId/edit'
-      path: '/parameters/$parameterId/edit'
-      fullPath: '/back-office/parameters/$parameterId/edit'
-      preLoaderRoute: typeof coreBackOfficeParametersParameterIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
     '/(core)/back-office/parameters/$parameterId/detail': {
       id: '/(core)/back-office/parameters/$parameterId/detail'
       path: '/parameters/$parameterId/detail'
       fullPath: '/back-office/parameters/$parameterId/detail'
       preLoaderRoute: typeof coreBackOfficeParametersParameterIdDetailRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit': {
-      id: '/(core)/back-office/parameter-categories/$parameterCategoriesId/edit'
-      path: '/parameter-categories/$parameterCategoriesId/edit'
-      fullPath: '/back-office/parameter-categories/$parameterCategoriesId/edit'
-      preLoaderRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/orders/$orderId/detail': {
@@ -3119,20 +3066,6 @@ declare module '@tanstack/react-router' {
       path: '/employees/$employeeId/edit'
       fullPath: '/back-office/employees/$employeeId/edit'
       preLoaderRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/clusters/$clusterId/edit': {
-      id: '/(core)/back-office/clusters/$clusterId/edit'
-      path: '/clusters/$clusterId/edit'
-      fullPath: '/back-office/clusters/$clusterId/edit'
-      preLoaderRoute: typeof coreBackOfficeClustersClusterIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit': {
-      id: '/(core)/back-office/chemical-materials/$chemicalMaterialId/edit'
-      path: '/chemical-materials/$chemicalMaterialId/edit'
-      fullPath: '/back-office/chemical-materials/$chemicalMaterialId/edit'
-      preLoaderRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/banners/$bannerId/edit': {
@@ -3211,20 +3144,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/pelatihan/$enrollmentId/ujian/$assessmentId/kerjakan'
       preLoaderRoute: typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdKerjakanRouteImport
       parentRoute: typeof coreDashboardPelatihanEnrollmentIdUjianAssessmentIdRoute
-    }
-    '/(core)/back-office/tools/$toolId/status/$statusId/edit': {
-      id: '/(core)/back-office/tools/$toolId/status/$statusId/edit'
-      path: '/tools/$toolId/status/$statusId/edit'
-      fullPath: '/back-office/tools/$toolId/status/$statusId/edit'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdStatusStatusIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
-    }
-    '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit': {
-      id: '/(core)/back-office/tools/$toolId/calibration/$calibrationId/edit'
-      path: '/tools/$toolId/calibration/$calibrationId/edit'
-      fullPath: '/back-office/tools/$toolId/calibration/$calibrationId/edit'
-      preLoaderRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRouteImport
-      parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail': {
       id: '/(core)/back-office/tools/$toolId/calibration/$calibrationId/detail'
@@ -3311,6 +3230,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
   coreBackOfficeAuditsIndexRoute: typeof coreBackOfficeAuditsIndexRoute
   coreBackOfficeBannersIndexRoute: typeof coreBackOfficeBannersIndexRoute
+  coreBackOfficeChatbotIndexRoute: typeof coreBackOfficeChatbotIndexRoute
   coreBackOfficeChemicalMaterialsIndexRoute: typeof coreBackOfficeChemicalMaterialsIndexRoute
   coreBackOfficeClustersIndexRoute: typeof coreBackOfficeClustersIndexRoute
   coreBackOfficeEmployeesIndexRoute: typeof coreBackOfficeEmployeesIndexRoute
@@ -3334,24 +3254,18 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeUsersIndexRoute: typeof coreBackOfficeUsersIndexRoute
   coreBackOfficeWorksheetsIndexRoute: typeof coreBackOfficeWorksheetsIndexRoute
   coreBackOfficeBannersBannerIdEditRoute: typeof coreBackOfficeBannersBannerIdEditRoute
-  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute: typeof coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute
-  coreBackOfficeClustersClusterIdEditRoute: typeof coreBackOfficeClustersClusterIdEditRoute
   coreBackOfficeEmployeesEmployeeIdEditRoute: typeof coreBackOfficeEmployeesEmployeeIdEditRoute
   coreBackOfficeKblisKbliIdEditRoute: typeof coreBackOfficeKblisKbliIdEditRoute
   coreBackOfficeMediaPublicationsMediaIdEditRoute: typeof coreBackOfficeMediaPublicationsMediaIdEditRoute
   coreBackOfficeNewsNewsIdEditRoute: typeof coreBackOfficeNewsNewsIdEditRoute
   coreBackOfficeOrdersOrderIdDetailRoute: typeof coreBackOfficeOrdersOrderIdDetailRoute
-  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute: typeof coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute
   coreBackOfficeParametersParameterIdDetailRoute: typeof coreBackOfficeParametersParameterIdDetailRoute
-  coreBackOfficeParametersParameterIdEditRoute: typeof coreBackOfficeParametersParameterIdEditRoute
   coreBackOfficePositionsPositionIdEditRoute: typeof coreBackOfficePositionsPositionIdEditRoute
   coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
   coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
   coreBackOfficeSurveyQuestionsQuestionIdEditRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
   coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
-  coreBackOfficeToolCodesToolCodeIdEditRoute: typeof coreBackOfficeToolCodesToolCodeIdEditRoute
   coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute
-  coreBackOfficeToolsToolIdEditRoute: typeof coreBackOfficeToolsToolIdEditRoute
   coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
   coreBackOfficePengujianImportExportIndexRoute: typeof coreBackOfficePengujianImportExportIndexRoute
   coreBackOfficeToolsToolIdCalibrationCreateRoute: typeof coreBackOfficeToolsToolIdCalibrationCreateRoute
@@ -3359,8 +3273,6 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeToolsToolIdCalibrationIndexRoute: typeof coreBackOfficeToolsToolIdCalibrationIndexRoute
   coreBackOfficeToolsToolIdStatusIndexRoute: typeof coreBackOfficeToolsToolIdStatusIndexRoute
   coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute
-  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute: typeof coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute
-  coreBackOfficeToolsToolIdStatusStatusIdEditRoute: typeof coreBackOfficeToolsToolIdStatusStatusIdEditRoute
 }
 
 const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
@@ -3391,6 +3303,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
   coreBackOfficeAuditsIndexRoute: coreBackOfficeAuditsIndexRoute,
   coreBackOfficeBannersIndexRoute: coreBackOfficeBannersIndexRoute,
+  coreBackOfficeChatbotIndexRoute: coreBackOfficeChatbotIndexRoute,
   coreBackOfficeChemicalMaterialsIndexRoute:
     coreBackOfficeChemicalMaterialsIndexRoute,
   coreBackOfficeClustersIndexRoute: coreBackOfficeClustersIndexRoute,
@@ -3422,10 +3335,6 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeWorksheetsIndexRoute: coreBackOfficeWorksheetsIndexRoute,
   coreBackOfficeBannersBannerIdEditRoute:
     coreBackOfficeBannersBannerIdEditRoute,
-  coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute:
-    coreBackOfficeChemicalMaterialsChemicalMaterialIdEditRoute,
-  coreBackOfficeClustersClusterIdEditRoute:
-    coreBackOfficeClustersClusterIdEditRoute,
   coreBackOfficeEmployeesEmployeeIdEditRoute:
     coreBackOfficeEmployeesEmployeeIdEditRoute,
   coreBackOfficeKblisKbliIdEditRoute: coreBackOfficeKblisKbliIdEditRoute,
@@ -3434,12 +3343,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeNewsNewsIdEditRoute: coreBackOfficeNewsNewsIdEditRoute,
   coreBackOfficeOrdersOrderIdDetailRoute:
     coreBackOfficeOrdersOrderIdDetailRoute,
-  coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute:
-    coreBackOfficeParameterCategoriesParameterCategoriesIdEditRoute,
   coreBackOfficeParametersParameterIdDetailRoute:
     coreBackOfficeParametersParameterIdDetailRoute,
-  coreBackOfficeParametersParameterIdEditRoute:
-    coreBackOfficeParametersParameterIdEditRoute,
   coreBackOfficePositionsPositionIdEditRoute:
     coreBackOfficePositionsPositionIdEditRoute,
   coreBackOfficeRolesRoleIdDetailRoute: coreBackOfficeRolesRoleIdDetailRoute,
@@ -3448,10 +3353,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeSurveyQuestionsQuestionIdEditRoute,
   coreBackOfficeTestingsTestingIdDetailRoute:
     coreBackOfficeTestingsTestingIdDetailRoute,
-  coreBackOfficeToolCodesToolCodeIdEditRoute:
-    coreBackOfficeToolCodesToolCodeIdEditRoute,
   coreBackOfficeToolsToolIdDetailRoute: coreBackOfficeToolsToolIdDetailRoute,
-  coreBackOfficeToolsToolIdEditRoute: coreBackOfficeToolsToolIdEditRoute,
   coreBackOfficeUsersUserIdEditRoute: coreBackOfficeUsersUserIdEditRoute,
   coreBackOfficePengujianImportExportIndexRoute:
     coreBackOfficePengujianImportExportIndexRoute,
@@ -3465,10 +3367,6 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeToolsToolIdStatusIndexRoute,
   coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute:
     coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute,
-  coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute:
-    coreBackOfficeToolsToolIdCalibrationCalibrationIdEditRoute,
-  coreBackOfficeToolsToolIdStatusStatusIdEditRoute:
-    coreBackOfficeToolsToolIdStatusStatusIdEditRoute,
 }
 
 const coreBackOfficeRouteRouteWithChildren =
@@ -3639,6 +3537,7 @@ const corePelatihanRouteRouteWithChildren =
 
 interface corePengujianRouteRouteChildren {
   corePengujianCheckoutRoute: typeof corePengujianCheckoutRoute
+  corePengujianPanduanRoute: typeof corePengujianPanduanRoute
   corePengujianSertifikatRoute: typeof corePengujianSertifikatRoute
   corePengujianStatusRoute: typeof corePengujianStatusRoute
   corePengujianSurveyKepuasanRoute: typeof corePengujianSurveyKepuasanRoute
@@ -3648,6 +3547,7 @@ interface corePengujianRouteRouteChildren {
 
 const corePengujianRouteRouteChildren: corePengujianRouteRouteChildren = {
   corePengujianCheckoutRoute: corePengujianCheckoutRoute,
+  corePengujianPanduanRoute: corePengujianPanduanRoute,
   corePengujianSertifikatRoute: corePengujianSertifikatRoute,
   corePengujianStatusRoute: corePengujianStatusRoute,
   corePengujianSurveyKepuasanRoute: corePengujianSurveyKepuasanRoute,
@@ -3661,12 +3561,14 @@ const corePengujianRouteRouteWithChildren =
 interface coreWorksheetsRouteRouteChildren {
   coreWorksheetsDetailTransaksiRoute: typeof coreWorksheetsDetailTransaksiRoute
   coreWorksheetsJadwalPersonelRoute: typeof coreWorksheetsJadwalPersonelRoute
+  coreWorksheetsProposedDatesRoute: typeof coreWorksheetsProposedDatesRoute
   coreWorksheetsIndexRoute: typeof coreWorksheetsIndexRoute
 }
 
 const coreWorksheetsRouteRouteChildren: coreWorksheetsRouteRouteChildren = {
   coreWorksheetsDetailTransaksiRoute: coreWorksheetsDetailTransaksiRoute,
   coreWorksheetsJadwalPersonelRoute: coreWorksheetsJadwalPersonelRoute,
+  coreWorksheetsProposedDatesRoute: coreWorksheetsProposedDatesRoute,
   coreWorksheetsIndexRoute: coreWorksheetsIndexRoute,
 }
 
@@ -3731,6 +3633,7 @@ const rootRouteChildren: RootRouteChildren = {
   PpidPermohonanRoute: PpidPermohonanRoute,
   PpidProfilRoute: PpidProfilRoute,
   PpidSertaMertaRoute: PpidSertaMertaRoute,
+  TteSignSpkRoute: TteSignSpkRoute,
   VerifyTokenRoute: VerifyTokenRoute,
   BeritaIndexRoute: BeritaIndexRoute,
   MediaDanPublikasiIndexRoute: MediaDanPublikasiIndexRoute,

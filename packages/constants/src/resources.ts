@@ -34,6 +34,7 @@ export const RESOURCES = [
 
   // ==================== IMPORT / EXPORT ====================
   { key: "pengujian-import-export" },
+  { key: "kepegawaian-import-export" },
 
   // ==================== TOOLS ====================
   { key: "tool-codes" },

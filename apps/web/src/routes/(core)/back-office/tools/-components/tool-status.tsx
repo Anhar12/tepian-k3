@@ -14,12 +14,13 @@ import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { SoftDeleteToggle } from "@/components/soft-delete-toggle";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
-import getToolCheckColumns from "@/components/columns/tool-check-columns";
+import getToolCheckColumns, { getToolCheckActionConfig } from "@/components/columns/tool-check-columns";
+import { useCrudRowActions, CrudRowActionsModal } from "@/components/crud-row-actions";
+import type { ToolCheck as ToolCheckType } from "@tepian-k3/types/pengujian/tool-check.types";
 
 interface ToolStatusProps {
   toolId: string;
@@ -45,6 +46,10 @@ export default function ToolStatus({ toolId }: { toolId: string }) {
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
+  
+  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } = useCrudRowActions<ToolCheckType>();
+  
+  const actionConfig = useMemo(() => getToolCheckActionConfig(toolId), [toolId]);
 
   const columns = useMemo(
     () =>
@@ -56,7 +61,7 @@ export default function ToolStatus({ toolId }: { toolId: string }) {
   );
 
   const { table } = useDataTableRouter({
-    data: toolChecks?.data ?? [],
+    data: (toolChecks?.data ?? []) as ToolCheckType[],
     columns,
     pageCount: toolChecks?.pageCount ?? 0,
     search: params,
@@ -80,10 +85,9 @@ export default function ToolStatus({ toolId }: { toolId: string }) {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between gap-4">
-            <div className="flex flex-row gap-2">
-              <Checkbox
-                id="show-deleted-calibrations"
-                checked={showDeleted}
+            <div className="flex flex-row gap-2 items-center">
+              <SoftDeleteToggle
+                checked={showDeleted ?? false}
                 onCheckedChange={(checked) => {
                   navigate({
                     to: "/back-office/tools/$toolId/status",
@@ -98,7 +102,6 @@ export default function ToolStatus({ toolId }: { toolId: string }) {
                   setShowDeleted(Boolean(checked));
                 }}
               />
-              <Label>Deleted Status</Label>
             </div>
             <PermissionGate permission="tool-checks.create">
               <Button
@@ -120,12 +123,20 @@ export default function ToolStatus({ toolId }: { toolId: string }) {
             error={error}
             emptyMessage="Tidak ada status ditemukan."
             emptyDescription="Coba sesuaikan filter atau kata kunci pencarian Anda."
+            onRowClick={handleRowClick}
           >
             <DataTableToolbar table={table}>
               <DataTableFilterMenu table={table} />
               <DataTableSortList table={table} />
             </DataTableToolbar>
           </DataTable>
+          
+          <CrudRowActionsModal
+            config={actionConfig}
+            row={selectedRow}
+            open={isActionsOpen}
+            onOpenChange={setIsActionsOpen}
+          />
         </CardContent>
       </Card>
     </div>

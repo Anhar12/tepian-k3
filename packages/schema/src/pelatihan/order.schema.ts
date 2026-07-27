@@ -6,12 +6,12 @@ export const approvePelatihanOrderSchema = z.object({
 
 export const rejectPelatihanOrderApprovalSchema = z.object({
   orderId: z.string().uuid("ID order tidak valid"),
-  reason: z.string().min(10, "Alasan penolakan minimal 10 karakter"),
+  reason: z.string().min(20, "Alasan penolakan minimal 20 karakter"),
 });
 
 export const rejectPelatihanPaymentSchema = z.object({
   orderId: z.string().uuid("ID order tidak valid"),
-  reason: z.string().min(10, "Alasan penolakan minimal 10 karakter"),
+  reason: z.string().min(20, "Alasan penolakan minimal 20 karakter"),
 });
 
 export const pelatihanOrderSchema = {

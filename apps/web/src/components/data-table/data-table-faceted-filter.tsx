@@ -83,7 +83,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           {selectedValues?.size > 0 ? (
             <div
               role="button"
-              aria-label={`Clear ${title} filter`}
+              aria-label={`Hapus penyaringan ${title}`}
               tabIndex={0}
               className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
               onClick={onReset}
@@ -112,7 +112,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     variant="secondary"
                     className="rounded-sm px-1 font-normal"
                   >
-                    {selectedValues.size} selected
+                    {selectedValues.size} dipilih
                   </Badge>
                 ) : (
                   options
@@ -136,7 +136,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         <Command>
           <CommandInput placeholder={title} />
           <CommandList className="max-h-full">
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>Tidak ada hasil ditemukan.</CommandEmpty>
             <CommandGroup className="max-h-75 scroll-py-1 overflow-x-hidden overflow-y-auto">
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
@@ -175,7 +175,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     onSelect={() => onReset()}
                     className="justify-center text-center"
                   >
-                    Clear filters
+                    Hapus penyaringan
                   </CommandItem>
                 </CommandGroup>
               </>

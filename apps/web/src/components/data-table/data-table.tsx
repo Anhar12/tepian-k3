@@ -25,6 +25,7 @@ interface DataTableProps<TData> extends React.ComponentProps<"div"> {
   error?: TRPCClientErrorLike<AppRouter> | null;
   emptyMessage?: string;
   emptyDescription?: string;
+  onRowClick?: (row: TData) => void;
 }
 
 export function DataTable<TData>({
@@ -36,6 +37,7 @@ export function DataTable<TData>({
   error = null,
   emptyMessage = "Tidak ada data ditemukan.",
   emptyDescription = "Coba sesuaikan filter atau kata kunci pencarian Anda.",
+  onRowClick,
   ...props
 }: DataTableProps<TData>) {
   const columnCount = table.getAllColumns().length;
@@ -96,6 +98,17 @@ export function DataTable<TData>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={(e) => {
+                    if (!onRowClick) return;
+                    
+                    // Prevent row click when clicking on interactive elements
+                    const target = e.target as HTMLElement;
+                    const isInteractive = target.closest('button, a, input, [role="checkbox"], [role="menuitem"]');
+                    if (isInteractive) return;
+
+                    onRowClick(row.original);
+                  }}
+                  className={cn(onRowClick && "cursor-pointer hover:bg-muted/50")}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell

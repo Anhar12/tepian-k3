@@ -28,9 +28,10 @@ import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import { z } from "zod";
 import { replaceStorageFile } from "../helpers/storage.helpers";
+import { maskUserCompany } from "../helpers/mask.helpers";
 
 const userCompanyQueries = {
-  getAllUserCompaniesByUserId(userId: string) {
+  getAllUserCompaniesByUserId(userId: string, options: { unmask?: boolean } = {}) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findMany({
@@ -56,7 +57,7 @@ const userCompanyQueries = {
           ? Effect.succeed(
               userCompanies.map((uc) => {
                 return {
-                  ...uc,
+                  ...(!options.unmask ? maskUserCompany(uc) : uc),
                   companyPictureUrl: uc.companyPictureUrl
                     ? storageService.getPublicUrl(uc.companyPictureUrl)
                     : null,
@@ -68,7 +69,7 @@ const userCompanyQueries = {
     );
   },
 
-  getUserCompanyById(id: string) {
+  getUserCompanyById(id: string, options: { unmask?: boolean } = {}) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findFirst({
@@ -87,12 +88,12 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
       ),
     );
   },
 
-  getUserCompanyDetailsByUserIdAndId(userId: string, id: string) {
+  getUserCompanyDetailsByUserIdAndId(userId: string, id: string, options: { unmask?: boolean } = {}) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findFirst({
@@ -147,12 +148,12 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
       ),
     );
   },
 
-  getDeletedUserCompanyById(id: string) {
+  getDeletedUserCompanyById(id: string, options: { unmask?: boolean } = {}) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findFirst({
@@ -174,12 +175,12 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
       ),
     );
   },
 
-  getUserCompanyByName(name: string) {
+  getUserCompanyByName(name: string, options: { unmask?: boolean } = {}) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findFirst({
@@ -198,7 +199,7 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(userCompany) : Effect.succeed(null),
+        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
       ),
     );
   },
@@ -229,7 +230,7 @@ const userCompanyQueries = {
 
   getOffsetPaginatedUserCompaniesByUserId(
     userId: string,
-    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema>,
+    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema> & { unmask?: boolean },
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -361,14 +362,14 @@ const userCompanyQueries = {
       const pageCount = Math.ceil(total / input.perPage);
 
       return {
-        data,
+        data: input.unmask ? data : data.map(maskUserCompany as any),
         pageCount,
       };
     });
   },
 
   getOffsetPaginatedUserCompanies(
-    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema>,
+    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema> & { unmask?: boolean },
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;

@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Input } from "./ui/input";
+import { MaskableInput } from "./ui/maskable-input";
 import { Label } from "./ui/label";
 import type { Users } from "@tepian-k3/types/platform/users.types";
 import z from "zod";
@@ -84,11 +85,11 @@ export default function UpdateUserProfileForm({
 
             <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
-              <Input
+              <MaskableInput
                 id="email"
                 type="email"
-                defaultValue={user?.email || ""}
-                placeholder="Masukkan email Anda"
+                value={user?.email || ""}
+                maskType="email"
                 disabled
               />
               <p className="text-xs text-muted-foreground">

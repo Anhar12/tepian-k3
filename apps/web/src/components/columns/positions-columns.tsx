@@ -6,20 +6,19 @@ import {
   createNumberColumn,
   createTextColumn,
   createDateColumn,
-  createActionColumn,
 } from "@/lib/column-helpers";
-import { createCrudActionCell } from "@/lib/create-crud-action-cell";
+import type { CrudActionCellConfig } from "@/components/crud-row-actions";
 
 interface PositionsColumnsProps {
   currentPage: number;
   perPage: number;
 }
 
-const ActionCell = createCrudActionCell<
+export const positionActionConfig: CrudActionCellConfig<
   Positions,
   (typeof Route)["types"]["searchSchema"]
->({
-  resourceName: "position",
+> = {
+  resourceName: "jabatan",
   resourcePath: "positions",
   permissionPrefix: "positions",
   deleteMutation: trpc.platform.position.deletePosition,
@@ -28,7 +27,7 @@ const ActionCell = createCrudActionCell<
   getQueryOptions: (params) =>
     trpc.platform.position.getPositionPaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
-});
+};
 
 export default function getPositionsColumns({
   currentPage,
@@ -46,6 +45,5 @@ export default function getPositionsColumns({
     createDateColumn<Positions>("updatedAt", "Diubah", {
       nullable: true,
     }),
-    createActionColumn<Positions>(({ row }) => <ActionCell row={row} />),
   ];
 }

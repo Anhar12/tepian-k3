@@ -4,22 +4,21 @@ import { trpc } from "@/utils/trpc";
 import { Route } from "@/routes/(core)/back-office/employees";
 import {
   createNumberColumn,
-  createTextColumn,
-  createDateColumn,
-  createActionColumn,
+  createMergedTextColumn,
+  createCompactDateColumn,
 } from "@/lib/column-helpers";
-import { createCrudActionCell } from "@/lib/create-crud-action-cell";
+import type { CrudActionCellConfig } from "@/components/crud-row-actions";
 
 interface EmployeesColumnsProps {
   currentPage: number;
   perPage: number;
 }
 
-const ActionCell = createCrudActionCell<
+export const employeeActionConfig: CrudActionCellConfig<
   Employees,
   (typeof Route)["types"]["searchSchema"]
->({
-  resourceName: "employee",
+> = {
+  resourceName: "pegawai",
   resourcePath: "employees",
   permissionPrefix: "employees",
   deleteMutation: trpc.platform.employee.deleteEmployee,
@@ -28,7 +27,8 @@ const ActionCell = createCrudActionCell<
   getQueryOptions: (params) =>
     trpc.platform.employee.getEmployeePaginated.queryOptions(params),
   useSearchParams: () => Route.useSearch(),
-});
+  showDetail: true,
+};
 
 export default function getEmployeesColumns({
   currentPage,
@@ -36,16 +36,10 @@ export default function getEmployeesColumns({
 }: EmployeesColumnsProps): ColumnDef<Employees>[] {
   return [
     createNumberColumn<Employees>(currentPage, perPage),
-    createTextColumn<Employees>("name", "Nama", {
+    createMergedTextColumn<Employees>("name", "Nama", {
       width: "w-64",
+      secondaryId: "position.name",
     }),
-    createTextColumn<Employees>("position.name", "Posisi", {
-      width: "w-64",
-    }),
-    createDateColumn<Employees>("createdAt", "Dibuat"),
-    createDateColumn<Employees>("updatedAt", "Diubah", {
-      nullable: true,
-    }),
-    createActionColumn<Employees>(({ row }) => <ActionCell row={row} />),
+    createCompactDateColumn<Employees>("createdAt", "Dibuat"),
   ];
 }

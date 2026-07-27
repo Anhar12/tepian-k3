@@ -106,13 +106,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // When on /back-office/* routes, back-office menu takes priority over employee menu.
   const filteredNavMain = React.useMemo(() => {
     const seen = new Set<string>();
-    const items: (typeof userMenu.pengujian)[number][] = [];
+    const items: any[] = [];
 
-    const push = (candidate: (typeof userMenu.pengujian)[number]) => {
-      if (!seen.has(candidate.url)) {
-        seen.add(candidate.url);
+    const push = (candidate: any) => {
+      const key = candidate.url || candidate.title;
+      if (!seen.has(key)) {
+        seen.add(key);
         items.push(candidate);
       }
+    };
+
+    const filterSubItems = (item: any) => {
+      if (item.items) {
+        const filteredChildren = item.items.filter(
+          (sub: any) =>
+            !sub.permission || profile.permissions.includes(sub.permission),
+        );
+        return { ...item, items: filteredChildren };
+      }
+      return item;
     };
 
     if (hasUserRole && !isOnBackOffice) {
@@ -133,59 +145,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
 
     if (hasBackOfficeRole && isOnBackOffice) {
-      if (activeMode === "pelatihan") {
-        const trainingTitles = [
-          "Dasbor",
-          "E-Learning",
-          "Bimtek",
-          "Webinar",
-          "Order Pelatihan",
-          "Manajemen Absensi",
-          "Sertifikat Pelatihan",
-          "Landing Page & FAQ",
-          "Media & Publikasi",
-        ];
-        backOfficeMenu.navMain
-          .filter(
-            (item) =>
-              (!item.permission ||
-                profile.permissions.includes(item.permission)) &&
-              trainingTitles.includes(item.title),
-          )
-          .forEach(push);
-      } else {
-        const testingTitles = [
-          "Dasbor",
-          "Pesanan",
-          "Lembar Kerja",
-          "Pengujian",
-          "Pengguna",
-          "Jabatan",
-          "Pegawai",
-          "Peran",
-          "Klaster",
-          "Kategori Parameter",
-          "Parameter",
-          "Kode Alat",
-          "Alat",
-          "Bahan Kimia",
-          "Import / Export",
-          "KBLI",
-          "Survei",
-          "Spanduk",
-          "Berita",
-          "Log Audit",
-          "Media & Publikasi",
-        ];
-        backOfficeMenu.navMain
-          .filter(
-            (item) =>
-              (!item.permission ||
-                profile.permissions.includes(item.permission)) &&
-              testingTitles.includes(item.title),
-          )
-          .forEach(push);
-      }
+      const sourceMenu =
+        activeMode === "pelatihan"
+          ? backOfficeMenu.pelatihan
+          : backOfficeMenu.pengujian;
+
+      sourceMenu.forEach((parent) => {
+        const filteredParent = filterSubItems(parent);
+
+        // Jika memiliki anak menu dan semuanya tidak bisa diakses, jangan render induknya
+        if (filteredParent.items && filteredParent.items.length === 0) {
+          return;
+        }
+
+        // Jika menu induk butuh permission
+        if (
+          filteredParent.permission &&
+          !profile.permissions.includes(filteredParent.permission)
+        ) {
+          return;
+        }
+
+        push(filteredParent);
+      });
     }
 
     return items;

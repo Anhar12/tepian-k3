@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { createDateColumn, createNumberColumn } from "@/lib/column-helpers";
+import { createCompactDateColumn, createNumberColumn } from "@/lib/column-helpers";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 export type PelatihanEnrollment =
@@ -63,65 +63,57 @@ export default function getEnrollmentColumns({
     {
       accessorKey: "pelatihanTitle",
       header: "Pelatihan",
-      cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="line-clamp-1 font-medium">
-            {row.original.pelatihanTitle}
-          </span>
-          <Badge variant="outline" className="mt-1 w-fit text-xs capitalize">
-            {row.original.pelatihanLevel}
-          </Badge>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
       cell: ({ row }) => {
-        const { label, variant } = getEnrollmentStatusBadge(
-          row.original.status,
+        const { label, variant } = getEnrollmentStatusBadge(row.original.status);
+        return (
+          <div className="flex flex-col gap-1.5 w-64">
+            <span className="line-clamp-1 font-medium leading-tight">
+              {row.original.pelatihanTitle}
+            </span>
+            <div className="flex gap-2 items-center mt-1">
+              <Badge variant={variant} className="text-[10px] px-1.5 py-0 h-4 leading-none">{label}</Badge>
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 capitalize leading-none">
+                {row.original.pelatihanLevel}
+              </Badge>
+            </div>
+          </div>
         );
-        return <Badge variant={variant}>{label}</Badge>;
       },
     },
     {
-      accessorKey: "progressPercentage",
-      header: "Progres",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-20 rounded-full bg-muted">
-            <div
-              className="h-2 rounded-full bg-primary transition-all"
-              style={{ width: `${row.original.progressPercentage}%` }}
-            />
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {row.original.progressPercentage}%
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "finalScore",
-      header: "Nilai Akhir",
+      id: "progres_nilai",
+      header: "Progres & Nilai",
       cell: ({ row }) => {
         const score = row.original.finalScore;
-        return score !== null ? (
-          <span
-            className={
-              score >= 70
-                ? "font-medium text-green-600"
-                : "font-medium text-red-600"
-            }
-          >
+        const scoreNode = score !== null ? (
+          <span className={score >= 70 ? "font-medium text-green-600" : "font-medium text-red-600"}>
             {score}
           </span>
         ) : (
           <span className="text-muted-foreground">-</span>
         );
+
+        return (
+          <div className="flex flex-col gap-1 w-32">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Progres</span>
+              <span>{row.original.progressPercentage}%</span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-1.5 rounded-full bg-primary transition-all"
+                style={{ width: `${row.original.progressPercentage}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs mt-1">
+              <span className="text-muted-foreground">Nilai:</span>
+              {scoreNode}
+            </div>
+          </div>
+        );
       },
     },
-    createDateColumn<PelatihanEnrollment>("enrolledAt", "Tanggal Daftar"),
+    createCompactDateColumn<PelatihanEnrollment>("enrolledAt", "Tanggal Daftar"),
     {
       id: "actions",
       header: "Aksi",

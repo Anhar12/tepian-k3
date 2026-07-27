@@ -39,6 +39,7 @@ export const testingRouter = createTRPCRouter({
         page: z.number().min(1).default(1),
         perPage: z.number().min(1).max(100).default(10),
         search: z.string().optional(),
+        status: z.enum(TESTING_STATUSES).optional(),
       }),
     )
     .query(
@@ -48,6 +49,7 @@ export const testingRouter = createTRPCRouter({
             input.page,
             input.perPage,
             input.search,
+            input.status,
           ),
         ),
     ),
@@ -75,6 +77,13 @@ export const testingRouter = createTRPCRouter({
 
       return testing;
     }),
+
+  /**
+   * Get testing counts by status
+   */
+  getTestingStatusCount: withPermission("testing.view").query(
+    async () => await runEffect(testingQueries.getTestingStatusCount()),
+  ),
 
   /**
    * Get testing with documents

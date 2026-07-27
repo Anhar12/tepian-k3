@@ -116,10 +116,12 @@ export const orderRouter = createTRPCRouter({
     .input(
       z.object({
         coverFlightIncluded: z.boolean(),
+        coverBaggageIncluded: z.boolean(),
         coverGroundTransportationIncluded: z.boolean(),
         coverGroundTransportationToAirportOrHarbour: z.boolean(),
         coverLodgingIncluded: z.boolean(),
         coverWaterTransportationIncluded: z.boolean(),
+        fundingType: z.enum(["pnbp", "dipa"]).default("pnbp"),
         customerNote: z.string().optional(),
         data: z.array(
           z.object({
@@ -139,10 +141,12 @@ export const orderRouter = createTRPCRouter({
                 orderQueries.createOrder(
                   ctx.user.id,
                   input.coverFlightIncluded,
+                  input.coverBaggageIncluded,
                   input.coverGroundTransportationIncluded,
                   input.coverGroundTransportationToAirportOrHarbour,
                   input.coverLodgingIncluded,
                   input.coverWaterTransportationIncluded,
+                  input.fundingType,
                   input.customerNote,
                   orderPayload.orderData,
                   orderPayload.orderItems,
@@ -178,6 +182,24 @@ export const orderRouter = createTRPCRouter({
       async ({ input, ctx }) =>
         await runEffect(
           orderQueries.reviseOrder(
+            input.orderId,
+            ctx.user.id,
+            input.revisionNotes,
+          ),
+        ),
+    ),
+
+  submitOrderRevision: withProtectedRateLimit(rateLimiters.moderate())
+    .input(
+      z.object({
+        orderId: z.uuidv7(),
+        revisionNotes: z.string().min(10, "Catatan revisi minimal 10 karakter"),
+      }),
+    )
+    .mutation(
+      async ({ input, ctx }) =>
+        await runEffect(
+          orderQueries.submitOrderRevisionByUser(
             input.orderId,
             ctx.user.id,
             input.revisionNotes,
@@ -862,7 +884,7 @@ export const orderRouter = createTRPCRouter({
     .input(
       z.object({
         orderId: z.uuidv7(),
-        reason: z.string().min(10, "Alasan penolakan minimal 10 karakter"),
+        reason: z.string().min(20, "Alasan penolakan minimal 20 karakter"),
       }),
     )
     .mutation(
@@ -896,16 +918,7 @@ export const orderRouter = createTRPCRouter({
               },
             });
 
-            yield* Effect.tryPromise(() =>
-              ctx.eventBus.publish(EventTypes.ORDER_STATUS_CHANGED, {
-                orderId: order.id,
-                orderNumber: order.orderNumber,
-                userId: order.userId,
-                newStatus: "rejected",
-                oldStatus: "pending",
-                triggeredBy: ctx.user.id,
-              }),
-            );
+
 
             return order;
           }),

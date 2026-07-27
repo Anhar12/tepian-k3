@@ -28,6 +28,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import SingleImageUpload from "@/components/ui/single-image-upload";
 import { toast } from "sonner";
 import {
   ChevronLeft,
@@ -36,6 +44,7 @@ import {
   Pencil,
   Trash2,
   Eye,
+  ImageIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute("/(core)/back-office/pelatihan/")({
@@ -56,6 +65,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState(params.search || "");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [thumbnailDialogId, setThumbnailDialogId] = useState<string | null>(null);
 
   const typeParam = params.type || "elearning";
   const currentPage = params.page ?? 1;
@@ -72,6 +82,15 @@ function RouteComponent() {
   // Delete mutation
   const deleteMutation = useMutation(
     trpc.pelatihan.base.deletePelatihan.mutationOptions(),
+  );
+
+  // Thumbnail mutations
+  const updateThumbnailMutation = useMutation(
+    trpc.pelatihan.base.updateThumbnail.mutationOptions(),
+  );
+  
+  const uploadThumbnailMutation = useMutation(
+    trpc.pelatihan.base.uploadThumbnail.mutationOptions(),
   );
 
   const handleDelete = (id: string) => {
@@ -172,6 +191,7 @@ function RouteComponent() {
         status: displayStatus,
         statusColor: displayStatusColor,
         thumbnail: item.thumbnailUrl || null,
+        rawStatus: item.status,
       };
     });
   }, [databaseData?.data, typeParam, currentPage, perPage]);
@@ -617,6 +637,15 @@ function RouteComponent() {
                               Edit
                             </Link>
                           </DropdownMenuItem>
+                          {row.rawStatus === "published" && (
+                            <DropdownMenuItem
+                              className="flex items-center gap-2 text-blue-600 focus:bg-blue-50 focus:text-blue-700"
+                              onClick={() => setThumbnailDialogId(row.id)}
+                            >
+                              <ImageIcon className="h-4 w-4" />
+                              Ganti Sampul
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             className="flex items-center gap-2 text-red-600 focus:bg-red-50 focus:text-red-700"
                             onClick={() => setDeleteId(row.id)}
@@ -731,6 +760,87 @@ function RouteComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Update Thumbnail Dialog */}
+      <Dialog
+        open={!!thumbnailDialogId}
+        onOpenChange={(open) => !open && setThumbnailDialogId(null)}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Ganti Sampul Pelatihan</DialogTitle>
+            <DialogDescription>
+              Ubah sampul untuk pelatihan yang telah dipublish ini.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <SingleImageUpload
+              value={
+                dbRows.find((r) => r.id === thumbnailDialogId)?.thumbnail || null
+              }
+              onChange={(file) => {
+                if (!file) {
+                  // User clicks delete
+                  if (thumbnailDialogId) {
+                    updateThumbnailMutation.mutate(
+                      { id: thumbnailDialogId, thumbnailUrl: null },
+                      {
+                        onSuccess: () => {
+                          toast.success("Sampul berhasil dihapus");
+                          queryClient.invalidateQueries({
+                            queryKey: trpc.pelatihan.base.getAllPelatihan.queryKey(),
+                          });
+                          setThumbnailDialogId(null);
+                        },
+                        onError: (error) => {
+                          toast.error(error.message || "Gagal menghapus sampul");
+                        },
+                      }
+                    );
+                  }
+                  return;
+                }
+                
+                // User selects a new file
+                if (thumbnailDialogId) {
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  
+                  uploadThumbnailMutation.mutate(
+                    formData,
+                    {
+                      onSuccess: (data) => {
+                        updateThumbnailMutation.mutate(
+                          { id: thumbnailDialogId, thumbnailUrl: data.key },
+                          {
+                            onSuccess: () => {
+                              toast.success("Sampul berhasil diperbarui");
+                              queryClient.invalidateQueries({
+                                queryKey: trpc.pelatihan.base.getAllPelatihan.queryKey(),
+                              });
+                              setThumbnailDialogId(null);
+                            },
+                            onError: (error) => {
+                              toast.error(error.message || "Gagal menyimpan sampul");
+                            },
+                          }
+                        );
+                      },
+                      onError: (error) => {
+                        toast.error(error.message || "Gagal mengunggah gambar");
+                      },
+                    }
+                  );
+                }
+              }}
+              disabled={
+                uploadThumbnailMutation.isPending ||
+                updateThumbnailMutation.isPending
+              }
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

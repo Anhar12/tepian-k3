@@ -1,5 +1,5 @@
 import Navbar from "@/components/navbar";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clusters } from "./(core)/pengujian/-components/parameter-categories";
 import { TestingTable } from "./(core)/pengujian/-components/testing-table";
 import { useEffect, useRef } from "react";
@@ -48,13 +48,24 @@ function RouteComponent() {
       <div className="relative z-10">
         <Navbar />
 
-        <div className="mx-auto max-w-7xl space-y-12 px-4 py-8">
-          {/* Page Title */}
-          <div className="space-y-4 text-center">
+        <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 font-['Poppins']">
+          {/* Page Title & Banner */}
+          <div className="space-y-6 text-center">
             <h1 className="text-4xl font-bold tracking-tight text-[#0056B3]">
               Katalog Pengujian
             </h1>
             <div className="mx-auto h-2 w-96 bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
+            <p className="mx-auto max-w-2xl text-slate-500">
+              Temukan berbagai parameter pengujian K3 yang sesuai dengan kebutuhan perusahaan Anda.
+              Pilih dari berbagai klaster industri dan temukan layanan terbaik kami.
+            </p>
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+              </span>
+              Belum tahu harus mulai dari mana? <Link to="/pengujian/panduan" className="underline hover:text-blue-800">Baca Panduan Pengujian K3</Link>
+            </div>
           </div>
 
           {/* Clusters */}

@@ -39,11 +39,11 @@ function RouteComponent() {
   }
 
   if (activeMode === "pelatihan") {
-    return <PelatihanDashboard profileName={profile.name} />;
+    return <PelatihanDashboard profileName={profile.name} roles={profile.roles} />;
   }
 
   if (activeMode === "pengujian") {
-    return <PengujianDashboard profileName={profile.name} />;
+    return <PengujianDashboard profileName={profile.name} roles={profile.roles} />;
   }
 
   return null;

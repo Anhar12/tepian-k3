@@ -94,3 +94,42 @@ export const WORKSHEET_NOTE_STATUS_COLORS: Record<WorksheetNoteStatus, string> =
     urgent: "bg-pink-100 text-pink-700",
     unknown: "bg-gray-100 text-gray-700",
   };
+
+export const OPERATIONAL_COST_VERIFICATION_STATUS = [
+  "draft",
+  "submitted",
+  "verified",
+  "revised",
+] as const;
+
+export type OperationalCostVerificationStatus =
+  (typeof OPERATIONAL_COST_VERIFICATION_STATUS)[number];
+
+export const OPERATIONAL_COST_VERIFICATION_STATUS_LABELS: Record<
+  OperationalCostVerificationStatus,
+  string
+> = {
+  draft: "Draft",
+  submitted: "Diajukan",
+  verified: "Terverifikasi",
+  revised: "Direvisi",
+};
+
+export const OPERATIONAL_COST_VERIFICATION_STATUS_COLORS: Record<
+  OperationalCostVerificationStatus,
+  string
+> = {
+  draft: "bg-gray-100 text-gray-700",
+  submitted: "bg-yellow-100 text-yellow-700",
+  verified: "bg-green-100 text-green-700",
+  revised: "bg-orange-100 text-orange-700",
+};
+
+export const WORKSHEET_PROPOSED_DATE_STATUS = [
+  "pending",
+  "approved",
+  "rejected",
+] as const;
+
+export type WorksheetProposedDateStatus =
+  (typeof WORKSHEET_PROPOSED_DATE_STATUS)[number];

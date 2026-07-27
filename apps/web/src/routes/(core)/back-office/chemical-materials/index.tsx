@@ -1,12 +1,10 @@
-import getChemicalMaterialsColumns from "@/components/columns/checmical-materials-columns";
+import getChemicalMaterialsColumns, { chemicalMaterialActionConfig } from "@/components/columns/checmical-materials-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
@@ -16,6 +14,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import chemicalMaterialSchema from "@tepian-k3/schema/pengujian/chemical-material.schema";
 import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { SoftDeleteToggle } from "@/components/soft-delete-toggle";
+import { useCrudRowActions, CrudRowActionsModal } from "@/components/crud-row-actions";
+import type { ChemicalMaterial } from "@tepian-k3/types/pengujian/chemical-material.types";
+import { ChemicalSummaryCard } from "./-components/chemical-summary-card";
 
 export const Route = createFileRoute("/(core)/back-office/chemical-materials/")(
   {
@@ -43,6 +45,8 @@ function RouteComponent() {
   });
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
+  
+  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } = useCrudRowActions<ChemicalMaterial>();
 
   const columns = useMemo(
     () =>
@@ -54,7 +58,7 @@ function RouteComponent() {
   );
 
   const { table } = useDataTableRouter({
-    data: chemicalMaterials?.data ?? [],
+    data: (chemicalMaterials?.data ?? []) as ChemicalMaterial[],
     columns,
     pageCount: chemicalMaterials?.pageCount ?? 0,
     search: params,
@@ -69,11 +73,11 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col">
+      <ChemicalSummaryCard />
       <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="flex flex-row gap-2">
-          <Checkbox
-            id="show-deleted-chemical-material"
-            checked={showDeleted}
+        <div className="flex flex-row gap-2 items-center">
+          <SoftDeleteToggle
+            checked={showDeleted ?? false}
             onCheckedChange={(checked) => {
               navigate({
                 to: "/back-office/chemical-materials",
@@ -85,7 +89,6 @@ function RouteComponent() {
               setShowDeleted(Boolean(checked));
             }}
           />
-          <Label>Deleted Chemical Materials</Label>
         </div>
         <PermissionGate permission="chemical-materials.create">
           <Button
@@ -94,7 +97,7 @@ function RouteComponent() {
             }
           >
             <PlusCircle className="size-4" />
-            Tambah Chemical Material
+            Tambah Bahan Kimia
           </Button>
         </PermissionGate>
       </div>
@@ -104,12 +107,20 @@ function RouteComponent() {
         error={error}
         emptyMessage="Tidak ada bahan kimia yang ditemukan"
         emptyDescription="Coba sesuaikan filter atau kata kunci pencarian Anda."
+        onRowClick={handleRowClick}
       >
         <DataTableToolbar table={table}>
           <DataTableFilterMenu table={table} />
           <DataTableSortList table={table} />
         </DataTableToolbar>
       </DataTable>
+      
+      <CrudRowActionsModal
+        config={chemicalMaterialActionConfig}
+        row={selectedRow}
+        open={isActionsOpen}
+        onOpenChange={setIsActionsOpen}
+      />
     </div>
   );
 }

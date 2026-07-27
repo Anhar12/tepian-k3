@@ -1,6 +1,8 @@
 import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
+import { SectionHeader } from "../components/section-header";
+import { TteSrikandi } from "../components/tte-srikandi";
 import { storageService } from "../../storage";
 import { registerLiberationSans } from "../fonts/register-liberation-sans";
 import { tw } from "../utils/tw";
@@ -251,37 +253,7 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
 
         {/* Signature  */}
         <View style={tw("flex-row justify-between items-start mt-8")}>
-          {/* Signature Table */}
-          <View style={tw("w-5/12 border border-black")}>
-            <View style={tw("flex-row border-b border-black")}>
-              <Text
-                style={tw(
-                  "text-[7px] p-2 border-r border-black w-2/3 text-center",
-                )}
-              >
-                Penanggungjawab
-              </Text>
-              <Text
-                style={tw(
-                  "text-[7px] p-2 border-r border-black w-1/3 text-center",
-                )}
-              >
-                Paraf
-              </Text>
-              <Text style={tw("text-[7px] p-2 w-1/3 text-center")}>
-                Tanggal
-              </Text>
-            </View>
-            <View style={tw("flex-row")}>
-              <View style={tw("w-2/3 border-r border-black")}>
-                <Text style={tw("text-[7px] p-2 text-center")}>
-                  Pengendali Administrasi (Kasubbag Umum Balai K3 Samarinda)
-                </Text>
-              </View>
-              <View style={tw("w-1/3 border-r border-black h-16")} />
-              <View style={tw("w-1/3 h-16")} />
-            </View>
-          </View>
+          <TteSrikandi />
 
           {/* Head Signature */}
           <View style={tw("items-center w-4/12")}>

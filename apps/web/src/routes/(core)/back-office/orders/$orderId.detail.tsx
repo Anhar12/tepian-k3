@@ -11,6 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,19 +45,24 @@ import { cn } from "@/lib/utils";
 import { openBase64InNewTab } from "@/utils/download";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
+import { toWaLink } from "@/utils/wa-link";
 import { queryClient, trpc } from "@/utils/trpc";
 import { getPublicUrl } from "@/utils/url";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ORDER_STATUS_LABELS } from "@tepian-k3/constants";
+import { RejectPaymentDialog } from "./-components/reject-payment-dialog";
 import { format } from "date-fns";
 import {
+  AlertCircle,
   Check,
   Download,
   Eye,
+  EyeOff,
   FileText,
   Loader2,
   Mail,
+  MessageCircle,
   Plus,
 } from "lucide-react";
 import { useState } from "react";
@@ -124,7 +130,7 @@ function RouteComponent() {
       reason: z
         .string()
         .min(1, "Reason is required")
-        .min(20, "Payment rejection must be at least 20 characters")
+        .min(20, "Alasan penolakan minimal 20 karakter")
         .max(1000, "Reason must not exceed 1000 characters"),
     }),
     reviseWorksheet: z.object({
@@ -144,6 +150,7 @@ function RouteComponent() {
   } as const);
 
   const [publishInvoiceOpen, setPublishInvoiceOpen] = useState(false);
+  const [rejectPaymentOpen, setRejectPaymentOpen] = useState(false);
 
   const { hasPermission } = usePermissions();
 
@@ -159,6 +166,26 @@ function RouteComponent() {
       orderId,
     }),
   );
+
+  const [unmaskedData, setUnmaskedData] = useState<any>(null);
+  const { refetch: fetchUnmasked, isFetching: isUnmasking } = useQuery({
+    ...trpc.pengujian.userCompany.getUnmaskedUserCompanyById.queryOptions({
+      id: order?.company?.id || "",
+    }),
+    enabled: false,
+  });
+
+  const handleToggleMask = async () => {
+    if (unmaskedData) {
+      setUnmaskedData(null);
+    } else {
+      if (!order?.company?.id) return;
+      const { data } = await fetchUnmasked();
+      if (data) setUnmaskedData(data);
+    }
+  };
+
+  const displayCompany = unmaskedData || order?.company;
 
   // Approval mutations
   const approveMutation = useMutation(
@@ -307,7 +334,7 @@ function RouteComponent() {
         );
         dialogs.close("rejectPayment");
         dialogs.updateData("rejectPayment", { reason: "" });
-        globalSuccessToast("Pembayaran berhasil ditolak");
+        globalSuccessToast("Bukti pembayaran ditolak. Customer akan menerima notifikasi.");
       },
       onError: (error) => {
         globalErrorToast("Gagal menolak pembayaran: " + error.message);
@@ -716,6 +743,15 @@ function RouteComponent() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Order Info */}
           <div className="space-y-6 lg:col-span-2">
+            {order.paymentStatus === "rejected" && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Pembayaran Ditolak</AlertTitle>
+                <AlertDescription>
+                  Alasan penolakan: {order.paymentRejectedReason || "-"}
+                </AlertDescription>
+              </Alert>
+            )}
             {/* Order Items */}
             <Card>
               <CardHeader>
@@ -730,6 +766,7 @@ function RouteComponent() {
                     <TableRow>
                       <TableHead>Parameter</TableHead>
                       <TableHead>Cluster</TableHead>
+                      <TableHead>Lokasi</TableHead>
                       <TableHead className="text-right">Quantity</TableHead>
                       <TableHead className="text-right">Price</TableHead>
                       <TableHead className="text-right">Subtotal</TableHead>
@@ -752,6 +789,19 @@ function RouteComponent() {
                             {item.parameter?.category?.cluster?.name ?? "-"}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          {item.location ? (
+                            <div className="flex flex-col">
+                              <span>{item.location.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {item.location.district?.name ? `${item.location.district.name}, ` : ""}
+                                {item.location.regency?.name || ""}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           {item.quantity}
                         </TableCell>
@@ -765,7 +815,7 @@ function RouteComponent() {
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={4} className="text-right font-bold">
+                      <TableCell colSpan={5} className="text-right font-bold">
                         Total
                       </TableCell>
                       <TableCell className="text-right text-lg font-bold">
@@ -803,7 +853,7 @@ function RouteComponent() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-primary" />
-                      Persetujuan Penawaran
+                      Approve Penawaran
                     </CardTitle>
                     <CardDescription>
                       Admin telah mengajukan penawaran. Tinjau pratinjau lalu
@@ -859,7 +909,7 @@ function RouteComponent() {
                           ) : (
                             <Check className="mr-2 h-4 w-4" />
                           )}
-                          Setujui Penawaran
+                          Approve
                         </Button>
                       </PermissionGate>
                     </div>
@@ -967,7 +1017,7 @@ function RouteComponent() {
                                 {approveMutation.isPending && (
                                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                Setujui Order
+                                Approve
                               </Button>
                             </span>
                           </TooltipTrigger>
@@ -2029,8 +2079,29 @@ function RouteComponent() {
           {/* Right Column - Customer & Location Info */}
           <div className="space-y-6">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle>Informasi Pelanggan</CardTitle>
+                {order?.company?.id && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleToggleMask}
+                    disabled={isUnmasking}
+                    className="h-8 gap-2 px-2"
+                  >
+                    {unmaskedData ? (
+                      <>
+                        <EyeOff className="w-4 h-4" />
+                        <span className="text-xs">Sembunyikan</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-4 h-4" />
+                        <span className="text-xs">Tampilkan</span>
+                      </>
+                    )}
+                  </Button>
+                )}
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
@@ -2055,7 +2126,7 @@ function RouteComponent() {
                       Email Perusahaan
                     </dt>
                     <dd className="font-medium">
-                      {order.company?.email || "-"}
+                      {displayCompany?.email || "-"}
                     </dd>
                   </div>
 
@@ -2084,38 +2155,63 @@ function RouteComponent() {
                   <div>
                     <dt className="text-sm text-muted-foreground">Email PIC</dt>
                     <dd className="font-medium">
-                      {order.company?.responsibleTestingPersonEmail || "-"}
+                      {displayCompany?.responsibleTestingPersonEmail || "-"}
                     </dd>
                   </div>
                   <div>
                     <dt className="text-sm text-muted-foreground">No WA PIC</dt>
                     <dd className="font-medium">
-                      {order.company?.responsibleTestingPersonPhone || "-"}
+                      {displayCompany?.responsibleTestingPersonPhone ? (
+                        <a
+                          href={toWaLink(displayCompany.responsibleTestingPersonPhone) ?? "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-green-600 hover:underline"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          {displayCompany.responsibleTestingPersonPhone}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
                     </dd>
                   </div>
                 </dl>
               </CardContent>
             </Card>
 
-            {/* <Card>
+            <Card>
               <CardHeader>
                 <CardTitle>Lokasi Pengujian</CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="space-y-3">
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Lokasi</dt>
-                    <dd className="font-medium">
-                      {order.testingLocation.name}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm text-muted-foreground">Alamat</dt>
-                    <dd className="text-sm">{order.testingLocation.address}</dd>
-                  </div>
+                  {Array.from(
+                    new Map(
+                      order.items
+                        .filter((item) => item.location)
+                        .map((item) => [item.location!.id, item.location!])
+                    ).values()
+                  ).map((location, index) => (
+                    <div key={location.id} className={index > 0 ? "pt-3 border-t" : ""}>
+                      <dt className="text-sm text-muted-foreground">Lokasi {index + 1}</dt>
+                      <dd className="font-medium">
+                        {location.name}
+                      </dd>
+                      <dd className="text-sm text-muted-foreground mt-1">
+                        {location.district?.name ? `${location.district.name}, ` : ""}
+                        {location.regency?.name || ""}
+                      </dd>
+                    </div>
+                  ))}
+                  {order.items.filter((item) => item.location).length === 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      Tidak ada lokasi pengujian yang ditentukan.
+                    </div>
+                  )}
                 </dl>
               </CardContent>
-            </Card> */}
+            </Card>
 
             <Card>
               <CardHeader>
@@ -2267,6 +2363,47 @@ function RouteComponent() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">
+            {order.documents.find((doc) => doc.type === "proof_of_payment") && (
+              <div className="mb-4 rounded-lg border p-4 bg-muted/30">
+                <p className="text-sm font-medium mb-2">Preview Bukti Pembayaran:</p>
+                {order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl.endsWith(".pdf") ? (
+                  <div className="flex items-center gap-4">
+                    <FileText className="h-8 w-8 text-blue-500" />
+                    <Button
+                      variant="link"
+                      className="h-auto p-0"
+                      onClick={() =>
+                        window.open(
+                          getPublicUrl(
+                            order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl
+                          ),
+                          "_blank"
+                        )
+                      }
+                    >
+                      Lihat Dokumen PDF
+                    </Button>
+                  </div>
+                ) : (
+                  <ImageWithFallback
+                    src={getPublicUrl(
+                      order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl
+                    )}
+                    alt="Bukti pembayaran"
+                    className="max-h-48 w-auto rounded object-contain border cursor-pointer"
+                    onClick={() =>
+                      window.open(
+                        getPublicUrl(
+                          order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl
+                        ),
+                        "_blank"
+                      )
+                    }
+                  />
+                )}
+              </div>
+            )}
+            
             <Textarea
               value={dialogs.getData("rejectPayment")?.reason ?? ""}
               onChange={(e) =>
@@ -2275,6 +2412,11 @@ function RouteComponent() {
               placeholder="Tuliskan alasan penolakan (minimal 10 karakter)"
               rows={4}
             />
+            {dialogs.getErrors("rejectPayment").reason && (
+              <p className="mt-2 text-sm text-red-500 font-medium">
+                {dialogs.getErrors("rejectPayment").reason}
+              </p>
+            )}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -2291,6 +2433,19 @@ function RouteComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <RejectPaymentDialog
+        orderId={orderId}
+        open={rejectPaymentOpen}
+        onOpenChange={setRejectPaymentOpen}
+        onSuccess={() => {
+          queryClient.invalidateQueries(
+            trpc.pengujian.order.getOrderWithDocumentsAdmin.queryFilter({
+              orderId,
+            }),
+          );
+        }}
+      />
     </Card>
   );
 }

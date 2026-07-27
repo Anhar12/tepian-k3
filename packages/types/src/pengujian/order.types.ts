@@ -199,7 +199,11 @@ export type OrderDetailWithStatus = InferQueryModel<
         };
       };
       testing: true;
-      worksheet: true;
+      worksheet: {
+        with: {
+          proposedDates: true;
+        };
+      };
       statusHistory: true;
       documents: true;
     };

@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running type checks before push..."
+pnpm check-types
+
+echo "Running tests before push..."
+pnpm test

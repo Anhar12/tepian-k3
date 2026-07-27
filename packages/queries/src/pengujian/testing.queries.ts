@@ -57,7 +57,12 @@ const testingQueries = {
   /**
    * Get all testings with pagination
    */
-  getAllTestings(page: number = 1, limit: number = 10, search?: string) {
+  getAllTestings(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    status?: TestingStatus,
+  ) {
     return Effect.gen(function* () {
       const offset = (page - 1) * limit;
 
@@ -65,10 +70,12 @@ const testingQueries = {
         try: () =>
           Promise.all([
             db.query.testing.findMany({
-              where: search
-                ? sql`${testing.testingNumber} ILIKE ${`%${search}%`}`
-                : undefined,
-              limit,
+              where: and(
+                search
+                  ? sql`${testing.testingNumber} ILIKE ${`%${search}%`}`
+                  : undefined,
+                status ? eq(testing.status, status) : undefined,
+              ),
               offset,
               orderBy: (testing, { desc }) => [desc(testing.createdAt)],
               with: {
@@ -91,6 +98,14 @@ const testingQueries = {
             db
               .select({ count: sql<number>`count(*)` })
               .from(testing)
+              .where(
+                and(
+                  search
+                    ? sql`${testing.testingNumber} ILIKE ${`%${search}%`}`
+                    : undefined,
+                  status ? eq(testing.status, status) : undefined,
+                ),
+              )
               .then((result) => result[0]?.count),
           ]),
         catch: (error) => {
@@ -120,6 +135,52 @@ const testingQueries = {
           totalItems: totalCount,
         },
       };
+    });
+  },
+
+  /**
+   * Get testing counts by status
+   */
+  getTestingStatusCount() {
+    return Effect.tryPromise({
+      try: async () => {
+        const result = await db
+          .select({
+            status: testing.status,
+            count: sql<number>`count(*)`,
+          })
+          .from(testing)
+          .groupBy(testing.status);
+
+        // Calculate total and format result
+        const counts: Record<string, number> = { total: 0 };
+        for (const row of result) {
+          if (row.status) {
+            counts[row.status] = Number(row.count);
+            counts.total = (counts.total || 0) + Number(row.count);
+          }
+        }
+        return {
+          total: counts?.total || 0,
+          start_testing: counts?.start_testing || 0,
+          sample_submission: counts?.sample_submission || 0,
+          sample_analysis: counts?.sample_analysis || 0,
+          report_generation: counts?.report_generation || 0,
+          report_publishing: counts?.report_publishing || 0,
+          completed: counts?.completed || 0,
+        };
+      },
+      catch: (error) => {
+        logError(
+          "testingQueries.getTestingStatusCount",
+          "Failed to fetch testing status counts",
+          { error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil jumlah testing berdasarkan status",
+        });
+      },
     });
   },
 

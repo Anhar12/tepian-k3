@@ -3,7 +3,7 @@ import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-m
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { PermissionGate } from "@/components/permission-gate";
-import getToolCalibrationColumns from "@/components/columns/tool-calibrations-columns";
+import getToolCalibrationColumns, { getToolCalibrationActionConfig } from "@/components/columns/tool-calibrations-columns";
 import {
   Card,
   CardContent,
@@ -15,11 +15,12 @@ import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { SoftDeleteToggle } from "@/components/soft-delete-toggle";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
+import { useCrudRowActions, CrudRowActionsModal } from "@/components/crud-row-actions";
+import type { ToolCalibration as ToolCalibrationType } from "@tepian-k3/types/pengujian/tool-calibration.types";
 
 interface ToolCalibrationProps {
   toolId: string;
@@ -45,6 +46,10 @@ export default function ToolCalibration({ toolId }: { toolId: string }) {
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
+  
+  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } = useCrudRowActions<ToolCalibrationType>();
+  
+  const actionConfig = useMemo(() => getToolCalibrationActionConfig(toolId), [toolId]);
 
   const columns = useMemo(
     () =>
@@ -56,7 +61,7 @@ export default function ToolCalibration({ toolId }: { toolId: string }) {
   );
 
   const { table } = useDataTableRouter({
-    data: calibrations?.data ?? [],
+    data: (calibrations?.data ?? []) as ToolCalibrationType[],
     columns,
     pageCount: calibrations?.pageCount ?? 0,
     search: params,
@@ -80,10 +85,9 @@ export default function ToolCalibration({ toolId }: { toolId: string }) {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between gap-4">
-            <div className="flex flex-row gap-2">
-              <Checkbox
-                id="show-deleted-calibrations"
-                checked={showDeleted}
+            <div className="flex flex-row gap-2 items-center">
+              <SoftDeleteToggle
+                checked={showDeleted ?? false}
                 onCheckedChange={(checked) => {
                   navigate({
                     to: "/back-office/tools/$toolId/calibration",
@@ -98,7 +102,6 @@ export default function ToolCalibration({ toolId }: { toolId: string }) {
                   setShowDeleted(Boolean(checked));
                 }}
               />
-              <Label>Deleted Calibrations</Label>
             </div>
             <PermissionGate permission="tool-calibrations.create">
               <Button
@@ -120,12 +123,20 @@ export default function ToolCalibration({ toolId }: { toolId: string }) {
             error={error}
             emptyMessage="Tidak ada kalibrasi ditemukan."
             emptyDescription="Coba sesuaikan filter atau kata kunci pencarian Anda."
+            onRowClick={handleRowClick}
           >
             <DataTableToolbar table={table}>
               <DataTableFilterMenu table={table} />
               <DataTableSortList table={table} />
             </DataTableToolbar>
           </DataTable>
+          
+          <CrudRowActionsModal
+            config={actionConfig}
+            row={selectedRow}
+            open={isActionsOpen}
+            onOpenChange={setIsActionsOpen}
+          />
         </CardContent>
       </Card>
     </div>

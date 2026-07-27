@@ -1,0 +1,2 @@
+CREATE TYPE "public"."parameter_service_type" AS ENUM('utama', 'tambahan');--> statement-breakpoint
+ALTER TABLE "parameters" ADD COLUMN "service_type" "parameter_service_type" DEFAULT 'utama' NOT NULL;

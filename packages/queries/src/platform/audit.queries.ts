@@ -14,10 +14,13 @@ import { eq, and, desc, sql, type SQL } from "@tepian-k3/db";
 import type { AuditAction } from "@tepian-k3/constants";
 import { TRPCError } from "@trpc/server";
 
+import type { DBorTx } from "@tepian-k3/db/client";
+
 /**
  * Create an audit log entry
  */
 const createAuditLog = (options: AuditLogOptions) =>
+
   Effect.gen(function* () {
     const {
       entityType,
@@ -86,6 +89,42 @@ const createAuditLog = (options: AuditLogOptions) =>
 
     return audit;
   });
+
+/**
+ * Create an audit log entry within a transaction
+ */
+const createAuditLogTx = (tx: DBorTx, options: AuditLogOptions) => {
+  const {
+    entityType,
+    entityId,
+    action,
+    userId,
+    userEmail,
+    oldValues,
+    newValues,
+    metadata,
+    description,
+  } = options;
+
+  const diff = compareObjects(oldValues || null, newValues || null);
+  const changedFields = diff.changed ? getChangedFieldNames(diff) : [];
+  const autoDescription = diff.changed
+    ? generateChangeDescription(diff)
+    : description;
+
+  return tx.insert(audits).values({
+    entityType,
+    entityId,
+    action,
+    userId: userId || null,
+    userEmail: userEmail || null,
+    oldValues: oldValues || null,
+    newValues: newValues || null,
+    changedFields: changedFields.length > 0 ? changedFields : null,
+    metadata: metadata || null,
+    description: autoDescription || null,
+  }).returning();
+};
 
 /**
  * Get audit logs for a specific entity
@@ -331,6 +370,7 @@ const getAuditLogById = (id: string) =>
 
 const auditQueries = {
   createAuditLog,
+  createAuditLogTx,
   getAuditLogById,
   getAuditLogsByEntity,
   getAuditLogsByUser,

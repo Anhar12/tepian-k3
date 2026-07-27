@@ -32,6 +32,7 @@ import {
 import { format } from "date-fns";
 import { Building2, Calendar, Settings2, Wrench } from "lucide-react";
 import z from "zod";
+import { ToolStatsCards } from "./-components/tool-stats-cards";
 
 const TOOL_RELEVANT_STATUSES = [
   "verified",
@@ -67,6 +68,10 @@ function RouteComponent() {
     }),
   );
 
+  const { data: allToolsData } = useQuery(
+    trpc.pengujian.tool.getAllUnassignedTools.queryOptions(),
+  );
+
   const handlePageChange = (page: number) => {
     navigate({ search: { ...params, page } });
   };
@@ -92,6 +97,8 @@ function RouteComponent() {
         subtitle="Pilih dan kelola alat yang digunakan untuk worksheet yang telah terverifikasi"
         actionButton={[]}
       />
+
+      <ToolStatsCards tools={allToolsData || []} />
 
       <Card>
         <CardContent className="p-4 sm:p-6">

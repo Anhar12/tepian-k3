@@ -2,7 +2,12 @@ import orderQueries from "@tepian-k3/queries/pengujian/order.queries";
 import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
 import documentQueries from "@tepian-k3/queries/platform/document.queries";
 import documentSchema from "@tepian-k3/schema/platform/document.schema";
-import { createDocumentSignature } from "@tepian-k3/services/document-signing";
+import { createDocumentSignature, verifyTTERequestToken } from "@tepian-k3/services/document-signing";
+import { generateVerificationURL } from "@tepian-k3/services/pdf";
+import * as QRCode from "qrcode";
+import { db } from "@tepian-k3/db/client";
+import { documents } from "@tepian-k3/db/schema";
+import { eq } from "@tepian-k3/db";
 import {
   pdfSigningService,
   type QRCodePosition,
@@ -267,6 +272,192 @@ export const documentRouter = createTRPCRouter({
         payload: result.payload,
       };
     }),
+
+  /**
+   * Get TTE Request Detail (PUBLIC - for TTE page)
+   */
+  getTTERequestDetail: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+      }),
+    )
+    .query(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Verify the token
+            const result = yield* verifyTTERequestToken(input.token);
+            if (!result.valid || !result.payload) {
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: result.error || "Token tidak valid",
+              });
+            }
+
+            // Get document
+            const document = yield* documentQueries.getDocumentById(
+              result.payload.documentId,
+            );
+
+            if (!document) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Dokumen tidak ditemukan",
+              });
+            }
+
+            // Get file base64
+            const fileBuffer = yield* storageService.download(document.fileUrl);
+
+            return {
+              payload: result.payload,
+              document: {
+                id: document.id,
+                title: document.title,
+                documentNumber: document.documentNumber,
+              },
+              fileBase64: fileBuffer.toString("base64"),
+            };
+          })
+        )
+    ),
+
+  /**
+   * Sign SPK with TTE (PUBLIC - triggered from TTE page)
+   */
+  signSpkWithTTE: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+        position: z.object({
+          x: z.number(),
+          y: z.number(),
+          width: z.number(),
+          height: z.number(),
+          page: z.number(),
+        }),
+      })
+    )
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            // Verify the token
+            const result = yield* verifyTTERequestToken(input.token);
+            if (!result.valid || !result.payload) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: result.error || "Token tidak valid",
+                })
+              );
+            }
+
+            const { payload } = result;
+
+            // Get document
+            const document = yield* documentQueries.getDocumentById(
+              payload.documentId,
+            );
+
+            if (!document) {
+              return yield* Effect.fail(
+                new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Dokumen tidak ditemukan",
+                })
+              );
+            }
+
+            // Get PDF buffer
+            const fileBuffer = yield* storageService.download(document.fileUrl);
+
+            // Generate Verification URL
+            const appUrl = process.env.APP_URL || "http://localhost:3000";
+            
+            // Sign the document (this creates a JWT for the QR)
+            const signatureResult = yield* createDocumentSignature(
+              document.id,
+              document.documentNumber,
+              document.entityType,
+              document.entityId,
+              document.type,
+              document.fileUrl,
+              fileBuffer,
+              "external-signer" // signedByUserId
+            );
+
+            const verificationUrl = `${appUrl}/verify/${signatureResult.verificationToken}`;
+
+            // Convert client coordinates to PDF coordinates
+            const pdfPosition = yield* pdfSigningService.convertClientCoordinatesToPDFPoints(
+              input.position.x,
+              input.position.y,
+              input.position.width,
+              input.position.height,
+              input.position.page,
+              fileBuffer,
+            );
+
+            // Embed QR Code
+            const signatureData = {
+              userId: "external-signer",
+              userName: payload.signerName,
+              purpose: "Penandatanganan SPK",
+              verificationUrl,
+            };
+
+            const signedPdfBuffer = yield* pdfSigningService.embedSingleQRCodeInPDF(
+              fileBuffer,
+              signatureData,
+              pdfPosition,
+            );
+
+            // Upload the signed PDF (replace the original)
+            yield* storageService.upload(signedPdfBuffer, {
+              filename: document.fileName,
+              contentType: "application/pdf",
+              folder: "documents/order/spk",
+              // We could overwrite or use the same key
+            });
+
+            // Generate QR code for the database record
+            const qrCodeDataUrl = yield* Effect.tryPromise({
+              try: () => QRCode.toDataURL(verificationUrl, { width: 400, margin: 2, errorCorrectionLevel: "H" }),
+              catch: (error) => new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Gagal membuat kode QR", cause: error }),
+            });
+            const splitDataUrl = qrCodeDataUrl.split(",")[1];
+            if (!splitDataUrl) {
+              return yield* Effect.fail(
+                new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Gagal membuat kode QR" })
+              );
+            }
+            const qrBuffer = Buffer.from(splitDataUrl, "base64");
+            const qrFile = yield* storageService.upload(qrBuffer, {
+              filename: `qr-${signatureResult.verificationToken}.png`,
+              folder: "qr-codes",
+            });
+
+            // Update document signed status in DB
+            yield* documentQueries.updateDocumentSignedStatus(document.id, {
+              status: "signed",
+              signatureData: signatureResult.signatureData,
+              verificationToken: signatureResult.verificationToken,
+              verificationUrl,
+              qrCodeUrl: qrFile.key,
+              signedByUserId: "external-signer",
+              signedAt: new Date().toISOString(),
+            });
+
+            return {
+              success: true,
+              message: "Dokumen berhasil ditandatangani",
+            };
+          })
+        )
+    ),
+
 
   /**
    * Get verification history for a document

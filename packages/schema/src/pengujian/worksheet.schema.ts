@@ -12,6 +12,7 @@ import {
   WORKSHEET_NOTE_STATUS,
   BAHAN_UNITS,
   TOOLS_CONDITIONS,
+  OPERATIONAL_COST_VERIFICATION_STATUS,
 } from "@tepian-k3/constants";
 
 // Base schemas from drizzle
@@ -139,6 +140,21 @@ const returnToolsFromWorksheetSchema = z.object({
   checkConditionResult: z.enum(TOOLS_CONDITIONS),
 });
 
+// Batch return borrowed tools with condition checks
+const batchReturnToolsFromWorksheetSchema = z.object({
+  worksheetId: z.uuidv7(),
+  tools: z.array(
+    z.object({
+      worksheetToolId: z.uuidv7(),
+      checkAlatMenyala: z.boolean(),
+      checkPenyimpangan: z.boolean(),
+      checkKelengkapanAlat: z.boolean(),
+      checkKondisiFisikAlat: z.boolean(),
+      checkConditionResult: z.enum(TOOLS_CONDITIONS),
+    })
+  ),
+});
+
 // Assign employees to worksheet (with optional schedule dates)
 const assignEmployeesToWorksheetSchema = z.object({
   worksheetId: z.uuidv7(),
@@ -182,12 +198,28 @@ const operationalCostItemSchema = z.object({
   unitCost: z.number().int().min(0).nullable(),
   note: z.string().nullable().optional(),
   sortOrder: z.number().int().default(0),
+  sbmYear: z.number().int().nullable().optional(),
+  verificationStatus: z.enum(OPERATIONAL_COST_VERIFICATION_STATUS).optional(),
+  verificationNote: z.string().nullable().optional(),
 });
 
-// Save operational costs (batch upsert)
+// Save worksheet operational costs
 const saveWorksheetOperationalCostsSchema = z.object({
   worksheetId: z.uuidv7(),
   costs: z.array(operationalCostItemSchema),
+});
+
+// Verify worksheet operational costs
+const verifyWorksheetOperationalCostsSchema = z.object({
+  worksheetId: z.uuidv7(),
+  verifications: z.array(
+    z.object({
+      id: z.uuidv7(),
+      verificationStatus: z.enum(["draft", "submitted", "verified", "revised"]),
+      verificationNote: z.string().nullable().optional(),
+      sbmYear: z.number().int().nullable().optional(),
+    })
+  ),
 });
 
 // Chemical material item schema for batch operations
@@ -214,6 +246,20 @@ const updateWorksheetChemicalMaterialRequiredSchema = z.object({
 // Get worksheet chemical materials schema
 const getWorksheetChemicalMaterialsSchema = z.object({
   worksheetId: z.uuidv7(),
+});// Propose Date schema
+const proposeWorksheetDateSchema = z.object({
+  worksheetId: z.uuidv7(),
+  proposedStartDate: z.string().datetime(),
+  proposedEndDate: z.string().datetime(),
+  note: z.string().optional(),
+});
+
+// Respond to Proposed Date schema
+const respondWorksheetProposedDateSchema = z.object({
+  proposedDateId: z.uuidv7(),
+  action: z.enum(["approved", "rejected"]),
+  finalStartDate: z.string().datetime().optional(),
+  finalEndDate: z.string().datetime().optional(),
 });
 
 const worksheetSchema = {
@@ -236,6 +282,7 @@ const worksheetSchema = {
   assignToolsToWorksheetSchema,
   borrowToolsFromWorksheetSchema,
   returnToolsFromWorksheetSchema,
+  batchReturnToolsFromWorksheetSchema,
   assignEmployeesToWorksheetSchema,
   addWorksheetNoteSchema,
   getWorksheetsSchema,
@@ -243,10 +290,13 @@ const worksheetSchema = {
   getWorksheetTransactionDetailSchema,
   operationalCostItemSchema,
   saveWorksheetOperationalCostsSchema,
+  verifyWorksheetOperationalCostsSchema,
   worksheetChemicalMaterialItemSchema,
   saveWorksheetChemicalMaterialsSchema,
   updateWorksheetChemicalMaterialRequiredSchema,
   getWorksheetChemicalMaterialsSchema,
+  proposeWorksheetDateSchema,
+  respondWorksheetProposedDateSchema,
 };
 
 export default worksheetSchema;

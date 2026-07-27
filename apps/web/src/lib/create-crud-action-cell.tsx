@@ -75,6 +75,8 @@ interface CrudActionCellConfig<T, TParams> {
   onHoverDetail?: (id: string) => void;
   /** Extra dropdown items derived from the row. Use for actions like opening a file URL. */
   customActions?: (row: T) => CustomAction[];
+  /** Render an edit modal instead of navigating to an edit page */
+  editModal?: (props: { row: T; open: boolean; onOpenChange: (open: boolean) => void }) => React.ReactNode;
 }
 
 /**
@@ -109,6 +111,7 @@ export function createCrudActionCell<
   return function ActionCell({ row }: { row: Row<T> }) {
     const params = useSearchParams();
     const [isHardDeleteOpen, setIsHardDeleteOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const { data: profile } = useSuspenseQuery(
       trpc.platform.auth.profile.queryOptions(),
@@ -220,7 +223,11 @@ export function createCrudActionCell<
               : `Apakah anda yakin ingin menghapus data ${resourceName} ini? Data yang sudah dihapus tidak dapat dikembalikan.`
           }
           btnClassName="bg-red-600 text-white hover:bg-red-500"
-          onEditAction={`${nestedPathRoute ?? ""}${row.original.id}/edit`}
+          onEditAction={
+            config.editModal
+              ? () => setIsEditModalOpen(true)
+              : `${nestedPathRoute ?? ""}${row.original.id}/edit`
+          }
           onHoverEdit={() => onHoverEdit && onHoverEdit(row.original.id)}
           showEdit={canEdit && !row.original.deletedAt}
           showDelete={hasCrudActions && canDelete}
@@ -241,6 +248,13 @@ export function createCrudActionCell<
               : deleteMut.mutate({ id: row.original.id })
           }
         />
+
+        {config.editModal &&
+          config.editModal({
+            row: row.original,
+            open: isEditModalOpen,
+            onOpenChange: setIsEditModalOpen,
+          })}
 
         {hardDeleteMutation && (
           <AlertDialog

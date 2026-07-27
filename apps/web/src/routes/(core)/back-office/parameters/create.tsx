@@ -41,6 +41,17 @@ import { Check, ChevronsUpDown, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
+import {
+  PARAMETER_SERVICE_TYPES,
+  PARAMETER_SERVICE_TYPE_LABELS,
+} from "@tepian-k3/constants";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/(core)/back-office/parameters/create")({
   beforeLoad: async ({ context }) =>
@@ -73,6 +84,7 @@ function RouteComponent() {
       price: 0,
       reference: "",
       unit: "",
+      serviceType: "utama",
     },
   });
 
@@ -277,6 +289,39 @@ function RouteComponent() {
                       {...field}
                       aria-invalid={fieldState.invalid}
                     />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="serviceType"
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel className="ml-1 text-sm font-bold">
+                      Kategori Layanan
+                    </FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger className="h-10 text-sm">
+                        <SelectValue placeholder="Pilih kategori layanan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PARAMETER_SERVICE_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {PARAMETER_SERVICE_TYPE_LABELS[type]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}

@@ -23,8 +23,9 @@ import React, { useEffect, useState } from "react";
 export type CustomAction = {
   icon: React.ReactNode;
   text: string;
-  action: string | (() => void);
+  action: string | ((e?: React.MouseEvent) => void);
   className?: string;
+  disabled?: boolean;
 };
 
 type DataTableActionCellProps = {

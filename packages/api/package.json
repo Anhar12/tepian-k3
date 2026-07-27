@@ -18,9 +18,11 @@
   },
   "devDependencies": {
     "@tepian-k3/config": "workspace:*",
+    "@types/qrcode": "catalog:",
     "typescript": "catalog:"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@node-rs/argon2": "catalog:",
     "@tepian-k3/auth": "workspace:*",
     "@tepian-k3/constants": "workspace:*",
@@ -35,6 +37,7 @@
     "effect": "catalog:",
     "exceljs": "^4.4.0",
     "hono": "catalog:",
+    "qrcode": "catalog:",
     "superjson": "^2.2.6",
     "ua-parser-js": "^2.0.8",
     "uuid": "catalog:",

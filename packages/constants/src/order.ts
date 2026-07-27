@@ -191,3 +191,17 @@ export const ORDER_PAYMENT_STATUS_LABELS: Record<OrderPaymentStatus, string> = {
 };
 
 export const ORDER_SEQUENCE_NAME = "order_number_seq";
+
+export const ORDER_FUNDING_TYPES = ["pnbp", "dipa"] as const;
+
+export type OrderFundingType = (typeof ORDER_FUNDING_TYPES)[number];
+
+export const ORDER_FUNDING_TYPE_LABELS: Record<OrderFundingType, string> = {
+  pnbp: "PNBP",
+  dipa: "DIPA",
+};
+
+export const ORDER_FUNDING_TYPE_COLORS: Record<OrderFundingType, string> = {
+  pnbp: "bg-blue-100 text-blue-700",
+  dipa: "bg-emerald-100 text-emerald-700",
+};

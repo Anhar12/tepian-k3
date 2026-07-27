@@ -23,6 +23,10 @@ import {
 import useDebounced from "@/hooks/use-debounced";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import {
+  PARAMETER_SERVICE_TYPE_COLORS,
+  PARAMETER_SERVICE_TYPE_LABELS,
+} from "@tepian-k3/constants";
 import { authMeQueryOptions } from "@/utils/auth-query";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -349,12 +353,30 @@ export function TestingTable({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
-                          >
-                            {row.name}
-                          </Badge>
+                          <div className="flex flex-col items-start gap-1">
+                            <Badge
+                              variant="secondary"
+                              className="rounded-full border-none bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-100"
+                            >
+                              {row.name}
+                            </Badge>
+                            {row.serviceType && (
+                              <Badge
+                                className={cn(
+                                  "rounded-full border-none px-2 py-0.5 text-[9px] font-bold",
+                                  PARAMETER_SERVICE_TYPE_COLORS[
+                                    row.serviceType as keyof typeof PARAMETER_SERVICE_TYPE_COLORS
+                                  ],
+                                )}
+                              >
+                                {
+                                  PARAMETER_SERVICE_TYPE_LABELS[
+                                    row.serviceType as keyof typeof PARAMETER_SERVICE_TYPE_LABELS
+                                  ]
+                                }
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="max-w-35 text-[10px] font-medium text-slate-500">
                           <div className="font-bold text-slate-700">
