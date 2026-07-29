@@ -25,6 +25,7 @@ const clustersQueries = {
       try: () =>
         db.query.clusters.findMany({
           where: isNull(clusters.deletedAt),
+          orderBy: [asc(clusters.sortOrder), asc(clusters.name)],
         }),
       catch: (error) => {
         logError(
@@ -39,6 +40,103 @@ const clustersQueries = {
           message: "Gagal mengambil data cluster",
         });
       },
+    });
+  },
+
+  reorderClusters(payload: { id: string; direction: "left" | "right" }) {
+    return Effect.gen(function* () {
+      const allClusters = yield* Effect.tryPromise({
+        try: () =>
+          db.query.clusters.findMany({
+            where: isNull(clusters.deletedAt),
+            orderBy: [asc(clusters.sortOrder), asc(clusters.name)],
+          }),
+        catch: (error) => {
+          logError(
+            "clustersQueries.reorderClusters",
+            "Error fetching all clusters for reordering",
+            { error },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal mengambil data cluster",
+          });
+        },
+      });
+
+      const currentIndex = allClusters.findIndex((c) => c.id === payload.id);
+      if (currentIndex === -1) {
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "NOT_FOUND",
+            message: "Klaster tidak ditemukan",
+          }),
+        );
+      }
+
+      const targetIndex =
+        payload.direction === "left" ? currentIndex - 1 : currentIndex + 1;
+
+      if (targetIndex < 0 || targetIndex >= allClusters.length) {
+        return yield* Effect.succeed({ success: true });
+      }
+
+      const currentCluster = allClusters[currentIndex];
+      const targetCluster = allClusters[targetIndex];
+
+      if (!currentCluster || !targetCluster) {
+        return yield* Effect.succeed({ success: true });
+      }
+
+      // Jika sortOrder sama, beri sequence baru 0, 1, 2... untuk semua klaster
+      let currentOrder = currentCluster.sortOrder;
+      let targetOrder = targetCluster.sortOrder;
+
+      if (currentOrder === targetOrder) {
+        currentOrder = currentIndex;
+        targetOrder = targetIndex;
+      }
+
+      yield* Effect.tryPromise({
+        try: () =>
+          db.transaction(async (tx) => {
+            // Normalisasi urutan seluruh cluster jika ada order duplikat
+            for (let i = 0; i < allClusters.length; i++) {
+              const item = allClusters[i];
+              if (!item) continue;
+
+              if (i === currentIndex) {
+                await tx
+                  .update(clusters)
+                  .set({ sortOrder: targetOrder })
+                  .where(eq(clusters.id, currentCluster.id));
+              } else if (i === targetIndex) {
+                await tx
+                  .update(clusters)
+                  .set({ sortOrder: currentOrder })
+                  .where(eq(clusters.id, targetCluster.id));
+              } else {
+                await tx
+                  .update(clusters)
+                  .set({ sortOrder: i })
+                  .where(eq(clusters.id, item.id));
+              }
+            }
+          }),
+        catch: (error) => {
+          logError(
+            "clustersQueries.reorderClusters",
+            "Error updating cluster order in transaction",
+            { error, payload },
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Gagal memperbarui urutan klaster",
+          });
+        },
+      });
+
+      return yield* Effect.succeed({ success: true });
     });
   },
 

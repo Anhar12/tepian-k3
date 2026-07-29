@@ -18,14 +18,19 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { trpc } from "@/utils/trpc";
-// import { getPublicUrl } from "@/utils/url";
 import { openBase64InNewTab } from "@/utils/download";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import generateDocumentSchema from "@tepian-k3/schema/pengujian/generate-document.schema";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
+import { ArrowLeft, ArrowRight, QrCode } from "lucide-react";
+import {
+  QRSignaturePlacer,
+  type SignaturePosition,
+  type SignerInfo,
+} from "@/components/document-signing";
 
 interface GenerateSPTDialogProps {
   worksheetId: string;
@@ -41,12 +46,29 @@ export default function GenerateSPTDialog({
   isOpen,
   setIsOpen,
 }: GenerateSPTDialogProps) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [signatures, setSignatures] = useState<SignaturePosition[]>([]);
+
+  const meQuery = useQuery(trpc.platform.auth.me.queryOptions());
+  const currentUser = meQuery.data;
+
+  const defaultSigners: SignerInfo[] = currentUser
+    ? [
+        {
+          userId: currentUser.id,
+          userName: currentUser.name || "Pejabat Penandatangan SPT",
+          purpose: "Pejabat Penandatangan SPT",
+        },
+      ]
+    : [];
+
   const form = useForm<
-    z.infer<typeof generateDocumentSchema.generateAssignmentLetter>
+    z.input<typeof generateDocumentSchema.generateAssignmentLetter>
   >({
     resolver: zodResolver(generateDocumentSchema.generateAssignmentLetter),
     defaultValues: {
       worksheetId,
+      signatures: [],
     },
   });
 
@@ -64,13 +86,50 @@ export default function GenerateSPTDialog({
   );
 
   function handleSubmit(
-    data: z.infer<typeof generateDocumentSchema.generateAssignmentLetter>,
+    data: z.input<typeof generateDocumentSchema.generateAssignmentLetter>,
   ) {
-    generateAssignmentLetterMutation.mutate(data);
+    const finalData = {
+      ...data,
+      signatures: signatures.map((s) => ({
+        userId: s.userId,
+        userName: s.userName,
+        purpose: s.purpose,
+        page: s.page ?? 0,
+        x: s.x ?? 450,
+        y: s.y ?? 700,
+        width: s.width ?? 100,
+        height: s.height ?? 100,
+      })),
+    };
+    generateAssignmentLetterMutation.mutate(finalData);
   }
+
+  const handleNextToSignature = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) return;
+
+    if (signatures.length === 0 && currentUser) {
+      setSignatures([
+        {
+          userId: currentUser.id,
+          userName: currentUser.name || "Pejabat Penandatangan SPT",
+          purpose: "Pejabat Penandatangan SPT",
+          page: 0,
+          x: 600,
+          y: 900,
+          width: 100,
+          height: 100,
+        },
+      ]);
+    }
+
+    setStep(2);
+  };
 
   useEffect(() => {
     if (isOpen) {
+      setStep(1);
+      setSignatures([]);
       if (offeringLetterNumber)
         form.setValue("letterNumber", offeringLetterNumber);
     } else {
@@ -80,16 +139,26 @@ export default function GenerateSPTDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <form>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Buat Surat SPT</DialogTitle>
-            <DialogDescription>
-              Isi form berikut untuk membuat surat SPT.
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent className={step === 2 ? "max-w-4xl" : "max-w-md"}>
+        <DialogHeader>
+          <DialogTitle>
+            {step === 1
+              ? "Buat Surat SPT"
+              : "Posisi Tanda Tangan Digital (QR Code)"}
+          </DialogTitle>
+          <DialogDescription>
+            {step === 1
+              ? "Isi form berikut untuk membuat surat SPT."
+              : "Atur posisi dan ukuran QR Code tanda tangan digital pada dokumen."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === 1 ? (
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleNextToSignature();
+            }}
             className="grid gap-4"
           >
             <FieldGroup>
@@ -143,21 +212,63 @@ export default function GenerateSPTDialog({
                 )}
               />
             </FieldGroup>
-            <DialogFooter>
-              <DialogClose>Batal</DialogClose>
+            <DialogFooter className="flex gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Batal
+                </Button>
+              </DialogClose>
               <Button
-                type="submit"
+                type="button"
+                variant="secondary"
+                onClick={form.handleSubmit((data) => {
+                  setSignatures([]);
+                  generateAssignmentLetterMutation.mutate({
+                    ...data,
+                    signatures: [],
+                  });
+                })}
                 disabled={generateAssignmentLetterMutation.isPending}
               >
-                {generateAssignmentLetterMutation.isPending ? (
-                  <Spinner />
-                ) : null}
-                Buat SPT
+                Cetak Tanpa QR
+              </Button>
+              <Button type="submit">
+                Atur Posisi TTD <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      </form>
+        ) : (
+          <div className="space-y-4">
+            <QRSignaturePlacer
+              signers={defaultSigners}
+              positions={signatures}
+              onChange={setSignatures}
+              maxPages={5}
+            />
+            <DialogFooter className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep(1)}
+              >
+                <ArrowLeft className="mr-1.5 h-4 w-4" /> Kembali
+              </Button>
+              <Button
+                type="button"
+                onClick={form.handleSubmit(handleSubmit)}
+                disabled={generateAssignmentLetterMutation.isPending}
+              >
+                {generateAssignmentLetterMutation.isPending ? (
+                  <Spinner className="mr-2" />
+                ) : (
+                  <QrCode className="mr-2 h-4 w-4" />
+                )}
+                Buat SPT Bertanda Tangan
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+      </DialogContent>
     </Dialog>
   );
 }

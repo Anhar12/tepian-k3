@@ -190,6 +190,13 @@
       "when": 1784389100367,
       "tag": "0038_add_estimated_signature_date",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1785179215920,
+      "tag": "0039_zippy_leader",
+      "breakpoints": true
     }
   ]
 }

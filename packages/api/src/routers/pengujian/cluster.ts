@@ -66,6 +66,15 @@ export const clusterRouter = createTRPCRouter({
         ),
     ),
 
+  reorderCluster: withPermission("clusters.update")
+    .input(clusterSchema.reorderClusterSchema)
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.CLUSTERS_PREFIX, () =>
+          runEffect(clustersQueries.reorderClusters(input)),
+        ),
+    ),
+
   deleteCluster: withPermission("clusters.delete")
     .input(
       z.object({

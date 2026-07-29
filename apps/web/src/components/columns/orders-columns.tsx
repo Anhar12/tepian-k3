@@ -1,4 +1,3 @@
-import { PermissionGate } from "@/components/permission-gate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MaskedText } from "@/components/ui/masked-text";
@@ -11,10 +10,14 @@ import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { PaginatedOrder } from "@tepian-k3/types/pengujian/order.types";
+import { Clock, FileSpreadsheet, FileArchive } from "lucide-react";
 
 interface OrdersColumnsProps {
   currentPage: number;
   perPage: number;
+  onOpenAuditModal?: (orderId: string) => void;
+  onDownloadExcel?: (orderId: string) => void;
+  onDownloadZip?: (orderId: string) => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -67,6 +70,9 @@ const getStatusLabel = (status: string) => {
 export default function getOrdersColumns({
   currentPage,
   perPage,
+  onOpenAuditModal,
+  onDownloadExcel,
+  onDownloadZip,
 }: OrdersColumnsProps): ColumnDef<PaginatedOrder>[] {
   return [
     createNumberColumn<PaginatedOrder>(currentPage, perPage),
@@ -97,16 +103,19 @@ export default function getOrdersColumns({
         const companyName = row.original.company?.name;
         const userName = row.original.user.name;
         const userEmail = row.original.user.email;
-        
+
         return (
-          <div className="flex flex-col min-w-0 w-48">
-            <span className="font-medium truncate" title={companyName || userName}>
+          <div className="flex w-48 min-w-0 flex-col">
+            <span
+              className="truncate font-medium"
+              title={companyName || userName}
+            >
               {companyName || userName}
             </span>
-            <MaskedText 
-              value={companyName ? userName : userEmail} 
+            <MaskedText
+              value={companyName ? userName : userEmail}
               maskType={companyName ? "name" : "email"}
-              className="text-xs text-muted-foreground w-full" 
+              className="w-full text-xs text-muted-foreground"
             />
           </div>
         );
@@ -116,14 +125,29 @@ export default function getOrdersColumns({
       id: "status_lengkap",
       header: "Status",
       cell: ({ row }) => (
-        <div className="flex flex-col gap-1 w-32">
-          <Badge className={cn(getStatusColor(row.original.status), "w-fit text-[10px] px-1.5 py-0 uppercase tracking-wider")}>
+        <div className="flex w-32 flex-col gap-1">
+          <Badge
+            className={cn(
+              getStatusColor(row.original.status),
+              "w-fit px-1.5 py-0 text-[10px] tracking-wider uppercase",
+            )}
+          >
             {getStatusLabel(row.original.status)}
           </Badge>
-          <Badge className={cn(getApprovalStatusColor(row.original.approvalStatus), "w-fit text-[10px] px-1.5 py-0 uppercase tracking-wider")}>
+          <Badge
+            className={cn(
+              getApprovalStatusColor(row.original.approvalStatus),
+              "w-fit px-1.5 py-0 text-[10px] tracking-wider uppercase",
+            )}
+          >
             APRV: {getStatusLabel(row.original.approvalStatus)}
           </Badge>
-          <Badge className={cn(getPaymentStatusColor(row.original.paymentStatus), "w-fit text-[10px] px-1.5 py-0 uppercase tracking-wider")}>
+          <Badge
+            className={cn(
+              getPaymentStatusColor(row.original.paymentStatus),
+              "w-fit px-1.5 py-0 text-[10px] tracking-wider uppercase",
+            )}
+          >
             PAY: {getStatusLabel(row.original.paymentStatus)}
           </Badge>
         </div>
@@ -167,5 +191,46 @@ export default function getOrdersColumns({
       ),
     },
     createCompactDateColumn<PaginatedOrder>("createdAt", "Tanggal Order"),
+    {
+      id: "audit_actions",
+      header: () => <div className="text-center">Audit &amp; Export</div>,
+      cell: ({ row }) => {
+        const orderId = row.original.id;
+        return (
+          <div className="flex items-center justify-center gap-1">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="size-8 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+              title="Preview Audit Trail & Durasi"
+              onClick={() => onOpenAuditModal?.(orderId)}
+            >
+              <Clock className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="size-8 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+              title="Export Rekap Excel (.xlsx)"
+              onClick={() => onDownloadExcel?.(orderId)}
+            >
+              <FileSpreadsheet className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="size-8 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+              title="Download Bundle Dokumen (.zip)"
+              onClick={() => onDownloadZip?.(orderId)}
+            >
+              <FileArchive className="size-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
   ];
 }

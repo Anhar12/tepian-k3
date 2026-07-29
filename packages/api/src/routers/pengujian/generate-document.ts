@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import {
   OPERATIONAL_BANK_ACCOUNT,
   OPERATIONAL_BANK_ACCOUNT_NAME,
@@ -12,6 +13,7 @@ import {
   generateOfferingLetterPdf,
   generateSpkPdf,
   generateTagihanPdf,
+  pdfSigningService,
 } from "@tepian-k3/services/pdf";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
@@ -22,7 +24,10 @@ import { logError } from "@tepian-k3/services/logger";
 import { storageService } from "@tepian-k3/services/storage";
 import documentQueries from "@tepian-k3/queries/platform/document.queries";
 import { emailService } from "@tepian-k3/services/email";
-import { createTTERequestToken } from "@tepian-k3/services/document-signing";
+import {
+  createDocumentSignature,
+  createTTERequestToken,
+} from "@tepian-k3/services/document-signing";
 
 export const generateDocumentRouter = createTRPCRouter({
   generateOfferingLetter: withPermission("documents.create")
@@ -34,7 +39,7 @@ export const generateDocumentRouter = createTRPCRouter({
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
-                { unmask: true }
+                { unmask: true },
               );
 
             if (!worksheet) {
@@ -102,23 +107,112 @@ export const generateDocumentRouter = createTRPCRouter({
             });
 
             // Merge using the service
-            const mergedPdf = yield* addCoverPage(
-              offeringLetterHeader as Buffer,
-              offeringLetter as Buffer,
+            let finalPdfBuffer = Buffer.from(
+              (yield* addCoverPage(
+                offeringLetterHeader as Buffer,
+                offeringLetter as Buffer,
+              )) as Buffer,
             );
 
-            // const uploadedOfferingLetter = yield* storageService.upload(
-            //   mergedPdf as Buffer,
-            //   {
-            //     filename: `offering-letter-${input.letterNumber}.pdf`,
-            //     contentType: "application/pdf",
-            //     folder: "generated-documents/offering-letters",
-            //   },
-            // );
+            // If signatures were specified, embed QR codes into PDF and persist record
+            if (input.signatures && input.signatures.length > 0) {
+              const baseUrl =
+                process.env.APP_URL ||
+                process.env.VITE_APP_URL ||
+                "http://localhost:3000";
+              const docSignatures = [];
+
+              for (const sigInput of input.signatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.letterNumber,
+                  "worksheet",
+                  input.worksheetId,
+                  "offering_document",
+                  "temp-url",
+                  finalPdfBuffer,
+                  sigInput.userId,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
+                  signatureData: signature.signatureData,
+                  verificationToken: signature.verificationToken,
+                  fileHash: signature.fileHash,
+                });
+              }
+
+              const qrCodeData = docSignatures.map((sig) => ({
+                signature: {
+                  userId: sig.userId,
+                  userName: sig.userName,
+                  purpose: sig.purpose,
+                  verificationUrl: sig.verificationUrl,
+                },
+                position: {
+                  x: sig.x,
+                  y: sig.y,
+                  width: sig.width,
+                  height: sig.height,
+                  page: sig.page,
+                },
+              }));
+
+              const signedPdf = yield* pdfSigningService.embedQRCodesInPDF(
+                finalPdfBuffer,
+                qrCodeData,
+              );
+              finalPdfBuffer = Buffer.from(signedPdf);
+
+              const filename = `offering-letter-${input.letterNumber}.pdf`;
+              const uploadedFile = yield* storageService.upload(
+                finalPdfBuffer,
+                {
+                  filename,
+                  contentType: "application/pdf",
+                  folder: "documents/worksheet/offering-letters",
+                },
+              );
+
+              const documentNumber = `DOC-OFFERING-${input.letterNumber}`;
+              const document = yield* documentQueries.createDocument({
+                documentNumber,
+                type: "offering_document",
+                title: `Surat Penawaran - ${input.letterNumber}`,
+                description: `Surat Penawaran untuk Worksheet ${input.worksheetId}`,
+                entityType: "worksheet",
+                entityId: input.worksheetId,
+                fileUrl: uploadedFile.key,
+                fileName: filename,
+                fileSize: finalPdfBuffer.length,
+                mimeType: "application/pdf",
+                uploadedByUserId: ctx.user.id,
+              });
+
+              yield* documentQueries.createDocumentSignatures(
+                docSignatures.map((sig, index) => ({
+                  documentId: document.id,
+                  signedByUserId: sig.userId,
+                  signerName: sig.userName,
+                  purpose: sig.purpose,
+                  signatureOrder: index + 1,
+                  qrCodePosition: {
+                    x: sig.x,
+                    y: sig.y,
+                    width: sig.width,
+                    height: sig.height,
+                    page: sig.page,
+                  },
+                  verificationToken: sig.verificationToken,
+                  verificationUrl: sig.verificationUrl,
+                  signatureData: sig.signatureData,
+                  fileHash: sig.fileHash,
+                })),
+              );
+            }
 
             // Persist the offering letter number + issue date on the worksheet.
-            // These gate the downstream Invoice/SPK/SPT actions and pre-fill the
-            // Invoice reference, so they must be saved on every Cetak.
             yield* worksheetQueries.saveOfferingLetterInfo(
               input.worksheetId,
               ctx.user.id,
@@ -126,7 +220,7 @@ export const generateDocumentRouter = createTRPCRouter({
             );
 
             return {
-              base64: Buffer.from(mergedPdf as Buffer).toString("base64"),
+              base64: finalPdfBuffer.toString("base64"),
               filename: `offering-letter-${input.letterNumber}.pdf`,
               contentType: "application/pdf",
             };
@@ -143,7 +237,7 @@ export const generateDocumentRouter = createTRPCRouter({
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
-                { unmask: true }
+                { unmask: true },
               );
 
             if (!worksheet) {
@@ -191,7 +285,58 @@ export const generateDocumentRouter = createTRPCRouter({
             });
 
             // Convert PDF to Buffer
-            const spkBuffer = Buffer.from(spk as Buffer);
+            let spkBuffer = Buffer.from(spk as Buffer);
+
+            if (input.signatures && input.signatures.length > 0) {
+              const baseUrl =
+                process.env.APP_URL ||
+                process.env.VITE_APP_URL ||
+                "http://localhost:3000";
+              const docSignatures = [];
+
+              for (const sigInput of input.signatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.letterNumber,
+                  "order",
+                  worksheet.orderId,
+                  "cooperation_agreement",
+                  "temp-url",
+                  spkBuffer,
+                  sigInput.userId,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
+                  signatureData: signature.signatureData,
+                  verificationToken: signature.verificationToken,
+                  fileHash: signature.fileHash,
+                });
+              }
+
+              const qrCodeData = docSignatures.map((sig) => ({
+                signature: {
+                  userId: sig.userId,
+                  userName: sig.userName,
+                  purpose: sig.purpose,
+                  verificationUrl: sig.verificationUrl,
+                },
+                position: {
+                  x: sig.x,
+                  y: sig.y,
+                  width: sig.width,
+                  height: sig.height,
+                  page: sig.page,
+                },
+              }));
+
+              const signedPdf = yield* pdfSigningService.embedQRCodesInPDF(
+                spkBuffer,
+                qrCodeData,
+              );
+              spkBuffer = Buffer.from(signedPdf);
+            }
 
             // Upload draft SPK to storage
             const filename = `spk-draft-${input.letterNumber}-${Date.now()}.pdf`;
@@ -217,6 +362,38 @@ export const generateDocumentRouter = createTRPCRouter({
               uploadedByUserId: ctx.user.id,
             });
 
+            if (input.signatures && input.signatures.length > 0) {
+              const baseUrl =
+                process.env.APP_URL ||
+                process.env.VITE_APP_URL ||
+                "http://localhost:3000";
+              const docSignatures = input.signatures.map((sigInput) => ({
+                ...sigInput,
+                verificationToken: crypto.randomBytes(32).toString("hex"),
+              }));
+
+              yield* documentQueries.createDocumentSignatures(
+                docSignatures.map((sig, index) => ({
+                  documentId: document.id,
+                  signedByUserId: sig.userId,
+                  signerName: sig.userName,
+                  purpose: sig.purpose,
+                  signatureOrder: index + 1,
+                  qrCodePosition: {
+                    x: sig.x,
+                    y: sig.y,
+                    width: sig.width,
+                    height: sig.height,
+                    page: sig.page,
+                  },
+                  verificationToken: sig.verificationToken,
+                  verificationUrl: `${baseUrl}/verify/${sig.verificationToken}`,
+                  signatureData: "JWT-SIGNATURE",
+                  fileHash: "HASH",
+                })),
+              );
+            }
+
             // Generate TTE request token
             const tteToken = yield* createTTERequestToken({
               documentId: document.id,
@@ -227,11 +404,14 @@ export const generateDocumentRouter = createTRPCRouter({
             });
 
             // Send TTE request email
-            const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "http://localhost:3000";
+            const appUrl =
+              process.env.APP_URL ||
+              process.env.VITE_APP_URL ||
+              "http://localhost:3000";
             const tteLink = `${appUrl}/tte/sign-spk?token=${tteToken}`;
-            
+
             yield* Effect.tryPromise({
-              try: () => 
+              try: () =>
                 emailService.sendTTERequest({
                   email: worksheet.order.user.email,
                   signerName: company.headOfCompany,
@@ -239,9 +419,10 @@ export const generateDocumentRouter = createTRPCRouter({
                   tteLink,
                 }),
               catch: (error) => {
-                logError("generateSpkDocument", "Failed to send TTE email", { error });
-                // We don't fail the request if email fails, but we log it.
-              }
+                logError("generateSpkDocument", "Failed to send TTE email", {
+                  error,
+                });
+              },
             });
 
             return {
@@ -257,13 +438,13 @@ export const generateDocumentRouter = createTRPCRouter({
   generateTagihanDocument: withPermission("documents.create")
     .input(generateDocumentSchema.generateTagihanDocumentSchema)
     .mutation(
-      async ({ input }) =>
+      async ({ input, ctx }) =>
         await runEffect(
           Effect.gen(function* () {
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
-                { unmask: true }
+                { unmask: true },
               );
 
             if (!worksheet) {
@@ -287,8 +468,6 @@ export const generateDocumentRouter = createTRPCRouter({
               0,
             );
 
-            // Sum subTotal from orderItems whose matching worksheetItem is ready.
-            // Uses the snapshotted price from the order (not the current catalog price).
             const totalItemCost = worksheet.order.items.reduce(
               (total, orderItem) => {
                 const isReady = worksheet.items.some(
@@ -329,17 +508,104 @@ export const generateDocumentRouter = createTRPCRouter({
               },
             });
 
-            // const uploadedTagihan = yield* storageService.upload(
-            //   tagihan as Buffer,
-            //   {
-            //     filename: `tagihan-${input.letterNumber}.pdf`,
-            //     contentType: "application/pdf",
-            //     folder: "generated-documents/tagihans",
-            //   },
-            // );
+            let tagihanBuffer = Buffer.from(tagihan as Buffer);
+
+            if (input.signatures && input.signatures.length > 0) {
+              const baseUrl =
+                process.env.APP_URL ||
+                process.env.VITE_APP_URL ||
+                "http://localhost:3000";
+              const docSignatures = [];
+
+              for (const sigInput of input.signatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.letterNumber,
+                  "worksheet",
+                  input.worksheetId,
+                  "invoice",
+                  "temp-url",
+                  tagihanBuffer,
+                  sigInput.userId,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
+                  signatureData: signature.signatureData,
+                  verificationToken: signature.verificationToken,
+                  fileHash: signature.fileHash,
+                });
+              }
+
+              const qrCodeData = docSignatures.map((sig) => ({
+                signature: {
+                  userId: sig.userId,
+                  userName: sig.userName,
+                  purpose: sig.purpose,
+                  verificationUrl: sig.verificationUrl,
+                },
+                position: {
+                  x: sig.x,
+                  y: sig.y,
+                  width: sig.width,
+                  height: sig.height,
+                  page: sig.page,
+                },
+              }));
+
+              const signedPdf = yield* pdfSigningService.embedQRCodesInPDF(
+                tagihanBuffer,
+                qrCodeData,
+              );
+              tagihanBuffer = Buffer.from(signedPdf);
+
+              const filename = `tagihan-${input.letterNumber}.pdf`;
+              const uploadedFile = yield* storageService.upload(tagihanBuffer, {
+                filename,
+                contentType: "application/pdf",
+                folder: "documents/worksheet/invoices",
+              });
+
+              const documentNumber = `DOC-INVOICE-${input.letterNumber}`;
+              const document = yield* documentQueries.createDocument({
+                documentNumber,
+                type: "invoice",
+                title: `Invoice / Tagihan - ${input.letterNumber}`,
+                description: `Invoice untuk Worksheet ${input.worksheetId}`,
+                entityType: "worksheet",
+                entityId: input.worksheetId,
+                fileUrl: uploadedFile.key,
+                fileName: filename,
+                fileSize: tagihanBuffer.length,
+                mimeType: "application/pdf",
+                uploadedByUserId: ctx.user.id,
+              });
+
+              yield* documentQueries.createDocumentSignatures(
+                docSignatures.map((sig, index) => ({
+                  documentId: document.id,
+                  signedByUserId: sig.userId,
+                  signerName: sig.userName,
+                  purpose: sig.purpose,
+                  signatureOrder: index + 1,
+                  qrCodePosition: {
+                    x: sig.x,
+                    y: sig.y,
+                    width: sig.width,
+                    height: sig.height,
+                    page: sig.page,
+                  },
+                  verificationToken: sig.verificationToken,
+                  verificationUrl: sig.verificationUrl,
+                  signatureData: sig.signatureData,
+                  fileHash: sig.fileHash,
+                })),
+              );
+            }
 
             return {
-              base64: Buffer.from(tagihan as Buffer).toString("base64"),
+              base64: tagihanBuffer.toString("base64"),
               filename: `tagihan-${input.letterNumber}.pdf`,
               contentType: "application/pdf",
             };
@@ -350,13 +616,13 @@ export const generateDocumentRouter = createTRPCRouter({
   generateAssignmentLetter: withPermission("documents-spt.create")
     .input(generateDocumentSchema.generateAssignmentLetter)
     .mutation(
-      async ({ input }) =>
+      async ({ input, ctx }) =>
         await runEffect(
           Effect.gen(function* () {
             const worksheet =
               yield* worksheetQueries.getWorksheetTransactionDetail(
                 input.worksheetId,
-                { unmask: true }
+                { unmask: true },
               );
 
             if (!worksheet) {
@@ -374,7 +640,6 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            // check if worksheet has startDate and endDate
             if (!worksheet.startDate || !worksheet.endDate) {
               throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -382,7 +647,6 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            // check if worksheet has assignment details
             if (!worksheet.assignments || worksheet.assignments.length === 0) {
               throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -425,10 +689,104 @@ export const generateDocumentRouter = createTRPCRouter({
               },
             });
 
+            let sptBuffer = Buffer.from(assignmentLetter as Buffer);
+
+            if (input.signatures && input.signatures.length > 0) {
+              const baseUrl =
+                process.env.APP_URL ||
+                process.env.VITE_APP_URL ||
+                "http://localhost:3000";
+              const docSignatures = [];
+
+              for (const sigInput of input.signatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.assignmentLetterNumber,
+                  "worksheet",
+                  input.worksheetId,
+                  "assignment_letter",
+                  "temp-url",
+                  sptBuffer,
+                  sigInput.userId,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
+                  signatureData: signature.signatureData,
+                  verificationToken: signature.verificationToken,
+                  fileHash: signature.fileHash,
+                });
+              }
+
+              const qrCodeData = docSignatures.map((sig) => ({
+                signature: {
+                  userId: sig.userId,
+                  userName: sig.userName,
+                  purpose: sig.purpose,
+                  verificationUrl: sig.verificationUrl,
+                },
+                position: {
+                  x: sig.x,
+                  y: sig.y,
+                  width: sig.width,
+                  height: sig.height,
+                  page: sig.page,
+                },
+              }));
+
+              const signedPdf = yield* pdfSigningService.embedQRCodesInPDF(
+                sptBuffer,
+                qrCodeData,
+              );
+              sptBuffer = Buffer.from(signedPdf);
+
+              const filename = `surat-tugas-${input.assignmentLetterNumber}.pdf`;
+              const uploadedFile = yield* storageService.upload(sptBuffer, {
+                filename,
+                contentType: "application/pdf",
+                folder: "documents/worksheet/assignment-letters",
+              });
+
+              const documentNumber = `DOC-SPT-${input.assignmentLetterNumber}`;
+              const document = yield* documentQueries.createDocument({
+                documentNumber,
+                type: "assignment_letter",
+                title: `Surat Tugas - ${input.assignmentLetterNumber}`,
+                description: `SPT untuk Worksheet ${input.worksheetId}`,
+                entityType: "worksheet",
+                entityId: input.worksheetId,
+                fileUrl: uploadedFile.key,
+                fileName: filename,
+                fileSize: sptBuffer.length,
+                mimeType: "application/pdf",
+                uploadedByUserId: ctx.user.id,
+              });
+
+              yield* documentQueries.createDocumentSignatures(
+                docSignatures.map((sig, index) => ({
+                  documentId: document.id,
+                  signedByUserId: sig.userId,
+                  signerName: sig.userName,
+                  purpose: sig.purpose,
+                  signatureOrder: index + 1,
+                  qrCodePosition: {
+                    x: sig.x,
+                    y: sig.y,
+                    width: sig.width,
+                    height: sig.height,
+                    page: sig.page,
+                  },
+                  verificationToken: sig.verificationToken,
+                  verificationUrl: sig.verificationUrl,
+                  signatureData: sig.signatureData,
+                  fileHash: sig.fileHash,
+                })),
+              );
+            }
+
             return {
-              base64: Buffer.from(assignmentLetter as Buffer).toString(
-                "base64",
-              ),
+              base64: sptBuffer.toString("base64"),
               filename: `surat-tugas-${input.assignmentLetterNumber}.pdf`,
               contentType: "application/pdf",
             };
