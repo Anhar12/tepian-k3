@@ -27,10 +27,16 @@ const updateClusterSchema = createUpdateSchema(clusters, {
   description: z.optional(z.string().min(1).max(1000)),
 });
 
+const reorderClusterSchema = z.object({
+  id: z.uuidv7(),
+  direction: z.enum(["left", "right"]),
+});
+
 const clusterSchema = {
   getAllClustersSchema,
   createClusterSchema,
   updateClusterSchema,
+  reorderClusterSchema,
 };
 
 export default clusterSchema;

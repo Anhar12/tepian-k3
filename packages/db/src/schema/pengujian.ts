@@ -370,11 +370,13 @@ export const clusters = createTable(
       .$default(() => uuidv7()),
     name: varchar("name", { length: 250 }).notNull().unique(),
     description: text("description"),
+    sortOrder: integer("sort_order").notNull().default(0),
     ...timestamps,
   },
   (table) => [
     index("cluster_id_idx").using("btree", table.id),
     index("cluster_name_idx").using("btree", table.name),
+    index("cluster_sort_order_idx").using("btree", table.sortOrder),
   ],
 );
 
@@ -558,8 +560,9 @@ export const order = createTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    companyId: uuid("company_id")
-      .references(() => userCompanies.id, { onDelete: "cascade" }),
+    companyId: uuid("company_id").references(() => userCompanies.id, {
+      onDelete: "cascade",
+    }),
     status: orderStatusEnum("status").notNull().default("pending"),
     totalAmount: integer("total_amount").notNull(),
 
@@ -572,9 +575,7 @@ export const order = createTable(
       .notNull()
       .default("unpaid"),
     paymentRejectedReason: text("payment_rejected_reason"),
-    fundingType: orderFundingTypeEnum("funding_type")
-      .notNull()
-      .default("pnbp"),
+    fundingType: orderFundingTypeEnum("funding_type").notNull().default("pnbp"),
 
     // Revision tracking
     revisionCount: integer("revision_count").notNull().default(0),
@@ -657,10 +658,13 @@ export const orderItem = createTable(
       .notNull()
       .references(() => order.id, { onDelete: "cascade" }),
     type: orderItemTypeEnum("type").notNull().default("pengujian"),
-    parameterId: uuid("parameter_id")
-      .references(() => parameters.id, { onDelete: "cascade" }),
-    locationId: uuid("location_id")
-      .references(() => userCompanyTestingLocation.id, { onDelete: "cascade" }),
+    parameterId: uuid("parameter_id").references(() => parameters.id, {
+      onDelete: "cascade",
+    }),
+    locationId: uuid("location_id").references(
+      () => userCompanyTestingLocation.id,
+      { onDelete: "cascade" },
+    ),
     pelatihanId: uuid("pelatihan_id"), // Nullable by default
     quantity: integer("quantity").notNull().default(1),
     price: integer("price").notNull(),
@@ -960,11 +964,18 @@ export const worksheetOperationalCosts = createTable(
     unitCost: integer("unit_cost"),
     note: text("note"),
     sortOrder: integer("sort_order").notNull().default(0),
-    verificationStatus: operationalCostVerificationStatusEnum("verification_status")
+    verificationStatus: operationalCostVerificationStatusEnum(
+      "verification_status",
+    )
       .notNull()
       .default("draft"),
-    verifiedBy: uuid("verified_by").references(() => users.id, { onDelete: "set null" }),
-    verifiedAt: timestamp("verified_at", { withTimezone: true, mode: "string" }),
+    verifiedBy: uuid("verified_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    verifiedAt: timestamp("verified_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
     verificationNote: text("verification_note"),
     sbmYear: integer("sbm_year"),
     ...timestamps,

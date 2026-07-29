@@ -25,16 +25,20 @@ import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
-// import { getPublicUrl } from "@/utils/url";
 import { openBase64InNewTab } from "@/utils/download";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import generateDocumentSchema from "@tepian-k3/schema/pengujian/generate-document.schema";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useEffect } from "react";
+import { CalendarIcon, ArrowLeft, ArrowRight, QrCode } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import type z from "zod";
+import {
+  QRSignaturePlacer,
+  type SignaturePosition,
+  type SignerInfo,
+} from "@/components/document-signing";
 
 interface GenerateSPKDialogProps {
   worksheetId: string;
@@ -47,12 +51,29 @@ export default function GenerateSPKDialog({
   isOpen,
   setIsOpen,
 }: GenerateSPKDialogProps) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [signatures, setSignatures] = useState<SignaturePosition[]>([]);
+
+  const meQuery = useQuery(trpc.platform.auth.me.queryOptions());
+  const currentUser = meQuery.data;
+
+  const defaultSigners: SignerInfo[] = currentUser
+    ? [
+        {
+          userId: currentUser.id,
+          userName: currentUser.name || "Kepala Balai K3",
+          purpose: "Kepala Balai K3",
+        },
+      ]
+    : [];
+
   const form = useForm<
-    z.infer<typeof generateDocumentSchema.generateSpkDocumentSchema>
+    z.input<typeof generateDocumentSchema.generateSpkDocumentSchema>
   >({
     resolver: zodResolver(generateDocumentSchema.generateSpkDocumentSchema),
     defaultValues: {
       worksheetId,
+      signatures: [],
     },
   });
 
@@ -60,7 +81,6 @@ export default function GenerateSPKDialog({
     trpc.pengujian.generateDocument.generateSpkDocument.mutationOptions({
       onSuccess: (data) => {
         globalSuccessToast("Surat SPK berhasil dibuat");
-        // window.open(getPublicUrl(data.offeringLetterUrl), "_blank");
         openBase64InNewTab(data.base64, data.contentType);
         setIsOpen(false);
       },
@@ -71,29 +91,77 @@ export default function GenerateSPKDialog({
   );
 
   function handleSubmit(
-    data: z.infer<typeof generateDocumentSchema.generateSpkDocumentSchema>,
+    data: z.input<typeof generateDocumentSchema.generateSpkDocumentSchema>,
   ) {
-    generateSpkMutation.mutate(data);
+    const finalData = {
+      ...data,
+      signatures: signatures.map((s) => ({
+        userId: s.userId,
+        userName: s.userName,
+        purpose: s.purpose,
+        page: s.page ?? 0,
+        x: s.x ?? 450,
+        y: s.y ?? 700,
+        width: s.width ?? 100,
+        height: s.height ?? 100,
+      })),
+    };
+    generateSpkMutation.mutate(finalData);
   }
 
-  useEffect(() => {
-    if (!isOpen) {
-      form.reset();
+  const handleNextToSignature = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) return;
+
+    if (signatures.length === 0 && currentUser) {
+      setSignatures([
+        {
+          userId: currentUser.id,
+          userName: currentUser.name || "Kepala Balai K3",
+          purpose: "Kepala Balai K3",
+          page: 0,
+          x: 600,
+          y: 900,
+          width: 100,
+          height: 100,
+        },
+      ]);
     }
-  }, [isOpen, form]);
+
+    setStep(2);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setSignatures([]);
+    } else {
+      form.reset({ worksheetId });
+    }
+  }, [isOpen, worksheetId, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <form>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Buat Surat SPK</DialogTitle>
-            <DialogDescription>
-              Isi form berikut untuk membuat surat SPK.
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent className={step === 2 ? "max-w-4xl" : "max-w-md"}>
+        <DialogHeader>
+          <DialogTitle>
+            {step === 1
+              ? "Buat Surat SPK"
+              : "Posisi Tanda Tangan Digital (QR Code)"}
+          </DialogTitle>
+          <DialogDescription>
+            {step === 1
+              ? "Isi form berikut untuk membuat surat SPK."
+              : "Atur posisi dan ukuran QR Code tanda tangan digital pada dokumen."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === 1 ? (
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleNextToSignature();
+            }}
             className="grid gap-4"
           >
             <FieldGroup>
@@ -151,7 +219,9 @@ export default function GenerateSPKDialog({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={new Date(field.value ?? "")}
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           onSelect={(value) => {
                             field.onChange(value?.toISOString() ?? null);
                           }}
@@ -166,16 +236,63 @@ export default function GenerateSPKDialog({
                 )}
               />
             </FieldGroup>
-            <DialogFooter>
-              <DialogClose>Batal</DialogClose>
-              <Button type="submit" disabled={generateSpkMutation.isPending}>
-                {generateSpkMutation.isPending ? <Spinner /> : null}
-                Buat SPK
+            <DialogFooter className="flex gap-2">
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Batal
+                </Button>
+              </DialogClose>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={form.handleSubmit((data) => {
+                  setSignatures([]);
+                  generateSpkMutation.mutate({
+                    ...data,
+                    signatures: [],
+                  });
+                })}
+                disabled={generateSpkMutation.isPending}
+              >
+                Cetak Tanpa QR
+              </Button>
+              <Button type="submit">
+                Atur Posisi TTD <ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
-      </form>
+        ) : (
+          <div className="space-y-4">
+            <QRSignaturePlacer
+              signers={defaultSigners}
+              positions={signatures}
+              onChange={setSignatures}
+              maxPages={5}
+            />
+            <DialogFooter className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep(1)}
+              >
+                <ArrowLeft className="mr-1.5 h-4 w-4" /> Kembali
+              </Button>
+              <Button
+                type="button"
+                onClick={form.handleSubmit(handleSubmit)}
+                disabled={generateSpkMutation.isPending}
+              >
+                {generateSpkMutation.isPending ? (
+                  <Spinner className="mr-2" />
+                ) : (
+                  <QrCode className="mr-2 h-4 w-4" />
+                )}
+                Buat SPK Bertanda Tangan
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+      </DialogContent>
     </Dialog>
   );
 }

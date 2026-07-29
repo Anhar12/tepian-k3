@@ -18,13 +18,15 @@ MAJOR.MINOR.PATCH
 
 ### v1.x.x - Core Platform
 
-| Version    | Description                                            | Status   |
-| ---------- | ------------------------------------------------------ | -------- |
-| **v1.0.0** | Initial release - Auth, Users, Roles, Permissions      | Released |
-| **v1.0.1** | Bug fixes and UI improvements                          | Released |
-| **v1.0.2** | Order system and payment flow                          | Released |
-| **v1.0.3** | Document verification and signing                      | Released |
-| **v1.0.4** | Docker deployment, Dockerfile improvements, env config | Released |
+| Version     | Description                                            | Status   |
+| ----------- | ------------------------------------------------------ | -------- |
+| **v1.0.0**  | Initial release - Auth, Users, Roles, Permissions      | Released |
+| **v1.0.1**  | Bug fixes and UI improvements                          | Released |
+| **v1.0.2**  | Order system and payment flow                          | Released |
+| **v1.0.3**  | Document verification and signing                      | Released |
+| **v1.0.4**  | Docker deployment, Dockerfile improvements, env config | Released |
+| **v1.14.0** | Pelatihan module enhancements and test fixes           | Released |
+| **v1.15.0** | QR Digital Signature, Audit Trail, and Cluster Reorder | Released |
 
 ### Existing Module Changes (MINOR / PATCH)
 

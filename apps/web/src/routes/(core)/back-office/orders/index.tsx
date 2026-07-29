@@ -18,11 +18,13 @@ import { authMeQueryOptions } from "@/utils/auth-query";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { trpc } from "@/utils/trpc";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import type { OrderStatus, Role, WorksheetStatus } from "@tepian-k3/constants";
 import orderSchema from "@tepian-k3/schema/pengujian/order.schema";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
+import { QuickAuditModal } from "./-components/quick-audit-modal";
 
 /** A role-locked orders view: filter by order status and/or worksheet status. */
 interface RoleLock {
@@ -90,23 +92,20 @@ function RouteComponent() {
       : undefined;
   }, [lock]);
 
-  const effectiveParams = useMemo(
-    () => {
-      const base = {
-        ...params,
-        fundingType: params.fundingType || "pnbp",
-      };
-      return lock
-        ? {
-            ...base,
-            status: undefined,
-            statuses: lock.statuses,
-            worksheetStatuses: lock.worksheetStatuses,
-          }
-        : base;
-    },
-    [lock, params],
-  );
+  const effectiveParams = useMemo(() => {
+    const base = {
+      ...params,
+      fundingType: params.fundingType || "pnbp",
+    };
+    return lock
+      ? {
+          ...base,
+          status: undefined,
+          statuses: lock.statuses,
+          worksheetStatuses: lock.worksheetStatuses,
+        }
+      : base;
+  }, [lock, params]);
 
   const {
     data: ordersData,
@@ -116,11 +115,62 @@ function RouteComponent() {
     trpc.pengujian.order.getAllOrdersPaginated.queryOptions(effectiveParams),
   );
 
+  const [selectedAuditOrderId, setSelectedAuditOrderId] = useState<
+    string | null
+  >(null);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+
+  const downloadExcelMutation = useMutation(
+    trpc.pengujian.auditTrail.downloadExcel.mutationOptions({
+      onSuccess: (res) => {
+        const link = document.createElement("a");
+        link.href = `data:${res.mimeType};base64,${res.base64}`;
+        link.download = res.filename;
+        link.click();
+        globalSuccessToast("Rekap Excel berhasil diunduh");
+      },
+      onError: (err) => {
+        globalErrorToast(`Gagal mendownload Excel: ${err.message}`);
+      },
+    }),
+  );
+
+  const downloadZipMutation = useMutation(
+    trpc.pengujian.auditTrail.downloadZip.mutationOptions({
+      onSuccess: (res) => {
+        const link = document.createElement("a");
+        link.href = `data:${res.mimeType};base64,${res.base64}`;
+        link.download = res.filename;
+        link.click();
+        globalSuccessToast("Bundle Dokumen ZIP berhasil diunduh");
+      },
+      onError: (err) => {
+        globalErrorToast(`Gagal mendownload ZIP: ${err.message}`);
+      },
+    }),
+  );
+
+  const handleOpenAuditModal = (orderId: string) => {
+    setSelectedAuditOrderId(orderId);
+    setIsAuditModalOpen(true);
+  };
+
+  const handleDownloadExcel = (orderId: string) => {
+    downloadExcelMutation.mutate({ orderId });
+  };
+
+  const handleDownloadZip = (orderId: string) => {
+    downloadZipMutation.mutate({ orderId, includeZipDocs: true });
+  };
+
   const columns = useMemo(
     () =>
       getOrdersColumns({
         currentPage: params.page,
         perPage: params.perPage,
+        onOpenAuditModal: handleOpenAuditModal,
+        onDownloadExcel: handleDownloadExcel,
+        onDownloadZip: handleDownloadZip,
       }),
     [params.page, params.perPage],
   );
@@ -153,7 +203,11 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
+      <Tabs
+        value={currentTab}
+        onValueChange={handleTabChange}
+        className="w-full"
+      >
         <TabsList className="grid w-80 grid-cols-2">
           <TabsTrigger value="pnbp">PNBP</TabsTrigger>
           <TabsTrigger value="dipa">DIPA</TabsTrigger>
@@ -163,95 +217,103 @@ function RouteComponent() {
       <div className="flex flex-col">
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-row items-center gap-2">
-          <div className="flex flex-col gap-1.5">
-          <Label className="whitespace-nowrap font-medium text-muted-foreground flex items-center gap-2">
-            🔍 Filter berdasarkan Status Pesanan:
-          </Label>
-          <p className="text-xs text-muted-foreground">Pilih status untuk melihat pesanan tertentu</p>
-          {lockedLabels ? (
-            <div className="flex flex-wrap gap-1.5">
-              {lockedLabels.map((label) => (
-                <Badge
-                  key={label}
-                  variant="secondary"
-                  className="bg-blue-50 text-blue-700"
+            <div className="flex flex-col gap-1.5">
+              <Label className="flex items-center gap-2 font-medium whitespace-nowrap text-muted-foreground">
+                🔍 Filter berdasarkan Status Pesanan:
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Pilih status untuk melihat pesanan tertentu
+              </p>
+              {lockedLabels ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {lockedLabels.map((label) => (
+                    <Badge
+                      key={label}
+                      variant="secondary"
+                      className="bg-blue-50 text-blue-700"
+                    >
+                      {label}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <Select
+                  value={params.status || "all"}
+                  onValueChange={(value) => {
+                    navigate({
+                      to: "/back-office/orders",
+                      search: {
+                        ...params,
+                        status:
+                          value === "all" ? undefined : (value as OrderStatus),
+                        page: 1,
+                      },
+                    });
+                  }}
                 >
-                  {label}
-                </Badge>
-              ))}
+                  <SelectTrigger className="w-45">
+                    <SelectValue placeholder="Semua Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Status</SelectItem>
+                    <SelectItem value="pending">Menunggu</SelectItem>
+                    <SelectItem value="kaji_ulang">Kaji Ulang</SelectItem>
+                    <SelectItem value="kaji_ulang_disetujui">
+                      Kaji Ulang Disetujui
+                    </SelectItem>
+                    <SelectItem value="penawaran_review">
+                      Menunggu Persetujuan Penawaran
+                    </SelectItem>
+                    <SelectItem value="penawaran_diterbitkan">
+                      Penawaran Diterbitkan
+                    </SelectItem>
+                    <SelectItem value="revision">Revisi</SelectItem>
+                    <SelectItem value="persetujuan_disetujui">
+                      Persetujuan Disetujui
+                    </SelectItem>
+                    <SelectItem value="tagihan_diterbitkan">
+                      Tagihan Diterbitkan
+                    </SelectItem>
+                    <SelectItem value="pembayaran_diterima">
+                      Pembayaran Diterima
+                    </SelectItem>
+                    <SelectItem value="proses_pengambilan_sampel">
+                      Proses Pengambilan Sampel
+                    </SelectItem>
+                    <SelectItem value="completed">Selesai</SelectItem>
+                    <SelectItem value="rejected">Ditolak</SelectItem>
+                    <SelectItem value="cancelled">Dibatalkan</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
-          ) : (
-            <Select
-              value={params.status || "all"}
-              onValueChange={(value) => {
-                navigate({
-                  to: "/back-office/orders",
-                  search: {
-                    ...params,
-                    status:
-                      value === "all" ? undefined : (value as OrderStatus),
-                    page: 1,
-                  },
-                });
-              }}
-            >
-              <SelectTrigger className="w-45">
-                <SelectValue placeholder="Semua Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="pending">Menunggu</SelectItem>
-                <SelectItem value="kaji_ulang">Kaji Ulang</SelectItem>
-                <SelectItem value="kaji_ulang_disetujui">
-                  Kaji Ulang Disetujui
-                </SelectItem>
-                <SelectItem value="penawaran_review">
-                  Menunggu Persetujuan Penawaran
-                </SelectItem>
-                <SelectItem value="penawaran_diterbitkan">
-                  Penawaran Diterbitkan
-                </SelectItem>
-                <SelectItem value="revision">Revisi</SelectItem>
-                <SelectItem value="persetujuan_disetujui">
-                  Persetujuan Disetujui
-                </SelectItem>
-                <SelectItem value="tagihan_diterbitkan">
-                  Tagihan Diterbitkan
-                </SelectItem>
-                <SelectItem value="pembayaran_diterima">
-                  Pembayaran Diterima
-                </SelectItem>
-                <SelectItem value="proses_pengambilan_sampel">
-                  Proses Pengambilan Sampel
-                </SelectItem>
-                <SelectItem value="completed">Selesai</SelectItem>
-                <SelectItem value="rejected">Ditolak</SelectItem>
-                <SelectItem value="cancelled">Dibatalkan</SelectItem>
-              </SelectContent>
-            </Select>
+          </div>
+
+          {ordersData && (
+            <div className="text-sm text-muted-foreground">
+              Halaman {params.page} dari {ordersData.pageCount}
+            </div>
           )}
         </div>
-        </div>
 
-        {ordersData && (
-          <div className="text-sm text-muted-foreground">
-            Halaman {params.page} dari {ordersData.pageCount}
-          </div>
-        )}
-      </div>
+        <DataTable
+          table={table}
+          isLoading={isLoading}
+          error={error}
+          emptyMessage="Tidak ada order ditemukan."
+          emptyDescription="Belum ada order yang dibuat oleh pelanggan."
+        >
+          <DataTableToolbar table={table}>
+            <DataTableFilterMenu table={table} />
+            <DataTableSortList table={table} />
+          </DataTableToolbar>
+        </DataTable>
 
-      <DataTable
-        table={table}
-        isLoading={isLoading}
-        error={error}
-        emptyMessage="Tidak ada order ditemukan."
-        emptyDescription="Belum ada order yang dibuat oleh pelanggan."
-      >
-        <DataTableToolbar table={table}>
-          <DataTableFilterMenu table={table} />
-          <DataTableSortList table={table} />
-        </DataTableToolbar>
-      </DataTable>
+        <QuickAuditModal
+          orderId={selectedAuditOrderId}
+          open={isAuditModalOpen}
+          onOpenChange={setIsAuditModalOpen}
+        />
       </div>
     </div>
   );

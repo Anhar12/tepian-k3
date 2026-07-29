@@ -1,4 +1,6 @@
-import getClustersColumns, { clusterActionConfig } from "@/components/columns/clusters-columns";
+import getClustersColumns, {
+  clusterActionConfig,
+} from "@/components/columns/clusters-columns";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableFilterMenu } from "@/components/data-table/data-table-filter-menu";
 import { DataTableSortList } from "@/components/data-table/data-table-sort-list";
@@ -15,8 +17,12 @@ import { PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
 import { SoftDeleteToggle } from "@/components/soft-delete-toggle";
-import { useCrudRowActions, CrudRowActionsModal } from "@/components/crud-row-actions";
+import {
+  useCrudRowActions,
+  CrudRowActionsModal,
+} from "@/components/crud-row-actions";
 import type { Clusters } from "@tepian-k3/types/pengujian/clusters.types";
+import { ClusterReorderPanel } from "./-components/cluster-reorder-panel";
 
 export const Route = createFileRoute("/(core)/back-office/clusters/")({
   validateSearch: clusterSchema.getAllClustersSchema,
@@ -39,8 +45,9 @@ function RouteComponent() {
   );
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
-  
-  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } = useCrudRowActions<Clusters>();
+
+  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } =
+    useCrudRowActions<Clusters>();
 
   const columns = useMemo(
     () =>
@@ -68,7 +75,7 @@ function RouteComponent() {
   return (
     <div className="flex flex-col">
       <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="flex flex-row gap-2 items-center">
+        <div className="flex flex-row items-center gap-2">
           <SoftDeleteToggle
             checked={showDeleted ?? false}
             onCheckedChange={(checked) => {
@@ -92,6 +99,11 @@ function RouteComponent() {
           </Button>
         </PermissionGate>
       </div>
+
+      <PermissionGate permission="clusters.update">
+        <ClusterReorderPanel />
+      </PermissionGate>
+
       <DataTable
         table={table}
         isLoading={isLoading}
@@ -105,7 +117,7 @@ function RouteComponent() {
           <DataTableSortList table={table} />
         </DataTableToolbar>
       </DataTable>
-      
+
       <CrudRowActionsModal
         config={clusterActionConfig}
         row={selectedRow}
