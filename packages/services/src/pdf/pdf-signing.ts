@@ -106,35 +106,49 @@ export const embedQRCodesInPDF = (
         });
       }
 
+      const pageWidth = page.getWidth();
       const pageHeight = page.getHeight();
 
-      // PDF coordinates are from bottom-left, but our input is from top-left
-      // Convert Y coordinate from top-left to bottom-left
-      const yFromBottom = pageHeight - position.y - position.height;
+      // Frontend Canvas Reference Dimensions (matching QRSignaturePlacer: 800 x 1100)
+      const CANVAS_WIDTH = 800;
+      const CANVAS_HEIGHT = 1100;
+
+      // Scale coordinates from frontend canvas to actual PDF page dimensions
+      const pdfX = (position.x / CANVAS_WIDTH) * pageWidth;
+      const pdfY = (position.y / CANVAS_HEIGHT) * pageHeight;
+      const pdfW = (position.width / CANVAS_WIDTH) * pageWidth;
+      const pdfH = (position.height / CANVAS_HEIGHT) * pageHeight;
+
+      // PDF coordinates are from bottom-left, but input is top-left
+      const yFromBottom = pageHeight - pdfY - pdfH;
+
+      // Safety bounds to guarantee QR code stays within printable page area
+      const safeX = Math.max(0, Math.min(pdfX, pageWidth - pdfW));
+      const safeY = Math.max(0, Math.min(yFromBottom, pageHeight - pdfH));
 
       // Draw QR code on the page
       page.drawImage(qrImage, {
-        x: position.x,
-        y: yFromBottom,
-        width: position.width,
-        height: position.height,
+        x: safeX,
+        y: safeY,
+        width: pdfW,
+        height: pdfH,
       });
 
       // Optionally add signature text below QR code
       const fontSize = 8;
-      const textY = yFromBottom - 12;
+      const textY = safeY - 12;
 
       if (textY > 0) {
         // Only draw text if there's space
         page.drawText(`Signed by: ${signature.userName}`, {
-          x: position.x,
+          x: safeX,
           y: textY,
           size: fontSize,
           color: rgb(0, 0, 0),
         });
 
         page.drawText(`Purpose: ${signature.purpose.substring(0, 40)}`, {
-          x: position.x,
+          x: safeX,
           y: textY - fontSize - 2,
           size: fontSize - 1,
           color: rgb(0.3, 0.3, 0.3),
