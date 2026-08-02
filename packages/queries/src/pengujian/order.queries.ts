@@ -942,13 +942,17 @@ const orderQueries = {
 
   acceptOffer(orderId: string, userId: string) {
     return Effect.gen(function* () {
-      // check if order exists and is in offered status
+      // check if order exists and is in offered/penawaran status
       const orderToAccept = yield* Effect.tryPromise({
         try: () =>
           db.query.order.findFirst({
             where: and(
               eq(order.id, orderId),
-              eq(order.status, "penawaran_diterbitkan"),
+              inArray(order.status, [
+                "penawaran_diterbitkan",
+                "penawaran_review",
+                "kaji_ulang_disetujui",
+              ]),
             ),
           }),
         catch: (error) => {
@@ -1081,13 +1085,17 @@ const orderQueries = {
 
   reviseOrder(orderId: string, userId: string, revisionNote: string) {
     return Effect.gen(function* () {
-      // check if order exists and is in offered status
+      // check if order exists and is in offered/penawaran status
       const orderToRevise = yield* Effect.tryPromise({
         try: () =>
           db.query.order.findFirst({
             where: and(
               eq(order.id, orderId),
-              eq(order.status, "penawaran_diterbitkan"),
+              inArray(order.status, [
+                "penawaran_diterbitkan",
+                "penawaran_review",
+                "kaji_ulang_disetujui",
+              ]),
             ),
           }),
         catch: (error) => {
