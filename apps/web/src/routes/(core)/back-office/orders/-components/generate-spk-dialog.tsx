@@ -112,6 +112,19 @@ export default function GenerateSPKDialog({
     generateSpkMutation.mutate(finalData);
   }
 
+  const previewSpkMutation = useMutation(
+    trpc.pengujian.generateDocument.previewSpkDocument.mutationOptions({
+      onSuccess: (data) => {
+        setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
+      },
+      onError: (error) => {
+        globalErrorToast(
+          "Gagal memuat pratinjau dokumen: " + (error?.message || ""),
+        );
+      },
+    }),
+  );
+
   const handleNextToSignature = async () => {
     const isValid = await form.trigger();
     if (!isValid) return;
@@ -132,17 +145,10 @@ export default function GenerateSPKDialog({
     }
 
     setPdfPreviewUrl(undefined);
-    generateSpkMutation.mutate(
-      {
-        ...form.getValues(),
-        signatures: [],
-      },
-      {
-        onSuccess: (data) => {
-          setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
-        },
-      },
-    );
+    previewSpkMutation.mutate({
+      ...form.getValues(),
+      signatures: [],
+    });
 
     setStep(2);
   };

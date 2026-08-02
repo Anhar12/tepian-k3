@@ -808,4 +808,294 @@ export const generateDocumentRouter = createTRPCRouter({
           }),
         ),
     ),
+
+  previewOfferingLetter: withPermission("documents.create")
+    .input(generateDocumentSchema.generateOfferingLetterDocumentSchema)
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const worksheet =
+              yield* worksheetQueries.getWorksheetTransactionDetail(
+                input.worksheetId,
+                { unmask: true },
+              );
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            const company = worksheet.order.company;
+            if (!company) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Perusahaan tidak ditemukan pada pesanan ini",
+              });
+            }
+
+            const offeringLetterHeader = yield* Effect.tryPromise({
+              try: () =>
+                generateOfferingLetterHeaderPdf({
+                  companyName: company.name,
+                  regencyName: company.regency.name,
+                  letterNumber: input.letterNumber,
+                  referenceNumber: input.referenceNumber ?? "",
+                  referenceDate: input.referenceDate ?? "",
+                  adminEmail: input.adminEmail || ADMIN_EMAIL,
+                  adminContact: input.adminContact || ADMIN_PHONE,
+                  companyRepName: company.headOfCompany,
+                  companyRepPosition: company.headOfCompanyPosition,
+                }),
+              catch: (error) =>
+                handleTRPCError(
+                  error,
+                  "Gagal menghasilkan header surat penawaran",
+                  "INTERNAL_SERVER_ERROR",
+                ),
+            });
+
+            const offeringLetter = yield* Effect.tryPromise({
+              try: () =>
+                generateOfferingLetterPdf({
+                  worksheet,
+                  companyName: company.name,
+                  letterNumber: input.letterNumber,
+                  companyBankName: company.companyBankName,
+                  companyBankAccount: company.companyBankAccount,
+                  companyBankAccountName: company.companyBankAccountName,
+                  companyRepName: company.headOfCompany,
+                  companyRepPosition: company.headOfCompanyPosition,
+                }),
+              catch: (error) =>
+                handleTRPCError(
+                  error,
+                  "Gagal menghasilkan surat penawaran",
+                  "INTERNAL_SERVER_ERROR",
+                ),
+            });
+
+            const pdfBuffer = Buffer.from(
+              (yield* addCoverPage(
+                offeringLetterHeader as Buffer,
+                offeringLetter as Buffer,
+              )) as Buffer,
+            );
+
+            return {
+              base64: pdfBuffer.toString("base64"),
+              contentType: "application/pdf",
+            };
+          }),
+        ),
+    ),
+
+  previewSpkDocument: withPermission("documents.create")
+    .input(generateDocumentSchema.generateSpkDocumentSchema)
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const worksheet =
+              yield* worksheetQueries.getWorksheetTransactionDetail(
+                input.worksheetId,
+                { unmask: true },
+              );
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            const company = worksheet.order.company;
+            if (!company) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Perusahaan tidak ditemukan pada pesanan ini",
+              });
+            }
+
+            const spk = yield* Effect.tryPromise({
+              try: () =>
+                generateSpkPdf({
+                  worksheet,
+                  agreementDate: input.agreementDate,
+                  companyRepName: company.headOfCompany,
+                  companyRepPosition: company.headOfCompanyPosition,
+                  companyRepAddress: company.address ?? "",
+                  companyBankName: company.companyBankName,
+                  companyBankAccount: company.companyBankAccount,
+                  companyBankAccountName: company.companyBankAccountName,
+                  operationalBankName: OPERATIONAL_BANK_NAME,
+                  operationalBankAccount: OPERATIONAL_BANK_ACCOUNT,
+                  operationalBankAccountName: OPERATIONAL_BANK_ACCOUNT_NAME,
+                  letterNumber: input.letterNumber,
+                  companyName: company.name,
+                }),
+              catch: (error) =>
+                handleTRPCError(
+                  error,
+                  "Gagal menghasilkan dokumen SPK",
+                  "INTERNAL_SERVER_ERROR",
+                ),
+            });
+
+            return {
+              base64: Buffer.from(spk as Buffer).toString("base64"),
+              contentType: "application/pdf",
+            };
+          }),
+        ),
+    ),
+
+  previewAssignmentLetter: withPermission("documents.create")
+    .input(generateDocumentSchema.generateAssignmentLetter)
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const worksheet =
+              yield* worksheetQueries.getWorksheetTransactionDetail(
+                input.worksheetId,
+                { unmask: true },
+              );
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            const company = worksheet.order.company;
+            if (!company) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Perusahaan tidak ditemukan pada pesanan ini",
+              });
+            }
+
+            const assignmentLetter = yield* Effect.tryPromise({
+              try: () =>
+                generateAssignmentLetterPdf({
+                  companyName: company.name,
+                  companyRegency: company.regency.name,
+                  orderDate: worksheet.order.createdAt,
+                  assignmentDateStart: worksheet.startDate!,
+                  assignmentDateEnd: worksheet.endDate!,
+                  letterNumber: input.letterNumber,
+                  assignmentLetterNumber: input.assignmentLetterNumber,
+                  spkNumber: input.spkNumber,
+                  spkDate: input.spkDate,
+                  offeringNumber: input.offeringNumber,
+                  offeringDate: input.offeringDate,
+                  financingSource: worksheet.operationalCosts
+                    .map((cost) => cost.item)
+                    .join(", "),
+                  assignees: worksheet.assignments.map((assignee) => ({
+                    ...assignee,
+                    employee: {
+                      ...assignee.employee,
+                      position: assignee.employee.position || null,
+                    },
+                  })),
+                }),
+              catch: (error) =>
+                handleTRPCError(
+                  error,
+                  "Gagal menghasilkan surat tugas",
+                  "INTERNAL_SERVER_ERROR",
+                ),
+            });
+
+            return {
+              base64: Buffer.from(assignmentLetter as Buffer).toString(
+                "base64",
+              ),
+              contentType: "application/pdf",
+            };
+          }),
+        ),
+    ),
+
+  previewTagihanDocument: withPermission("documents.create")
+    .input(generateDocumentSchema.generateTagihanDocumentSchema)
+    .mutation(
+      async ({ input }) =>
+        await runEffect(
+          Effect.gen(function* () {
+            const worksheet =
+              yield* worksheetQueries.getWorksheetTransactionDetail(
+                input.worksheetId,
+                { unmask: true },
+              );
+
+            if (!worksheet) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Worksheet tidak ditemukan",
+              });
+            }
+
+            const company = worksheet.order.company;
+            if (!company) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Perusahaan tidak ditemukan pada pesanan ini",
+              });
+            }
+
+            const operationalCost = worksheet.operationalCosts.reduce(
+              (total, cost) =>
+                total + (cost.unitCost ?? 0) * cost.unitCount * cost.days,
+              0,
+            );
+
+            const totalItemCost = worksheet.order.items.reduce(
+              (total, orderItem) => {
+                const isReady = worksheet.items.some(
+                  (wi) =>
+                    wi.parameterId === orderItem.parameterId &&
+                    wi.locationId === orderItem.locationId &&
+                    wi.isReady,
+                );
+                return total + (isReady ? orderItem.subTotal : 0);
+              },
+              0,
+            );
+
+            const tagihan = yield* Effect.tryPromise({
+              try: () =>
+                generateTagihanPdf({
+                  companyRegency: company.regency.name,
+                  letterNumber: input.letterNumber,
+                  referenceNumber: input.referenceNumber,
+                  referenceDate: input.referenceDate,
+                  billingCode: input.billingCode,
+                  billingAmount: totalItemCost,
+                  operationalAmount: operationalCost,
+                  billingExpiryDate: input.billingExpiryDate,
+                  companyName: company.name,
+                  operationalBankAccount: OPERATIONAL_BANK_ACCOUNT,
+                  operationalBankAccountName: OPERATIONAL_BANK_ACCOUNT_NAME,
+                }),
+              catch: (error) =>
+                handleTRPCError(
+                  error,
+                  "Gagal menghasilkan dokumen tagihan",
+                  "INTERNAL_SERVER_ERROR",
+                ),
+            });
+
+            return {
+              base64: Buffer.from(tagihan as Buffer).toString("base64"),
+              contentType: "application/pdf",
+            };
+          }),
+        ),
+    ),
 });
