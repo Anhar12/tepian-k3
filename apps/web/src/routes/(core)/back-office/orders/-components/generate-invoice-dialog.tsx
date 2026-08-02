@@ -143,6 +143,19 @@ export default function GenerateInvoiceDialog({
     generateInvoiceMutation.mutate(finalData);
   }
 
+  const previewTagihanMutation = useMutation(
+    trpc.pengujian.generateDocument.previewTagihanDocument.mutationOptions({
+      onSuccess: (data) => {
+        setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
+      },
+      onError: (error) => {
+        globalErrorToast(
+          "Gagal memuat pratinjau dokumen: " + (error?.message || ""),
+        );
+      },
+    }),
+  );
+
   const handleNextToSignature = async () => {
     const isValid = await form.trigger();
     if (!isValid) return;
@@ -163,17 +176,10 @@ export default function GenerateInvoiceDialog({
     }
 
     setPdfPreviewUrl(undefined);
-    generateInvoiceMutation.mutate(
-      {
-        ...form.getValues(),
-        signatures: [],
-      },
-      {
-        onSuccess: (data) => {
-          setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
-        },
-      },
-    );
+    previewTagihanMutation.mutate({
+      ...form.getValues(),
+      signatures: [],
+    });
 
     setStep(2);
   };

@@ -107,6 +107,19 @@ export default function GenerateSPTDialog({
     generateAssignmentLetterMutation.mutate(finalData);
   }
 
+  const previewAssignmentLetterMutation = useMutation(
+    trpc.pengujian.generateDocument.previewAssignmentLetter.mutationOptions({
+      onSuccess: (data) => {
+        setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
+      },
+      onError: (error) => {
+        globalErrorToast(
+          "Gagal memuat pratinjau dokumen: " + (error?.message || ""),
+        );
+      },
+    }),
+  );
+
   const handleNextToSignature = async () => {
     const isValid = await form.trigger();
     if (!isValid) return;
@@ -127,17 +140,10 @@ export default function GenerateSPTDialog({
     }
 
     setPdfPreviewUrl(undefined);
-    generateAssignmentLetterMutation.mutate(
-      {
-        ...form.getValues(),
-        signatures: [],
-      },
-      {
-        onSuccess: (data) => {
-          setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
-        },
-      },
-    );
+    previewAssignmentLetterMutation.mutate({
+      ...form.getValues(),
+      signatures: [],
+    });
 
     setStep(2);
   };
