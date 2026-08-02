@@ -25,7 +25,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/utils/trpc";
-import { openBase64InNewTab } from "@/utils/download";
+import { base64ToBlobUrl, openBase64InNewTab } from "@/utils/download";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import generateDocumentSchema from "@tepian-k3/schema/pengujian/generate-document.schema";
@@ -63,6 +63,9 @@ export default function GenerateInvoiceDialog({
 }: GenerateInvoiceDialogProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [signatures, setSignatures] = useState<SignaturePosition[]>([]);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | undefined>(
+    undefined,
+  );
 
   const meQuery = useQuery(trpc.platform.auth.me.queryOptions());
   const currentUser = meQuery.data;
@@ -159,19 +162,38 @@ export default function GenerateInvoiceDialog({
       ]);
     }
 
+    setPdfPreviewUrl(undefined);
+    generateInvoiceMutation.mutate(
+      {
+        ...form.getValues(),
+        signatures: [],
+      },
+      {
+        onSuccess: (data) => {
+          setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
+        },
+      },
+    );
+
     setStep(2);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className={step === 2 ? "max-w-4xl" : "max-w-md"}>
-        <DialogHeader>
+      <DialogContent
+        className={
+          step === 2
+            ? "flex max-h-[90vh] w-[95vw] max-w-5xl flex-col overflow-hidden p-0"
+            : "max-w-md"
+        }
+      >
+        <DialogHeader className={step === 2 ? "border-b px-6 py-4" : ""}>
           <DialogTitle>
             {step === 1
               ? "Cetak Tagihan"
               : "Posisi Tanda Tangan Digital (QR Code)"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className={step === 2 ? "hidden" : ""}>
             {step === 1
               ? "Isi nomor surat untuk mencetak tagihan. Data referensi dan billing telah terisi otomatis."
               : "Atur posisi dan ukuran QR Code tanda tangan digital pada dokumen."}
@@ -184,7 +206,7 @@ export default function GenerateInvoiceDialog({
               e.preventDefault();
               handleNextToSignature();
             }}
-            className="grid gap-4"
+            className="grid gap-4 p-6 pt-0"
           >
             <FieldGroup>
               <Controller
@@ -196,7 +218,7 @@ export default function GenerateInvoiceDialog({
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nomor Surat
+                      Nomor Surat Tagihan / SPK
                     </FieldLabel>
                     <Input
                       type="text"
@@ -221,14 +243,11 @@ export default function GenerateInvoiceDialog({
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Nomor Referensi{" "}
-                      <span className="font-normal text-muted-foreground">
-                        (dari penawaran)
-                      </span>
+                      Nomor Acuan Surat Penawaran
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Nomor surat penawaran"
+                      placeholder="Masukkan nomor acuan penawaran"
                       className="h-10 text-sm"
                       {...field}
                       aria-invalid={fieldState.invalid}
@@ -298,13 +317,14 @@ export default function GenerateInvoiceDialog({
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Kode Billing
+                      Kode Billing (SIMPONI / MPN)
                     </FieldLabel>
                     <Input
                       type="text"
-                      placeholder="Kode billing"
+                      placeholder="Masukkan kode billing"
                       className="h-10 text-sm"
                       {...field}
+                      value={field.value ?? ""}
                       aria-invalid={fieldState.invalid}
                     />
                     {fieldState.invalid && (
@@ -323,7 +343,7 @@ export default function GenerateInvoiceDialog({
                     className="space-y-1"
                   >
                     <FieldLabel className="ml-1 text-sm font-bold">
-                      Tanggal Berakhir Billing
+                      Batas Waktu Pembayaran (Expiry Billing)
                     </FieldLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -336,7 +356,7 @@ export default function GenerateInvoiceDialog({
                         >
                           {field.value
                             ? format(new Date(field.value), "PPP")
-                            : "Pilih tanggal"}
+                            : "Pick a date"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -386,14 +406,17 @@ export default function GenerateInvoiceDialog({
             </DialogFooter>
           </form>
         ) : (
-          <div className="space-y-4">
-            <QRSignaturePlacer
-              signers={defaultSigners}
-              positions={signatures}
-              onChange={setSignatures}
-              maxPages={5}
-            />
-            <DialogFooter className="flex gap-2">
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <QRSignaturePlacer
+                signers={defaultSigners}
+                positions={signatures}
+                onChange={setSignatures}
+                pdfPreviewUrl={pdfPreviewUrl}
+                maxPages={5}
+              />
+            </div>
+            <DialogFooter className="border-t bg-muted/20 px-6 py-3">
               <Button
                 type="button"
                 variant="outline"
@@ -409,9 +432,9 @@ export default function GenerateInvoiceDialog({
                 {generateInvoiceMutation.isPending ? (
                   <Spinner className="mr-2" />
                 ) : (
-                  <QrCode className="mr-2 h-4 w-4" />
+                  <QrCode className="mr-1.5 h-4 w-4" />
                 )}
-                Cetak Tagihan Bertanda Tangan
+                Cetak Dokumen Bertanda Tangan
               </Button>
             </DialogFooter>
           </div>

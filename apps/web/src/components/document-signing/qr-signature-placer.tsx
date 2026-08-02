@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { QrCode, Trash2, Maximize2, Move } from "lucide-react";
+import { QrCode, Trash2, Maximize2, Move, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -304,14 +304,21 @@ export default function QRSignaturePlacer({
         >
           {/* PDF Background Preview */}
           {pdfPreviewUrl ? (
-            <iframe
-              src={`${pdfPreviewUrl}#page=${selectedPage + 1}&toolbar=0&navpanes=0&scrollbar=0`}
+            <object
+              data={`${pdfPreviewUrl}#page=${selectedPage + 1}&toolbar=0&navpanes=0&scrollbar=0`}
+              type="application/pdf"
               className="pointer-events-none h-full w-full border-0 select-none"
-              title="PDF Preview Page"
-            />
+            >
+              <iframe
+                src={`${pdfPreviewUrl}#page=${selectedPage + 1}&toolbar=0&navpanes=0&scrollbar=0`}
+                className="pointer-events-none h-full w-full border-0 select-none"
+                title="PDF Preview Page"
+              />
+            </object>
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-              Memuat Pratinjau Dokumen...
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <span>Memuat Pratinjau Dokumen...</span>
             </div>
           )}
 

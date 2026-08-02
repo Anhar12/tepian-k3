@@ -24,7 +24,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { openBase64InNewTab } from "@/utils/download";
+import { base64ToBlobUrl, openBase64InNewTab } from "@/utils/download";
 import { trpc } from "@/utils/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -60,6 +60,9 @@ export default function GenerateOfferingDialog({
 }: GenerateOfferingDialogProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [signatures, setSignatures] = useState<SignaturePosition[]>([]);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | undefined>(
+    undefined,
+  );
 
   // Fetch current user for default signer
   const meQuery = useQuery(trpc.platform.auth.me.queryOptions());
@@ -156,12 +159,31 @@ export default function GenerateOfferingDialog({
       ]);
     }
 
+    setPdfPreviewUrl(undefined);
+    generateOfferingMutation.mutate(
+      {
+        ...form.getValues(),
+        signatures: [],
+      },
+      {
+        onSuccess: (data) => {
+          setPdfPreviewUrl(base64ToBlobUrl(data.base64, data.contentType));
+        },
+      },
+    );
+
     setStep(2);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className={step === 2 ? "max-w-4xl" : "max-w-md"}>
+      <DialogContent
+        className={
+          step === 2
+            ? "flex max-h-[90vh] w-[95vw] max-w-5xl flex-col overflow-hidden p-0"
+            : "max-w-md"
+        }
+      >
         <DialogHeader>
           <DialogTitle>
             {step === 1
@@ -356,14 +378,17 @@ export default function GenerateOfferingDialog({
             </DialogFooter>
           </form>
         ) : (
-          <div className="space-y-4">
-            <QRSignaturePlacer
-              signers={defaultSigners}
-              positions={signatures}
-              onChange={setSignatures}
-              maxPages={5}
-            />
-            <DialogFooter className="flex gap-2">
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <QRSignaturePlacer
+                signers={defaultSigners}
+                positions={signatures}
+                onChange={setSignatures}
+                pdfPreviewUrl={pdfPreviewUrl}
+                maxPages={5}
+              />
+            </div>
+            <DialogFooter className="border-t bg-muted/20 px-6 py-3">
               <Button
                 type="button"
                 variant="outline"
@@ -379,7 +404,7 @@ export default function GenerateOfferingDialog({
                 {generateOfferingMutation.isPending ? (
                   <Spinner className="mr-2" />
                 ) : (
-                  <QrCode className="mr-2 h-4 w-4" />
+                  <QrCode className="mr-1.5 h-4 w-4" />
                 )}
                 Cetak Dokumen Bertanda Tangan
               </Button>

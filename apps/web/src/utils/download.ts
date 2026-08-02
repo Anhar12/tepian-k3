@@ -32,3 +32,9 @@ export function downloadBase64Pdf(
   a.click();
   URL.revokeObjectURL(url);
 }
+
+export function base64ToBlobUrl(base64: string, contentType: string): string {
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  const blob = new Blob([bytes], { type: contentType });
+  return URL.createObjectURL(blob);
+}
