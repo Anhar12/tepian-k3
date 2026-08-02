@@ -24,9 +24,9 @@ export function Clusters({ route }: ClustersProps) {
   return (
     <div className="space-y-8 rounded-4xl border border-slate-100 bg-white p-10 shadow-sm">
       <div className="space-y-1">
-        <h2 className="font-bold text-slate-800">Pilih Parameter Pengujian</h2>
+        <h2 className="font-bold text-slate-800">Pilih Jenis Pengujian</h2>
         <p className="text-sm text-slate-500">
-          Pilih Parameter Pengujian Berdasarkan Lokasi
+          Pilih lokasi lalu tentukan jenis pengujian yang Anda butuhkan.
         </p>
       </div>
 
@@ -46,8 +46,8 @@ export function Clusters({ route }: ClustersProps) {
         <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
           <Info className="h-5 w-5 shrink-0 text-blue-600" />
           <p className="text-sm text-blue-700">
-            Silakan pilih kategori terlebih dahulu untuk melihat daftar
-            parameter pengujian.
+            Pilih jenis pengujian sesuai dengan kebutuhan Anda. Kami akan
+            menampilkan parameter yang relevan.
           </p>
         </div>
       )}

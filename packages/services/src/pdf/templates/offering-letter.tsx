@@ -11,6 +11,8 @@ interface OfferingLetterProps {
   companyBankName: string;
   companyBankAccount: string;
   companyBankAccountName: string;
+  companyRepName?: string;
+  companyRepPosition?: string;
 }
 
 export const OfferingLetter: React.FC<OfferingLetterProps> = ({
@@ -20,6 +22,8 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
   companyBankName,
   companyBankAccount,
   companyBankAccountName,
+  companyRepName,
+  companyRepPosition,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
     day: "numeric",
@@ -76,9 +80,14 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
               {companyName}
             </Text>
 
-            <Text style={tw("text-[10px] text-center")}>
-              (_________________________)
+            <Text style={tw("text-[10px] text-center underline")}>
+              {companyRepName || "(_________________________)"}
             </Text>
+            {companyRepPosition && (
+              <Text style={tw("text-[10px] text-center")}>
+                {companyRepPosition}
+              </Text>
+            )}
           </View>
 
           {/* Signature Table */}

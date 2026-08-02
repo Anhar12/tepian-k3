@@ -3,7 +3,6 @@ import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { tw } from "../utils/tw";
 import { Letterhead } from "../components/letterhead";
 import { LabeledField } from "../components/labeled-field";
-import { SignatureTable } from "../components/signature-table";
 import { HeadSignature } from "../components/head-signature";
 import { storageService } from "../../storage";
 import { format } from "date-fns";
@@ -19,6 +18,8 @@ interface TagihanProps {
   billingAmount: number;
   operationalAmount: number;
   billingExpiryDate: string;
+  operationalBankAccount?: string;
+  operationalBankAccountName?: string;
 }
 
 const formatCurrency = (amount: number) =>
@@ -30,7 +31,7 @@ const formatCurrency = (amount: number) =>
 
 export const Tagihan: React.FC<TagihanProps> = ({
   companyName,
-  companyRegency,
+  companyRegency: _companyRegency,
   letterNumber,
   referenceNumber,
   referenceDate,
@@ -38,6 +39,8 @@ export const Tagihan: React.FC<TagihanProps> = ({
   billingAmount,
   operationalAmount,
   billingExpiryDate,
+  operationalBankAccount = "148-00-2495411-0",
+  operationalBankAccountName = "RPL 046 PS Balai K3 SMD Utk Ops",
 }) => {
   const today = format(new Date(), "dd MMMM yyyy", { locale: id });
   const refDateFormatted = format(new Date(referenceDate), "dd MMMM yyyy", {
@@ -73,7 +76,7 @@ export const Tagihan: React.FC<TagihanProps> = ({
               />
               <LabeledField
                 label="Lampiran"
-                value="2 (dua) Lembar"
+                value="1 (satu) Rangkap"
                 labelWidth="w-16"
               />
             </View>
@@ -83,44 +86,59 @@ export const Tagihan: React.FC<TagihanProps> = ({
 
         {/* Recipient */}
         <View style={tw("mb-6")}>
-          <Text>Yth. Pimpinan</Text>
-          <Text>{companyName}</Text>
-          <Text>di {companyRegency}</Text>
+          <Text>Yth. Pimpinan {companyName}</Text>
+          <Text>di Tempat</Text>
         </View>
 
         {/* Body */}
-        <Text style={tw("text-justify leading-relaxed mb-4")}>
-          Merujuk surat Nomor {referenceNumber} tanggal {refDateFormatted} hal
-          Penawaran pelaksanaan dari perusahaan saudara, dengan ini kami
-          sampaikan Tagihan Biaya Pengujian dengan Kode Billing{" "}
-          <Text style={tw("font-bold")}>{billingCode}</Text> sebesar{" "}
-          {formatCurrency(billingAmount)},-. dan untuk biaya operasional ke
-          nomor rekening <Text style={tw("font-bold")}>148-00-2495411-0</Text>{" "}
-          an.{" "}
-          <Text style={tw("font-bold")}>RPL 046 PS Balai K3SMD Utk Ops</Text>{" "}
-          sebesar {formatCurrency(operationalAmount)},-. Pembayaran agar
-          dilakukan sebelum masa kadaluarsa kode billing yaitu pada tanggal{" "}
-          {expiryFormatted} (Terlampir)
+        <Text style={tw("text-justify leading-relaxed mb-2")}>
+          Merujuk surat Nomor {referenceNumber} tanggal {refDateFormatted}{" "}
+          tentang Penawaran pelaksanaan pada perusahaan saudara, kami sampaikan
+          hal-hal sebagai berikut:
         </Text>
 
+        <View style={tw("ml-4 mb-4")}>
+          {/* Poin 1 */}
+          <View style={tw("flex-row mb-2")}>
+            <Text style={tw("w-6")}>1.</Text>
+            <Text style={tw("flex-1 text-justify leading-relaxed")}>
+              Tagihan Biaya Pengujian dengan Kode Billing{" "}
+              <Text style={tw("font-bold")}>{billingCode}</Text> sebesar{" "}
+              {formatCurrency(billingAmount)}
+            </Text>
+          </View>
+
+          {/* Poin 2 */}
+          <View style={tw("flex-row mb-2")}>
+            <Text style={tw("w-6")}>2.</Text>
+            <Text style={tw("flex-1 text-justify leading-relaxed")}>
+              Tagihan Biaya Operasional dibayarkan ke nomor rekening Bank
+              Mandiri{" "}
+              <Text style={tw("font-bold")}>{operationalBankAccount}</Text> an.{" "}
+              <Text style={tw("font-bold")}>{operationalBankAccountName}</Text>{" "}
+              sebesar {formatCurrency(operationalAmount)}
+            </Text>
+          </View>
+
+          {/* Poin 3 */}
+          <View style={tw("flex-row mb-2")}>
+            <Text style={tw("w-6")}>3.</Text>
+            <Text style={tw("flex-1 text-justify leading-relaxed")}>
+              Pembayaran agar dilakukan sebelum masa kadaluarsa kode billing
+              yaitu pada tanggal {expiryFormatted} (Bukti Pembuatan Tagihan PNBP
+              Terlampir).
+            </Text>
+          </View>
+        </View>
+
         {/* Closing */}
-        <Text style={tw("text-center mb-6")}>
-          Demikian disampaikan atas perhatian dan kerjasamanya diucapkan
-          terimakasih.
+        <Text style={tw("mb-6")}>
+          Demikian surat ini disampaikan. Atas perhatian dan kerja sama Saudara,
+          kami ucapkan terima kasih.
         </Text>
 
         {/* Signature section */}
-        <View style={tw("flex-row justify-between items-start mt-4")}>
-          {/* Signature Table */}
-          <SignatureTable
-            rows={[
-              {
-                role: "Pengendali Administrasi (Kasubbag Tata Usaha Balai K3 Samarinda)",
-              },
-            ]}
-            className="w-5/12"
-          />
-
+        <View style={tw("flex-row justify-end items-start mt-4")}>
           {/* Head Signature */}
           <HeadSignature width="w-5/12" spacing="mb-16" />
         </View>
@@ -143,16 +161,11 @@ export const Tagihan: React.FC<TagihanProps> = ({
             akan tertutup otomatis dan permintaan pengujian tidak dapat
             diproses.
           </Text>
-          {/* <Text style={tw("text-[8px]")}>
-            4. Bukti pembayaran dapat dikirimkan melalui email {adminEmail} / ke
-            no Whatsapp Admin pengujian {adminContact} dengan mencantumkan nomor
-            tagihan dan nama perusahaan/instansi.
-          </Text> */}
           <Text style={tw("text-[8px]")}>
-            4. Bukti pembayaran dapat dikirimkan melalui email HYPERLINK
-            "mailto:bk3samarinda@kemnaker.go.id" bk3samarinda@kemnaker.go.id /
-            ke no Whatsapp Admin pengujian 0821-2261-9630 dengan mencantumkan
-            nomor tagihan dan nama perusahaan/ instansi.
+            4. Bukti pembayaran dapat dikirimkan melalui email
+            bk3samarinda@kemnaker.go.id / ke no Whatsapp Admin pengujian
+            0821-2261-9630 dengan mencantumkan nomor tagihan dan nama
+            perusahaan/ instansi.
           </Text>
         </View>
       </Page>

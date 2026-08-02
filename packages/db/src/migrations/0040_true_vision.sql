@@ -1,0 +1,1 @@
+ALTER TABLE "user_companies" ADD COLUMN "head_of_company_email" varchar(250) DEFAULT '' NOT NULL;

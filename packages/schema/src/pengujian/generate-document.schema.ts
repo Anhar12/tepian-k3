@@ -16,8 +16,8 @@ const generateOfferingLetterDocumentSchema = z.object({
   letterNumber: z.string().min(1).max(250),
   referenceNumber: z.string().min(1).max(250).optional(),
   referenceDate: z.string().optional(),
-  adminEmail: z.email().min(1).max(100),
-  adminContact: z.string().min(1).max(100),
+  adminEmail: z.string().email().max(100).optional().or(z.literal("")),
+  adminContact: z.string().max(100).optional().or(z.literal("")),
   signatures: z.array(qrSignaturePositionSchema).optional().default([]),
 });
 
@@ -42,6 +42,10 @@ const generateAssignmentLetter = z.object({
   worksheetId: z.uuidv7(),
   letterNumber: z.string().min(1).max(255),
   assignmentLetterNumber: z.string().min(1).max(255),
+  spkNumber: z.string().min(1).max(255).optional(),
+  spkDate: z.string().optional(),
+  offeringNumber: z.string().min(1).max(255).optional(),
+  offeringDate: z.string().optional(),
   signatures: z.array(qrSignaturePositionSchema).optional().default([]),
 });
 

@@ -10,6 +10,8 @@ interface GenerateOfferingLetterHeaderOptions {
   referenceDate: string;
   adminEmail: string;
   adminContact: string;
+  companyRepName?: string;
+  companyRepPosition?: string;
   logoUrl?: string;
   qrCodeDataURL?: string;
   verificationURL?: string;

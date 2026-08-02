@@ -161,6 +161,11 @@ export const userCompanies = createTable(
     headOfCompanyPosition: varchar("head_of_company_position", {
       length: 250,
     }).notNull(),
+    headOfCompanyEmail: varchar("head_of_company_email", {
+      length: 250,
+    })
+      .notNull()
+      .default(""),
     email: varchar("email", { length: 250 }).notNull(),
     wlkpStatus: boolean("wlkp_status").notNull().default(false),
     wlkp: text("wlkp"),

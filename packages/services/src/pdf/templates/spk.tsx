@@ -143,6 +143,11 @@ export const Spk: React.FC<SpkProps> = ({
             Dalam hal ini bertindak atas nama/mewakili {companyName} selanjutnya
             disebut PIHAK KEDUA,
           </Text>
+          <Text style={tw("mt-2 text-justify leading-relaxed ml-6")}>
+            PIHAK PERTAMA dan PIHAK KEDUA bertindak secara bersama-sama disebut
+            "PARA PIHAK" dan bertindak secara sendiri-sendiri disebut sebagai
+            "PIHAK".
+          </Text>
         </View>
 
         {/* Legal basis paragraph */}
@@ -154,9 +159,9 @@ export const Spk: React.FC<SpkProps> = ({
           Tentang Jenis dan Tarif Atas Jenis Penerimaan Negara Bukan Pajak yang
           Bersifat Volatil Yang Berlaku di Lingkungan Kemnaker dan{" "}
           <Text style={tw("font-bold")}>
-            Peraturan Menteri Keuangan Republik Indonesia Nomor 39 Tahun 2024
+            Peraturan Menteri Keuangan Republik Indonesia Nomor 32 Tahun 2025
           </Text>{" "}
-          tentang Standar Biaya Masukan Tahun Anggaran 2025, sepakat mengikat
+          tentang Standar Biaya Masukan Tahun Anggaran 2026, sepakat mengikat
           dalam Perjanjian Kerja sama tentang Pendayagunaan Fasilitas Balai
           Keselamatan dan Kesehatan Kerja Samarinda.
         </Text>
@@ -267,7 +272,9 @@ export const Spk: React.FC<SpkProps> = ({
           </Text>
           <Text style={tw("mb-1 text-justify leading-relaxed")}>
             - Membayar biaya penambahan parameter/titik lokasi pengujian kepada
-            PIHAK PERTAMA apabila terjadi penambahan parameter/titik pengujian.
+            PIHAK PERTAMA apabila terjadi penambahan parameter/titik pengujian
+            sesuai dengan kesepakatan Para Pihak dan dituangkan dalam berita
+            acara pengambilan sampel.
           </Text>
         </View>
 
@@ -325,11 +332,7 @@ export const Spk: React.FC<SpkProps> = ({
             pengujian terhitung sejak ditandatangani oleh PARA PIHAK.
           </Text>
           <Text style={tw("mb-1 text-justify leading-relaxed")}>
-            b. Apabila biaya pengujian sudah dibayarkan kepada PIHAK KEDUA maka
-            pengujian tidak dapat dibatalkan.
-          </Text>
-          <Text style={tw("mb-1 text-justify leading-relaxed")}>
-            c. PIHAK PERTAMA menetapkan jadwal/waktu Pengujian maksimal 5 (lima)
+            b. PIHAK PERTAMA menetapkan jadwal/waktu Pengujian maksimal 5 (lima)
             hari kerja setelah menerima konfirmasi pembayaran biaya uji dari
             PIHAK KEDUA
           </Text>
@@ -388,7 +391,10 @@ export const Spk: React.FC<SpkProps> = ({
         <SectionHeader text="Penyelesaian Perselisihan" bold spacing="mb-2" />
         <Text style={tw("text-justify leading-relaxed mb-4")}>
           Jika terjadi perselisihan antara kedua belah pihak, maka akan
-          diselesaikan secara musyawarah dan mufakat.
+          diselesaikan secara musyawarah dan mufakat. Apabila musyawarah dan
+          mufakat tidak tercapai, maka akan diselesaikan berdasarkan hukum dan
+          peraturan perundang-undangan yang berlaku di Negara Republik
+          Indonesia.
         </Text>
 
         {/* Pasal 8 */}

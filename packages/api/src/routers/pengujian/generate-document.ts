@@ -1,5 +1,7 @@
 import crypto from "node:crypto";
 import {
+  ADMIN_EMAIL,
+  ADMIN_PHONE,
   OPERATIONAL_BANK_ACCOUNT,
   OPERATIONAL_BANK_ACCOUNT_NAME,
   OPERATIONAL_BANK_NAME,
@@ -65,8 +67,10 @@ export const generateDocumentRouter = createTRPCRouter({
                   letterNumber: input.letterNumber,
                   referenceNumber: input.referenceNumber ?? "",
                   referenceDate: input.referenceDate ?? "",
-                  adminEmail: input.adminEmail,
-                  adminContact: input.adminContact,
+                  adminEmail: input.adminEmail || ADMIN_EMAIL,
+                  adminContact: input.adminContact || ADMIN_PHONE,
+                  companyRepName: company.headOfCompany,
+                  companyRepPosition: company.headOfCompanyPosition,
                 }),
               catch: (error) => {
                 logError(
@@ -91,6 +95,8 @@ export const generateDocumentRouter = createTRPCRouter({
                   companyBankName: company.companyBankName,
                   companyBankAccount: company.companyBankAccount,
                   companyBankAccountName: company.companyBankAccountName,
+                  companyRepName: company.headOfCompany,
+                  companyRepPosition: company.headOfCompanyPosition,
                 }),
               catch: (error) => {
                 logError(
@@ -395,12 +401,15 @@ export const generateDocumentRouter = createTRPCRouter({
             }
 
             // Generate TTE request token
+            const signerEmail =
+              company.headOfCompanyEmail || worksheet.order.user.email;
+
             const tteToken = yield* createTTERequestToken({
               documentId: document.id,
               orderId: worksheet.orderId,
               signerName: company.headOfCompany,
               signerRole: company.headOfCompanyPosition,
-              signerEmail: worksheet.order.user.email,
+              signerEmail,
             });
 
             // Send TTE request email
@@ -413,7 +422,7 @@ export const generateDocumentRouter = createTRPCRouter({
             yield* Effect.tryPromise({
               try: () =>
                 emailService.sendTTERequest({
-                  email: worksheet.order.user.email,
+                  email: signerEmail,
                   signerName: company.headOfCompany,
                   documentName: document.title,
                   tteLink,
@@ -493,6 +502,8 @@ export const generateDocumentRouter = createTRPCRouter({
                   operationalAmount: operationalCost,
                   billingExpiryDate: input.billingExpiryDate,
                   companyName: company.name,
+                  operationalBankAccount: OPERATIONAL_BANK_ACCOUNT,
+                  operationalBankAccountName: OPERATIONAL_BANK_ACCOUNT_NAME,
                 }),
               catch: (error) => {
                 logError(
@@ -664,6 +675,10 @@ export const generateDocumentRouter = createTRPCRouter({
                   assignmentDateEnd: worksheet.endDate!,
                   letterNumber: input.letterNumber,
                   assignmentLetterNumber: input.assignmentLetterNumber,
+                  spkNumber: input.spkNumber,
+                  spkDate: input.spkDate,
+                  offeringNumber: input.offeringNumber,
+                  offeringDate: input.offeringDate,
                   financingSource: worksheet.operationalCosts
                     .map((cost) => cost.item)
                     .join(", "),

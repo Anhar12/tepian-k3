@@ -10,6 +10,8 @@ interface GenerateOfferingLetterOptions {
   companyBankName: string;
   companyBankAccount: string;
   companyBankAccountName: string;
+  companyRepName?: string;
+  companyRepPosition?: string;
 }
 /**
  * Generates an Offering Letter PDF buffer

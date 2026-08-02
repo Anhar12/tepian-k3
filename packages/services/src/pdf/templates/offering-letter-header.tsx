@@ -1,7 +1,6 @@
 import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
-import { SectionHeader } from "../components/section-header";
 import { TteSrikandi } from "../components/tte-srikandi";
 import { storageService } from "../../storage";
 import { registerLiberationSans } from "../fonts/register-liberation-sans";
@@ -104,17 +103,21 @@ interface OfferingLetterHeaderProps {
   referenceDate: string;
   adminEmail: string;
   adminContact: string;
+  companyRepName?: string;
+  companyRepPosition?: string;
   logoUrl?: string;
 }
 
 export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
   companyName,
-  regencyName,
+  regencyName: _regencyName,
   letterNumber,
   referenceNumber,
   referenceDate,
   adminEmail,
   adminContact,
+  companyRepName,
+  companyRepPosition,
   logoUrl,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
@@ -150,7 +153,7 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
           <View style={styles.row}>
             <Text style={styles.label}>Lampiran</Text>
             <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>2 (dua) lembar</Text>
+            <Text style={styles.value}>1 (satu) Rangkap</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Hal</Text>
@@ -161,21 +164,19 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
 
         {/* Recipient */}
         <View style={styles.recipient}>
-          <Text>Yth. Pimpinan Perusahaan</Text>
-          <Text>{companyName}</Text>
-          <Text>{regencyName}</Text>
+          <Text>Yth. Pimpinan {companyName}</Text>
+          <Text>di Tempat</Text>
         </View>
 
         {/* Body */}
         <Text style={styles.bodyText}>
-          Sesuai dengan surat saudara nomor {referenceNumber} tanggal{" "}
+          Sesuai dengan permohonan saudara nomor {referenceNumber} tanggal{" "}
           {referenceDate
             ? format(new Date(referenceDate), "dd MMMM yyyy")
             : "-"}{" "}
-          perihal Permohonan Pengajuan K3 Lingkungan Kerja, pada prinsipnya
-          Balai Keselamatan dan Kesehatan Kerja Samarinda bersedia untuk
-          melakukan pengujian keselamatan dan kesehatan kerja dengan hal-hal
-          sebagai berikut:
+          perihal Permohonan Pengujian K3, pada prinsipnya Balai Keselamatan dan
+          Kesehatan Kerja Samarinda bersedia untuk melakukan pengujian tersebut
+          dengan hal-hal sebagai berikut:
         </Text>
 
         {/* Numbered List */}
@@ -253,7 +254,26 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
 
         {/* Signature  */}
         <View style={tw("flex-row justify-between items-start mt-8")}>
-          <TteSrikandi />
+          {companyRepName ? (
+            <View style={tw("items-center w-4/12")}>
+              <Text style={tw("text-[10px] font-bold text-center")}>
+                Menyetujui,
+              </Text>
+              <Text style={tw("text-[10px] font-bold text-center mb-12")}>
+                {companyName}
+              </Text>
+              <Text style={tw("text-[10px] text-center underline")}>
+                {companyRepName}
+              </Text>
+              {companyRepPosition && (
+                <Text style={tw("text-[10px] text-center")}>
+                  {companyRepPosition}
+                </Text>
+              )}
+            </View>
+          ) : (
+            <TteSrikandi />
+          )}
 
           {/* Head Signature */}
           <View style={tw("items-center w-4/12")}>

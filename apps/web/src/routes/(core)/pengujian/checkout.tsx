@@ -116,9 +116,13 @@ function RouteComponent() {
 
   const groupedMappedItems = useMemo(() => {
     const items = mappedItems.flatMap((cluster) => cluster.items);
-    
-    const utamaItems = items.filter((item) => item.parameter.serviceType === "utama");
-    const tambahanItems = items.filter((item) => item.parameter.serviceType === "tambahan");
+
+    const utamaItems = items.filter(
+      (item) => item.parameter.serviceType === "utama",
+    );
+    const tambahanItems = items.filter(
+      (item) => item.parameter.serviceType === "tambahan",
+    );
     const noneItems = items.filter((item) => !item.parameter.serviceType);
 
     const result = [];
@@ -270,34 +274,12 @@ function RouteComponent() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row">
         <Select
-          value={currentCompany ?? "all"}
-          onValueChange={(value) => {
-            setCurrentLocation(null);
-            setCurrentCompany(value === "all" ? null : value);
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-1/2">
-            <SelectValue placeholder="Semua Perusahaan" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Perusahaan</SelectLabel>
-              <SelectItem value="all">Semua Perusahaan</SelectItem>
-              {mappedCompanyFromCartItem.map((company) => (
-                <SelectItem key={company.id} value={company.id}>
-                  {company.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Select
           value={currentLocation ?? "all"}
           onValueChange={(value) => {
             setCurrentLocation(value === "all" ? null : value);
           }}
         >
-          <SelectTrigger className="w-full sm:w-1/2">
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Semua Lokasi" />
           </SelectTrigger>
           <SelectContent>
@@ -531,32 +513,46 @@ function RouteComponent() {
 
             <CardFooter className="flex-col items-stretch gap-4 p-0">
               <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex justify-between items-center pb-3 border-b border-slate-200">
-                  <span className="text-sm font-medium text-slate-600">Subtotal Pengujian</span>
-                  <span className="text-sm font-semibold text-slate-900 tabular-nums">Rp {totalPrice.toLocaleString("id-ID")}</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <span className="text-sm font-medium text-slate-600">
+                    Subtotal Pengujian
+                  </span>
+                  <span className="text-sm font-semibold text-slate-900 tabular-nums">
+                    Rp {totalPrice.toLocaleString("id-ID")}
+                  </span>
                 </div>
-                
+
                 {optionalSelections.size > 0 && (
-                  <div className="flex justify-between items-start pb-3 border-b border-slate-200">
+                  <div className="flex items-start justify-between border-b border-slate-200 pb-3">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-slate-600">Akomodasi & Transportasi</span>
-                      <span className="text-xs text-amber-600 font-medium mt-1">
+                      <span className="text-sm font-medium text-slate-600">
+                        Akomodasi & Transportasi
+                      </span>
+                      <span className="mt-1 text-xs font-medium text-amber-600">
                         * Dihitung saat penawaran (Sesuai SBM)
                       </span>
                     </div>
-                    <span className="text-sm font-semibold text-slate-500">TBD</span>
+                    <span className="text-sm font-semibold text-slate-500">
+                      TBD
+                    </span>
                   </div>
                 )}
-                
+
                 <div className="flex items-center justify-between pt-1">
-                  <span className="font-bold text-slate-800">Total Estimasi</span>
+                  <span className="font-bold text-slate-800">
+                    Total Estimasi
+                  </span>
                   <span className="text-xl font-bold text-blue-600 tabular-nums">
                     Rp {totalPrice.toLocaleString("id-ID")}
-                    {optionalSelections.size > 0 && <span className="text-sm font-normal text-slate-500 ml-1">+</span>}
+                    {optionalSelections.size > 0 && (
+                      <span className="ml-1 text-sm font-normal text-slate-500">
+                        +
+                      </span>
+                    )}
                   </span>
                 </div>
                 <Button
-                  className="h-11 w-full bg-blue-600 font-semibold text-white hover:bg-blue-700 shadow-sm"
+                  className="h-11 w-full bg-blue-600 font-semibold text-white shadow-sm hover:bg-blue-700"
                   disabled={
                     mappedItems.length === 0 ||
                     !confirmed ||

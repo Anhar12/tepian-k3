@@ -5,7 +5,16 @@ import type {
   WorksheetStatus,
 } from "@tepian-k3/constants";
 import { WORKSHEET_ALWAYS_ALLOWED_OPERATIONAL_ITEMS } from "@tepian-k3/constants";
-import { and, count, eq, inArray, isNotNull, isNull, ne, sql } from "@tepian-k3/db";
+import {
+  and,
+  count,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  ne,
+  sql,
+} from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import {
   chemicalMaterials,
@@ -155,7 +164,9 @@ const worksheetQueries = {
             },
             createdBy: true,
             proposedDates: {
-              orderBy: (proposedDates, { desc }) => [desc(proposedDates.createdAt)],
+              orderBy: (proposedDates, { desc }) => [
+                desc(proposedDates.createdAt),
+              ],
             },
           },
         }),
@@ -1439,7 +1450,8 @@ const worksheetQueries = {
         conditions.push(eq(worksheetProposedDates.status, status));
       }
 
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
 
       const { data, count } = yield* Effect.tryPromise({
         try: async () => {
@@ -1456,11 +1468,11 @@ const worksheetQueries = {
                       with: {
                         company: true,
                         user: true,
-                      }
-                    }
-                  }
-                }
-              }
+                      },
+                    },
+                  },
+                },
+              },
             }),
             db
               .select({ count: sql<number>`count(*)` })
@@ -1473,7 +1485,7 @@ const worksheetQueries = {
           logError(
             "worksheetQueries.getAllProposedDates",
             "Failed to fetch proposed dates",
-            { error }
+            { error },
           );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
@@ -1527,11 +1539,12 @@ const worksheetQueries = {
           return result;
         },
         catch: (error) => {
-          logError(
-            "worksheetQueries.proposeDate",
-            "Failed to propose date",
-            { error, worksheetId, proposedStartDate, proposedEndDate }
-          );
+          logError("worksheetQueries.proposeDate", "Failed to propose date", {
+            error,
+            worksheetId,
+            proposedStartDate,
+            proposedEndDate,
+          });
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Terjadi kesalahan saat mengajukan tanggal usulan",
@@ -1591,7 +1604,7 @@ const worksheetQueries = {
           logError(
             "worksheetQueries.respondProposedDate",
             "Failed to respond to proposed date",
-            { error, proposedDateId, action }
+            { error, proposedDateId, action },
           );
           if (error instanceof TRPCError) throw error;
           throw new TRPCError({
@@ -2137,7 +2150,10 @@ const worksheetQueries = {
    * Get worksheet transaction detail for document generation
    * Returns worksheet with ready items, assignments, and operational costs
    */
-  getWorksheetTransactionDetail(worksheetId: string, options?: { unmask?: boolean }) {
+  getWorksheetTransactionDetail(
+    worksheetId: string,
+    options?: { unmask?: boolean },
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.worksheets.findFirst({
@@ -2156,6 +2172,7 @@ const worksheetQueries = {
                     address: true,
                     headOfCompany: true,
                     headOfCompanyPosition: true,
+                    headOfCompanyEmail: true,
                   },
                   with: {
                     regency: {
@@ -2251,7 +2268,9 @@ const worksheetQueries = {
       Effect.flatMap((worksheet) => {
         if (!worksheet) return Effect.succeed(null);
         if (!options?.unmask && worksheet.order?.company) {
-          worksheet.order.company = maskUserCompany(worksheet.order.company) as any;
+          worksheet.order.company = maskUserCompany(
+            worksheet.order.company,
+          ) as any;
         }
         return Effect.succeed(worksheet);
       }),
@@ -2307,9 +2326,10 @@ const worksheetQueries = {
 
             // 3. Strict Validation for Admin/Staff (non-verifier)
             if (!isVerifier) {
-              const existingCosts = await tx.query.worksheetOperationalCosts.findMany({
-                where: eq(worksheetOperationalCosts.worksheetId, worksheetId),
-              });
+              const existingCosts =
+                await tx.query.worksheetOperationalCosts.findMany({
+                  where: eq(worksheetOperationalCosts.worksheetId, worksheetId),
+                });
 
               for (const existing of existingCosts) {
                 if (
@@ -2796,9 +2816,9 @@ const worksheetQueries = {
    * Requires the worksheet to be `verified` and to have saved operational costs.
    */
   publishOffering(
-    worksheetId: string, 
+    worksheetId: string,
     userId: string,
-    _estimatedSigningDeadline?: string
+    _estimatedSigningDeadline?: string,
   ) {
     return Effect.gen(function* () {
       yield* Effect.tryPromise({

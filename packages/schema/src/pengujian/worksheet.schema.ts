@@ -151,7 +151,7 @@ const batchReturnToolsFromWorksheetSchema = z.object({
       checkKelengkapanAlat: z.boolean(),
       checkKondisiFisikAlat: z.boolean(),
       checkConditionResult: z.enum(TOOLS_CONDITIONS),
-    })
+    }),
   ),
 });
 
@@ -218,7 +218,7 @@ const verifyWorksheetOperationalCostsSchema = z.object({
       verificationStatus: z.enum(["draft", "submitted", "verified", "revised"]),
       verificationNote: z.string().nullable().optional(),
       sbmYear: z.number().int().nullable().optional(),
-    })
+    }),
   ),
 });
 
@@ -246,11 +246,11 @@ const updateWorksheetChemicalMaterialRequiredSchema = z.object({
 // Get worksheet chemical materials schema
 const getWorksheetChemicalMaterialsSchema = z.object({
   worksheetId: z.uuidv7(),
-});// Propose Date schema
+}); // Propose Date schema
 const proposeWorksheetDateSchema = z.object({
   worksheetId: z.uuidv7(),
-  proposedStartDate: z.string().datetime(),
-  proposedEndDate: z.string().datetime(),
+  proposedStartDate: z.string().min(1, "Tanggal mulai wajib diisi"),
+  proposedEndDate: z.string().min(1, "Tanggal selesai wajib diisi"),
   note: z.string().optional(),
 });
 
