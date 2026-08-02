@@ -9,14 +9,11 @@ import {
 import ComboBox from "@/components/ui/combobox";
 import {
   Field,
-  FieldContent,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldLegend,
   FieldSet,
-  FieldTitle,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
@@ -34,8 +31,17 @@ import { RadioGroupItem } from "@radix-ui/react-radio-group";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import userCompanySchema from "@tepian-k3/schema/pengujian/user-company.schema";
-import { CreditCard, LoaderCircle, MapPin, Users, Building, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  CreditCard,
+  LoaderCircle,
+  MapPin,
+  Users,
+  Building,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+} from "lucide-react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { cn } from "@/lib/utils";
@@ -105,24 +111,6 @@ function RouteComponent() {
   const regencyId = form.watch("regencyId");
   const districtId = form.watch("districtId");
   const wlkpStatus = form.watch("wlkpStatus");
-  const wlkp = form.watch("wlkp");
-
-  // Mock WLKP integration pre-fill
-  useEffect(() => {
-    if (wlkpStatus && wlkp && wlkp.length >= 6) {
-      form.setValue("name", "PT Waskita Karya (Mock WLKP)");
-      form.setValue("email", "contact@waskita.mock");
-      form.setValue("address", "Jl. MT Haryono Kav 10");
-      form.setValue("maleWorkers", "150");
-      form.setValue("femaleWorkers", "50");
-      form.setValue("healthFacilityAvailable", true);
-      form.setValue("responsibleTestingPerson", "Budi Santoso");
-      form.setValue("responsibleTestingPersonEmail", "budi@waskita.mock");
-      form.setValue("responsibleTestingPersonPhone", "08123456789");
-      form.setValue("headOfCompany", "Agus Suharyanto");
-      form.setValue("headOfCompanyPosition", "Direktur Utama");
-    }
-  }, [wlkpStatus, wlkp, form]);
 
   const createUserCompanyMutation = useMutation(
     trpc.pengujian.userCompany.userCreateUserCompany.mutationOptions({
@@ -145,25 +133,48 @@ function RouteComponent() {
 
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
-    
+
     if (currentStep === 1) {
-      fieldsToValidate = ['wlkpStatus', 'wlkp', 'picture', 'name', 'email', 'kbliId', 'address', 'provinceId', 'regencyId', 'districtId', 'villageId'];
+      fieldsToValidate = [
+        "wlkpStatus",
+        "wlkp",
+        "picture",
+        "name",
+        "email",
+        "kbliId",
+        "address",
+        "provinceId",
+        "regencyId",
+        "districtId",
+        "villageId",
+      ];
     } else if (currentStep === 2) {
-      fieldsToValidate = ['responsibleTestingPerson', 'responsibleTestingPersonEmail', 'responsibleTestingPersonPhone', 'headOfCompany', 'headOfCompanyPosition'];
+      fieldsToValidate = [
+        "responsibleTestingPerson",
+        "responsibleTestingPersonEmail",
+        "responsibleTestingPersonPhone",
+        "headOfCompany",
+        "headOfCompanyPosition",
+        "headOfCompanyEmail",
+      ];
     } else if (currentStep === 3) {
-      fieldsToValidate = ['maleWorkers', 'femaleWorkers', 'healthFacilityAvailable'];
+      fieldsToValidate = [
+        "maleWorkers",
+        "femaleWorkers",
+        "healthFacilityAvailable",
+      ];
     }
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
       setCurrentStep((prev) => Math.min(prev + 1, 4));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const prevStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const { data: kbli } = useSuspenseQuery(
@@ -192,45 +203,65 @@ function RouteComponent() {
   });
 
   return (
-    <div className="flex flex-col gap-6 mx-auto max-w-4xl">
-      <Card className="border-slate-200 shadow-sm overflow-hidden">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+      <Card className="overflow-hidden border-slate-200 shadow-sm">
         {/* Progress Header */}
-        <div className="bg-slate-50 border-b border-slate-100 p-6 md:p-8">
-          <h1 className="text-2xl font-bold text-neutral-800 tracking-tight">Pendaftaran Perusahaan</h1>
-          <p className="text-slate-500 mt-1">Lengkapi data perusahaan Anda dalam 4 langkah mudah.</p>
-          
-          <div className="mt-8 flex items-center justify-between relative">
+        <div className="border-b border-slate-100 bg-slate-50 p-6 md:p-8">
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
+            Pendaftaran Perusahaan
+          </h1>
+          <p className="mt-1 text-slate-500">
+            Lengkapi data perusahaan Anda dalam 4 langkah mudah.
+          </p>
+
+          <div className="relative mt-8 flex items-center justify-between">
             {/* Progress Bar Background */}
-            <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-200 -translate-y-1/2 rounded-full z-0 hidden sm:block"></div>
-            
+            <div className="absolute top-1/2 right-0 left-0 z-0 hidden h-1 -translate-y-1/2 rounded-full bg-slate-200 sm:block"></div>
+
             {/* Progress Bar Fill */}
-            <div 
-              className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full z-0 transition-all duration-500 hidden sm:block"
-              style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+            <div
+              className="absolute top-1/2 left-0 z-0 hidden h-1 -translate-y-1/2 rounded-full bg-primary transition-all duration-500 sm:block"
+              style={{
+                width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`,
+              }}
             ></div>
 
             {STEPS.map((step) => {
               const StepIcon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
-              
+
               return (
-                <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
-                  <div 
+                <div
+                  key={step.id}
+                  className="relative z-10 flex flex-col items-center gap-2"
+                >
+                  <div
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                      isActive ? "bg-primary border-primary text-white shadow-md shadow-primary/20 scale-110" : 
-                      isCompleted ? "bg-primary border-primary text-white" : 
-                      "bg-white border-slate-200 text-slate-400"
+                      "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300",
+                      isActive
+                        ? "scale-110 border-primary bg-primary text-white shadow-md shadow-primary/20"
+                        : isCompleted
+                          ? "border-primary bg-primary text-white"
+                          : "border-slate-200 bg-white text-slate-400",
                     )}
                   >
-                    {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
+                    {isCompleted ? (
+                      <CheckCircle2 className="h-5 w-5" />
+                    ) : (
+                      <StepIcon className="h-5 w-5" />
+                    )}
                   </div>
-                  <span className={cn(
-                    "text-xs font-semibold hidden sm:block transition-colors",
-                    isActive ? "text-primary" : 
-                    isCompleted ? "text-neutral-700" : "text-slate-400"
-                  )}>
+                  <span
+                    className={cn(
+                      "hidden text-xs font-semibold transition-colors sm:block",
+                      isActive
+                        ? "text-primary"
+                        : isCompleted
+                          ? "text-neutral-700"
+                          : "text-slate-400",
+                    )}
+                  >
                     {step.title}
                   </span>
                 </div>
@@ -245,19 +276,31 @@ function RouteComponent() {
             className="grid gap-6"
           >
             {/* STEP 1: Informasi Dasar */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-right-4 duration-500", currentStep !== 1 && "hidden")}>
+            <div
+              className={cn(
+                "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
+                currentStep !== 1 && "hidden",
+              )}
+            >
               <div className="mb-4 border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-semibold text-neutral-800">1. Informasi Dasar Perusahaan</h3>
-                <p className="text-sm text-slate-500">Logo, nama, kontak utama, dan alamat lengkap perusahaan.</p>
+                <h3 className="text-lg font-semibold text-neutral-800">
+                  1. Informasi Dasar Perusahaan
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Logo, nama, kontak utama, dan alamat lengkap perusahaan.
+                </p>
               </div>
 
               <FieldGroup>
-                <div className="space-y-6 mb-6">
+                <div className="mb-6 space-y-6">
                   <Controller
                     name="wlkpStatus"
                     control={form.control}
                     render={({ field, fieldState }) => (
-                      <FieldSet data-invalid={fieldState.invalid} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm">
+                      <FieldSet
+                        data-invalid={fieldState.invalid}
+                        className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                      >
                         <FieldLegend className="flex items-center gap-1 text-base">
                           Status WLKP Online *
                           <HelpTooltip content="Wajib Lapor Ketenagakerjaan di Perusahaan sesuai dengan UU No. 7 Tahun 1981." />
@@ -272,27 +315,60 @@ function RouteComponent() {
                             }
                           }}
                           aria-invalid={fieldState.invalid}
-                          className="flex flex-row gap-4 mt-3"
+                          className="mt-3 flex flex-row gap-4"
                         >
-                          <FieldLabel htmlFor={`form-wlkp-radiogroup-yes`} className="cursor-pointer">
-                            <div className={cn("px-4 py-3 border rounded-lg transition-all", field.value === true ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-slate-200 hover:border-primary/50")}>
+                          <FieldLabel
+                            htmlFor={`form-wlkp-radiogroup-yes`}
+                            className="cursor-pointer"
+                          >
+                            <div
+                              className={cn(
+                                "rounded-lg border px-4 py-3 transition-all",
+                                field.value === true
+                                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                  : "border-slate-200 hover:border-primary/50",
+                              )}
+                            >
                               <div className="flex items-center gap-2">
-                                <RadioGroupItem value="true" id={`form-wlkp-radiogroup-yes`} />
-                                <span className="font-semibold text-sm">Ya, Sudah Ada</span>
+                                <RadioGroupItem
+                                  value="true"
+                                  id={`form-wlkp-radiogroup-yes`}
+                                />
+                                <span className="text-sm font-semibold">
+                                  Ya, Sudah Ada
+                                </span>
                               </div>
                             </div>
                           </FieldLabel>
-                          <FieldLabel htmlFor={`form-wlkp-radiogroup-no`} className="cursor-pointer">
-                            <div className={cn("px-4 py-3 border rounded-lg transition-all", field.value === false ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-slate-200 hover:border-primary/50")}>
+                          <FieldLabel
+                            htmlFor={`form-wlkp-radiogroup-no`}
+                            className="cursor-pointer"
+                          >
+                            <div
+                              className={cn(
+                                "rounded-lg border px-4 py-3 transition-all",
+                                field.value === false
+                                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                  : "border-slate-200 hover:border-primary/50",
+                              )}
+                            >
                               <div className="flex items-center gap-2">
-                                <RadioGroupItem value="false" id={`form-wlkp-radiogroup-no`} />
-                                <span className="font-semibold text-sm">Belum Ada</span>
+                                <RadioGroupItem
+                                  value="false"
+                                  id={`form-wlkp-radiogroup-no`}
+                                />
+                                <span className="text-sm font-semibold">
+                                  Belum Ada
+                                </span>
                               </div>
                             </div>
                           </FieldLabel>
                         </RadioGroup>
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} className="mt-2" />
+                          <FieldError
+                            errors={[fieldState.error]}
+                            className="mt-2"
+                          />
                         )}
                       </FieldSet>
                     )}
@@ -305,7 +381,7 @@ function RouteComponent() {
                       render={({ field, fieldState }) => (
                         <Field
                           data-invalid={fieldState.invalid}
-                          className="space-y-1 animate-in slide-in-from-top-2 fade-in"
+                          className="animate-in space-y-1 fade-in slide-in-from-top-2"
                         >
                           <FieldLabel className="ml-1 text-sm font-bold">
                             Nomor Registrasi WLKP *
@@ -339,7 +415,7 @@ function RouteComponent() {
                       data-invalid={fieldState.invalid}
                       className="space-y-1"
                     >
-                      <FieldLabel className="ml-1 text-sm font-bold flex items-center gap-1">
+                      <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
                         Logo Perusahaan *
                         <HelpTooltip content="Unggah logo resmi perusahaan berformat JPG/PNG maksimal 2MB." />
                       </FieldLabel>
@@ -351,14 +427,14 @@ function RouteComponent() {
                   )}
                 />
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row">
                   <Controller
                     control={form.control}
                     name="name"
                     render={({ field, fieldState }) => (
                       <Field
                         data-invalid={fieldState.invalid}
-                        className="space-y-1 flex-1"
+                        className="flex-1 space-y-1"
                       >
                         <FieldLabel className="ml-1 text-sm font-bold">
                           Nama Perusahaan *
@@ -383,7 +459,7 @@ function RouteComponent() {
                     render={({ field, fieldState }) => (
                       <Field
                         data-invalid={fieldState.invalid}
-                        className="space-y-1 flex-1"
+                        className="flex-1 space-y-1"
                       >
                         <FieldLabel className="ml-1 text-sm font-bold">
                           Email Perusahaan *
@@ -411,7 +487,7 @@ function RouteComponent() {
                       data-invalid={fieldState.invalid}
                       className="space-y-1"
                     >
-                      <FieldLabel className="ml-1 text-sm font-bold flex items-center gap-1">
+                      <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
                         Kategori KBLI *
                         <HelpTooltip content="Klasifikasi Baku Lapangan Usaha Indonesia sesuai NIB." />
                       </FieldLabel>
@@ -446,7 +522,7 @@ function RouteComponent() {
                       </FieldLabel>
                       <Textarea
                         placeholder="Jalan, RT/RW, Patokan..."
-                        className="h-24 text-sm resize-none"
+                        className="h-24 resize-none text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
@@ -457,7 +533,7 @@ function RouteComponent() {
                   )}
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Controller
                     control={form.control}
                     name="provinceId"
@@ -593,16 +669,26 @@ function RouteComponent() {
             </div>
 
             {/* STEP 2: Kontak & Pimpinan */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-right-4 duration-500", currentStep !== 2 && "hidden")}>
+            <div
+              className={cn(
+                "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
+                currentStep !== 2 && "hidden",
+              )}
+            >
               <div className="mb-4 border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-semibold text-neutral-800">2. Kontak & Pimpinan</h3>
-                <p className="text-sm text-slate-500">Informasi penanggung jawab pengujian (PIC) dan pimpinan perusahaan.</p>
+                <h3 className="text-lg font-semibold text-neutral-800">
+                  2. Kontak & Pimpinan
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Informasi penanggung jawab pengujian (PIC) dan pimpinan
+                  perusahaan.
+                </p>
               </div>
 
               <FieldGroup>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-4">
-                  <div className="flex items-center gap-2 mb-2 text-primary font-semibold">
-                    <Users className="w-5 h-5" />
+                <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="mb-2 flex items-center gap-2 font-semibold text-primary">
+                    <Users className="h-5 w-5" />
                     Penanggung Jawab / PIC
                   </div>
                   <Controller
@@ -619,7 +705,7 @@ function RouteComponent() {
                         <Input
                           type="text"
                           placeholder="Nama lengkap PIC"
-                          className="h-11 text-sm bg-white"
+                          className="h-11 bg-white text-sm"
                           {...field}
                           aria-invalid={fieldState.invalid}
                         />
@@ -629,8 +715,8 @@ function RouteComponent() {
                       </Field>
                     )}
                   />
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Controller
                       control={form.control}
                       name="responsibleTestingPersonEmail"
@@ -645,7 +731,7 @@ function RouteComponent() {
                           <Input
                             type="email"
                             placeholder="email.pic@contoh.com"
-                            className="h-11 text-sm bg-white"
+                            className="h-11 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -664,14 +750,14 @@ function RouteComponent() {
                           data-invalid={fieldState.invalid}
                           className="space-y-1"
                         >
-                          <FieldLabel className="ml-1 text-sm font-bold flex items-center gap-1">
+                          <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
                             No WhatsApp PIC *
                             <HelpTooltip content="Nomor WhatsApp aktif untuk menerima notifikasi otomatis terkait pengujian." />
                           </FieldLabel>
                           <Input
                             type="tel"
                             placeholder="08xxxxxxxxxx"
-                            className="h-11 text-sm bg-white"
+                            className="h-11 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -684,12 +770,12 @@ function RouteComponent() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-4">
-                  <div className="flex items-center gap-2 mb-2 text-primary font-semibold">
-                    <Building className="w-5 h-5" />
+                <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="mb-2 flex items-center gap-2 font-semibold text-primary">
+                    <Building className="h-5 w-5" />
                     Pimpinan Perusahaan
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Controller
                       control={form.control}
                       name="headOfCompany"
@@ -704,7 +790,7 @@ function RouteComponent() {
                           <Input
                             type="text"
                             placeholder="Nama Pimpinan Perusahaan"
-                            className="h-11 text-sm bg-white"
+                            className="h-11 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -729,7 +815,7 @@ function RouteComponent() {
                           <Input
                             type="text"
                             placeholder="Direktur Utama / Manajer"
-                            className="h-11 text-sm bg-white"
+                            className="h-11 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -740,21 +826,59 @@ function RouteComponent() {
                       )}
                     />
                   </div>
+
+                  <Controller
+                    control={form.control}
+                    name="headOfCompanyEmail"
+                    render={({ field, fieldState }) => (
+                      <Field
+                        data-invalid={fieldState.invalid}
+                        className="space-y-1"
+                      >
+                        <FieldLabel className="ml-1 text-sm font-bold">
+                          Email Pimpinan *
+                        </FieldLabel>
+                        <Input
+                          type="email"
+                          placeholder="email@perusahaan.com"
+                          className="h-11 bg-white text-sm"
+                          {...field}
+                          aria-invalid={fieldState.invalid}
+                        />
+                        <p className="ml-1 text-xs text-slate-500">
+                          Email aktif pimpinan perusahaan wajib diisi untuk
+                          pengiriman tautan TTE persetujuan penawaran dan
+                          Perjanjian Kerja Sama.
+                        </p>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
                 </div>
               </FieldGroup>
             </div>
 
             {/* STEP 3: WLKP & Tenaga Kerja */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-right-4 duration-500", currentStep !== 3 && "hidden")}>
+            <div
+              className={cn(
+                "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
+                currentStep !== 3 && "hidden",
+              )}
+            >
               <div className="mb-4 border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-semibold text-neutral-800">3. Data Ketenagakerjaan</h3>
-                <p className="text-sm text-slate-500">Informasi kepatuhan WLKP dan rincian tenaga kerja perusahaan.</p>
+                <h3 className="text-lg font-semibold text-neutral-800">
+                  3. Data Ketenagakerjaan
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Informasi kepatuhan WLKP dan rincian tenaga kerja perusahaan.
+                </p>
               </div>
 
               <FieldGroup>
                 <div className="space-y-6">
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Controller
                       control={form.control}
                       name="maleWorkers"
@@ -816,7 +940,10 @@ function RouteComponent() {
                     name="healthFacilityAvailable"
                     control={form.control}
                     render={({ field, fieldState }) => (
-                      <FieldSet data-invalid={fieldState.invalid} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm">
+                      <FieldSet
+                        data-invalid={fieldState.invalid}
+                        className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                      >
                         <FieldLegend className="flex items-center gap-1 text-base">
                           Fasilitas Kesehatan di Perusahaan *
                           <HelpTooltip content="Apakah terdapat klinik, ruang P3K, atau layanan medis internal di area perusahaan?" />
@@ -828,27 +955,60 @@ function RouteComponent() {
                             field.onChange(value === "true");
                           }}
                           aria-invalid={fieldState.invalid}
-                          className="flex flex-row gap-4 mt-3"
+                          className="mt-3 flex flex-row gap-4"
                         >
-                          <FieldLabel htmlFor={`form-rhf-radiogroup-yes`} className="cursor-pointer">
-                            <div className={cn("px-4 py-3 border rounded-lg transition-all", field.value === true ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-slate-200 hover:border-primary/50")}>
+                          <FieldLabel
+                            htmlFor={`form-rhf-radiogroup-yes`}
+                            className="cursor-pointer"
+                          >
+                            <div
+                              className={cn(
+                                "rounded-lg border px-4 py-3 transition-all",
+                                field.value === true
+                                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                  : "border-slate-200 hover:border-primary/50",
+                              )}
+                            >
                               <div className="flex items-center gap-2">
-                                <RadioGroupItem value="true" id={`form-rhf-radiogroup-yes`} />
-                                <span className="font-semibold text-sm">Ya, Tersedia</span>
+                                <RadioGroupItem
+                                  value="true"
+                                  id={`form-rhf-radiogroup-yes`}
+                                />
+                                <span className="text-sm font-semibold">
+                                  Ya, Tersedia
+                                </span>
                               </div>
                             </div>
                           </FieldLabel>
-                          <FieldLabel htmlFor={`form-rhf-radiogroup-no`} className="cursor-pointer">
-                            <div className={cn("px-4 py-3 border rounded-lg transition-all", field.value === false ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-slate-200 hover:border-primary/50")}>
+                          <FieldLabel
+                            htmlFor={`form-rhf-radiogroup-no`}
+                            className="cursor-pointer"
+                          >
+                            <div
+                              className={cn(
+                                "rounded-lg border px-4 py-3 transition-all",
+                                field.value === false
+                                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                  : "border-slate-200 hover:border-primary/50",
+                              )}
+                            >
                               <div className="flex items-center gap-2">
-                                <RadioGroupItem value="false" id={`form-rhf-radiogroup-no`} />
-                                <span className="font-semibold text-sm">Tidak Tersedia</span>
+                                <RadioGroupItem
+                                  value="false"
+                                  id={`form-rhf-radiogroup-no`}
+                                />
+                                <span className="text-sm font-semibold">
+                                  Tidak Tersedia
+                                </span>
                               </div>
                             </div>
                           </FieldLabel>
                         </RadioGroup>
                         {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} className="mt-2" />
+                          <FieldError
+                            errors={[fieldState.error]}
+                            className="mt-2"
+                          />
                         )}
                       </FieldSet>
                     )}
@@ -858,10 +1018,20 @@ function RouteComponent() {
             </div>
 
             {/* STEP 4: Bank */}
-            <div className={cn("space-y-6 animate-in fade-in slide-in-from-right-4 duration-500", currentStep !== 4 && "hidden")}>
+            <div
+              className={cn(
+                "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
+                currentStep !== 4 && "hidden",
+              )}
+            >
               <div className="mb-4 border-b border-slate-100 pb-4">
-                <h3 className="text-lg font-semibold text-neutral-800">4. Informasi Bank</h3>
-                <p className="text-sm text-slate-500">Data rekening bank untuk keperluan pengembalian dana (refund) operasional jika ada.</p>
+                <h3 className="text-lg font-semibold text-neutral-800">
+                  4. Informasi Bank
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Data rekening bank untuk keperluan pengembalian dana (refund)
+                  operasional jika ada.
+                </p>
               </div>
 
               <FieldGroup>
@@ -873,9 +1043,11 @@ function RouteComponent() {
                       data-invalid={fieldState.invalid}
                       className="space-y-1"
                     >
-                      <FieldLabel className="ml-1 text-sm font-bold flex items-center gap-1">
+                      <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
                         Nama Bank
-                        <span className="font-normal text-slate-400 ml-2">(Opsional)</span>
+                        <span className="ml-2 font-normal text-slate-400">
+                          (Opsional)
+                        </span>
                       </FieldLabel>
                       <Input
                         type="text"
@@ -901,7 +1073,9 @@ function RouteComponent() {
                     >
                       <FieldLabel className="ml-1 text-sm font-bold">
                         Nomor Rekening
-                        <span className="font-normal text-slate-400 ml-2">(Opsional)</span>
+                        <span className="ml-2 font-normal text-slate-400">
+                          (Opsional)
+                        </span>
                       </FieldLabel>
                       <Input
                         type="text"
@@ -927,7 +1101,9 @@ function RouteComponent() {
                     >
                       <FieldLabel className="ml-1 text-sm font-bold">
                         Nama Pemilik Rekening
-                        <span className="font-normal text-slate-400 ml-2">(Opsional)</span>
+                        <span className="ml-2 font-normal text-slate-400">
+                          (Opsional)
+                        </span>
                       </FieldLabel>
                       <Input
                         type="text"
@@ -946,14 +1122,17 @@ function RouteComponent() {
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center justify-between pt-6 border-t border-slate-100 mt-4">
+            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-6">
               <Button
                 type="button"
                 variant="outline"
                 onClick={prevStep}
-                className={cn("h-11 px-6 font-medium gap-2", currentStep === 1 && "invisible")}
+                className={cn(
+                  "h-11 gap-2 px-6 font-medium",
+                  currentStep === 1 && "invisible",
+                )}
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="h-4 w-4" />
                 Kembali
               </Button>
 
@@ -961,27 +1140,26 @@ function RouteComponent() {
                 <Button
                   type="button"
                   onClick={nextStep}
-                  className="h-11 px-8 font-medium gap-2 ml-auto shadow-sm"
+                  className="ml-auto h-11 gap-2 px-8 font-medium shadow-sm"
                 >
                   Selanjutnya
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button
                   type="submit"
-                  className="h-11 px-8 font-medium gap-2 shadow-sm bg-green-600 hover:bg-green-700 ml-auto"
+                  className="ml-auto h-11 gap-2 bg-green-600 px-8 font-medium shadow-sm hover:bg-green-700"
                   disabled={createUserCompanyMutation.isPending}
                 >
                   {createUserCompanyMutation.isPending ? (
                     <LoaderCircle className="h-4 w-4 animate-spin" />
                   ) : (
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="h-4 w-4" />
                   )}
                   Simpan Perusahaan
                 </Button>
               )}
             </div>
-
           </form>
         </CardContent>
       </Card>

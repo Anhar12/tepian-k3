@@ -13,6 +13,10 @@ interface GenerateAssignmentLetterOptions {
   assignmentLetterNumber: string;
   financingSource: string;
   assignees: WorksheetAssignmentDetail[];
+  spkNumber?: string;
+  spkDate?: string;
+  offeringNumber?: string;
+  offeringDate?: string;
 }
 
 export const generateAssignmentLetterPdf = async (

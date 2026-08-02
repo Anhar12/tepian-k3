@@ -12,7 +12,13 @@ import type { OrderDetailWithStatus } from "@tepian-k3/types/pengujian/order.typ
 import type { Document } from "@tepian-k3/types/platform/document.types";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { format, differenceInDays, differenceInHours, parseISO, isPast } from "date-fns";
+import {
+  format,
+  differenceInDays,
+  differenceInHours,
+  parseISO,
+  isPast,
+} from "date-fns";
 import {
   AlertCircle,
   Ban,
@@ -588,7 +594,8 @@ export function StatusStateContactRevisionRequested({
         description={
           <div className="space-y-3">
             <p>
-              Perbaiki data kontak perusahaan Anda (email atau nama contact person), lalu kirim ulang order ini.
+              Perbaiki data kontak perusahaan Anda (email atau nama contact
+              person), lalu kirim ulang order ini.
             </p>
             {orderDetail.revisionNotes && (
               <div className="rounded-lg bg-amber-100/50 p-3">
@@ -604,17 +611,22 @@ export function StatusStateContactRevisionRequested({
         }
         type="warning"
         actionButton={
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Link
               to="/dashboard/company/$companyId/edit"
               params={{ companyId: orderDetail.company?.id ?? "" }}
-              className={cn(Button({ variant: "outline", size: "sm" }), "bg-white/50 border-amber-300 hover:bg-amber-100 text-amber-900")}
+              className={cn(
+                Button({ variant: "outline", size: "sm" }),
+                "border-amber-300 bg-white/50 text-amber-900 hover:bg-amber-100",
+              )}
             >
               Edit Data Kontak
             </Link>
 
             <Button
-              onClick={() => resubmitMutation.mutate({ orderId: orderDetail.id })}
+              onClick={() =>
+                resubmitMutation.mutate({ orderId: orderDetail.id })
+              }
               size="sm"
               disabled={resubmitMutation.isPending}
               className="bg-amber-600 text-white hover:bg-amber-700"
@@ -648,7 +660,10 @@ export function StatusStateRequestReview({
         title="Koreksi Sedang Diperiksa"
         description={
           <div className="space-y-3">
-            <p>Admin akan memeriksa perbaikan data Anda dan mengembalikan order ke antrean jika sudah sesuai.</p>
+            <p>
+              Admin akan memeriksa perbaikan data Anda dan mengembalikan order
+              ke antrean jika sudah sesuai.
+            </p>
             {orderDetail.revisionNotes && (
               <div className="rounded-lg bg-amber-100/50 p-3">
                 <p className="text-xs font-medium text-amber-800">
@@ -681,10 +696,10 @@ export function StatusStatePendingReview({
       </p>
 
       {/* Estimasi Tanggal Tanda Tangan */}
-      <div className="mb-8 flex w-full max-w-sm items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 self-center">
+      <div className="mb-8 flex w-full max-w-sm items-start gap-3 self-center rounded-lg border border-blue-100 bg-blue-50 p-4">
         <CalendarIcon className="mt-0.5 size-5 flex-shrink-0 text-blue-600" />
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-800">
+          <p className="text-xs font-semibold tracking-wide text-blue-800 uppercase">
             Estimasi Surat Penawaran
           </p>
           <p className="mt-1 text-sm font-medium text-blue-900">
@@ -743,10 +758,10 @@ export function StatusStateWorksheetInReview({
       </p>
 
       {/* Estimasi Tanggal Tanda Tangan */}
-      <div className="mb-8 flex w-full max-w-sm items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 self-center">
+      <div className="mb-8 flex w-full max-w-sm items-start gap-3 self-center rounded-lg border border-blue-100 bg-blue-50 p-4">
         <CalendarIcon className="mt-0.5 size-5 flex-shrink-0 text-blue-600" />
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-800">
+          <p className="text-xs font-semibold tracking-wide text-blue-800 uppercase">
             Estimasi Surat Penawaran
           </p>
           <p className="mt-1 text-sm font-medium text-blue-900">
@@ -773,16 +788,22 @@ export function StatusStateWorksheetInReview({
         colorScheme={colorScheme}
         className="h-full w-full self-center"
       />
-
-      {orderDetail.worksheet && (
-        <FormUsulanTanggal orderId={orderDetail.id} worksheetId={orderDetail.worksheet.id} proposedDates={orderDetail.worksheet.proposedDates ?? []} />
-      )}
     </StateLayout>
   );
 }
 
-function FormUsulanTanggal({ orderId, worksheetId, proposedDates }: { orderId: string, worksheetId: string, proposedDates: any[] }) {
-  const form = useForm<z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>>({
+function FormUsulanTanggal({
+  orderId,
+  worksheetId,
+  proposedDates,
+}: {
+  orderId: string;
+  worksheetId: string;
+  proposedDates: any[];
+}) {
+  const form = useForm<
+    z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>
+  >({
     resolver: zodResolver(worksheetSchema.proposeWorksheetDateSchema),
     defaultValues: {
       worksheetId,
@@ -807,13 +828,21 @@ function FormUsulanTanggal({ orderId, worksheetId, proposedDates }: { orderId: s
     }),
   );
 
-  const onSubmit = (data: z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>) => {
-    proposeDateMutation.mutate(data);
+  const onSubmit = (
+    data: z.infer<typeof worksheetSchema.proposeWorksheetDateSchema>,
+  ) => {
+    proposeDateMutation.mutate({
+      ...data,
+      proposedStartDate: new Date(data.proposedStartDate).toISOString(),
+      proposedEndDate: new Date(data.proposedEndDate).toISOString(),
+    });
   };
 
   return (
     <div className="mt-8">
-      <h3 className="mb-4 text-lg font-semibold text-foreground">Histori Usulan Tanggal</h3>
+      <h3 className="mb-4 text-lg font-semibold text-foreground">
+        Histori Usulan Tanggal
+      </h3>
       {proposedDates.length > 0 ? (
         <div className="mb-8 overflow-hidden rounded-md border border-border">
           <Table>
@@ -829,9 +858,15 @@ function FormUsulanTanggal({ orderId, worksheetId, proposedDates }: { orderId: s
             <TableBody>
               {proposedDates.map((pd) => (
                 <TableRow key={pd.id}>
-                  <TableCell>{format(new Date(pd.createdAt), "dd MMM yyyy HH:mm")}</TableCell>
-                  <TableCell>{format(new Date(pd.proposedStartDate), "dd MMM yyyy")}</TableCell>
-                  <TableCell>{format(new Date(pd.proposedEndDate), "dd MMM yyyy")}</TableCell>
+                  <TableCell>
+                    {format(new Date(pd.createdAt), "dd MMM yyyy HH:mm")}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(pd.proposedStartDate), "dd MMM yyyy")}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(pd.proposedEndDate), "dd MMM yyyy")}
+                  </TableCell>
                   <TableCell>{pd.note || "-"}</TableCell>
                   <TableCell>
                     <Badge
@@ -856,20 +891,25 @@ function FormUsulanTanggal({ orderId, worksheetId, proposedDates }: { orderId: s
           </Table>
         </div>
       ) : (
-        <p className="mb-8 text-sm text-muted-foreground">Belum ada usulan tanggal.</p>
+        <p className="mb-8 text-sm text-muted-foreground">
+          Belum ada usulan tanggal.
+        </p>
       )}
 
-      <h3 className="mb-4 text-lg font-semibold text-foreground">Usulkan Tanggal Baru</h3>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 rounded-md border border-border p-4">
+      <h3 className="mb-4 text-lg font-semibold text-foreground">
+        Usulkan Tanggal Baru
+      </h3>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 rounded-md border border-border p-4"
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FieldGroup>
             <FieldLabel>Tanggal Mulai</FieldLabel>
             <Controller
               control={form.control}
               name="proposedStartDate"
-              render={({ field }) => (
-                <Input type="date" {...field} />
-              )}
+              render={({ field }) => <Input type="date" {...field} />}
             />
             <FieldError errors={[form.formState.errors.proposedStartDate]} />
           </FieldGroup>
@@ -878,9 +918,7 @@ function FormUsulanTanggal({ orderId, worksheetId, proposedDates }: { orderId: s
             <Controller
               control={form.control}
               name="proposedEndDate"
-              render={({ field }) => (
-                <Input type="date" {...field} />
-              )}
+              render={({ field }) => <Input type="date" {...field} />}
             />
             <FieldError errors={[form.formState.errors.proposedEndDate]} />
           </FieldGroup>
@@ -891,13 +929,18 @@ function FormUsulanTanggal({ orderId, worksheetId, proposedDates }: { orderId: s
             control={form.control}
             name="note"
             render={({ field }) => (
-              <Textarea placeholder="Alasan atau catatan tambahan..." {...field} />
+              <Textarea
+                placeholder="Alasan atau catatan tambahan..."
+                {...field}
+              />
             )}
           />
           <FieldError errors={[form.formState.errors.note]} />
         </FieldGroup>
         <Button type="submit" disabled={proposeDateMutation.isPending}>
-          {proposeDateMutation.isPending && <Spinner className="mr-2 h-4 w-4" />}
+          {proposeDateMutation.isPending && (
+            <Spinner className="mr-2 h-4 w-4" />
+          )}
           Kirim Usulan
         </Button>
       </form>
@@ -928,12 +971,15 @@ export function StatusStateWorksheetVerified({
       />
 
       {orderDetail.worksheet && (
-        <FormUsulanTanggal orderId={orderDetail.id} worksheetId={orderDetail.worksheet.id} proposedDates={orderDetail.worksheet.proposedDates ?? []} />
+        <FormUsulanTanggal
+          orderId={orderDetail.id}
+          worksheetId={orderDetail.worksheet.id}
+          proposedDates={orderDetail.worksheet.proposedDates ?? []}
+        />
       )}
     </StateLayout>
   );
 }
-
 
 interface StatusStateOfferPublishedProps extends SharedStatusStateProps {
   offeringDoc: Document | undefined;
@@ -945,14 +991,14 @@ export function StatusStateOfferPublished({
 }: StatusStateOfferPublishedProps) {
   const deadline = orderDetail.worksheet?.estimatedSigningDeadline;
   const isExpired = deadline ? isPast(parseISO(deadline)) : false;
-  
+
   let countdownText = "";
   let isWarning = false;
-  
+
   if (deadline && !isExpired) {
     const parsedDeadline = parseISO(deadline);
     const daysLeft = differenceInDays(parsedDeadline, new Date());
-    
+
     if (daysLeft > 0) {
       countdownText = `${daysLeft} hari lagi`;
     } else {
@@ -964,7 +1010,7 @@ export function StatusStateOfferPublished({
 
   return (
     <StateLayout>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+      <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="mb-2 text-xl font-semibold text-foreground">
             {`Order #${orderDetail.orderNumber} - Penawaran Diterbitkan`}
@@ -974,20 +1020,24 @@ export function StatusStateOfferPublished({
             tahap pembayaran.
           </p>
         </div>
-        
+
         {deadline && (
-          <div className="flex flex-col items-end shrink-0">
-            <span className="text-xs font-semibold uppercase text-slate-500 mb-1">Batas Waktu Persetujuan</span>
+          <div className="flex shrink-0 flex-col items-end">
+            <span className="mb-1 text-xs font-semibold text-slate-500 uppercase">
+              Batas Waktu Persetujuan
+            </span>
             {isExpired ? (
               <Badge variant="destructive" className="px-3 py-1">
                 Waktu Habis
               </Badge>
             ) : (
-              <Badge 
-                variant="outline" 
-                className={isWarning 
-                  ? "bg-amber-50 text-amber-600 border-amber-200 px-3 py-1" 
-                  : "bg-blue-50 text-blue-600 border-blue-200 px-3 py-1"}
+              <Badge
+                variant="outline"
+                className={
+                  isWarning
+                    ? "border-amber-200 bg-amber-50 px-3 py-1 text-amber-600"
+                    : "border-blue-200 bg-blue-50 px-3 py-1 text-blue-600"
+                }
               >
                 {countdownText}
               </Badge>
@@ -995,11 +1045,11 @@ export function StatusStateOfferPublished({
           </div>
         )}
       </div>
-      
+
       {isWarning && !isExpired && (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm font-medium text-amber-800">
-            <AlertCircle className="inline-block mr-2 h-4 w-4" />
+            <AlertCircle className="mr-2 inline-block h-4 w-4" />
             Segera setujui penawaran ini sebelum waktu habis.
           </p>
         </div>
@@ -1008,6 +1058,14 @@ export function StatusStateOfferPublished({
       <div className="flex flex-col gap-4 sm:flex-row">
         <DocumentCard title="Surat Penawaran" fileUrl={offeringDoc?.fileUrl} />
       </div>
+
+      {orderDetail.worksheet && (
+        <FormUsulanTanggal
+          orderId={orderDetail.id}
+          worksheetId={orderDetail.worksheet.id}
+          proposedDates={orderDetail.worksheet.proposedDates ?? []}
+        />
+      )}
     </StateLayout>
   );
 }
@@ -1032,9 +1090,10 @@ export function StatusStateUploadApproval({
         description={
           <div className="space-y-4">
             <p>
-              Silakan unggah surat persetujuan yang telah ditandatangani untuk melanjutkan ke tahap berikutnya.
+              Silakan unggah surat persetujuan yang telah ditandatangani untuk
+              melanjutkan ke tahap berikutnya.
             </p>
-            <div className="bg-white/60 rounded-xl">
+            <div className="rounded-xl bg-white/60">
               <FileUploadCard
                 id="approval-letter-input"
                 title="Surat Persetujuan"
@@ -1050,7 +1109,7 @@ export function StatusStateUploadApproval({
                 selectedContent={
                   <Button
                     size="sm"
-                    className="shrink-0 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                    className="shrink-0 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
                     onClick={handleUploadApprovalLetter}
                     disabled={uploadingApprovalLetter}
                   >
@@ -1260,7 +1319,7 @@ export function StatusStatePendingPaymentVerification({
   };
 
   const proposedDates = orderDetail.worksheet?.proposedDates ?? [];
-  const hasPendingProposal = proposedDates.some(p => p.status === "pending");
+  const hasPendingProposal = proposedDates.some((p) => p.status === "pending");
 
   return (
     <StateLayout>
@@ -1272,7 +1331,7 @@ export function StatusStatePendingPaymentVerification({
         colorScheme="amber"
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4 mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
         {paymentProofDoc && (
           <DocumentCard
             title="Bukti Pembayaran"
@@ -1289,16 +1348,18 @@ export function StatusStatePendingPaymentVerification({
         )}
       </div>
 
-      <div className="border-t pt-6 mt-6">
+      <div className="mt-6 border-t pt-6">
         <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50/50 p-4">
           <div className="flex gap-3">
-            <Calendar className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+            <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
             <div>
-              <h4 className="font-semibold text-blue-900 text-sm">
+              <h4 className="text-sm font-semibold text-blue-900">
                 Ajukan Usulan Tanggal Pelaksanaan
               </h4>
-              <p className="text-xs text-blue-700 mt-1">
-                Pembayaran Anda sedang dalam proses verifikasi. Untuk mempercepat proses penjadwalan, Anda sudah dapat mengajukan usulan tanggal pelaksanaan pengujian melalui form di bawah ini.
+              <p className="mt-1 text-xs text-blue-700">
+                Pembayaran Anda sedang dalam proses verifikasi. Untuk
+                mempercepat proses penjadwalan, Anda sudah dapat mengajukan
+                usulan tanggal pelaksanaan pengujian melalui form di bawah ini.
               </p>
             </div>
           </div>
@@ -1307,9 +1368,9 @@ export function StatusStatePendingPaymentVerification({
         <h3 className="text-lg font-semibold text-foreground">
           Usulan Tanggal Pengujian (Opsional)
         </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Anda dapat memberikan usulan tanggal pelaksanaan pengujian. Tim kami akan
-          mempertimbangkan usulan Anda dalam penyusunan jadwal.
+        <p className="mb-4 text-sm text-muted-foreground">
+          Anda dapat memberikan usulan tanggal pelaksanaan pengujian. Tim kami
+          akan mempertimbangkan usulan Anda dalam penyusunan jadwal.
         </p>
 
         {proposedDates.length > 0 && (
@@ -1319,16 +1380,34 @@ export function StatusStatePendingPaymentVerification({
               {proposedDates.map((pd) => (
                 <div
                   key={pd.id}
-                  className="rounded-lg border p-4 bg-slate-50/50 space-y-2"
+                  className="space-y-2 rounded-lg border bg-slate-50/50 p-4"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      {format(new Date(pd.proposedStartDate), "dd MMM yyyy HH:mm")} - {format(new Date(pd.proposedEndDate), "dd MMM yyyy HH:mm")}
+                      {format(
+                        new Date(pd.proposedStartDate),
+                        "dd MMM yyyy HH:mm",
+                      )}{" "}
+                      -{" "}
+                      {format(
+                        new Date(pd.proposedEndDate),
+                        "dd MMM yyyy HH:mm",
+                      )}
                     </span>
                     <Badge
-                      variant={pd.status === "approved" ? "default" : pd.status === "rejected" ? "destructive" : "secondary"}
+                      variant={
+                        pd.status === "approved"
+                          ? "default"
+                          : pd.status === "rejected"
+                            ? "destructive"
+                            : "secondary"
+                      }
                     >
-                      {pd.status === "approved" ? "Disetujui" : pd.status === "rejected" ? "Ditolak" : "Menunggu"}
+                      {pd.status === "approved"
+                        ? "Disetujui"
+                        : pd.status === "rejected"
+                          ? "Ditolak"
+                          : "Menunggu"}
                     </Badge>
                   </div>
                   {pd.note && (
@@ -1341,17 +1420,26 @@ export function StatusStatePendingPaymentVerification({
         )}
 
         {!hasPendingProposal && (
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 rounded-xl border bg-card p-6 shadow-sm"
+          >
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel>Usulan Tanggal Mulai</FieldLabel>
                 <Input
                   type="datetime-local"
                   {...form.register("proposedStartDate")}
-                  className={form.formState.errors.proposedStartDate ? "border-destructive" : ""}
+                  className={
+                    form.formState.errors.proposedStartDate
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
                 {form.formState.errors.proposedStartDate && (
-                  <FieldError>{form.formState.errors.proposedStartDate.message}</FieldError>
+                  <FieldError>
+                    {form.formState.errors.proposedStartDate.message}
+                  </FieldError>
                 )}
               </Field>
 
@@ -1360,10 +1448,16 @@ export function StatusStatePendingPaymentVerification({
                 <Input
                   type="datetime-local"
                   {...form.register("proposedEndDate")}
-                  className={form.formState.errors.proposedEndDate ? "border-destructive" : ""}
+                  className={
+                    form.formState.errors.proposedEndDate
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
                 {form.formState.errors.proposedEndDate && (
-                  <FieldError>{form.formState.errors.proposedEndDate.message}</FieldError>
+                  <FieldError>
+                    {form.formState.errors.proposedEndDate.message}
+                  </FieldError>
                 )}
               </Field>
             </div>
@@ -1383,7 +1477,9 @@ export function StatusStatePendingPaymentVerification({
             <div className="flex justify-end">
               <Button
                 type="submit"
-                disabled={proposeDateMutation.isPending || !form.formState.isValid}
+                disabled={
+                  proposeDateMutation.isPending || !form.formState.isValid
+                }
                 className="w-full sm:w-auto"
               >
                 {proposeDateMutation.isPending ? (
@@ -1446,7 +1542,7 @@ export function StatusStateAwaitingSchedule({
   };
 
   const proposedDates = orderDetail.worksheet?.proposedDates ?? [];
-  const hasPendingProposal = proposedDates.some(p => p.status === "pending");
+  const hasPendingProposal = proposedDates.some((p) => p.status === "pending");
 
   return (
     <StateLayout>
@@ -1470,8 +1566,8 @@ export function StatusStateAwaitingSchedule({
           Usulan Tanggal Pengujian (Opsional)
         </h3>
         <p className="text-sm text-muted-foreground">
-          Anda dapat memberikan usulan tanggal pelaksanaan pengujian. Tim kami akan
-          mempertimbangkan usulan Anda dalam penyusunan jadwal.
+          Anda dapat memberikan usulan tanggal pelaksanaan pengujian. Tim kami
+          akan mempertimbangkan usulan Anda dalam penyusunan jadwal.
         </p>
 
         {proposedDates.length > 0 && (
@@ -1481,16 +1577,34 @@ export function StatusStateAwaitingSchedule({
               {proposedDates.map((pd) => (
                 <div
                   key={pd.id}
-                  className="rounded-lg border p-4 bg-slate-50/50 space-y-2"
+                  className="space-y-2 rounded-lg border bg-slate-50/50 p-4"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      {format(new Date(pd.proposedStartDate), "dd MMM yyyy HH:mm")} - {format(new Date(pd.proposedEndDate), "dd MMM yyyy HH:mm")}
+                      {format(
+                        new Date(pd.proposedStartDate),
+                        "dd MMM yyyy HH:mm",
+                      )}{" "}
+                      -{" "}
+                      {format(
+                        new Date(pd.proposedEndDate),
+                        "dd MMM yyyy HH:mm",
+                      )}
                     </span>
                     <Badge
-                      variant={pd.status === "approved" ? "default" : pd.status === "rejected" ? "destructive" : "secondary"}
+                      variant={
+                        pd.status === "approved"
+                          ? "default"
+                          : pd.status === "rejected"
+                            ? "destructive"
+                            : "secondary"
+                      }
                     >
-                      {pd.status === "approved" ? "Disetujui" : pd.status === "rejected" ? "Ditolak" : "Menunggu"}
+                      {pd.status === "approved"
+                        ? "Disetujui"
+                        : pd.status === "rejected"
+                          ? "Ditolak"
+                          : "Menunggu"}
                     </Badge>
                   </div>
                   {pd.note && (
@@ -1503,17 +1617,26 @@ export function StatusStateAwaitingSchedule({
         )}
 
         {!hasPendingProposal && (
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 rounded-xl border bg-card p-6 shadow-sm"
+          >
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel>Usulan Tanggal Mulai</FieldLabel>
                 <Input
                   type="datetime-local"
                   {...form.register("proposedStartDate")}
-                  className={form.formState.errors.proposedStartDate ? "border-destructive" : ""}
+                  className={
+                    form.formState.errors.proposedStartDate
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
                 {form.formState.errors.proposedStartDate && (
-                  <FieldError>{form.formState.errors.proposedStartDate.message}</FieldError>
+                  <FieldError>
+                    {form.formState.errors.proposedStartDate.message}
+                  </FieldError>
                 )}
               </Field>
 
@@ -1522,10 +1645,16 @@ export function StatusStateAwaitingSchedule({
                 <Input
                   type="datetime-local"
                   {...form.register("proposedEndDate")}
-                  className={form.formState.errors.proposedEndDate ? "border-destructive" : ""}
+                  className={
+                    form.formState.errors.proposedEndDate
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
                 {form.formState.errors.proposedEndDate && (
-                  <FieldError>{form.formState.errors.proposedEndDate.message}</FieldError>
+                  <FieldError>
+                    {form.formState.errors.proposedEndDate.message}
+                  </FieldError>
                 )}
               </Field>
             </div>
@@ -1545,7 +1674,9 @@ export function StatusStateAwaitingSchedule({
             <div className="flex justify-end">
               <Button
                 type="submit"
-                disabled={proposeDateMutation.isPending || !form.formState.isValid}
+                disabled={
+                  proposeDateMutation.isPending || !form.formState.isValid
+                }
                 className="w-full sm:w-auto"
               >
                 {proposeDateMutation.isPending ? (

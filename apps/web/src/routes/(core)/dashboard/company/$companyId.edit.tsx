@@ -124,6 +124,7 @@ function RouteComponent() {
       responsibleTestingPersonPhone: company.responsibleTestingPersonPhone,
       headOfCompany: company.headOfCompany,
       headOfCompanyPosition: company.headOfCompanyPosition,
+      headOfCompanyEmail: company.headOfCompanyEmail ?? "",
       companyBankName: company.companyBankName ?? "",
       companyBankAccount: company.companyBankAccount ?? "",
       companyBankAccountName: company.companyBankAccountName ?? "",
@@ -199,7 +200,7 @@ function RouteComponent() {
             className="grid gap-4"
           >
             <FieldGroup>
-              <div className="flex w-full flex-row gap-4 mb-4">
+              <div className="mb-4 flex w-full flex-row gap-4">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-primary/30">
                   <MapPin className="text-primary" />
                 </div>
@@ -670,6 +671,36 @@ function RouteComponent() {
                     </Field>
                   )}
                 />
+
+                <Controller
+                  control={form.control}
+                  name="headOfCompanyEmail"
+                  render={({ field, fieldState }) => (
+                    <Field
+                      data-invalid={fieldState.invalid}
+                      className="w-full space-y-1"
+                    >
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Email Pimpinan Perusahaan *
+                      </FieldLabel>
+                      <Input
+                        type="email"
+                        placeholder="email@perusahaan.com"
+                        className="h-10 text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <p className="ml-1 text-xs text-slate-500">
+                        Email aktif pimpinan perusahaan wajib diisi untuk
+                        pengiriman tautan TTE persetujuan penawaran dan
+                        Perjanjian Kerja Sama.
+                      </p>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
               </div>
 
               <Controller
@@ -700,7 +731,6 @@ function RouteComponent() {
                   </Field>
                 )}
               />
-
 
               <div className="flex w-full flex-row gap-4">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-primary/30">

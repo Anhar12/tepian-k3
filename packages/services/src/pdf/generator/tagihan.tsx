@@ -12,6 +12,8 @@ interface GenerateTagihanOptions {
   billingAmount: number;
   operationalAmount: number;
   billingExpiryDate: string;
+  operationalBankAccount?: string;
+  operationalBankAccountName?: string;
 }
 
 export const generateTagihanPdf = async (

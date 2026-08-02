@@ -19,16 +19,22 @@ graph TD
 ## Detail Alur Transaksi Lengkap
 
 ### Fase 1: Pembuatan Order & Review
-1. **Customer membuat order**
+
+1. **Pendaftaran Perusahaan (User Company)**
+   - User mendaftarkan data perusahaan pemohon mencakup Nama, Alamat, Ketenagakerjaan, serta **Data Pimpinan Perusahaan** (Nama Pimpinan, Jabatan, dan **Email Aktif Pimpinan Perusahaan**).
+   - Form pendaftaran perusahaan secara default bersifat kosong tanpa pengisian data mock.
+   - Email Pimpinan (`headOfCompanyEmail`) digunakan sebagai alamat pengiriman otomatis untuk tautan TTE Persetujuan Penawaran & Perjanjian Kerja Sama.
+2. **Customer membuat order**
    - User memilih parameter dan membuat order dari keranjang (cart).
    - Status order: `pending`.
-2. **Admin mereview order yang masuk**
+3. **Admin mereview order yang masuk**
    - Melihat daftar order yang `pending`.
    - Memeriksa detail order, parameter, jumlah.
    - Mempersiapkan untuk review teknis (kaji ulang).
 
 ### Fase 2: Kaji Ulang Teknis (Pembuatan Worksheet)
-3. **Admin membuat worksheet awal**
+
+4. **Admin membuat worksheet awal**
    - Melakukan review dan konfirmasi:
      - **Parameter** yang dibutuhkan untuk pengujian.
      - **Bahan** yang diperlukan.
@@ -37,31 +43,37 @@ graph TD
      - **Jumlah tim** (total anggota yang dibutuhkan).
    - Status worksheet: `draft` atau `pending_verification`.
    - **CATATAN**: Worksheet ini belum terhubung ke testing karena testing record belum dibuat.
-4. **Admin membuat worksheet items**
+5. **Admin membuat worksheet items**
    - Untuk setiap parameter yang akan diuji, menentukan lokasi dan jumlah, lalu menghubungkan alat via `parameterTools`.
 
 ### Fase 3: Verifikasi Koordinator
-5. **Koordinator mereview dan memverifikasi worksheet**
+
+6. **Koordinator mereview dan memverifikasi worksheet**
    - Mereview kelayakan teknis (spesifikasi, alat, bahan, jadwal, kapasitas tim).
    - Menunjuk supervisor (`mainSupervisorId`, `accompanyingSupervisorId`).
    - Menunjuk teknisi lab (`worksheetAssignments`).
    - Status worksheet: `pending_verification` → `verified`.
 
-### Fase 4: Perhitungan Biaya & Penawaran
-6. **Koordinator/Admin menghitung biaya transaksi**
+### Fase 4: Perhitungan Biaya & Penerbitan Penawaran (TTE Signer)
+
+7. **Koordinator/Admin menghitung biaya transaksi**
    - Menghitung total biaya berdasarkan parameter, durasi, anggota tim, dan penggunaan alat.
    - Memperbarui harga order jika diperlukan.
-   - Status order: `pending` → `approved`.
-7. **Admin mengupload surat penawaran** (Offering Document)
-   - Dokumen (`ORDER` > `OFFERING_LETTER`) mencakup parameter, jadwal, tim, dan rincian biaya.
-   - Customer dinotifikasi.
+8. **Admin mengupload / menerbitkan surat penawaran** (Offering Document)
+   - Dokumen mencakup parameter, lokasi, dan rincian biaya.
+   - Status order: `penawaran_diterbitkan`.
+   - Sistem secara otomatis men-generate token TTE dan mengirimkan notifikasi permintaan TTE ke **Email Pimpinan Perusahaan** (`headOfCompanyEmail`).
 
-### Fase 5: Persetujuan Customer
-8. **Admin mengupload template surat persetujuan** (Cooperation Agreement Template).
-9. **Customer download, tanda tangan, dan upload** (`signed_offering_approval`).
-   - Timestamp `approvedAt` pada order diset.
+### Fase 5: Persetujuan Penawaran & Usulkan Tanggal Baru
+
+9. **Customer Meninjau Penawaran**:
+   - Customer melihat pratinjau dokumen penawaran di halaman status order.
+   - **Pilihan 1 — Setujui Penawaran**: Customer mengklik tombol **Setuju**, mengonfirmasi persetujuan, dan melangkah ke tahap pengunggahan surat persetujuan/pembayaran (`upload_surat_persetujuan`).
+   - **Pilihan 2 — Usulkan Tanggal Baru**: Customer dapat mengisi form **Usulkan Tanggal Baru** pada halaman penawaran diterbitkan (Tanggal Mulai, Tanggal Selesai format ISO, dan Catatan Opsional) jika memerlukan penyesuaian jadwal sebelum persetujuan final.
+   - **Pilihan 3 — Ajukan Revisi**: Customer mengajukan catatan revisi ke admin jika rincian parameter/biaya memerlukan penyesuaian.
 
 ### Fase 6: Invoice & Pembayaran
+
 10. **Admin mengupload**:
     - `invoice` (Invoice dengan detail pembayaran).
     - `cooperation_agreement` (Surat Perjanjian Kerjasama).
@@ -72,6 +84,7 @@ graph TD
     - Status order: `approved` → `unpaid` → `paid`.
 
 ### Fase 7: Pembuatan Testing Record (Setelah Pembayaran)
+
 13. **Admin membuat record testing** (terhubung ke orderId)
     - Generate `testingNumber` yang unik.
     - Menghubungkan ke `orderId`, `userId`, `companyId`, `testingType`.
@@ -82,6 +95,7 @@ graph TD
     - Update `worksheet.testingId` untuk menghubungkan worksheet yang sudah ada ke testing yang baru.
 
 ### Fase 8: Persiapan Pelaksanaan & Pengujian
+
 16. **Admin finalisasi worksheet**
     - Konfirmasi jadwal final dan tim yang ditunjuk.
     - Status worksheet: `verified` → `ready` atau `in_progress`.
@@ -100,6 +114,7 @@ graph TD
     - Status testing: `in_progress` → `completed`.
 
 ### Fase 9: Sertifikat & Pengiriman
+
 21. **Admin generate sertifikat**
     - Generate PDF sertifikat dengan verifikasi QR (`TESTING` > `CERTIFICATE`).
 22. **User berwenang menandatangani sertifikat** (digital signature).
@@ -132,23 +147,27 @@ graph TD
 ```
 
 ### Fase 1: Persiapan Kelas
+
 1. **Admin membuat Master Pelatihan** (E-learning, Bimtek, Webinar).
 2. **Admin menyusun Silabus & Materi** (Video, Modul PDF, dll).
 3. **Admin menyusun Soal Ujian/Assessment**.
 4. **Admin mengubah status pelatihan menjadi `published`**.
 
 ### Fase 2: Pendaftaran & Pembayaran
+
 1. **Customer memilih pelatihan dan checkout (Order)**.
 2. **Customer melakukan pembayaran**.
 3. **Admin memverifikasi pembayaran**, dan status order berubah menjadi `paid`.
 4. Sistem otomatis membuat `enrollment` untuk setiap peserta yang didaftarkan.
 
 ### Fase 3: Pelaksanaan & Pembelajaran
+
 1. **Peserta (Siswa) login dan membuka menu Profil Belajar**.
 2. **Peserta mengakses materi** secara berurutan sesuai silabus.
 3. **Peserta mengikuti ujian** (Assessment) di akhir sesi.
 
 ### Fase 4: Kelulusan & Sertifikat
+
 1. **Sistem menghitung nilai ujian otomatis**.
 2. Jika lulus (nilai > passing grade), **sistem meng-generate Sertifikat**.
 3. Peserta dapat mendownload sertifikat digital dari menu profil mereka.

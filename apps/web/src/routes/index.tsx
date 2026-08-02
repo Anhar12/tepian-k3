@@ -176,11 +176,8 @@ function HomeComponent() {
       >
         {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
-          <span className="flex items-center gap-1.5 text-sm font-medium tracking-wider text-primary">
-            <GradientBox /> layanan K3
-          </span>
           <h2 className="mb-2 text-center text-5xl font-semibold text-primary md:text-6xl">
-            Layanan kami
+            Pilih Layanan yang Anda Butuhkan
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
@@ -253,20 +250,19 @@ function HomeComponent() {
         {/* Right: Text Content */}
         <div className="flex max-w-xl flex-col gap-6">
           <span className="text-sm font-semibold tracking-wider text-primary uppercase">
-            Tepian K3
+            TENTANG KAMI
           </span>
           <h2 className="text-4xl leading-tight font-bold text-foreground md:text-5xl">
             Balai Keselamatan dan Kesehatan Kerja Samarinda
           </h2>
           <p className="text-base leading-relaxed text-muted-foreground">
-            Balai Keselamatan dan kesehatan kerja (K3) Samarinda merupakan
-            lembaga resmi yang berperan strategis dalam mendukung penerapan K3
-            melalui pembinaan, pengujian dan pelatihan intensif.
+            Kami mendukung penerapan Keselamatan dan Kesehatan Kerja melalui
+            layanan pengujian, pelatihan, uji kompetensi, dan konsultasi K3.
           </p>
           <p className="text-base leading-relaxed text-muted-foreground">
-            Tujuan utama kami adalah menciptakan lingkungan kerja yang aman,
-            sehat, dan produktif demi kesejahteraan tenaga kerja serta
-            keberlangsungan industri sesuai regulasi yang berlaku.
+            Dengan dukungan TEPIAN K3, masyarakat dan perusahaan dapat
+            memperoleh informasi serta mengajukan layanan secara daring dalam
+            satu platform.
           </p>
           <Link
             to="/profil"
@@ -297,11 +293,8 @@ function HomeComponent() {
         />
         {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
-          <span className="flex items-center gap-1.5 text-sm font-medium tracking-wider text-primary">
-            <GradientBox /> insights & updates
-          </span>
           <h2 className="mb-2 max-w-3xl text-center text-5xl font-semibold text-primary md:text-6xl">
-            Informasi Keselamatan & Kesehatan Kerja
+            Informasi & Update Terkini
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>

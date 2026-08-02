@@ -4,7 +4,7 @@ import { tw } from "../utils/tw";
 import { PAGE_MARGINS } from "../utils/page-styles";
 import { Letterhead } from "../components/letterhead";
 import { storageService } from "../../storage";
-import { differenceInBusinessDays, format } from "date-fns";
+import { format } from "date-fns";
 import { NumberedList } from "../components/numbered-list";
 import { LabeledField } from "../components/labeled-field";
 import { SectionHeader } from "../components/section-header";
@@ -23,6 +23,10 @@ interface AssignmentLetterProps {
   assignmentLetterNumber: string;
   financingSource: string;
   assignees: WorksheetAssignmentDetail[];
+  spkNumber?: string;
+  spkDate?: string;
+  offeringNumber?: string;
+  offeringDate?: string;
 }
 
 export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
@@ -30,31 +34,41 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
   companyRegency,
   orderDate,
   assignmentDateStart,
-  assignmentDateEnd,
+  assignmentDateEnd: _assignmentDateEnd,
   letterNumber,
   assignmentLetterNumber,
   financingSource,
   assignees,
+  spkNumber,
+  spkDate,
+  offeringNumber,
+  offeringDate,
 }) => {
   const dasarItems = [
-    `Surat Permintaan pengujian ${companyName} nomor ${letterNumber} tanggal ${format(
-      orderDate,
+    `Permohonan Pengujian Nomor: ${letterNumber} tanggal ${format(
+      new Date(orderDate),
       "dd MMMM yyyy",
     )}.`,
-    `Surat Persetujuan Pelaksanaan Pengujian K3 Nomor ${assignmentLetterNumber} Tanggal ${format(
-      new Date(),
+    `Surat Perjanjian Kerjasama Pendayagunaan Fasilitas Layanan Balai K3 Samarinda Nomor: ${
+      spkNumber || assignmentLetterNumber
+    } tanggal ${format(
+      spkDate ? new Date(spkDate) : new Date(),
+      "dd MMMM yyyy",
+    )}.`,
+    `Sesuai dengan surat Penawaran Pelaksanaan Kegiatan Nomor ${
+      offeringNumber || letterNumber
+    } tanggal ${format(
+      offeringDate ? new Date(offeringDate) : new Date(orderDate),
       "dd MMMM yyyy",
     )}.`,
   ];
 
   const untukItems = [
     `Melaksanakan Perjalanan Dinas Dalam Rangka Pengujian K3 pada ${companyName} di ${companyRegency}.`,
-    `Dilaksanakan pada tanggal ${format(
-      assignmentDateStart,
+    `Dilaksanakan pada Tanggal ${format(
+      new Date(assignmentDateStart),
       "dd MMMM yyyy",
-    )} - ${format(assignmentDateEnd, "dd MMMM yyyy")} (${
-      differenceInBusinessDays(assignmentDateEnd, assignmentDateStart) + 1
-    } hari).`,
+    )}.`,
     `Melaporkan pelaksanaan kegiatan secara tertulis kepada Kepala Balai K3 Samarinda.`,
     `Melaksanakan perintah ini dengan sebaik-baiknya dan penuh rasa tanggung jawab.`,
   ];
@@ -62,7 +76,7 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
   const columns: TableColumn<WorksheetAssignmentDetail>[] = [
     {
       key: "employee.name",
-      label: "Nama",
+      label: "NAMA",
       width: "w-4/12",
     },
     {
@@ -72,19 +86,13 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
     },
     {
       key: "employee.type",
-      label: "Pangkat/Golongan",
+      label: "PANGKAT/ GOLONGAN",
       width: "w-4/12",
     },
     {
       key: "employee.position.name",
-      label: "Jabatan",
+      label: "JABATAN/ PERAN",
       width: "w-4/12",
-    },
-    {
-      key: "note",
-      label: "Ket",
-      width: "w-3/12",
-      defaultValue: "",
     },
   ];
 
@@ -110,7 +118,7 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
           {/* Pertimbangan */}
           <LabeledField
             label="Pertimbangan"
-            value="Demi kepentingan dinas dipandang perlu memerintahkan kepada Pegawai Negeri Sipil pada Balai Keselamatan dan Kesehatan Kerja Samarinda untuk melaksanakan pengujian K3 lingkungan kerja."
+            value="Demi kepentingan dinas dipandang perlu memerintahkan kepada Pegawai Negeri Sipil pada Balai Keselamatan dan Kesehatan Kerja Samarinda untuk melaksanakan pengujian K3."
           />
 
           {/* Dasar */}
@@ -138,7 +146,7 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
           {/* Pembiayaan */}
           <LabeledField
             label="Pembiayaan"
-            value={`${financingSource} dibebankan pada RPL 046 PS Balai K3 SMD.`}
+            value={`${financingSource} dibebankan pada RPL 046 PS Balai K3 SMD, Akomodasi dan Operasional selama Pengujian disediakan dan di tanggung oleh perusahaan.`}
           />
 
           {/* Closing */}

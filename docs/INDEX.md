@@ -28,6 +28,7 @@ Panduan terkait Hono, tRPC, PostgreSQL, Drizzle ORM, dan logika bisnis backend.
 - [DATABASE.md](backend/DATABASE.md) — Konvensi skema, migrasi, transaksi, UUIDv7, relasi polimorfik.
 - [AUTH_AND_PERMISSIONS.md](backend/AUTH_AND_PERMISSIONS.md) — Sistem JWT, role, middleware, dan panduan autentikasi.
 - [QR_DIGITAL_SIGNATURE.md](QR_DIGITAL_SIGNATURE.md) — Arsitektur & panduan integrasi Tanda Tangan Digital (TTE) berbasis QR Code.
+- [document-signatures-implementation.md](document-signatures-implementation.md) — Dokumentasi alur TTE Pimpinan Perusahaan (`headOfCompanyEmail`) dan pembuatan dokumen PDF (Tagihan, SPK, Penawaran, SPT).
 
 ## 4. Frontend (UI/UX & Routing)
 

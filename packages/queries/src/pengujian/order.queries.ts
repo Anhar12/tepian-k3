@@ -27,7 +27,6 @@ import {
   userCompanies,
   userCompanyTestingLocation,
   worksheets,
-  worksheetTools,
   tools,
 } from "@tepian-k3/db/schema";
 import { generateOrderNumberWithSequence } from "@tepian-k3/db/utils";
@@ -39,7 +38,11 @@ import { filterColumns } from "@tepian-k3/utils/filter-column";
 import { TRPCError } from "@trpc/server";
 import { Cause, Effect, Exit } from "effect";
 import { z } from "zod";
-import { logCreate, logUpdate, logStatusChange } from "../helpers/audit.helpers";
+import {
+  logCreate,
+  logUpdate,
+  logStatusChange,
+} from "../helpers/audit.helpers";
 import { maskUserCompany } from "../helpers/mask.helpers";
 import orderItemQueries from "./order-item.queries";
 import orderStatusHistoryQueries from "./order-status-history.queries";
@@ -134,7 +137,9 @@ const orderQueries = {
             input.showDeleted
               ? isNotNull(order.deletedAt)
               : isNull(order.deletedAt),
-            input.fundingType ? eq(order.fundingType, input.fundingType) : undefined,
+            input.fundingType
+              ? eq(order.fundingType, input.fundingType)
+              : undefined,
           );
 
       const orderBy =
@@ -256,49 +261,51 @@ const orderQueries = {
   getOrderWithCompanyAndItems(
     orderId: string,
     userId: string,
-    options?: { unmask?: boolean }
+    options?: { unmask?: boolean },
   ) {
     return Effect.tryPromise({
       try: () =>
-        db.query.order.findFirst({
-          where: and(eq(order.id, orderId), eq(order.userId, userId)),
-          with: {
-            company: {
-              columns: {
-                id: true,
-                name: true,
-                address: true,
-                responsibleTestingPersonPhone: true,
-              },
-              with: {
-                regency: {
-                  columns: {
-                    id: true,
-                    name: true,
+        db.query.order
+          .findFirst({
+            where: and(eq(order.id, orderId), eq(order.userId, userId)),
+            with: {
+              company: {
+                columns: {
+                  id: true,
+                  name: true,
+                  address: true,
+                  responsibleTestingPersonPhone: true,
+                },
+                with: {
+                  regency: {
+                    columns: {
+                      id: true,
+                      name: true,
+                    },
                   },
                 },
               },
-            },
-            statusHistory: true,
-            items: {
-              with: {
-                parameter: {
-                  columns: {
-                    id: true,
-                    name: true,
-                    unit: true,
-                  },
-                  with: {
-                    category: {
-                      columns: {
-                        id: true,
-                        name: true,
-                      },
-                      with: {
-                        cluster: {
-                          columns: {
-                            id: true,
-                            name: true,
+              statusHistory: true,
+              items: {
+                with: {
+                  parameter: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      unit: true,
+                    },
+                    with: {
+                      category: {
+                        columns: {
+                          id: true,
+                          name: true,
+                        },
+                        with: {
+                          cluster: {
+                            columns: {
+                              id: true,
+                              name: true,
+                            },
                           },
                         },
                       },
@@ -307,14 +314,14 @@ const orderQueries = {
                 },
               },
             },
-          },
-        }).then((data) => {
-          if (!data) return data;
-          if (!options?.unmask && data.company) {
-            data.company = maskUserCompany(data.company) as any;
-          }
-          return data;
-        }),
+          })
+          .then((data) => {
+            if (!data) return data;
+            if (!options?.unmask && data.company) {
+              data.company = maskUserCompany(data.company) as any;
+            }
+            return data;
+          }),
       catch: (error) => {
         logError("orderQueries.getOrderById", "Failed to fetch order by ID", {
           error,
@@ -332,85 +339,87 @@ const orderQueries = {
   getOrderWithDocuments(
     orderId: string,
     userId: string,
-    options?: { unmask?: boolean }
+    options?: { unmask?: boolean },
   ) {
     return Effect.tryPromise({
       try: () =>
-        db.query.order.findFirst({
-          where: and(eq(order.id, orderId), eq(order.userId, userId)),
-          with: {
-            company: {
-              columns: {
-                id: true,
-                name: true,
+        db.query.order
+          .findFirst({
+            where: and(eq(order.id, orderId), eq(order.userId, userId)),
+            with: {
+              company: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
               },
-            },
-            user: true,
-            items: {
-              with: {
-                parameter: {
-                  columns: {
-                    id: true,
-                    name: true,
-                    unit: true,
-                  },
-                  with: {
-                    category: {
-                      columns: {
-                        id: true,
-                        name: true,
-                      },
-                      with: {
-                        cluster: {
-                          columns: {
-                            id: true,
-                            name: true,
+              user: true,
+              items: {
+                with: {
+                  parameter: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      unit: true,
+                    },
+                    with: {
+                      category: {
+                        columns: {
+                          id: true,
+                          name: true,
+                        },
+                        with: {
+                          cluster: {
+                            columns: {
+                              id: true,
+                              name: true,
+                            },
                           },
                         },
                       },
                     },
                   },
-                },
-                location: {
-                  columns: {
-                    id: true,
-                    name: true,
+                  location: {
+                    columns: {
+                      id: true,
+                      name: true,
+                    },
+                    with: {
+                      regency: true,
+                      district: true,
+                    },
                   },
-                  with: {
-                    regency: true,
-                    district: true,
-                  },
-                },
-                pelatihan: {
-                  columns: {
-                    id: true,
-                    title: true,
+                  pelatihan: {
+                    columns: {
+                      id: true,
+                      title: true,
+                    },
                   },
                 },
               },
-            },
-            testing: true,
-            worksheet: {
-              with: {
-                proposedDates: true,
+              testing: true,
+              worksheet: {
+                with: {
+                  proposedDates: true,
+                },
+              },
+              statusHistory: {
+                orderBy: (statusHistory, { desc }) => [
+                  desc(statusHistory.createdAt),
+                ],
+              },
+              documents: {
+                orderBy: (documents, { desc }) => [desc(documents.createdAt)],
               },
             },
-            statusHistory: {
-              orderBy: (statusHistory, { desc }) => [
-                desc(statusHistory.createdAt),
-              ],
-            },
-            documents: {
-              orderBy: (documents, { desc }) => [desc(documents.createdAt)],
-            },
-          },
-        }).then((data) => {
-          if (!data) return data;
-          if (!options?.unmask && data.company) {
-            data.company = maskUserCompany(data.company) as any;
-          }
-          return data;
-        }),
+          })
+          .then((data) => {
+            if (!data) return data;
+            if (!options?.unmask && data.company) {
+              data.company = maskUserCompany(data.company) as any;
+            }
+            return data;
+          }),
       catch: (error) => {
         logError(
           "orderQueries.getOrderWithDocuments",
@@ -429,93 +438,92 @@ const orderQueries = {
     });
   },
 
-  getOrderWithDocumentsAdmin(
-    orderId: string,
-    options?: { unmask?: boolean }
-  ) {
+  getOrderWithDocumentsAdmin(orderId: string, options?: { unmask?: boolean }) {
     return Effect.tryPromise({
       try: () =>
-        db.query.order.findFirst({
-          where: eq(order.id, orderId),
-          with: {
-            company: {
-              columns: {
-                id: true,
-                name: true,
-                address: true,
-                email: true,
-                headOfCompany: true,
-                headOfCompanyPosition: true,
-                responsibleTestingPersonPhone: true,
-                responsibleTestingPersonEmail: true,
-                responsibleTestingPerson: true,
+        db.query.order
+          .findFirst({
+            where: eq(order.id, orderId),
+            with: {
+              company: {
+                columns: {
+                  id: true,
+                  name: true,
+                  address: true,
+                  email: true,
+                  headOfCompany: true,
+                  headOfCompanyPosition: true,
+                  responsibleTestingPersonPhone: true,
+                  responsibleTestingPersonEmail: true,
+                  responsibleTestingPerson: true,
+                },
               },
-            },
-            user: true,
-            items: {
-              with: {
-                parameter: {
-                  columns: {
-                    id: true,
-                    name: true,
-                    unit: true,
-                  },
-                  with: {
-                    category: {
-                      columns: {
-                        id: true,
-                        name: true,
-                      },
-                      with: {
-                        cluster: {
-                          columns: {
-                            id: true,
-                            name: true,
+              user: true,
+              items: {
+                with: {
+                  parameter: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      unit: true,
+                    },
+                    with: {
+                      category: {
+                        columns: {
+                          id: true,
+                          name: true,
+                        },
+                        with: {
+                          cluster: {
+                            columns: {
+                              id: true,
+                              name: true,
+                            },
                           },
                         },
                       },
                     },
                   },
-                },
-                location: {
-                  columns: {
-                    id: true,
-                    name: true,
+                  location: {
+                    columns: {
+                      id: true,
+                      name: true,
+                    },
+                    with: {
+                      regency: true,
+                      district: true,
+                    },
                   },
-                  with: {
-                    regency: true,
-                    district: true,
-                  },
-                },
-                pelatihan: {
-                  columns: {
-                    id: true,
-                    title: true,
+                  pelatihan: {
+                    columns: {
+                      id: true,
+                      title: true,
+                    },
                   },
                 },
               },
-            },
-            testing: true,
-            worksheet: true,
-            statusHistory: {
-              with: {
-                changedByUser: true,
+              testing: true,
+              worksheet: true,
+              statusHistory: {
+                with: {
+                  changedByUser: true,
+                },
+                orderBy: (statusHistory, { asc }) => [
+                  asc(statusHistory.createdAt),
+                ],
               },
-              orderBy: (statusHistory, { asc }) => [
-                asc(statusHistory.createdAt),
-              ],
+              documents: {
+                orderBy: (documents, { desc }) => [desc(documents.createdAt)],
+              },
             },
-            documents: {
-              orderBy: (documents, { desc }) => [desc(documents.createdAt)],
-            },
-          },
-        }).then((data) => {
-          if (!data) return data;
-          if (!options?.unmask && data.company) {
-            data.company = maskUserCompany(data.company) as any;
-          }
-          return data;
-        }),
+          })
+          .then((data) => {
+            if (!data) return data;
+            if (!options?.unmask && data.company) {
+              data.company = maskUserCompany(data.company) as any;
+            }
+            return data;
+          }),
       catch: (error) => {
         logError(
           "orderQueries.getOrderWithDocuments",
@@ -737,7 +745,7 @@ const orderQueries = {
 
             // Log creation
             await Effect.runPromise(
-              logCreate("order", newOrder.id, newOrder, userId)
+              logCreate("order", newOrder.id, newOrder, userId),
             );
 
             return { order: newOrder, items };
@@ -924,8 +932,8 @@ const orderQueries = {
           data.orderId,
           {},
           updateData as Record<string, unknown>,
-          userId
-        )
+          userId,
+        ),
       );
 
       return updatedOrder;
@@ -940,7 +948,6 @@ const orderQueries = {
           db.query.order.findFirst({
             where: and(
               eq(order.id, orderId),
-              eq(order.userId, userId),
               eq(order.status, "penawaran_diterbitkan"),
             ),
           }),
@@ -1046,7 +1053,13 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logStatusChange("order", orderId, "ditawarkan", "upload_surat_persetujuan", userId)
+        logStatusChange(
+          "order",
+          orderId,
+          "ditawarkan",
+          "upload_surat_persetujuan",
+          userId,
+        ),
       );
 
       yield* Effect.forkDaemon(
@@ -1054,9 +1067,12 @@ const orderQueries = {
           "order",
           orderId,
           { status: "penawaran_diterbitkan" },
-          { status: "upload_surat_persetujuan", approvedAt: updatedOrder.approvedAt },
+          {
+            status: "upload_surat_persetujuan",
+            approvedAt: updatedOrder.approvedAt,
+          },
           userId,
-        )
+        ),
       );
 
       return updatedOrder;
@@ -1071,7 +1087,6 @@ const orderQueries = {
           db.query.order.findFirst({
             where: and(
               eq(order.id, orderId),
-              eq(order.userId, userId),
               eq(order.status, "penawaran_diterbitkan"),
             ),
           }),
@@ -1220,7 +1235,13 @@ const orderQueries = {
       // status history is written inside the transaction above; no second write here
 
       yield* Effect.forkDaemon(
-        logStatusChange("order", orderId, "menunggu_revisi", "revisi_ditawarkan", userId)
+        logStatusChange(
+          "order",
+          orderId,
+          "menunggu_revisi",
+          "revisi_ditawarkan",
+          userId,
+        ),
       );
 
       yield* Effect.forkDaemon(
@@ -1228,16 +1249,24 @@ const orderQueries = {
           "order",
           orderId,
           { status: "menunggu_revisi" },
-          { status: "revisi_ditawarkan", revisionNotes: revisionNote, revisionCount: (orderToRevise.revisionCount ?? 0) + 1 },
+          {
+            status: "revisi_ditawarkan",
+            revisionNotes: revisionNote,
+            revisionCount: (orderToRevise.revisionCount ?? 0) + 1,
+          },
           userId,
-        )
+        ),
       );
 
       return updatedOrder;
     });
   },
 
-  submitOrderRevisionByUser(orderId: string, userId: string, revisionNote: string) {
+  submitOrderRevisionByUser(
+    orderId: string,
+    userId: string,
+    revisionNote: string,
+  ) {
     return Effect.gen(function* () {
       // check if order exists and is not yet completed/published
       const orderToRevise = yield* Effect.tryPromise({
@@ -1246,15 +1275,24 @@ const orderQueries = {
             where: and(
               eq(order.id, orderId),
               eq(order.userId, userId),
-              notInArray(order.status, ["laporan_diterbitkan", "completed", "rejected", "cancelled"]),
+              notInArray(order.status, [
+                "laporan_diterbitkan",
+                "completed",
+                "rejected",
+                "cancelled",
+              ]),
             ),
           }),
         catch: (error) => {
-          logError("orderQueries.submitOrderRevisionByUser", "Failed to fetch order", {
-            error,
-            orderId,
-            userId,
-          });
+          logError(
+            "orderQueries.submitOrderRevisionByUser",
+            "Failed to fetch order",
+            {
+              error,
+              orderId,
+              userId,
+            },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal mengambil pesanan",
@@ -1312,11 +1350,15 @@ const orderQueries = {
             return updatedOrders;
           }),
         catch: (error) => {
-          logError("orderQueries.submitOrderRevisionByUser", "Failed to update order", {
-            error,
-            orderId,
-            userId,
-          });
+          logError(
+            "orderQueries.submitOrderRevisionByUser",
+            "Failed to update order",
+            {
+              error,
+              orderId,
+              userId,
+            },
+          );
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui pesanan",
@@ -1325,7 +1367,13 @@ const orderQueries = {
       });
 
       yield* Effect.forkDaemon(
-        logStatusChange("order", orderId, orderToRevise.status, "revision", userId)
+        logStatusChange(
+          "order",
+          orderId,
+          orderToRevise.status,
+          "revision",
+          userId,
+        ),
       );
 
       yield* Effect.forkDaemon(
@@ -1333,9 +1381,13 @@ const orderQueries = {
           "order",
           orderId,
           { status: orderToRevise.status },
-          { status: "revision", revisionNotes: revisionNote, revisionCount: (orderToRevise.revisionCount ?? 0) + 1 },
+          {
+            status: "revision",
+            revisionNotes: revisionNote,
+            revisionCount: (orderToRevise.revisionCount ?? 0) + 1,
+          },
           userId,
-        )
+        ),
       );
 
       return updatedOrder;
@@ -1417,7 +1469,7 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logStatusChange("order", orderId, "any", "dibatalkan", userId)
+        logStatusChange("order", orderId, "any", "dibatalkan", userId),
       );
 
       return updatedOrder;
@@ -1514,7 +1566,13 @@ const orderQueries = {
       }
 
       yield* Effect.forkDaemon(
-        logUpdate("order", orderId, { approvalStatus: "pending" }, { approvalStatus: "approved" }, "system")
+        logUpdate(
+          "order",
+          orderId,
+          { approvalStatus: "pending" },
+          { approvalStatus: "approved" },
+          "system",
+        ),
       );
 
       return {
@@ -1617,7 +1675,13 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logUpdate("order", orderId, { approvalStatus: "pending" }, { approvalStatus: "rejected" }, "system")
+        logUpdate(
+          "order",
+          orderId,
+          { approvalStatus: "pending" },
+          { approvalStatus: "rejected" },
+          "system",
+        ),
       );
 
       return { ...updatedOrder, user: orderToReject.user };
@@ -1705,7 +1769,13 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logUpdate("order", orderId, { approvalStatus: "any" }, { approvalStatus: "revision_requested" }, "system")
+        logUpdate(
+          "order",
+          orderId,
+          { approvalStatus: "any" },
+          { approvalStatus: "revision_requested" },
+          "system",
+        ),
       );
 
       return { ...updatedOrder, user: orderToRevise.user };
@@ -1872,7 +1942,13 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logUpdate("order", orderId, { approvalStatus: "any" }, { approvalStatus: "pending" }, "system")
+        logUpdate(
+          "order",
+          orderId,
+          { approvalStatus: "any" },
+          { approvalStatus: "pending" },
+          "system",
+        ),
       );
 
       return { ...updatedOrder, user: orderToRevert.user };
@@ -1955,7 +2031,13 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logUpdate("order", orderId, { paymentStatus: "unpaid" }, { paymentStatus: "paid" }, "system")
+        logUpdate(
+          "order",
+          orderId,
+          { paymentStatus: "unpaid" },
+          { paymentStatus: "paid" },
+          "system",
+        ),
       );
 
       return { ...updatedOrder, user: orderToVerify.user };
@@ -2040,8 +2122,8 @@ const orderQueries = {
           orderId,
           { paymentStatus: "unpaid" },
           { paymentStatus: "rejected", paymentRejectedReason: reason },
-          adminId
-        )
+          adminId,
+        ),
       );
 
       return { ...updatedOrder, user: orderToReject.user };
@@ -2110,7 +2192,7 @@ const orderQueries = {
             logError(
               "orderQueries.updateOrderStatus",
               "Failed to automate tool return on order completion",
-              { error, orderId, status }
+              { error, orderId, status },
             );
             // Non-fatal error, we don't throw to prevent blocking the status update
           },
@@ -2127,7 +2209,7 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logStatusChange("order", orderId, "any", status, "system")
+        logStatusChange("order", orderId, "any", status, "system"),
       );
 
       return updatedOrder;
@@ -2208,7 +2290,7 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logStatusChange("order", orderId, "any", "diterima", "system")
+        logStatusChange("order", orderId, "any", "diterima", "system"),
       );
 
       return updatedOrder;
@@ -2293,7 +2375,13 @@ const orderQueries = {
       );
 
       yield* Effect.forkDaemon(
-        logStatusChange("order", orderId, "ditawarkan", "menunggu_revisi", "system")
+        logStatusChange(
+          "order",
+          orderId,
+          "ditawarkan",
+          "menunggu_revisi",
+          "system",
+        ),
       );
 
       return updatedOrder;
@@ -2344,7 +2432,13 @@ const orderQueries = {
         );
       }
       yield* Effect.forkDaemon(
-        logUpdate("order", orderId, {}, { paymentStatus: paymentStatus }, "system")
+        logUpdate(
+          "order",
+          orderId,
+          {},
+          { paymentStatus: paymentStatus },
+          "system",
+        ),
       );
 
       return updatedOrder;

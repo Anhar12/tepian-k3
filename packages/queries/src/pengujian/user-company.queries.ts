@@ -31,7 +31,10 @@ import { replaceStorageFile } from "../helpers/storage.helpers";
 import { maskUserCompany } from "../helpers/mask.helpers";
 
 const userCompanyQueries = {
-  getAllUserCompaniesByUserId(userId: string, options: { unmask?: boolean } = {}) {
+  getAllUserCompaniesByUserId(
+    userId: string,
+    options: { unmask?: boolean } = {},
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findMany({
@@ -88,12 +91,20 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
+        userCompany
+          ? Effect.succeed(
+              !options?.unmask ? maskUserCompany(userCompany) : userCompany,
+            )
+          : Effect.succeed(null),
       ),
     );
   },
 
-  getUserCompanyDetailsByUserIdAndId(userId: string, id: string, options: { unmask?: boolean } = {}) {
+  getUserCompanyDetailsByUserIdAndId(
+    userId: string,
+    id: string,
+    options: { unmask?: boolean } = {},
+  ) {
     return Effect.tryPromise({
       try: () =>
         db.query.userCompanies.findFirst({
@@ -148,7 +159,11 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
+        userCompany
+          ? Effect.succeed(
+              !options?.unmask ? maskUserCompany(userCompany) : userCompany,
+            )
+          : Effect.succeed(null),
       ),
     );
   },
@@ -175,7 +190,11 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
+        userCompany
+          ? Effect.succeed(
+              !options?.unmask ? maskUserCompany(userCompany) : userCompany,
+            )
+          : Effect.succeed(null),
       ),
     );
   },
@@ -199,7 +218,11 @@ const userCompanyQueries = {
       },
     }).pipe(
       Effect.flatMap((userCompany) =>
-        userCompany ? Effect.succeed(!options?.unmask ? maskUserCompany(userCompany) : userCompany) : Effect.succeed(null),
+        userCompany
+          ? Effect.succeed(
+              !options?.unmask ? maskUserCompany(userCompany) : userCompany,
+            )
+          : Effect.succeed(null),
       ),
     );
   },
@@ -230,7 +253,9 @@ const userCompanyQueries = {
 
   getOffsetPaginatedUserCompaniesByUserId(
     userId: string,
-    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema> & { unmask?: boolean },
+    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema> & {
+      unmask?: boolean;
+    },
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -369,7 +394,9 @@ const userCompanyQueries = {
   },
 
   getOffsetPaginatedUserCompanies(
-    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema> & { unmask?: boolean },
+    input: z.infer<typeof userCompanySchema.getAllUserCompaniesSchema> & {
+      unmask?: boolean;
+    },
   ) {
     return Effect.gen(function* () {
       const offset = (input.page - 1) * input.perPage;
@@ -513,9 +540,10 @@ const userCompanyQueries = {
               responsibleTestingPersonPhone: data.responsibleTestingPersonPhone,
               headOfCompany: data.headOfCompany,
               headOfCompanyPosition: data.headOfCompanyPosition,
-              companyBankName: data.companyBankName,
-              companyBankAccount: data.companyBankAccount,
-              companyBankAccountName: data.companyBankAccountName,
+              headOfCompanyEmail: data.headOfCompanyEmail,
+              companyBankName: data.companyBankName ?? "",
+              companyBankAccount: data.companyBankAccount ?? "",
+              companyBankAccountName: data.companyBankAccountName ?? "",
               companyPictureUrl: url,
             })
             .returning()
@@ -640,6 +668,9 @@ const userCompanyQueries = {
               headOfCompanyPosition:
                 data.headOfCompanyPosition ??
                 existingUserCompany.headOfCompanyPosition,
+              headOfCompanyEmail:
+                data.headOfCompanyEmail ??
+                existingUserCompany.headOfCompanyEmail,
             })
             .where(eq(userCompanies.id, data.id))
             .returning()
