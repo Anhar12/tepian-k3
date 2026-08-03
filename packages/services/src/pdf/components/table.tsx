@@ -113,16 +113,21 @@ export const Table = <T extends Record<string, unknown>>({
     return classes.filter((cls) => cls && cls.trim() !== "").join(" ");
   };
 
-  const borderClass = bordered ? "border border-black" : "";
-  const borderBottomClass = bordered ? "border-b border-black" : "";
+  const headerBorderClass = bordered
+    ? "border-t border-b border-l border-r border-black"
+    : "";
+  const rowBorderClass = bordered
+    ? "border-b border-l border-r border-black"
+    : "";
 
   return (
-    <View style={tw(buildClassString("mb-6", borderClass))}>
+    <View style={tw("mb-6")}>
       {/* Header Row */}
       <View
         style={tw(
-          buildClassString("flex-row", borderBottomClass, headerClassName),
+          buildClassString("flex-row", headerBorderClass, headerClassName),
         )}
+        fixed
       >
         {allColumns.map((column, index) => {
           const borderRightClass =
@@ -154,15 +159,13 @@ export const Table = <T extends Record<string, unknown>>({
 
       {/* Data Rows */}
       {data.map((item, rowIndex) => {
-        const isLastRow = rowIndex === data.length - 1;
-        const rowBorderClass = bordered && !isLastRow ? borderBottomClass : "";
-
         return (
           <View
             key={rowIndex}
             style={tw(
               buildClassString("flex-row", rowBorderClass, rowClassName),
             )}
+            wrap={false}
           >
             {allColumns.map((column, colIndex) => {
               const isIndexColumn = column.key === "__index__";

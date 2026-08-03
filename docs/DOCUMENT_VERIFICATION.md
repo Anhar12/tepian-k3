@@ -31,6 +31,36 @@ Sistem verifikasi dokumen yang mirip dengan **MagangHub Kemnaker** - memungkinka
 
 ---
 
+## 🎨 Standar Template PDF & Layout Dokumen
+
+Seluruh template PDF yang dihasilkan oleh sistem (Surat Penawaran, SPK, SPT, Tagihan) dibangun menggunakan `@react-pdf/renderer` pada folder `@tepian-k3/services/src/pdf/templates`.
+
+### 1. Kop Surat Resmi (`Letterhead`)
+
+- **Logo**: Logo Kemnaker di sisi kiri.
+- **Pemisah**: Pemisah garis vertikal berwarna Navy (`#1E3A8A`).
+- **Header Teks**: Teks biru Navy cetak tebal (KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA / DIREKTORAT JENDERAL PEMBINAAN PENGAWASAN KETENAGAKERJAAN DAN KESELAMATAN DAN KESEHATAN KERJA / BALAI KESELAMATAN DAN KESEHATAN KERJA SAMARINDA).
+- **Baris Kontak**: Alamat, Website, Email, dan Telepon.
+
+### 2. Surat Penawaran (`offering-letter.tsx`)
+
+- **Tujuan Surat**: Format 3 baris terpisah (`Yth. Pimpinan` / `{nama_perusahaan}` / `di Tempat`).
+- **Poin Permohonan**: Wajib mempertahankan 6 poin permohonan lengkap.
+- **Halaman 2 (Lampiran)**: Tanda tangan 2 kolom (Kiri: Menyetujui Perusahaan, Kanan: Kepala Balai K3 Samarinda). Tanpa tabel paraf dan tanpa box refund.
+
+### 3. Surat Perjanjian Kerja Sama / SPK (`spk.tsx`)
+
+- **Judul Dokumen**: `PERJANJIAN KERJA SAMA` dengan sub-judul `PENDAYAGUNAAN FASILITAS LAYANAN BALAI K3 SAMARINDA`.
+- **Pengulangan Header Tabel**: Menggunakan `fixed={true}` pada baris header tabel agar otomatis dicetak ulang di bagian atas saat tabel berlanjut ke halaman baru.
+- **Perlindungan Pemotongan Baris**: Menggunakan `wrap={false}` pada setiap baris item, baris total, dan `ListItem` agar teks tidak terbelah di batas halaman.
+- **Rincian Bank**: Kolom label menggunakan `w-36` agar teks `c) Nama Rekening` tidak terpotong menjadi `Nama Reken-ing`.
+
+### 4. Surat Perintah Tugas / SPT (`assignment-letter.tsx`)
+
+- **Null Safety Tanggal**: Memiliki fallback tanggal penugasan otomatis (`startDate ?? order.createdAt`) untuk mencegah error `400 Bad Request` saat mencetak atau mempratinjau SPT.
+
+---
+
 ## 🏗️ Arsitektur Sistem
 
 ```
@@ -82,6 +112,7 @@ Sistem verifikasi dokumen yang mirip dengan **MagangHub Kemnaker** - memungkinka
 **File:** `apps/web/src/routes/verify.$token.tsx`
 
 **Features:**
+
 - Dynamic route parameter `$token`
 - Three states: Loading, Error, Success
 - Responsive layout dengan Tailwind CSS
@@ -89,6 +120,7 @@ Sistem verifikasi dokumen yang mirip dengan **MagangHub Kemnaker** - memungkinka
 - SEO-friendly dengan custom meta tags
 
 **UI Components:**
+
 - Verification success banner (green)
 - Document information card
 - Signature details dengan timestamp
@@ -101,6 +133,7 @@ Sistem verifikasi dokumen yang mirip dengan **MagangHub Kemnaker** - memungkinka
 **File:** `packages/api/src/routers/document.ts`
 
 **Changes:**
+
 ```typescript
 // Updated response mapping untuk match frontend expectation
 verifyDocument: publicProcedure
@@ -132,6 +165,7 @@ verifyDocument: publicProcedure
 **File:** `packages/queries/src/document.queries.ts`
 
 **Changes:**
+
 ```typescript
 // OLD: Backend API route
 const verificationUrl = `${appUrl}/api/verify-document/${token}`;
@@ -153,7 +187,7 @@ const verificationUrl = `${appUrl}/verify/${token}`;
 const signedDocument = await documentQueries.signDocumentWithJWT(
   documentId,
   userId,
-  process.env.APP_URL // e.g., "https://tepian-k3.com"
+  process.env.APP_URL, // e.g., "https://tepian-k3.com"
 );
 
 // Result:
@@ -174,6 +208,7 @@ const signedDocument = await documentQueries.signDocumentWithJWT(
 ### 3. Manual Verification
 
 User juga bisa manual copy-paste token:
+
 ```
 https://tepian-k3.com/verify/abc123xyz...
 ```
@@ -185,6 +220,7 @@ https://tepian-k3.com/verify/abc123xyz...
 ### Current Implementation (JWT-based)
 
 ✅ **Yang Sudah Ada:**
+
 - HMAC-SHA256 signature untuk document signing
 - SHA-256 file hashing untuk integrity check
 - Verification logging (IP, user agent, timestamp)
@@ -192,6 +228,7 @@ https://tepian-k3.com/verify/abc123xyz...
 - Audit trail lengkap
 
 ⚠️ **Limitations:**
+
 - Menggunakan symmetric key (HMAC) bukan asymmetric (RSA/ECDSA)
 - **TIDAK** memenuhi standar tanda tangan digital tersertifikasi (UU ITE Pasal 11-12)
 - **TIDAK** terintegrasi dengan PSrE (Penyelenggara Sertifikasi Elektronik)
@@ -200,12 +237,14 @@ https://tepian-k3.com/verify/abc123xyz...
 ### Status Hukum
 
 **✅ COCOK UNTUK:**
+
 - Verifikasi dokumen internal
 - Proof of authenticity untuk administrasi
 - Anti-tampering verification
 - Audit trail untuk compliance
 
 **❌ TIDAK COCOK UNTUK:**
+
 - Dokumen legal yang butuh tanda tangan digital tersertifikasi
 - Transaksi yang memerlukan non-repudiasi kuat
 - Dokumen yang perlu diajukan ke pengadilan sebagai alat bukti elektronik utama
@@ -219,6 +258,7 @@ https://tepian-k3.com/verify/abc123xyz...
 ### Manual Testing Checklist
 
 1. **Generate Document dengan QR Code:**
+
    ```bash
    # Upload dan sign document via tRPC
    # Check QR code generated di storage
@@ -248,7 +288,7 @@ https://tepian-k3.com/verify/abc123xyz...
 
 ```typescript
 // Example E2E test
-test('Public verification flow', async () => {
+test("Public verification flow", async () => {
   // 1. Create and sign document
   const doc = await createDocument();
   const signed = await signDocument(doc.id);
@@ -257,7 +297,7 @@ test('Public verification flow', async () => {
   await page.goto(`/verify/${signed.verificationToken}`);
 
   // 3. Check success state
-  await expect(page.getByText('Dokumen Terverifikasi')).toBeVisible();
+  await expect(page.getByText("Dokumen Terverifikasi")).toBeVisible();
   await expect(page.getByText(doc.title)).toBeVisible();
 });
 ```
@@ -267,6 +307,7 @@ test('Public verification flow', async () => {
 ## 📊 Database Schema
 
 ### documents table
+
 ```sql
 CREATE TABLE documents (
   id UUID PRIMARY KEY,
@@ -283,6 +324,7 @@ CREATE TABLE documents (
 ```
 
 ### document_verifications table (Audit Log)
+
 ```sql
 CREATE TABLE document_verifications (
   id UUID PRIMARY KEY,
@@ -360,23 +402,27 @@ CREATE TABLE document_verifications (
 ## 🎨 UI/UX Features
 
 ### Responsive Design
+
 - Mobile-first approach
 - Gradient backgrounds untuk visual appeal
 - Card-based layout
 - Icon system dari Lucide React
 
 ### Loading States
+
 - Skeleton loading
 - Progress indicator
 - Spinner animation
 - Smooth transitions
 
 ### Error Handling
+
 - Clear error messages dalam Bahasa Indonesia
 - Actionable suggestions ("Coba Lagi", etc.)
 - Visual error states (red, yellow, green)
 
 ### Accessibility
+
 - Semantic HTML
 - ARIA labels
 - Keyboard navigation support
@@ -387,24 +433,28 @@ CREATE TABLE document_verifications (
 ## 🚦 Next Steps (Optional Enhancements)
 
 ### Phase 2: Security Enhancements
+
 - [ ] Encrypted verification tokens (base64 + AES like Kemnaker)
 - [ ] Rate limiting untuk prevent brute force
 - [ ] CAPTCHA untuk bot protection
 - [ ] Token expiration policy
 
 ### Phase 3: Visual Improvements
+
 - [ ] PDF watermark/stamp ("TERVERIFIKASI")
 - [ ] Visible QR code di PDF dengan border
 - [ ] Signature appearance (nama + timestamp di PDF)
 - [ ] Multi-signature support visualization
 
 ### Phase 4: Analytics & Monitoring
+
 - [ ] Verification analytics dashboard
 - [ ] Geographic distribution map
 - [ ] Suspicious activity alerts
 - [ ] Export audit logs
 
 ### Phase 5: Upgrade to Certified Digital Signature (Jika Diperlukan)
+
 - [ ] Integrasi PSrE (PrivyID, VIDA, dll)
 - [ ] Asymmetric cryptography (RSA-2048)
 - [ ] Trusted Timestamp Authority (TSA)
@@ -416,10 +466,13 @@ CREATE TABLE document_verifications (
 ## ❓ FAQ
 
 ### Q: Apakah sistem ini legal di Indonesia?
+
 **A:** Ya, untuk **dokumen elektronik biasa** sesuai Pasal 5 UU ITE. Namun **BUKAN** tanda tangan digital tersertifikasi (Pasal 11-12) yang memerlukan integrasi PSrE.
 
 ### Q: Apakah dokumen bisa dipalsukan?
+
 **A:** Sangat sulit. JWT signature + SHA-256 hash memastikan:
+
 - Dokumen tidak bisa diubah tanpa invalidate signature
 - Token verification unik per dokumen
 - Audit trail mencatat semua verifikasi
@@ -427,19 +480,24 @@ CREATE TABLE document_verifications (
 Namun, siapapun yang punya akses ke `JWT_DOCUMENT_SECRET` secara teoritis bisa membuat signature palsu.
 
 ### Q: Bagaimana cara scan QR code?
+
 **A:**
+
 1. Buka camera smartphone
 2. Arahkan ke QR code di PDF
 3. Tap notifikasi link yang muncul
 4. Browser akan buka halaman verifikasi
 
 ### Q: Apakah perlu login untuk verifikasi?
+
 **A:** **TIDAK**. Halaman `/verify/{token}` adalah public route. Siapapun bisa verify tanpa akun.
 
 ### Q: Berapa lama token valid?
+
 **A:** Default: 10 tahun (untuk dokumen arsip). Bisa diubah di `signDocument()` parameter `expiresIn`.
 
 ### Q: Apakah file PDF ikut disimpan?
+
 **A:** Ya, di storage service (MinIO/S3). Tapi hanya hash yang dimasukkan dalam signature, bukan file asli.
 
 ---
@@ -447,6 +505,7 @@ Namun, siapapun yang punya akses ke `JWT_DOCUMENT_SECRET` secara teoritis bisa m
 ## 📞 Support
 
 Jika ada pertanyaan atau issue:
+
 1. Check dokumentasi ini terlebih dahulu
 2. Review code di files yang disebutkan
 3. Check audit log di database untuk debugging

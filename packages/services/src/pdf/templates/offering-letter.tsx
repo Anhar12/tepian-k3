@@ -19,9 +19,9 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
   worksheet,
   companyName,
   letterNumber,
-  companyBankName,
-  companyBankAccount,
-  companyBankAccountName,
+  companyBankName: _companyBankName,
+  companyBankAccount: _companyBankAccount,
+  companyBankAccountName: _companyBankAccountName,
   companyRepName,
   companyRepPosition,
 }) => {
@@ -39,9 +39,7 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
           <View style={tw("flex-row justify-between items-center gap-2")}>
             <Text style={tw("text-[12px]")}>Lampiran</Text>
             <Text style={tw("text-[12px]")}>:</Text>
-            <Text style={tw("text-[12px]")}>
-              Surat Kepala Balai K3 Nomor {letterNumber}
-            </Text>
+            <Text style={tw("text-[12px]")}>{letterNumber}</Text>
           </View>
 
           <View style={tw("flex-row justify-between items-center gap-2")}>
@@ -66,17 +64,17 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
           operationalCosts={worksheet.operationalCosts}
         />
 
-        {/* Signature  */}
+        {/* Signatures on Lampiran */}
         <View
-          style={tw("flex-row justify-between items-start mt-8")}
+          style={tw("flex-row justify-between items-start mt-12")}
           wrap={false}
         >
           {/* Company Signature */}
-          <View style={tw("items-center w-4/12")}>
+          <View style={tw("items-center w-5/12")}>
             <Text style={tw("text-[10px] font-bold text-center")}>
               Menyetujui,
             </Text>
-            <Text style={tw("text-[10px] font-bold text-center mb-12")}>
+            <Text style={tw("text-[10px] font-bold text-center mb-16")}>
               {companyName}
             </Text>
 
@@ -90,91 +88,15 @@ export const OfferingLetter: React.FC<OfferingLetterProps> = ({
             )}
           </View>
 
-          {/* Signature Table */}
-          <View style={tw("w-5/12 border border-black")}>
-            <View style={tw("flex-row border-b border-black")}>
-              <Text
-                style={tw(
-                  "text-[7px] p-2 border-r border-black w-2/3 text-center",
-                )}
-              >
-                Penanggungjawab
-              </Text>
-              <Text
-                style={tw(
-                  "text-[7px] p-2 border-r border-black w-1/3 text-center",
-                )}
-              >
-                Paraf
-              </Text>
-              <Text style={tw("text-[7px] p-2 w-1/3 text-center")}>
-                Tanggal
-              </Text>
-            </View>
-            <View style={tw("flex-row border-b border-black")}>
-              <View style={tw("w-2/3 border-r border-black p-2")}>
-                <Text style={tw("text-[7px] text-center")}>Pengendali</Text>
-                <Text style={tw("text-[7px] text-center")}>Administrasi</Text>
-                <Text style={tw("text-[7px] text-center")}>
-                  (Kasubbag Umum Balai K3 Samarinda)
-                </Text>
-              </View>
-              <View style={tw("w-1/3 border-r border-black h-16")} />
-              <View style={tw("w-1/3 h-16")} />
-            </View>
-            <View style={tw("flex-row")}>
-              <View style={tw("w-2/3 border-r border-black p-2")}>
-                <Text style={tw("text-[7px] text-center")}>Pengendali</Text>
-                <Text style={tw("text-[7px] text-center")}>Teknis</Text>
-                <Text style={tw("text-[7px] text-center")}>
-                  (Sub Koordinator Pengujian Balai K3 Samarinda)
-                </Text>
-              </View>
-              <View style={tw("w-1/3 border-r border-black h-16")} />
-              <View style={tw("w-1/3 h-16")} />
-            </View>
-          </View>
-
           {/* Head Signature */}
-          <View style={tw("items-center w-4/12")}>
-            <Text style={tw("text-[10px] font-bold text-center")}>
-              Kepala Balai
-            </Text>
-            <Text style={tw("text-[10px] font-bold text-center")}>
-              Keselamatan dan Kesehatan Kerja
-            </Text>
-            <Text style={tw("text-[10px] font-bold text-center mb-12")}>
-              Samarinda
+          <View style={tw("items-center w-5/12")}>
+            <Text style={tw("text-[10px] font-bold text-center mb-16")}>
+              Kepala Balai K3 Samarinda,
             </Text>
 
             <Text style={tw("text-[10px] text-center underline")}>
-              dr. Erwin Anjasmara lchsan, M.K.M.
+              dr. Erwin Anjasmara Ichsan, M.K.M.
             </Text>
-            <Text style={tw("text-[10px] text-center")}>
-              NIP. 19760718 200312 1 001
-            </Text>
-          </View>
-        </View>
-
-        {/* Refund Bank Info */}
-        <View style={tw("mt-8")}>
-          <Text style={tw("text-[10px] mb-2")}>
-            * Nomor rekening pengembalian sisa dana operasional
-          </Text>
-          <View style={tw("flex-row items-center mb-1")}>
-            <Text style={tw("text-[10px] w-32")}>Nama Bank</Text>
-            <Text style={tw("text-[10px] mx-2")}>:</Text>
-            <Text style={tw("text-[10px]")}>{companyBankName}</Text>
-          </View>
-          <View style={tw("flex-row items-center mb-1")}>
-            <Text style={tw("text-[10px] w-32")}>Nomor Rekening</Text>
-            <Text style={tw("text-[10px] mx-2")}>:</Text>
-            <Text style={tw("text-[10px]")}>{companyBankAccount}</Text>
-          </View>
-          <View style={tw("flex-row items-center mb-1")}>
-            <Text style={tw("text-[10px] w-32")}>Atas Nama</Text>
-            <Text style={tw("text-[10px] mx-2")}>:</Text>
-            <Text style={tw("text-[10px]")}>{companyBankAccountName}</Text>
           </View>
         </View>
       </Page>

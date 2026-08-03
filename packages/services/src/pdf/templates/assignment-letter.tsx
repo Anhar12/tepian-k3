@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { NumberedList } from "../components/numbered-list";
 import { LabeledField } from "../components/labeled-field";
 import { SectionHeader } from "../components/section-header";
-import { SignatureTable } from "../components/signature-table";
 import { HeadSignature } from "../components/head-signature";
 import type { WorksheetAssignmentDetail } from "@tepian-k3/types/pengujian/worksheet-assignment.types";
 import { Table, type TableColumn } from "../components/table";
@@ -156,41 +155,38 @@ export const AssignmentLetter: React.FC<AssignmentLetterProps> = ({
           </Text>
 
           {/* Signature */}
-          <View style={tw("flex-row justify-between items-center mt-8")}>
+          <View style={tw("flex-row justify-between items-start mt-8")}>
             <View style={tw("flex flex-col items-center w-5/12")}>
-              <View style={tw("mb-2 border border-black p-2")}>
-                <Text style={tw("text-[10px] font-bold")}>
+              <View style={tw("border border-black p-2")}>
+                <Text style={tw("text-[9px] font-bold text-center")}>
                   ASN Balai K3 Samarinda tidak menerima gratifikasi dalam
                   pelaksanaan tugas sesuai ketentuan yang berlaku.
                 </Text>
               </View>
-              <SignatureTable
-                rows={[
-                  {
-                    role: "Pengendali Administrasi (Kasubbag Umum Balai K3 Samarinda)",
-                  },
-                  {
-                    role: "Pengendali Teknis (Sub Koordinator Pengujian Balai K3 Samarinda)",
-                  },
-                ]}
-                className="w-full"
-              />
             </View>
 
-            <View style={tw("flex flex-col justify-center items-center p-2")}>
-              <View style={tw("flex flex-col items-center justify-center")}>
+            <View style={tw("flex flex-col items-center w-5/12")}>
+              <View style={tw("mb-2 w-full")}>
                 <LabeledField
                   label="Dikeluarkan di"
-                  value={"Samarinda"}
-                  valueWidth="w-4/12"
+                  value="Samarinda"
+                  labelWidth="w-24"
                 />
                 <LabeledField
                   label="Pada tanggal"
                   value={format(new Date(), "dd MMMM yyyy")}
-                  valueWidth="w-4/12"
+                  labelWidth="w-24"
                 />
               </View>
-              <HeadSignature width="w-full" spacing="mb-24" />
+              <Text style={tw("text-[10px] font-bold text-center")}>
+                Kepala Balai
+              </Text>
+              <Text style={tw("text-[10px] font-bold text-center mb-16")}>
+                Keselamatan dan Kesehatan Kerja Samarinda,
+              </Text>
+              <Text style={tw("text-[10px] text-center underline")}>
+                dr. Erwin Anjasmara Ichsan, M.K.M.
+              </Text>
             </View>
           </View>
         </View>

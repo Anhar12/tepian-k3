@@ -308,7 +308,32 @@ sendEmail: withProtectedRateLimit(
   (ctx) => `email:${ctx.user.email}`,
 );
 
-// Role-based automatic tier
-// Admins: 100k req/hr | Users: 1k req/hr | Viewers: 100 req/hr
 getProfile: withRoleBasedRateLimit("api");
 ```
+
+---
+
+## 8. Safe `runEffect` Error Handling & Null Safety
+
+Saat menangani error di dalam runner `runEffect`, **wajib** menggunakan _optional chaining_ dan _nullish coalescing_ untuk menghindari `TypeError: Cannot read properties of undefined (reading 'code')`:
+
+```typescript
+// Helper konversi TRPCError aman
+export const handleTRPCError = (
+  error: unknown,
+  defaultMessage: string,
+  defaultCode: TRPCError["code"] = "INTERNAL_SERVER_ERROR",
+) => {
+  if (error instanceof TRPCError) return error;
+
+  const code = (error as { code?: TRPCError["code"] })?.code ?? defaultCode;
+  const message = (error as { message?: string })?.message || defaultMessage;
+
+  return new TRPCError({ code, message });
+};
+
+// Penggunaan pada Effect.tryPromise
+catch: (error) => handleTRPCError(error, "Gagal memproses dokumen")
+```
+
+Selain itu, selalu gunakan fallback nilai default (`?? ""`) untuk field DB yang nullable saat menyusun parameter ke service eksternal atau renderer PDF.

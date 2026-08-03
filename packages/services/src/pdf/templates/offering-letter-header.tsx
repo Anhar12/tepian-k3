@@ -1,7 +1,6 @@
 import React from "react";
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { Letterhead } from "../components/letterhead";
-import { TteSrikandi } from "../components/tte-srikandi";
 import { storageService } from "../../storage";
 import { registerLiberationSans } from "../fonts/register-liberation-sans";
 import { tw } from "../utils/tw";
@@ -116,8 +115,8 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
   referenceDate,
   adminEmail,
   adminContact,
-  companyRepName,
-  companyRepPosition,
+  companyRepName: _companyRepName,
+  companyRepPosition: _companyRepPosition,
   logoUrl,
 }) => {
   const today = new Date().toLocaleDateString("id-ID", {
@@ -164,7 +163,8 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
 
         {/* Recipient */}
         <View style={styles.recipient}>
-          <Text>Yth. Pimpinan {companyName}</Text>
+          <Text>Yth. Pimpinan</Text>
+          <Text>{companyName}</Text>
           <Text>di Tempat</Text>
         </View>
 
@@ -253,45 +253,18 @@ export const OfferingLetterHeader: React.FC<OfferingLetterHeaderProps> = ({
         </Text>
 
         {/* Signature  */}
-        <View style={tw("flex-row justify-between items-start mt-8")}>
-          {companyRepName ? (
-            <View style={tw("items-center w-4/12")}>
-              <Text style={tw("text-[10px] font-bold text-center")}>
-                Menyetujui,
-              </Text>
-              <Text style={tw("text-[10px] font-bold text-center mb-12")}>
-                {companyName}
-              </Text>
-              <Text style={tw("text-[10px] text-center underline")}>
-                {companyRepName}
-              </Text>
-              {companyRepPosition && (
-                <Text style={tw("text-[10px] text-center")}>
-                  {companyRepPosition}
-                </Text>
-              )}
-            </View>
-          ) : (
-            <TteSrikandi />
-          )}
-
+        <View style={tw("flex-row justify-end items-start mt-8")}>
           {/* Head Signature */}
-          <View style={tw("items-center w-4/12")}>
+          <View style={tw("items-center w-5/12")}>
             <Text style={tw("text-[10px] font-bold text-center")}>
               Kepala Balai
             </Text>
-            <Text style={tw("text-[10px] font-bold text-center")}>
-              Keselamatan dan Kesehatan Kerja
-            </Text>
-            <Text style={tw("text-[10px] font-bold text-center mb-12")}>
-              Samarinda
+            <Text style={tw("text-[10px] font-bold text-center mb-16")}>
+              Keselamatan dan Kesehatan Kerja Samarinda,
             </Text>
 
             <Text style={tw("text-[10px] text-center underline")}>
-              dr. Erwin Anjasmara lchsan, M.K.M.
-            </Text>
-            <Text style={tw("text-[10px] text-center")}>
-              NIP. 19760718 200312 1 001
+              dr. Erwin Anjasmara Ichsan, M.K.M.
             </Text>
           </View>
         </View>
