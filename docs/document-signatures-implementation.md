@@ -319,8 +319,45 @@ const testData = {
 4. **PDF corruption**: Verify pdf-lib version compatibility
 5. **File hash mismatch**: Ensure same buffer is used for signing and hashing
 
+## Recent System Enhancements & Fixes
+
+### 1. Pure Preview Backend Procedures
+
+To prevent premature database mutations and automatic modal closures when switching to Step 2 ("Atur Posisi TTD"), 4 dedicated preview endpoints were implemented:
+
+- `previewOfferingLetter`: Renders temporary base64 PDF preview for Surat Penawaran.
+- `previewSpkDocument`: Renders temporary base64 PDF preview for Surat SPK.
+- `previewAssignmentLetter`: Renders temporary base64 PDF preview for Surat SPT.
+- `previewTagihanDocument`: Renders temporary base64 PDF preview for Tagihan / Invoice.
+
+These procedures bypass database creation and file storage, returning only the rendered PDF buffer for client-side canvas preview.
+
+### 2. Canvas to PDF Coordinate Auto-Scaling
+
+To resolve issues where QR signatures were drawn outside printable PDF bounds due to dimension mismatches between Frontend Canvas (`800x1100 px`) and standard A4 PDF (`595.28x841.89 pt`), coordinate scaling with safety boundary clamping was implemented in `packages/services/src/pdf/pdf-signing.ts`:
+
+```typescript
+const pageWidth = page.getWidth(); // e.g. 595.28 pt
+const pageHeight = page.getHeight(); // e.g. 841.89 pt
+
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 1100;
+
+// Scale coordinates from frontend canvas to actual PDF page dimensions
+const pdfX = (position.x / CANVAS_WIDTH) * pageWidth;
+const pdfY = (position.y / CANVAS_HEIGHT) * pageHeight;
+const pdfW = (position.width / CANVAS_WIDTH) * pageWidth;
+const pdfH = (position.height / CANVAS_HEIGHT) * pageHeight;
+
+const yFromBottom = pageHeight - pdfY - pdfH;
+
+// Safety bounds to guarantee QR code stays within printable page area
+const safeX = Math.max(0, Math.min(pdfX, pageWidth - pdfW));
+const safeY = Math.max(0, Math.min(yFromBottom, pageHeight - pdfH));
+```
+
 ## References
 
 - [PDF Signing Example](./pdf-signing-example.md)
-- [Document Signing Service](f:/Monorepo/tepian-k3/packages/services/src/document-signing/index.ts)
+- [Document Signing Service](file:///d:/project/k3/tepian-k3/packages/services/src/pdf/pdf-signing.ts)
 - [pdf-lib Documentation](https://pdf-lib.js.org/)
