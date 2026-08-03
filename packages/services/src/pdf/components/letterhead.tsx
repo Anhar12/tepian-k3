@@ -57,36 +57,44 @@ interface LetterheadProps {
 }
 
 export const Letterhead: React.FC<LetterheadProps> = ({ logoUrl }) => (
-  <View style={tw("mb-4")}>
-    <View style={tw("flex-row items-center border-b-2 border-black pb-2")}>
-      {logoUrl && <Image src={logoUrl} style={styles.logo} />}
-      <View style={tw("flex-1")}>
-        <Text style={tw("text-center text-[12px]")}>
-          KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA
+  <View style={tw("mb-4 flex-row items-center border-b border-gray-300 pb-3")}>
+    {/* Left Logo + Text */}
+    <View style={tw("items-center pr-3 border-r-2 border-[#1E3A8A]")}>
+      {logoUrl && <Image src={logoUrl} style={{ width: 56, height: 56 }} />}
+      <Text
+        style={tw("text-[9px] font-bold text-[#1E3A8A] mt-1 tracking-wider")}
+      >
+        KEMNAKER
+      </Text>
+    </View>
+
+    {/* Right Header Information */}
+    <View style={tw("flex-1 pl-3")}>
+      <Text style={tw("text-[10px] font-bold text-black tracking-tight")}>
+        KEMENTERIAN KETENAGAKERJAAN REPUBLIK INDONESIA
+      </Text>
+      <Text style={tw("text-[11px] font-bold text-black tracking-tight")}>
+        DIREKTORAT JENDERAL PEMBINAAN PENGAWASAN KETENAGAKERJAAN
+      </Text>
+      <Text style={tw("text-[11px] font-bold text-black tracking-tight")}>
+        DAN KESELAMATAN DAN KESEHATAN KERJA
+      </Text>
+      <Text
+        style={tw("text-[13px] font-bold text-[#1E3A8A] tracking-tight mb-1")}
+      >
+        BALAI KESELAMATAN DAN KESEHATAN KERJA
+      </Text>
+      <Text style={tw("text-[8px] text-gray-800 mb-1")}>
+        Jl.Sentosa No.09 Samarinda 75117
+      </Text>
+      <View style={tw("flex-row items-center gap-3")}>
+        <Text style={tw("text-[8px] text-gray-800")}>
+          http://balaik3samarinda.kemnaker.go.id
         </Text>
-        <Text style={tw("text-center text-[12px]")}>DIREKTORAT JENDERAL</Text>
-        <Text style={tw("text-center text-[12px]")}>
-          PEMBINAAN PENGAWASAN KETENAGAKERJAAN
+        <Text style={tw("text-[8px] text-gray-800")}>
+          bk3samarinda@kemnaker.go.id
         </Text>
-        <Text style={tw("text-center text-[12px]")}>
-          DAN KESELAMATAN DAN KESEHATAN KERJA
-        </Text>
-        <Text style={tw("text-center text-[16px]")}>
-          BALAI KESELAMATAN DAN KESEHATAN KERJA
-        </Text>
-        <Text style={tw("text-center text-[9px]")}>
-          Jalan Sentosa No. 09 Samarinda Telp./Fax. (0541) 771306, 732941
-          Samarinda 75117
-        </Text>
-        <View style={tw("flex-row justify-center gap-2")}>
-          <Text style={tw("text-center text-[9px] italic")}>Laman</Text>
-          <Text style={tw("text-center text-[9px] italic")}>:</Text>
-          <Text
-            style={tw("text-center text-[9px] italic underline text-blue-600")}
-          >
-            http://bkk3.samarinda.kemnaker.go.id
-          </Text>
-        </View>
+        <Text style={tw("text-[8px] text-gray-800")}>(0541) 771306</Text>
       </View>
     </View>
   </View>

@@ -74,10 +74,12 @@ export const embedQRCodesInPDF = (
 
       // Validate page number
       if (position.page < 0 || position.page >= pages.length) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Invalid page number: ${position.page}. Document has ${pages.length} pages.`,
-        });
+        return yield* Effect.fail(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Halaman QR (${position.page + 1}) tidak valid. Dokumen hanya memiliki ${pages.length} halaman.`,
+          }),
+        );
       }
 
       // Generate QR code as PNG buffer

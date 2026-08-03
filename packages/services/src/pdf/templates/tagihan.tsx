@@ -86,7 +86,8 @@ export const Tagihan: React.FC<TagihanProps> = ({
 
         {/* Recipient */}
         <View style={tw("mb-6")}>
-          <Text>Yth. Pimpinan {companyName}</Text>
+          <Text>Yth. Pimpinan</Text>
+          <Text>{companyName}</Text>
           <Text>di Tempat</Text>
         </View>
 

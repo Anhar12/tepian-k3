@@ -132,6 +132,8 @@ packages/db/drop_schema.ts
 .cursor/
 .codeium/
 .copilot/
+.system_generated/
+scratch/
 
 # =============================================================================
 # Dokumen Panduan Pengembang & AI (WAJIB di-commit agar bisa dibaca AI/Junior Dev)

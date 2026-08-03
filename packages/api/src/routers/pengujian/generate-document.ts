@@ -266,12 +266,12 @@ export const generateDocumentRouter = createTRPCRouter({
                 generateSpkPdf({
                   worksheet,
                   agreementDate: input.agreementDate,
-                  companyRepName: company.headOfCompany,
-                  companyRepPosition: company.headOfCompanyPosition,
+                  companyRepName: company.headOfCompany ?? "",
+                  companyRepPosition: company.headOfCompanyPosition ?? "",
                   companyRepAddress: company.address ?? "",
-                  companyBankName: company.companyBankName,
-                  companyBankAccount: company.companyBankAccount,
-                  companyBankAccountName: company.companyBankAccountName,
+                  companyBankName: company.companyBankName ?? "",
+                  companyBankAccount: company.companyBankAccount ?? "",
+                  companyBankAccountName: company.companyBankAccountName ?? "",
                   operationalBankName: OPERATIONAL_BANK_NAME,
                   operationalBankAccount: OPERATIONAL_BANK_ACCOUNT,
                   operationalBankAccountName: OPERATIONAL_BANK_ACCOUNT_NAME,
@@ -407,9 +407,9 @@ export const generateDocumentRouter = createTRPCRouter({
             const tteToken = yield* createTTERequestToken({
               documentId: document.id,
               orderId: worksheet.orderId,
-              signerName: company.headOfCompany,
-              signerRole: company.headOfCompanyPosition,
-              signerEmail,
+              signerName: company.headOfCompany ?? "Pimpinan",
+              signerRole: company.headOfCompanyPosition ?? "Direktur",
+              signerEmail: signerEmail ?? "admin@bk3samarinda.kemnaker.go.id",
             });
 
             // Send TTE request email
@@ -420,18 +420,26 @@ export const generateDocumentRouter = createTRPCRouter({
             const tteLink = `${appUrl}/tte/sign-spk?token=${tteToken}`;
 
             yield* Effect.tryPromise({
-              try: () =>
-                emailService.sendTTERequest({
-                  email: signerEmail,
-                  signerName: company.headOfCompany,
-                  documentName: document.title,
-                  tteLink,
-                }),
-              catch: (error) => {
-                logError("generateSpkDocument", "Failed to send TTE email", {
-                  error,
-                });
+              try: async () => {
+                try {
+                  await emailService.sendTTERequest({
+                    email: signerEmail ?? "admin@bk3samarinda.kemnaker.go.id",
+                    signerName: company.headOfCompany ?? "Pimpinan",
+                    documentName: document.title,
+                    tteLink,
+                  });
+                } catch (error) {
+                  logError("generateSpkDocument", "Failed to send TTE email", {
+                    error,
+                  });
+                }
               },
+              catch: (error) =>
+                handleTRPCError(
+                  error,
+                  "Gagal mengirim email TTE",
+                  "INTERNAL_SERVER_ERROR",
+                ),
             });
 
             return {
@@ -651,28 +659,34 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
-            if (!worksheet.startDate || !worksheet.endDate) {
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Worksheet tidak memiliki tanggal penugasan",
-              });
-            }
+            const startDate =
+              worksheet.startDate ??
+              worksheet.order.createdAt ??
+              new Date().toISOString();
+            const endDate =
+              worksheet.endDate ??
+              worksheet.order.createdAt ??
+              new Date().toISOString();
 
-            if (!worksheet.assignments || worksheet.assignments.length === 0) {
-              throw new TRPCError({
-                code: "BAD_REQUEST",
-                message: "Worksheet tidak memiliki data penugasan",
-              });
-            }
+            const assignees =
+              worksheet.assignments && worksheet.assignments.length > 0
+                ? worksheet.assignments.map((assignee) => ({
+                    ...assignee,
+                    employee: {
+                      ...assignee.employee,
+                      position: assignee.employee.position || null,
+                    },
+                  }))
+                : [];
 
             const assignmentLetter = yield* Effect.tryPromise({
               try: () =>
                 generateAssignmentLetterPdf({
                   companyName: company.name,
-                  companyRegency: company.regency.name,
+                  companyRegency: company.regency?.name ?? "Samarinda",
                   orderDate: worksheet.order.createdAt,
-                  assignmentDateStart: worksheet.startDate!,
-                  assignmentDateEnd: worksheet.endDate!,
+                  assignmentDateStart: startDate,
+                  assignmentDateEnd: endDate,
                   letterNumber: input.letterNumber,
                   assignmentLetterNumber: input.assignmentLetterNumber,
                   spkNumber: input.spkNumber,
@@ -680,15 +694,11 @@ export const generateDocumentRouter = createTRPCRouter({
                   offeringNumber: input.offeringNumber,
                   offeringDate: input.offeringDate,
                   financingSource: worksheet.operationalCosts
-                    .map((cost) => cost.item)
-                    .join(", "),
-                  assignees: worksheet.assignments.map((assignee) => ({
-                    ...assignee,
-                    employee: {
-                      ...assignee.employee,
-                      position: assignee.employee.position || null,
-                    },
-                  })),
+                    ? worksheet.operationalCosts
+                        .map((cost) => cost.item)
+                        .join(", ")
+                    : "",
+                  assignees,
                 }),
               catch: (error) => {
                 logError(
@@ -979,14 +989,34 @@ export const generateDocumentRouter = createTRPCRouter({
               });
             }
 
+            const startDate =
+              worksheet.startDate ??
+              worksheet.order.createdAt ??
+              new Date().toISOString();
+            const endDate =
+              worksheet.endDate ??
+              worksheet.order.createdAt ??
+              new Date().toISOString();
+
+            const assignees =
+              worksheet.assignments && worksheet.assignments.length > 0
+                ? worksheet.assignments.map((assignee) => ({
+                    ...assignee,
+                    employee: {
+                      ...assignee.employee,
+                      position: assignee.employee.position || null,
+                    },
+                  }))
+                : [];
+
             const assignmentLetter = yield* Effect.tryPromise({
               try: () =>
                 generateAssignmentLetterPdf({
                   companyName: company.name,
-                  companyRegency: company.regency.name,
+                  companyRegency: company.regency?.name ?? "Samarinda",
                   orderDate: worksheet.order.createdAt,
-                  assignmentDateStart: worksheet.startDate!,
-                  assignmentDateEnd: worksheet.endDate!,
+                  assignmentDateStart: startDate,
+                  assignmentDateEnd: endDate,
                   letterNumber: input.letterNumber,
                   assignmentLetterNumber: input.assignmentLetterNumber,
                   spkNumber: input.spkNumber,
@@ -994,15 +1024,11 @@ export const generateDocumentRouter = createTRPCRouter({
                   offeringNumber: input.offeringNumber,
                   offeringDate: input.offeringDate,
                   financingSource: worksheet.operationalCosts
-                    .map((cost) => cost.item)
-                    .join(", "),
-                  assignees: worksheet.assignments.map((assignee) => ({
-                    ...assignee,
-                    employee: {
-                      ...assignee.employee,
-                      position: assignee.employee.position || null,
-                    },
-                  })),
+                    ? worksheet.operationalCosts
+                        .map((cost) => cost.item)
+                        .join(", ")
+                    : "",
+                  assignees,
                 }),
               catch: (error) =>
                 handleTRPCError(

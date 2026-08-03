@@ -55,7 +55,10 @@ export const env = createEnv({
     RATE_LIMITER_ENABLED: z.enum(["true", "false"]).default("true"),
 
     // Main document secret
-    JWT_DOCUMENT_SECRET: z.string().min(32),
+    JWT_DOCUMENT_SECRET: z
+      .string()
+      .min(32)
+      .default("tepian-k3-default-document-secret-min-32-chars-key"),
 
     // Optional: Type-specific secrets
     JWT_LEGAL_DOCUMENT_SECRET: z.string().min(32).optional(),

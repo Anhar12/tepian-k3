@@ -24,11 +24,13 @@ Panduan untuk penerapan Test-Driven Development (TDD) dan data _fixtures_.
 
 Panduan terkait Hono, tRPC, PostgreSQL, Drizzle ORM, dan logika bisnis backend.
 
-- [PATTERNS.md](backend/PATTERNS.md) — Panduan utama untuk arsitektur backend, pola Effect library, CRUD standard.
+- [PATTERNS.md](backend/PATTERNS.md) — Panduan utama untuk arsitektur backend, pola Effect library, `runEffect` error handling.
 - [DATABASE.md](backend/DATABASE.md) — Konvensi skema, migrasi, transaksi, UUIDv7, relasi polimorfik.
 - [AUTH_AND_PERMISSIONS.md](backend/AUTH_AND_PERMISSIONS.md) — Sistem JWT, role, middleware, dan panduan autentikasi.
 - [QR_DIGITAL_SIGNATURE.md](QR_DIGITAL_SIGNATURE.md) — Arsitektur & panduan integrasi Tanda Tangan Digital (TTE) berbasis QR Code.
+- [DOCUMENT_VERIFICATION.md](DOCUMENT_VERIFICATION.md) — Panduan verifikasi publik dokumen PDF, Kop Surat resmi, dan layout SPK/Penawaran/SPT.
 - [document-signatures-implementation.md](document-signatures-implementation.md) — Dokumentasi alur TTE Pimpinan Perusahaan (`headOfCompanyEmail`) dan pembuatan dokumen PDF (Tagihan, SPK, Penawaran, SPT).
+- [CLIENT_SIDE_PDF_IMPLEMENTATION.md](CLIENT_SIDE_PDF_IMPLEMENTATION.md) — Panduan pratinjau & penempelan QR Code berbasis React PDF viewer (`QRSignaturePlacer`).
 
 ## 4. Frontend (UI/UX & Routing)
 

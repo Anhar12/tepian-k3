@@ -41,8 +41,13 @@ export const PricingTable: React.FC<PricingTableProps> = ({
   return (
     <View>
       {/* Services Table */}
-      <View style={tw("mb-6 border border-black")}>
-        <View style={tw("flex-row border-b border-black")}>
+      <View style={tw("mb-6")}>
+        <View
+          style={tw(
+            "flex-row border-t border-b border-l border-r border-black",
+          )}
+          fixed
+        >
           <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
             No.
           </Text>
@@ -50,21 +55,28 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             Jenis
           </Text>
           <View style={tw("w-2/12 border-r border-black p-2 text-center")}>
-            <Text>Harga</Text>
-            <Text>Parameter</Text>
+            <Text>Harga Per Item/</Text>
+            <Text>Parameter (Rp)</Text>
           </View>
           <View style={tw("w-2/12 border-r border-black p-2 text-center")}>
             <Text>Jumlah</Text>
-            <Text>Parameter</Text>
+            <Text>Parameter/Orang</Text>
           </View>
           <View style={tw("w-2/12 border-r border-black p-2 text-center")}>
-            <Text>Lokasi</Text>
-            <Text>Pengujian</Text>
+            <Text>Lokasi/Titik/</Text>
+            <Text>Hari</Text>
           </View>
-          <Text style={tw("w-2/12 border-black p-2 text-center")}>Total</Text>
+          <Text style={tw("w-2/12 border-black p-2 text-center")}>
+            Total (Rp)
+          </Text>
         </View>
         {/* Section Header */}
-        <View style={tw("flex-row border-b border-black bg-gray-100")}>
+        <View
+          style={tw(
+            "flex-row border-b border-l border-r border-black bg-gray-100",
+          )}
+          wrap={false}
+        >
           <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
             I
           </Text>
@@ -73,11 +85,8 @@ export const PricingTable: React.FC<PricingTableProps> = ({
         {isReadyParameters.map((item, index) => (
           <View
             key={item.id}
-            style={tw(
-              `flex-row border-black ${
-                index === isReadyParameters.length - 1 ? "" : "border-b"
-              }`.trim(),
-            )}
+            style={tw("flex-row border-b border-l border-r border-black")}
+            wrap={false}
           >
             <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
               {index + 1}
@@ -101,7 +110,10 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             </Text>
           </View>
         ))}
-        <View style={tw("flex-row border-t border-black")}>
+        <View
+          style={tw("flex-row border-b border-l border-r border-black")}
+          wrap={false}
+        >
           <Text
             style={tw(
               "w-10/12 border-r border-black p-2 font-bold text-center",
@@ -117,8 +129,13 @@ export const PricingTable: React.FC<PricingTableProps> = ({
 
       {/* Operational Cost Table */}
       {operationalCosts.length > 0 && (
-        <View style={tw("mb-6 border border-black")}>
-          <View style={tw("flex-row border-b border-black")}>
+        <View style={tw("mb-6")}>
+          <View
+            style={tw(
+              "flex-row border-t border-b border-l border-r border-black",
+            )}
+            fixed
+          >
             <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
               No.
             </Text>
@@ -140,23 +157,25 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             <Text style={tw("w-2/12 border-black p-2 text-center")}>Total</Text>
           </View>
           {/* Section Header */}
-          <View style={tw("flex-row border-b border-black bg-gray-100")}>
+          <View
+            style={tw(
+              "flex-row border-b border-l border-r border-black bg-gray-100",
+            )}
+            wrap={false}
+          >
             <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
               II
             </Text>
             <Text style={tw("w-11/12 p-2")}>Operasional Pengujian</Text>
           </View>
-          {operationalCosts.map((cost, index) => (
+          {operationalCosts.map((cost) => (
             <View
               key={cost.id}
-              style={tw(
-                `flex-row border-black ${
-                  index === operationalCosts.length - 1 ? "" : "border-b"
-                }`.trim(),
-              )}
+              style={tw("flex-row border-b border-l border-r border-black")}
+              wrap={false}
             >
               <Text style={tw("w-1/12 border-r border-black p-2 text-center")}>
-                {index + 1}
+                {operationalCosts.indexOf(cost) + 1}
               </Text>
               {cost.unitCost == null ? (
                 // Descriptive-only row (no cost) — spans remaining columns
@@ -188,7 +207,10 @@ export const PricingTable: React.FC<PricingTableProps> = ({
               )}
             </View>
           ))}
-          <View style={tw("flex-row border-t border-black")}>
+          <View
+            style={tw("flex-row border-b border-l border-r border-black")}
+            wrap={false}
+          >
             <Text
               style={tw(
                 "w-10/12 border-r border-black p-2 font-bold text-center",
@@ -201,7 +223,10 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             </Text>
           </View>
           {showGrandTotal && (
-            <View style={tw("flex-row border-t border-black")}>
+            <View
+              style={tw("flex-row border-b border-l border-r border-black")}
+              wrap={false}
+            >
               <Text
                 style={tw(
                   "w-10/12 border-r border-black p-2 font-bold text-center",

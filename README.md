@@ -6,11 +6,12 @@ A modern, type-safe TypeScript monorepo built with [Better-T-Stack](https://gith
 
 ## 📖 Peta Dokumentasi
 
-Semua dokumentasi untuk developer dan AI Agent kini disusun secara terpusat untuk kemudahan akses dan kelengkapan informasi. 
+Semua dokumentasi untuk developer dan AI Agent kini disusun secara terpusat untuk kemudahan akses dan kelengkapan informasi.
 
 👉 **Silakan mulai dari [docs/INDEX.md](docs/INDEX.md) untuk menjelajahi semua panduan proyek.** 👈
 
 **Sorotan Cepat:**
+
 - [Panduan Memulai Cepat (Quickstart)](docs/getting-started/QUICKSTART.md) — Instalasi, `.env`, dan skrip npm.
 - [Panduan Arsitektur (Architecture)](docs/getting-started/ARCHITECTURE.md) — Struktur monorepo dan aturan modul.
 - [AGENTS.md](AGENTS.md) — Aturan wajib yang dibaca oleh sistem AI Agent.
@@ -21,12 +22,30 @@ Semua dokumentasi untuk developer dan AI Agent kini disusun secara terpusat untu
 
 - 🔒 **End-to-end type safety** - Dari database hingga UI dengan tRPC.
 - ⚡ **Lightning-fast builds** - Turborepo caching dan eksekusi paralel.
+- 📄 **PDF & Document Engine** - Pembuatan Surat Penawaran, SPK, SPT, dan Tagihan secara otomatis menggunakan `@react-pdf/renderer` dengan layout & header berulang presisi.
+- 🔏 **QR & TTE Signature** - Penempelan Tanda Tangan Digital (QR Code) berbasis JWT pada PDF dengan posisi dinamis melalui canvas editor (`QRSignaturePlacer`).
 - 📦 **Monorepo architecture** - Pembagian paket terpusat (namespace `@tepian-k3/*`).
 - 🎯 **File-based routing** - TanStack Router dengan dukungan penuh TypeScript.
-- 🗄️ **Type-safe ORM** - Drizzle ORM dengan PostgreSQL.
+- 🗄️ **Type-safe ORM** - Drizzle ORM dengan PostgreSQL dan UUIDv7.
 - 📱 **PWA ready** - Progressive Web App dengan offline support.
 - 🎨 **Modern UI** - shadcn/ui + TailwindCSS.
 - 🔧 **DX optimized** - Git hooks, ESLint, Prettier, hot reload.
+
+---
+
+## 🚀 Perintah Dasar
+
+```bash
+# Jalankan aplikasi (web :3001, server :3000)
+pnpm dev
+
+# Periksa type check seluruh monorepo
+pnpm check-types
+
+# Eksekusi database migration
+pnpm db:generate
+pnpm db:migrate
+```
 
 ---
 

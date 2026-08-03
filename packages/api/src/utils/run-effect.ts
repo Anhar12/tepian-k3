@@ -8,10 +8,10 @@ export async function runEffect<A, E>(
   const result = await Effect.runPromiseExit(effect);
 
   if (Exit.isFailure(result)) {
-    const error = Cause.squash(result.cause) as TRPCError;
+    const error = Cause.squash(result.cause) as TRPCError | undefined;
     throw new TRPCError({
-      code: error.code ?? "INTERNAL_SERVER_ERROR",
-      message: error.message || fallbackMessage,
+      code: error?.code ?? "INTERNAL_SERVER_ERROR",
+      message: error?.message || fallbackMessage,
       cause: error,
     });
   }
