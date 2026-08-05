@@ -11,20 +11,43 @@ import { replaceStorageFile } from "../helpers/storage.helpers";
 
 const bannerQueries = {
   /**
-   * Get all active banners for user display
+   * Get all active banners for user display (filtered by type: 'hero' | 'info')
    */
-  getAllActiveBanners: () =>
+  getAllActiveBanners: (type: string = "hero") =>
     Effect.tryPromise({
       try: () =>
         db.query.banners.findMany({
-          where: eq(banners.isActive, true),
+          where: and(
+            eq(banners.isActive, true),
+            eq(banners.type, type),
+            isNull(banners.deletedAt),
+          ),
           orderBy: asc(banners.order),
         }),
       catch: (error) => {
-        logError("banner.queries", "getAllActiveBanners", { error });
+        logError("banner.queries", "getAllActiveBanners", { error, type });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal mengambil banner aktif.",
+        });
+      },
+    }),
+
+  /**
+   * Get all banners (active & inactive) for admin management
+   */
+  getAllBannersForAdmin: () =>
+    Effect.tryPromise({
+      try: () =>
+        db.query.banners.findMany({
+          where: isNull(banners.deletedAt),
+          orderBy: asc(banners.order),
+        }),
+      catch: (error) => {
+        logError("banner.queries", "getAllBannersForAdmin", { error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil semua data banner.",
         });
       },
     }),
@@ -56,7 +79,7 @@ const bannerQueries = {
     Effect.tryPromise({
       try: () =>
         db.query.banners.findFirst({
-          where: eq(banners.order, order),
+          where: and(eq(banners.order, order), isNull(banners.deletedAt)),
         }),
       catch: (error) => {
         logError("banner.queries", "getBannerByOrder", { error, order });
@@ -122,12 +145,15 @@ const bannerQueries = {
       const isExisting = yield* bannerQueries.getBannerByOrder(data.order);
 
       if (isExisting) {
-        return Effect.fail(
-          new TRPCError({
-            code: "CONFLICT",
-            message: `Banner dengan order ${data.order} sudah ada.`,
-          }),
+        const allBanners = yield* Effect.tryPromise({
+          try: () => db.select({ order: banners.order }).from(banners),
+          catch: () => [],
+        });
+        const maxOrder = allBanners.reduce(
+          (max, b) => Math.max(max, b.order),
+          0,
         );
+        data.order = maxOrder + 1;
       }
 
       const [newBanner] = yield* Effect.tryPromise({
@@ -340,6 +366,31 @@ const bannerQueries = {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal menghapus permanen banner.",
+        });
+      },
+    }),
+
+  /**
+   * Bulk reorder banners
+   * @param {Array<{ id: string; order: number }>} items
+   */
+  reorderBanners: (items: Array<{ id: string; order: number }>) =>
+    Effect.tryPromise({
+      try: () =>
+        db.transaction(async (tx) => {
+          for (const item of items) {
+            await tx
+              .update(banners)
+              .set({ order: item.order })
+              .where(eq(banners.id, item.id));
+          }
+          return items;
+        }),
+      catch: (error) => {
+        logError("banner.queries", "reorderBanners", { error });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal memperbarui urutan banner.",
         });
       },
     }),

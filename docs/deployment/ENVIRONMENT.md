@@ -1,89 +1,157 @@
-# Environment Variables & Konfigurasi
+# 🔑 Panduan Environment Variables & Konfigurasi
 
-Aplikasi ini sangat bergantung pada environment variables untuk berbagai pengaturannya, baik di backend, database, maupun frontend.
+Dokumen ini berisi panduan lengkap seluruh variabel lingkungan (_environment variables_) yang digunakan dalam proyek **tepian-k3**, baik untuk lingkungan lokal (Development), Docker, maupun Production.
 
-## Persyaratan Dasar
+---
 
-Semua pengaturan disimpan dalam file `.env` di root repository. Anda dapat menyalin file template dengan menjalankan:
+## 📋 File Template Environment
+
+Proyek ini menyediakan 2 file template konfigurasi dasar:
+
+1. **`.env.example`**: Template utama untuk pengembangan lokal (`pnpm dev`).
+2. **`.env.docker.example`**: Template khusus untuk deployment berbasis Docker (`docker-compose.prod.yml`).
+
+---
+
+## ⚡ Panduan Cepat Setup
+
+### Development Lokal
 
 ```bash
 cp .env.example .env
 ```
 
-## Daftar Variabel Utama
+### Docker / Production
 
-### Database (PostgreSQL)
-
-```env
-# Koneksi utama ke database menggunakan pooling
-DATABASE_URL="postgres://user:password@localhost:5432/tepian_k3"
-
-# Koneksi langsung (bukan pool) untuk migrasi
-DIRECT_URL="postgres://user:password@localhost:5432/tepian_k3"
+```bash
+cp .env.docker.example .env
 ```
 
-### Autentikasi (JWT)
+> [!WARNING]
+> File `.env` berisi rahasia kredensial dan **JANGAN PERNAH** di-commit ke Git. Pastikan `.env` terdaftar di `.gitignore`.
+
+---
+
+## 📊 Tabel Ringkasan Variabel Lingkungan
+
+| Nama Variabel                   | Wajib?        | Default Dev             | Keterangan & Aturan                                        |
+| ------------------------------- | ------------- | ----------------------- | ---------------------------------------------------------- |
+| `NODE_ENV`                      | ✅ Wajib      | `development`           | Options: `development`, `production`, `test`               |
+| `POSTGRES_URL` / `DATABASE_URL` | ✅ Wajib      | `postgresql://...`      | URI Koneksi PostgreSQL                                     |
+| `JWT_SECRET`                    | ✅ Wajib      | —                       | Kunci rahasia JWT Access Token (min 32 kar)                |
+| `JWT_REFRESH_SECRET`            | ✅ Wajib      | —                       | Kunci rahasia JWT Refresh Token (min 32 kar)               |
+| `JWT_DOCUMENT_SECRET`           | ✅ Wajib      | —                       | Kunci rahasia penandatanganan TTE PDF                      |
+| `VITE_SERVER_URL`               | ✅ Wajib      | `http://localhost:3001` | URL publik backend/proxy untuk request browser             |
+| `CORS_ORIGIN`                   | ✅ Wajib      | `http://localhost:3001` | URL frontend yang diizinkan oleh backend CORS              |
+| `SERVER_PORT` / `PORT`          | ○ Opsional    | `3000`                  | Port tempat backend Hono berjalan                          |
+| `STORAGE_TYPE`                  | ⚠️ Disarankan | `filesystem`            | Options: `filesystem`, `s3`, `minio`                       |
+| `EMAIL_PROVIDER`                | ⚠️ Disarankan | `smtp`                  | Options: `smtp`, `gmail`, `sendgrid`, `resend`, `ethereal` |
+| `MEMURAI_HOST` / `REDIS_HOST`   | ⚠️ Disarankan | `localhost`             | Host Server Redis                                          |
+| `MEMURAI_PORT` / `REDIS_PORT`   | ⚠️ Disarankan | `6379`                  | Port Server Redis                                          |
+| `DOCUMENT_QR_EXPIRATION`        | ○ Opsional    | `10y`                   | Masa berlaku QR Code TTE (contoh: `10y`, `1y`, `30d`)      |
+
+---
+
+## 🔍 Detail Kategori Variabel Lingkungan
+
+### 1. Database (PostgreSQL)
 
 ```env
-# Kunci rahasia untuk menandatangani token JWT (Wajib diisi, minimal 32 karakter)
-JWT_SECRET="super-secret-key-that-is-at-least-32-characters-long"
+# URL koneksi utama PostgreSQL (menggunakan Drizzle ORM)
+POSTGRES_URL="postgresql://tepian:password@localhost:5432/tepian_k3"
 ```
 
-### Konfigurasi Frontend (Web)
+### 2. Autentikasi (JWT & Security)
 
-```env
-# URL publik aplikasi web
-VITE_PUBLIC_APP_URL="http://localhost:3001"
+Seluruh token rahasia dapat di-generate otomatis menggunakan skrip bawaan:
 
-# URL ke API Backend (tRPC)
-VITE_PUBLIC_API_URL="http://localhost:3000"
+```bash
+pnpm regenerate:jwt
 ```
 
-### Konfigurasi Backend (Server)
+```env
+# Kunci rahasia Access Token (15 menit default)
+JWT_SECRET="ganti_dengan_string_random_minimal_32_karakter"
+
+# Kunci rahasia Refresh Token (30 hari default)
+JWT_REFRESH_SECRET="ganti_dengan_string_random_minimal_32_karakter"
+
+# Kunci rahasia Reset Password Token
+JWT_RESET_PASSWORD_SECRET="ganti_dengan_string_random_minimal_32_karakter"
+
+# Durasi Expired Token
+JWT_ACCESS_TOKEN_EXPIRY="15m"
+JWT_REFRESH_TOKEN_EXPIRY="30d"
+```
+
+### 3. Penandatanganan Dokumen & QR Code (TTE)
 
 ```env
-# Port tempat server akan berjalan (default: 3000)
-PORT=3000
+# Kunci rahasia utama untuk menandatangani dokumen PDF (SPK, Tagihan, Sertifikat)
+JWT_DOCUMENT_SECRET="ganti_dengan_string_random_minimal_32_karakter"
 
-# URL frontend untuk keperluan CORS
+# Base URL untuk halaman verifikasi QR Code
+DOCUMENT_VERIFICATION_BASE_URL="http://localhost:3001/verify"
+
+# Masa berlaku default QR Code
+DOCUMENT_QR_EXPIRATION="10y"
+```
+
+### 4. Frontend & Communication (Vite & CORS)
+
+```env
+# URL API tempat browser mengirim request tRPC/HTTP
+# PENTING: Variabel VITE_* di-bake langsung ke bundle JS pada saat build time!
+VITE_SERVER_URL="http://localhost:3001"
+
+# URL Frontend yang diizinkan melakukan request ke Server (CORS Header)
 CORS_ORIGIN="http://localhost:3001"
 ```
 
-### 5. Layanan Penyimpanan Pihak Ketiga (MinIO / S3)
+### 5. Media & Storage Service
 
 ```env
-# URL publik atau lokal dari MinIO/S3
+# Jenis penyimpanan berkas
+STORAGE_TYPE="filesystem" # Pilihan: filesystem, s3, minio
+
+# Konfigurasi jika menggunakan filesystem lokal
+UPLOADS_DIR="uploads"
+BASE_URL="http://localhost:3001"
+
+# Konfigurasi jika menggunakan S3 / MinIO
 MINIO_ENDPOINT="localhost"
 MINIO_PORT=9000
-MINIO_USE_SSL="false"
+MINIO_USE_SSL=false
 MINIO_ACCESS_KEY="minioadmin"
 MINIO_SECRET_KEY="minioadmin"
-MINIO_BUCKET_NAME="tepian-k3"
+MINIO_BUCKET="tepian-k3"
 ```
 
-### 6. Redis (Caching & Antrean)
+### 6. Email Notification Service
 
 ```env
-# Koneksi Redis untuk session/caching dan background jobs
-REDIS_URL="redis://localhost:6379"
+# Jenis provider email
+EMAIL_PROVIDER="smtp" # Pilihan: smtp, gmail, sendgrid, resend, ethereal
+
+# Konfigurasi SMTP
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER="user@example.com"
+SMTP_PASSWORD="app-password-anda"
+EMAIL_FROM="noreply@tepiank3.tech"
 ```
 
-### 7. Email (SMTP)
+---
 
-```env
-# Konfigurasi SMTP untuk pengiriman email (Reset password, Notifikasi Order, dll)
-SMTP_HOST="smtp.mailtrap.io"
-SMTP_PORT=2525
-SMTP_USER="your-mailtrap-user"
-SMTP_PASS="your-mailtrap-pass"
-SMTP_FROM="noreply@tepian-k3.com"
+## ⚙️ Validasi Runtime Environment (Zod)
+
+Backend menggunakan **Zod Schema** untuk memvalidasi keberadaan dan format variabel lingkungan saat pertama kali server menyala (`apps/server/src/index.ts`).
+
+Jika ada variabel **wajib** yang hilang atau tidak sesuai format, server akan **langsung gagal me-booting** dan memberikan pesan kesalahan yang jelas di konsol/log:
+
+```text
+❌ Invalid environment variables:
+  - JWT_SECRET: String must contain at least 32 character(s)
+  - POSTGRES_URL: Required
 ```
-
-## Keamanan
-
-> [!WARNING]
-> Jangan pernah meng-*commit* file `.env` ke repository Git. Pastikan `.env` terdaftar di `.gitignore`. Jika Anda menambahkan variabel baru yang diperlukan aplikasi, selalu perbarui file `.env.example`.
-
-## Validasi Environment
-
-Sistem memvalidasi keberadaan variabel environment pada saat *runtime* (saat server menyala) menggunakan *Zod*. Jika ada variabel penting yang terlewat, aplikasi akan gagal menyala dengan pesan error yang jelas, mencantumkan variabel mana yang hilang atau tidak valid.

@@ -1,4 +1,4 @@
-import { LogOut, Settings, User } from "lucide-react";
+import { LayoutGrid, LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import {
@@ -13,10 +13,21 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { authMeQueryOptions } from "@/utils/auth-query";
 import { logout } from "@/lib/logout";
+import { BACK_OFFICE_ROLES, EMPLOYEE_ROLES } from "@tepian-k3/constants";
 
 export default function MainHeader() {
   const navigate = useNavigate();
   const { data: user } = useQuery(authMeQueryOptions());
+
+  const roleNames = user?.roles?.map((role) => role.name) ?? [];
+  const canAccessBackOffice =
+    roleNames.some((name) =>
+      (BACK_OFFICE_ROLES as readonly string[]).includes(name),
+    ) ||
+    roleNames.some((name) =>
+      (EMPLOYEE_ROLES as readonly string[]).includes(name),
+    ) ||
+    roleNames.some((name) => name !== "user");
 
   function handleLogout() {
     logout();
@@ -57,6 +68,14 @@ export default function MainHeader() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {canAccessBackOffice && (
+              <DropdownMenuItem
+                onClick={() => navigate({ to: "/back-office" })}
+              >
+                <LayoutGrid className="mr-2 h-4 w-4" />
+                <span>Backoffice</span>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>

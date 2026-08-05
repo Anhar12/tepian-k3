@@ -287,12 +287,7 @@ function RouteComponent() {
     isWorksheetVerified &&
     offeringDoc;
 
-  const canShowReviseButton =
-    !isRejected &&
-    !isCancelled &&
-    !isCompleted &&
-    !isRevisionStatus &&
-    orderDetail.status !== "laporan_diterbitkan";
+  const canShowReviseButton = canShowOfferButtons;
 
   // Get revision notes from the latest revision status history
   const revisionHistory = orderDetail.statusHistory
@@ -431,7 +426,7 @@ function RouteComponent() {
   return (
     <Card className="container min-h-[calc(100vh-8rem)] pt-0">
       {/* Header Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 pt-6 md:pt-8 mb-6">
+      <div className="mb-6 flex flex-col justify-between gap-4 border-b border-slate-100 pt-6 pb-4 sm:flex-row sm:items-center md:pt-8">
         <div className="flex items-center gap-3">
           <span className="inline-block rounded-md bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700">
             Layanan Pengujian
@@ -443,13 +438,16 @@ function RouteComponent() {
         </div>
         {orderDetail && (
           <div className="flex flex-col items-end gap-1.5">
-            <StatusBadgeAwam
-              status={orderDetail.status}
-            />
+            <StatusBadgeAwam status={orderDetail.status} />
             {orderDetail.estimatedSignatureDate && (
-              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+              <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
                 <span className="text-slate-500">Estimasi TTD:</span>
-                <span>{format(new Date(orderDetail.estimatedSignatureDate), "dd MMM yyyy")}</span>
+                <span>
+                  {format(
+                    new Date(orderDetail.estimatedSignatureDate),
+                    "dd MMM yyyy",
+                  )}
+                </span>
               </div>
             )}
           </div>
@@ -459,11 +457,15 @@ function RouteComponent() {
       {orderDetail?.status === "revision" && (
         <div className="mx-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 md:mx-6">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
             <div className="space-y-1">
-              <h4 className="text-sm font-semibold text-amber-900">Permohonan Memerlukan Revisi</h4>
+              <h4 className="text-sm font-semibold text-amber-900">
+                Permohonan Memerlukan Revisi
+              </h4>
               <p className="text-xs text-amber-700">
-                Petugas meminta revisi data atau parameter pada permohonan ini. Silakan periksa catatan revisi di bawah dan ajukan perbaikan permohonan.
+                Petugas meminta revisi data atau parameter pada permohonan ini.
+                Silakan periksa catatan revisi di bawah dan ajukan perbaikan
+                permohonan.
               </p>
             </div>
           </div>
@@ -763,8 +765,10 @@ function RouteComponent() {
                           Revisi Layanan Pengujian
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          Apakah Anda yakin ingin mengajukan revisi untuk layanan pengujian ini?
-                          Tindakan ini akan mengembalikan pesanan Anda ke status revisi dan mengirimkan notifikasi kepada admin.
+                          Apakah Anda yakin ingin mengajukan revisi untuk
+                          layanan pengujian ini? Tindakan ini akan mengembalikan
+                          pesanan Anda ke status revisi dan mengirimkan
+                          notifikasi kepada admin.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <div className="py-4">

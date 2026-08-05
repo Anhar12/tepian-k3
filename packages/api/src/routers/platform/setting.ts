@@ -65,7 +65,7 @@ export const settingRouter = createTRPCRouter({
         z.object({
           picture: z
             .file()
-            .max(5 * 1024 * 1024)
+            .max(10 * 1024 * 1024)
             .mime(["image/jpeg", "image/png", "image/webp"]),
         }),
       ),

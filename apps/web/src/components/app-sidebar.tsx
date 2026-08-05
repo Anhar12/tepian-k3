@@ -48,6 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         pathname.includes("/back-office/absensi") ||
         pathname.includes("/back-office/sertifikat-pelatihan") ||
         pathname.includes("/back-office/landing-settings") ||
+        pathname.includes("/back-office/ppid") ||
         pathname.includes("/back-office/media-publications")
       ) {
         setActiveMode("pelatihan");

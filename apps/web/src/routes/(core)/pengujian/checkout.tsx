@@ -31,7 +31,7 @@ import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Car, Hotel, Loader2, Plane, Ship, Wallet, Wrench } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/(core)/pengujian/checkout")({
   head: () => pageHead("Pengujian - Checkout"),
@@ -114,41 +114,6 @@ function RouteComponent() {
     new Set(),
   );
 
-  const groupedMappedItems = useMemo(() => {
-    const items = mappedItems.flatMap((cluster) => cluster.items);
-
-    const utamaItems = items.filter(
-      (item) => item.parameter.serviceType === "utama",
-    );
-    const tambahanItems = items.filter(
-      (item) => item.parameter.serviceType === "tambahan",
-    );
-    const noneItems = items.filter((item) => !item.parameter.serviceType);
-
-    const result = [];
-    if (utamaItems.length > 0) {
-      result.push({
-        id: "utama",
-        name: "Layanan Utama",
-        items: utamaItems,
-      });
-    }
-    if (tambahanItems.length > 0) {
-      result.push({
-        id: "tambahan",
-        name: "Layanan Tambahan",
-        items: tambahanItems,
-      });
-    }
-    if (noneItems.length > 0) {
-      result.push({
-        id: "none",
-        name: "Lainnya",
-        items: noneItems,
-      });
-    }
-    return result;
-  }, [mappedItems]);
   const [fundingType, setFundingType] = useState<"pnbp" | "dipa">("pnbp");
   const [note, setNote] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -300,7 +265,7 @@ function RouteComponent() {
         <Card className="flex flex-1 flex-col space-y-6">
           <CardContent className="h-full space-y-6">
             <CartItemsList
-              mappedItems={groupedMappedItems}
+              mappedItems={mappedItems}
               loadingItems={loadingItems}
               deleteLoadingItems={deleteLoadingItems}
               onIncrement={(id) =>

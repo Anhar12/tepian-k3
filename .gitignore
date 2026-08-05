@@ -20,6 +20,8 @@ out
 .env
 .env.*
 !.env.example
+!.env.docker.example
+!.env.build.example
 temp.env.docker
 
 # =============================================================================
@@ -106,7 +108,6 @@ report.json
 report.html
 test.ts
 test-query.ts
-scratch/
 
 # =============================================================================
 # Skrip Sementara & Danger Scripts

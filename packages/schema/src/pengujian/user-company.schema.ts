@@ -48,7 +48,7 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
     companyPictureUrl: true,
   })
   .extend({
-    picture: z.file().max(2 * 1024 * 1024),
+    picture: z.file().max(10 * 1024 * 1024),
   });
 
 const updateUserCompanySchema = createUpdateSchema(userCompanies, {
@@ -87,7 +87,7 @@ const updateUserCompanySchema = createUpdateSchema(userCompanies, {
     companyPictureUrl: true,
   })
   .extend({
-    picture: z.optional(z.file().max(2 * 1024 * 1024)),
+    picture: z.optional(z.file().max(10 * 1024 * 1024)),
   });
 
 const userCompanySchema = {

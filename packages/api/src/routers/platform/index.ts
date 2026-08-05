@@ -21,6 +21,8 @@ import { ppidRouter } from "./ppid";
 import { mediaPublicationsRouter } from "./media-publications";
 import { kepegawaianExcelRouter } from "./kepegawaian-excel";
 import { chatbotRouter } from "./chatbot";
+import { landingStatsRouter } from "./landing-stats";
+import { landingRegionRouter } from "./landing-region";
 
 export const platformRouter = createTRPCRouter({
   auth: authRouter,
@@ -45,4 +47,6 @@ export const platformRouter = createTRPCRouter({
   mediaPublications: mediaPublicationsRouter,
   kepegawaianExcel: kepegawaianExcelRouter,
   chatbot: chatbotRouter,
+  landingStats: landingStatsRouter,
+  landingRegion: landingRegionRouter,
 });

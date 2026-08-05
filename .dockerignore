@@ -42,11 +42,22 @@ coverage
 # Documentation (not needed in image)
 docs
 **/*.md
-!packages/db/src/migrations/**
 
-# Misc
+# AI Agent Artifacts & System Directories
+.agent
+.agents
+.gemini
+.cursor
+.antigravitycli
+.system_generated
+
+# Misc & Local Temp Files
 *.tgz
 .changeset
 CHANGELOG.md
 scripts
 .husky
+scratch
+Template
+*.bak
+*.orig

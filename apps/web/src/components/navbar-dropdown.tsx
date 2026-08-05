@@ -1,4 +1,9 @@
-import { IconHome, IconLogout, IconSettings } from "@tabler/icons-react";
+import {
+  IconHome,
+  IconLogout,
+  IconSettings,
+  IconLayoutGrid,
+} from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -14,11 +19,22 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
 import { logout } from "@/lib/logout";
+import { BACK_OFFICE_ROLES, EMPLOYEE_ROLES } from "@tepian-k3/constants";
 
 export default function NavbarDropdown() {
   const navigate = useNavigate();
 
   const { data: user } = useSuspenseQuery(authMeQueryOptions());
+
+  const roleNames = user?.roles?.map((role) => role.name) ?? [];
+  const canAccessBackOffice =
+    roleNames.some((name) =>
+      (BACK_OFFICE_ROLES as readonly string[]).includes(name),
+    ) ||
+    roleNames.some((name) =>
+      (EMPLOYEE_ROLES as readonly string[]).includes(name),
+    ) ||
+    roleNames.some((name) => name !== "user");
 
   function onLogout() {
     logout();
@@ -71,6 +87,12 @@ export default function NavbarDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {canAccessBackOffice && (
+            <DropdownMenuItem onSelect={() => navigate({ to: "/back-office" })}>
+              <IconLayoutGrid />
+              Backoffice
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onSelect={() => navigate({ to: "/dashboard" })}>
             <IconHome />
             Dashboard
