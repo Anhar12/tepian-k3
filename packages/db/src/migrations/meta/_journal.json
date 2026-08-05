@@ -204,6 +204,13 @@
       "when": 1785691214218,
       "tag": "0040_true_vision",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1785959308108,
+      "tag": "0041_bored_the_renegades",
+      "breakpoints": true
     }
   ]
 }

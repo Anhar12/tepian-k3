@@ -15,6 +15,7 @@ import {
   User,
   Shield,
   HelpCircle,
+  LayoutGrid,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logout } from "@/lib/logout";
+import { BACK_OFFICE_ROLES, EMPLOYEE_ROLES } from "@tepian-k3/constants";
 
 function formatSegment(segment: string): string {
   return segment
@@ -81,18 +83,30 @@ function getPageTitle(pathname: string): string {
   }
 
   const isId = /^[0-9a-f-]{36}$|^\d+$/.test(lastSegment);
-
   if (isId && segments.length > 1) {
     const parentSegment = segments[segments.length - 2];
     if (!parentSegment) return "Detail";
-
     const singular = parentSegment.endsWith("s")
       ? parentSegment.slice(0, -1)
       : parentSegment;
     return `${formatSegment(singular)} Detail`;
   }
 
-  return formatSegment(lastSegment);
+  const titleMap: Record<string, string> = {
+    dashboard: "Dasbor Utama",
+    "back-office": "Dasbor Backoffice",
+    employee: "Portal Pegawai",
+    pengujian: "Layanan Pengujian K3",
+    pelatihan: "Portal Pelatihan K3",
+    orders: "Pesanan K3",
+    worksheets: "Lembar Kerja",
+    testings: "Hasil Pengujian",
+    users: "Manajemen Pengguna",
+    roles: "Manajemen Peran",
+    settings: "Pengaturan Akun",
+  };
+
+  return titleMap[lastSegment] || formatSegment(lastSegment);
 }
 
 export function SiteHeader() {
@@ -107,86 +121,62 @@ export function SiteHeader() {
     [location.pathname],
   );
 
-  // Extract breadcrumbs segments
-  const breadcrumbs = useMemo(() => {
-    const cleanPath = location.pathname.replace(/\/$/, "") || "/";
-    const segments = cleanPath.split("/").filter(Boolean);
-    return segments.map((seg, index) => {
-      const path = "/" + segments.slice(0, index + 1).join("/");
-      return {
-        label: formatSegment(seg),
-        path,
-        isLast: index === segments.length - 1,
-      };
-    });
-  }, [location.pathname]);
-
   const initials = useMemo(() => {
     if (!profile?.name) return "A";
     return profile.name
       .split(" ")
-      .map((n: string) => n[0])
-      .slice(0, 2)
+      .map((n) => n[0])
       .join("")
+      .slice(0, 2)
       .toUpperCase();
   }, [profile?.name]);
 
+  const roleNames = profile?.roles?.map((role) => role.name) ?? [];
+  const canAccessBackOffice =
+    roleNames.some((name) =>
+      (BACK_OFFICE_ROLES as readonly string[]).includes(name),
+    ) ||
+    roleNames.some((name) =>
+      (EMPLOYEE_ROLES as readonly string[]).includes(name),
+    ) ||
+    roleNames.some((name) => name !== "user");
+
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white px-6 shadow-xs select-none dark:bg-zinc-950">
-      {/* Left section: Toggle Sidebar and Breadcrumbs */}
+    <header className="sticky top-0 z-40 flex h-12 shrink-0 items-center justify-between border-b border-neutral-200/80 bg-white/80 px-4 backdrop-blur-md transition-all duration-200 dark:border-zinc-800/80 dark:bg-zinc-950/80">
+      {/* Left section: Toggle + Breadcrumbs */}
       <div className="flex items-center gap-3">
-        <SidebarTrigger className="-ml-1 h-9 w-9 rounded-xl transition-all hover:bg-neutral-100 dark:hover:bg-zinc-900" />
+        <SidebarTrigger className="-ml-1 h-8 w-8 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100" />
         <Separator
           orientation="vertical"
           className="h-4 bg-neutral-200 dark:bg-zinc-800"
         />
-
-        {/* Breadcrumbs Navigation */}
-        <div className="hidden items-center gap-1.5 text-xs font-semibold text-muted-foreground md:flex">
+        <div className="flex items-center gap-2 text-xs font-semibold">
           <Link
-            to="/back-office"
-            className="transition-colors hover:text-teal-600"
+            to="/"
+            className="text-neutral-400 transition-colors hover:text-neutral-700 dark:text-zinc-500 dark:hover:text-zinc-300"
           >
-            Dasbor
+            Aplikasi
           </Link>
-          {breadcrumbs.map((crumb) => (
-            <React.Fragment key={crumb.path}>
-              <span className="text-neutral-400">/</span>
-              {crumb.isLast ? (
-                <span className="max-w-[150px] truncate font-bold text-zinc-800 dark:text-zinc-200">
-                  {crumb.label}
-                </span>
-              ) : (
-                <Link
-                  to={crumb.path as any}
-                  className="max-w-[120px] truncate transition-colors hover:text-teal-600"
-                >
-                  {crumb.label}
-                </Link>
-              )}
-            </React.Fragment>
-          ))}
+          <span className="text-neutral-300 dark:text-zinc-700">/</span>
+          <span className="font-bold text-neutral-800 dark:text-zinc-200">
+            {pageTitle}
+          </span>
         </div>
-
-        <h1 className="max-w-[150px] truncate text-sm font-bold text-zinc-900 md:hidden dark:text-zinc-50">
-          {pageTitle}
-        </h1>
       </div>
 
-      {/* Right section: Notifications and Profile */}
-      <div className="flex items-center gap-3.5">
-        {/* Action icons */}
-        <div className="flex items-center gap-1.5">
-          {/* Notification Button */}
+      {/* Right section: Actions + Profile Dropdown */}
+      <div className="flex items-center gap-3">
+        {/* Quick Notifications Button */}
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 rounded-xl text-zinc-600 transition-all hover:bg-neutral-100 dark:text-zinc-400 dark:hover:bg-zinc-900"
+            className="relative h-8 w-8 rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
           >
-            <Bell className="h-[18px] w-[18px]" />
-            <span className="absolute top-2 right-2 flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
+            <Bell className="h-4 w-4" />
+            <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-500"></span>
             </span>
           </Button>
         </div>
@@ -240,6 +230,14 @@ export function SiteHeader() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
+                {canAccessBackOffice && (
+                  <DropdownMenuItem
+                    onSelect={() => navigate({ to: "/back-office" as any })}
+                  >
+                    <LayoutGrid className="mr-2 h-4 w-4 text-zinc-500" />
+                    <span>Backoffice</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onSelect={() => navigate({ to: "/" as any })}>
                   <User className="mr-2 h-4 w-4 text-zinc-500" />
                   <span>Profil Saya</span>

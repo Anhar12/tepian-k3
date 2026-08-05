@@ -688,7 +688,8 @@ const orderQueries = {
                 orderNumber,
                 totalAmount: calculatedTotal,
                 status: "pending",
-                approvalStatus: "pending",
+                approvalStatus: "approved",
+                approvedAt: new Date().toISOString(),
                 paymentStatus: "unpaid",
                 coverFlightIncluded,
                 coverBaggageIncluded,
@@ -1021,6 +1022,7 @@ const orderQueries = {
             .update(order)
             .set({
               status: "upload_surat_persetujuan",
+              approvalStatus: "approved",
               approvedAt: new Date().toISOString(),
             })
             .where(eq(order.id, orderId))

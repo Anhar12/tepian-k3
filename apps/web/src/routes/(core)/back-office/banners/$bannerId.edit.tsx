@@ -35,6 +35,8 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
+import { getPublicUrl } from "@/utils/url";
+
 export const Route = createFileRoute(
   "/(core)/back-office/banners/$bannerId/edit",
 )({
@@ -60,6 +62,7 @@ function RouteComponent() {
     values: {
       id: bannerId,
       title: banner?.title ?? "",
+      type: (banner?.type as "hero" | "info") ?? "hero",
       order: banner?.order ?? 0,
       isActive: banner?.isActive ?? true,
     },
@@ -136,7 +139,17 @@ function RouteComponent() {
                 render={({ field, fieldState }) => (
                   <SingleImageUpload
                     {...field}
+                    value={
+                      field.value ??
+                      (banner?.bannerUrl
+                        ? getPublicUrl(banner.bannerUrl)
+                        : null)
+                    }
                     error={fieldState.error?.message}
+                    aspectRatio={16 / 9}
+                    targetWidth={1920}
+                    targetHeight={1080}
+                    maxSize={10 * 1024 * 1024}
                   />
                 )}
               />
@@ -151,6 +164,35 @@ function RouteComponent() {
                   >
                     <FieldLabel>Judul Banner</FieldLabel>
                     <Input placeholder="Masukkan judul banner" {...field} />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="type"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel>Tipe Banner / Penempatan</FieldLabel>
+                    <select
+                      {...field}
+                      value={field.value ?? "hero"}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold"
+                    >
+                      <option value="hero">
+                        Banner Hero Utama (Slideshow Atas)
+                      </option>
+                      <option value="info">
+                        Informasi & Update Terkini (Carousel)
+                      </option>
+                    </select>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}

@@ -44,8 +44,9 @@ Panduan terkait React, TanStack Router, Shadcn UI, dan styling.
 
 Panduan untuk mengatur infrastruktur dan environment.
 
-- [ENVIRONMENT.md](deployment/ENVIRONMENT.md) — Penjelasan _.env_ dan penggunaannya.
-- [DOCKER.md](deployment/DOCKER.md) — Setup Docker Compose dan panduan container.
+- [DEPLOYMENT_OVERVIEW.md](deployment/DEPLOYMENT_OVERVIEW.md) — **Mulai dari sini!** Ringkasan opsi deployment (Coolify vs Self-hosted).
+- [ENVIRONMENT.md](deployment/ENVIRONMENT.md) — Penjelasan lengkap _.env_ dan penggunaannya.
+- [DOCKER.md](deployment/DOCKER.md) — Setup Docker Compose, GHCR, dan panduan container self-hosted.
 - [PRODUCTION_DEPLOYMENT_GUIDE.md](deployment/PRODUCTION_DEPLOYMENT_GUIDE.md) — Panduan lengkap deploy ke production Coolify, checklist, tips aman, dan troubleshooting.
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — Panduan berkontribusi untuk developer baru.
 

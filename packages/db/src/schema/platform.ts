@@ -696,6 +696,7 @@ export const banners = createTable(
       .$default(() => uuidv7()),
     ...createRequiredFileUrlColumn("banner"),
     title: varchar("title", { length: 255 }).notNull(),
+    type: varchar("type", { length: 20 }).notNull().default("hero"),
     order: integer("order").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
     ...timestamps,
@@ -704,6 +705,49 @@ export const banners = createTable(
     index("banner_id_idx").using("btree", table.id),
     index("banner_order_idx").using("btree", table.order),
     index("banner_is_active_idx").using("btree", table.isActive),
+    index("banner_type_idx").using("btree", table.type),
+  ],
+);
+
+export const landingStats = createTable(
+  "landing_stats",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    serviceType: varchar("service_type", { length: 50 }).notNull().unique(),
+    primaryCount: integer("primary_count").notNull().default(0),
+    primaryLabel: varchar("primary_label", { length: 100 }).notNull(),
+    secondaryCount: integer("secondary_count").notNull().default(0),
+    secondaryLabel: varchar("secondary_label", { length: 100 }).notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [
+    index("landing_stats_id_idx").using("btree", table.id),
+    index("landing_stats_service_type_idx").using("btree", table.serviceType),
+    index("landing_stats_sort_order_idx").using("btree", table.sortOrder),
+  ],
+);
+
+export const landingRegions = createTable(
+  "landing_regions",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    provinceName: varchar("province_name", { length: 100 }).notNull(),
+    provinceKey: varchar("province_key", { length: 50 }).notNull().unique(),
+    companyCount: integer("company_count").notNull().default(0),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [
+    index("landing_regions_id_idx").using("btree", table.id),
+    index("landing_regions_province_key_idx").using("btree", table.provinceKey),
+    index("landing_regions_sort_order_idx").using("btree", table.sortOrder),
   ],
 );
 

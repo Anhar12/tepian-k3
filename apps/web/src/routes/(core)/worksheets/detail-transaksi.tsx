@@ -37,7 +37,6 @@ import {
   WORKSHEET_FIELD_OPERATIONAL_ITEM,
   OPERATIONAL_COST_VERIFICATION_STATUS_LABELS,
   OPERATIONAL_COST_VERIFICATION_STATUS_COLORS,
-  OPERATIONAL_COST_VERIFICATION_STATUS,
 } from "@tepian-k3/constants";
 import {
   addBusinessDays,
@@ -362,7 +361,6 @@ function RouteComponent() {
         });
       }
 
-
       // Field operational statement — always the last row. This is a fixed note
       // (no charge) indicating transport/field operations are covered by the
       // company, not a priced line item.
@@ -551,8 +549,7 @@ function RouteComponent() {
   const hasBaggageCost = useMemo(() => {
     return operationalCosts.some(
       (c) =>
-        c.item === "Bagasi Pesawat (PP)" ||
-        c.item === "Biaya Bagasi Pesawat",
+        c.item === "Bagasi Pesawat (PP)" || c.item === "Biaya Bagasi Pesawat",
     );
   }, [operationalCosts]);
 
@@ -905,11 +902,15 @@ function RouteComponent() {
                   </p>
                   {worksheet.order?.estimatedSignatureDate && (
                     <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-600">
-                      <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <Calendar className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                       <span>
                         Est. TTD:{" "}
                         <strong>
-                          {format(parseISO(worksheet.order.estimatedSignatureDate), "dd MMM yyyy", { locale: id })}
+                          {format(
+                            parseISO(worksheet.order.estimatedSignatureDate),
+                            "dd MMM yyyy",
+                            { locale: id },
+                          )}
                         </strong>
                       </span>
                     </div>
@@ -1224,9 +1225,6 @@ function RouteComponent() {
                     <TableHead className="hidden text-center text-xs font-semibold sm:text-sm md:table-cell">
                       Keterangan
                     </TableHead>
-                    <TableHead className="hidden text-center text-xs font-semibold sm:text-sm md:table-cell">
-                      Tahun SBM
-                    </TableHead>
                     <TableHead className="hidden text-right text-xs font-semibold sm:table-cell sm:text-sm">
                       Biaya/Unit
                     </TableHead>
@@ -1255,7 +1253,7 @@ function RouteComponent() {
                           className="bg-muted/20 hover:bg-muted/30"
                         >
                           <TableCell
-                            colSpan={6}
+                            colSpan={5}
                             className="text-xs text-muted-foreground italic sm:text-sm"
                           >
                             {item.item}
@@ -1326,24 +1324,6 @@ function RouteComponent() {
                             disabled={!isEditable}
                           />
                         </TableCell>
-                        <TableCell className="hidden text-center text-xs sm:text-sm md:table-cell">
-                          <Input
-                            type="number"
-                            min={2000}
-                            value={item.sbmYear ?? ""}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              handleUpdateOperationalCost(
-                                index,
-                                "sbmYear",
-                                val === "" ? null : parseInt(val, 10),
-                              );
-                            }}
-                            placeholder="Tahun"
-                            className="h-8 w-16 text-center text-xs sm:text-sm"
-                            disabled={!isEditable}
-                          />
-                        </TableCell>
                         <TableCell className="hidden text-right text-xs sm:table-cell sm:text-sm">
                           <Input
                             type="number"
@@ -1366,15 +1346,17 @@ function RouteComponent() {
                           {itemTotal !== null ? formatCurrency(itemTotal) : "-"}
                         </TableCell>
                         <TableCell className="text-center text-xs sm:text-sm">
-                          {isEditable && isVerifier && item.verificationStatus === "submitted" ? (
-                            <div className="flex flex-col gap-1 items-center">
+                          {isEditable &&
+                          isVerifier &&
+                          item.verificationStatus === "submitted" ? (
+                            <div className="flex flex-col items-center gap-1">
                               <select
                                 value={item.verificationStatus || "submitted"}
                                 onChange={(e) =>
                                   handleUpdateOperationalCost(
                                     index,
                                     "verificationStatus",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 className="h-8 w-28 rounded-md border border-input bg-transparent px-2 py-1 text-xs outline-none"
@@ -1383,14 +1365,15 @@ function RouteComponent() {
                                 <option value="verified">Verified</option>
                                 <option value="revised">Revisi</option>
                               </select>
-                              {operationalCosts[index]?.verificationStatus === "revised" && (
+                              {operationalCosts[index]?.verificationStatus ===
+                                "revised" && (
                                 <Input
                                   value={item.verificationNote || ""}
                                   onChange={(e) =>
                                     handleUpdateOperationalCost(
                                       index,
                                       "verificationNote",
-                                      e.target.value || null
+                                      e.target.value || null,
                                     )
                                   }
                                   placeholder="Catatan revisi"
@@ -1403,19 +1386,30 @@ function RouteComponent() {
                               <Badge
                                 variant="outline"
                                 className={cn(
-                                  "whitespace-nowrap rounded-md px-1.5 py-0 text-[10px] font-medium leading-4 tracking-wide shadow-none",
+                                  "rounded-md px-1.5 py-0 text-[10px] leading-4 font-medium tracking-wide whitespace-nowrap shadow-none",
                                   item.verificationStatus
-                                    ? OPERATIONAL_COST_VERIFICATION_STATUS_COLORS[item.verificationStatus]
-                                    : OPERATIONAL_COST_VERIFICATION_STATUS_COLORS["draft"]
+                                    ? OPERATIONAL_COST_VERIFICATION_STATUS_COLORS[
+                                        item.verificationStatus
+                                      ]
+                                    : OPERATIONAL_COST_VERIFICATION_STATUS_COLORS[
+                                        "draft"
+                                      ],
                                 )}
                               >
                                 {item.verificationStatus
-                                  ? OPERATIONAL_COST_VERIFICATION_STATUS_LABELS[item.verificationStatus]
-                                  : OPERATIONAL_COST_VERIFICATION_STATUS_LABELS["draft"]}
+                                  ? OPERATIONAL_COST_VERIFICATION_STATUS_LABELS[
+                                      item.verificationStatus
+                                    ]
+                                  : OPERATIONAL_COST_VERIFICATION_STATUS_LABELS[
+                                      "draft"
+                                    ]}
                               </Badge>
-                              {item.verificationStatus === "revised" && item.verificationNote && (
-                                <span className="text-[10px] text-muted-foreground">{item.verificationNote}</span>
-                              )}
+                              {item.verificationStatus === "revised" &&
+                                item.verificationNote && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {item.verificationNote}
+                                  </span>
+                                )}
                             </div>
                           )}
                         </TableCell>
@@ -1545,7 +1539,7 @@ function RouteComponent() {
                 ) && (
                   <PermissionGate permission="worksheets-transaction-details.verify">
                     <Button
-                      className="flex-1 gap-2 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="flex-1 gap-2 bg-emerald-600 text-white hover:bg-emerald-700 sm:flex-initial"
                       onClick={() => {
                         const itemsToVerify = operationalCosts.filter(
                           (c) =>
@@ -1580,7 +1574,7 @@ function RouteComponent() {
                 <PermissionGate permission="worksheets-transaction-details.approve">
                   <Button
                     variant="secondary"
-                    className="flex-1 gap-2 sm:flex-initial bg-purple-600 text-white hover:bg-purple-700"
+                    className="flex-1 gap-2 bg-purple-600 text-white hover:bg-purple-700 sm:flex-initial"
                     onClick={() => {
                       // Override action by Kepala Koordinator Administrasi
                       handleSave();

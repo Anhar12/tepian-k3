@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 // import GridBackground from "@/components/grid-background";
 import LandingNavbar from "@/components/navbar";
@@ -20,6 +21,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import { authMeQueryOptions } from "@/utils/auth-query";
 import { trpc } from "@/utils/trpc";
@@ -36,6 +38,8 @@ import { getPublicUrl } from "@/utils/url";
 import Autoplay from "embla-carousel-autoplay";
 import ImageWithFallback from "@/components/image-with-fallback";
 import GradientBox from "@/components/gradient-box";
+import KalimantanMap from "@/components/kalimantan-map";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) =>
@@ -82,9 +86,27 @@ const pusatLayananItems: {
 
 function HomeComponent() {
   const navigate = useNavigate();
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
+  // Jump mode state for hero banner navigator
+  const [isJumpMode, setIsJumpMode] = useState(false);
+  const [jumpInputVal, setJumpInputVal] = useState("");
 
   const { data: banners, isLoading: isBannersLoading } = useQuery(
     trpc.platform.banner.getAllBanners.queryOptions(),
+  );
+
+  const { data: infoBanners, isLoading: isInfoBannersLoading } = useQuery(
+    trpc.platform.banner.getAllInfoBanners.queryOptions(),
+  );
+
+  const { data: landingStatsData } = useQuery(
+    trpc.platform.landingStats.getAll.queryOptions(),
+  );
+
+  const { data: landingRegionData } = useQuery(
+    trpc.platform.landingRegion.getAll.queryOptions(),
   );
 
   const { data: news, isLoading: isNewsLoading } = useQuery(
@@ -95,15 +117,61 @@ function HomeComponent() {
     trpc.platform.faq.getByCategory.queryOptions({ category: "general" }),
   );
 
-  const { data: heroBannerSetting } = useQuery(
+  const { data: heroAutoplaySetting } = useQuery(
     trpc.platform.setting.getByKey.queryOptions({
-      key: "landing.hero.image_url",
+      key: "landing.hero.autoplay",
     }),
   );
 
-  const heroImageSrc = heroBannerSetting?.value
-    ? getPublicUrl(heroBannerSetting.value)
-    : "/assets/hero-banner.webp";
+  const isAutoplayEnabled = heroAutoplaySetting?.value !== "false";
+
+  useEffect(() => {
+    if (!api) return;
+
+    setCurrent(api.selectedScrollSnap());
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap());
+    };
+
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
+
+  const displayBanners =
+    banners && banners.length > 0
+      ? banners
+      : [
+          {
+            id: "placeholder",
+            bannerUrl: "/assets/hero-banner.webp",
+            title: "Hero Banner",
+          },
+        ];
+
+  // Sliding window 3 numbers helper for hero navigator
+  const getVisibleSlideIndices = (currentIdx: number, total: number) => {
+    if (total <= 3) return Array.from({ length: total }, (_, i) => i);
+    if (currentIdx === 0) return [0, 1, 2];
+    if (currentIdx === total - 1) return [total - 3, total - 2, total - 1];
+    return [currentIdx - 1, currentIdx, currentIdx + 1];
+  };
+
+  const visibleSlideIndices = getVisibleSlideIndices(
+    current,
+    displayBanners.length,
+  );
+
+  const handleJumpSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const target = parseInt(jumpInputVal, 10);
+    if (!isNaN(target) && target >= 1 && target <= displayBanners.length) {
+      api?.scrollTo(target - 1);
+    }
+    setIsJumpMode(false);
+    setJumpInputVal("");
+  };
 
   const faqItems =
     dbFaqs && dbFaqs.length > 0
@@ -154,18 +222,107 @@ function HomeComponent() {
       {/* Landing Page Navbar */}
       <LandingNavbar />
 
-      {/* Hero */}
+      {/* Hero Banner Carousel (16:9) */}
       <section
-        className="relative flex h-[60vh] flex-col justify-center px-4 text-center sm:px-10 md:h-[80vh] lg:h-[95vh]"
+        className="mx-auto w-full max-w-7xl px-4 pt-4 pb-6 md:px-8 md:pt-6 md:pb-8"
         id="beranda"
       >
-        {/* Background Image */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden bg-primary">
-          <ImageWithFallback
-            src={heroImageSrc}
-            className="h-full w-full"
-            imgClassName="object-cover object-bottom-right"
-          />
+        <div className="relative aspect-16/9 w-full overflow-hidden rounded-[2rem] bg-primary shadow-xl">
+          {isBannersLoading ? (
+            <Skeleton className="h-full w-full rounded-[2rem]" />
+          ) : (
+            <Carousel
+              setApi={setApi}
+              opts={{ loop: true }}
+              plugins={
+                isAutoplayEnabled
+                  ? [Autoplay({ delay: 5000, stopOnInteraction: false })]
+                  : []
+              }
+              className="h-full w-full"
+            >
+              <CarouselContent className="-ml-0 h-full">
+                {displayBanners.map((b, idx) => (
+                  <CarouselItem key={b.id ?? idx} className="h-full pl-0">
+                    <div className="relative h-full w-full overflow-hidden">
+                      <ImageWithFallback
+                        src={
+                          b.bannerUrl?.startsWith("/")
+                            ? b.bannerUrl
+                            : getPublicUrl(b.bannerUrl)
+                        }
+                        alt={b.title ?? `Banner ${idx + 1}`}
+                        className="h-full w-full"
+                        imgClassName="object-cover object-center"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              {/* Numbered Navigator — Tengah Bawah (Max 3 visible + double-click jump) */}
+              {displayBanners.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 shadow-lg backdrop-blur-md">
+                  {visibleSlideIndices.map((index, posIdx) => {
+                    const isMiddle =
+                      visibleSlideIndices.length === 3
+                        ? posIdx === 1
+                        : index === current;
+
+                    if (isMiddle && isJumpMode) {
+                      return (
+                        <form
+                          key={index}
+                          onSubmit={handleJumpSubmit}
+                          className="inline-flex"
+                        >
+                          <input
+                            type="number"
+                            min={1}
+                            max={displayBanners.length}
+                            autoFocus
+                            value={jumpInputVal}
+                            onChange={(e) => setJumpInputVal(e.target.value)}
+                            onBlur={() => handleJumpSubmit()}
+                            className="size-7 rounded-full bg-white text-center text-xs font-bold text-black shadow-xs outline-none"
+                            placeholder={`${index + 1}`}
+                          />
+                        </form>
+                      );
+                    }
+
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => api?.scrollTo(index)}
+                        onDoubleClick={() => {
+                          if (isMiddle) {
+                            setJumpInputVal(`${index + 1}`);
+                            setIsJumpMode(true);
+                          }
+                        }}
+                        className={cn(
+                          "flex size-6 cursor-pointer items-center justify-center rounded-full text-xs font-bold transition-all duration-300 focus:outline-hidden",
+                          current === index
+                            ? "scale-110 bg-white text-black shadow-xs"
+                            : "bg-white/25 text-white hover:bg-white/50",
+                        )}
+                        aria-label={`Ke banner ${index + 1}`}
+                        title={
+                          isMiddle
+                            ? "Double click untuk loncat ke slide tertentu"
+                            : undefined
+                        }
+                      >
+                        {index + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </Carousel>
+          )}
         </div>
       </section>
 
@@ -274,6 +431,238 @@ function HomeComponent() {
         </div>
       </section>
 
+      {/* Statistik & Wilayah Kerja */}
+      <section
+        className="relative flex flex-col bg-white px-6 py-16 md:px-16"
+        id="statistik"
+      >
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-12">
+          {/* 3 Stat Cards */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {/* Layanan Pengujian */}
+            {(() => {
+              const stat = landingStatsData?.find(
+                (s) => s.serviceType === "pengujian",
+              );
+              const pCount = stat?.primaryCount ?? 540;
+              const sCount = stat?.secondaryCount ?? 182;
+
+              return (
+                <div className="flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-xl">
+                  <div className="flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 py-10 text-white">
+                    <ImageWithFallback
+                      src="/assets/layanan_pengujian_thumb.webp"
+                      alt="Layanan Pengujian"
+                      className="h-24 w-auto object-contain drop-shadow-lg"
+                    />
+                    <h3 className="text-xl font-bold">Layanan Pengujian</h3>
+                  </div>
+                  <div className="flex flex-col items-center gap-4 p-6">
+                    <div className="text-center">
+                      <span className="text-4xl font-extrabold text-blue-600">
+                        {pCount.toLocaleString("id-ID")}
+                      </span>
+                      <p className="mt-1 text-sm font-semibold text-blue-600">
+                        Pengujian Dilakukan
+                      </p>
+                    </div>
+                    <div className="h-px w-full bg-neutral-100" />
+                    <div className="flex items-center gap-3">
+                      <ImageWithFallback
+                        src="/assets/building-05.svg"
+                        alt=""
+                        className="h-10 w-10 object-contain"
+                      />
+                      <div>
+                        <span className="text-xl font-extrabold text-blue-600">
+                          {sCount.toLocaleString("id-ID")}
+                        </span>
+                        <p className="text-xs font-semibold text-blue-600">
+                          Perusahaan Dilayani
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Layanan Pelatihan */}
+            {(() => {
+              const stat = landingStatsData?.find(
+                (s) => s.serviceType === "pelatihan",
+              );
+              const pCount = stat?.primaryCount ?? 20;
+              const sCount = stat?.secondaryCount ?? 4500;
+
+              return (
+                <div className="flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-xl">
+                  <div className="flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-400 to-teal-500 py-10 text-white">
+                    <ImageWithFallback
+                      src="/assets/layanan_pelatihan_thumb.webp"
+                      alt="Layanan Pelatihan"
+                      className="h-24 w-auto object-contain drop-shadow-lg"
+                    />
+                    <h3 className="text-xl font-bold">Layanan Pelatihan</h3>
+                  </div>
+                  <div className="flex flex-col items-center gap-4 p-6">
+                    <div className="text-center">
+                      <span className="text-4xl font-extrabold text-emerald-600">
+                        {pCount.toLocaleString("id-ID")}
+                      </span>
+                      <p className="mt-1 text-sm font-semibold text-emerald-600">
+                        Pelatihan Dilakukan
+                      </p>
+                    </div>
+                    <div className="h-px w-full bg-neutral-100" />
+                    <div className="flex items-center gap-3">
+                      <ImageWithFallback
+                        src="/assets/group-3.svg"
+                        alt=""
+                        className="h-10 w-10 object-contain"
+                      />
+                      <div>
+                        <span className="text-xl font-extrabold text-emerald-600">
+                          {sCount.toLocaleString("id-ID")}
+                        </span>
+                        <p className="text-xs font-semibold text-emerald-600">
+                          Peserta Pelatihan
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Layanan Uji Kompetensi */}
+            {(() => {
+              const stat = landingStatsData?.find(
+                (s) => s.serviceType === "uji_kompetensi",
+              );
+              const pCount = stat?.primaryCount ?? 2;
+              const sCount = stat?.secondaryCount ?? 30;
+
+              return (
+                <div className="flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-xl">
+                  <div className="flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-purple-500 to-purple-600 py-10 text-white">
+                    <ImageWithFallback
+                      src="/assets/layanan_ukom_thumb.webp"
+                      alt="Layanan Uji Kompetensi"
+                      className="h-24 w-auto object-contain drop-shadow-lg"
+                    />
+                    <h3 className="text-xl font-bold">
+                      Layanan Uji Kompetensi
+                    </h3>
+                  </div>
+                  <div className="flex flex-col items-center gap-4 p-6">
+                    <div className="text-center">
+                      <span className="text-4xl font-extrabold text-purple-600">
+                        {pCount.toLocaleString("id-ID")}
+                      </span>
+                      <p className="mt-1 text-sm font-semibold text-purple-600">
+                        Uji Kompetensi Dilakukan
+                      </p>
+                    </div>
+                    <div className="h-px w-full bg-neutral-100" />
+                    <div className="flex items-center gap-3">
+                      <ImageWithFallback
+                        src="/assets/award-1.svg"
+                        alt=""
+                        className="h-10 w-10 object-contain"
+                      />
+                      <div>
+                        <span className="text-xl font-extrabold text-purple-600">
+                          {sCount.toLocaleString("id-ID")}
+                        </span>
+                        <p className="text-xs font-semibold text-purple-600">
+                          Peserta Uji Kompetensi
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Wilayah Kerja Balai K3 Samarinda */}
+          <div className="flex flex-col gap-6 pt-6">
+            <h2 className="text-3xl font-extrabold text-blue-700 md:text-4xl">
+              Wilayah Kerja Balai K3 Samarinda
+            </h2>
+
+            <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
+              {/* Left SVG Map */}
+              <div className="flex w-full justify-center lg:w-1/2">
+                <KalimantanMap regions={landingRegionData} />
+              </div>
+
+              {/* Right Table / Card */}
+              <div className="w-full max-w-md lg:w-1/2">
+                <div className="overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-xl">
+                  <div className="bg-blue-600 px-6 py-4 text-white">
+                    <h3 className="text-xl font-bold">Sebaran Perusahaan</h3>
+                  </div>
+                  <div className="flex flex-col divide-y divide-neutral-100 p-4">
+                    {[
+                      {
+                        key: "kalimantan_timur",
+                        defaultName: "Kalimantan Timur",
+                        defaultCount: 64,
+                      },
+                      {
+                        key: "kalimantan_selatan",
+                        defaultName: "Kalimantan Selatan",
+                        defaultCount: 42,
+                      },
+                      {
+                        key: "kalimantan_utara",
+                        defaultName: "Kalimantan Utara",
+                        defaultCount: 34,
+                      },
+                      {
+                        key: "kalimantan_tengah",
+                        defaultName: "Kalimantan Tengah",
+                        defaultCount: 23,
+                      },
+                      {
+                        key: "kalimantan_barat",
+                        defaultName: "Kalimantan Barat",
+                        defaultCount: 14,
+                      },
+                    ].map((prov) => {
+                      const found = landingRegionData?.find(
+                        (r) => r.provinceKey === prov.key,
+                      );
+                      const name = found?.provinceName ?? prov.defaultName;
+                      const count = found?.companyCount ?? prov.defaultCount;
+
+                      return (
+                        <div
+                          key={prov.key}
+                          className="flex items-center justify-between px-4 py-3.5"
+                        >
+                          <span className="shrink-0 text-sm font-bold text-neutral-800">
+                            {name}
+                          </span>
+                          <div className="mx-4 flex flex-1 items-center">
+                            <div className="w-full border-b border-dotted border-neutral-300" />
+                          </div>
+                          <span className="shrink-0 text-base font-extrabold text-neutral-900">
+                            {count}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Informasi Keselamatan & Kesehatan Kerja */}
       <section
         className="relative flex flex-col bg-accent/10 px-10 py-16"
@@ -303,7 +692,7 @@ function HomeComponent() {
         <div className="flex flex-col gap-6">
           {/* Featured Banner Card */}
           <div className="relative z-10 flex w-full items-center justify-center">
-            {isBannersLoading ? (
+            {isInfoBannersLoading ? (
               <div className="w-full max-w-6xl">
                 <Card className="h-72 w-full overflow-hidden rounded-2xl md:h-80">
                   <CardContent className="flex h-full flex-col items-center justify-center p-6">
@@ -311,14 +700,14 @@ function HomeComponent() {
                   </CardContent>
                 </Card>
               </div>
-            ) : banners && banners.length > 0 ? (
+            ) : infoBanners && infoBanners.length > 0 ? (
               <Carousel
                 className="w-full max-w-6xl"
                 opts={{ loop: true }}
                 plugins={[Autoplay({ delay: 4000 })]}
               >
                 <CarouselContent>
-                  {banners.map((banner) => (
+                  {infoBanners.map((banner) => (
                     <CarouselItem key={banner.id}>
                       <div className="relative h-72 w-full overflow-hidden rounded-2xl md:h-80">
                         <ImageWithFallback
@@ -358,7 +747,7 @@ function HomeComponent() {
               <div className="w-full max-w-6xl">
                 <Card className="h-72 w-full overflow-hidden rounded-2xl md:h-80">
                   <CardContent className="flex h-full flex-col items-center justify-center text-muted-foreground">
-                    <p>No banners available</p>
+                    <p>Belum ada banner informasi</p>
                   </CardContent>
                 </Card>
               </div>

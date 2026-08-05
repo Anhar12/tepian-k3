@@ -21,6 +21,7 @@ const getAllBannersSchema = createPaginationSchema(
 
 const createBannerSchema = createInsertSchema(banners, {
   title: z.string().min(1).max(255),
+  type: z.enum(["hero", "info"]),
   order: z.number(),
   isActive: z.boolean(),
 })
@@ -30,13 +31,15 @@ const createBannerSchema = createInsertSchema(banners, {
   .extend({
     picture: z
       .file()
-      .max(2 * 1024 * 1024)
+      .max(10 * 1024 * 1024)
       .mime(["image/jpeg", "image/png", "image/webp"]),
+    type: z.enum(["hero", "info"]),
   });
 
 const updateBannerSchema = createUpdateSchema(banners, {
   id: z.uuidv7(),
   title: z.string().min(1).max(255),
+  type: z.enum(["hero", "info"]).optional(),
   order: z.optional(z.number()),
   isActive: z.optional(z.boolean()),
 })
@@ -46,15 +49,28 @@ const updateBannerSchema = createUpdateSchema(banners, {
   .extend({
     picture: z
       .file()
-      .max(2 * 1024 * 1024)
+      .max(10 * 1024 * 1024)
       .mime(["image/jpeg", "image/png", "image/webp"])
       .optional(),
+    type: z.enum(["hero", "info"]).optional(),
   });
+
+const reorderBannersSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        id: z.uuidv7(),
+        order: z.number().int().min(0),
+      }),
+    )
+    .min(1),
+});
 
 const bannerSchema = {
   getAllBannersSchema,
   createBannerSchema,
   updateBannerSchema,
+  reorderBannersSchema,
 };
 
 export default bannerSchema;

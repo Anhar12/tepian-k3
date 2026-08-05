@@ -39,7 +39,7 @@ const createNewsSchema = createInsertSchema(news, {
   .extend({
     image: z
       .file()
-      .max(2 * 1024 * 1024)
+      .max(10 * 1024 * 1024)
       .mime(["image/jpeg", "image/png", "image/webp"]),
   });
 
@@ -56,7 +56,7 @@ const updateNewsSchema = createUpdateSchema(news, {
   .extend({
     image: z
       .file()
-      .max(2 * 1024 * 1024)
+      .max(10 * 1024 * 1024)
       .mime(["image/jpeg", "image/png", "image/webp"])
       .optional(),
   });

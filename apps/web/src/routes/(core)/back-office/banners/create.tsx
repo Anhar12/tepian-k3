@@ -42,6 +42,12 @@ function RouteComponent() {
 
   const form = useForm<z.infer<typeof bannerSchema.createBannerSchema>>({
     resolver: zodResolver(bannerSchema.createBannerSchema),
+    defaultValues: {
+      title: "",
+      type: "hero",
+      order: 0,
+      isActive: true,
+    },
   });
 
   const createBannerMutation = useMutation({
@@ -85,6 +91,10 @@ function RouteComponent() {
                   <SingleImageUpload
                     {...field}
                     error={fieldState.error?.message}
+                    aspectRatio={16 / 9}
+                    targetWidth={1920}
+                    targetHeight={1080}
+                    maxSize={10 * 1024 * 1024}
                   />
                 )}
               />
@@ -99,6 +109,33 @@ function RouteComponent() {
                   >
                     <FieldLabel>Judul Banner</FieldLabel>
                     <Input placeholder="Masukkan judul banner" {...field} />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="type"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    className="space-y-1"
+                  >
+                    <FieldLabel>Tipe Banner / Penempatan</FieldLabel>
+                    <select
+                      {...field}
+                      className="flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold"
+                    >
+                      <option value="hero">
+                        Banner Hero Utama (Slideshow Atas)
+                      </option>
+                      <option value="info">
+                        Informasi & Update Terkini (Carousel)
+                      </option>
+                    </select>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}

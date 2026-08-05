@@ -25,9 +25,23 @@ export const bannerRouter = createTRPCRouter({
       await withCache(
         CACHE_KEYS.BANNERS_ALL,
         CACHE_TTL.LONG,
-        () => runEffect(bannerQueries.getAllActiveBanners()),
+        () => runEffect(bannerQueries.getAllActiveBanners("hero")),
         () => ctx.c.header("X-Data-Source", "cache"),
       ),
+  ),
+
+  getAllInfoBanners: withRateLimit(rateLimiters.moderate()).query(
+    async ({ ctx }) =>
+      await withCache(
+        "banners:info:all",
+        CACHE_TTL.LONG,
+        () => runEffect(bannerQueries.getAllActiveBanners("info")),
+        () => ctx.c.header("X-Data-Source", "cache"),
+      ),
+  ),
+
+  getAllBannersForAdmin: withPermission("banners.view").query(
+    async () => await runEffect(bannerQueries.getAllBannersForAdmin()),
   ),
 
   getPaginatedBanners: withPermission("banners.view")
@@ -145,6 +159,15 @@ export const bannerRouter = createTRPCRouter({
       async ({ input }) =>
         await withCacheInvalidation(CACHE_KEYS.BANNERS_PREFIX, () =>
           runEffect(bannerQueries.hardDeleteBanner(input.id)),
+        ),
+    ),
+
+  reorderBanners: withPermission("banners.update")
+    .input(bannerSchema.reorderBannersSchema)
+    .mutation(
+      async ({ input }) =>
+        await withCacheInvalidation(CACHE_KEYS.BANNERS_PREFIX, () =>
+          runEffect(bannerQueries.reorderBanners(input.items)),
         ),
     ),
 });

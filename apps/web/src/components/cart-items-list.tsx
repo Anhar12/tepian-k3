@@ -2,11 +2,6 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getClusterColor } from "@/lib/cluster-colors";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import {
-  PARAMETER_SERVICE_TYPE_COLORS,
-  PARAMETER_SERVICE_TYPE_LABELS,
-} from "@tepian-k3/constants";
 import { Loader2, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 
 type CartCluster = {
@@ -85,42 +80,10 @@ export function CartItemsList({
                           <h3 className="truncate text-base font-semibold text-gray-900 sm:text-lg">
                             {item.parameter.name}
                           </h3>
-                          {item.parameter.serviceType && (
-                            <Badge
-                              className={cn(
-                                "hidden sm:inline-flex",
-                                PARAMETER_SERVICE_TYPE_COLORS[
-                                  item.parameter.serviceType as keyof typeof PARAMETER_SERVICE_TYPE_COLORS
-                                ],
-                              )}
-                            >
-                              {
-                                PARAMETER_SERVICE_TYPE_LABELS[
-                                  item.parameter.serviceType as keyof typeof PARAMETER_SERVICE_TYPE_LABELS
-                                ]
-                              }
-                            </Badge>
-                          )}
                         </div>
                         <p className="mt-1 text-sm text-gray-500">
                           {item.parameter.category.name}
                         </p>
-                        {item.parameter.serviceType && (
-                          <Badge
-                            className={cn(
-                              "mt-2 sm:hidden",
-                              PARAMETER_SERVICE_TYPE_COLORS[
-                                item.parameter.serviceType as keyof typeof PARAMETER_SERVICE_TYPE_COLORS
-                              ],
-                            )}
-                          >
-                            {
-                              PARAMETER_SERVICE_TYPE_LABELS[
-                                item.parameter.serviceType as keyof typeof PARAMETER_SERVICE_TYPE_LABELS
-                              ]
-                            }
-                          </Badge>
-                        )}
                       </div>
                       <div className="flex items-center justify-between gap-3 sm:ml-4 sm:gap-4">
                         <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-2 py-1.5 sm:px-3 sm:py-2">

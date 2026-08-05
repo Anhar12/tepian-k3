@@ -21,6 +21,8 @@ import {
   IconAward,
   IconVideo,
   IconSettings,
+  IconLayoutGrid,
+  IconFileText,
 } from "@tabler/icons-react";
 
 const urlStarter = "/back-office";
@@ -161,6 +163,18 @@ export const backOfficeMenu: {
       icon: IconSettings,
       items: [
         {
+          title: "Manajemen Aset Halaman",
+          url: `${urlStarter}/landing-settings`,
+          icon: IconLayoutGrid,
+          permission: "banners.view",
+        },
+        {
+          title: "Manajemen PPID",
+          url: `${urlStarter}/landing-settings?tab=ppid`,
+          icon: IconFileText,
+          permission: "ppid-submissions.read",
+        },
+        {
           title: "Survei",
           url: `${urlStarter}/survey-questions`,
           icon: IconMessage2Question,
@@ -170,10 +184,10 @@ export const backOfficeMenu: {
           title: "Chatbot Asty",
           url: `${urlStarter}/chatbot`,
           icon: IconMessage2Question,
-          permission: "banners.view", // Reusing banners permission as specified in the plan
+          permission: "banners.view",
         },
         {
-          title: "Spanduk",
+          title: "Spanduk (Banner Hero)",
           url: `${urlStarter}/banners`,
           icon: IconAd,
           permission: "banners.view",
@@ -270,9 +284,9 @@ export const backOfficeMenu: {
       icon: IconSettings,
       items: [
         {
-          title: "Landing Page & FAQ",
+          title: "Manajemen Aset Halaman",
           url: `${urlStarter}/landing-settings`,
-          icon: IconSettings,
+          icon: IconLayoutGrid,
           permission: "banners.view",
         },
         {

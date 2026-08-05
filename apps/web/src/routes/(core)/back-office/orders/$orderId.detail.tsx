@@ -334,7 +334,9 @@ function RouteComponent() {
         );
         dialogs.close("rejectPayment");
         dialogs.updateData("rejectPayment", { reason: "" });
-        globalSuccessToast("Bukti pembayaran ditolak. Customer akan menerima notifikasi.");
+        globalSuccessToast(
+          "Bukti pembayaran ditolak. Customer akan menerima notifikasi.",
+        );
       },
       onError: (error) => {
         globalErrorToast("Gagal menolak pembayaran: " + error.message);
@@ -698,7 +700,10 @@ function RouteComponent() {
   // Worksheet status flags (new flow: worksheet created during kaji ulang)
   const hasWorksheet = !!worksheet;
   const worksheetStatus = worksheet?.status;
-  const needsWorksheet = isPendingApproval && !hasWorksheet;
+  const needsWorksheet =
+    !hasWorksheet &&
+    order.status !== "cancelled" &&
+    order.status !== "rejected";
   const worksheetInDraft = hasWorksheet && worksheetStatus === "draft";
   const worksheetInRevision = hasWorksheet && worksheetStatus === "revision";
   const worksheetPendingVerification =
@@ -794,7 +799,9 @@ function RouteComponent() {
                             <div className="flex flex-col">
                               <span>{item.location.name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {item.location.district?.name ? `${item.location.district.name}, ` : ""}
+                                {item.location.district?.name
+                                  ? `${item.location.district.name}, `
+                                  : ""}
                                 {item.location.regency?.name || ""}
                               </span>
                             </div>
@@ -2091,12 +2098,12 @@ function RouteComponent() {
                   >
                     {unmaskedData ? (
                       <>
-                        <EyeOff className="w-4 h-4" />
+                        <EyeOff className="h-4 w-4" />
                         <span className="text-xs">Sembunyikan</span>
                       </>
                     ) : (
                       <>
-                        <Eye className="w-4 h-4" />
+                        <Eye className="h-4 w-4" />
                         <span className="text-xs">Tampilkan</span>
                       </>
                     )}
@@ -2163,7 +2170,11 @@ function RouteComponent() {
                     <dd className="font-medium">
                       {displayCompany?.responsibleTestingPersonPhone ? (
                         <a
-                          href={toWaLink(displayCompany.responsibleTestingPersonPhone) ?? "#"}
+                          href={
+                            toWaLink(
+                              displayCompany.responsibleTestingPersonPhone,
+                            ) ?? "#"
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-green-600 hover:underline"
@@ -2190,16 +2201,21 @@ function RouteComponent() {
                     new Map(
                       order.items
                         .filter((item) => item.location)
-                        .map((item) => [item.location!.id, item.location!])
-                    ).values()
+                        .map((item) => [item.location!.id, item.location!]),
+                    ).values(),
                   ).map((location, index) => (
-                    <div key={location.id} className={index > 0 ? "pt-3 border-t" : ""}>
-                      <dt className="text-sm text-muted-foreground">Lokasi {index + 1}</dt>
-                      <dd className="font-medium">
-                        {location.name}
-                      </dd>
-                      <dd className="text-sm text-muted-foreground mt-1">
-                        {location.district?.name ? `${location.district.name}, ` : ""}
+                    <div
+                      key={location.id}
+                      className={index > 0 ? "border-t pt-3" : ""}
+                    >
+                      <dt className="text-sm text-muted-foreground">
+                        Lokasi {index + 1}
+                      </dt>
+                      <dd className="font-medium">{location.name}</dd>
+                      <dd className="mt-1 text-sm text-muted-foreground">
+                        {location.district?.name
+                          ? `${location.district.name}, `
+                          : ""}
                         {location.regency?.name || ""}
                       </dd>
                     </div>
@@ -2364,9 +2380,13 @@ function RouteComponent() {
           </AlertDialogHeader>
           <div className="py-4">
             {order.documents.find((doc) => doc.type === "proof_of_payment") && (
-              <div className="mb-4 rounded-lg border p-4 bg-muted/30">
-                <p className="text-sm font-medium mb-2">Preview Bukti Pembayaran:</p>
-                {order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl.endsWith(".pdf") ? (
+              <div className="mb-4 rounded-lg border bg-muted/30 p-4">
+                <p className="mb-2 text-sm font-medium">
+                  Preview Bukti Pembayaran:
+                </p>
+                {order.documents
+                  .find((doc) => doc.type === "proof_of_payment")!
+                  .fileUrl.endsWith(".pdf") ? (
                   <div className="flex items-center gap-4">
                     <FileText className="h-8 w-8 text-blue-500" />
                     <Button
@@ -2375,9 +2395,11 @@ function RouteComponent() {
                       onClick={() =>
                         window.open(
                           getPublicUrl(
-                            order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl
+                            order.documents.find(
+                              (doc) => doc.type === "proof_of_payment",
+                            )!.fileUrl,
                           ),
-                          "_blank"
+                          "_blank",
                         )
                       }
                     >
@@ -2387,23 +2409,27 @@ function RouteComponent() {
                 ) : (
                   <ImageWithFallback
                     src={getPublicUrl(
-                      order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl
+                      order.documents.find(
+                        (doc) => doc.type === "proof_of_payment",
+                      )!.fileUrl,
                     )}
                     alt="Bukti pembayaran"
-                    className="max-h-48 w-auto rounded object-contain border cursor-pointer"
+                    className="max-h-48 w-auto cursor-pointer rounded border object-contain"
                     onClick={() =>
                       window.open(
                         getPublicUrl(
-                          order.documents.find((doc) => doc.type === "proof_of_payment")!.fileUrl
+                          order.documents.find(
+                            (doc) => doc.type === "proof_of_payment",
+                          )!.fileUrl,
                         ),
-                        "_blank"
+                        "_blank",
                       )
                     }
                   />
                 )}
               </div>
             )}
-            
+
             <Textarea
               value={dialogs.getData("rejectPayment")?.reason ?? ""}
               onChange={(e) =>
@@ -2413,7 +2439,7 @@ function RouteComponent() {
               rows={4}
             />
             {dialogs.getErrors("rejectPayment").reason && (
-              <p className="mt-2 text-sm text-red-500 font-medium">
+              <p className="mt-2 text-sm font-medium text-red-500">
                 {dialogs.getErrors("rejectPayment").reason}
               </p>
             )}

@@ -1,5 +1,7 @@
 # tepian-k3
 
+[![CI Status](https://github.com/rizrmdhn/tepian-k3/workflows/CI/badge.svg)](https://github.com/rizrmdhn/tepian-k3/actions)
+
 A modern, type-safe TypeScript monorepo built with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack). Powered by **Turborepo** for blazing-fast builds and **pnpm workspaces** for efficient dependency management.
 
 ---
@@ -12,9 +14,12 @@ Semua dokumentasi untuk developer dan AI Agent kini disusun secara terpusat untu
 
 **Sorotan Cepat:**
 
-- [Panduan Memulai Cepat (Quickstart)](docs/getting-started/QUICKSTART.md) — Instalasi, `.env`, dan skrip npm.
-- [Panduan Arsitektur (Architecture)](docs/getting-started/ARCHITECTURE.md) — Struktur monorepo dan aturan modul.
-- [AGENTS.md](AGENTS.md) — Aturan wajib yang dibaca oleh sistem AI Agent.
+- 🚀 [Peta Deployment (Overview)](docs/deployment/DEPLOYMENT_OVERVIEW.md) — Ringkasan opsi & panduan deployment.
+- ⚡ [Panduan Memulai Cepat (Quickstart)](docs/getting-started/QUICKSTART.md) — Instalasi lokal, `.env`, dan skrip npm.
+- 🏗️ [Panduan Arsitektur (Architecture)](docs/getting-started/ARCHITECTURE.md) — Struktur monorepo dan aturan modul.
+- 🐳 [Panduan Docker & Self-Hosted](docs/deployment/DOCKER.md) — Deployment menggunakan Docker Compose & GHCR.
+- 🌐 [Panduan Production Coolify](docs/deployment/PRODUCTION_DEPLOYMENT_GUIDE.md) — Deployment ke server produksi Coolify.
+- 🤖 [AGENTS.md](AGENTS.md) — Aturan wajib yang dibaca oleh sistem AI Agent.
 
 ---
 
@@ -36,7 +41,11 @@ Semua dokumentasi untuk developer dan AI Agent kini disusun secara terpusat untu
 ## 🚀 Perintah Dasar
 
 ```bash
-# Jalankan aplikasi (web :3001, server :3000)
+# Setup environment (pilih salah satu)
+cp .env.example .env            # Untuk dev lokal
+cp .env.docker.example .env     # Untuk Docker / Self-hosted
+
+# Jalankan dev server lokal (web :3001, server :3000)
 pnpm dev
 
 # Periksa type check seluruh monorepo
