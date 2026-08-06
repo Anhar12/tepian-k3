@@ -37,6 +37,7 @@ Panduan terkait Hono, tRPC, PostgreSQL, Drizzle ORM, dan logika bisnis backend.
 Panduan terkait React, TanStack Router, Shadcn UI, dan styling.
 
 - [DESIGN_GUIDE.md](frontend/DESIGN_GUIDE.md) — Panduan desain UI/UX, warna, typography, layout pattern.
+- [LANDING_PAGE_GUIDE.md](frontend/LANDING_PAGE_GUIDE.md) — Panduan arsitektur landing page, Hero Carousel, Peta Kalimantan, dan standar typography h2.
 - [ROUTING.md](frontend/ROUTING.md) — Penjelasan struktur folder TanStack Router, route protection.
 - [COMPONENTS.md](frontend/COMPONENTS.md) — Panduan komponen spesifik, reusable hooks, dan state management.
 

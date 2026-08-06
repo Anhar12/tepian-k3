@@ -56,26 +56,26 @@ className="text-muted-foreground"
 
 ### Token Utama
 
-| Token                 | Light Mode                 | Penggunaan                        |
-| --------------------- | -------------------------- | --------------------------------- |
-| `--background`        | `oklch(0.98 0.005 259)`   | Background halaman                |
-| `--foreground`        | `oklch(0.25 0.02 259)`    | Teks utama                        |
-| `--primary`           | `oklch(0.5208 0.1943 259)` | Brand color (biru tepian-k3)      |
-| `--muted`             | `oklch(0.95 0.015 259)`   | Background subtle/secondary       |
-| `--muted-foreground`  | `oklch(0.5 0.03 259)`     | Teks secondary/hint               |
-| `--destructive`       | `oklch(0.577 0.245 27)`   | Error/danger                      |
-| `--accent`            | `oklch(0.92 0.04 259)`    | Highlight, hover states           |
-| `--border`            | `oklch(0.9 0.02 259)`     | Border/divider                    |
-| `--sidebar`           | `#1e53a4`                 | Sidebar background                |
+| Token                | Light Mode                 | Penggunaan                   |
+| -------------------- | -------------------------- | ---------------------------- |
+| `--background`       | `oklch(0.98 0.005 259)`    | Background halaman           |
+| `--foreground`       | `oklch(0.25 0.02 259)`     | Teks utama                   |
+| `--primary`          | `oklch(0.5208 0.1943 259)` | Brand color (biru tepian-k3) |
+| `--muted`            | `oklch(0.95 0.015 259)`    | Background subtle/secondary  |
+| `--muted-foreground` | `oklch(0.5 0.03 259)`      | Teks secondary/hint          |
+| `--destructive`      | `oklch(0.577 0.245 27)`    | Error/danger                 |
+| `--accent`           | `oklch(0.92 0.04 259)`     | Highlight, hover states      |
+| `--border`           | `oklch(0.9 0.02 259)`      | Border/divider               |
+| `--sidebar`          | `#1e53a4`                  | Sidebar background           |
 
 ### Radius System
 
 ```css
---radius: 0.625rem;        /* 10px — base radius */
---radius-sm: 6px;          /* Small elements */
---radius-md: 8px;          /* Medium elements */
---radius-lg: 10px;         /* Cards, dialogs */
---radius-xl: 14px;         /* Large cards, hero sections */
+--radius: 0.625rem; /* 10px — base radius */
+--radius-sm: 6px; /* Small elements */
+--radius-md: 8px; /* Medium elements */
+--radius-lg: 10px; /* Cards, dialogs */
+--radius-xl: 14px; /* Large cards, hero sections */
 ```
 
 > **Rule:** Gunakan `rounded-lg` atau `rounded-xl` untuk cards. Gunakan `rounded-md` untuk input fields dan buttons. Jangan gunakan `rounded-full` kecuali untuk avatar dan badge.
@@ -86,21 +86,22 @@ className="text-muted-foreground"
 
 ### Font Family
 
-| Font          | Penggunaan                           | Import                 |
-| ------------- | ------------------------------------ | ---------------------- |
-| **Poppins**   | Font utama (`--font-sans`)           | Google Fonts via CSS   |
-| **Plus Jakarta Sans** | Heading hero landing pages   | `font-['Plus Jakarta Sans']` |
+| Font                  | Penggunaan                 | Import                       |
+| --------------------- | -------------------------- | ---------------------------- |
+| **Poppins**           | Font utama (`--font-sans`) | Google Fonts via CSS         |
+| **Plus Jakarta Sans** | Heading hero landing pages | `font-['Plus Jakarta Sans']` |
 
 ### Font Scale (Tailwind Classes)
 
-| Element           | Class           | Size   | Weight       |
-| ----------------- | --------------- | ------ | ------------ |
-| Hero Heading      | `text-4xl md:text-5xl` | 36-48px | `font-extrabold` (800) |
-| Section Heading   | `text-2xl md:text-3xl` | 24-30px | `font-bold` (700)      |
-| Card Title        | `text-lg`       | 18px   | `font-semibold` (600)  |
-| Body Text         | `text-base`     | 16px   | `font-normal` (400)    |
-| Small/Caption     | `text-sm`       | 14px   | `font-normal` (400)    |
-| Badge/Label       | `text-xs`       | 12px   | `font-medium` (500)    |
+| Element          | Class                              | Size    | Weight                 |
+| ---------------- | ---------------------------------- | ------- | ---------------------- |
+| Hero Heading     | `text-4xl md:text-5xl`             | 36-48px | `font-extrabold` (800) |
+| Major H2 Heading | `text-3xl md:text-4xl lg:text-5xl` | 30-48px | `font-semibold` (600)  |
+| Sub H2 / Section | `text-2xl md:text-3xl`             | 24-30px | `font-bold` (700)      |
+| Card Title       | `text-lg`                          | 18px    | `font-semibold` (600)  |
+| Body Text        | `text-base`                        | 16px    | `font-normal` (400)    |
+| Small/Caption    | `text-sm`                          | 14px    | `font-normal` (400)    |
+| Badge/Label      | `text-xs`                          | 12px    | `font-medium` (500)    |
 
 ### Rules
 
@@ -115,30 +116,30 @@ className="text-muted-foreground"
 
 ### Brand Colors
 
-| Nama              | Tailwind Class          | Hex/OKLCH                  | Penggunaan                  |
-| ----------------- | ----------------------- | -------------------------- | --------------------------- |
-| Primary Blue      | `bg-primary`            | `oklch(0.5208 0.1943 259)` | CTA utama, link, brand      |
-| Sidebar Blue      | `bg-[#1e53a4]`          | `#1e53a4`                  | Sidebar background           |
-| Accent Blue       | `bg-[#1061d6]`          | `#1061d6`                  | Active states, sidebar hover |
+| Nama         | Tailwind Class | Hex/OKLCH                  | Penggunaan                   |
+| ------------ | -------------- | -------------------------- | ---------------------------- |
+| Primary Blue | `bg-primary`   | `oklch(0.5208 0.1943 259)` | CTA utama, link, brand       |
+| Sidebar Blue | `bg-[#1e53a4]` | `#1e53a4`                  | Sidebar background           |
+| Accent Blue  | `bg-[#1061d6]` | `#1061d6`                  | Active states, sidebar hover |
 
 ### Semantic Colors
 
-| Semantik     | Tailwind Class         | Penggunaan                    |
-| ------------ | ---------------------- | ----------------------------- |
-| Success      | `text-emerald-600`     | Status berhasil, badge aktif  |
-| Warning      | `text-amber-500`       | Peringatan, status pending    |
-| Error        | `text-destructive`     | Error state, tombol hapus     |
-| Info         | `text-sky-500`         | Informasi, link sekunder      |
+| Semantik | Tailwind Class     | Penggunaan                   |
+| -------- | ------------------ | ---------------------------- |
+| Success  | `text-emerald-600` | Status berhasil, badge aktif |
+| Warning  | `text-amber-500`   | Peringatan, status pending   |
+| Error    | `text-destructive` | Error state, tombol hapus    |
+| Info     | `text-sky-500`     | Informasi, link sekunder     |
 
 ### Landing Page Section Colors
 
-| Section                | Background                              | Text             |
-| ---------------------- | --------------------------------------- | ---------------- |
-| Hero Banner            | Dynamic image + overlay                 | `text-white`     |
-| Katalog Pelatihan      | `bg-white` / `bg-gray-50`              | `text-foreground`|
-| In-House / CTA Banner  | `bg-gradient-to-r from-sky-900 to-sky-700` | `text-white` |
-| FAQ                    | `bg-white`                              | `text-foreground`|
-| Stats/Counter          | `bg-primary` gradient                   | `text-white`     |
+| Section               | Background                                 | Text              |
+| --------------------- | ------------------------------------------ | ----------------- |
+| Hero Banner           | Dynamic image + overlay                    | `text-white`      |
+| Katalog Pelatihan     | `bg-white` / `bg-gray-50`                  | `text-foreground` |
+| In-House / CTA Banner | `bg-gradient-to-r from-sky-900 to-sky-700` | `text-white`      |
+| FAQ                   | `bg-white`                                 | `text-foreground` |
+| Stats/Counter         | `bg-primary` gradient                      | `text-white`      |
 
 ### Aturan Warna
 
@@ -159,9 +160,21 @@ Semua komponen UI dasar diimpor dari `@/components/ui/`:
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 ```
 
 ### Rules
@@ -174,13 +187,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 ### Komponen Custom yang Sudah Ada
 
-| Komponen               | Path                              | Penggunaan                |
-| ----------------------- | --------------------------------- | ------------------------- |
-| `ImageWithFallback`     | `@/components/image-with-fallback`| Image dengan fallback     |
-| `SingleImageUpload`     | `@/components/ui/single-image-upload` | Upload gambar         |
-| `Navbar`                | `@/components/navbar`             | Navbar public pages       |
-| `Spinner`               | `@/components/ui/spinner`         | Loading indicator         |
-| `Field`, `FieldLabel`   | `@/components/ui/field`           | Form field wrapper        |
+| Komponen              | Path                                  | Penggunaan            |
+| --------------------- | ------------------------------------- | --------------------- |
+| `ImageWithFallback`   | `@/components/image-with-fallback`    | Image dengan fallback |
+| `SingleImageUpload`   | `@/components/ui/single-image-upload` | Upload gambar         |
+| `Navbar`              | `@/components/navbar`                 | Navbar public pages   |
+| `Spinner`             | `@/components/ui/spinner`             | Loading indicator     |
+| `Field`, `FieldLabel` | `@/components/ui/field`               | Form field wrapper    |
 
 ---
 
@@ -201,9 +214,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
   {/* Content */}
   <Card>
-    <CardContent className="p-6">
-      {/* Isi */}
-    </CardContent>
+    <CardContent className="p-6">{/* Isi */}</CardContent>
   </Card>
 </div>
 ```
@@ -215,7 +226,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
   <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     {/* Section Header */}
     <div className="mb-12 text-center">
-      <Badge variant="outline" className="mb-4">Label</Badge>
+      <Badge variant="outline" className="mb-4">
+        Label
+      </Badge>
       <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
         Judul Section
       </h2>
@@ -234,12 +247,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 ### Grid System
 
-| Layout        | Class                                       | Penggunaan                  |
-| ------------- | ------------------------------------------- | --------------------------- |
-| 2 columns     | `grid gap-6 sm:grid-cols-2`                 | Form 2 kolom, card pairs    |
-| 3 columns     | `grid gap-6 sm:grid-cols-2 md:grid-cols-3`  | Card grid medium            |
-| 4 columns     | `grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4` | Katalog pelatihan |
-| 12-col flex   | `grid md:grid-cols-12` + `md:col-span-X`    | Complex layouts             |
+| Layout      | Class                                                     | Penggunaan               |
+| ----------- | --------------------------------------------------------- | ------------------------ |
+| 2 columns   | `grid gap-6 sm:grid-cols-2`                               | Form 2 kolom, card pairs |
+| 3 columns   | `grid gap-6 sm:grid-cols-2 md:grid-cols-3`                | Card grid medium         |
+| 4 columns   | `grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4` | Katalog pelatihan        |
+| 12-col flex | `grid md:grid-cols-12` + `md:col-span-X`                  | Complex layouts          |
 
 ---
 
@@ -267,15 +280,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 ### Pola Responsive Landing Page
 
 ```tsx
-{/* Mobile: stack, Desktop: 2 columns */}
+{
+  /* Mobile: stack, Desktop: 2 columns */
+}
 <div className="grid items-center gap-8 md:grid-cols-12">
-  <div className="space-y-6 md:col-span-7">
-    {/* Text content */}
-  </div>
+  <div className="space-y-6 md:col-span-7">{/* Text content */}</div>
   <div className="hidden md:col-span-5 md:block">
     {/* Image/illustration */}
   </div>
-</div>
+</div>;
 ```
 
 ---
@@ -285,17 +298,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 ### Transisi Standar
 
 ```tsx
-{/* Hover scale */}
-className="transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+{
+  /* Hover scale */
+}
+className =
+  "transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]";
 
-{/* Hover shadow lift */}
-className="transition-shadow duration-300 hover:shadow-lg"
+{
+  /* Hover shadow lift */
+}
+className = "transition-shadow duration-300 hover:shadow-lg";
 
-{/* Opacity transition (slide/carousel) */}
-className="transition-opacity duration-700 ease-in-out"
+{
+  /* Opacity transition (slide/carousel) */
+}
+className = "transition-opacity duration-700 ease-in-out";
 
-{/* Color transition */}
-className="transition-colors duration-200"
+{
+  /* Color transition */
+}
+className = "transition-colors duration-200";
 ```
 
 ### Rules
@@ -310,19 +332,23 @@ className="transition-colors duration-200"
 ### Carousel/Slider Pattern
 
 ```tsx
-{/* Indicator dots */}
+{
+  /* Indicator dots */
+}
 <button
   className={`h-2.5 cursor-pointer rounded-full transition-all duration-300 ${
     isActive ? "w-8 bg-amber-500" : "w-2.5 bg-white/40"
   }`}
-/>
+/>;
 
-{/* Slide transition */}
+{
+  /* Slide transition */
+}
 <div
   className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
     isActive ? "z-10 opacity-100" : "z-0 opacity-0"
   }`}
-/>
+/>;
 ```
 
 ---
@@ -353,14 +379,14 @@ const staticImage = "/assets/banner-auth.webp";
 
 Saat admin mengunggah gambar banner untuk landing page:
 
-| Aspek              | Rekomendasi                                    |
-| ------------------ | ---------------------------------------------- |
-| **Resolusi**       | Minimal 1920×800px (landscape ultra-wide)      |
-| **Aspect Ratio**   | 21:9 atau 16:9                                 |
-| **Format**         | WebP atau JPEG, max 500KB                      |
-| **Konten Gambar**  | Hindari teks dalam gambar — teks overlay di CSS |
-| **Overlay**        | Selalu ada dark overlay (`bg-black/40`) agar teks CTA terbaca |
-| **Safe Area**      | Konten penting (orang, objek) di 60% tengah, karena crop berbeda per device |
+| Aspek             | Rekomendasi                                                                 |
+| ----------------- | --------------------------------------------------------------------------- |
+| **Resolusi**      | Minimal 1920×800px (landscape ultra-wide)                                   |
+| **Aspect Ratio**  | 21:9 atau 16:9                                                              |
+| **Format**        | WebP atau JPEG, max 500KB                                                   |
+| **Konten Gambar** | Hindari teks dalam gambar — teks overlay di CSS                             |
+| **Overlay**       | Selalu ada dark overlay (`bg-black/40`) agar teks CTA terbaca               |
+| **Safe Area**     | Konten penting (orang, objek) di 60% tengah, karena crop berbeda per device |
 
 ---
 
@@ -370,16 +396,16 @@ Saat admin mengunggah gambar banner untuk landing page:
 
 Halaman ini terdiri dari section-section berikut:
 
-| #  | Section         | Background              | Dynamic?           |
-| -- | --------------- | ----------------------- | ------------------ |
-| 1  | Hero Banner     | Carousel 5 gambar       | ✅ Admin editable  |
-| 2  | Stats Counter   | Gradient primary        | Hardcoded          |
-| 3  | E-Learning      | `bg-white`              | DB + mock fallback |
-| 4  | Bimtek          | `bg-gray-50`            | DB + mock fallback |
-| 5  | Webinar         | `bg-white`              | DB + mock fallback |
-| 6  | In-House CTA    | Gradient sky-900→sky-700| ✅ Banner admin    |
-| 7  | FAQ             | `bg-white`              | DB + hardcoded     |
-| 8  | Final CTA       | Gradient primary        | Hardcoded          |
+| #   | Section       | Background               | Dynamic?           |
+| --- | ------------- | ------------------------ | ------------------ |
+| 1   | Hero Banner   | Carousel 5 gambar        | ✅ Admin editable  |
+| 2   | Stats Counter | Gradient primary         | Hardcoded          |
+| 3   | E-Learning    | `bg-white`               | DB + mock fallback |
+| 4   | Bimtek        | `bg-gray-50`             | DB + mock fallback |
+| 5   | Webinar       | `bg-white`               | DB + mock fallback |
+| 6   | In-House CTA  | Gradient sky-900→sky-700 | ✅ Banner admin    |
+| 7   | FAQ           | `bg-white`               | DB + hardcoded     |
+| 8   | Final CTA     | Gradient primary         | Hardcoded          |
 
 ### Design Pattern: CTA Banner (In-House Training)
 
@@ -412,15 +438,19 @@ Saat ada 2 tombol berdampingan:
 ```tsx
 <div className="flex flex-wrap items-center gap-4">
   {/* Primary CTA — bg putih, teks biru */}
-  <Button className="rounded-xl bg-white px-8 py-4 text-sky-500 font-semibold shadow-md
-    hover:bg-gray-100 hover:scale-[1.02] active:scale-[0.98]">
+  <Button
+    className="rounded-xl bg-white px-8 py-4 text-sky-500 font-semibold shadow-md
+    hover:bg-gray-100 hover:scale-[1.02] active:scale-[0.98]"
+  >
     Hubungi Corporate Sales
   </Button>
 
   {/* Secondary CTA — bg orange, teks putih + ikon */}
-  <button className="px-8 py-4 bg-orange-500 rounded-xl inline-flex justify-center
+  <button
+    className="px-8 py-4 bg-orange-500 rounded-xl inline-flex justify-center
     items-center gap-2 text-white font-semibold shadow-md
-    hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98]">
+    hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98]"
+  >
     Download Brosur
     <DownloadIcon />
   </button>
@@ -475,7 +505,9 @@ Saat admin mengelola banner landing page pelatihan:
   <CardHeader>
     <div className="flex items-center justify-between">
       <CardTitle>Daftar Data</CardTitle>
-      <Button size="sm"><Plus className="mr-2 h-4 w-4" /> Tambah</Button>
+      <Button size="sm">
+        <Plus className="mr-2 h-4 w-4" /> Tambah
+      </Button>
     </div>
   </CardHeader>
   <CardContent>
@@ -494,17 +526,19 @@ Saat admin mengelola banner landing page pelatihan:
           <TableHead className="text-right">Aksi</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
-        {/* Rows */}
-      </TableBody>
+      <TableBody>{/* Rows */}</TableBody>
     </Table>
 
     {/* Pagination */}
     <div className="mt-4 flex items-center justify-between">
       <p className="text-sm text-muted-foreground">Menampilkan 1-10 dari 50</p>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm">Sebelumnya</Button>
-        <Button variant="outline" size="sm">Selanjutnya</Button>
+        <Button variant="outline" size="sm">
+          Sebelumnya
+        </Button>
+        <Button variant="outline" size="sm">
+          Selanjutnya
+        </Button>
       </div>
     </div>
   </CardContent>
@@ -532,7 +566,7 @@ Saat admin mengelola banner landing page pelatihan:
 1. **Label** wajib di setiap input — gunakan `<FieldLabel>`
 2. **Placeholder** berformat "Masukkan..." atau "Pilih..."
 3. **Error messages** ditampilkan di bawah input, warna `text-destructive`
-4. **Required indicator** — Tambahkan asterisk (*) di label atau gunakan `required` attribute
+4. **Required indicator** — Tambahkan asterisk (\*) di label atau gunakan `required` attribute
 5. **Form layout** — 1 kolom di mobile, 2 kolom di desktop untuk form pendek
 6. **Submit button** — Selalu di kanan bawah form, gunakan loading state saat submitting
 7. **Cancel button** — Selalu ada di sebelah kiri submit button
@@ -544,12 +578,16 @@ Saat admin mengelola banner landing page pelatihan:
   <DialogContent className="max-w-lg">
     <DialogHeader>
       <DialogTitle>Tambah Data Baru</DialogTitle>
-      <DialogDescription>Isi form di bawah untuk menambah data.</DialogDescription>
+      <DialogDescription>
+        Isi form di bawah untuk menambah data.
+      </DialogDescription>
     </DialogHeader>
     <form onSubmit={handleSubmit}>
       {/* Form fields */}
       <DialogFooter>
-        <Button variant="outline" onClick={() => setIsOpen(false)}>Batal</Button>
+        <Button variant="outline" onClick={() => setIsOpen(false)}>
+          Batal
+        </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Spinner className="mr-2 h-4 w-4" /> : null}
           Simpan
@@ -612,42 +650,45 @@ Dark mode didukung via CSS variables di `:root` dan `.dark`. Namun **halaman pub
 Untuk memastikan kepatuhan penuh terhadap estetika premium dan struktur desain di Figma, AI agent dan developer harus mengikuti aturan berikut:
 
 ### 1. Ekstraksi Metrik Figma
-* **Ketebalan Batas & Radius**: Selalu periksa nilai border-radius (`borderRadius` di JSON Figma) dan border-weight. Layout kartu premium menggunakan `rounded-2xl` (14px) atau `rounded-3xl` (24px) dengan batas abu-abu lembut (`#E7E7E7` atau `border-border`).
-* **Bayangan (Shadows)**: Gunakan bayangan bermotif biru/cyan lembut untuk elemen melayang (seperti kartu informasi) untuk merepresentasikan `shadow card (blue)` dari Figma: `shadow-[0px_0px_100px_-2px_rgba(16,97,214,0.06)]`.
-* **Lebar & Responsif**: Dimensi lebar tetap (seperti `width: 770px` atau `width: 494px` di desktop) wajib diterjemahkan menjadi kombinasi kolom grid responsif (mis. `grid-cols-1 lg:grid-cols-12`) dengan porsi `lg:col-span-7` dan `lg:col-span-5` agar layout tidak pecah pada perangkat yang lebih kecil.
+
+- **Ketebalan Batas & Radius**: Selalu periksa nilai border-radius (`borderRadius` di JSON Figma) dan border-weight. Layout kartu premium menggunakan `rounded-2xl` (14px) atau `rounded-3xl` (24px) dengan batas abu-abu lembut (`#E7E7E7` atau `border-border`).
+- **Bayangan (Shadows)**: Gunakan bayangan bermotif biru/cyan lembut untuk elemen melayang (seperti kartu informasi) untuk merepresentasikan `shadow card (blue)` dari Figma: `shadow-[0px_0px_100px_-2px_rgba(16,97,214,0.06)]`.
+- **Lebar & Responsif**: Dimensi lebar tetap (seperti `width: 770px` atau `width: 494px` di desktop) wajib diterjemahkan menjadi kombinasi kolom grid responsif (mis. `grid-cols-1 lg:grid-cols-12`) dengan porsi `lg:col-span-7` dan `lg:col-span-5` agar layout tidak pecah pada perangkat yang lebih kecil.
 
 ### 2. Tombol Berpasangan (Symmetry Rules)
-* **Tinggi & Padding Seragam**: Tombol primer dan sekunder yang diletakkan berdampingan (seperti tombol "Daftar" dan "Masukkan Keranjang") **WAJIB** memiliki tinggi (`h-12` / `h-14`) dan padding (`px-8 py-4`) yang identik. Hindari ketimpangan visual di mana satu tombol tampak lebih gemuk/tinggi dibanding tombol pasangannya.
-* **Warna Kontras Tinggi**: Tombol primer wajib berlatar solid (`bg-[#1061D6]`), tombol sekunder wajib berlatar putih dengan border biru tebal (`border-2 border-[#1061D6] text-[#1061D6]`).
-* **Mikro-Interaksi Aktif**: Setiap tombol interaktif harus dibekali efek hover dan aktif: `hover:scale-[1.01] active:scale-[0.98] transition-all duration-300`.
+
+- **Tinggi & Padding Seragam**: Tombol primer dan sekunder yang diletakkan berdampingan (seperti tombol "Daftar" dan "Masukkan Keranjang") **WAJIB** memiliki tinggi (`h-12` / `h-14`) dan padding (`px-8 py-4`) yang identik. Hindari ketimpangan visual di mana satu tombol tampak lebih gemuk/tinggi dibanding tombol pasangannya.
+- **Warna Kontras Tinggi**: Tombol primer wajib berlatar solid (`bg-[#1061D6]`), tombol sekunder wajib berlatar putih dengan border biru tebal (`border-2 border-[#1061D6] text-[#1061D6]`).
+- **Mikro-Interaksi Aktif**: Setiap tombol interaktif harus dibekali efek hover dan aktif: `hover:scale-[1.01] active:scale-[0.98] transition-all duration-300`.
 
 ### 3. Penanganan Konten Dinamis (Dynamic States)
-* **Collapse/Expand Fold**: Deskripsi panjang (seperti biografi instruktur atau deskripsi detail kelas) tidak boleh memakan ruang halaman secara berlebihan. Sediakan pembatas tinggi maksimal dan tombol toggle fold ("Selengkapnya" / "Sembunyikan") yang dilengkapi transisi rotasi ikon chevron (`svg transform transition-transform duration-300`).
-* **Status Terproteksi (Paywall & Restriction State)**: 
-  * Area interaktif yang membutuhkan pendaftaran (seperti formulir ulasan untuk user yang belum membeli kursus) harus diburamkan menggunakan kombinasi filter blur (`backdrop-blur-[0.5px]`), pelindung klik (`pointer-events-none`), dan warna latar redup.
-  * Tampilkan peringatan yang jelas dan profesional berupa kotak keterangan berwarna kuning/amber lembut (`border-amber-100 bg-amber-50/50 text-amber-700`) bertuliskan informasi restriksi secara eksplisit.
-  * Sediakan tombol CTA sekunder yang menuntun user untuk mendaftar atau memicu alur pembelian (mis. scroll ke form pendaftaran).
+
+- **Collapse/Expand Fold**: Deskripsi panjang (seperti biografi instruktur atau deskripsi detail kelas) tidak boleh memakan ruang halaman secara berlebihan. Sediakan pembatas tinggi maksimal dan tombol toggle fold ("Selengkapnya" / "Sembunyikan") yang dilengkapi transisi rotasi ikon chevron (`svg transform transition-transform duration-300`).
+- **Status Terproteksi (Paywall & Restriction State)**:
+  - Area interaktif yang membutuhkan pendaftaran (seperti formulir ulasan untuk user yang belum membeli kursus) harus diburamkan menggunakan kombinasi filter blur (`backdrop-blur-[0.5px]`), pelindung klik (`pointer-events-none`), dan warna latar redup.
+  - Tampilkan peringatan yang jelas dan profesional berupa kotak keterangan berwarna kuning/amber lembut (`border-amber-100 bg-amber-50/50 text-amber-700`) bertuliskan informasi restriksi secara eksplisit.
+  - Sediakan tombol CTA sekunder yang menuntun user untuk mendaftar atau memicu alur pembelian (mis. scroll ke form pendaftaran).
 
 ---
 
 ## Anti-Patterns (Hindari)
 
-| ❌ Jangan                                    | ✅ Gunakan                                      |
-| ------------------------------------------- | ----------------------------------------------- |
-| Hardcode warna: `bg-[#1e53a4]`              | Token: `bg-sidebar` (kecuali di landing pages)  |
-| `<img>` native tanpa fallback               | `<ImageWithFallback>`                           |
-| Teks putih di background terang             | Pastikan kontras ≥ 4.5:1                        |
-| `onClick` di `<div>` tanpa `role="button"`  | Gunakan `<button>` atau `<Button>`              |
-| `!important` di inline styles              | Override via Tailwind `className`               |
-| Font selain Poppins/Plus Jakarta Sans       | Konsisten dengan design system                  |
-| Animasi `width`/`height`                    | Animasi `transform`/`opacity`                   |
-| Spinner full-page saat loading              | Skeleton loader per-section                     |
-| Inline `style={{...}}` untuk layout         | Tailwind classes (kecuali dynamic values)        |
-| Tombol tanpa loading state                  | `disabled={isSubmitting}` + Spinner             |
-| Alert/Toast tanpa konteks                   | Pesan jelas: "Pelatihan berhasil ditambahkan"   |
-| Tombol berdampingan beda ukuran/tinggi      | Tinggi & padding sama (`h-12 px-8 py-4`)        |
-| Menulis teks biografi panjang tanpa fold    | Tombol "Selengkapnya" + Chevron rotasi          |
-| Membiarkan form ulasan terbuka untuk non-member | Backdrop blur + Amber warning restriksi + CTA   |
+| ❌ Jangan                                       | ✅ Gunakan                                     |
+| ----------------------------------------------- | ---------------------------------------------- |
+| Hardcode warna: `bg-[#1e53a4]`                  | Token: `bg-sidebar` (kecuali di landing pages) |
+| `<img>` native tanpa fallback                   | `<ImageWithFallback>`                          |
+| Teks putih di background terang                 | Pastikan kontras ≥ 4.5:1                       |
+| `onClick` di `<div>` tanpa `role="button"`      | Gunakan `<button>` atau `<Button>`             |
+| `!important` di inline styles                   | Override via Tailwind `className`              |
+| Font selain Poppins/Plus Jakarta Sans           | Konsisten dengan design system                 |
+| Animasi `width`/`height`                        | Animasi `transform`/`opacity`                  |
+| Spinner full-page saat loading                  | Skeleton loader per-section                    |
+| Inline `style={{...}}` untuk layout             | Tailwind classes (kecuali dynamic values)      |
+| Tombol tanpa loading state                      | `disabled={isSubmitting}` + Spinner            |
+| Alert/Toast tanpa konteks                       | Pesan jelas: "Pelatihan berhasil ditambahkan"  |
+| Tombol berdampingan beda ukuran/tinggi          | Tinggi & padding sama (`h-12 px-8 py-4`)       |
+| Menulis teks biografi panjang tanpa fold        | Tombol "Selengkapnya" + Chevron rotasi         |
+| Membiarkan form ulasan terbuka untuk non-member | Backdrop blur + Amber warning restriksi + CTA  |
 
 ---
 
