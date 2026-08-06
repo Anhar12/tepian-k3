@@ -114,13 +114,15 @@ Agar migrasi berjalan otomatis setiap kali ada deployment baru tanpa risiko meru
 
 ## 🔧 7. Troubleshooting Error Umum Production
 
-| Error / Gejala                                     | Penyebab Utama                                                      | Langkah Solusi                                                          |
-| -------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| **HTTP 500 saat pilih parameter/order**            | Skema database production ketinggalan (belum di-migrate).           | Jalankan `sh /usr/local/bin/docker-migrate.sh` di terminal Coolify API. |
-| **`sh: pnpm: not found` saat di terminal Coolify** | Container runtime production sengaja dibuat ringan (tanpa pnpm).    | Gunakan skrip bawaan: `sh /usr/local/bin/docker-migrate.sh`.            |
-| **`column "xxx" does not exist`**                  | Ada migration SQL baru yang belum berjalan di database.             | Jalankan `sh /usr/local/bin/docker-migrate.sh`.                         |
-| **`relation "xxx" does not exist`**                | Tabel baru di database belum dibuat.                                | Jalankan `sh /usr/local/bin/docker-migrate.sh`.                         |
-| **Error CORS di Browser Console**                  | Variable `CORS_ORIGIN` di Coolify tidak sesuai dengan URL frontend. | Pastikan `CORS_ORIGIN` di env Coolify diisi `https://tepiank3.tech`.    |
+| Error / Gejala                                     | Penyebab Utama                                                      | Langkah Solusi                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Coolify belum ter-update setelah push**          | Push dilakukan ke repository fork / PR belum di-merge ke `main`.    | Buat Pull Request (PR) dari fork ke `main` repository utama & merge PR.     |
+| **Perubahan UI tidak terlihat di browser**         | Cache aset static (JS/CSS) tersimpan di browser lokal.              | Lakukan Hard Refresh (`Ctrl + F5` / `Cmd + Shift + R`) atau buka Incognito. |
+| **HTTP 500 saat pilih parameter/order**            | Skema database production ketinggalan (belum di-migrate).           | Jalankan `sh /usr/local/bin/docker-migrate.sh` di terminal Coolify API.     |
+| **`sh: pnpm: not found` saat di terminal Coolify** | Container runtime production sengaja dibuat ringan (tanpa pnpm).    | Gunakan skrip bawaan: `sh /usr/local/bin/docker-migrate.sh`.                |
+| **`column "xxx" does not exist`**                  | Ada migration SQL baru yang belum berjalan di database.             | Jalankan `sh /usr/local/bin/docker-migrate.sh`.                             |
+| **`relation "xxx" does not exist`**                | Tabel baru di database belum dibuat.                                | Jalankan `sh /usr/local/bin/docker-migrate.sh`.                             |
+| **Error CORS di Browser Console**                  | Variable `CORS_ORIGIN` di Coolify tidak sesuai dengan URL frontend. | Pastikan `CORS_ORIGIN` di env Coolify diisi `https://tepiank3.tech`.        |
 
 ---
 
