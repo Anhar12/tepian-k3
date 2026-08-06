@@ -32,12 +32,16 @@ import {
   type LinkProps,
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicUrl } from "@/utils/url";
 import Autoplay from "embla-carousel-autoplay";
 import ImageWithFallback from "@/components/image-with-fallback";
-import GradientBox from "@/components/gradient-box";
 import KalimantanMap from "@/components/kalimantan-map";
 import { cn } from "@/lib/utils";
 
@@ -227,7 +231,21 @@ function HomeComponent() {
         className="mx-auto w-full max-w-7xl px-4 pt-4 pb-6 md:px-8 md:pt-6 md:pb-8"
         id="beranda"
       >
-        <div className="relative aspect-16/9 w-full overflow-hidden rounded-[2rem] bg-primary shadow-xl">
+        <div
+          className="group/hero relative aspect-16/9 w-full overflow-hidden rounded-[2rem] bg-primary shadow-xl"
+          onMouseEnter={() => {
+            const autoplay = api?.plugins()?.autoplay as
+              | { stop?: () => void }
+              | undefined;
+            autoplay?.stop?.();
+          }}
+          onMouseLeave={() => {
+            const autoplay = api?.plugins()?.autoplay as
+              | { play?: () => void }
+              | undefined;
+            autoplay?.play?.();
+          }}
+        >
           {isBannersLoading ? (
             <Skeleton className="h-full w-full rounded-[2rem]" />
           ) : (
@@ -260,9 +278,31 @@ function HomeComponent() {
                 ))}
               </CarouselContent>
 
-              {/* Numbered Navigator — Tengah Bawah (Max 3 visible + double-click jump) */}
+              {/* Slider Arrow Controls (Show on hover if multiple banners exist) */}
               {displayBanners.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 shadow-lg backdrop-blur-md">
+                <>
+                  <button
+                    type="button"
+                    onClick={() => api?.scrollPrev()}
+                    aria-label="Banner sebelumnya"
+                    className="absolute top-1/2 left-4 z-20 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/30 text-white opacity-0 backdrop-blur-xs transition duration-200 group-hover/hero:opacity-100 hover:bg-black/50 active:scale-95"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => api?.scrollNext()}
+                    aria-label="Banner berikutnya"
+                    className="absolute top-1/2 right-4 z-20 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/30 text-white opacity-0 backdrop-blur-xs transition duration-200 group-hover/hero:opacity-100 hover:bg-black/50 active:scale-95"
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                </>
+              )}
+
+              {/* Numbered Navigator — Tengah Bawah (Max 3 visible + double-click jump, show on hover) */}
+              {displayBanners.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 opacity-0 shadow-lg backdrop-blur-md transition duration-200 group-hover/hero:opacity-100">
                   {visibleSlideIndices.map((index, posIdx) => {
                     const isMiddle =
                       visibleSlideIndices.length === 3
@@ -333,7 +373,7 @@ function HomeComponent() {
       >
         {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
-          <h2 className="mb-2 text-center text-5xl font-semibold text-primary md:text-6xl">
+          <h2 className="mb-2 text-center text-3xl font-semibold text-primary md:text-4xl lg:text-5xl">
             Pilih Layanan yang Anda Butuhkan
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
@@ -382,52 +422,59 @@ function HomeComponent() {
 
       {/* Company Profile */}
       <section
-        className="relative flex items-center justify-center gap-12 px-10 py-20 md:px-20"
+        className="relative flex flex-col items-center justify-center gap-12 px-10 py-20 md:px-20"
         id="profile"
       >
-        {/* Left: Building Photo with Badge */}
-        <div className="relative hidden w-full max-w-md shrink-0 md:block">
-          <div className="overflow-hidden rounded-2xl">
-            <ImageWithFallback
-              src="/assets/profile-banner.webp"
-              alt="Balai Tepian K3"
-              className="h-105 w-full object-cover"
-            />
-          </div>
-          {/* Top-left Icon */}
-          <div className="absolute top-4 left-4">
-            <ImageWithFallback
-              src="/assets/profile-banner-icon.webp"
-              alt="Balai K3 Icon"
-              className="h-16 w-auto object-contain brightness-0 invert"
-            />
-          </div>
+        {/* Section Heading: Tentang Kami */}
+        <div className="mx-auto flex w-fit flex-col items-center gap-2">
+          <h2 className="mb-2 text-center text-3xl font-semibold text-primary md:text-4xl lg:text-5xl">
+            Tentang Kami
+          </h2>
+          <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
         </div>
 
-        {/* Right: Text Content */}
-        <div className="flex max-w-xl flex-col gap-6">
-          <span className="text-sm font-semibold tracking-wider text-primary uppercase">
-            TENTANG KAMI
-          </span>
-          <h2 className="text-4xl leading-tight font-bold text-foreground md:text-5xl">
-            Balai Keselamatan dan Kesehatan Kerja Samarinda
-          </h2>
-          <p className="text-base leading-relaxed text-muted-foreground">
-            Kami mendukung penerapan Keselamatan dan Kesehatan Kerja melalui
-            layanan pengujian, pelatihan, uji kompetensi, dan konsultasi K3.
-          </p>
-          <p className="text-base leading-relaxed text-muted-foreground">
-            Dengan dukungan TEPIAN K3, masyarakat dan perusahaan dapat
-            memperoleh informasi serta mengajukan layanan secara daring dalam
-            satu platform.
-          </p>
-          <Link
-            to="/profil"
-            className="mt-4 inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary hover:underline"
-          >
-            Baca selengkapnya
-            <ArrowRight className="size-4" />
-          </Link>
+        <div className="flex items-center justify-center gap-12">
+          {/* Left: Building Photo with Badge */}
+          <div className="relative hidden w-full max-w-md shrink-0 md:block">
+            <div className="overflow-hidden rounded-2xl">
+              <ImageWithFallback
+                src="/assets/profile-banner.webp"
+                alt="Balai Tepian K3"
+                className="h-105 w-full object-cover"
+              />
+            </div>
+            {/* Top-left Icon */}
+            <div className="absolute top-4 left-4">
+              <ImageWithFallback
+                src="/assets/profile-banner-icon.webp"
+                alt="Balai K3 Icon"
+                className="h-16 w-auto object-contain brightness-0 invert"
+              />
+            </div>
+          </div>
+
+          {/* Right: Text Content */}
+          <div className="flex max-w-xl flex-col gap-6">
+            <h3 className="text-3xl leading-tight font-bold text-foreground md:text-4xl">
+              Balai Keselamatan dan Kesehatan Kerja Samarinda
+            </h3>
+            <p className="text-base leading-relaxed text-muted-foreground">
+              Kami mendukung penerapan Keselamatan dan Kesehatan Kerja melalui
+              layanan pengujian, pelatihan, uji kompetensi, dan konsultasi K3.
+            </p>
+            <p className="text-base leading-relaxed text-muted-foreground">
+              Dengan dukungan TEPIAN K3, masyarakat dan perusahaan dapat
+              memperoleh informasi serta mengajukan layanan secara daring dalam
+              satu platform.
+            </p>
+            <Link
+              to="/profil"
+              className="mt-4 inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary hover:underline"
+            >
+              Baca selengkapnya
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -437,6 +484,14 @@ function HomeComponent() {
         id="statistik"
       >
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-12">
+          {/* Section Heading: Infografis */}
+          <div className="mx-auto flex w-fit flex-col items-center gap-2">
+            <h2 className="mb-2 text-center text-3xl font-semibold text-primary md:text-4xl lg:text-5xl">
+              Infografis
+            </h2>
+            <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
+          </div>
+
           {/* 3 Stat Cards */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Layanan Pengujian */}
@@ -588,18 +643,18 @@ function HomeComponent() {
 
           {/* Wilayah Kerja Balai K3 Samarinda */}
           <div className="flex flex-col gap-6 pt-6">
-            <h2 className="text-3xl font-extrabold text-blue-700 md:text-4xl">
+            <h2 className="text-2xl font-extrabold text-blue-700 md:text-3xl">
               Wilayah Kerja Balai K3 Samarinda
             </h2>
 
             <div className="flex flex-col items-center justify-between gap-8 lg:flex-row">
               {/* Left SVG Map */}
-              <div className="flex w-full justify-center lg:w-1/2">
+              <div className="flex w-full justify-center lg:w-3/5">
                 <KalimantanMap regions={landingRegionData} />
               </div>
 
               {/* Right Table / Card */}
-              <div className="w-full max-w-md lg:w-1/2">
+              <div className="w-full max-w-md lg:w-2/5">
                 <div className="overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-xl">
                   <div className="bg-blue-600 px-6 py-4 text-white">
                     <h3 className="text-xl font-bold">Sebaran Perusahaan</h3>
@@ -682,7 +737,7 @@ function HomeComponent() {
         />
         {/* <GridBackground /> */}
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
-          <h2 className="mb-2 max-w-3xl text-center text-5xl font-semibold text-primary md:text-6xl">
+          <h2 className="mb-2 max-w-3xl text-center text-3xl font-semibold text-primary md:text-4xl lg:text-5xl">
             Informasi & Update Terkini
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
@@ -839,10 +894,7 @@ function HomeComponent() {
       {/* FAQ */}
       <section className="relative flex flex-col px-10 py-16" id="faq">
         <div className="relative z-10 mx-auto mb-8 flex w-fit flex-col items-center gap-2">
-          <span className="flex items-center gap-1.5 text-sm font-semibold tracking-wider text-primary">
-            <GradientBox /> Trusted By
-          </span>
-          <h2 className="mb-2 max-w-xl text-center text-5xl font-semibold text-balance text-primary md:text-6xl">
+          <h2 className="mb-2 max-w-xl text-center text-3xl font-semibold text-balance text-primary md:text-4xl lg:text-5xl">
             Frequently Asked Questions
           </h2>
           <div className="mx-auto h-2 w-full bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
