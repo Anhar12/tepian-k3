@@ -148,7 +148,11 @@ const documentQueries = {
               fileSize: input.fileSize,
               mimeType: input.mimeType,
               uploadedByUserId: input.uploadedByUserId,
-              status: "draft",
+              verificationToken: input.verificationToken,
+              signatureData: input.signatureData,
+              signedByUserId: input.signedByUserId,
+              signedAt: input.signedAt,
+              status: input.status || "draft",
             })
             .returning(),
         catch: (error) => {
@@ -182,15 +186,19 @@ const documentQueries = {
   /**
    * Update document signed status
    */
-  updateDocumentSignedStatus: (documentId: string, data: {
-    status: "signed";
-    signatureData: string;
-    verificationToken: string;
-    verificationUrl: string;
-    qrCodeUrl: string;
-    signedByUserId: string;
-    signedAt: string;
-  }, tx: DBorTx = db) =>
+  updateDocumentSignedStatus: (
+    documentId: string,
+    data: {
+      status: "signed";
+      signatureData: string;
+      verificationToken: string;
+      verificationUrl: string;
+      qrCodeUrl: string;
+      signedByUserId: string;
+      signedAt: string;
+    },
+    tx: DBorTx = db,
+  ) =>
     Effect.gen(function* () {
       const results = yield* Effect.tryPromise({
         try: () =>
@@ -423,7 +431,7 @@ const documentQueries = {
   ) =>
     Effect.gen(function* () {
       // Get document by verification token
-      const results = yield* Effect.tryPromise({
+      let results = yield* Effect.tryPromise({
         try: () =>
           db.query.documents.findFirst({
             where: eq(documents.verificationToken, token),
@@ -445,6 +453,41 @@ const documentQueries = {
           });
         },
       });
+
+      // Fallback: search in documentSignatures table if not found directly in documents
+      if (!results) {
+        const sigRecord = yield* Effect.tryPromise({
+          try: () =>
+            db.query.documentSignatures.findFirst({
+              where: eq(documentSignatures.verificationToken, token),
+              with: {
+                document: {
+                  with: {
+                    signedBy: true,
+                  },
+                },
+                signedBy: true,
+              },
+            }),
+          catch: (error) => {
+            logError(
+              "documentQueries.verifyDocumentByToken",
+              "Error fetching signature by token",
+              { token, error },
+            );
+            return null;
+          },
+        });
+
+        if (sigRecord && sigRecord.document) {
+          results = {
+            ...sigRecord.document,
+            signatureData: sigRecord.signatureData,
+            verificationToken: sigRecord.verificationToken,
+            signedBy: sigRecord.signedBy || sigRecord.document.signedBy,
+          };
+        }
+      }
 
       if (!results) {
         return {
