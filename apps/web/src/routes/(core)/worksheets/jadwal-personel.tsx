@@ -94,7 +94,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { TestingCalendar } from "./-components/testing-calendar";
 
 export const Route = createFileRoute("/(core)/worksheets/jadwal-personel")({
   beforeLoad: async ({ context }) =>
@@ -120,7 +119,15 @@ interface WorksheetSchedule {
   id: string;
   company: string;
   location: string;
-  color: string | { bg: string; text: string; border: string; isTailwind?: boolean; className?: string };
+  color:
+    | string
+    | {
+        bg: string;
+        text: string;
+        border: string;
+        isTailwind?: boolean;
+        className?: string;
+      };
   startDate: Date | null;
   endDate: Date | null;
   personnel: string[];
@@ -161,9 +168,17 @@ function getColorForIndex(index: number): string {
   return colorPalette[index % colorPalette.length] ?? "bg-blue-500";
 }
 
-function getColorForCompany(companyId: string | undefined): { bg: string; text: string; border: string } {
+function getColorForCompany(companyId: string | undefined): {
+  bg: string;
+  text: string;
+  border: string;
+} {
   if (!companyId) {
-    return { bg: "hsl(210, 100%, 95%)", text: "hsl(210, 100%, 20%)", border: "hsl(210, 100%, 80%)" };
+    return {
+      bg: "hsl(210, 100%, 95%)",
+      text: "hsl(210, 100%, 20%)",
+      border: "hsl(210, 100%, 80%)",
+    };
   }
   let hash = 0;
   for (let i = 0; i < companyId.length; i++) {
@@ -185,9 +200,9 @@ function JadwalPersonilPage() {
     const isStringColor = typeof color === "string";
     const colorClass = isStringColor
       ? color
-      : (color.isTailwind
+      : color.isTailwind
         ? color.className
-        : "border");
+        : "border";
     const customStyle =
       isStringColor || color.isTailwind
         ? {}
@@ -308,30 +323,36 @@ function JadwalPersonilPage() {
   );
 
   // Calculate the dates to check for overlaps
-  const checkStart = selectedStartDate ?? (worksheet?.startDate ? new Date(worksheet.startDate) : undefined);
-  const checkEnd = selectedEndDate ?? (worksheet?.endDate ? new Date(worksheet.endDate) : undefined);
+  const checkStart =
+    selectedStartDate ??
+    (worksheet?.startDate ? new Date(worksheet.startDate) : undefined);
+  const checkEnd =
+    selectedEndDate ??
+    (worksheet?.endDate ? new Date(worksheet.endDate) : undefined);
 
   // Transform employees data to personnel format
   const personnelData: Personnel[] = useMemo(() => {
     if (!employeesData) return [];
-    
+
     return employeesData.map((emp, index) => {
       // Check for overlap in other worksheets
       let isBusy = false;
       if (checkStart && checkEnd && allWorksheetsData) {
-        isBusy = allWorksheetsData.some(ws => {
-           if (ws.id === worksheetId) return false; // skip current worksheet
-           
-           const isAssignedToWs = ws.assignments?.some(a => a.employee?.id === emp.id);
-           if (!isAssignedToWs) return false;
-           
-           if (!ws.startDate || !ws.endDate) return false;
-           
-           const wsStart = new Date(ws.startDate);
-           const wsEnd = new Date(ws.endDate);
-           
-           // Check if intervals overlap
-           return checkStart <= wsEnd && checkEnd >= wsStart;
+        isBusy = allWorksheetsData.some((ws) => {
+          if (ws.id === worksheetId) return false; // skip current worksheet
+
+          const isAssignedToWs = ws.assignments?.some(
+            (a) => a.employee?.id === emp.id,
+          );
+          if (!isAssignedToWs) return false;
+
+          if (!ws.startDate || !ws.endDate) return false;
+
+          const wsStart = new Date(ws.startDate);
+          const wsEnd = new Date(ws.endDate);
+
+          // Check if intervals overlap
+          return checkStart <= wsEnd && checkEnd >= wsStart;
         });
       }
 
@@ -370,7 +391,13 @@ function JadwalPersonilPage() {
       // Use company specific color to group worksheets from the same company
       color:
         ws.id === worksheetId
-          ? { bg: "", text: "", border: "", isTailwind: true, className: "bg-blue-600 text-white" }
+          ? {
+              bg: "",
+              text: "",
+              border: "",
+              isTailwind: true,
+              className: "bg-blue-600 text-white",
+            }
           : getColorForCompany(ws.order?.company?.id),
       startDate: ws.startDate ? new Date(ws.startDate) : null,
       endDate: ws.endDate ? new Date(ws.endDate) : null,
@@ -531,9 +558,9 @@ function JadwalPersonilPage() {
   const maxSelectedPersonnel = worksheet?.estimatedAmountOfMembers ?? 0;
 
   const togglePersonnel = (personId: string) => {
-    const person = availablePersonnel.find(p => p.id === personId);
+    const person = availablePersonnel.find((p) => p.id === personId);
     if (person?.isBusy) return;
-    
+
     setSelectedPersonnel((prev) =>
       prev.includes(personId)
         ? prev.filter((id) => id !== personId)
@@ -559,12 +586,19 @@ function JadwalPersonilPage() {
       return;
     }
 
-    const originalStart = worksheet?.startDate ? new Date(worksheet.startDate).toDateString() : "";
-    const originalEnd = worksheet?.endDate ? new Date(worksheet.endDate).toDateString() : "";
-    const selectedStart = selectedStartDate ? selectedStartDate.toDateString() : "";
+    const originalStart = worksheet?.startDate
+      ? new Date(worksheet.startDate).toDateString()
+      : "";
+    const originalEnd = worksheet?.endDate
+      ? new Date(worksheet.endDate).toDateString()
+      : "";
+    const selectedStart = selectedStartDate
+      ? selectedStartDate.toDateString()
+      : "";
     const selectedEnd = selectedEndDate ? selectedEndDate.toDateString() : "";
 
-    const isDateChanged = originalStart !== selectedStart || originalEnd !== selectedEnd;
+    const isDateChanged =
+      originalStart !== selectedStart || originalEnd !== selectedEnd;
 
     if (isDateChanged) {
       setShowPhoneConfirm(true);
@@ -817,7 +851,10 @@ function JadwalPersonilPage() {
                         key={event.id}
                         onClick={() => handleEventClick(event)}
                         className={`${getEventColorAndStyle(event.color).className} mb-1 block w-full truncate rounded p-1 text-left text-xs text-white hover:opacity-90`}
-                        style={{ marginTop: eventIdx * 24, ...getEventColorAndStyle(event.color).style }}
+                        style={{
+                          marginTop: eventIdx * 24,
+                          ...getEventColorAndStyle(event.color).style,
+                        }}
                       >
                         {event.company}
                       </button>
@@ -837,14 +874,16 @@ function JadwalPersonilPage() {
   };
 
   const renderDayView = () => {
-    const dayEvents: WorksheetSchedule[] = filteredSchedules.filter((schedule) => {
-      if (!schedule.startDate) return false;
-      const endDate = schedule.endDate ?? schedule.startDate;
-      return isWithinInterval(currentDate, {
-        start: schedule.startDate,
-        end: endDate,
-      });
-    });
+    const dayEvents: WorksheetSchedule[] = filteredSchedules.filter(
+      (schedule) => {
+        if (!schedule.startDate) return false;
+        const endDate = schedule.endDate ?? schedule.startDate;
+        return isWithinInterval(currentDate, {
+          start: schedule.startDate,
+          end: endDate,
+        });
+      },
+    );
 
     return (
       <div className="overflow-hidden rounded-xl border">
@@ -1157,12 +1196,21 @@ function JadwalPersonilPage() {
               {calendarView === "day" && renderDayView()}
 
               <div className="mt-4 flex flex-wrap gap-3 border-t pt-4">
-                <span className="text-sm font-medium text-muted-foreground w-full sm:w-auto">Legenda:</span>
-                {Array.from(new Set(filteredSchedules.map((s) => s.company))).map((company) => {
-                  const schedule = filteredSchedules.find((s) => s.company === company);
+                <span className="w-full text-sm font-medium text-muted-foreground sm:w-auto">
+                  Legenda:
+                </span>
+                {Array.from(
+                  new Set(filteredSchedules.map((s) => s.company)),
+                ).map((company) => {
+                  const schedule = filteredSchedules.find(
+                    (s) => s.company === company,
+                  );
                   if (!schedule) return null;
                   return (
-                    <div key={company} className="flex items-center gap-2 text-xs">
+                    <div
+                      key={company}
+                      className="flex items-center gap-2 text-xs"
+                    >
                       <div
                         className={`h-3 w-3 rounded-full border ${getEventColorAndStyle(schedule.color).className}`}
                         style={getEventColorAndStyle(schedule.color).style}
@@ -1171,10 +1219,6 @@ function JadwalPersonilPage() {
                     </div>
                   );
                 })}
-              </div>
-              <div className="mt-6 border-t pt-4">
-                <h4 className="mb-3 text-sm font-semibold text-slate-700">Tampilan Kalender Interaktif</h4>
-                <TestingCalendar worksheets={allWorksheetsData || []} />
               </div>
             </CardContent>
           </Card>
@@ -1227,7 +1271,9 @@ function JadwalPersonilPage() {
                       Usulan Tanggal
                     </h3>
                   </div>
-                  <Badge variant="outline">{worksheet.proposedDates.length}</Badge>
+                  <Badge variant="outline">
+                    {worksheet.proposedDates.length}
+                  </Badge>
                 </div>
                 <div className="space-y-3">
                   {worksheet.proposedDates.map((usulan: any) => (
@@ -1235,28 +1281,45 @@ function JadwalPersonilPage() {
                       key={usulan.id}
                       className="rounded-lg border bg-muted/30 p-3 text-sm"
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="mb-2 flex items-start justify-between">
                         <span className="font-medium">
-                          {format(new Date(usulan.proposedStartDate), "dd MMM yyyy", { locale: localeId })} -{" "}
-                          {format(new Date(usulan.proposedEndDate), "dd MMM yyyy", { locale: localeId })}
+                          {format(
+                            new Date(usulan.proposedStartDate),
+                            "dd MMM yyyy",
+                            { locale: localeId },
+                          )}{" "}
+                          -{" "}
+                          {format(
+                            new Date(usulan.proposedEndDate),
+                            "dd MMM yyyy",
+                            { locale: localeId },
+                          )}
                         </span>
                         {usulan.status === "pending" && (
-                          <Badge className="bg-yellow-100 text-yellow-700">Menunggu</Badge>
+                          <Badge className="bg-yellow-100 text-yellow-700">
+                            Menunggu
+                          </Badge>
                         )}
                         {usulan.status === "approved" && (
-                          <Badge className="bg-green-100 text-green-700">Disetujui</Badge>
+                          <Badge className="bg-green-100 text-green-700">
+                            Disetujui
+                          </Badge>
                         )}
                         {usulan.status === "rejected" && (
-                          <Badge className="bg-red-100 text-red-700">Ditolak</Badge>
+                          <Badge className="bg-red-100 text-red-700">
+                            Ditolak
+                          </Badge>
                         )}
                       </div>
                       {usulan.note && (
-                        <p className="text-muted-foreground text-xs italic mb-2">"{usulan.note}"</p>
+                        <p className="mb-2 text-xs text-muted-foreground italic">
+                          "{usulan.note}"
+                        </p>
                       )}
-                      
+
                       {usulan.status === "pending" && isEditable && (
                         <PermissionGate permission="worksheet-assignments.update">
-                          <div className="flex gap-2 mt-3 pt-3 border-t">
+                          <div className="mt-3 flex gap-2 border-t pt-3">
                             <Button
                               size="sm"
                               className="w-full bg-green-500 hover:bg-green-600"
@@ -1387,7 +1450,7 @@ function JadwalPersonilPage() {
                 />
                 <label
                   htmlFor="hide-busy-checkbox"
-                  className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  className="cursor-pointer text-xs leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   Sembunyikan pegawai dengan SPT aktif
                 </label>
@@ -1404,7 +1467,7 @@ function JadwalPersonilPage() {
                         className={`flex items-center gap-2 rounded-lg p-2 transition-colors sm:gap-3 ${
                           isAssigned
                             ? "border border-primary/20 bg-primary/5"
-                            : isBusy 
+                            : isBusy
                               ? "opacity-50"
                               : "hover:bg-muted/50"
                         }`}
@@ -1562,49 +1625,55 @@ function JadwalPersonilPage() {
                   {availablePersonnel.map((person) => {
                     const isBusy = person.isBusy;
                     return (
-                    <div
-                      key={person.id}
-                      onClick={() => togglePersonnel(person.id)}
-                      className={`flex items-center gap-3 rounded-lg p-2 transition-colors ${
-                        isBusy ? "opacity-50 cursor-not-allowed bg-muted/20" : "cursor-pointer"
-                      } ${
-                        selectedPersonnel.includes(person.id)
-                          ? "border border-primary bg-primary/10"
-                          : "border border-transparent hover:bg-muted/50"
-                      }`}
-                    >
-                      <Checkbox
-                        checked={selectedPersonnel.includes(person.id)}
-                        disabled={
-                          isBusy || 
-                          (!selectedPersonnel.includes(person.id) &&
-                          selectedPersonnel.length >= maxSelectedPersonnel)
-                        }
-                        onCheckedChange={() => togglePersonnel(person.id)}
-                      />
-                      <Avatar className={`h-8 w-8 ${person.color}`}>
-                        <AvatarFallback className="text-xs text-white">
-                          {person.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {person.name}
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {person.role}
-                        </p>
+                      <div
+                        key={person.id}
+                        onClick={() => togglePersonnel(person.id)}
+                        className={`flex items-center gap-3 rounded-lg p-2 transition-colors ${
+                          isBusy
+                            ? "cursor-not-allowed bg-muted/20 opacity-50"
+                            : "cursor-pointer"
+                        } ${
+                          selectedPersonnel.includes(person.id)
+                            ? "border border-primary bg-primary/10"
+                            : "border border-transparent hover:bg-muted/50"
+                        }`}
+                      >
+                        <Checkbox
+                          checked={selectedPersonnel.includes(person.id)}
+                          disabled={
+                            isBusy ||
+                            (!selectedPersonnel.includes(person.id) &&
+                              selectedPersonnel.length >= maxSelectedPersonnel)
+                          }
+                          onCheckedChange={() => togglePersonnel(person.id)}
+                        />
+                        <Avatar className={`h-8 w-8 ${person.color}`}>
+                          <AvatarFallback className="text-xs text-white">
+                            {person.initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {person.name}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {person.role}
+                          </p>
+                        </div>
+                        {isBusy && (
+                          <Badge
+                            variant="destructive"
+                            className="h-5 text-[10px]"
+                          >
+                            Tidak Tersedia
+                          </Badge>
+                        )}
+                        {selectedPersonnel.includes(person.id) && (
+                          <Check className="h-4 w-4 text-primary" />
+                        )}
                       </div>
-                      {isBusy && (
-                        <Badge variant="destructive" className="text-[10px] h-5">
-                          Tidak Tersedia
-                        </Badge>
-                      )}
-                      {selectedPersonnel.includes(person.id) && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                  )})}
+                    );
+                  })}
                   {availablePersonnel.length === 0 && (
                     <p className="py-4 text-center text-sm text-muted-foreground">
                       Tidak ada personel dengan status{" "}

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   Card,
   CardContent,
@@ -342,10 +342,10 @@ function RouteComponent() {
                 </Button>
               )}
               <Button variant="outline" asChild className="flex-1 sm:flex-none">
-                <Link to="/">
+                <a href="/">
                   <ExternalLink className="mr-2 h-4 w-4" />
                   Kunjungi Website
-                </Link>
+                </a>
               </Button>
             </div>
           </CardContent>

@@ -1,16 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { QrCode, Trash2, Maximize2, Move, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 
 export interface SignaturePosition {
+  stampId: string;
   userId: string;
   userName: string;
   purpose: string;
@@ -36,7 +29,7 @@ interface QRSignaturePlacerProps {
   onChange: (positions: SignaturePosition[]) => void;
   /** PDF preview URL (blob or data url) */
   pdfPreviewUrl?: string;
-  /** Total page count for page selector */
+  /** Total page count for document */
   maxPages?: number;
 }
 
@@ -50,9 +43,8 @@ export default function QRSignaturePlacer({
   positions,
   onChange,
   pdfPreviewUrl,
-  maxPages = 5,
+  maxPages = 1,
 }: QRSignaturePlacerProps) {
-  const [selectedPage, setSelectedPage] = useState<number>(0);
   const [activeDragIndex, setActiveDragIndex] = useState<number | null>(null);
   const [activeResizeIndex, setActiveResizeIndex] = useState<number | null>(
     null,
@@ -73,14 +65,19 @@ export default function QRSignaturePlacer({
     h: 100,
   });
 
-  const canvasRef = useRef<HTMLDivElement>(null);
+  // Array of refs for each rendered page canvas
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Add a signer if not already present
-  const handleAddSigner = (signer: SignerInfo) => {
-    if (positions.some((p) => p.userId === signer.userId)) return;
+  // Add a signer stamp to specified page (defaults to page 0)
+  const handleAddSigner = (signer: SignerInfo, targetPage: number = 0) => {
+    const stampId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `stamp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const newPos: SignaturePosition = {
+      stampId,
       ...signer,
-      page: selectedPage,
+      page: targetPage,
       x: 600,
       y: 900,
       width: 100,
@@ -89,9 +86,9 @@ export default function QRSignaturePlacer({
     onChange([...positions, newPos]);
   };
 
-  // Remove a signer position
-  const handleRemoveSigner = (userId: string) => {
-    onChange(positions.filter((p) => p.userId !== userId));
+  // Remove a signer position by stampId
+  const handleRemoveSigner = (stampId: string) => {
+    onChange(positions.filter((p) => p.stampId !== stampId));
   };
 
   // Start Drag
@@ -102,17 +99,19 @@ export default function QRSignaturePlacer({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!canvasRef.current) return;
+    const currentPos = positions[index];
+    if (!currentPos) return;
+
+    const targetRef = pageRefs.current[currentPos.page];
+    if (!targetRef) return;
+
     setActiveDragIndex(index);
 
     const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
     const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
 
-    const canvasRect = canvasRef.current.getBoundingClientRect();
+    const canvasRect = targetRef.getBoundingClientRect();
     const scaleRatio = canvasRect.width / CANVAS_WIDTH;
-
-    const currentPos = positions[index];
-    if (!currentPos) return;
 
     setDragOffset({
       x: (clientX - canvasRect.left) / scaleRatio - currentPos.x,
@@ -128,14 +127,16 @@ export default function QRSignaturePlacer({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!canvasRef.current) return;
+    const currentPos = positions[index];
+    if (!currentPos) return;
+
+    const targetRef = pageRefs.current[currentPos.page];
+    if (!targetRef) return;
+
     setActiveResizeIndex(index);
 
     const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
     const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
-
-    const currentPos = positions[index];
-    if (!currentPos) return;
 
     setResizeStart({
       x: clientX,
@@ -148,17 +149,18 @@ export default function QRSignaturePlacer({
   // Global mouse/touch move
   const handleMouseMove = useCallback(
     (e: MouseEvent | TouchEvent) => {
-      if (!canvasRef.current) return;
-
       const clientX = "touches" in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
       const clientY = "touches" in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
-
-      const canvasRect = canvasRef.current.getBoundingClientRect();
-      const scaleRatio = canvasRect.width / CANVAS_WIDTH;
 
       if (activeDragIndex !== null) {
         const currentPos = positions[activeDragIndex];
         if (!currentPos) return;
+
+        const targetRef = pageRefs.current[currentPos.page];
+        if (!targetRef) return;
+
+        const canvasRect = targetRef.getBoundingClientRect();
+        const scaleRatio = canvasRect.width / CANVAS_WIDTH;
 
         const newX = (clientX - canvasRect.left) / scaleRatio - dragOffset.x;
         const newY = (clientY - canvasRect.top) / scaleRatio - dragOffset.y;
@@ -176,6 +178,12 @@ export default function QRSignaturePlacer({
       } else if (activeResizeIndex !== null) {
         const currentPos = positions[activeResizeIndex];
         if (!currentPos) return;
+
+        const targetRef = pageRefs.current[currentPos.page];
+        if (!targetRef) return;
+
+        const canvasRect = targetRef.getBoundingClientRect();
+        const scaleRatio = canvasRect.width / CANVAS_WIDTH;
 
         const deltaX = (clientX - resizeStart.x) / scaleRatio;
         const deltaY = (clientY - resizeStart.y) / scaleRatio;
@@ -238,170 +246,150 @@ export default function QRSignaturePlacer({
   }, [activeDragIndex, activeResizeIndex, handleMouseMove, handleMouseUp]);
 
   return (
-    <div className="space-y-4">
-      {/* Controls Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/40 p-3">
-        <div className="flex items-center gap-2">
-          <Label className="text-xs font-semibold">Pilih Halaman:</Label>
-          <Select
-            value={selectedPage.toString()}
-            onValueChange={(val) => setSelectedPage(parseInt(val, 10))}
-          >
-            <SelectTrigger className="h-8 w-32 bg-background text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: maxPages }).map((_, i) => (
-                <SelectItem key={i} value={i.toString()} className="text-xs">
-                  Halaman {i + 1}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Signers selection */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            Tambah Penandatangan:
-          </span>
-          {signers.map((signer) => {
-            const isAdded = positions.some((p) => p.userId === signer.userId);
-            return (
-              <Button
-                key={signer.userId}
-                type="button"
-                variant={isAdded ? "secondary" : "outline"}
-                size="sm"
-                disabled={isAdded}
-                onClick={() => handleAddSigner(signer)}
-                className="h-7 text-xs"
-              >
-                + {signer.userName} ({signer.purpose})
-              </Button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Helper notice */}
-      <p className="text-xs text-muted-foreground">
-        Geser (drag) stamp QR di bawah ke posisi yang diinginkan. Gunakan handle
-        di pojok kanan bawah stamp untuk meresize ukuran QR.
-      </p>
-
-      {/* Canvas container */}
-      <div className="flex justify-center overflow-x-auto rounded-md border bg-muted/20 p-2">
-        <div
-          ref={canvasRef}
-          className="relative bg-white shadow-md transition-shadow hover:shadow-lg"
-          style={{
-            width: `${CANVAS_WIDTH}px`,
-            height: `${CANVAS_HEIGHT}px`,
-            minWidth: `${CANVAS_WIDTH}px`,
-            minHeight: `${CANVAS_HEIGHT}px`,
-          }}
-        >
-          {/* PDF Background Preview */}
-          {pdfPreviewUrl ? (
-            <object
-              data={`${pdfPreviewUrl}#page=${selectedPage + 1}&toolbar=0&navpanes=0&scrollbar=0`}
-              type="application/pdf"
-              className="pointer-events-none h-full w-full border-0 select-none"
+    <div className="space-y-6">
+      {/* Pages Vertical List */}
+      <div className="flex flex-col items-center space-y-8">
+        {Array.from({ length: maxPages }).map((_, pageIdx) => {
+          const pageStamps = positions.filter((p) => p.page === pageIdx);
+          return (
+            <div
+              key={pageIdx}
+              id={`page-container-${pageIdx + 1}`}
+              className="flex w-full flex-col items-center"
             >
-              <iframe
-                src={`${pdfPreviewUrl}#page=${selectedPage + 1}&toolbar=0&navpanes=0&scrollbar=0`}
-                className="pointer-events-none h-full w-full border-0 select-none"
-                title="PDF Preview Page"
-              />
-            </object>
-          ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              <span>Memuat Pratinjau Dokumen...</span>
-            </div>
-          )}
-
-          {/* Srikandi Standard Target Recommendation Box */}
-          <div
-            className="pointer-events-none absolute flex flex-col items-center justify-center rounded-md border-2 border-dashed border-emerald-400 bg-emerald-500/10 text-emerald-700/60"
-            style={{
-              left: "600px",
-              top: "900px",
-              width: "120px",
-              height: "120px",
-            }}
-          >
-            <span className="text-center text-[10px] leading-tight font-semibold">
-              Rekomendasi Posisi
-              <br />
-              (Srikandi)
-            </span>
-          </div>
-
-          {/* Draggable & Resizable QR Stamps */}
-          {positions.map((pos, index) => {
-            if (pos.page !== selectedPage) return null;
-            const isDraggingThis = activeDragIndex === index;
-            const isResizingThis = activeResizeIndex === index;
-
-            return (
-              <div
-                key={pos.userId}
-                className={`group absolute flex flex-col items-center justify-between rounded-md border-2 border-dashed bg-white/80 p-1 shadow-xs transition-colors select-none ${
-                  isDraggingThis || isResizingThis
-                    ? "border-primary bg-primary/10 shadow-lg"
-                    : "border-blue-500 hover:border-blue-700 hover:bg-blue-50/90"
-                }`}
-                style={{
-                  left: `${pos.x}px`,
-                  top: `${pos.y}px`,
-                  width: `${pos.width}px`,
-                  height: `${pos.height}px`,
-                  pointerEvents: "auto",
-                  touchAction: "none",
-                  backdropFilter: "blur(2px)",
-                }}
-              >
-                {/* Drag handle header */}
-                <div
-                  className="flex w-full cursor-grab items-center justify-between active:cursor-grabbing"
-                  onMouseDown={(e) => handleMouseDownDrag(e, index)}
-                  onTouchStart={(e) => handleMouseDownDrag(e, index)}
-                >
-                  <Move className="h-3 w-3 text-muted-foreground" />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveSigner(pos.userId);
-                    }}
-                    className="hover:text-destructive-foreground rounded p-0.5 text-muted-foreground hover:bg-destructive"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-
-                {/* QR Icon */}
-                <QrCode className="h-1/2 w-1/2 text-gray-800" />
-
-                {/* Signer label */}
-                <div className="w-full truncate text-center text-[9px] leading-none font-semibold text-gray-900">
-                  {pos.userName}
-                </div>
-
-                {/* Resize Handle at Bottom-Right */}
-                <div
-                  className="absolute right-0 bottom-0 cursor-se-resize rounded-tl bg-blue-500 p-0.5 text-white hover:bg-blue-700 active:bg-blue-800"
-                  onMouseDown={(e) => handleMouseDownResize(e, index)}
-                  onTouchStart={(e) => handleMouseDownResize(e, index)}
-                >
-                  <Maximize2 className="h-2.5 w-2.5 rotate-90" />
+              {/* Page Header Header */}
+              <div className="mb-2 flex w-[800px] max-w-full items-center justify-between px-2">
+                <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 shadow-2xs">
+                  📄 Halaman {pageIdx + 1} dari {maxPages}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-slate-500">
+                    {pageStamps.length > 0
+                      ? `${pageStamps.length} Stamp Terpasang`
+                      : "Belum ada stamp di halaman ini"}
+                  </span>
+                  {signers.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      {signers.map((signer) => (
+                        <Button
+                          key={signer.userId}
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAddSigner(signer, pageIdx)}
+                          className="h-6 px-2 text-[11px] text-blue-600 hover:bg-blue-50 hover:text-blue-800"
+                        >
+                          + Stamp di Hal. {pageIdx + 1}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            );
-          })}
-        </div>
+
+              {/* Page Canvas Container */}
+              <div className="flex w-full justify-center overflow-x-auto pb-2">
+                <div
+                  ref={(el) => {
+                    pageRefs.current[pageIdx] = el;
+                  }}
+                  className="relative rounded-sm border border-slate-200 bg-white shadow-md transition-shadow hover:shadow-lg"
+                  style={{
+                    width: `${CANVAS_WIDTH}px`,
+                    height: `${CANVAS_HEIGHT}px`,
+                    minWidth: `${CANVAS_WIDTH}px`,
+                    minHeight: `${CANVAS_HEIGHT}px`,
+                  }}
+                >
+                  {/* PDF Background Preview */}
+                  {pdfPreviewUrl ? (
+                    <object
+                      data={`${pdfPreviewUrl}#page=${pageIdx + 1}&toolbar=0&navpanes=0&scrollbar=0`}
+                      type="application/pdf"
+                      className="pointer-events-none h-full w-full border-0 select-none"
+                    >
+                      <iframe
+                        src={`${pdfPreviewUrl}#page=${pageIdx + 1}&toolbar=0&navpanes=0&scrollbar=0`}
+                        className="pointer-events-none h-full w-full border-0 select-none"
+                        title={`PDF Preview Page ${pageIdx + 1}`}
+                      />
+                    </object>
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      <span>Memuat Pratinjau Halaman {pageIdx + 1}...</span>
+                    </div>
+                  )}
+
+                  {/* Draggable & Resizable QR Stamps for this page */}
+                  {positions.map((pos, index) => {
+                    if (pos.page !== pageIdx) return null;
+                    const isDraggingThis = activeDragIndex === index;
+                    const isResizingThis = activeResizeIndex === index;
+
+                    return (
+                      <div
+                        key={pos.stampId || `${pos.userId}-${index}`}
+                        className={`group absolute flex flex-col items-center justify-between rounded-md border-2 border-dashed bg-white/95 p-1.5 shadow-md transition-all select-none ${
+                          isDraggingThis || isResizingThis
+                            ? "border-blue-600 bg-blue-50/95 shadow-xl ring-2 ring-blue-400 ring-offset-1"
+                            : "border-blue-500 hover:border-blue-700 hover:bg-blue-50/95"
+                        }`}
+                        style={{
+                          left: `${pos.x}px`,
+                          top: `${pos.y}px`,
+                          width: `${pos.width}px`,
+                          height: `${pos.height}px`,
+                          pointerEvents: "auto",
+                          touchAction: "none",
+                          backdropFilter: "blur(2px)",
+                        }}
+                      >
+                        {/* Drag handle header */}
+                        <div
+                          className="mb-0.5 flex w-full cursor-grab items-center justify-between border-b border-blue-100 pb-0.5 active:cursor-grabbing"
+                          onMouseDown={(e) => handleMouseDownDrag(e, index)}
+                          onTouchStart={(e) => handleMouseDownDrag(e, index)}
+                        >
+                          <Move className="h-3.5 w-3.5 text-blue-600" />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveSigner(pos.stampId);
+                            }}
+                            title="Hapus Stamp Ini"
+                            className="rounded p-0.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        {/* QR Icon */}
+                        <QrCode className="h-1/2 w-1/2 text-slate-800" />
+
+                        {/* Signer label */}
+                        <div className="w-full truncate px-0.5 text-center text-[10px] leading-tight font-bold text-slate-900">
+                          {pos.userName}
+                        </div>
+
+                        {/* Resize Handle at Bottom-Right */}
+                        <div
+                          className="absolute right-0 bottom-0 cursor-se-resize rounded-tl bg-blue-600 p-0.5 text-white hover:bg-blue-700 active:bg-blue-800"
+                          onMouseDown={(e) => handleMouseDownResize(e, index)}
+                          onTouchStart={(e) => handleMouseDownResize(e, index)}
+                          title="Tarik untuk mengubah ukuran stamp"
+                        >
+                          <Maximize2 className="h-3 w-3 rotate-90" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

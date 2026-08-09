@@ -13,23 +13,44 @@ Fitur Tanda Tangan Digital (TTE) berbasis QR Code memungkinkan pengguna memasukk
 
 ## 🏗️ Arsitektur & Alur Data
 
+# Panduan Implementasi Tanda Tangan Digital (QR Code Signature)
+
+## 📌 Gambaran Umum
+
+Fitur Tanda Tangan Digital (TTE) berbasis QR Code memungkinkan pengguna memasukkan stempel QR Code secara visual dan fleksibel (posisi draggable, resizable, dan multi-page vertical scroll) ke dalam dokumen PDF resmi seperti:
+
+- **Surat Penawaran** (Offering Letter)
+- **SPK** (Surat Perintah Kerja)
+- **SPT** (Surat Perintah Tugas)
+- **Invoice / Tagihan**
+
+---
+
+## 🏗️ Arsitektur & Alur Data
+
+Proses penandatanganan dilakukan pada **Halaman Terpisah** (`/(core)/document-signing/`) untuk memberikan tampilan pratinjau penuh (_full preview_) serta kemudahan navigasi antar halaman dokumen:
+
 ```text
-[Frontend Wizard UI Step 2]
-    │  (Pengguna menggeser & meresize stempel QR di atas preview PDF)
+[Dialog Dokumen / Action Menu]
+    │  (Form input data dokumen standar)
+    │  1. Klik "Atur Tanda Tangan Digital" -> Simpan data & PDF base64 ke sessionStorage
+    │  2. Redirect ke route `/(core)/document-signing?sessionKey=...`
+    ▼
+[Document Signing Route (`/document-signing`)]
+    │  1. Mengambil data payload dari sessionStorage
+    │  2. Deteksi otomatis total halaman PDF via `pdf-lib`
+    │  3. Menampilkan QRSignaturePlacer dalam 2-kolom layout (Kontrol & Preview Vertikal)
     ▼
 [QRSignaturePlacer Component]
-    │  (Mengirimkan koordinat { x, y, width, height, page, userId, purpose })
+    │  (Mengatur posisi { x, y, width, height, page, userId, purpose })
     ▼
-[Zod Schema Validation] (`generateDocumentSchema`)
-    │  (Validasi array signatures & atribut opsional)
-    ▼
-[tRPC Router] (`generateOfferingLetter`, `generateSpkDocument`, dll)
-    │  1. Generate file PDF mentah
+[tRPC Router Mutation] (`generateOfferingLetter`, `generateSpkDocument`, dll)
+    │  1. Backend menerima array `signatures`
     │  2. panggil `pdfSigningService.embedQRCodesInPDF()`
     │  3. Simpan PDF ber-QR ke S3 / Local Storage via `storageService`
     │  4. Simpan log tanda tangan ke tabel DB `document_signatures`
     ▼
-[Output PDF File] (Siap diunduh / dicetak oleh pengguna)
+[Output PDF File] (Pratinjau otomatis dibuka di Tab Baru tanpa hambatan login)
 ```
 
 ---
@@ -57,7 +78,8 @@ Komponen visual untuk mengatur letak dan ukuran stempel QR:
 
 - **Drag & Drop**: Menggeser stempel QR di seluruh permukaan halaman preview PDF.
 - **Resize Handle**: Mengubah ukuran stempel QR secara dinamis.
-- **Multi-Signer Support**: Menambah penandatangan tambahan jika diperlukan.
+- **Multi-Page Vertical Layout**: Menampilkan seluruh halaman PDF secara kontinu dengan scroll vertikal.
+- **Multi-Signer Support**: Menambah penandatangan tambahan jika diperlukan tanpa batas rekomendasi kaku.
 
 ### 3. Backend Service (`packages/services/src/pdf/pdf-signing.ts`)
 
@@ -89,10 +111,15 @@ export function convertClientCoordinatesToPDFPoints(
 
 Jika ingin menambahkan fitur QR signature ke dialog dokumen baru:
 
-1. Tambahkan `signatures: z.array(qrSignaturePositionSchema).optional().default([])` pada schema Zod dokumen.
-2. Impor `QRSignaturePlacer` dan buat flow **2-Step Wizard** di dialog frontend:
-   - **Step 1**: Form isian data standar + tombol _"Cetak Tanpa QR"_ (memanggil `form.handleSubmit` dengan `signatures: []`).
-   - **Step 2**: Komponen `QRSignaturePlacer` untuk mengatur posisi stempel QR + tombol _"Cetak Dokumen Bertanda Tangan"_.
-3. Di router tRPC backend, cek jika `signatures.length > 0`:
-   - Panggil `pdfSigningService.embedQRCodesInPDF(pdfBuffer, signatures)`.
-   - Simpan PDF hasil tanda tangan ke `storageService` dan simpan log ke `documentSignatures`.
+1. Simpan payload form dan PDF mentah ke `sessionStorage` dengan key acak (misal `doc_signing_<timestamp>`).
+2. Navigasikan user ke route signing:
+   ```typescript
+   sessionStorage.setItem(
+     sessionKey,
+     JSON.stringify({ type: "SPK", payload, pdfBase64 }),
+   );
+   navigate({ to: "/document-signing", search: { sessionKey } });
+   ```
+3. Halaman `/document-signing` akan membaca data tersebut, mendeteksi halaman otomatis, dan menampilkan `QRSignaturePlacer`.
+4. Saat tombol **Selesaikan & Cetak Dokumen** diklik, halaman signing memanggil tRPC mutation backend dengan menyertakan `signatures: [...]`.
+5. Hasil PDF bertanda tangan direspons sebagai base64 dan langsung dibuka di **Tab Baru** (`openBase64InNewTab`).

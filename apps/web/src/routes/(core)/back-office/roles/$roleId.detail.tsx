@@ -219,6 +219,10 @@ const RESOURCE_LABELS: Record<Resource, { title: string; category: string }> = {
     title: "Bahan Kimia Lembar Kerja",
     category: "Lembar Kerja Karyawan",
   },
+  "worksheet-proposed-dates": {
+    title: "Usulan Tanggal Lembar Kerja",
+    category: "Lembar Kerja Karyawan",
+  },
 
   pelatihan: {
     title: "Program Pelatihan",

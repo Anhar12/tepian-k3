@@ -127,14 +127,32 @@ function HomeComponent() {
     }),
   );
 
+  const { data: heroNavigatorModeSetting } = useQuery(
+    trpc.platform.setting.getByKey.queryOptions({
+      key: "landing.hero.navigator.mode",
+    }),
+  );
+
   const isAutoplayEnabled = heroAutoplaySetting?.value !== "false";
+  const navigatorMode =
+    heroNavigatorModeSetting?.value === "all" ? "all" : "windowed";
 
   useEffect(() => {
     if (!api) return;
 
+    const savedSlide = sessionStorage.getItem("hero-banner-slide");
+    if (savedSlide !== null) {
+      const idx = parseInt(savedSlide, 10);
+      if (!isNaN(idx) && idx > 0) {
+        api.scrollTo(idx, true);
+      }
+    }
+
     setCurrent(api.selectedScrollSnap());
     const onSelect = () => {
-      setCurrent(api.selectedScrollSnap());
+      const newSlide = api.selectedScrollSnap();
+      setCurrent(newSlide);
+      sessionStorage.setItem("hero-banner-slide", String(newSlide));
     };
 
     api.on("select", onSelect);
@@ -154,9 +172,14 @@ function HomeComponent() {
           },
         ];
 
-  // Sliding window 3 numbers helper for hero navigator
-  const getVisibleSlideIndices = (currentIdx: number, total: number) => {
-    if (total <= 3) return Array.from({ length: total }, (_, i) => i);
+  // Helper for hero navigator (sliding window 3 numbers or all numbers)
+  const getVisibleSlideIndices = (
+    currentIdx: number,
+    total: number,
+    mode: "windowed" | "all",
+  ) => {
+    if (mode === "all" || total <= 3)
+      return Array.from({ length: total }, (_, i) => i);
     if (currentIdx === 0) return [0, 1, 2];
     if (currentIdx === total - 1) return [total - 3, total - 2, total - 1];
     return [currentIdx - 1, currentIdx, currentIdx + 1];
@@ -165,6 +188,7 @@ function HomeComponent() {
   const visibleSlideIndices = getVisibleSlideIndices(
     current,
     displayBanners.length,
+    navigatorMode,
   );
 
   const handleJumpSubmit = (e?: React.FormEvent) => {
@@ -300,9 +324,9 @@ function HomeComponent() {
                 </>
               )}
 
-              {/* Numbered Navigator — Tengah Bawah (Max 3 visible + double-click jump, show on hover) */}
+              {/* Numbered Navigator — Tengah Bawah (3 visible atau semua + double-click jump, show on hover) */}
               {displayBanners.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 opacity-0 shadow-lg backdrop-blur-md transition duration-200 group-hover/hero:opacity-100">
+                <div className="absolute bottom-4 left-1/2 z-20 flex max-w-[90%] -translate-x-1/2 items-center gap-1.5 overflow-x-auto rounded-full bg-black/50 px-3 py-1.5 opacity-0 shadow-lg backdrop-blur-md transition duration-200 group-hover/hero:opacity-100">
                   {visibleSlideIndices.map((index, posIdx) => {
                     const isMiddle =
                       visibleSlideIndices.length === 3

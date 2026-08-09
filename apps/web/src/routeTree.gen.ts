@@ -55,6 +55,7 @@ import { Route as PpidSetiapSaatIndexRouteImport } from './routes/ppid/setiap-sa
 import { Route as coreWorksheetsIndexRouteImport } from './routes/(core)/worksheets/index'
 import { Route as corePengujianIndexRouteImport } from './routes/(core)/pengujian/index'
 import { Route as coreEmployeeIndexRouteImport } from './routes/(core)/employee/index'
+import { Route as coreDocumentSigningIndexRouteImport } from './routes/(core)/document-signing/index'
 import { Route as coreDisplayBoardIndexRouteImport } from './routes/(core)/display-board/index'
 import { Route as coreDashboardIndexRouteImport } from './routes/(core)/dashboard/index'
 import { Route as coreCartPelatihanIndexRouteImport } from './routes/(core)/cart-pelatihan/index'
@@ -397,6 +398,12 @@ const coreEmployeeIndexRoute = coreEmployeeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => coreEmployeeRouteRoute,
 } as any)
+const coreDocumentSigningIndexRoute =
+  coreDocumentSigningIndexRouteImport.update({
+    id: '/document-signing/',
+    path: '/document-signing/',
+    getParentRoute: () => coreRouteRoute,
+  } as any)
 const coreDisplayBoardIndexRoute = coreDisplayBoardIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -1120,6 +1127,7 @@ export interface FileRoutesByFullPath {
   '/cart-pelatihan': typeof coreCartPelatihanIndexRoute
   '/dashboard/': typeof coreDashboardIndexRoute
   '/display-board/': typeof coreDisplayBoardIndexRoute
+  '/document-signing': typeof coreDocumentSigningIndexRoute
   '/employee/': typeof coreEmployeeIndexRoute
   '/pengujian/': typeof corePengujianIndexRoute
   '/worksheets/': typeof coreWorksheetsIndexRoute
@@ -1272,6 +1280,7 @@ export interface FileRoutesByTo {
   '/cart-pelatihan': typeof coreCartPelatihanIndexRoute
   '/dashboard': typeof coreDashboardIndexRoute
   '/display-board': typeof coreDisplayBoardIndexRoute
+  '/document-signing': typeof coreDocumentSigningIndexRoute
   '/employee': typeof coreEmployeeIndexRoute
   '/pengujian': typeof corePengujianIndexRoute
   '/worksheets': typeof coreWorksheetsIndexRoute
@@ -1433,6 +1442,7 @@ export interface FileRoutesById {
   '/(core)/cart-pelatihan/': typeof coreCartPelatihanIndexRoute
   '/(core)/dashboard/': typeof coreDashboardIndexRoute
   '/(core)/display-board/': typeof coreDisplayBoardIndexRoute
+  '/(core)/document-signing/': typeof coreDocumentSigningIndexRoute
   '/(core)/employee/': typeof coreEmployeeIndexRoute
   '/(core)/pengujian/': typeof corePengujianIndexRoute
   '/(core)/worksheets/': typeof coreWorksheetsIndexRoute
@@ -1593,6 +1603,7 @@ export interface FileRouteTypes {
     | '/cart-pelatihan'
     | '/dashboard/'
     | '/display-board/'
+    | '/document-signing'
     | '/employee/'
     | '/pengujian/'
     | '/worksheets/'
@@ -1745,6 +1756,7 @@ export interface FileRouteTypes {
     | '/cart-pelatihan'
     | '/dashboard'
     | '/display-board'
+    | '/document-signing'
     | '/employee'
     | '/pengujian'
     | '/worksheets'
@@ -1905,6 +1917,7 @@ export interface FileRouteTypes {
     | '/(core)/cart-pelatihan/'
     | '/(core)/dashboard/'
     | '/(core)/display-board/'
+    | '/(core)/document-signing/'
     | '/(core)/employee/'
     | '/(core)/pengujian/'
     | '/(core)/worksheets/'
@@ -2360,6 +2373,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/employee/'
       preLoaderRoute: typeof coreEmployeeIndexRouteImport
       parentRoute: typeof coreEmployeeRouteRoute
+    }
+    '/(core)/document-signing/': {
+      id: '/(core)/document-signing/'
+      path: '/document-signing'
+      fullPath: '/document-signing'
+      preLoaderRoute: typeof coreDocumentSigningIndexRouteImport
+      parentRoute: typeof coreRouteRoute
     }
     '/(core)/display-board/': {
       id: '/(core)/display-board/'
@@ -3591,6 +3611,7 @@ interface coreRouteRouteChildren {
   coreProfileRoute: typeof coreProfileRoute
   coreSettingsRoute: typeof coreSettingsRoute
   coreCartPelatihanIndexRoute: typeof coreCartPelatihanIndexRoute
+  coreDocumentSigningIndexRoute: typeof coreDocumentSigningIndexRoute
 }
 
 const coreRouteRouteChildren: coreRouteRouteChildren = {
@@ -3609,6 +3630,7 @@ const coreRouteRouteChildren: coreRouteRouteChildren = {
   coreProfileRoute: coreProfileRoute,
   coreSettingsRoute: coreSettingsRoute,
   coreCartPelatihanIndexRoute: coreCartPelatihanIndexRoute,
+  coreDocumentSigningIndexRoute: coreDocumentSigningIndexRoute,
 }
 
 const coreRouteRouteWithChildren = coreRouteRoute._addFileChildren(
