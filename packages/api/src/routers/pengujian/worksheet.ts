@@ -52,7 +52,7 @@ export const worksheetRouter = createTRPCRouter({
    */
   getWorksheetStatusCount: withPermission("worksheets.view").query(
     // async () => await runEffect(worksheetQueries.getWorksheetStatusCount()),
-    async () => await runEffect(Effect.succeed({}))
+    async () => await runEffect(Effect.succeed({})),
   ),
 
   /**
@@ -789,7 +789,7 @@ export const worksheetRouter = createTRPCRouter({
         //   input.tools,
         //   ctx.user.id
         // )
-        Effect.succeed({})
+        Effect.succeed({}),
       );
     }),
 
@@ -1121,7 +1121,7 @@ export const worksheetRouter = createTRPCRouter({
       z.object({
         worksheetId: z.uuidv7(),
         estimatedSigningDeadline: z.string().optional(),
-      })
+      }),
     )
     .mutation(
       async ({ input, ctx }) =>
@@ -1129,7 +1129,7 @@ export const worksheetRouter = createTRPCRouter({
           worksheetQueries.publishOffering(
             input.worksheetId,
             ctx.user.id,
-            input.estimatedSigningDeadline
+            input.estimatedSigningDeadline,
           ),
         ),
     ),
@@ -1293,21 +1293,19 @@ export const worksheetRouter = createTRPCRouter({
    */
   saveOperationalCosts: withPermission("worksheets-transaction-details.update")
     .input(worksheetSchema.saveWorksheetOperationalCostsSchema)
-    .mutation(
-      async ({ input, ctx }) => {
-        const isVerifier = await Effect.runPromise(
-          permissionQueries.userHasPermission(ctx.user.id, "worksheets.verify"),
-        );
-        return await runEffect(
-          worksheetQueries.saveWorksheetOperationalCosts(
-            input.worksheetId,
-            input.costs,
-            ctx.user.id,
-            isVerifier,
-          ),
-        );
-      },
-    ),
+    .mutation(async ({ input, ctx }) => {
+      const isVerifier = await Effect.runPromise(
+        permissionQueries.userHasPermission(ctx.user.id, "worksheets.verify"),
+      );
+      return await runEffect(
+        worksheetQueries.saveWorksheetOperationalCosts(
+          input.worksheetId,
+          input.costs,
+          ctx.user.id,
+          isVerifier,
+        ),
+      );
+    }),
 
   /**
    * Verify operational costs for worksheet
@@ -1488,8 +1486,11 @@ export const worksheetRouter = createTRPCRouter({
       z.object({
         page: z.number().min(1).default(1),
         perPage: z.number().min(1).max(100).default(10),
-        status: z.enum(["all", "pending", "approved", "rejected"]).default("all").optional(),
-      })
+        status: z
+          .enum(["all", "pending", "approved", "rejected"])
+          .default("all")
+          .optional(),
+      }),
     )
     .query(async ({ input }) => {
       return await runEffect(
@@ -1520,7 +1521,7 @@ export const worksheetRouter = createTRPCRouter({
   /**
    * Respond to a proposed date (Admin/Coordinator)
    */
-  respondProposedDate: withPermission("worksheets.update")
+  respondProposedDate: withPermission("worksheet-proposed-dates.update")
     .input(worksheetSchema.respondWorksheetProposedDateSchema)
     .mutation(async ({ ctx: _ctx, input }) => {
       return await runEffect(

@@ -46,21 +46,21 @@ CREATE TABLE "document_signatures" (
 
 ## Files Modified/Created
 
-### 1. Database Schema ([schema.ts:930-994](f:/Monorepo/tepian-k3/packages/db/src/schema.ts#L930-L994))
+### 1. Database Schema (`packages/db/src/schema.ts`)
 
 Added `documentSignatures` table definition with all necessary columns and indexes.
 
-### 2. Database Relations ([relations.ts:7,327,365-377](f:/Monorepo/tepian-k3/packages/db/src/relations.ts))
+### 2. Database Relations (`packages/db/src/relations.ts`)
 
 - Added import for `documentSignatures`
 - Added `signatures: many(documentSignatures)` to `documentsRelations`
 - Created `documentSignaturesRelations` with document and signedBy relations
 
-### 3. Database Migration ([0006_equal_green_goblin.sql](f:/Monorepo/tepian-k3/packages/db/src/migrations/0006_equal_green_goblin.sql))
+### 3. Database Migration (`packages/db/src/migrations/0006_equal_green_goblin.sql`)
 
 Generated migration file that creates the `document_signatures` table with all constraints and indexes.
 
-### 4. Document Queries ([document.queries.ts:778-985](f:/Monorepo/tepian-k3/packages/queries/src/document.queries.ts#L778-L985))
+### 4. Document Queries (`packages/queries/src/document.queries.ts`)
 
 Added the following query functions:
 
@@ -70,7 +70,7 @@ Added the following query functions:
 - **`getSignatureByToken`**: Find signature by verification token
 - **`getSignatureById`**: Find signature by ID
 
-### 5. PDF Signing Service ([pdf-signing.ts](f:/Monorepo/tepian-k3/packages/services/src/pdf/pdf-signing.ts))
+### 5. PDF Signing Service (`packages/services/src/pdf/pdf-signing.ts`)
 
 Created comprehensive PDF manipulation service:
 
@@ -79,7 +79,7 @@ Created comprehensive PDF manipulation service:
 - **`embedSingleQRCodeInPDF`**: Helper for single QR code
 - **`convertClientCoordinatesToPDFPoints`**: Convert canvas coordinates to PDF points
 
-### 6. API Router ([document.ts:315-444](f:/Monorepo/tepian-k3/packages/api/src/routers/document.ts#L315-L444))
+### 6. API Router (`packages/api/src/routers/document.ts`)
 
 Updated `signDocumentWithQRCodes` endpoint to:
 
@@ -90,6 +90,15 @@ Updated `signDocumentWithQRCodes` endpoint to:
 5. Create document record
 6. **Store signature records in database** (NEW)
 7. Return document and signature information
+
+### 7. Standalone Document Signing Route (`apps/web/src/routes/(core)/document-signing/index.tsx`)
+
+Created dedicated full-page editor for signature placement:
+
+- Reads document data and PDF payload from `sessionStorage` via `sessionKey` parameter.
+- Automatically calculates total PDF pages using `pdf-lib` without hardcoded page count limits.
+- Renders `QRSignaturePlacer` in vertical continuous scroll view for multi-page placement.
+- Displays full preview and opens signed PDF directly in a new tab upon completion.
 
 ## API Usage
 

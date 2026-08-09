@@ -115,6 +115,7 @@ test-query.ts
 fix-*.cjs
 fix-*.mjs
 fix-*.js
+check-roles.ts
 packages/db/drop_drizzle.ts
 packages/db/drop_schema.ts
 
@@ -135,6 +136,9 @@ packages/db/drop_schema.ts
 .copilot/
 .system_generated/
 scratch/
+.git-overtime-cache.json
+overtime.json
+bts.jsonc
 
 # =============================================================================
 # Dokumen Panduan & Konfigurasi (WAJIB di-commit untuk AI Agent & Developer)

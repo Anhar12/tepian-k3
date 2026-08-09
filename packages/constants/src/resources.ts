@@ -137,6 +137,7 @@ export const RESOURCES = [
     key: "worksheet-chemical-materials",
     approvalActions: "all",
   },
+  { key: "worksheet-proposed-dates" },
 
   // ==================== PELATIHAN ====================
   { key: "pelatihan", approvalActions: "all" },

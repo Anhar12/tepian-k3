@@ -5,6 +5,23 @@
 
 ---
 
+### 2026-08-09 — Redesign TTE Signature Page, Hero Banner Configuration, Fix Bugs, & Audit Dokumentasi
+
+- **Pembaruan & Fix:**
+  - **Permission Bendahara:** Menghilangkan tombol/action "Buat Pengujian" untuk role Bendahara di halaman daftar pengujian.
+  - **Respon Usulan Tanggal:** Memperbaiki error permission `merespon usulan tanggal` di sudut pandang Back-Office.
+  - **Kalender Jadwal Personel:** Menyatukan dua kalender di halaman Jadwal Personel menjadi 1 kalender terpadu.
+  - **Standalone Document Signing Route:** Mengganti modal wizard tanda tangan dengan halaman terpisah `/(core)/document-signing/` untuk pratinjau dokumen penuh (_full preview_).
+  - **Multi-Page PDF & Vertical Scroll:** Mengimplementasikan visualizer `QRSignaturePlacer` dengan scroll vertikal kontinu multi-halaman tanpa batasan rekomendasi posisi (Srikandi) dan mendukung multi-tanda tangan.
+  - **Deteksi Halaman PDF Otomatis:** Menggunakan `pdf-lib` untuk mendeteksi total halaman PDF secara dinamis pada client side.
+  - **QR Code Clean Design:** Mengubah tampilan stempel QR Code menjadi logo murni tanpa teks "Signed By" dan "Purpose".
+  - **Public Verification QR Scan:** QR Code hasil tanda tangan dapat diverifikasi publik melalui `/verify/$token` tanpa perlunya login.
+  - **Fullscreen Preview PDF:** Hasil dokumen PDF yang telah ditandatangani langsung terbuka di Tab Baru (`openBase64InNewTab`).
+  - **Configurable Hero Banner:** Mengatur jumlah maksimal slide banner yang tampil dari Back-Office (`landing_settings`) serta menjaga posisi slide terakhir via `sessionStorage`.
+  - **Audit Dokumentasi & `.gitignore`:** Menyinkronkan seluruh dokumen arsitektur TTE, Landing Page, Components, dan memperbarui `.gitignore` untuk script debugging lokal.
+
+---
+
 ### 2026-06-25 — Optimasi Dokumentasi, PRD, dan Gitignore untuk LLM & Junior Dev
 
 - **Pembaruan:** Mengoptimalkan seluruh dokumentasi agar ramah terhadap model AI berbiaya murah (low-resource LLMs) dan developer junior, serta menyinkronkan status modul Pelatihan (LMS) ke production:

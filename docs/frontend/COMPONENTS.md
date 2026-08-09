@@ -12,20 +12,21 @@ Semua komponen ditempatkan di dalam `apps/web/src/components/`:
 ## 2. Aturan Penggunaan shadcn/ui
 
 - **Jangan buat komponen UI dasar dari awal** jika shadcn/ui telah menyediakannya. Selalu periksa folder `components/ui/` terlebih dahulu.
-- **Jangan mengubah gaya default komponen ui** secara hardcode di dalam file aslinya kecuali ingin mengubah gaya global aplikasi. 
+- **Jangan mengubah gaya default komponen ui** secara hardcode di dalam file aslinya kecuali ingin mengubah gaya global aplikasi.
 - Untuk memodifikasi tampilan pada halaman tertentu, teruskan properti `className` tambahan saat menggunakan komponen (contoh: `<Button className="bg-red-500">Batal</Button>`).
 
 ## 3. Komponen Khusus (Custom Components)
 
 Ada beberapa komponen custom yang sering digunakan di tepian-k3:
 
-| Komponen | Path | Kegunaan |
-|----------|------|----------|
-| `ImageWithFallback` | `@/components/image-with-fallback` | Digunakan alih-alih `<img>` bawaan HTML, menampilkan gambar fallback apabila URL gagal dimuat. |
-| `SingleImageUpload` | `@/components/ui/single-image-upload` | Komponen dropzone untuk mengunggah gambar dengan pratinjau. |
-| `Spinner` | `@/components/ui/spinner` | Loading indikator kecil. |
-| `PermissionGate` | (berada di routes/layout atau utils auth UI) | Komponen untuk membungkus elemen (seperti tombol) agar hanya tampil untuk pengguna dengan hak akses tertentu. |
-| `Field` & `FieldLabel` | `@/components/ui/field` | Pembungkus standar untuk form input (memastikan jarak dan tipografi konsisten). |
+| Komponen               | Path                                         | Kegunaan                                                                                                      |
+| ---------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ImageWithFallback`    | `@/components/image-with-fallback`           | Digunakan alih-alih `<img>` bawaan HTML, menampilkan gambar fallback apabila URL gagal dimuat.                |
+| `SingleImageUpload`    | `@/components/ui/single-image-upload`        | Komponen dropzone untuk mengunggah gambar dengan pratinjau.                                                   |
+| `Spinner`              | `@/components/ui/spinner`                    | Loading indikator kecil.                                                                                      |
+| `PermissionGate`       | (berada di routes/layout atau utils auth UI) | Komponen untuk membungkus elemen (seperti tombol) agar hanya tampil untuk pengguna dengan hak akses tertentu. |
+| `Field` & `FieldLabel` | `@/components/ui/field`                      | Pembungkus standar untuk form input (memastikan jarak dan tipografi konsisten).                               |
+| `QRSignaturePlacer`    | `@/components/document-signing`              | Komponen visual penempatan stempel QR Code TTE dengan dukungan multi-halaman vertikal, drag-drop, & resize.   |
 
 ## 4. Format Formulir (Form Patterns)
 
@@ -42,7 +43,7 @@ Selalu gunakan format seragam untuk formulir input:
 ```
 
 - Selalu sertakan `FieldLabel`.
-- Tampilkan indikator wajib (*) jika field harus diisi.
+- Tampilkan indikator wajib (\*) jika field harus diisi.
 - Tombol Submit selalu berada di pojok kanan bawah dengan keadaan `disabled` saat sedang loading.
 - Tombol Batal selalu diletakkan di sebelah kiri tombol Submit.
 
@@ -50,13 +51,13 @@ Selalu gunakan format seragam untuk formulir input:
 
 Terdapat beberapa hooks krusial yang sering digunakan di aplikasi:
 
-| Hook | Sumber / Path | Deskripsi |
-|------|--------------|-----------|
-| `useAuth` | `@/hooks/use-auth` | Mengambil data sesi pengguna, role, dan fungsi autentikasi (login, logout). |
-| `usePermissions` | `@/hooks/use-permissions` | Memeriksa apakah pengguna memiliki permission spesifik. |
-| `trpc` (Hooks) | `@tepian-k3/api` (via trpc client) | Contoh: `trpc.platform.user.getById.useQuery()`. Seluruh pengambilan data dilakukan via tRPC hooks. |
-| `useToast` | `@/components/ui/use-toast` | Memunculkan notifikasi flash (toast) untuk interaksi sukses/error. |
-| `useRouter` | `@tanstack/react-router` | Mengatur navigasi dan routing secara terprogram. |
+| Hook             | Sumber / Path                      | Deskripsi                                                                                           |
+| ---------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `useAuth`        | `@/hooks/use-auth`                 | Mengambil data sesi pengguna, role, dan fungsi autentikasi (login, logout).                         |
+| `usePermissions` | `@/hooks/use-permissions`          | Memeriksa apakah pengguna memiliki permission spesifik.                                             |
+| `trpc` (Hooks)   | `@tepian-k3/api` (via trpc client) | Contoh: `trpc.platform.user.getById.useQuery()`. Seluruh pengambilan data dilakukan via tRPC hooks. |
+| `useToast`       | `@/components/ui/use-toast`        | Memunculkan notifikasi flash (toast) untuk interaksi sukses/error.                                  |
+| `useRouter`      | `@tanstack/react-router`           | Mengatur navigasi dan routing secara terprogram.                                                    |
 
 ## 6. Ikon
 

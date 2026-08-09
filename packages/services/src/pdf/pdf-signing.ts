@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import * as QRCode from "qrcode";
 import { TRPCError } from "@trpc/server";
 
@@ -135,27 +135,6 @@ export const embedQRCodesInPDF = (
         width: pdfW,
         height: pdfH,
       });
-
-      // Optionally add signature text below QR code
-      const fontSize = 8;
-      const textY = safeY - 12;
-
-      if (textY > 0) {
-        // Only draw text if there's space
-        page.drawText(`Signed by: ${signature.userName}`, {
-          x: safeX,
-          y: textY,
-          size: fontSize,
-          color: rgb(0, 0, 0),
-        });
-
-        page.drawText(`Purpose: ${signature.purpose.substring(0, 40)}`, {
-          x: safeX,
-          y: textY - fontSize - 2,
-          size: fontSize - 1,
-          color: rgb(0.3, 0.3, 0.3),
-        });
-      }
     }
 
     // Save the modified PDF

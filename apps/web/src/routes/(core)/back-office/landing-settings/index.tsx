@@ -22,6 +22,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -179,6 +186,13 @@ function LandingSettingsComponent() {
     }),
   );
 
+  const { data: heroNavigatorModeSetting, refetch: refetchHeroNavigatorMode } =
+    useQuery(
+      trpc.platform.setting.getByKey.queryOptions({
+        key: "landing.hero.navigator.mode",
+      }),
+    );
+
   const { data: trainingSlidesSetting, refetch: refetchTrainingSlides } =
     useQuery(
       trpc.platform.setting.getByKey.queryOptions({
@@ -193,6 +207,7 @@ function LandingSettingsComponent() {
       refetchWhyChooseUs();
       refetchInHouse();
       refetchHeroAutoplay();
+      refetchHeroNavigatorMode();
       refetchTrainingSlides();
     },
     onError: (err) => {
@@ -776,6 +791,47 @@ function LandingSettingsComponent() {
                       ? "Aktif"
                       : "Nonaktif"}
                   </label>
+                </div>
+              </div>
+
+              {/* Tampilan Tombol Navigator Slide */}
+              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-0.5">
+                  <label className="text-sm font-bold text-slate-800">
+                    Tampilan Tombol Navigator Slide
+                  </label>
+                  <p className="text-xs text-slate-500">
+                    Pilih berapa banyak tombol nomor slide yang ditampilkan di
+                    bagian bawah carousel landing page. "Terbatas (3)"
+                    menampilkan 3 tombol terdekat, "Semua Slide" menampilkan
+                    seluruh nomor tombol slide sekaligus.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={
+                      heroNavigatorModeSetting?.value === "all"
+                        ? "all"
+                        : "windowed"
+                    }
+                    disabled={setSettingMutation.isPending}
+                    onValueChange={(value) => {
+                      setSettingMutation.mutate({
+                        key: "landing.hero.navigator.mode",
+                        value,
+                        description:
+                          "Mode tampilan tombol navigator slide hero banner",
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-36 text-xs font-semibold">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="windowed">Terbatas (3)</SelectItem>
+                      <SelectItem value="all">Semua Slide</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>

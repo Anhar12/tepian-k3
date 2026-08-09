@@ -1,5 +1,9 @@
 # Client-Side PDF Modification Implementation
 
+> [!NOTE]
+> **Pembaruan Arsitektur Terbaru (Agustus 2026)**:
+> Komponen utama untuk penempatan stempel QR signature kini berlokasi di `apps/web/src/components/document-signing/qr-signature-placer.tsx` dan diakses melalui halaman terpisah `/(core)/document-signing/` dengan layout scroll vertikal multi-halaman dan otomatisasi deteksi jumlah halaman PDF (`pdf-lib`). Rujukan lengkap silakan baca [QR_DIGITAL_SIGNATURE.md](QR_DIGITAL_SIGNATURE.md).
+
 ## Overview
 
 This document describes the implementation of client-side PDF modification services for the Tepian K3 application. These services allow users to modify PDFs directly in their browser, including adding QR codes with drag-and-drop positioning.
@@ -7,11 +11,13 @@ This document describes the implementation of client-side PDF modification servi
 ## What Was Implemented
 
 ### 1. PDF Modification Service
+
 **Location**: `packages/services/src/pdf/client/pdf-modifier.ts`
 
 A comprehensive service for modifying PDFs in the browser using `pdf-lib`:
 
 **Features:**
+
 - Load PDFs from files, ArrayBuffer, or Uint8Array
 - Add QR codes at specific positions
 - Add text and images to PDFs
@@ -21,6 +27,7 @@ A comprehensive service for modifying PDFs in the browser using `pdf-lib`:
 - Get page count and dimensions
 
 **Key Functions:**
+
 - `loadPDF()` - Load PDF from various sources
 - `addQRCodeToPDF()` - Add QR code at specific position
 - `addTextToPDF()` - Add text with styling
@@ -33,11 +40,13 @@ A comprehensive service for modifying PDFs in the browser using `pdf-lib`:
 - `mergePDFs()` - Merge multiple PDFs
 
 ### 2. QR Code Generator Service
+
 **Location**: `packages/services/src/pdf/client/qrcode-generator.ts`
 
 Service for generating QR codes in the browser using `qrcode`:
 
 **Features:**
+
 - Generate QR codes as data URL (base64 PNG)
 - Generate as canvas element
 - Custom error correction levels (L, M, Q, H)
@@ -49,6 +58,7 @@ Service for generating QR codes in the browser using `qrcode`:
 - Direct download
 
 **Key Functions:**
+
 - `generateDataURL()` - Generate QR code as data URL
 - `generateCanvas()` - Generate as canvas element
 - `generateVerificationQRCode()` - Generate with verification URL
@@ -58,11 +68,13 @@ Service for generating QR codes in the browser using `qrcode`:
 - `downloadQRCode()` - Download as PNG file
 
 ### 3. PDF QR Code Editor Component
+
 **Location**: `apps/web/src/components/pdf/pdf-qrcode-editor.tsx`
 
 A complete React component with drag-and-drop interface:
 
 **Features:**
+
 - Drag-and-drop PDF upload
 - File picker alternative
 - QR code text input and generation
@@ -76,6 +88,7 @@ A complete React component with drag-and-drop interface:
 - Real-time preview
 
 **Component Props:**
+
 ```typescript
 interface PDFQRCodeEditorProps {
   onSave?: (pdfBlob: Blob, filename: string) => void;
@@ -86,6 +99,7 @@ interface PDFQRCodeEditorProps {
 ```
 
 ### 4. TanStack Router Route
+
 **Location**: `apps/web/src/routes/(core)/pdf-editor.tsx`
 
 A dedicated route for the PDF editor:
@@ -93,11 +107,13 @@ A dedicated route for the PDF editor:
 **Access**: Navigate to `/pdf-editor` in the application
 
 **Features:**
+
 - Full-screen editor interface
 - Integrated with app routing
 - Save callback for server upload (optional)
 
 ### 5. Package Exports
+
 **Location**: `packages/services/src/pdf/index.ts`
 
 All client-side services are exported from the main package:
@@ -246,6 +262,7 @@ PDF Coordinates (Bottom-Left Origin):
 ```
 
 **The service handles coordinate conversion automatically:**
+
 ```typescript
 // UI coordinates (top-left origin)
 const uiY = 100;
@@ -259,12 +276,15 @@ const pdfY = pageHeight - uiY - elementHeight;
 ### Example 1: Simple QR Code Addition
 
 ```typescript
-import { PDFModifierService, QRCodeGeneratorService } from '@tepian-k3/services/pdf';
+import {
+  PDFModifierService,
+  QRCodeGeneratorService,
+} from "@tepian-k3/services/pdf";
 
 async function addSimpleQRCode(pdfFile: File) {
   // Generate QR code
   const qrCode = await QRCodeGeneratorService.generateDataURL(
-    'https://verify.example.com/abc123'
+    "https://verify.example.com/abc123",
   );
 
   // Load and modify PDF
@@ -278,21 +298,24 @@ async function addSimpleQRCode(pdfFile: File) {
   });
 
   // Save
-  await PDFModifierService.savePDF(pdfDoc, 'document-with-qrcode.pdf');
+  await PDFModifierService.savePDF(pdfDoc, "document-with-qrcode.pdf");
 }
 ```
 
 ### Example 2: Upload Modified PDF to Server
 
 ```typescript
-import { PDFModifierService, QRCodeGeneratorService } from '@tepian-k3/services/pdf';
+import {
+  PDFModifierService,
+  QRCodeGeneratorService,
+} from "@tepian-k3/services/pdf";
 
 async function modifyAndUpload(pdfFile: File, verificationToken: string) {
   // Generate verification QR code
   const { qrCodeDataURL, verificationURL } =
     await QRCodeGeneratorService.generateVerificationQRCode(
       verificationToken,
-      'https://verify.tepian-k3.com'
+      "https://verify.tepian-k3.com",
     );
 
   // Modify PDF
@@ -317,11 +340,11 @@ async function modifyAndUpload(pdfFile: File, verificationToken: string) {
 
   // Upload to server
   const formData = new FormData();
-  formData.append('file', blob, 'modified-document.pdf');
-  formData.append('documentId', 'doc-123');
+  formData.append("file", blob, "modified-document.pdf");
+  formData.append("documentId", "doc-123");
 
-  const response = await fetch('/api/documents/upload', {
-    method: 'POST',
+  const response = await fetch("/api/documents/upload", {
+    method: "POST",
     body: formData,
   });
 
@@ -363,25 +386,25 @@ export function DocumentVerificationPage() {
 ### Example 4: Branded QR Code
 
 ```typescript
-import { QRCodeGeneratorService } from '@tepian-k3/services/pdf';
+import { QRCodeGeneratorService } from "@tepian-k3/services/pdf";
 
 async function createBrandedQR() {
   // Assume we have a logo file
-  const logoDataUrl = 'data:image/png;base64,...';
+  const logoDataUrl = "data:image/png;base64,...";
 
   // Generate branded QR code
   const brandedQR = await QRCodeGeneratorService.generateBrandedQRCode(
-    'https://verify.example.com/abc123',
+    "https://verify.example.com/abc123",
     {
       logo: logoDataUrl,
       logoSize: 20, // 20% of QR code size
       width: 300,
-      errorCorrectionLevel: 'H', // High EC required for logo
+      errorCorrectionLevel: "H", // High EC required for logo
       color: {
-        dark: '#1e40af', // Blue
-        light: '#ffffff',
+        dark: "#1e40af", // Blue
+        light: "#ffffff",
       },
-    }
+    },
   );
 
   return brandedQR;
@@ -393,11 +416,13 @@ async function createBrandedQR() {
 The client-side services complement the existing server-side PDF generation:
 
 ### Server-Side (Existing)
+
 - Generate invoices and offering letters with QR codes
 - Used in automated document generation
 - Backend processing with @react-pdf/renderer
 
 ### Client-Side (New)
+
 - Add QR codes to existing PDFs
 - User-controlled positioning
 - No server upload required (processes in browser)
@@ -427,8 +452,8 @@ Modified PDF saved locally or uploaded back to server
 
 ```typescript
 // packages/api/src/routers/document.ts
-import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '..';
+import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "..";
 
 export const documentRouter = createTRPCRouter({
   uploadModifiedDocument: protectedProcedure
@@ -438,17 +463,17 @@ export const documentRouter = createTRPCRouter({
         // Frontend will send as base64
         fileData: z.string(), // base64 PDF
         filename: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Decode base64
-      const buffer = Buffer.from(input.fileData, 'base64');
+      const buffer = Buffer.from(input.fileData, "base64");
 
       // Upload to storage
       const uploadResult = await storageService.upload(buffer, {
         filename: input.filename,
-        folder: 'modified-documents',
-        contentType: 'application/pdf',
+        folder: "modified-documents",
+        contentType: "application/pdf",
       });
 
       // Update document record
@@ -468,8 +493,8 @@ export const documentRouter = createTRPCRouter({
 ### Frontend Usage
 
 ```typescript
-import { trpc } from '~/utils/trpc';
-import { PDFModifierService, getPDFAsBase64 } from '@tepian-k3/services/pdf';
+import { trpc } from "~/utils/trpc";
+import { PDFModifierService, getPDFAsBase64 } from "@tepian-k3/services/pdf";
 
 export function usePDFUpload() {
   const uploadMutation = trpc.document.uploadModifiedDocument.useMutation();
@@ -477,7 +502,7 @@ export function usePDFUpload() {
   const uploadModifiedPDF = async (
     pdfDoc: PDFDocument,
     documentId: string,
-    filename: string
+    filename: string,
   ) => {
     // Get as base64
     const base64 = await getPDFAsBase64(pdfDoc);
@@ -485,7 +510,7 @@ export function usePDFUpload() {
     // Upload via tRPC
     return await uploadMutation.mutateAsync({
       documentId,
-      fileData: base64.split(',')[1], // Remove data:application/pdf;base64, prefix
+      fileData: base64.split(",")[1], // Remove data:application/pdf;base64, prefix
       filename,
     });
   };
@@ -497,16 +522,19 @@ export function usePDFUpload() {
 ## Performance Considerations
 
 ### File Size Limits
+
 - **Recommended**: < 5MB for smooth experience
 - **Maximum**: < 20MB (may cause slow processing)
 - **Large files**: Show loading indicators
 
 ### Memory Usage
+
 - PDFs are loaded entirely into memory
 - Multiple modifications don't increase memory significantly
 - Clean up blob URLs with `URL.revokeObjectURL()`
 
 ### Processing Times (Approximate)
+
 - Load 1MB PDF: ~200ms
 - Generate QR code: ~50ms
 - Add QR code to PDF: ~100ms
@@ -515,6 +543,7 @@ export function usePDFUpload() {
 ### Optimization Tips
 
 1. **Use batch operations**:
+
 ```typescript
 // Good: Single call
 await modifyPDF(file, { qrCode, text, images });
@@ -526,14 +555,16 @@ await addImageToPDF(doc, ...);
 ```
 
 2. **Debounce drag updates**:
+
 ```typescript
 const debouncedUpdate = useMemo(
   () => debounce((x, y) => updatePosition(x, y), 16),
-  []
+  [],
 );
 ```
 
 3. **Lazy load large previews**:
+
 ```typescript
 const [showPreview, setShowPreview] = useState(false);
 
@@ -544,47 +575,50 @@ const [showPreview, setShowPreview] = useState(false);
 ## Security Considerations
 
 ### Client-Side Processing Benefits
+
 - ✅ Files never leave user's browser
 - ✅ No server storage of sensitive documents
 - ✅ Full user control over data
 - ✅ Works offline after initial page load
 
 ### Validation
+
 ```typescript
 // Validate file type
-if (file.type !== 'application/pdf') {
-  throw new Error('Invalid file type');
+if (file.type !== "application/pdf") {
+  throw new Error("Invalid file type");
 }
 
 // Validate file size
 const MAX_SIZE = 20 * 1024 * 1024; // 20MB
 if (file.size > MAX_SIZE) {
-  throw new Error('File too large');
+  throw new Error("File too large");
 }
 
 // Validate QR text length
-const validation = QRCodeGeneratorService.validateTextLength(text, 'H');
+const validation = QRCodeGeneratorService.validateTextLength(text, "H");
 if (!validation.isValid) {
-  throw new Error('QR text too long');
+  throw new Error("QR text too long");
 }
 ```
 
 ### Content Security
+
 - QR codes can contain any text/URL
 - Consider validating URLs before generating QR codes
 - Sanitize user input for text overlays
 
 ## Browser Compatibility
 
-| Browser | Support | Notes |
-|---------|---------|-------|
-| Chrome 90+ | ✅ Full | Recommended |
-| Edge 90+ | ✅ Full | Recommended |
-| Firefox 88+ | ✅ Full | Works well |
-| Safari 14+ | ✅ Full | Works well |
+| Browser       | Support | Notes                       |
+| ------------- | ------- | --------------------------- |
+| Chrome 90+    | ✅ Full | Recommended                 |
+| Edge 90+      | ✅ Full | Recommended                 |
+| Firefox 88+   | ✅ Full | Works well                  |
+| Safari 14+    | ✅ Full | Works well                  |
 | Mobile Chrome | ✅ Full | May be slow for large files |
-| Mobile Safari | ✅ Full | iOS 13+ required |
-| IE 11 | ❌ No | Not supported |
+| Mobile Safari | ✅ Full | iOS 13+ required            |
+| IE 11         | ❌ No   | Not supported               |
 
 ## Error Handling
 
@@ -594,15 +628,15 @@ if (!validation.isValid) {
 try {
   const pdfDoc = await PDFModifierService.loadPDF(file);
 } catch (error) {
-  if (error.message.includes('Failed to load PDF')) {
+  if (error.message.includes("Failed to load PDF")) {
     // Invalid or corrupted PDF
-    showError('This PDF file appears to be corrupted');
-  } else if (error.message.includes('Page')) {
+    showError("This PDF file appears to be corrupted");
+  } else if (error.message.includes("Page")) {
     // Invalid page index
-    showError('Invalid page number');
+    showError("Invalid page number");
   } else {
     // Generic error
-    showError('An error occurred processing the PDF');
+    showError("An error occurred processing the PDF");
   }
 }
 ```
@@ -611,11 +645,11 @@ try {
 
 ```typescript
 const ERROR_MESSAGES = {
-  LOAD_FAILED: 'Unable to load PDF. Please ensure it is a valid PDF file.',
-  CORRUPTED: 'This PDF appears to be corrupted or password-protected.',
-  TOO_LARGE: 'File is too large. Maximum size is 20MB.',
-  INVALID_PAGE: 'Selected page does not exist in this document.',
-  QR_TOO_LONG: 'QR code text is too long. Please use a shorter URL.',
+  LOAD_FAILED: "Unable to load PDF. Please ensure it is a valid PDF file.",
+  CORRUPTED: "This PDF appears to be corrupted or password-protected.",
+  TOO_LARGE: "File is too large. Maximum size is 20MB.",
+  INVALID_PAGE: "Selected page does not exist in this document.",
+  QR_TOO_LONG: "QR code text is too long. Please use a shorter URL.",
 };
 ```
 
@@ -624,31 +658,33 @@ const ERROR_MESSAGES = {
 ### Unit Tests Example
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { QRCodeGeneratorService } from '@tepian-k3/services/pdf';
+import { describe, it, expect } from "vitest";
+import { QRCodeGeneratorService } from "@tepian-k3/services/pdf";
 
-describe('QRCodeGeneratorService', () => {
-  it('generates QR code data URL', async () => {
-    const dataUrl = await QRCodeGeneratorService.generateDataURL('test');
+describe("QRCodeGeneratorService", () => {
+  it("generates QR code data URL", async () => {
+    const dataUrl = await QRCodeGeneratorService.generateDataURL("test");
     expect(dataUrl).toMatch(/^data:image\/png;base64,/);
   });
 
-  it('validates text length correctly', () => {
-    const shortText = 'https://example.com';
-    const result = QRCodeGeneratorService.validateTextLength(shortText, 'H');
+  it("validates text length correctly", () => {
+    const shortText = "https://example.com";
+    const result = QRCodeGeneratorService.validateTextLength(shortText, "H");
     expect(result.isValid).toBe(true);
     expect(result.currentLength).toBe(shortText.length);
   });
 
-  it('generates verification QR code with URL', async () => {
-    const token = 'abc123';
+  it("generates verification QR code with URL", async () => {
+    const token = "abc123";
     const result = await QRCodeGeneratorService.generateVerificationQRCode(
       token,
-      'https://verify.example.com'
+      "https://verify.example.com",
     );
 
     expect(result.qrCodeDataURL).toMatch(/^data:image\/png;base64,/);
-    expect(result.verificationURL).toBe('https://verify.example.com/verify/abc123');
+    expect(result.verificationURL).toBe(
+      "https://verify.example.com/verify/abc123",
+    );
   });
 });
 ```

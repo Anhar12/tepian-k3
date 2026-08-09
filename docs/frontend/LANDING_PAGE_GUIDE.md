@@ -41,6 +41,14 @@ Dokumen ini menjelaskan arsitektur, pola komponen interaktif, serta standar desa
 3. **Tombol Panah Custom**:
    - Menggunakan tombol `Button` custom berukuran `size-10 rounded-full bg-white/30 backdrop-blur-md` yang diposisikan di tengah vertikal sisi kiri (`left-4`) dan kanan (`right-4`).
 
+4. **Pengaturan Jumlah Slide dari Back-Office (Configurable Banner Count)**:
+   - Jumlah maksimal kartu banner yang ditampilkan dapat diatur secara fleksibel melalui Pengaturan Landing Page di Back-Office (`landing_settings`).
+   - Admin dapat memilih untuk menampilkan semua banner aktif atau membatasinya ke jumlah tertentu (misalnya default 3 slide).
+
+5. **Penjagaan Posisi Slide saat Navigasi (Session State Persistence)**:
+   - Indeks slide terakhir yang dibuka pengguna disimpan di `sessionStorage` (`hero-carousel-active-index`).
+   - Saat pengguna berpindah halaman atau mengolah tab lain lalu kembali ke Landing Page, carousel akan otomatis memuat slide terakhir yang sedang ia lihat tanpa kembali ke slide pertama.
+
 ---
 
 ## 🗺️ 2. Komponen Peta Kalimantan Interaktif (`KalimantanMap`)

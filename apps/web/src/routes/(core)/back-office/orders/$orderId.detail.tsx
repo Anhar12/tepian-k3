@@ -1964,32 +1964,34 @@ function RouteComponent() {
                     </Card>
 
                     <div className="flex justify-end pt-4">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span tabIndex={0}>
-                            <Button
-                              className="bg-blue-500 hover:bg-blue-600"
-                              onClick={handleCreateTesting}
-                              disabled={
-                                createTestingMutation.isPending ||
-                                !canCreateTesting
-                              }
-                            >
-                              {createTestingMutation.isPending ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Plus className="mr-2 h-4 w-4" />
-                              )}
-                              Buat Pengujian
-                            </Button>
-                          </span>
-                        </TooltipTrigger>
-                        {!canCreateTesting && (
-                          <TooltipContent>
-                            {createTestingLockReason}
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
+                      <PermissionGate permission="testing.create">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span tabIndex={0}>
+                              <Button
+                                className="bg-blue-500 hover:bg-blue-600"
+                                onClick={handleCreateTesting}
+                                disabled={
+                                  createTestingMutation.isPending ||
+                                  !canCreateTesting
+                                }
+                              >
+                                {createTestingMutation.isPending ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Plus className="mr-2 h-4 w-4" />
+                                )}
+                                Buat Pengujian
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {!canCreateTesting && (
+                            <TooltipContent>
+                              {createTestingLockReason}
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </PermissionGate>
                     </div>
                   </div>
                 </CardContent>
