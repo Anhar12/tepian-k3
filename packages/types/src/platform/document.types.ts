@@ -37,6 +37,11 @@ export type CreateDocumentInput = {
   fileSize?: number;
   mimeType?: string;
   uploadedByUserId: string;
+  verificationToken?: string;
+  signatureData?: string;
+  signedByUserId?: string;
+  signedAt?: string;
+  status?: DocumentStatus;
 };
 
 // Sign document input

@@ -2,12 +2,12 @@ import orderQueries from "@tepian-k3/queries/pengujian/order.queries";
 import worksheetQueries from "@tepian-k3/queries/pengujian/worksheet.queries";
 import documentQueries from "@tepian-k3/queries/platform/document.queries";
 import documentSchema from "@tepian-k3/schema/platform/document.schema";
-import { createDocumentSignature, verifyTTERequestToken } from "@tepian-k3/services/document-signing";
-import { generateVerificationURL } from "@tepian-k3/services/pdf";
+import {
+  createDocumentSignature,
+  generateVerificationToken,
+  verifyTTERequestToken,
+} from "@tepian-k3/services/document-signing";
 import * as QRCode from "qrcode";
-import { db } from "@tepian-k3/db/client";
-import { documents } from "@tepian-k3/db/schema";
-import { eq } from "@tepian-k3/db";
 import {
   pdfSigningService,
   type QRCodePosition,
@@ -319,8 +319,8 @@ export const documentRouter = createTRPCRouter({
               },
               fileBase64: fileBuffer.toString("base64"),
             };
-          })
-        )
+          }),
+        ),
     ),
 
   /**
@@ -337,7 +337,7 @@ export const documentRouter = createTRPCRouter({
           height: z.number(),
           page: z.number(),
         }),
-      })
+      }),
     )
     .mutation(
       async ({ input }) =>
@@ -350,7 +350,7 @@ export const documentRouter = createTRPCRouter({
                 new TRPCError({
                   code: "UNAUTHORIZED",
                   message: result.error || "Token tidak valid",
-                })
+                }),
               );
             }
 
@@ -366,7 +366,7 @@ export const documentRouter = createTRPCRouter({
                 new TRPCError({
                   code: "NOT_FOUND",
                   message: "Dokumen tidak ditemukan",
-                })
+                }),
               );
             }
 
@@ -375,7 +375,7 @@ export const documentRouter = createTRPCRouter({
 
             // Generate Verification URL
             const appUrl = process.env.APP_URL || "http://localhost:3000";
-            
+
             // Sign the document (this creates a JWT for the QR)
             const signatureResult = yield* createDocumentSignature(
               document.id,
@@ -385,20 +385,21 @@ export const documentRouter = createTRPCRouter({
               document.type,
               document.fileUrl,
               fileBuffer,
-              "external-signer" // signedByUserId
+              "external-signer", // signedByUserId
             );
 
             const verificationUrl = `${appUrl}/verify/${signatureResult.verificationToken}`;
 
             // Convert client coordinates to PDF coordinates
-            const pdfPosition = yield* pdfSigningService.convertClientCoordinatesToPDFPoints(
-              input.position.x,
-              input.position.y,
-              input.position.width,
-              input.position.height,
-              input.position.page,
-              fileBuffer,
-            );
+            const pdfPosition =
+              yield* pdfSigningService.convertClientCoordinatesToPDFPoints(
+                input.position.x,
+                input.position.y,
+                input.position.width,
+                input.position.height,
+                input.position.page,
+                fileBuffer,
+              );
 
             // Embed QR Code
             const signatureData = {
@@ -408,11 +409,12 @@ export const documentRouter = createTRPCRouter({
               verificationUrl,
             };
 
-            const signedPdfBuffer = yield* pdfSigningService.embedSingleQRCodeInPDF(
-              fileBuffer,
-              signatureData,
-              pdfPosition,
-            );
+            const signedPdfBuffer =
+              yield* pdfSigningService.embedSingleQRCodeInPDF(
+                fileBuffer,
+                signatureData,
+                pdfPosition,
+              );
 
             // Upload the signed PDF (replace the original)
             yield* storageService.upload(signedPdfBuffer, {
@@ -424,13 +426,26 @@ export const documentRouter = createTRPCRouter({
 
             // Generate QR code for the database record
             const qrCodeDataUrl = yield* Effect.tryPromise({
-              try: () => QRCode.toDataURL(verificationUrl, { width: 400, margin: 2, errorCorrectionLevel: "H" }),
-              catch: (error) => new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Gagal membuat kode QR", cause: error }),
+              try: () =>
+                QRCode.toDataURL(verificationUrl, {
+                  width: 400,
+                  margin: 2,
+                  errorCorrectionLevel: "H",
+                }),
+              catch: (error) =>
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal membuat kode QR",
+                  cause: error,
+                }),
             });
             const splitDataUrl = qrCodeDataUrl.split(",")[1];
             if (!splitDataUrl) {
               return yield* Effect.fail(
-                new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Gagal membuat kode QR" })
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Gagal membuat kode QR",
+                }),
               );
             }
             const qrBuffer = Buffer.from(splitDataUrl, "base64");
@@ -454,10 +469,9 @@ export const documentRouter = createTRPCRouter({
               success: true,
               message: "Dokumen berhasil ditandatangani",
             };
-          })
-        )
+          }),
+        ),
     ),
-
 
   /**
    * Get verification history for a document
@@ -674,33 +688,29 @@ export const documentRouter = createTRPCRouter({
                 ),
               );
 
-              // First, create document signatures for all signers
-              const baseUrl = process.env.APP_URL || "http://localhost:3000";
-              const documentSignatures = [];
+              // Step 1: Pre-generate verification tokens & URLs for all signers
+              const baseUrl =
+                process.env.APP_URL ||
+                process.env.VITE_APP_URL ||
+                "http://localhost:3000";
 
-              for (const qrCode of ctx.input.data.qrCodes) {
-                const signature = yield* createDocumentSignature(
-                  "temp-id", // Will be updated after document creation
-                  `TEMP-${Date.now()}`,
-                  ctx.input.data.entityType,
-                  ctx.input.data.entityId,
-                  ctx.input.data.type,
-                  "temp-url", // Will be updated after upload
-                  originalBuffer,
-                  qrCode.userId,
-                );
+              const preSignatures = yield* Effect.all(
+                ctx.input.data.qrCodes.map((qrCode) =>
+                  Effect.gen(function* () {
+                    const verificationToken =
+                      yield* generateVerificationToken();
+                    const verificationUrl = `${baseUrl}/verify/${verificationToken}`;
+                    return {
+                      ...qrCode,
+                      verificationToken,
+                      verificationUrl,
+                    };
+                  }),
+                ),
+              );
 
-                documentSignatures.push({
-                  ...qrCode,
-                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
-                  signatureData: signature.signatureData,
-                  verificationToken: signature.verificationToken,
-                  fileHash: signature.fileHash,
-                });
-              }
-
-              // Embed QR codes into the PDF
-              const qrCodeData = documentSignatures.map((sig) => ({
+              // Step 2: Embed QR codes into the PDF
+              const qrCodeData = preSignatures.map((sig) => ({
                 signature: {
                   userId: sig.userId,
                   userName: sig.userName,
@@ -716,6 +726,28 @@ export const documentRouter = createTRPCRouter({
                   qrCodeData,
                 );
 
+              // Step 3: Compute JWT signature and fileHash from final signedPdfBuffer
+              const documentSignatures = [];
+              for (const sig of preSignatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  `TEMP-${Date.now()}`,
+                  ctx.input.data.entityType,
+                  ctx.input.data.entityId,
+                  ctx.input.data.type,
+                  "temp-url",
+                  signedPdfBuffer, // File hash calculated from final signed PDF!
+                  sig.userId,
+                  sig.verificationToken,
+                );
+
+                documentSignatures.push({
+                  ...sig,
+                  signatureData: signature.signatureData,
+                  fileHash: signature.fileHash,
+                });
+              }
+
               // Upload signed PDF to storage
               const uploadedFile = yield* storageService.upload(
                 signedPdfBuffer,
@@ -729,6 +761,8 @@ export const documentRouter = createTRPCRouter({
               const timestamp = Date.now();
               const documentNumber = `DOC-SIGNED-${ctx.input.data.entityType.toUpperCase()}-${timestamp}`;
 
+              const primarySig = documentSignatures[0];
+
               // Create document record
               const document = yield* documentQueries.createDocument({
                 documentNumber,
@@ -741,6 +775,11 @@ export const documentRouter = createTRPCRouter({
                 fileSize: signedPdfBuffer.length,
                 mimeType: "application/pdf",
                 uploadedByUserId: ctx.user.id,
+                verificationToken: primarySig?.verificationToken,
+                signatureData: primarySig?.signatureData,
+                signedByUserId: primarySig?.userId,
+                signedAt: new Date().toISOString(),
+                status: "signed",
               });
 
               // Store document signatures in database

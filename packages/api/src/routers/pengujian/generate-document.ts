@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import {
   ADMIN_EMAIL,
   ADMIN_PHONE,
@@ -29,6 +28,7 @@ import { emailService } from "@tepian-k3/services/email";
 import {
   createDocumentSignature,
   createTTERequestToken,
+  generateVerificationToken,
 } from "@tepian-k3/services/document-signing";
 
 export const generateDocumentRouter = createTRPCRouter({
@@ -126,30 +126,23 @@ export const generateDocumentRouter = createTRPCRouter({
                 process.env.APP_URL ||
                 process.env.VITE_APP_URL ||
                 "http://localhost:3000";
-              const docSignatures = [];
 
-              for (const sigInput of input.signatures) {
-                const signature = yield* createDocumentSignature(
-                  "temp-id",
-                  input.letterNumber,
-                  "worksheet",
-                  input.worksheetId,
-                  "offering_document",
-                  "temp-url",
-                  finalPdfBuffer,
-                  sigInput.userId,
-                );
+              const preSignatures = yield* Effect.all(
+                input.signatures.map((sigInput) =>
+                  Effect.gen(function* () {
+                    const verificationToken =
+                      yield* generateVerificationToken();
+                    const verificationUrl = `${baseUrl}/verify/${verificationToken}`;
+                    return {
+                      ...sigInput,
+                      verificationToken,
+                      verificationUrl,
+                    };
+                  }),
+                ),
+              );
 
-                docSignatures.push({
-                  ...sigInput,
-                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
-                  signatureData: signature.signatureData,
-                  verificationToken: signature.verificationToken,
-                  fileHash: signature.fileHash,
-                });
-              }
-
-              const qrCodeData = docSignatures.map((sig) => ({
+              const qrCodeData = preSignatures.map((sig) => ({
                 signature: {
                   userId: sig.userId,
                   userName: sig.userName,
@@ -171,6 +164,27 @@ export const generateDocumentRouter = createTRPCRouter({
               );
               finalPdfBuffer = Buffer.from(signedPdf);
 
+              const docSignatures = [];
+              for (const sigInput of preSignatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.letterNumber,
+                  "worksheet",
+                  input.worksheetId,
+                  "offering_document",
+                  "temp-url",
+                  finalPdfBuffer, // Final PDF buffer containing QR code!
+                  sigInput.userId,
+                  sigInput.verificationToken,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  signatureData: signature.signatureData,
+                  fileHash: signature.fileHash,
+                });
+              }
+
               const filename = `offering-letter-${input.letterNumber}.pdf`;
               const uploadedFile = yield* storageService.upload(
                 finalPdfBuffer,
@@ -181,6 +195,7 @@ export const generateDocumentRouter = createTRPCRouter({
                 },
               );
 
+              const primarySig = docSignatures[0];
               const documentNumber = `DOC-OFFERING-${input.letterNumber}`;
               const document = yield* documentQueries.createDocument({
                 documentNumber,
@@ -194,6 +209,11 @@ export const generateDocumentRouter = createTRPCRouter({
                 fileSize: finalPdfBuffer.length,
                 mimeType: "application/pdf",
                 uploadedByUserId: ctx.user.id,
+                verificationToken: primarySig?.verificationToken,
+                signatureData: primarySig?.signatureData,
+                signedByUserId: primarySig?.userId,
+                signedAt: new Date().toISOString(),
+                status: "signed",
               });
 
               yield* documentQueries.createDocumentSignatures(
@@ -293,35 +313,43 @@ export const generateDocumentRouter = createTRPCRouter({
             // Convert PDF to Buffer
             let spkBuffer = Buffer.from(spk as Buffer);
 
+            const docSignatures: Array<{
+              userId: string;
+              userName: string;
+              purpose: string;
+              x: number;
+              y: number;
+              width: number;
+              height: number;
+              page: number;
+              verificationToken: string;
+              verificationUrl: string;
+              signatureData: string;
+              fileHash: string;
+            }> = [];
+
             if (input.signatures && input.signatures.length > 0) {
               const baseUrl =
                 process.env.APP_URL ||
                 process.env.VITE_APP_URL ||
                 "http://localhost:3000";
-              const docSignatures = [];
 
-              for (const sigInput of input.signatures) {
-                const signature = yield* createDocumentSignature(
-                  "temp-id",
-                  input.letterNumber,
-                  "order",
-                  worksheet.orderId,
-                  "cooperation_agreement",
-                  "temp-url",
-                  spkBuffer,
-                  sigInput.userId,
-                );
+              const preSignatures = yield* Effect.all(
+                input.signatures.map((sigInput) =>
+                  Effect.gen(function* () {
+                    const verificationToken =
+                      yield* generateVerificationToken();
+                    const verificationUrl = `${baseUrl}/verify/${verificationToken}`;
+                    return {
+                      ...sigInput,
+                      verificationToken,
+                      verificationUrl,
+                    };
+                  }),
+                ),
+              );
 
-                docSignatures.push({
-                  ...sigInput,
-                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
-                  signatureData: signature.signatureData,
-                  verificationToken: signature.verificationToken,
-                  fileHash: signature.fileHash,
-                });
-              }
-
-              const qrCodeData = docSignatures.map((sig) => ({
+              const qrCodeData = preSignatures.map((sig) => ({
                 signature: {
                   userId: sig.userId,
                   userName: sig.userName,
@@ -342,15 +370,37 @@ export const generateDocumentRouter = createTRPCRouter({
                 qrCodeData,
               );
               spkBuffer = Buffer.from(signedPdf);
+
+              for (const sigInput of preSignatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.letterNumber,
+                  "order",
+                  worksheet.orderId,
+                  "cooperation_agreement",
+                  "temp-url",
+                  spkBuffer, // Hash calculated from final signed SPK buffer!
+                  sigInput.userId,
+                  sigInput.verificationToken,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  signatureData: signature.signatureData,
+                  fileHash: signature.fileHash,
+                });
+              }
             }
 
-            // Upload draft SPK to storage
+            // Upload SPK to storage
             const filename = `spk-draft-${input.letterNumber}-${Date.now()}.pdf`;
             const uploadedSpk = yield* storageService.upload(spkBuffer, {
               filename,
               contentType: "application/pdf",
               folder: "documents/order/spk",
             });
+
+            const primarySig = docSignatures[0];
 
             // Create document record
             const documentNumber = `SPK-${worksheet.order.orderNumber}-${Date.now()}`;
@@ -366,18 +416,14 @@ export const generateDocumentRouter = createTRPCRouter({
               fileSize: spkBuffer.length,
               mimeType: "application/pdf",
               uploadedByUserId: ctx.user.id,
+              verificationToken: primarySig?.verificationToken,
+              signatureData: primarySig?.signatureData,
+              signedByUserId: primarySig?.userId,
+              signedAt: primarySig ? new Date().toISOString() : undefined,
+              status: primarySig ? "signed" : "draft",
             });
 
-            if (input.signatures && input.signatures.length > 0) {
-              const baseUrl =
-                process.env.APP_URL ||
-                process.env.VITE_APP_URL ||
-                "http://localhost:3000";
-              const docSignatures = input.signatures.map((sigInput) => ({
-                ...sigInput,
-                verificationToken: crypto.randomBytes(32).toString("hex"),
-              }));
-
+            if (docSignatures.length > 0) {
               yield* documentQueries.createDocumentSignatures(
                 docSignatures.map((sig, index) => ({
                   documentId: document.id,
@@ -393,9 +439,9 @@ export const generateDocumentRouter = createTRPCRouter({
                     page: sig.page,
                   },
                   verificationToken: sig.verificationToken,
-                  verificationUrl: `${baseUrl}/verify/${sig.verificationToken}`,
-                  signatureData: "JWT-SIGNATURE",
-                  fileHash: "HASH",
+                  verificationUrl: sig.verificationUrl,
+                  signatureData: sig.signatureData,
+                  fileHash: sig.fileHash,
                 })),
               );
             }
@@ -534,30 +580,23 @@ export const generateDocumentRouter = createTRPCRouter({
                 process.env.APP_URL ||
                 process.env.VITE_APP_URL ||
                 "http://localhost:3000";
-              const docSignatures = [];
 
-              for (const sigInput of input.signatures) {
-                const signature = yield* createDocumentSignature(
-                  "temp-id",
-                  input.letterNumber,
-                  "worksheet",
-                  input.worksheetId,
-                  "invoice",
-                  "temp-url",
-                  tagihanBuffer,
-                  sigInput.userId,
-                );
+              const preSignatures = yield* Effect.all(
+                input.signatures.map((sigInput) =>
+                  Effect.gen(function* () {
+                    const verificationToken =
+                      yield* generateVerificationToken();
+                    const verificationUrl = `${baseUrl}/verify/${verificationToken}`;
+                    return {
+                      ...sigInput,
+                      verificationToken,
+                      verificationUrl,
+                    };
+                  }),
+                ),
+              );
 
-                docSignatures.push({
-                  ...sigInput,
-                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
-                  signatureData: signature.signatureData,
-                  verificationToken: signature.verificationToken,
-                  fileHash: signature.fileHash,
-                });
-              }
-
-              const qrCodeData = docSignatures.map((sig) => ({
+              const qrCodeData = preSignatures.map((sig) => ({
                 signature: {
                   userId: sig.userId,
                   userName: sig.userName,
@@ -579,6 +618,27 @@ export const generateDocumentRouter = createTRPCRouter({
               );
               tagihanBuffer = Buffer.from(signedPdf);
 
+              const docSignatures = [];
+              for (const sigInput of preSignatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.letterNumber,
+                  "worksheet",
+                  input.worksheetId,
+                  "invoice",
+                  "temp-url",
+                  tagihanBuffer, // Calculated from final signed buffer!
+                  sigInput.userId,
+                  sigInput.verificationToken,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  signatureData: signature.signatureData,
+                  fileHash: signature.fileHash,
+                });
+              }
+
               const filename = `tagihan-${input.letterNumber}.pdf`;
               const uploadedFile = yield* storageService.upload(tagihanBuffer, {
                 filename,
@@ -586,6 +646,7 @@ export const generateDocumentRouter = createTRPCRouter({
                 folder: "documents/worksheet/invoices",
               });
 
+              const primarySig = docSignatures[0];
               const documentNumber = `DOC-INVOICE-${input.letterNumber}`;
               const document = yield* documentQueries.createDocument({
                 documentNumber,
@@ -599,6 +660,11 @@ export const generateDocumentRouter = createTRPCRouter({
                 fileSize: tagihanBuffer.length,
                 mimeType: "application/pdf",
                 uploadedByUserId: ctx.user.id,
+                verificationToken: primarySig?.verificationToken,
+                signatureData: primarySig?.signatureData,
+                signedByUserId: primarySig?.userId,
+                signedAt: new Date().toISOString(),
+                status: "signed",
               });
 
               yield* documentQueries.createDocumentSignatures(
@@ -721,30 +787,23 @@ export const generateDocumentRouter = createTRPCRouter({
                 process.env.APP_URL ||
                 process.env.VITE_APP_URL ||
                 "http://localhost:3000";
-              const docSignatures = [];
 
-              for (const sigInput of input.signatures) {
-                const signature = yield* createDocumentSignature(
-                  "temp-id",
-                  input.assignmentLetterNumber,
-                  "worksheet",
-                  input.worksheetId,
-                  "assignment_letter",
-                  "temp-url",
-                  sptBuffer,
-                  sigInput.userId,
-                );
+              const preSignatures = yield* Effect.all(
+                input.signatures.map((sigInput) =>
+                  Effect.gen(function* () {
+                    const verificationToken =
+                      yield* generateVerificationToken();
+                    const verificationUrl = `${baseUrl}/verify/${verificationToken}`;
+                    return {
+                      ...sigInput,
+                      verificationToken,
+                      verificationUrl,
+                    };
+                  }),
+                ),
+              );
 
-                docSignatures.push({
-                  ...sigInput,
-                  verificationUrl: `${baseUrl}/verify/${signature.verificationToken}`,
-                  signatureData: signature.signatureData,
-                  verificationToken: signature.verificationToken,
-                  fileHash: signature.fileHash,
-                });
-              }
-
-              const qrCodeData = docSignatures.map((sig) => ({
+              const qrCodeData = preSignatures.map((sig) => ({
                 signature: {
                   userId: sig.userId,
                   userName: sig.userName,
@@ -766,6 +825,27 @@ export const generateDocumentRouter = createTRPCRouter({
               );
               sptBuffer = Buffer.from(signedPdf);
 
+              const docSignatures = [];
+              for (const sigInput of preSignatures) {
+                const signature = yield* createDocumentSignature(
+                  "temp-id",
+                  input.assignmentLetterNumber,
+                  "worksheet",
+                  input.worksheetId,
+                  "assignment_letter",
+                  "temp-url",
+                  sptBuffer, // Calculated from final signed buffer!
+                  sigInput.userId,
+                  sigInput.verificationToken,
+                );
+
+                docSignatures.push({
+                  ...sigInput,
+                  signatureData: signature.signatureData,
+                  fileHash: signature.fileHash,
+                });
+              }
+
               const filename = `surat-tugas-${input.assignmentLetterNumber}.pdf`;
               const uploadedFile = yield* storageService.upload(sptBuffer, {
                 filename,
@@ -773,6 +853,7 @@ export const generateDocumentRouter = createTRPCRouter({
                 folder: "documents/worksheet/assignment-letters",
               });
 
+              const primarySig = docSignatures[0];
               const documentNumber = `DOC-SPT-${input.assignmentLetterNumber}`;
               const document = yield* documentQueries.createDocument({
                 documentNumber,
@@ -786,6 +867,11 @@ export const generateDocumentRouter = createTRPCRouter({
                 fileSize: sptBuffer.length,
                 mimeType: "application/pdf",
                 uploadedByUserId: ctx.user.id,
+                verificationToken: primarySig?.verificationToken,
+                signatureData: primarySig?.signatureData,
+                signedByUserId: primarySig?.userId,
+                signedAt: new Date().toISOString(),
+                status: "signed",
               });
 
               yield* documentQueries.createDocumentSignatures(
