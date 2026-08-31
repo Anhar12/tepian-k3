@@ -56,7 +56,7 @@ services:
   - type: web
     name: tepian-k3-web-dev
     runtime: static
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm --filter @tepian-k3/web build
+    buildCommand: pnpm install --frozen-lockfile --prod=false --ignore-scripts && pnpm --filter @tepian-k3/web build
     staticPublishPath: ./apps/web/dist
     envVars:
       - key: VITE_SERVER_URL
