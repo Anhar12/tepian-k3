@@ -5,7 +5,9 @@ import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
 import { SoftDeleteToggle } from "@/components/soft-delete-toggle";
-import getUsersColumns, { getUserActionConfig } from "@/components/columns/users-columns";
+import getUsersColumns, {
+  getUserActionConfig,
+} from "@/components/columns/users-columns";
 import { pageHead } from "@/utils/page-head";
 import { requirePermission } from "@/utils/require-permission";
 import { queryClient, trpc } from "@/utils/trpc";
@@ -15,7 +17,10 @@ import userSchema from "@tepian-k3/schema/platform/users.schema";
 import { LoaderCircle, PlusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDataTableRouter } from "@/hooks/use-data-table-router";
-import { CrudRowActionsModal, useCrudRowActions } from "@/components/crud-row-actions";
+import {
+  CrudRowActionsModal,
+  useCrudRowActions,
+} from "@/components/crud-row-actions";
 import type { UsersWithoutFoto } from "@tepian-k3/types/platform/users.types";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import {
@@ -56,23 +61,13 @@ function RouteComponent() {
   } = useQuery(trpc.platform.user.getUserPaginated.queryOptions(params));
 
   const [showDeleted, setShowDeleted] = useState(params.showDeleted);
-  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } = useCrudRowActions<UsersWithoutFoto>();
+  const { selectedRow, isActionsOpen, setIsActionsOpen, handleRowClick } =
+    useCrudRowActions<UsersWithoutFoto>();
 
-  const [rejectDialogUserId, setRejectDialogUserId] = useState<string | null>(null);
-  const [rejectionReason, setRejectionReason] = useState("");
-
-  const verifyUserMutation = useMutation(
-    trpc.platform.user.verifyUser.mutationOptions({
-      onSuccess: () => {
-        globalSuccessToast("Pengguna berhasil diverifikasi");
-        void queryClient.invalidateQueries(trpc.platform.user.getUserPaginated.queryOptions(params));
-        setIsActionsOpen(false);
-      },
-      onError: (error) => {
-        globalErrorToast("Gagal memverifikasi pengguna: " + error.message);
-      },
-    }),
+  const [rejectDialogUserId, setRejectDialogUserId] = useState<string | null>(
+    null,
   );
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const rejectUserMutation = useMutation(
     trpc.platform.user.rejectUser.mutationOptions({
@@ -80,7 +75,9 @@ function RouteComponent() {
         globalSuccessToast("Pengguna berhasil ditolak");
         setRejectDialogUserId(null);
         setRejectionReason("");
-        void queryClient.invalidateQueries(trpc.platform.user.getUserPaginated.queryOptions(params));
+        void queryClient.invalidateQueries(
+          trpc.platform.user.getUserPaginated.queryOptions(params),
+        );
         setIsActionsOpen(false);
       },
       onError: (error) => {
@@ -89,14 +86,14 @@ function RouteComponent() {
     }),
   );
 
-  const userActionConfig = useMemo(() => getUserActionConfig(
-    hasVerificationRole,
-    (userId) => verifyUserMutation.mutate({ userId }),
-    (userId) => {
-      setRejectionReason("");
-      setRejectDialogUserId(userId);
-    }
-  ), [hasVerificationRole, verifyUserMutation]);
+  const userActionConfig = useMemo(
+    () =>
+      getUserActionConfig(hasVerificationRole, (userId) => {
+        setRejectionReason("");
+        setRejectDialogUserId(userId);
+      }),
+    [hasVerificationRole],
+  );
 
   const columns = useMemo(
     () =>
@@ -175,8 +172,8 @@ function RouteComponent() {
           <AlertDialogHeader>
             <AlertDialogTitle>Tolak Verifikasi Pengguna</AlertDialogTitle>
             <AlertDialogDescription>
-              Masukkan alasan penolakan verifikasi. Alasan ini akan
-              dikirimkan kepada pengguna.
+              Masukkan alasan penolakan verifikasi. Alasan ini akan dikirimkan
+              kepada pengguna.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="my-4">
@@ -201,9 +198,7 @@ function RouteComponent() {
                   });
                 }
               }}
-              disabled={
-                !rejectionReason.trim() || rejectUserMutation.isPending
-              }
+              disabled={!rejectionReason.trim() || rejectUserMutation.isPending}
             >
               {rejectUserMutation.isPending && (
                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />

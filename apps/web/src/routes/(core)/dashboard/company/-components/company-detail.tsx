@@ -25,12 +25,12 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Eye, EyeOff } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { toWaLink } from "@/utils/wa-link";
 import ImageWithFallback from "@/components/image-with-fallback";
+import { CompanyTestingLocationList } from "./company-testing-location-list";
 
 interface CompanyDetailProps {
   companyId: string;
@@ -50,6 +50,14 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
     }),
     enabled: false,
   });
+
+  const { data: testingLocations } = useQuery(
+    trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
+      {
+        companyId,
+      },
+    ),
+  );
 
   const handleToggleMask = async () => {
     if (unmaskedData) {
@@ -113,7 +121,7 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            <div className="flex justify-between items-start">
+            <div className="flex items-start justify-between">
               {displayCompany.companyPictureUrl ? (
                 // If company has a logo, display it
                 <ImageWithFallback
@@ -128,7 +136,7 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                 </div>
               )}
 
-              <Button
+              {/* <Button
                 variant="outline"
                 size="sm"
                 onClick={handleToggleMask}
@@ -137,7 +145,7 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
               >
                 {unmaskedData ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 {unmaskedData ? "Sembunyikan Data" : "Lihat Data Lengkap"}
-              </Button>
+              </Button> */}
             </div>
 
             <FieldGroup>
@@ -336,6 +344,8 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                 />
               </Field>
 
+              <CompanyTestingLocationList locations={testingLocations ?? []} />
+
               <FieldSet>
                 <FieldLegend>
                   Fasilitas Kesehatan Tersedia di Perusahaan
@@ -422,7 +432,10 @@ export default function CompanyDetail({ companyId }: CompanyDetailProps) {
                 />
                 {displayCompany.responsibleTestingPersonPhone && (
                   <a
-                    href={toWaLink(displayCompany.responsibleTestingPersonPhone) ?? "#"}
+                    href={
+                      toWaLink(displayCompany.responsibleTestingPersonPhone) ??
+                      "#"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-1 inline-flex items-center gap-1 text-xs text-green-600 hover:underline"

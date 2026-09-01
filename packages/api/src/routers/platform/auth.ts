@@ -24,6 +24,9 @@ import { v7 as uuidv7 } from "uuid";
 import { logError } from "@tepian-k3/services/logger";
 import { rateLimiters } from "@tepian-k3/services/rate-limiter";
 import { strongPasswordSchema } from "@tepian-k3/schema/platform/password.schema";
+import { createHash, randomBytes } from "node:crypto";
+import { emailService } from "@tepian-k3/services/email";
+import passwordResetsQueries from "@tepian-k3/queries/platform/password-resets.queries";
 
 export const authRouter = createTRPCRouter({
   login: withRateLimit(rateLimiters.auth())
@@ -63,16 +66,6 @@ export const authRouter = createTRPCRouter({
                 new TRPCError({
                   code: "FORBIDDEN",
                   message: `Pendaftaran akun Anda ditolak oleh Administrator. Alasan: ${user.verificationRejectionReason ?? "Tidak ada alasan spesifik."}`,
-                }),
-              );
-            }
-
-            if (user.verificationStatus === "pending") {
-              return yield* Effect.fail(
-                new TRPCError({
-                  code: "FORBIDDEN",
-                  message:
-                    "Akun Anda sedang menunggu verifikasi dari Administrator.",
                 }),
               );
             }
@@ -174,6 +167,46 @@ export const authRouter = createTRPCRouter({
         Effect.gen(function* () {
           const newUser = yield* usersQueries.createUser(input);
 
+          const rawToken = randomBytes(32).toString("base64url");
+          const tokenHash = `email:${createHash("sha256")
+            .update(`email:${rawToken}`)
+            .digest("hex")}`;
+          const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+          yield* passwordResetsQueries.createResetRecord(
+            newUser.id,
+            tokenHash,
+            expiresAt.toISOString(),
+          );
+
+          const baseUrl =
+            process.env.APP_URL ??
+            process.env.VITE_APP_URL ??
+            "http://localhost:3001";
+          yield* Effect.tryPromise({
+            try: () =>
+              emailService.sendEmailVerification(
+                newUser.email,
+                `${baseUrl}/verify-email?token=${encodeURIComponent(rawToken)}`,
+                newUser.name,
+              ),
+            catch: (error) => {
+              logError(
+                "authRouter.register",
+                "Gagal mengirim email verifikasi",
+                {
+                  userId: newUser.id,
+                  error,
+                },
+              );
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message:
+                  "Akun berhasil dibuat, tetapi email verifikasi gagal dikirim.",
+                cause: error,
+              });
+            },
+          });
+
           // Query all administrators
           const admins = yield* usersQueries.getAdmins();
 
@@ -183,7 +216,7 @@ export const authRouter = createTRPCRouter({
               userId: admin.id,
               type: "general",
               title: "Registrasi Pengguna Baru",
-              message: `Pengguna baru ${newUser.name} (${newUser.email}) telah mendaftar dan menunggu verifikasi.`,
+              message: `Pengguna baru ${newUser.name} (${newUser.email}) telah mendaftar dan menunggu verifikasi email.`,
             });
           }
 
@@ -195,6 +228,110 @@ export const authRouter = createTRPCRouter({
       // ##################
       // end authored
       // ##################
+    }),
+
+  verifyEmail: withRateLimit(rateLimiters.email())
+    .input(z.object({ token: z.string().min(32).max(256) }))
+    .mutation(async ({ input }) => {
+      const tokenHash = `email:${createHash("sha256")
+        .update(`email:${input.token}`)
+        .digest("hex")}`;
+      const userId = await runEffect(
+        passwordResetsQueries.validateResetToken(tokenHash),
+      );
+
+      if (!userId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Link verifikasi tidak valid atau sudah kedaluwarsa.",
+        });
+      }
+
+      return await runEffect(
+        Effect.gen(function* () {
+          yield* passwordResetsQueries.markTokenAsUsed(tokenHash);
+          return yield* usersQueries.markUserEmailAsVerified(userId);
+        }),
+      );
+    }),
+
+  resendEmailVerification: withRateLimit(rateLimiters.email())
+    .input(z.object({ email: z.string().email("Format email tidak valid") }))
+    .mutation(async ({ input }) => {
+      let user;
+      try {
+        user = await runEffect(usersQueries.getUserByEmail(input.email));
+      } catch (error) {
+        if (error instanceof TRPCError && error.code === "NOT_FOUND") {
+          return {
+            success: true,
+            message:
+              "Jika email terdaftar dan belum diverifikasi, link baru akan dikirim.",
+          };
+        }
+        throw error;
+      }
+
+      if (!user || user.emailVerified) {
+        return {
+          success: true,
+          message:
+            "Jika email terdaftar dan belum diverifikasi, link baru akan dikirim.",
+        };
+      }
+
+      const rawToken = randomBytes(32).toString("base64url");
+      const tokenHash = `email:${createHash("sha256")
+        .update(`email:${rawToken}`)
+        .digest("hex")}`;
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      await runEffect(
+        passwordResetsQueries.invalidateEmailVerificationTokens(user.id),
+      );
+      await runEffect(
+        passwordResetsQueries.createResetRecord(
+          user.id,
+          tokenHash,
+          expiresAt.toISOString(),
+        ),
+      );
+
+      const baseUrl =
+        process.env.APP_URL ??
+        process.env.VITE_APP_URL ??
+        "http://localhost:3001";
+      await runEffect(
+        Effect.tryPromise({
+          try: () =>
+            emailService.sendEmailVerification(
+              user.email,
+              `${baseUrl}/verify-email?token=${encodeURIComponent(rawToken)}`,
+              user.name,
+            ),
+          catch: (error) => {
+            logError(
+              "authRouter.resendEmailVerification",
+              "Gagal mengirim ulang email verifikasi",
+              {
+                email: input.email,
+                error,
+              },
+            );
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal mengirim ulang email verifikasi.",
+              cause: error,
+            });
+          },
+        }),
+      );
+
+      return {
+        success: true,
+        message:
+          "Jika email terdaftar dan belum diverifikasi, link baru akan dikirim.",
+      };
     }),
 
   sendOTP: withRateLimit(rateLimiters.otp())

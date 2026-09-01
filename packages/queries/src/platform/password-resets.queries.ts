@@ -1,5 +1,5 @@
 import { hash } from "@node-rs/argon2";
-import { and, eq, gt } from "@tepian-k3/db";
+import { and, eq, gt, like } from "@tepian-k3/db";
 import { db, type DBorTx } from "@tepian-k3/db/client";
 import { passwordResets } from "@tepian-k3/db/schema";
 import { logError } from "@tepian-k3/services/logger";
@@ -187,6 +187,34 @@ const passwordResetsQueries = {
           code: "INTERNAL_SERVER_ERROR",
           message:
             "Gagal menonaktifkan token pengaturan ulang kata sandi pengguna.",
+          cause: error,
+        });
+      },
+    });
+  },
+
+  invalidateEmailVerificationTokens(userId: string, tx: DBorTx = db) {
+    return Effect.tryPromise({
+      try: () =>
+        tx
+          .update(passwordResets)
+          .set({ used: true })
+          .where(
+            and(
+              eq(passwordResets.userId, userId),
+              like(passwordResets.token, "email:%"),
+            ),
+          )
+          .returning(),
+      catch: (error) => {
+        logError(
+          "passwordResetsQueries.invalidateEmailVerificationTokens",
+          "Failed to invalidate email verification tokens",
+          { userId, error },
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal membatalkan token verifikasi email sebelumnya.",
           cause: error,
         });
       },

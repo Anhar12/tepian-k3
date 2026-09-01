@@ -16,6 +16,12 @@ const getAllUserCompaniesSchema = createPaginationSchema(
   name: z.string().default(""),
 });
 
+const testingLocationInputSchema = z.object({
+  name: z.string().min(1).max(256),
+  regencyId: z.uuidv7(),
+  districtId: z.uuidv7(),
+});
+
 const createUserCompanySchema = createInsertSchema(userCompanies, {
   kbliId: z.uuidv7(),
   provinceId: z.uuidv7(),
@@ -49,6 +55,12 @@ const createUserCompanySchema = createInsertSchema(userCompanies, {
   })
   .extend({
     picture: z.file().max(10 * 1024 * 1024),
+    testingLocations: z.preprocess((value) => {
+      if (typeof value === "string") {
+        return JSON.parse(value);
+      }
+      return value;
+    }, z.array(testingLocationInputSchema)),
   });
 
 const updateUserCompanySchema = createUpdateSchema(userCompanies, {
@@ -65,7 +77,7 @@ const updateUserCompanySchema = createUpdateSchema(userCompanies, {
   maleWorkers: z.optional(z.string().regex(/^\d+$/).max(10)),
   healthFacilityAvailable: z.optional(z.boolean()),
   wlkpStatus: z.optional(z.boolean()),
-  wlkp: z.optional(z.string().regex(/^\d+$/).max(10)),
+  wlkp: z.optional(z.string().regex(/^\d+$/).max(10).or(z.literal(""))),
   responsibleTestingPerson: z.optional(z.string().min(1).max(256)),
   responsibleTestingPersonEmail: z.optional(z.string().email().max(256)),
   responsibleTestingPersonPhone: z.optional(z.string().min(1).max(20)),
@@ -88,6 +100,19 @@ const updateUserCompanySchema = createUpdateSchema(userCompanies, {
   })
   .extend({
     picture: z.optional(z.file().max(10 * 1024 * 1024)),
+    testingLocations: z.preprocess((value) => {
+      if (typeof value === "string") {
+        return JSON.parse(value);
+      }
+      return value;
+    }, z.array(testingLocationInputSchema)),
+
+    deletedTestingLocationIds: z.preprocess((value) => {
+      if (typeof value === "string") {
+        return JSON.parse(value);
+      }
+      return value;
+    }, z.array(z.uuidv7())),
   });
 
 const userCompanySchema = {

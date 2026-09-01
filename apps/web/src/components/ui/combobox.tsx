@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, type LucideIcon } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -26,6 +26,7 @@ interface ComboBoxProps {
   invalid?: boolean;
   className?: string;
   isLoading?: boolean;
+  icon?: LucideIcon;
 }
 
 function ComboBox({
@@ -41,6 +42,7 @@ function ComboBox({
   invalid,
   className,
   isLoading = false,
+  icon: Icon,
 }: ComboBoxProps) {
   const selectedOption = useMemo(
     () => options?.find((opt) => opt.id === value),
@@ -74,15 +76,25 @@ function ComboBox({
             className,
           )}
         >
-          {selectedOption?.name || placeholder}
-          <ChevronsUpDown className="opacity-50" />
+          <span className="flex min-w-0 items-center gap-2">
+            {Icon && <Icon className="h-4 w-4 shrink-0 text-slate-400" />}
+
+            <span className="truncate">
+              {selectedOption?.name || placeholder}
+            </span>
+          </span>
+
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
+
       <PopoverContent className="popover-content-width-full p-0">
         <Command>
           <CommandInput placeholder={searchPlaceholder} className="h-9" />
+
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
+
             <CommandGroup>
               {options?.map((option) => (
                 <CommandItem
@@ -91,6 +103,7 @@ function ComboBox({
                   onSelect={() => handleSelect(option.id)}
                 >
                   {option.name}
+
                   <Check
                     className={cn(
                       "ml-auto",

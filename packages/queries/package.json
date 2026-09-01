@@ -17,6 +17,7 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tepian-k3/config": "workspace:*",
     "@types/better-sqlite3": "^7.6.12",
     "@types/qrcode": "catalog:",
@@ -25,14 +26,14 @@
     "typescript": "catalog:"
   },
   "dependencies": {
-    "@tepian-k3/db": "workspace:*",
+    "@node-rs/argon2": "catalog:",
     "@tepian-k3/constants": "workspace:*",
-    "@tepian-k3/services": "workspace:*",
+    "@tepian-k3/db": "workspace:*",
     "@tepian-k3/schema": "workspace:*",
+    "@tepian-k3/services": "workspace:*",
     "@tepian-k3/types": "workspace:*",
     "@tepian-k3/utils": "workspace:*",
     "@trpc/server": "catalog:",
-    "@node-rs/argon2": "catalog:",
     "effect": "catalog:",
     "qrcode": "catalog:",
     "uuid": "catalog:",

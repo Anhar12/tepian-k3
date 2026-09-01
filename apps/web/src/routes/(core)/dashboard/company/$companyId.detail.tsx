@@ -1,10 +1,9 @@
 import { SkeletonGenerator } from "@/components/ui/skeleton-generator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import { pageHead } from "@/utils/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import CompanyDetail from "./-components/company-detail";
-import CompanyTestingLocationList from "./-components/company-testing-location-list";
 
 export const Route = createFileRoute(
   "/(core)/dashboard/company/$companyId/detail",
@@ -50,18 +49,7 @@ function RouteComponent() {
           });
         }}
       >
-        <TabsList>
-          <TabsTrigger value="company-info">Informasi Perusahaan</TabsTrigger>
-          <TabsTrigger value="company-testing-location">
-            Lokasi Pengujian
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="company-info">
-          <CompanyDetail companyId={companyId} />
-        </TabsContent>
-        <TabsContent value="company-testing-location">
-          <CompanyTestingLocationList companyId={companyId} />
-        </TabsContent>
+        <CompanyDetail companyId={companyId} />
       </Tabs>
     </div>
   );

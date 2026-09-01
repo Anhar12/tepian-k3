@@ -41,7 +41,7 @@ export default function Navbar() {
       </Link>
 
       {/* Desktop Navigation */}
-      <div className="hidden items-center gap-4 md:flex">
+      <div className="hidden items-center gap-12 md:flex">
         {navItems.map((item) => (
           <Link
             key={item.label}
@@ -63,15 +63,15 @@ export default function Navbar() {
         <div className="hidden items-center gap-4 md:flex">
           <a
             href="/login"
-            className="text-sm font-medium text-primary hover:underline"
+            className="rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors duration-300 hover:bg-primary hover:text-white"
           >
-            Login
+            Masuk
           </a>
           <a
             href="/register"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Sign Up
+            Daftar
           </a>
         </div>
       )}
@@ -126,14 +126,14 @@ export default function Navbar() {
                     className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-input bg-background text-sm font-medium transition-colors hover:bg-muted"
                     onClick={() => setOpen(false)}
                   >
-                    Login
+                    Masuk
                   </a>
                   <a
                     href="/register"
                     className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     onClick={() => setOpen(false)}
                   >
-                    Sign Up
+                    Daftar
                   </a>
                 </div>
               )}

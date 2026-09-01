@@ -19,15 +19,9 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { BACK_OFFICE_ROLES, EMPLOYEE_ROLES } from "@tepian-k3/constants";
 import * as React from "react";
 import ImageWithFallback from "./image-with-fallback";
-import {
-  IconSettings,
-  IconLogout,
-  IconFlask,
-  IconBook,
-} from "@tabler/icons-react";
+import { IconSettings, IconLogout } from "@tabler/icons-react";
 import { logout } from "@/lib/logout";
 import { useDashboardStore } from "@/stores/dashboard.stores";
-import { cn } from "@/lib/utils";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: profile } = useSuspenseQuery(
@@ -185,10 +179,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar
       collapsible="offcanvas"
       {...props}
-      className="border-r border-transparent bg-[#1e53a4] text-white select-none"
+      className="border-r text-white shadow select-none"
     >
       {/* Decorative Wave Background Graphic */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#1e53a4]">
+      {/* <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <svg
           className="absolute bottom-0 left-[-100px] h-[400px] w-[500px] opacity-15"
           viewBox="0 0 400 400"
@@ -228,94 +222,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </linearGradient>
           </defs>
         </svg>
-      </div>
+      </div> */}
 
       {/* 1. White Header Section with Brand Logo Colored Asset */}
-      <SidebarHeader className="z-10 flex shrink-0 flex-col items-center justify-center border-b border-neutral-100 bg-white px-4 py-4">
-        <Link to="/" className="flex w-full items-center justify-center py-1">
+      <SidebarHeader className="z-10 flex shrink-0 flex-col items-center justify-center bg-white">
+        <Link to="/" className="flex w-full items-center justify-center">
           <ImageWithFallback
             src="/assets/logo-tepiank3.webp"
             alt="Tepian K3 Logo"
-            className="h-12 w-auto max-w-[200px] object-contain"
+            className="object-contain"
           />
         </Link>
-
-        {hasUserRole && !isOnBackOffice && (
-          <div className="mt-3 flex w-full rounded-xl border border-slate-200/50 bg-slate-100 p-1">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMode("pengujian");
-                navigate({ to: "/dashboard" });
-              }}
-              className={cn(
-                "flex flex-grow cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-[10px] font-extrabold tracking-wide transition-all duration-300",
-                activeMode === "pengujian"
-                  ? "bg-white text-[#1061D6] shadow-sm"
-                  : "text-slate-500 hover:text-slate-800",
-              )}
-            >
-              <IconFlask className="size-3.5" />
-              PENGUJIAN K3
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMode("pelatihan");
-                navigate({
-                  to: "/dashboard/pelatihan",
-                  search: { tab: "profil" },
-                });
-              }}
-              className={cn(
-                "flex flex-grow cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-[10px] font-extrabold tracking-wide transition-all duration-300",
-                activeMode === "pelatihan"
-                  ? "bg-white text-[#1061D6] shadow-sm"
-                  : "text-slate-500 hover:text-slate-800",
-              )}
-            >
-              <IconBook className="size-3.5" />
-              PELATIHAN K3
-            </button>
-          </div>
-        )}
-
-        {isOnBackOffice && (
-          <div className="mt-3 flex w-full rounded-xl border border-slate-200/50 bg-slate-100 p-1">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMode("pengujian");
-                navigate({ to: "/back-office" });
-              }}
-              className={cn(
-                "flex flex-grow cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-[10px] font-extrabold tracking-wide transition-all duration-300",
-                activeMode === "pengujian"
-                  ? "bg-white text-[#1061D6] shadow-sm"
-                  : "text-slate-500 hover:text-slate-800",
-              )}
-            >
-              <IconFlask className="size-3.5" />
-              PENGUJIAN
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMode("pelatihan");
-                navigate({ to: "/back-office" });
-              }}
-              className={cn(
-                "flex flex-grow cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-[10px] font-extrabold tracking-wide transition-all duration-300",
-                activeMode === "pelatihan"
-                  ? "bg-white text-[#1061D6] shadow-sm"
-                  : "text-slate-500 hover:text-slate-800",
-              )}
-            >
-              <IconBook className="size-3.5" />
-              PELATIHAN
-            </button>
-          </div>
-        )}
       </SidebarHeader>
 
       {/* 2. Deep Blue Navigation Area */}
@@ -329,7 +246,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {/* Settings Button */}
           <SidebarMenuButton
             onClick={() => navigate({ to: "/settings" })}
-            className="h-12 w-full gap-3.5 rounded-none bg-transparent pr-6 pl-6 text-[#dce7ff] transition-all hover:bg-white/10 hover:text-white [&>svg]:stroke-[#dce7ff] [&>svg]:text-[#dce7ff]"
+            className="h-12 w-full gap-3.5 rounded-none bg-transparent pr-6 pl-6 text-slate-800 transition-all hover:bg-primary/10 hover:text-primary"
           >
             <IconSettings className="size-5 shrink-0" />
             <span className="text-sm font-medium">Pengaturan</span>

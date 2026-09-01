@@ -36,16 +36,23 @@ import {
   LoaderCircle,
   MapPin,
   Users,
+  UserRoundCog,
+  UserCheck2,
   Building,
   ArrowRight,
-  ArrowLeft,
   CheckCircle2,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { cn } from "@/lib/utils";
 import { HelpTooltip } from "@/components/help-tooltip";
+import {
+  TestingLocationList,
+  type TestingLocation,
+} from "./-components/testing-location-list";
+import { TestingLocationDialog } from "./-components/testing-location-dialog";
 
 export const Route = createFileRoute("/(core)/dashboard/company/create")({
   loader: async ({ context }) => {
@@ -81,9 +88,10 @@ function LoaderComponent() {
 
 const STEPS = [
   { id: 1, title: "Informasi Dasar", icon: Building },
-  { id: 2, title: "Kontak & Pimpinan", icon: Users },
-  { id: 3, title: "Data Ketenagakerjaan", icon: MapPin }, // Using MapPin to match original icon layout
-  { id: 4, title: "Informasi Bank", icon: CreditCard },
+  { id: 2, title: "Lokasi Pengujian", icon: MapPin },
+  { id: 3, title: "Kontak & Pimpinan", icon: Users },
+  { id: 4, title: "Data Ketenagakerjaan", icon: BriefcaseBusiness },
+  { id: 5, title: "Informasi Bank", icon: CreditCard },
 ];
 
 function RouteComponent() {
@@ -95,14 +103,33 @@ function RouteComponent() {
   const [regencyOpen, setRegencyOpen] = useState(false);
   const [districtOpen, setDistrictOpen] = useState(false);
   const [villageOpen, setVillageOpen] = useState(false);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
+  const [dialogRegencyId, setDialogRegencyId] = useState("");
+
+  const [testingLocations, setTestingLocations] = useState<TestingLocation[]>(
+    [],
+  );
+
+  const [editingLocationIndex, setEditingLocationIndex] = useState<
+    number | null
+  >(null);
+
+  const [editingLocation, setEditingLocation] =
+    useState<TestingLocation | null>(null);
+
+  const [editingLocationRegencyId, setEditingLocationRegencyId] = useState("");
 
   const form = useForm<
-    z.infer<typeof userCompanySchema.createUserCompanySchema>
+    z.input<typeof userCompanySchema.createUserCompanySchema>,
+    unknown,
+    z.output<typeof userCompanySchema.createUserCompanySchema>
   >({
     resolver: zodResolver(userCompanySchema.createUserCompanySchema),
     defaultValues: {
       wlkpStatus: false,
       healthFacilityAvailable: false,
+      testingLocations: [],
     },
     mode: "onTouched",
   });
@@ -127,7 +154,14 @@ function RouteComponent() {
   const handleSubmit = (
     data: z.infer<typeof userCompanySchema.createUserCompanySchema>,
   ) => {
-    const formData = toFormData(data);
+    const formData = toFormData({
+      ...data,
+      testingLocations: testingLocations.map((location) => ({
+        name: location.name,
+        regencyId: location.regencyId,
+        districtId: location.districtId,
+      })),
+    });
     createUserCompanyMutation.mutate(formData);
   };
 
@@ -148,7 +182,7 @@ function RouteComponent() {
         "districtId",
         "villageId",
       ];
-    } else if (currentStep === 2) {
+    } else if (currentStep === 3) {
       fieldsToValidate = [
         "responsibleTestingPerson",
         "responsibleTestingPersonEmail",
@@ -157,7 +191,7 @@ function RouteComponent() {
         "headOfCompanyPosition",
         "headOfCompanyEmail",
       ];
-    } else if (currentStep === 3) {
+    } else if (currentStep === 4) {
       fieldsToValidate = [
         "maleWorkers",
         "femaleWorkers",
@@ -167,7 +201,7 @@ function RouteComponent() {
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, 4));
+      setCurrentStep((prev) => Math.min(prev + 1, 5));
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -177,24 +211,71 @@ function RouteComponent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const openAddLocationDialog = () => {
+    setEditingLocationIndex(null);
+    setEditingLocation(null);
+    setDialogRegencyId("");
+    setLocationDialogOpen(true);
+  };
+
+  const openEditLocationDialog = (index: number) => {
+    const location = testingLocations[index];
+
+    if (!location) {
+      return;
+    }
+
+    setEditingLocationIndex(index);
+    setEditingLocation(location);
+    setDialogRegencyId(location.regencyId);
+    setLocationDialogOpen(true);
+  };
+
+  const saveTestingLocation = (location: TestingLocation) => {
+    setTestingLocations((prev) => {
+      // ADD
+      if (editingLocationIndex === null) {
+        return [...prev, location];
+      }
+
+      // EDIT
+      return prev.map((item, index) =>
+        index === editingLocationIndex ? location : item,
+      );
+    });
+
+    setEditingLocationIndex(null);
+    setEditingLocation(null);
+    setDialogRegencyId("");
+    setLocationDialogOpen(false);
+  };
+
+  const removeTestingLocation = (index: number) => {
+    setTestingLocations((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const { data: kbli } = useSuspenseQuery(
     trpc.pengujian.kbli.getAllKblis.queryOptions(),
   );
+
   const { data: province } = useSuspenseQuery(
     trpc.platform.province.getAllProvinces.queryOptions(),
   );
+
   const { data: regency } = useQuery({
     ...trpc.platform.regency.getAllRegenciesByProvinceId.queryOptions({
       provinceId,
     }),
     enabled: !!provinceId,
   });
+
   const { data: district } = useQuery({
     ...trpc.platform.district.getAllDistrictsByRegencyId.queryOptions({
       regencyId,
     }),
     enabled: !!regencyId,
   });
+
   const { data: village } = useQuery({
     ...trpc.platform.village.getAllVillagesByDistrictId.queryOptions({
       districtId,
@@ -202,11 +283,50 @@ function RouteComponent() {
     enabled: !!districtId,
   });
 
+  const { data: locationRegency } = useQuery({
+    ...trpc.platform.regency.getAllRegenciesByProvinceId.queryOptions({
+      provinceId,
+    }),
+    enabled: !!provinceId && locationDialogOpen,
+  });
+
+  const { data: locationDistrict } = useQuery({
+    ...trpc.platform.district.getAllDistrictsByRegencyId.queryOptions({
+      regencyId: dialogRegencyId,
+    }),
+    enabled: !!dialogRegencyId && locationDialogOpen,
+  });
+
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setIsChecked(checked);
+
+    form.setValue(
+      "responsibleTestingPerson",
+      checked ? (profile.name ?? "") : "",
+      { shouldValidate: true, shouldDirty: true },
+    );
+    form.setValue(
+      "responsibleTestingPersonEmail",
+      checked ? (profile.email ?? "") : "",
+      { shouldValidate: true, shouldDirty: true },
+    );
+    form.setValue(
+      "responsibleTestingPersonPhone",
+      checked ? (profile.phone ?? "") : "",
+      { shouldValidate: true, shouldDirty: true },
+    );
+  };
+
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
-      <Card className="overflow-hidden border-slate-200 shadow-sm">
+    <div className="mx-auto flex w-full flex-col gap-6">
+      <Card className="w-full overflow-hidden border-0 shadow-none">
         {/* Progress Header */}
-        <div className="border-b border-slate-100 bg-slate-50 p-6 md:p-8">
+        <div className="px-6">
           <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
             Pendaftaran Perusahaan
           </h1>
@@ -270,11 +390,8 @@ function RouteComponent() {
           </div>
         </div>
 
-        <CardContent className="p-6 md:p-8">
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="grid gap-6"
-          >
+        <CardContent className="px-6">
+          <form className="grid gap-6">
             {/* STEP 1: Informasi Dasar */}
             <div
               className={cn(
@@ -292,17 +409,15 @@ function RouteComponent() {
               </div>
 
               <FieldGroup>
-                <div className="mb-6 space-y-6">
+                <div className="space-y-5 rounded-xl border p-5">
                   <Controller
                     name="wlkpStatus"
                     control={form.control}
                     render={({ field, fieldState }) => (
-                      <FieldSet
-                        data-invalid={fieldState.invalid}
-                        className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-                      >
-                        <FieldLegend className="flex items-center gap-1 text-base">
-                          Status WLKP Online *
+                      <FieldSet data-invalid={fieldState.invalid} className="">
+                        <FieldLegend className="mb-2 flex items-center gap-2 text-base font-semibold">
+                          Status WLKP Online
+                          <span className="text-red-700">*</span>
                           <HelpTooltip content="Wajib Lapor Ketenagakerjaan di Perusahaan sesuai dengan UU No. 7 Tahun 1981." />
                         </FieldLegend>
                         <RadioGroup
@@ -381,14 +496,14 @@ function RouteComponent() {
                       render={({ field, fieldState }) => (
                         <Field
                           data-invalid={fieldState.invalid}
-                          className="animate-in space-y-1 fade-in slide-in-from-top-2"
+                          className="animate-in fade-in slide-in-from-top-2"
                         >
                           <FieldLabel className="ml-1 text-sm font-bold">
                             Nomor Registrasi WLKP *
                           </FieldLabel>
                           <Input
                             placeholder="Masukkan nomor seri WLKP"
-                            className="h-11 text-sm"
+                            className="h-10 text-sm"
                             value={field.value ?? ""}
                             onChange={(e) => field.onChange(e.target.value)}
                             onBlur={field.onBlur}
@@ -405,18 +520,17 @@ function RouteComponent() {
                   )}
                 </div>
 
-                <hr className="my-2 border-t border-slate-200" />
-
                 <Controller
                   control={form.control}
                   name="picture"
                   render={({ field, fieldState }) => (
                     <Field
                       data-invalid={fieldState.invalid}
-                      className="space-y-1"
+                      className="space-y-1 rounded-xl border p-5"
                     >
                       <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
-                        Logo Perusahaan *
+                        Logo Perusahaan
+                        <span className="text-red-700">*</span>
                         <HelpTooltip content="Unggah logo resmi perusahaan berformat JPG/PNG maksimal 2MB." />
                       </FieldLabel>
                       <SingleImageUpload
@@ -434,15 +548,16 @@ function RouteComponent() {
                     render={({ field, fieldState }) => (
                       <Field
                         data-invalid={fieldState.invalid}
-                        className="flex-1 space-y-1"
+                        className="flex-1"
                       >
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Nama Perusahaan *
+                          Nama Perusahaan
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <Input
                           type="text"
-                          placeholder="PT Contoh Sejahtera"
-                          className="h-11 text-sm"
+                          placeholder="Masukkan nama perusahaan Anda"
+                          className="h-10 text-sm"
                           {...field}
                           aria-invalid={fieldState.invalid}
                         />
@@ -459,15 +574,16 @@ function RouteComponent() {
                     render={({ field, fieldState }) => (
                       <Field
                         data-invalid={fieldState.invalid}
-                        className="flex-1 space-y-1"
+                        className="flex-1"
                       >
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Email Perusahaan *
+                          Email Perusahaan
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <Input
                           type="email"
-                          placeholder="info@perusahaan.com"
-                          className="h-11 text-sm"
+                          placeholder="Masukkan email perusahaan Anda"
+                          className="h-10 text-sm"
                           {...field}
                           aria-invalid={fieldState.invalid}
                         />
@@ -483,24 +599,23 @@ function RouteComponent() {
                   control={form.control}
                   name="kbliId"
                   render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="space-y-1"
-                    >
+                    <Field data-invalid={fieldState.invalid}>
                       <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
-                        Kategori KBLI *
+                        Kategori KBLI
+                        <span className="text-red-700">*</span>
                         <HelpTooltip content="Klasifikasi Baku Lapangan Usaha Indonesia sesuai NIB." />
                       </FieldLabel>
                       <ComboBox
                         options={kbli}
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder="Pilih kategori KBLI..."
-                        searchPlaceholder="Cari kategori KBLI..."
+                        placeholder="Pilih kategori KBLI"
+                        searchPlaceholder="Cari kategori KBLI"
                         emptyMessage="Tidak ada kategori KBLI yang ditemukan."
                         open={kbliOpen}
                         onOpenChange={setKbliOpen}
                         invalid={fieldState.invalid}
+                        className="bg-white"
                       />
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -509,41 +624,15 @@ function RouteComponent() {
                   )}
                 />
 
-                <Controller
-                  control={form.control}
-                  name="address"
-                  render={({ field, fieldState }) => (
-                    <Field
-                      data-invalid={fieldState.invalid}
-                      className="space-y-1"
-                    >
-                      <FieldLabel className="ml-1 text-sm font-bold">
-                        Alamat Lengkap *
-                      </FieldLabel>
-                      <Textarea
-                        placeholder="Jalan, RT/RW, Patokan..."
-                        className="h-24 resize-none text-sm"
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 space-y-2 sm:grid-cols-2">
                   <Controller
                     control={form.control}
                     name="provinceId"
                     render={({ field, fieldState }) => (
-                      <Field
-                        data-invalid={fieldState.invalid}
-                        className="space-y-1"
-                      >
+                      <Field data-invalid={fieldState.invalid}>
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Provinsi *
+                          Provinsi
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <ComboBox
                           options={province}
@@ -554,12 +643,13 @@ function RouteComponent() {
                             form.setValue("districtId", "");
                             form.setValue("villageId", "");
                           }}
-                          placeholder="Pilih provinsi..."
-                          searchPlaceholder="Cari provinsi..."
+                          placeholder="Pilih provinsi"
+                          searchPlaceholder="Cari provinsi"
                           emptyMessage="Tidak ada provinsi yang ditemukan."
                           open={provinceOpen}
                           onOpenChange={setProvinceOpen}
                           invalid={fieldState.invalid}
+                          className="bg-white"
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -572,12 +662,10 @@ function RouteComponent() {
                     control={form.control}
                     name="regencyId"
                     render={({ field, fieldState }) => (
-                      <Field
-                        data-invalid={fieldState.invalid}
-                        className="space-y-1"
-                      >
+                      <Field data-invalid={fieldState.invalid}>
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Kabupaten/Kota *
+                          Kabupaten/Kota
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <ComboBox
                           options={regency || []}
@@ -587,13 +675,14 @@ function RouteComponent() {
                             form.setValue("districtId", "");
                             form.setValue("villageId", "");
                           }}
-                          placeholder="Pilih kabupaten/kota..."
-                          searchPlaceholder="Cari kabupaten/kota..."
+                          placeholder="Pilih kabupaten/kota"
+                          searchPlaceholder="Cari kabupaten/kota"
                           emptyMessage="Tidak ada kabupaten/kota yang ditemukan."
                           open={regencyOpen}
                           onOpenChange={setRegencyOpen}
                           disabled={!provinceId}
                           invalid={fieldState.invalid}
+                          className="bg-white"
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -606,12 +695,10 @@ function RouteComponent() {
                     control={form.control}
                     name="districtId"
                     render={({ field, fieldState }) => (
-                      <Field
-                        data-invalid={fieldState.invalid}
-                        className="space-y-1"
-                      >
+                      <Field data-invalid={fieldState.invalid}>
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Kecamatan *
+                          Kecamatan
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <ComboBox
                           options={district || []}
@@ -620,13 +707,14 @@ function RouteComponent() {
                             field.onChange(val);
                             form.setValue("villageId", "");
                           }}
-                          placeholder="Pilih kecamatan..."
-                          searchPlaceholder="Cari kecamatan..."
+                          placeholder="Pilih kecamatan"
+                          searchPlaceholder="Cari kecamatan"
                           emptyMessage="Tidak ada kecamatan yang ditemukan."
                           open={districtOpen}
                           onOpenChange={setDistrictOpen}
                           disabled={!regencyId}
                           invalid={fieldState.invalid}
+                          className="bg-white"
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -639,24 +727,23 @@ function RouteComponent() {
                     control={form.control}
                     name="villageId"
                     render={({ field, fieldState }) => (
-                      <Field
-                        data-invalid={fieldState.invalid}
-                        className="space-y-1"
-                      >
+                      <Field data-invalid={fieldState.invalid}>
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Desa/Kelurahan *
+                          Desa/Kelurahan
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <ComboBox
                           options={village || []}
                           value={field.value}
                           onChange={field.onChange}
-                          placeholder="Pilih desa/kelurahan..."
-                          searchPlaceholder="Cari desa/kelurahan..."
+                          placeholder="Pilih desa/kelurahan"
+                          searchPlaceholder="Cari desa/kelurahan"
                           emptyMessage="Tidak ada desa/kelurahan yang ditemukan."
                           open={villageOpen}
                           onOpenChange={setVillageOpen}
                           disabled={!districtId}
                           invalid={fieldState.invalid}
+                          className="bg-white"
                         />
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -665,10 +752,32 @@ function RouteComponent() {
                     )}
                   />
                 </div>
+
+                <Controller
+                  control={form.control}
+                  name="address"
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel className="ml-1 text-sm font-bold">
+                        Alamat Lengkap
+                        <span className="text-red-700">*</span>
+                      </FieldLabel>
+                      <Textarea
+                        placeholder="Masukkan alamat perusahaan Anda"
+                        className="h-24 resize-none text-sm"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
               </FieldGroup>
             </div>
 
-            {/* STEP 2: Kontak & Pimpinan */}
+            {/* STEP 2: Lokasi Pengujian */}
             <div
               className={cn(
                 "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
@@ -677,7 +786,34 @@ function RouteComponent() {
             >
               <div className="mb-4 border-b border-slate-100 pb-4">
                 <h3 className="text-lg font-semibold text-neutral-800">
-                  2. Kontak & Pimpinan
+                  2. Lokasi
+                </h3>
+
+                <p className="text-sm text-slate-500">
+                  Tambahkan lokasi pengujian perusahaan.
+                </p>
+              </div>
+
+              <FieldGroup>
+                <TestingLocationList
+                  locations={testingLocations}
+                  onAdd={openAddLocationDialog}
+                  onEdit={openEditLocationDialog}
+                  onRemove={removeTestingLocation}
+                />
+              </FieldGroup>
+            </div>
+
+            {/* STEP 3: Kontak & Pimpinan */}
+            <div
+              className={cn(
+                "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
+                currentStep !== 3 && "hidden",
+              )}
+            >
+              <div className="mb-4 border-b border-slate-100 pb-4">
+                <h3 className="text-lg font-semibold text-neutral-800">
+                  3. Kontak & Pimpinan
                 </h3>
                 <p className="text-sm text-slate-500">
                   Informasi penanggung jawab pengujian (PIC) dan pimpinan
@@ -686,26 +822,35 @@ function RouteComponent() {
               </div>
 
               <FieldGroup>
-                <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <div className="space-y-5 rounded-xl border border-slate-200 bg-slate-50 p-5">
                   <div className="mb-2 flex items-center gap-2 font-semibold text-primary">
-                    <Users className="h-5 w-5" />
+                    <UserCheck2 className="h-5 w-5" />
                     Penanggung Jawab / PIC
                   </div>
+
+                  <label className="ml-1 flex items-center gap-2 pt-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={handleCheckboxChange}
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    Gunakan data akun saya sebagai Penanggung Jawab (PIC).
+                  </label>
+
                   <Controller
                     control={form.control}
                     name="responsibleTestingPerson"
                     render={({ field, fieldState }) => (
-                      <Field
-                        data-invalid={fieldState.invalid}
-                        className="space-y-1"
-                      >
+                      <Field data-invalid={fieldState.invalid}>
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Nama PIC *
+                          Nama PIC
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <Input
                           type="text"
                           placeholder="Nama lengkap PIC"
-                          className="h-11 bg-white text-sm"
+                          className="h-10 bg-white text-sm"
                           {...field}
                           aria-invalid={fieldState.invalid}
                         />
@@ -721,17 +866,15 @@ function RouteComponent() {
                       control={form.control}
                       name="responsibleTestingPersonEmail"
                       render={({ field, fieldState }) => (
-                        <Field
-                          data-invalid={fieldState.invalid}
-                          className="space-y-1"
-                        >
+                        <Field data-invalid={fieldState.invalid}>
                           <FieldLabel className="ml-1 text-sm font-bold">
-                            Email PIC *
+                            Email PIC
+                            <span className="text-red-700">*</span>
                           </FieldLabel>
                           <Input
                             type="email"
                             placeholder="email.pic@contoh.com"
-                            className="h-11 bg-white text-sm"
+                            className="h-10 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -746,18 +889,16 @@ function RouteComponent() {
                       control={form.control}
                       name="responsibleTestingPersonPhone"
                       render={({ field, fieldState }) => (
-                        <Field
-                          data-invalid={fieldState.invalid}
-                          className="space-y-1"
-                        >
+                        <Field data-invalid={fieldState.invalid}>
                           <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
-                            No WhatsApp PIC *
+                            No WhatsApp PIC
+                            <span className="text-red-700">*</span>
                             <HelpTooltip content="Nomor WhatsApp aktif untuk menerima notifikasi otomatis terkait pengujian." />
                           </FieldLabel>
                           <Input
                             type="tel"
                             placeholder="08xxxxxxxxxx"
-                            className="h-11 bg-white text-sm"
+                            className="h-10 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -770,9 +911,9 @@ function RouteComponent() {
                   </div>
                 </div>
 
-                <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
-                  <div className="mb-2 flex items-center gap-2 font-semibold text-primary">
-                    <Building className="h-5 w-5" />
+                <div className="space-y-5 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="mb-4 flex items-center gap-2 font-semibold text-primary">
+                    <UserRoundCog className="h-5 w-5" />
                     Pimpinan Perusahaan
                   </div>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -780,17 +921,15 @@ function RouteComponent() {
                       control={form.control}
                       name="headOfCompany"
                       render={({ field, fieldState }) => (
-                        <Field
-                          data-invalid={fieldState.invalid}
-                          className="space-y-1"
-                        >
+                        <Field data-invalid={fieldState.invalid}>
                           <FieldLabel className="ml-1 text-sm font-bold">
-                            Nama Pimpinan *
+                            Nama Pimpinan
+                            <span className="text-red-700">*</span>
                           </FieldLabel>
                           <Input
                             type="text"
                             placeholder="Nama Pimpinan Perusahaan"
-                            className="h-11 bg-white text-sm"
+                            className="h-10 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -805,17 +944,15 @@ function RouteComponent() {
                       control={form.control}
                       name="headOfCompanyPosition"
                       render={({ field, fieldState }) => (
-                        <Field
-                          data-invalid={fieldState.invalid}
-                          className="space-y-1"
-                        >
+                        <Field data-invalid={fieldState.invalid}>
                           <FieldLabel className="ml-1 text-sm font-bold">
-                            Jabatan *
+                            Jabatan
+                            <span className="text-red-700">*</span>
                           </FieldLabel>
                           <Input
                             type="text"
                             placeholder="Direktur Utama / Manajer"
-                            className="h-11 bg-white text-sm"
+                            className="h-10 bg-white text-sm"
                             {...field}
                             aria-invalid={fieldState.invalid}
                           />
@@ -831,17 +968,15 @@ function RouteComponent() {
                     control={form.control}
                     name="headOfCompanyEmail"
                     render={({ field, fieldState }) => (
-                      <Field
-                        data-invalid={fieldState.invalid}
-                        className="space-y-1"
-                      >
+                      <Field data-invalid={fieldState.invalid}>
                         <FieldLabel className="ml-1 text-sm font-bold">
-                          Email Pimpinan *
+                          Email Pimpinan
+                          <span className="text-red-700">*</span>
                         </FieldLabel>
                         <Input
                           type="email"
                           placeholder="email@perusahaan.com"
-                          className="h-11 bg-white text-sm"
+                          className="h-10 bg-white text-sm"
                           {...field}
                           aria-invalid={fieldState.invalid}
                         />
@@ -860,16 +995,16 @@ function RouteComponent() {
               </FieldGroup>
             </div>
 
-            {/* STEP 3: WLKP & Tenaga Kerja */}
+            {/* STEP 4: WLKP & Tenaga Kerja */}
             <div
               className={cn(
                 "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
-                currentStep !== 3 && "hidden",
+                currentStep !== 4 && "hidden",
               )}
             >
               <div className="mb-4 border-b border-slate-100 pb-4">
                 <h3 className="text-lg font-semibold text-neutral-800">
-                  3. Data Ketenagakerjaan
+                  4. Data Ketenagakerjaan
                 </h3>
                 <p className="text-sm text-slate-500">
                   Informasi kepatuhan WLKP dan rincian tenaga kerja perusahaan.
@@ -883,16 +1018,14 @@ function RouteComponent() {
                       control={form.control}
                       name="maleWorkers"
                       render={({ field, fieldState }) => (
-                        <Field
-                          data-invalid={fieldState.invalid}
-                          className="space-y-1"
-                        >
+                        <Field data-invalid={fieldState.invalid}>
                           <FieldLabel className="ml-1 text-sm font-bold">
-                            Jumlah Pekerja Laki-laki *
+                            Jumlah Pekerja Laki-laki
+                            <span className="text-red-700">*</span>
                           </FieldLabel>
                           <NumberInput
                             placeholder="Contoh: 50"
-                            className="h-11 text-sm"
+                            className="h-10 text-sm"
                             value={field.value ?? ""}
                             onChange={(value) => field.onChange(String(value))}
                             onBlur={field.onBlur}
@@ -911,16 +1044,14 @@ function RouteComponent() {
                       control={form.control}
                       name="femaleWorkers"
                       render={({ field, fieldState }) => (
-                        <Field
-                          data-invalid={fieldState.invalid}
-                          className="space-y-1"
-                        >
+                        <Field data-invalid={fieldState.invalid}>
                           <FieldLabel className="ml-1 text-sm font-bold">
-                            Jumlah Pekerja Perempuan *
+                            Jumlah Pekerja Perempuan
+                            <span className="text-red-700">*</span>
                           </FieldLabel>
                           <NumberInput
                             placeholder="Contoh: 25"
-                            className="h-11 text-sm"
+                            className="h-10 text-sm"
                             value={field.value ?? ""}
                             onChange={(value) => field.onChange(String(value))}
                             onBlur={field.onBlur}
@@ -942,12 +1073,13 @@ function RouteComponent() {
                     render={({ field, fieldState }) => (
                       <FieldSet
                         data-invalid={fieldState.invalid}
-                        className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                        className="rounded-xl border p-5"
                       >
-                        <FieldLegend className="flex items-center gap-1 text-base">
-                          Fasilitas Kesehatan di Perusahaan *
+                        <div className="flex items-center gap-2 text-base font-semibold">
+                          Fasilitas Kesehatan di Perusahaan
+                          <span className="text-red-700">*</span>
                           <HelpTooltip content="Apakah terdapat klinik, ruang P3K, atau layanan medis internal di area perusahaan?" />
-                        </FieldLegend>
+                        </div>
                         <RadioGroup
                           name={field.name}
                           value={String(field.value)}
@@ -1017,16 +1149,16 @@ function RouteComponent() {
               </FieldGroup>
             </div>
 
-            {/* STEP 4: Bank */}
+            {/* STEP 5: Bank */}
             <div
               className={cn(
                 "animate-in space-y-6 duration-500 fade-in slide-in-from-right-4",
-                currentStep !== 4 && "hidden",
+                currentStep !== 5 && "hidden",
               )}
             >
               <div className="mb-4 border-b border-slate-100 pb-4">
                 <h3 className="text-lg font-semibold text-neutral-800">
-                  4. Informasi Bank
+                  5. Informasi Bank
                 </h3>
                 <p className="text-sm text-slate-500">
                   Data rekening bank untuk keperluan pengembalian dana (refund)
@@ -1045,14 +1177,11 @@ function RouteComponent() {
                     >
                       <FieldLabel className="ml-1 flex items-center gap-1 text-sm font-bold">
                         Nama Bank
-                        <span className="ml-2 font-normal text-slate-400">
-                          (Opsional)
-                        </span>
                       </FieldLabel>
                       <Input
                         type="text"
                         placeholder="Contoh: Bank Mandiri"
-                        className="h-11 text-sm"
+                        className="h-10 text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
@@ -1073,14 +1202,11 @@ function RouteComponent() {
                     >
                       <FieldLabel className="ml-1 text-sm font-bold">
                         Nomor Rekening
-                        <span className="ml-2 font-normal text-slate-400">
-                          (Opsional)
-                        </span>
                       </FieldLabel>
                       <Input
                         type="text"
                         placeholder="Contoh: 14200xxxxxxxx"
-                        className="h-11 text-sm"
+                        className="h-10 text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
@@ -1101,14 +1227,11 @@ function RouteComponent() {
                     >
                       <FieldLabel className="ml-1 text-sm font-bold">
                         Nama Pemilik Rekening
-                        <span className="ml-2 font-normal text-slate-400">
-                          (Opsional)
-                        </span>
                       </FieldLabel>
                       <Input
                         type="text"
                         placeholder="Atas nama sesuai buku tabungan"
-                        className="h-11 text-sm"
+                        className="h-10 text-sm"
                         {...field}
                         aria-invalid={fieldState.invalid}
                       />
@@ -1122,33 +1245,35 @@ function RouteComponent() {
             </div>
 
             {/* Navigation Buttons */}
-            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-6">
+            <div className="mt-4 flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
               <Button
                 type="button"
-                variant="outline"
                 onClick={prevStep}
                 className={cn(
-                  "h-11 gap-2 px-6 font-medium",
+                  "h-10 gap-2 border border-primary bg-white px-6 font-medium text-primary hover:bg-primary hover:text-white",
                   currentStep === 1 && "invisible",
                 )}
               >
-                <ArrowLeft className="h-4 w-4" />
                 Kembali
               </Button>
 
-              {currentStep < 4 ? (
+              {currentStep < 5 ? (
                 <Button
                   type="button"
                   onClick={nextStep}
-                  className="ml-auto h-11 gap-2 px-8 font-medium shadow-sm"
+                  className="h-10 gap-2 px-8 font-medium shadow-sm"
                 >
                   Selanjutnya
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button
-                  type="submit"
-                  className="ml-auto h-11 gap-2 bg-green-600 px-8 font-medium shadow-sm hover:bg-green-700"
+                  type="button"
+                  name="create-company"
+                  onClick={() => {
+                    void form.handleSubmit(handleSubmit)();
+                  }}
+                  className="h-10 gap-2 bg-green-600 px-8 font-medium shadow-sm hover:bg-green-700"
                   disabled={createUserCompanyMutation.isPending}
                 >
                   {createUserCompanyMutation.isPending ? (
@@ -1161,6 +1286,24 @@ function RouteComponent() {
               )}
             </div>
           </form>
+
+          <TestingLocationDialog
+            open={locationDialogOpen}
+            onOpenChange={(open) => {
+              setLocationDialogOpen(open);
+
+              if (!open) {
+                setEditingLocationIndex(null);
+                setEditingLocation(null);
+                setDialogRegencyId("");
+              }
+            }}
+            location={editingLocation}
+            regency={locationRegency ?? []}
+            district={locationDistrict ?? []}
+            onRegencyChange={setDialogRegencyId}
+            onSave={saveTestingLocation}
+          />
         </CardContent>
       </Card>
     </div>

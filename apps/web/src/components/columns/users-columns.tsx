@@ -3,7 +3,7 @@ import type { UsersWithoutFoto } from "@tepian-k3/types/platform/users.types";
 import { Route } from "@/routes/(core)/back-office/users";
 import { trpc } from "@/utils/trpc";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import {
   createCompactDateColumn,
   createNumberColumn,
@@ -20,9 +20,11 @@ interface UsersColumnsProps {
 
 export const getUserActionConfig = (
   hasVerificationRole: boolean,
-  onVerify: (userId: string) => void,
-  onReject: (userId: string) => void
-): CrudActionCellConfig<UsersWithoutFoto, (typeof Route)["types"]["searchSchema"]> => ({
+  onReject: (userId: string) => void,
+): CrudActionCellConfig<
+  UsersWithoutFoto,
+  (typeof Route)["types"]["searchSchema"]
+> => ({
   resourceName: "pengguna",
   resourcePath: "users",
   permissionPrefix: "users",
@@ -36,13 +38,6 @@ export const getUserActionConfig = (
   customActions: (row) => {
     const actions: CustomAction[] = [];
     if (hasVerificationRole && !row.deletedAt) {
-      if (row.verificationStatus !== "approved") {
-        actions.push({
-          icon: <CheckCircle className="mr-3 size-5 text-green-600" />,
-          text: "Terima Verifikasi",
-          action: () => onVerify(row.id),
-        });
-      }
       if (row.verificationStatus === "pending") {
         actions.push({
           icon: <XCircle className="mr-3 size-5 text-red-600" />,
@@ -52,7 +47,7 @@ export const getUserActionConfig = (
       }
     }
     return actions;
-  }
+  },
 });
 
 export default function getUsersColumns({

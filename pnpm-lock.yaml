@@ -421,7 +421,7 @@ importers:
         version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       nuqs:
         specifier: 'catalog:'
-        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       pdf-lib:
         specifier: 'catalog:'
         version: 1.17.1
@@ -685,10 +685,10 @@ importers:
         version: 17.2.3
       drizzle-orm:
         specifier: ^0.45.1
-        version: 0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
+        version: 0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
       drizzle-seed:
         specifier: ^0.3.1
-        version: 0.3.1(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7))
+        version: 0.3.1(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7))
       ioredis:
         specifier: ^5.9.1
         version: 5.9.2
@@ -760,6 +760,9 @@ importers:
         specifier: 'catalog:'
         version: 4.2.1
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: ^0.5.8
+        version: 0.5.8
       '@tepian-k3/config':
         specifier: workspace:*
         version: link:../config
@@ -774,7 +777,7 @@ importers:
         version: 11.10.0
       drizzle-orm:
         specifier: ^0.45.1
-        version: 0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(pg@8.16.3)(postgres@3.4.7)
+        version: 0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(pg@8.16.3)(postgres@3.4.7)
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -795,7 +798,7 @@ importers:
         version: link:../types
       drizzle-zod:
         specifier: ^0.8.3
-        version: 0.8.3(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7))(zod@4.2.1)
+        version: 0.8.3(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7))(zod@4.2.1)
       zod:
         specifier: 'catalog:'
         version: 4.2.1
@@ -996,7 +999,7 @@ importers:
         version: 3.19.13
       nuqs:
         specifier: 'catalog:'
-        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+        version: 2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       zod:
         specifier: 'catalog:'
         version: 4.2.1
@@ -1006,7 +1009,7 @@ importers:
         version: link:../config
       drizzle-orm:
         specifier: ^0.45.1
-        version: 0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
+        version: 0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
 
 packages:
 
@@ -1266,8 +1269,8 @@ packages:
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
 
-  '@electric-sql/pglite@0.5.4':
-    resolution: {integrity: sha512-yYZUyyXrHU7tPlCjwZQJ6hIG9DscdCCn7Uk0mYKwC1FeHX286AbcmFveMiRBEak8e9iPupjsoVImN3yJZVed2g==}
+  '@electric-sql/pglite@0.5.8':
+    resolution: {integrity: sha512-n9tsbUOhwx2epK1V0ZG9Ar4SHWUju04dhmzZXiSBXwBoleOvIfals33NAaWgagQVAL4Rbvx/Ptsu3P+pA09f6Q==}
 
   '@emnapi/core@1.7.1':
     resolution: {integrity: sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg==}
@@ -1280,11 +1283,11 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild/aix-ppc64@0.25.12':
     resolution: {integrity: sha512-Hhmwd6CInZ3dwpuGTF8fJG6yoWmsToE+vYgD4nytZVxcu1ulHpUQRAB1UJ8+N1Am3Mz4+xOByoQoSZf4D+CpkA==}
@@ -4657,6 +4660,7 @@ packages:
   cron-parser@4.9.0:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
+    deprecated: v4 is no longer maintained, upgrade to v5
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -4664,6 +4668,7 @@ packages:
 
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
   css-box-model@1.2.1:
     resolution: {integrity: sha512-a7Vr4Q/kd/aw96bnJG332W9V9LkJO69JRcaCYDUqjp6/z0w6VcZjgAcTbgFxEPfBgdnAwlh3iwu+hLopa+flJw==}
@@ -6741,6 +6746,7 @@ packages:
   recharts@2.15.4:
     resolution: {integrity: sha512-UT/q6fwS3c1dHbXv2uFgYJ9BMFHu3fwnd7AYZaEQhXuYQ4hgsxLvsUXzGdKeZrW5xopzDCvuA2N41WJ88I7zIw==}
     engines: {node: '>=14'}
+    deprecated: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
     peerDependencies:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -8104,8 +8110,7 @@ snapshots:
 
   '@drizzle-team/brocli@0.10.2': {}
 
-  '@electric-sql/pglite@0.5.4':
-    optional: true
+  '@electric-sql/pglite@0.5.8': {}
 
   '@emnapi/core@1.7.1':
     dependencies:
@@ -11423,33 +11428,33 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(pg@8.16.3)(postgres@3.4.7):
+  drizzle-orm@0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@11.10.0)(pg@8.16.3)(postgres@3.4.7):
     optionalDependencies:
-      '@electric-sql/pglite': 0.5.4
+      '@electric-sql/pglite': 0.5.8
       '@types/better-sqlite3': 7.6.13
       '@types/pg': 8.16.0
       better-sqlite3: 11.10.0
       pg: 8.16.3
       postgres: 3.4.7
 
-  drizzle-orm@0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7):
+  drizzle-orm@0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7):
     optionalDependencies:
-      '@electric-sql/pglite': 0.5.4
+      '@electric-sql/pglite': 0.5.8
       '@types/better-sqlite3': 7.6.13
       '@types/pg': 8.16.0
       better-sqlite3: 12.11.1
       pg: 8.16.3
       postgres: 3.4.7
 
-  drizzle-seed@0.3.1(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)):
+  drizzle-seed@0.3.1(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)):
     dependencies:
       pure-rand: 6.1.0
     optionalDependencies:
-      drizzle-orm: 0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
+      drizzle-orm: 0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
 
-  drizzle-zod@0.8.3(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7))(zod@4.2.1):
+  drizzle-zod@0.8.3(drizzle-orm@0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7))(zod@4.2.1):
     dependencies:
-      drizzle-orm: 0.45.1(@electric-sql/pglite@0.5.4)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
+      drizzle-orm: 0.45.1(@electric-sql/pglite@0.5.8)(@types/better-sqlite3@7.6.13)(@types/pg@8.16.0)(better-sqlite3@12.11.1)(pg@8.16.3)(postgres@3.4.7)
       zod: 4.2.1
 
   dts-resolver@2.1.3: {}
@@ -12682,7 +12687,7 @@ snapshots:
       path-key: 4.0.0
       unicorn-magic: 0.3.0
 
-  nuqs@2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
+  nuqs@2.8.6(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(next@16.0.9(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
     dependencies:
       '@standard-schema/spec': 1.0.0
       react: 19.2.3

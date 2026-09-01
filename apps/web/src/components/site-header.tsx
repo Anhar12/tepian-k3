@@ -1,10 +1,14 @@
 import * as React from "react";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useLocation, Link, useNavigate } from "@tanstack/react-router";
+import {
+  useLocation,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useMemo } from "react";
 import { trpc } from "@/utils/trpc";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -26,8 +30,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { logout } from "@/lib/logout";
 import { BACK_OFFICE_ROLES, EMPLOYEE_ROLES } from "@tepian-k3/constants";
+import { cn } from "@/lib/utils";
+import { useDashboardStore } from "@/stores/dashboard.stores";
 
 function formatSegment(segment: string): string {
   return segment
@@ -114,7 +121,9 @@ export function SiteHeader() {
   const navigate = useNavigate();
 
   // Fetch logged in profile info
-  const { data: profile } = useQuery(trpc.platform.auth.profile.queryOptions());
+  const { data: profile } = useSuspenseQuery(
+    trpc.platform.auth.profile.queryOptions(),
+  );
 
   const pageTitle = useMemo(
     () => getPageTitle(location.pathname),
@@ -131,7 +140,74 @@ export function SiteHeader() {
       .toUpperCase();
   }, [profile?.name]);
 
-  const roleNames = profile?.roles?.map((role) => role.name) ?? [];
+  const { activeMode, setActiveMode } = useDashboardStore();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isOnBackOffice = pathname.startsWith("/back-office");
+
+  React.useEffect(() => {
+    if (isOnBackOffice) {
+      if (
+        pathname.includes("/back-office/pelatihan") ||
+        pathname.includes("/back-office/order-pelatihan") ||
+        pathname.includes("/back-office/absensi") ||
+        pathname.includes("/back-office/sertifikat-pelatihan") ||
+        pathname.includes("/back-office/landing-settings") ||
+        pathname.includes("/back-office/ppid") ||
+        pathname.includes("/back-office/media-publications")
+      ) {
+        setActiveMode("pelatihan");
+      } else if (
+        pathname.includes("/back-office/orders") ||
+        pathname.includes("/back-office/worksheets") ||
+        pathname.includes("/back-office/testings") ||
+        pathname.includes("/back-office/users") ||
+        pathname.includes("/back-office/positions") ||
+        pathname.includes("/back-office/employees") ||
+        pathname.includes("/back-office/roles") ||
+        pathname.includes("/back-office/clusters") ||
+        pathname.includes("/back-office/parameter-categories") ||
+        pathname.includes("/back-office/parameters") ||
+        pathname.includes("/back-office/tool-codes") ||
+        pathname.includes("/back-office/tools") ||
+        pathname.includes("/back-office/chemical-materials") ||
+        pathname.includes("/back-office/kblis") ||
+        pathname.includes("/back-office/survey-questions") ||
+        pathname.includes("/back-office/banners") ||
+        pathname.includes("/back-office/news") ||
+        pathname.includes("/back-office/audits")
+      ) {
+        setActiveMode("pengujian");
+      }
+    } else {
+      if (
+        pathname.includes("/dashboard/pelatihan") ||
+        pathname.includes("/pelatihan/transaksi")
+      ) {
+        setActiveMode("pelatihan");
+      } else if (
+        pathname.includes("/dashboard/company") ||
+        pathname.includes("/pengujian")
+      ) {
+        setActiveMode("pengujian");
+      }
+    }
+  }, [pathname, isOnBackOffice, setActiveMode]);
+
+  const roleNames = profile.roles.map((role) => role.name);
+  const hasUserRole = roleNames.includes("user");
+
+  // const hasEmployeeRole =
+  //   roleNames.some((name) =>
+  //     (EMPLOYEE_ROLES as readonly string[]).includes(name),
+  //   ) || roleNames.some((name) => name !== "user");
+
+  // const hasBackOfficeRole =
+  //   isOnBackOffice ||
+  //   roleNames.some((name) =>
+  //     (BACK_OFFICE_ROLES as readonly string[]).includes(name),
+  //   ) ||
+  //   roleNames.some((name) => name !== "user");
+
   const canAccessBackOffice =
     roleNames.some((name) =>
       (BACK_OFFICE_ROLES as readonly string[]).includes(name),
@@ -142,15 +218,15 @@ export function SiteHeader() {
     roleNames.some((name) => name !== "user");
 
   return (
-    <header className="sticky top-0 z-40 flex h-12 shrink-0 items-center justify-between border-b border-neutral-200/80 bg-white/80 px-4 backdrop-blur-md transition-all duration-200 dark:border-zinc-800/80 dark:bg-zinc-950/80">
+    <header className="sticky top-0 z-40 flex h-13 shrink-0 items-center justify-between border-b px-4 shadow-sm backdrop-blur-md transition-all duration-200 dark:border-zinc-800/80 dark:bg-zinc-950/80">
       {/* Left section: Toggle + Breadcrumbs */}
-      <div className="flex items-center gap-3">
-        <SidebarTrigger className="-ml-1 h-8 w-8 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100" />
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="-ml-1 h-8 w-8 text-slate-800 hover:bg-neutral-100 hover:text-primary dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100" />
         <Separator
           orientation="vertical"
           className="h-4 bg-neutral-200 dark:bg-zinc-800"
         />
-        <div className="flex items-center gap-2 text-xs font-semibold">
+        {/* <div className="flex items-center gap-2 text-xs font-semibold">
           <Link
             to="/"
             className="text-neutral-400 transition-colors hover:text-neutral-700 dark:text-zinc-500 dark:hover:text-zinc-300"
@@ -161,7 +237,108 @@ export function SiteHeader() {
           <span className="font-bold text-neutral-800 dark:text-zinc-200">
             {pageTitle}
           </span>
-        </div>
+        </div> */}
+
+        {hasUserRole && !isOnBackOffice && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMode("pengujian");
+                navigate({ to: "/dashboard" });
+              }}
+              className={cn(
+                "relative flex cursor-pointer items-center justify-center gap-1.5 px-2 py-2 text-[13px] font-semibold tracking-wide transition-all duration-300",
+                activeMode === "pengujian"
+                  ? "text-primary"
+                  : "text-slate-800 hover:bg-primary/10 hover:text-primary",
+              )}
+            >
+              {/* <IconFlask className="size-4" /> */}
+              Pengujian
+              <div
+                className={cn(
+                  "absolute bottom-0 w-full border-b-2 border-primary",
+                  activeMode === "pengujian" ? "block" : "hidden",
+                )}
+              ></div>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMode("pelatihan");
+                navigate({
+                  to: "/dashboard/pelatihan",
+                  search: { tab: "profil" },
+                });
+              }}
+              className={cn(
+                "relative flex cursor-pointer items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-semibold tracking-wide transition-all duration-300",
+                activeMode === "pelatihan"
+                  ? "text-primary"
+                  : "text-slate-800 hover:bg-primary/10 hover:text-primary",
+              )}
+            >
+              {/* <IconBook className="size-4" /> */}
+              Pelatihan
+              <div
+                className={cn(
+                  "absolute bottom-0 w-full border-b-2 border-primary",
+                  activeMode === "pelatihan" ? "block" : "hidden",
+                )}
+              ></div>
+            </button>
+          </div>
+        )}
+
+        {isOnBackOffice && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMode("pengujian");
+                navigate({ to: "/back-office" });
+              }}
+              className={cn(
+                "relative flex cursor-pointer items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-semibold tracking-wide transition-all duration-300",
+                activeMode === "pengujian"
+                  ? "text-primary"
+                  : "text-slate-800 hover:bg-primary/10 hover:text-primary",
+              )}
+            >
+              {/* <IconFlask className="size-4" /> */}
+              Pengujian
+              <div
+                className={cn(
+                  "absolute bottom-0 w-full border-b-2 border-primary",
+                  activeMode === "pengujian" ? "block" : "hidden",
+                )}
+              ></div>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMode("pelatihan");
+                navigate({ to: "/back-office" });
+              }}
+              className={cn(
+                "relative flex cursor-pointer items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-semibold tracking-wide transition-all duration-300",
+                activeMode === "pelatihan"
+                  ? "text-primary"
+                  : "text-slate-800 hover:bg-primary/10 hover:text-primary",
+              )}
+            >
+              {/* <IconBook className="size-4" /> */}
+              Pelatihan
+              <div
+                className={cn(
+                  "absolute bottom-0 w-full border-b-2 border-primary",
+                  activeMode === "pelatihan" ? "block" : "hidden",
+                )}
+              ></div>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Right section: Actions + Profile Dropdown */}
@@ -171,10 +348,10 @@ export function SiteHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-8 w-8 rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
+            className="relative h-8 w-8 rounded-lg text-slate-800 hover:bg-primary/10 hover:text-primary dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
           >
-            <Bell className="h-4 w-4" />
-            <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+            <Bell className="size-6" />
+            <span className="absolute top-1 right-1.5 flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-500"></span>
             </span>
@@ -190,11 +367,17 @@ export function SiteHeader() {
         {profile && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex h-9 items-center gap-2 rounded-xl p-1 pl-2.5 transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-zinc-900"
-              >
-                <div className="flex hidden flex-col items-end text-right sm:flex">
+              <Button className="flex h-10 items-center gap-4 border bg-slate-50 transition-all duration-200 hover:bg-primary/10 dark:hover:bg-zinc-900">
+                <Avatar className="h-7 w-7 shrink-0 rounded-lg ring-1 ring-neutral-200/50">
+                  <AvatarImage
+                    src={profile.profilePictureUrl || undefined}
+                    alt={profile.name}
+                  />
+                  <AvatarFallback className="rounded-full bg-primary text-[10px] font-black text-white">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col items-end text-right sm:flex">
                   <span className="text-xs leading-none font-bold text-zinc-800 dark:text-zinc-200">
                     {profile.name}
                   </span>
@@ -202,20 +385,11 @@ export function SiteHeader() {
                     {profile.roles?.[0]?.name ?? "Admin"}
                   </span>
                 </div>
-                <Avatar className="h-7 w-7 shrink-0 rounded-lg ring-1 ring-neutral-200/50">
-                  <AvatarImage
-                    src={profile.profilePictureUrl || undefined}
-                    alt={profile.name}
-                  />
-                  <AvatarFallback className="rounded-lg bg-teal-500/10 text-[10px] font-black text-teal-700">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <ChevronDown className="hidden h-3.5 w-3.5 shrink-0 text-zinc-400 sm:block" />
+                <ChevronDown className="hidden h-3.5 w-3.5 shrink-0 text-slate-800 sm:block" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="mt-1.5 w-56 rounded-xl border border-neutral-100 shadow-xl"
+              className="mt-1.5 w-56 rounded-xl border shadow-xl"
               align="end"
             >
               <DropdownMenuLabel className="p-2 font-normal">

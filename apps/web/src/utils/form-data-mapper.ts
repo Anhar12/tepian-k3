@@ -42,6 +42,11 @@ export function toFormData<T extends Record<string, unknown>>(
 
     // Handle arrays
     if (Array.isArray(value)) {
+      if (value.length === 0) {
+        formData.append(formKey, "[]");
+        continue;
+      }
+
       value.forEach((item: unknown, index) => {
         if (item instanceof File || item instanceof Blob) {
           formData.append(`${formKey}[]`, item);

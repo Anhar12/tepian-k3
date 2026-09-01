@@ -1018,32 +1018,6 @@ const usersQueries = {
     });
   },
 
-  approveUser(userId: string) {
-    return Effect.tryPromise({
-      try: () =>
-        db
-          .update(users)
-          .set({
-            emailVerified: true,
-            emailVerifiedAt: new Date().toISOString(),
-            verificationStatus: "approved",
-            verificationRejectionReason: null,
-          })
-          .where(eq(users.id, userId))
-          .returning(),
-      catch: (error) => {
-        logError("usersQueries.approveUser", "Failed to approve user", {
-          userId,
-          error,
-        });
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Gagal menyetujui verifikasi pengguna",
-        });
-      },
-    });
-  },
-
   rejectUser(userId: string, reason: string) {
     return Effect.tryPromise({
       try: () =>

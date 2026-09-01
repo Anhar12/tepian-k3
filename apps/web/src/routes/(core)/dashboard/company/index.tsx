@@ -5,8 +5,6 @@ import { DataTableSortList } from "@/components/data-table/data-table-sort-list"
 import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 import { PermissionGate } from "@/components/permission-gate";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { pageHead } from "@/utils/page-head";
 import { trpc } from "@/utils/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -65,23 +63,7 @@ function RouteComponent() {
   return (
     <div className="flex flex-col">
       <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="flex flex-row gap-2">
-          <Checkbox
-            id="show-deleted-clusters"
-            checked={showDeleted}
-            onCheckedChange={(checked) => {
-              navigate({
-                to: "/dashboard/company",
-                search: {
-                  ...params,
-                  showDeleted: Boolean(checked),
-                },
-              });
-              setShowDeleted(Boolean(checked));
-            }}
-          />
-          <Label>Deleted Companies</Label>
-        </div>
+        <div className="flex flex-row gap-2"></div>
         <PermissionGate permission="user-company.create">
           <Button onClick={() => navigate({ to: "/dashboard/company/create" })}>
             <PlusCircle className="size-4" />

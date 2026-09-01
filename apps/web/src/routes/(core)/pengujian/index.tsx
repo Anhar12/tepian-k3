@@ -13,7 +13,7 @@ export const Route = createFileRoute("/(core)/pengujian/")({
 
 function RouteComponent() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full flex-col gap-4 px-6">
       {/* Location Section */}
       <LocationSection />
 

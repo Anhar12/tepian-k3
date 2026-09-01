@@ -13,11 +13,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { globalErrorToast, globalSuccessToast } from "@/lib/toast";
 import { trpc } from "@/utils/trpc";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { pageHead } from "@/utils/page-head";
 import { ArrowLeft, CheckCircle2, Loader2, Info, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import z from "zod";
 import { Separator } from "@/components/ui/separator";
 import ImageWithFallback from "@/components/image-with-fallback";
@@ -25,6 +25,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const validateEmailSchema = z.object({
   email: z.string().optional(),
+  token: z.string().optional(),
 });
 
 export const Route = createFileRoute("/(auth)/verify-email")({
@@ -36,10 +37,39 @@ export const Route = createFileRoute("/(auth)/verify-email")({
 const BannerImage = "/assets/banner-auth.webp";
 
 function VerifyEmailComponent() {
-  const { email: emailFromSearch } = Route.useSearch();
+  const { email: emailFromSearch, token } = Route.useSearch();
   const [emailInput, setEmailInput] = useState<string>("");
   const [email, setEmail] = useState<string>("");
+  const verificationStarted = useRef(false);
   const navigate = useNavigate();
+  const verifyEmailMutation = useMutation(
+    trpc.platform.auth.verifyEmail.mutationOptions({
+      onSuccess: () => {
+        globalSuccessToast("Email berhasil diverifikasi. Silakan masuk.");
+        navigate({ to: "/login" });
+      },
+      onError: (verificationError) => {
+        globalErrorToast(verificationError.message);
+      },
+    }),
+  );
+  const resendEmailVerificationMutation = useMutation(
+    trpc.platform.auth.resendEmailVerification.mutationOptions({
+      onSuccess: (data) => {
+        globalSuccessToast(data.message);
+      },
+      onError: (resendError) => {
+        globalErrorToast(resendError.message);
+      },
+    }),
+  );
+
+  useEffect(() => {
+    if (token && !verificationStarted.current) {
+      verificationStarted.current = true;
+      verifyEmailMutation.mutate({ token });
+    }
+  }, [token, verifyEmailMutation]);
 
   // Set email from search param on load
   useEffect(() => {
@@ -61,10 +91,10 @@ function VerifyEmailComponent() {
     },
   });
 
-  // Watch for approval status
+  // Redirect after the email verification status becomes active.
   useEffect(() => {
     if (verificationStatusData?.verificationStatus === "approved") {
-      globalSuccessToast("Akun Anda telah disetujui oleh Administrator!");
+      globalSuccessToast("Email Anda berhasil diverifikasi!");
       const timer = setTimeout(() => {
         navigate({ to: "/login" });
       }, 2000);
@@ -150,10 +180,10 @@ function VerifyEmailComponent() {
     return (
       <div className="flex flex-col gap-1 text-center md:text-left">
         <h1 className="font-['Poppins'] text-[32px] leading-12 font-semibold text-[#242321]">
-          Menunggu Verifikasi
+          Verifikasi Email
         </h1>
         <p className="font-['Poppins'] text-[14px] leading-5.25 font-medium text-[#242321]">
-          Dalam peninjauan Administrator
+          Silakan cek email untuk mengaktifkan akun
         </p>
       </div>
     );
@@ -183,8 +213,8 @@ function VerifyEmailComponent() {
                     Cek Status Pendaftaran
                   </CardTitle>
                   <CardDescription className="font-['Poppins'] text-[14px] leading-5.25 font-normal text-[#64748B]">
-                    Masukkan email Anda untuk melihat status verifikasi akun
-                    oleh Administrator.
+                    Masukkan email Anda untuk melihat status verifikasi email
+                    akun.
                   </CardDescription>
                 </CardHeader>
 
@@ -291,11 +321,11 @@ function VerifyEmailComponent() {
                   </div>
                   <div className="space-y-2">
                     <h2 className="font-['Poppins'] text-[20px] font-semibold text-[#4D4D4D]">
-                      Pendaftaran Disetujui!
+                      Email Berhasil Diverifikasi!
                     </h2>
                     <p className="font-['Poppins'] text-[14px] text-[#64748B]">
-                      Akun Anda telah disetujui oleh Administrator. Mengalihkan
-                      ke halaman masuk...
+                      Email Anda telah diverifikasi. Mengalihkan ke halaman
+                      masuk...
                     </p>
                   </div>
                   <Loader2 className="h-8 w-8 animate-spin text-[#1061D6]" />
@@ -310,7 +340,7 @@ function VerifyEmailComponent() {
                 <>
                   <CardHeader className="space-y-1 px-6 pt-6 pb-6">
                     <CardTitle className="font-['Poppins'] text-[20px] leading-6 font-semibold text-[#4D4D4D]">
-                      Menunggu Persetujuan
+                      Menunggu Verifikasi Email
                     </CardTitle>
                     <CardDescription className="font-['Poppins'] text-[14px] leading-5.25 font-normal text-[#64748B]">
                       Status akun dengan email{" "}
@@ -324,18 +354,30 @@ function VerifyEmailComponent() {
                     <Alert className="border-blue-200 bg-blue-50 text-blue-800">
                       <Info className="h-4 w-4 text-blue-600" />
                       <AlertTitle className="font-semibold text-blue-900">
-                        Menunggu Verifikasi Administrator
+                        Menunggu Verifikasi Email
                       </AlertTitle>
                       <AlertDescription className="text-blue-700">
-                        Pendaftaran akun Anda sedang dalam antrean verifikasi.
-                        Mohon tunggu beberapa saat. Halaman ini akan mendeteksi
-                        persetujuan secara otomatis.
+                        Kami telah mengirim link verifikasi ke alamat email
+                        Anda. Buka link tersebut untuk mengaktifkan akun.
                       </AlertDescription>
                     </Alert>
 
                     <div className="flex flex-col items-center justify-center py-4">
                       <Loader2 className="h-10 w-10 animate-spin text-[#1061D6]" />
                     </div>
+
+                    <Button
+                      variant="outline"
+                      className="h-10 w-full font-['Poppins'] text-sm"
+                      disabled={resendEmailVerificationMutation.isPending}
+                      onClick={() =>
+                        resendEmailVerificationMutation.mutate({ email })
+                      }
+                    >
+                      {resendEmailVerificationMutation.isPending
+                        ? "Mengirim ulang..."
+                        : "Kirim Ulang Email Verifikasi"}
+                    </Button>
 
                     <div className="flex flex-col gap-3">
                       <Separator className="bg-slate-100" />

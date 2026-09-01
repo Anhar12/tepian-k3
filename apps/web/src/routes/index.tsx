@@ -256,7 +256,7 @@ function HomeComponent() {
         id="beranda"
       >
         <div
-          className="group/hero relative aspect-16/9 w-full overflow-hidden rounded-[2rem] bg-primary shadow-xl"
+          className="group/hero relative aspect-video w-full overflow-hidden rounded-4xl bg-primary shadow-xl"
           onMouseEnter={() => {
             const autoplay = api?.plugins()?.autoplay as
               | { stop?: () => void }
@@ -271,7 +271,7 @@ function HomeComponent() {
           }}
         >
           {isBannersLoading ? (
-            <Skeleton className="h-full w-full rounded-[2rem]" />
+            <Skeleton className="h-full w-full rounded-4xl" />
           ) : (
             <Carousel
               setApi={setApi}
@@ -283,7 +283,7 @@ function HomeComponent() {
               }
               className="h-full w-full"
             >
-              <CarouselContent className="-ml-0 h-full">
+              <CarouselContent className="ml-0 h-full">
                 {displayBanners.map((b, idx) => (
                   <CarouselItem key={b.id ?? idx} className="h-full pl-0">
                     <div className="relative h-full w-full overflow-hidden">
@@ -424,7 +424,7 @@ function HomeComponent() {
               </svg>
 
               {/* 3D Illustration */}
-              <div className="absolute inset-x-0 top-0 z-20 flex h-[190px] items-end justify-center">
+              <div className="absolute inset-x-0 top-0 z-20 flex h-47.5 items-end justify-center">
                 <ImageWithFallback
                   src={item.imageSrc}
                   alt={item.title}
@@ -528,7 +528,7 @@ function HomeComponent() {
 
               return (
                 <div className="flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-xl">
-                  <div className="flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 py-10 text-white">
+                  <div className="flex flex-col items-center justify-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 py-10 text-white">
                     <ImageWithFallback
                       src="/assets/layanan_pengujian_thumb.webp"
                       alt="Layanan Pengujian"
@@ -576,7 +576,7 @@ function HomeComponent() {
 
               return (
                 <div className="flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-xl">
-                  <div className="flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-400 to-teal-500 py-10 text-white">
+                  <div className="flex flex-col items-center justify-center gap-3 bg-linear-to-r from-emerald-400 to-teal-500 py-10 text-white">
                     <ImageWithFallback
                       src="/assets/layanan_pelatihan_thumb.webp"
                       alt="Layanan Pelatihan"
@@ -624,7 +624,7 @@ function HomeComponent() {
 
               return (
                 <div className="flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-xl">
-                  <div className="flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-purple-500 to-purple-600 py-10 text-white">
+                  <div className="flex flex-col items-center justify-center gap-3 bg-linear-to-r from-purple-500 to-purple-600 py-10 text-white">
                     <ImageWithFallback
                       src="/assets/layanan_ukom_thumb.webp"
                       alt="Layanan Uji Kompetensi"

@@ -1,7 +1,6 @@
 import Navbar from "@/components/navbar";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Clusters } from "./(core)/pengujian/-components/parameter-categories";
-import { TestingTable } from "./(core)/pengujian/-components/testing-table";
+import { KatalogBrowser } from "@/components/katalog-browser";
 import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/katalog")({
@@ -35,45 +34,33 @@ function RouteComponent() {
   }, []);
 
   return (
-    <div className="bg-primary-foreground">
-      {/* Background Grid Pattern */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
-        style={{
-          backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-
+    <div className="min-h-screen bg-[#f7f9fc] font-['Poppins'] text-slate-800">
       <div className="relative z-10">
         <Navbar />
 
-        <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 font-['Poppins']">
-          {/* Page Title & Banner */}
-          <div className="space-y-6 text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-[#0056B3]">
+        <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <section className="mx-auto max-w-3xl space-y-6 text-center">
+            <p className="text-sm font-semibold tracking-[0.24em] text-primary uppercase">
+              Layanan Pengujian K3
+            </p>
+            <h1 className="font-['Plus_Jakarta_Sans'] text-4xl font-extrabold tracking-tight text-[#123f98] md:text-5xl">
               Katalog Pengujian
             </h1>
-            <div className="mx-auto h-2 w-96 bg-linear-to-r from-accent-linear-1 via-accent-linear-2 to-accent-linear-3" />
-            <p className="mx-auto max-w-2xl text-slate-500">
-              Temukan berbagai parameter pengujian K3 yang sesuai dengan kebutuhan perusahaan Anda.
-              Pilih dari berbagai klaster industri dan temukan layanan terbaik kami.
+            <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-500 md:text-base">
+              Temukan berbagai parameter pengujian K3 yang sesuai dengan
+              kebutuhan perusahaan Anda. Pilih klaster industri dan tentukan
+              layanan terbaik untuk kebutuhan Anda.
             </p>
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
-              </span>
-              Belum tahu harus mulai dari mana? <Link to="/pengujian/panduan" className="underline hover:text-blue-800">Baca Panduan Pengujian K3</Link>
-            </div>
-          </div>
+            <Link
+              to="/pengujian/panduan"
+              className="inline-flex items-center rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:scale-[1.01] hover:bg-primary/90 active:scale-[0.98]"
+            >
+              Baca Panduan Pengujian K3
+            </Link>
+          </section>
 
-          {/* Clusters */}
-          <Clusters route="/katalog" />
-
-          {/* Testing Table */}
-          <TestingTable route="/katalog" />
-        </div>
+          <KatalogBrowser />
+        </main>
       </div>
     </div>
   );

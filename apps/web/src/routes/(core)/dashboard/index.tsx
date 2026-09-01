@@ -11,11 +11,53 @@ import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { pageHead } from "@/utils/page-head";
 import { useDashboardStore } from "@/stores/dashboard.stores";
-import { IconFlask, IconBook, IconArrowRight, IconClipboardList } from "@tabler/icons-react";
+import {
+  IconFlask,
+  IconBook,
+  IconArrowRight,
+  IconClipboardList,
+} from "@tabler/icons-react";
 import { PengujianOnboardingWizard } from "@/components/pengujian-onboarding-wizard";
 import { Button } from "@/components/ui/button";
 import { ContactHelp } from "@/components/contact-help";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { ORDER_STATUS_AWAM_MAP } from "@/components/status-badge-awam";
+
+const ADDITIONAL_ORDER_STATUS_LABELS: Record<string, string> = {
+  menunggu_pembayaran: "Menunggu Pembayaran",
+  selesai: "Selesai",
+};
+
+const ADDITIONAL_ORDER_STATUS_COLORS: Record<string, string> = {
+  menunggu_pembayaran: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  selesai: "bg-green-100 text-green-700 border-green-200",
+};
+
+/**
+ * Converts the stored order status into a readable Indonesian label.
+ * Unknown future statuses are formatted automatically instead of shown raw.
+ */
+function getOrderStatusLabel(status: string): string {
+  return (
+    ADDITIONAL_ORDER_STATUS_LABELS[status] ??
+    ORDER_STATUS_AWAM_MAP[status as keyof typeof ORDER_STATUS_AWAM_MAP]
+      ?.label ??
+    status
+      .replace(/[_-]+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (character) => character.toUpperCase())
+  );
+}
+
+function getOrderStatusColor(status: string): string {
+  return (
+    ADDITIONAL_ORDER_STATUS_COLORS[status] ??
+    ORDER_STATUS_AWAM_MAP[status as keyof typeof ORDER_STATUS_AWAM_MAP]
+      ?.colorClass ??
+    "bg-gray-100 text-gray-700 border-gray-200"
+  );
+}
 
 export const Route = createFileRoute("/(core)/dashboard/")({
   component: RouteComponent,
@@ -26,15 +68,15 @@ function RouteComponent() {
   const { data: profile } = useSuspenseQuery(
     trpc.platform.auth.profile.queryOptions(),
   );
-  
+
   const { data: companies, isLoading: isLoadingCompanies } = useQuery(
-    trpc.pengujian.userCompany.getAllUserCompaniesByUserId.queryOptions()
+    trpc.pengujian.userCompany.getAllUserCompaniesByUserId.queryOptions(),
   );
 
   const { data: activeOrders, isLoading: isLoadingOrders } = useQuery(
     trpc.pengujian.order.getAllOrders.queryOptions({
-      status: "all"
-    })
+      status: "all",
+    }),
   );
 
   const { activeMode, setActiveMode } = useDashboardStore();
@@ -154,7 +196,7 @@ function RouteComponent() {
 
   // If user doesn't have any company registered, show Onboarding Wizard
   const hasCompany = companies && companies.length > 0;
-  
+
   if (!hasCompany) {
     return <PengujianOnboardingWizard />;
   }
@@ -171,18 +213,25 @@ function RouteComponent() {
   // Active dashboard structure for users with a company
   return (
     <div className="space-y-6 font-['Poppins']">
-      <Card className="rounded-2xl border-slate-100 shadow-sm overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+      <Card className="overflow-hidden rounded-2xl border-slate-100 bg-primary text-white shadow-sm">
         <CardContent className="p-8 md:p-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div className="space-y-2">
-              <p className="text-blue-100 text-sm">{currentDate}</p>
-              <h2 className="text-3xl font-bold">Selamat Datang, {profile.name}!</h2>
-              <p className="text-blue-50 max-w-xl text-sm leading-relaxed">
-                Kelola pendaftaran pengujian K3, pantau status, dan unduh hasil laporan perusahaan Anda melalui dashboard terpadu ini.
+              <p className="text-sm text-blue-100">{currentDate}</p>
+              <h2 className="text-3xl font-bold">
+                Selamat Datang, {profile.name}!
+              </h2>
+              <p className="max-w-xl text-sm leading-relaxed text-blue-50">
+                Kelola pendaftaran pengujian K3, pantau status, dan unduh hasil
+                laporan perusahaan Anda melalui dashboard terpadu ini.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <Button asChild variant="secondary" className="w-full sm:w-auto font-semibold gap-2">
+            <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto">
+              <Button
+                asChild
+                variant="secondary"
+                className="w-full gap-2 font-semibold sm:w-auto"
+              >
                 <Link to="/pengujian">
                   Ajukan Pengujian
                   <IconArrowRight className="size-4" />
@@ -193,38 +242,63 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="">
         <Card className="rounded-2xl border-slate-100 shadow-sm md:col-span-2">
-          <CardHeader className="pb-3 border-b border-slate-100">
+          <CardHeader className="border-b border-slate-100 pb-3">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg">Pesanan Aktif</CardTitle>
-                <CardDescription>Status pengujian yang sedang berjalan</CardDescription>
+                <CardDescription>
+                  Status pengujian yang sedang berjalan
+                </CardDescription>
               </div>
-              <Button asChild variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-blue-600 hover:text-blue-700"
+              >
                 <Link to="/pengujian/transaksi">
                   Lihat Semua
-                  <IconArrowRight className="size-4 ml-1" />
+                  <IconArrowRight className="ml-1 size-4" />
                 </Link>
               </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {isLoadingOrders ? (
-              <div className="p-6 space-y-4">
+              <div className="space-y-4 p-6">
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-16 w-full" />
               </div>
             ) : totalOrders > 0 && activeOrders ? (
               <div className="divide-y divide-slate-100">
                 {activeOrders.slice(0, 3).map((order) => (
-                  <div key={order.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-800 truncate">{order.orderNumber}</p>
-                      <p className="text-xs text-slate-500 truncate">{companies?.find(c => c.id === order.companyId)?.name || 'Pesanan Pengujian'}</p>
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-slate-50"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-slate-800">
+                        {order.orderNumber}
+                      </p>
+                      <p className="truncate text-xs text-slate-500">
+                        {companies?.find((c) => c.id === order.companyId)
+                          ?.name || "Pesanan Pengujian"}
+                      </p>
                     </div>
+
+                    <Badge
+                      className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold ${getOrderStatusColor(order.status)}`}
+                    >
+                      {getOrderStatusLabel(order.status)}
+                    </Badge>
+
                     <Button asChild variant="outline" size="sm">
-                      <Link to="/pengujian/status" search={{ orderId: order.id }}>
+                      <Link
+                        to="/pengujian/status"
+                        search={{ orderId: order.id }}
+                      >
                         Cek Status
                       </Link>
                     </Button>
@@ -232,18 +306,20 @@ function RouteComponent() {
                 ))}
               </div>
             ) : (
-              <div className="p-12 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
                   <IconClipboardList className="size-6 text-slate-400" />
                 </div>
-                <h3 className="font-medium text-slate-800 mb-1">Belum Ada Pesanan</h3>
-                <p className="text-sm text-slate-500 mb-4 max-w-[250px]">
+                <h3 className="mb-1 font-medium text-slate-800">
+                  Belum Ada Pesanan
+                </h3>
+                <p className="mb-4 text-sm text-slate-500">
                   Anda belum memiliki pesanan pengujian yang sedang berjalan.
                 </p>
                 <Button asChild variant="outline" size="sm">
                   <Link to="/pengujian">
                     Mulai Pendaftaran
-                    <IconArrowRight className="size-4 ml-1" />
+                    <IconArrowRight className="ml-1 size-4" />
                   </Link>
                 </Button>
               </div>
@@ -251,7 +327,7 @@ function RouteComponent() {
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <Card className="rounded-2xl border-slate-100 shadow-sm">
             <CardHeader className="pb-3 border-b border-slate-100">
               <CardTitle className="text-lg">Statistik Pengujian</CardTitle>
@@ -269,11 +345,10 @@ function RouteComponent() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
 
       <ContactHelp className="mt-8 rounded-2xl border-slate-100 shadow-sm" />
     </div>
   );
 }
-

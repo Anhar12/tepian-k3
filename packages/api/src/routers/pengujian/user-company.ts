@@ -122,6 +122,7 @@ export const userCompanyRouter = createTRPCRouter({
         userCompanyQueries.getUserCompanyDetailsByUserIdAndId(
           user.id,
           input.id,
+          { unmask: true },
         ),
       );
 

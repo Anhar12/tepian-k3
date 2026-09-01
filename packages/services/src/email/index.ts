@@ -7,6 +7,7 @@ import { OTPEmail } from "./templates/otp";
 import { WelcomeEmail } from "./templates/welcome";
 import { PasswordResetEmail } from "./templates/password-reset";
 import { TTERequestEmail } from "./templates/tte-request";
+import { EmailVerification } from "./templates/email-verification";
 
 export class EmailService {
   private provider = emailProvider;
@@ -47,6 +48,20 @@ export class EmailService {
       to: email,
       subject: "Reset Your Password",
       react: PasswordResetEmail({ resetLink, expiresInMinutes }),
+    });
+  }
+
+  /** Sends a one-time account email verification link. */
+  async sendEmailVerification(
+    email: string,
+    verificationUrl: string,
+    name?: string,
+    expiresInHours = 24,
+  ) {
+    return await this.send({
+      to: email,
+      subject: "Verifikasi Email Akun Anda",
+      react: EmailVerification({ name, verificationUrl, expiresInHours }),
     });
   }
 

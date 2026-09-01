@@ -91,7 +91,9 @@ export function NavMain({ items }: NavMainProps) {
   // Sync open state with active route
   React.useEffect(() => {
     const parentWithActiveItem = items.find(
-      (item) => item.items && item.items.some((subItem) => activeItemUrl === subItem.url)
+      (item) =>
+        item.items &&
+        item.items.some((subItem) => activeItemUrl === subItem.url),
     );
     if (parentWithActiveItem) {
       setOpenItem(parentWithActiveItem.title);
@@ -117,8 +119,8 @@ export function NavMain({ items }: NavMainProps) {
                     className={cn(
                       "flex h-12 w-full items-center gap-3.5 rounded-none text-sm transition-all duration-200",
                       activeItemUrl === item.url
-                        ? "border-l-[3.5px] border-white bg-[#1061d6] pr-6 pl-5 font-semibold text-white hover:bg-[#1061d6] hover:text-white [&>svg]:stroke-white [&>svg]:stroke-[2px] [&>svg]:text-white"
-                        : "bg-transparent pr-6 pl-6 text-[#dce7ff] hover:bg-white/10 hover:text-white [&>svg]:stroke-[#dce7ff] [&>svg]:stroke-[1.8px] [&>svg]:text-[#dce7ff]",
+                        ? "border-r-[3.5px] border-primary font-semibold text-primary hover:text-primary [&>svg]:stroke-[2px]"
+                        : "bg-transparent text-slate-800 hover:bg-primary/10 hover:text-primary [&>svg]:stroke-[1.8px]",
                     )}
                   >
                     {item.icon && <item.icon className="size-5 shrink-0" />}
@@ -145,8 +147,8 @@ export function NavMain({ items }: NavMainProps) {
                       className={cn(
                         "flex h-12 w-full items-center gap-3.5 rounded-none text-sm transition-all duration-200",
                         isSubMenuActive
-                          ? "bg-transparent pr-6 pl-6 font-semibold text-white hover:bg-white/10 hover:text-white [&>svg]:stroke-white [&>svg]:stroke-[2px] [&>svg]:text-white"
-                          : "bg-transparent pr-6 pl-6 text-[#dce7ff] hover:bg-white/10 hover:text-white [&>svg]:stroke-[#dce7ff] [&>svg]:stroke-[1.8px] [&>svg]:text-[#dce7ff]",
+                          ? "border-r-[3.5px] border-primary bg-transparent font-semibold text-primary hover:bg-primary/10 hover:text-primary [&>svg]:stroke-[2px]"
+                          : "bg-transparent text-slate-800 hover:bg-primary/10 hover:text-primary [&>svg]:stroke-[1.8px]",
                       )}
                     >
                       {item.icon && <item.icon className="size-5 shrink-0" />}
@@ -155,21 +157,21 @@ export function NavMain({ items }: NavMainProps) {
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub className="mx-6 border-l border-white/20 px-2 py-1">
+                    <SidebarMenuSub className="border-l-2 border-slate-600 px-2 py-1">
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton
                             asChild
                             className={cn(
-                              "h-10 cursor-pointer rounded-md text-sm font-normal text-[#dce7ff] transition-all hover:bg-white/10 hover:text-white",
+                              "h-10 cursor-pointer rounded-md text-sm font-normal text-slate-800 transition-all hover:bg-primary/10 hover:text-primary",
                               activeItemUrl === subItem.url &&
-                                "bg-white/20 font-semibold text-white hover:bg-white/20",
+                                "bg-white/20 font-semibold text-primary hover:bg-white/20",
                             )}
                             onClick={() => navigate({ to: subItem.url })}
                           >
                             <span>
                               {subItem.icon && (
-                                <subItem.icon className="mr-2 size-4 shrink-0 inline-block opacity-70" />
+                                <subItem.icon className="mr-2 inline-block size-4 shrink-0 opacity-70" />
                               )}
                               {subItem.title}
                             </span>

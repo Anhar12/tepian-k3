@@ -8,6 +8,9 @@ import {
   IconUsers,
   IconVideo,
   IconAward,
+  IconTestPipe,
+  IconClipboardCheck,
+  IconHistory,
 } from "@tabler/icons-react";
 import type { NavMainProps } from "@/components/nav-main";
 
@@ -30,8 +33,24 @@ export const userMenu: {
     },
     {
       title: "Transaksi Pengujian",
-      url: "/pengujian/transaksi",
       icon: IconFlask,
+      items: [
+        {
+          title: "Order Pengujian",
+          url: `/pengujian`,
+          icon: IconTestPipe,
+        },
+        {
+          title: "Pesanan Pengujian",
+          url: `/pengujian/transaksi`,
+          icon: IconClipboardCheck,
+        },
+        {
+          title: "Riwayat Pengujian",
+          url: `/pengujian/riwayat`,
+          icon: IconHistory,
+        },
+      ],
     },
   ],
   pelatihan: [

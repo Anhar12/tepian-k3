@@ -9,6 +9,7 @@ import {
   ilike,
   isNotNull,
   isNull,
+  inArray,
 } from "@tepian-k3/db";
 import { db } from "@tepian-k3/db/client";
 import {
@@ -17,6 +18,7 @@ import {
   provinces,
   regencies,
   userCompanies,
+  userCompanyTestingLocation,
   villages,
 } from "@tepian-k3/db/schema";
 import userCompanySchema from "@tepian-k3/schema/pengujian/user-company.schema";
@@ -516,38 +518,63 @@ const userCompanyQueries = {
         });
       }
 
-      const [userCompany] = yield* Effect.tryPromise({
+      const userCompany = yield* Effect.tryPromise({
         try: () =>
-          db
-            .insert(userCompanies)
-            .values({
-              address: data.address,
-              email: data.email,
-              districtId: data.districtId,
-              kbliId: data.kbliId,
-              maleWorkers: Number(data.maleWorkers),
-              femaleWorkers: Number(data.femaleWorkers),
-              name: data.name,
-              provinceId: data.provinceId,
-              regencyId: data.regencyId,
-              userId,
-              villageId: data.villageId,
-              healthFacilityAvailable: data.healthFacilityAvailable,
-              wlkpStatus: data.wlkpStatus,
-              wlkp: data.wlkp,
-              responsibleTestingPerson: data.responsibleTestingPerson,
-              responsibleTestingPersonEmail: data.responsibleTestingPersonEmail,
-              responsibleTestingPersonPhone: data.responsibleTestingPersonPhone,
-              headOfCompany: data.headOfCompany,
-              headOfCompanyPosition: data.headOfCompanyPosition,
-              headOfCompanyEmail: data.headOfCompanyEmail,
-              companyBankName: data.companyBankName ?? "",
-              companyBankAccount: data.companyBankAccount ?? "",
-              companyBankAccountName: data.companyBankAccountName ?? "",
-              companyPictureUrl: url,
-            })
-            .returning()
-            .execute(),
+          db.transaction(async (tx) => {
+            const [createdUserCompany] = await tx
+              .insert(userCompanies)
+              .values({
+                address: data.address,
+                email: data.email,
+                districtId: data.districtId,
+                kbliId: data.kbliId,
+                maleWorkers: Number(data.maleWorkers),
+                femaleWorkers: Number(data.femaleWorkers),
+                name: data.name,
+                provinceId: data.provinceId,
+                regencyId: data.regencyId,
+                userId,
+                villageId: data.villageId,
+                healthFacilityAvailable: data.healthFacilityAvailable,
+                wlkpStatus: data.wlkpStatus,
+                wlkp: data.wlkp,
+                responsibleTestingPerson: data.responsibleTestingPerson,
+                responsibleTestingPersonEmail:
+                  data.responsibleTestingPersonEmail,
+                responsibleTestingPersonPhone:
+                  data.responsibleTestingPersonPhone,
+                headOfCompany: data.headOfCompany,
+                headOfCompanyPosition: data.headOfCompanyPosition,
+                headOfCompanyEmail: data.headOfCompanyEmail,
+                companyBankName: data.companyBankName ?? "",
+                companyBankAccount: data.companyBankAccount ?? "",
+                companyBankAccountName: data.companyBankAccountName ?? "",
+                companyPictureUrl: url,
+              })
+              .returning()
+              .execute();
+
+            if (!createdUserCompany) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Gagal membuat data perusahaan",
+              });
+            }
+
+            if (data.testingLocations.length > 0) {
+              await tx.insert(userCompanyTestingLocation).values(
+                data.testingLocations.map((location) => ({
+                  userCompanyId: createdUserCompany.id,
+                  userId,
+                  name: location.name,
+                  regencyId: location.regencyId,
+                  districtId: location.districtId,
+                })),
+              );
+            }
+
+            return createdUserCompany;
+          }),
         catch: (error) => {
           logError(
             "userCompanyQueries.userCreateUserCompany",
@@ -618,6 +645,7 @@ const userCompanyQueries = {
         );
       }
 
+      // Update data perusahaan
       const [updatedUserCompany] = yield* Effect.tryPromise({
         try: () =>
           db
@@ -681,6 +709,7 @@ const userCompanyQueries = {
             "Error updating userCompany",
             { error, data },
           );
+
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Gagal memperbarui data perusahaan",
@@ -692,6 +721,75 @@ const userCompanyQueries = {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal memperbarui data perusahaan",
+        });
+      }
+
+      // Hapus lokasi pengujian yang dihapus oleh user
+      if (data.deletedTestingLocationIds.length > 0) {
+        yield* Effect.tryPromise({
+          try: () =>
+            db
+              .delete(userCompanyTestingLocation)
+              .where(
+                and(
+                  eq(userCompanyTestingLocation.userCompanyId, data.id),
+                  inArray(
+                    userCompanyTestingLocation.id,
+                    data.deletedTestingLocationIds,
+                  ),
+                ),
+              )
+              .execute(),
+          catch: (error) => {
+            logError(
+              "userCompanyQueries.userUpdateUserCompany",
+              "Error deleting testing locations",
+              {
+                error,
+                companyId: data.id,
+                deletedTestingLocationIds: data.deletedTestingLocationIds,
+              },
+            );
+
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal menghapus lokasi pengujian perusahaan",
+            });
+          },
+        });
+      }
+
+      if (data.testingLocations.length > 0) {
+        yield* Effect.tryPromise({
+          try: () =>
+            db
+              .insert(userCompanyTestingLocation)
+              .values(
+                data.testingLocations.map((location) => ({
+                  userId,
+                  userCompanyId: data.id,
+                  name: location.name,
+                  regencyId: location.regencyId,
+                  districtId: location.districtId,
+                })),
+              )
+              .execute(),
+          catch: (error) => {
+            logError(
+              "userCompanyQueries.userUpdateUserCompany",
+              "Error inserting testing locations",
+              {
+                error,
+                companyId: data.id,
+                testingLocations: data.testingLocations,
+              },
+            );
+
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Gagal menambahkan lokasi pengujian perusahaan",
+            });
+          },
         });
       }
 
