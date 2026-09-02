@@ -19,45 +19,67 @@ interface DraftOrderCartStore {
   clear: () => void;
 }
 
-/** Menyimpan draft item order selama wizard aktif tanpa persistensi database. */
+/**
+ * Menyimpan draft item order selama wizard aktif
+ * tanpa persistensi database.
+ */
 export const usePengujianOrderCart = create<DraftOrderCartStore>((set) => ({
   items: [],
+
   addItems: (items) =>
     set((state) => {
       const next = [...state.items];
+
       for (const item of items) {
         const index = next.findIndex(
           (current) =>
             current.parameterId === item.parameterId &&
             current.locationId === item.locationId,
         );
-        if (index >= 0)
-          next[index] = {
-            ...next[index],
-            quantity: next[index].quantity + item.quantity,
-          };
-        else next.push(item);
+
+        if (index >= 0) {
+          const existingItem = next[index];
+
+          if (existingItem) {
+            next[index] = {
+              ...existingItem,
+              quantity: existingItem.quantity + item.quantity,
+            };
+          }
+        } else {
+          next.push(item);
+        }
       }
+
       return { items: next };
     }),
+
   increment: (parameterId, locationId) =>
     set((state) => ({
       items: state.items.map((item) =>
         item.parameterId === parameterId && item.locationId === locationId
-          ? { ...item, quantity: item.quantity + 1 }
+          ? {
+              ...item,
+              quantity: item.quantity + 1,
+            }
           : item,
       ),
     })),
+
   decrement: (parameterId, locationId) =>
     set((state) => ({
       items: state.items
         .map((item) =>
           item.parameterId === parameterId && item.locationId === locationId
-            ? { ...item, quantity: item.quantity - 1 }
+            ? {
+                ...item,
+                quantity: item.quantity - 1,
+              }
             : item,
         )
         .filter((item) => item.quantity > 0),
     })),
+
   remove: (parameterId, locationId) =>
     set((state) => ({
       items: state.items.filter(
@@ -65,5 +87,6 @@ export const usePengujianOrderCart = create<DraftOrderCartStore>((set) => ({
           !(item.parameterId === parameterId && item.locationId === locationId),
       ),
     })),
+
   clear: () => set({ items: [] }),
 }));
