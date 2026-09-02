@@ -157,7 +157,12 @@ export function NavMain({ items }: NavMainProps) {
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub className="border-l-2 border-slate-600 px-2 py-1">
+                    <SidebarMenuSub
+                      className={cn(
+                        "border-l-2 px-2 py-1",
+                        isSubMenuActive ? "border-primary" : "border-slate-600",
+                      )}
+                    >
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton

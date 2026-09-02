@@ -29,7 +29,7 @@ function RouteComponent() {
       <WorksheetSidebar variant="inset" />
       <SidebarInset className="overflow-hidden contain-inline-size">
         <WorksheetHeader />
-        <div className="overflow-y-auto p-4">
+        <div className="overflow-y-auto bg-slate-50 p-4">
           <Outlet />
         </div>
       </SidebarInset>

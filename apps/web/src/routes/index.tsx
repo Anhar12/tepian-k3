@@ -61,7 +61,7 @@ const pusatLayananItems: {
   {
     imageSrc: "/assets/pengujian.webp",
     title: "Pengujian",
-    to: "/pengujian",
+    to: "/katalog",
     bgColor: "#7e64fc",
     textColor: "#7e64fc",
   },

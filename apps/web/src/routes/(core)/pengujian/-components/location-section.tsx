@@ -1,46 +1,58 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import ComboBox from "@/components/ui/combobox";
-import { EmptyState } from "@/components/ui/empty-state";
-import MultiComboBox from "@/components/ui/multi-combobox";
-import { Skeleton } from "@/components/ui/skeleton";
-import { globalWarningToast } from "@/lib/toast";
-import { cn } from "@/lib/utils";
-import { useCartStore } from "@/stores/cart.stores";
-import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
-import { trpc } from "@/utils/trpc";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import { Building2, MapPin, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { Building2, Check, MapPin, Plus } from "lucide-react";
+
+import ImageWithFallback from "@/components/image-with-fallback";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { globalWarningToast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
+import { useTestingLocationDialogStore } from "@/stores/testing-location-dialog.stores";
+import { trpc } from "@/utils/trpc";
+
 import CreateCompanyLocationDialog from "../../dashboard/company/-components/create-company-location-dialog";
 
 const routeApi = getRouteApi("/(core)/pengujian/");
 
-export function LocationSection() {
+interface LocationSectionProps {
+  mode?: "company" | "location";
+  companyId?: string;
+  selectedLocationIds?: string[];
+  onCompanyChange?: (id: string) => void;
+  onLocationChange?: (ids: string[]) => void;
+  onLocationNamesChange?: (locations: { id: string; name: string }[]) => void;
+}
+
+/**
+ * Memilih perusahaan atau beberapa lokasi untuk order pengujian.
+ */
+export function LocationSection({
+  mode = "location",
+  companyId: controlledCompanyId,
+  selectedLocationIds,
+  onCompanyChange,
+  onLocationChange,
+  onLocationNamesChange,
+}: LocationSectionProps) {
   const { companyId, locationId } = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
 
-  const [companyOpen, setCompanyOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<string | null>(
-    companyId || null,
+    controlledCompanyId || companyId || null,
   );
-  const [locationOpen, setLocationOpen] = useState(false);
+
   const [selectedLocation, setSelectedLocation] = useState<string[]>(
-    locationId ? [locationId] : [],
+    selectedLocationIds ?? (locationId ? [locationId] : []),
   );
+
   const [currentLocation, setCurrentLocation] = useState<string | null>(
     locationId || null,
   );
 
-  const setCartItems = useCartStore((state) => state.setCartItems);
   const setIsCreateDialogOpen = useTestingLocationDialogStore(
     (state) => state.setIsCreateDialogOpen,
   );
@@ -51,93 +63,114 @@ export function LocationSection() {
 
   const { data: testingLocation, isLoading } = useQuery({
     ...trpc.pengujian.userCompanyTestingLocation.getAllUserCompanyTestingLocationsByCompanyIdAndUserId.queryOptions(
-      { companyId: selectedCompany || "" },
+      {
+        companyId: selectedCompany || "",
+      },
     ),
-    enabled: !!selectedCompany,
+    enabled: Boolean(selectedCompany),
   });
 
-  const selectedTestingLocations = testingLocation?.filter((location) =>
-    selectedLocation.includes(location.id),
-  );
+  const selectedTestingLocations = testingLocation;
+  useEffect(() => {
+    if (testingLocation?.length)
+      onLocationNamesChange?.(
+        testingLocation.map((location) => ({
+          id: location.id,
+          name: `${locationDisplayName(location.name)}\n${location.regency?.name ?? "-"}, ${location.district?.name ?? "-"}`,
+        })),
+      );
+  }, [testingLocation]);
+  const locationDisplayName = (name: string) =>
+    name.replace(/^Lokasi Pengujian\s*\d+\s*[-—]\s*/i, "");
+
+  const handleCompanySelect = (id: string) => {
+    setSelectedCompany(id);
+    onCompanyChange?.(id);
+
+    navigate({
+      to: "/pengujian",
+      search: (old) => ({
+        ...old,
+        companyId: id,
+        locationId: undefined,
+      }),
+      resetScroll: false,
+    });
+  };
+
+  const handleCreateLocation = () => {
+    if (!selectedCompany) {
+      globalWarningToast(
+        "Pilih perusahaan terlebih dahulu sebelum menambahkan lokasi pengujian.",
+      );
+
+      return;
+    }
+
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleLocationCardClick = (locationId: string) => {
+    const isCurrentLocation = currentLocation === locationId;
+
+    if (isCurrentLocation) {
+      setCurrentLocation(null);
+
+      navigate({
+        to: "/pengujian",
+        search: (old) => ({
+          ...old,
+          companyId: selectedCompany || "",
+          locationId: undefined,
+        }),
+        resetScroll: false,
+      });
+    } else {
+      setCurrentLocation(locationId);
+
+      navigate({
+        to: "/pengujian",
+        search: (old) => ({
+          ...old,
+          companyId: selectedCompany || "",
+          locationId,
+        }),
+        resetScroll: false,
+      });
+    }
+
+    const nextLocations = selectedLocation.includes(locationId)
+      ? selectedLocation.filter((id) => id !== locationId)
+      : [...selectedLocation, locationId];
+
+    setSelectedLocation(nextLocations);
+    onLocationChange?.(nextLocations);
+  };
 
   return (
     <div className="w-full space-y-6">
-      {/* dari sini */}
-
-      <div className="block w-full overflow-hidden rounded-2xl border shadow md:flex">
-        <div className="space-y-6 bg-primary px-5 py-7 text-white md:w-1/4">
-          <p className="">Tepian K3</p>
-          <h2 className="text-3xl font-semibold">Order Pengujian</h2>
-        </div>
-
-        <div className="space-y-6 bg-white p-4 px-5 py-7 md:w-3/4">
-          <div className="flex justify-between">
-            <p className="text-primary">Langkah 1</p>
-
-            <div className="flex-end flex flex-col">
-              <div></div>
-              <p className="text-primary">1/3 selesai</p>
+      {/* Company Selection */}
+      <div className={cn(mode !== "company" && "hidden")}>
+        {/* Company Header */}
+        <div className="mb-5 flex flex-col gap-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-primary">
+              <Building2 className="size-5" />
             </div>
-          </div>
 
-          <div className="flex items-end justify-between">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-semibold">Pilih Perusahaan</h2>
-              <p className="text-sm text-slate-600">
-                Pilih perusahaan atau daftarkan Perusahaan anda.
+            <div>
+              <h3 className="font-bold text-slate-800">Pilih perusahaan</h3>
+
+              <p className="text-sm text-slate-500">
+                Pilih perusahaan yang akan dilakukan pengujian.
               </p>
             </div>
-
-            <button className="flex items-center gap-2">
-              Lanjut
-              <ArrowRight className="size-5"></ArrowRight>
-            </button>
           </div>
-        </div>
-      </div>
-
-      {/* sampe sini */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        {/* Header */}
-        <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <Building2 className="h-5 w-5" />
-          </div>
-
-          <div className="min-w-0">
-            <h3 className="text-sm font-bold text-slate-800">
-              Pilih Perusahaan
-            </h3>
-            <p className="mt-0.5 text-sm text-slate-500">
-              Pilih perusahaan yang akan dilakukan pengujian
-            </p>
-          </div>
-        </div>
-
-        {/* Company Selection */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_220px]">
-          <ComboBox
-            options={company ?? []}
-            value={selectedCompany ?? ""}
-            onChange={(id: string) => {
-              setSelectedCompany(id);
-              navigate({
-                to: "/pengujian",
-                search: (old) => ({ ...old, companyId: id }),
-              });
-            }}
-            placeholder="Pilih perusahaan..."
-            searchPlaceholder="Cari perusahaan..."
-            emptyMessage="Tidak ada perusahaan yang ditemukan."
-            open={companyOpen}
-            onOpenChange={setCompanyOpen}
-            className="h-10 w-full"
-            disabled={isCompanyLoading}
-            isLoading={isCompanyLoading}
-          />
 
           <Button
-            className="h-10 w-full cursor-pointer"
+            type="button"
+            variant="outline"
+            className="flex h-10 gap-2"
             onClick={() =>
               navigate({
                 from: "/pengujian",
@@ -145,173 +178,269 @@ export function LocationSection() {
               })
             }
           >
+            <Plus className="size-4" />
             Tambah Perusahaan
           </Button>
         </div>
+
+        {/* Company List */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {isCompanyLoading
+            ? Array.from({ length: 3 }).map((_, index) => (
+                <Card
+                  key={index}
+                  className="space-y-5 rounded-3xl border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex items-start justify-between">
+                    <Skeleton className="size-12 rounded-xl" />
+                    <Skeleton className="h-4 w-20 rounded-full" />
+                  </div>
+
+                  <Skeleton className="h-7 w-3/4" />
+
+                  <div className="space-y-3 border-t pt-4">
+                    <div className="flex justify-between">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-28" />
+                    </div>
+
+                    <div className="flex justify-between">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                </Card>
+              ))
+            : company?.map((item) => {
+                const isSelected = selectedCompany === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleCompanySelect(item.id)}
+                    className={cn(
+                      "group relative rounded-3xl border bg-white p-5 text-left shadow-sm transition-all duration-200",
+                      "hover:-translate-y-1 hover:border-primary hover:shadow-lg",
+                      "focus-visible:ring-2 focus-visible:outline-none",
+                      "focus-visible:ring-primary focus-visible:ring-offset-2",
+                      isSelected
+                        ? "border-primary bg-blue-50/30 shadow-md ring-2 ring-primary"
+                        : "border-slate-200",
+                    )}
+                  >
+                    {isSelected && (
+                      <span className="absolute top-4 right-4 flex size-7 items-center justify-center rounded-full bg-primary text-white">
+                        <Check className="size-4" />
+                      </span>
+                    )}
+
+                    <div className="flex items-start justify-between gap-3">
+                      <span
+                        className={cn(
+                          "flex size-12 items-center justify-center overflow-hidden rounded-xl",
+                          isSelected ? "bg-primary/10" : "bg-slate-100",
+                        )}
+                      >
+                        <ImageWithFallback
+                          src={item.companyPictureUrl ?? ""}
+                          alt={`Logo ${item.name}`}
+                          className="h-full w-full object-cover"
+                          fallbackIcon={Building2}
+                          fallbackClassName="text-slate-500"
+                        />
+                      </span>
+
+                      <span className="text-xs font-semibold text-slate-500">
+                        Perusahaan
+                      </span>
+                    </div>
+
+                    <h4 className="mt-5 text-xl font-bold text-slate-800">
+                      {item.name}
+                    </h4>
+
+                    <div className="mt-4 space-y-2 border-t pt-4 text-sm">
+                      <p className="flex justify-between gap-3">
+                        <span className="text-slate-500">Provinsi</span>
+
+                        <span className="text-right font-medium">
+                          {item.province?.name ?? "-"}
+                        </span>
+                      </p>
+
+                      <p className="flex justify-between gap-3">
+                        <span className="text-slate-500">Kabupaten/Kota</span>
+
+                        <span className="text-right font-medium">
+                          {item.regency?.name ?? "-"}
+                        </span>
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        {/* Header */}
-        <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <MapPin className="h-5 w-5" />
-          </div>
+      {/* Testing Location Selection */}
+      <div
+        className={cn(
+          "rounded-3xl border border-slate-200 bg-white p-5 shadow-sm",
+          mode !== "location" && "hidden",
+        )}
+      >
+        {/* Location Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-primary">
+              <MapPin className="size-5" />
+            </div>
 
-          <div className="min-w-0">
-            <h3 className="text-sm font-bold text-slate-800">
-              Lokasi Pengujian
-            </h3>
-            <p className="mt-0.5 text-sm text-slate-500">
-              Masukkan lokasi pengujian sebelum menentukan parameter pengujian
-            </p>
-          </div>
-        </div>
+            <div>
+              <h3 className="font-bold text-slate-800">
+                Pilih lokasi pengujian
+              </h3>
 
-        {/* Location Selection */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_220px]">
-          <MultiComboBox
-            options={testingLocation ?? []}
-            value={selectedLocation ?? []}
-            onChange={setSelectedLocation}
-            placeholder="Pilih lokasi..."
-            searchPlaceholder="Cari lokasi..."
-            emptyMessage="Tidak ada lokasi yang ditemukan."
-            open={locationOpen}
-            onOpenChange={setLocationOpen}
-            className="h-10 w-full"
-            disabled={!selectedCompany || isLoading}
-            isLoading={isLoading}
-          />
+              <p className="text-sm text-slate-500">
+                Pilih semua lokasi yang ingin dimasukkan ke pesanan.
+              </p>
+            </div>
+          </div>
 
           <Button
-            className="h-10 w-full cursor-pointer"
-            onClick={() => {
-              if (!selectedCompany) {
-                globalWarningToast(
-                  "Pilih perusahaan terlebih dahulu sebelum menambahkan lokasi pengujian.",
-                );
-                return;
-              }
-
-              setIsCreateDialogOpen(true);
-            }}
+            type="button"
+            variant="outline"
+            className="gap-2"
+            onClick={handleCreateLocation}
           >
+            <Plus className="size-4" />
             Tambah Lokasi Pengujian
           </Button>
         </div>
+
+        {/* Location Selection Info */}
+        <div className="mt-5 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm">
+          <span className="text-slate-500">
+            Klik card untuk memilih atau membatalkan lokasi.
+          </span>
+
+          <span className="font-semibold text-primary">
+            {selectedLocation.length} lokasi dipilih
+          </span>
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex gap-4 overflow-x-auto pb-4 sm:gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card
-              key={i}
-              className="min-w-65 space-y-4 rounded-3xl border-none bg-white p-4 shadow-md shadow-slate-100 sm:min-w-[320px] sm:p-6"
-            >
-              <Skeleton className="h-7 w-24" />
-              <div className="grid grid-cols-1 gap-4">
-                <div className="rounded-2xl bg-blue-50/50 p-4">
-                  <Skeleton className="mb-2 h-3 w-32" />
-                  <Skeleton className="h-5 w-40" />
+      {/* Location Preview */}
+      {mode === "location" &&
+        (isLoading ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Card
+                key={index}
+                className="space-y-5 rounded-3xl border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <div className="flex items-start justify-between">
+                  <Skeleton className="size-12 rounded-xl" />
+                  <Skeleton className="size-7 rounded-full" />
                 </div>
-                <div className="rounded-2xl bg-blue-50/50 p-4">
-                  <Skeleton className="mb-2 h-3 w-24" />
-                  <Skeleton className="h-5 w-36" />
+
+                <Skeleton className="h-7 w-3/4" />
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="rounded-2xl bg-blue-50/50 p-4">
+                    <Skeleton className="mb-2 h-3 w-32" />
+                    <Skeleton className="h-5 w-40" />
+                  </div>
+
+                  <div className="rounded-2xl bg-blue-50/50 p-4">
+                    <Skeleton className="mb-2 h-3 w-24" />
+                    <Skeleton className="h-5 w-36" />
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : selectedTestingLocations && selectedTestingLocations.length > 0 ? (
-        <div className="flex flex-col items-center justify-center">
-          <Carousel className="w-full px-8 sm:w-[calc(100%-6rem)] sm:px-0">
-            <CarouselContent
-              className="-ml-1"
-              wrapperClassName="overflow-visible"
-            >
-              {selectedTestingLocations.map((area) => (
-                <CarouselItem
+              </Card>
+            ))}
+          </div>
+        ) : selectedTestingLocations && selectedTestingLocations.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {selectedTestingLocations.map((area, index) => {
+              const isSelected = selectedLocation.includes(area.id);
+
+              return (
+                <button
                   key={area.id}
+                  type="button"
+                  onClick={() => handleLocationCardClick(area.id)}
                   className={cn(
-                    "w-70 max-w-[320px] p-2 transition-all duration-250 sm:w-auto",
-                    currentLocation === area.id
-                      ? "scale-105"
-                      : "scale-95 opacity-70",
+                    "group relative w-full rounded-3xl border bg-white p-5 text-left shadow-sm transition-all duration-200",
+                    "hover:-translate-y-1 hover:border-primary hover:shadow-lg",
+                    "focus-visible:ring-2 focus-visible:outline-none",
+                    "focus-visible:ring-primary focus-visible:ring-offset-2",
+                    isSelected
+                      ? "border-primary bg-blue-50/30 shadow-md ring-2 ring-primary"
+                      : "border-slate-200",
                   )}
-                  onClick={() => {
-                    const arrayOfObjects = [
-                      { id: area.id, name: area.name, items: [] },
-                    ];
-
-                    if (currentLocation === area.id) {
-                      setCurrentLocation(null);
-                      navigate({
-                        to: "/pengujian",
-                        search: (old) => ({
-                          ...old,
-                          companyId: selectedCompany || "",
-                          locationId: undefined,
-                        }),
-                      });
-                    } else {
-                      setCurrentLocation(area.id);
-                      navigate({
-                        to: "/pengujian",
-                        search: (old) => ({
-                          ...old,
-                          companyId: selectedCompany || "",
-                          locationId: area.id,
-                        }),
-                      });
-                    }
-
-                    setCartItems(arrayOfObjects);
-                  }}
                 >
-                  <Card
-                    key={area.id}
-                    className={cn(
-                      "space-y-4 rounded-3xl border-none bg-white p-6 shadow-md shadow-slate-100",
-                      currentLocation === area.id &&
-                        "shadow-lg ring-3 shadow-blue-100 ring-blue-500",
-                    )}
-                  >
-                    <h4 className="border-b border-slate-100 pb-3 text-xl font-bold text-slate-800">
-                      {area.name}
-                    </h4>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="rounded-2xl bg-blue-50/50 p-4">
-                        <span className="mb-1 block text-[10px] font-bold text-slate-400 uppercase">
-                          Kota/Kabupaten
+                  <Card className="m-0 gap-1 border-none bg-transparent p-0 shadow-none">
+                    <div className="flex items-start gap-4">
+                      <span
+                        className={cn(
+                          "flex size-12 items-center justify-center rounded-xl p-0",
+                          isSelected
+                            ? "bg-primary/10 text-primary"
+                            : "bg-slate-100 text-slate-500",
+                        )}
+                      >
+                        <MapPin className="size-6" />
+                      </span>
+
+                      {isSelected && (
+                        <span className="absolute top-4 right-4 flex size-7 items-center justify-center rounded-full bg-primary text-white">
+                          <Check className="size-4" />
                         </span>
-                        <p className="font-bold text-slate-800">
-                          {area.regency.name}
+                      )}
+
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-400">
+                          Lokasi {index + 1}
                         </p>
-                      </div>
-                      <div className="rounded-2xl bg-blue-50/50 p-4">
-                        <span className="mb-1 block text-[10px] font-bold text-slate-400 uppercase">
-                          Kecamatan
-                        </span>
-                        <p className="font-bold text-slate-800">
-                          {area.district.name}
-                        </p>
+                        <h4 className="text-xl font-bold break-words text-slate-800">
+                          {locationDisplayName(area.name)}
+                        </h4>
                       </div>
                     </div>
+
+                    <div className="space-y-2 border-t pt-4 text-sm">
+                      <p className="flex justify-between gap-3">
+                        <span className="text-slate-500">Kota/Kabupaten</span>
+
+                        <span className="text-right font-medium">
+                          {area.regency?.name ?? "-"}
+                        </span>
+                      </p>
+
+                      <p className="flex justify-between gap-3">
+                        <span className="text-slate-500">Kecamatan</span>
+
+                        <span className="text-right font-medium">
+                          {area.district?.name ?? "-"}
+                        </span>
+                      </p>
+                    </div>
                   </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        </div>
-      ) : (
-        <EmptyState
-          icon={<MapPin className="h-12 w-12 text-slate-300" />}
-          title="Belum ada lokasi pengujian"
-          description="Anda belum menambahkan lokasi pengujian. Klik tombol di atas untuk menambahkan lokasi pertama Anda."
-        />
-      )}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            icon={<MapPin className="h-12 w-12 text-slate-300" />}
+            title="Belum ada lokasi pengujian"
+            description="Anda belum menambahkan lokasi pengujian. Klik tombol di atas untuk menambahkan lokasi pertama Anda."
+          />
+        ))}
+
+      {/* Create Location Dialog */}
       {selectedCompany && (
         <CreateCompanyLocationDialog companyId={selectedCompany} />
       )}

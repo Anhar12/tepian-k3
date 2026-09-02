@@ -29,13 +29,13 @@ import { cn } from "@/lib/utils";
 import { pageHead } from "@/utils/page-head";
 import { queryClient, trpc } from "@/utils/trpc";
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Car, Hotel, Loader2, Plane, Ship, Wallet, Wrench } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/(core)/pengujian/checkout")({
   head: () => pageHead("Pengujian - Checkout"),
-  component: RouteComponent,
+  component: CheckoutContent,
 });
 
 const autoItems = [
@@ -86,8 +86,8 @@ const optionalItems = [
   },
 ];
 
-function RouteComponent() {
-  const navigate = Route.useNavigate();
+export function CheckoutContent() {
+  const navigate = useNavigate();
 
   const {
     cartItems,

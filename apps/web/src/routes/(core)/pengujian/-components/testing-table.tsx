@@ -42,11 +42,13 @@ import { useEffect, useState } from "react";
 interface TestingTableProps extends React.HTMLAttributes<HTMLDivElement> {
   route: "/pengujian" | "/katalog";
   showCart?: boolean;
+  activeLocationId?: string;
 }
 
 export function TestingTable({
   route,
   showCart = true,
+  activeLocationId,
   ...props
 }: TestingTableProps) {
   const params = useSearch({ strict: false }) as {
@@ -136,7 +138,7 @@ export function TestingTable({
   const handleAddToCart = (parameterId: string, qty: number, price: number) => {
     if (!me) return;
 
-    if (!params.companyId || !params.locationId) {
+    if (!params.companyId || !(activeLocationId || params.locationId)) {
       globalErrorToast("Perusahaan dan lokasi harus dipilih terlebih dahulu");
       return;
     }
@@ -151,7 +153,7 @@ export function TestingTable({
     // Implement add to cart functionality here
     addToCartMutation.mutate({
       companyId: params.companyId!,
-      locationId: params.locationId!,
+      locationId: activeLocationId || params.locationId!,
       parameterId,
       quantity: qty,
       price,
@@ -167,7 +169,7 @@ export function TestingTable({
 
   useEffect(() => {
     setCart(new Map());
-  }, [params.locationId]);
+  }, [activeLocationId, params.locationId]);
 
   // set parameters data to filtered data based on debouncedSearchTerm
   useEffect(() => {
@@ -404,7 +406,7 @@ export function TestingTable({
                                 (cart.get(row.id)?.quantity ?? 0) * row.price
                               ).toLocaleString("id-ID")}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="hidden">
                               <Button
                                 className={cn(
                                   "h-10 gap-2 rounded-xl px-4 text-[10px] font-bold text-white transition-all",
@@ -418,7 +420,7 @@ export function TestingTable({
                                   addingToCart.get(row.id) ||
                                   !(cart.get(row.id)?.quantity ?? 0) ||
                                   !params.companyId ||
-                                  !params.locationId
+                                  !(activeLocationId || params.locationId)
                                 }
                                 onClick={() =>
                                   handleAddToCart(
@@ -537,6 +539,46 @@ export function TestingTable({
             >
               <span className="text-xs font-bold">Next</span>
               <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-bold text-slate-800">
+                {Array.from(cart.values()).reduce(
+                  (total, item) => total + item.quantity,
+                  0,
+                )}{" "}
+                layanan dipilih
+              </p>
+              <p className="text-sm text-slate-500">
+                Pilih jumlah pada beberapa baris, lalu tambahkan sekaligus ke
+                keranjang.
+              </p>
+            </div>
+            <Button
+              className="gap-2"
+              disabled={
+                !me ||
+                !params.companyId ||
+                !(activeLocationId || params.locationId) ||
+                cart.size === 0 ||
+                addToCartMutation.isPending
+              }
+              onClick={async () => {
+                for (const [parameterId, item] of cart)
+                  await addToCartMutation.mutateAsync({
+                    companyId: params.companyId!,
+                    locationId: activeLocationId || params.locationId!,
+                    parameterId,
+                    quantity: item.quantity,
+                    price: item.price,
+                  });
+                setCart(new Map());
+              }}
+            >
+              <ShoppingCart className="size-4" />
+              Tambahkan ke Keranjang
             </Button>
           </div>
         </>

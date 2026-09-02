@@ -44,6 +44,10 @@ const userCompanyQueries = {
             eq(userCompanies.userId, userId),
             isNull(userCompanies.deletedAt),
           ),
+          with: {
+            province: { columns: { id: true, name: true } },
+            regency: { columns: { id: true, name: true } },
+          },
         }),
       catch: (error) => {
         logError(

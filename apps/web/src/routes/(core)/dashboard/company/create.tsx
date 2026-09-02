@@ -324,7 +324,7 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto flex w-full flex-col gap-6">
-      <Card className="w-full overflow-hidden border-0 shadow-none">
+      <Card className="w-full overflow-hidden border border-0 shadow shadow-none">
         {/* Progress Header */}
         <div className="px-6">
           <h1 className="text-2xl font-bold tracking-tight text-neutral-800">
