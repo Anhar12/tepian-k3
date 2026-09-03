@@ -168,6 +168,7 @@ const parameterQueries = {
       return {
         data,
         pageCount,
+        total,
       };
     });
   },

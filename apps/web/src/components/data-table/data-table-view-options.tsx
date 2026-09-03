@@ -52,7 +52,7 @@ export function DataTableViewOptions<TData>({
           disabled={disabled}
         >
           <Settings2 className="text-muted-foreground" />
-          View
+          Lihat
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-44 p-0" {...props}>

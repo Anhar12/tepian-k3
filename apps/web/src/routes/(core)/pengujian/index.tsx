@@ -1,19 +1,17 @@
 import { useState } from "react";
-import { usePengujianOrderCart } from "@/stores/pengujian-order-cart.store";
-import { createFileRoute } from "@tanstack/react-router";
-import { useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ArrowRight,
-  Check,
   MapPin,
   ShoppingCart,
+  Trash2,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
+import { usePengujianOrderCart } from "@/stores/pengujian-order-cart.store";
 import parameterSchema from "@tepian-k3/schema/pengujian/parameter.schema";
-
 import { pageHead } from "@/utils/page-head";
 
 import { LocationSection } from "./-components/location-section";
@@ -28,6 +26,7 @@ export const Route = createFileRoute("/(core)/pengujian/")({
 
 function RouteComponent() {
   const navigate = useNavigate();
+
   const {
     items: draftItems,
     addItems,
@@ -35,18 +34,21 @@ function RouteComponent() {
     decrement,
     remove,
   } = usePengujianOrderCart();
+
   const [step, setStep] = useState(1);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [companyId, setCompanyId] = useState<string>();
   const [locationIds, setLocationIds] = useState<string[]>([]);
   const [activeLocationId, setActiveLocationId] = useState<string>();
+
   const [locationNames, setLocationNames] = useState<Record<string, string>>(
     {},
   );
 
   /*
-   * Flatten seluruh item cart agar lebih mudah digunakan
-   * untuk perhitungan dan tampilan.
+   * Item cart sudah berbentuk array sehingga bisa langsung
+   * digunakan untuk perhitungan dan tampilan.
    */
   const selectedCartItems = draftItems;
 
@@ -64,19 +66,28 @@ function RouteComponent() {
 
   const canGoParameter = Boolean(companyId && locationIds.length > 0);
 
+  const activeLocationName = activeLocationId
+    ? locationNames[activeLocationId]
+    : undefined;
+
   const handleCompanyChange = (id?: string) => {
     setCompanyId(id);
     setLocationIds([]);
     setActiveLocationId(undefined);
+    setLocationNames({});
   };
 
   const handleLocationChange = (ids: string[]) => {
     setLocationIds(ids);
-    setActiveLocationId(ids[0]);
+
+    setActiveLocationId((currentLocationId) => {
+      if (currentLocationId && ids.includes(currentLocationId)) {
+        return currentLocationId;
+      }
+
+      return ids[0];
+    });
   };
-  const activeLocationName = activeLocationId
-    ? locationNames[activeLocationId]
-    : undefined;
 
   const stepTitle =
     step === 1
@@ -107,11 +118,11 @@ function RouteComponent() {
         : cartItemCount === 0;
 
   const handlePreviousStep = () => {
-    setStep((currentStep) => currentStep - 1);
+    setStep((currentStep) => Math.max(1, currentStep - 1));
   };
 
   const handleNextStep = () => {
-    setStep((currentStep) => currentStep + 1);
+    setStep((currentStep) => Math.min(4, currentStep + 1));
   };
 
   return (
@@ -145,7 +156,7 @@ function RouteComponent() {
             />
           </div>
 
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <h2 className="mt-8 text-2xl font-bold text-slate-800 md:text-3xl">
                 {currentStepTitle}
@@ -196,13 +207,13 @@ function RouteComponent() {
           companyId={companyId}
           selectedLocationIds={locationIds}
           onLocationChange={handleLocationChange}
-          onLocationNamesChange={(locations) =>
+          onLocationNamesChange={(locations) => {
             setLocationNames(
               Object.fromEntries(
                 locations.map((location) => [location.id, location.name]),
               ),
-            )
-          }
+            );
+          }}
         />
       )}
 
@@ -210,42 +221,52 @@ function RouteComponent() {
       {step === 3 && canGoParameter && (
         <div className="space-y-4">
           {/* Active Location Selector */}
-          <div className="flex flex-col gap-4 rounded-3xl border border-blue-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3 sm:min-w-56">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-primary">
-                <MapPin className="size-5" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-800">Lokasi aktif</p>
-                <p className="text-xs text-slate-500">
-                  Atur parameter per lokasi
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-1 flex-wrap items-center gap-2">
-              {locationIds.map((id, index) => (
-                <Button
-                  key={id}
-                  variant={activeLocationId === id ? "default" : "outline"}
-                  className="h-auto min-h-10 max-w-full items-start px-3 py-2 text-left whitespace-normal"
-                  onClick={() => setActiveLocationId(id)}
-                >
-                  {activeLocationId === id && <Check className="mr-1 size-3" />}
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+              <div className="flex shrink-0 items-center gap-3 lg:w-52">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                  <MapPin className="size-5" />
+                </div>
 
-                  <span className="flex min-w-0 flex-col items-start text-left leading-tight">
-                    <span className="text-[10px] opacity-70">
-                      Lokasi {index + 1}
+                <div>
+                  <p className="text-sm font-bold text-slate-800">
+                    Lokasi aktif
+                  </p>
+
+                  <p className="text-xs text-slate-500">
+                    Atur parameter per lokasi
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                {locationIds.map((id, index) => (
+                  <Button
+                    key={id}
+                    variant={activeLocationId === id ? "default" : "outline"}
+                    className="h-auto min-h-12 w-full min-w-0 justify-start gap-2 px-3 py-2 text-left text-xs"
+                    aria-pressed={activeLocationId === id}
+                    onClick={() => setActiveLocationId(id)}
+                  >
+                    <span
+                      className={`flex size-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${activeLocationId === id ? "bg-white text-primary" : "bg-primary/20 text-slate-800"}`}
+                    >
+                      {index + 1}
                     </span>
-                    <span className="break-words whitespace-pre-line">
+
+                    <span className="min-w-0 leading-tight wrap-break-word whitespace-normal">
                       {locationNames[id] ?? "Nama lokasi"}
                     </span>
-                  </span>
-                </Button>
-              ))}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+          {/* Main Layout */}
+          <div
+            className={`relative grid items-start gap-3 transition-all duration-300 ${isCartOpen ? "xl:grid-cols-[minmax(0,3fr)_minmax(260px,1fr)]" : "grid-cols-1"}`}
+          >
             {/* Parameter Selection */}
             <div className="min-w-0">
               <ParameterSelection
@@ -253,126 +274,166 @@ function RouteComponent() {
                 activeLocationId={activeLocationId}
                 activeLocationName={activeLocationName}
                 onAddItems={addItems}
+                isCartOpen={isCartOpen}
+                onToggleCart={() => setIsCartOpen((open) => !open)}
               />
             </div>
 
-            {/* Cart Summary */}
-            <aside className="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm lg:sticky lg:top-4">
-              {/* Cart Header */}
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-primary">
-                  <ShoppingCart className="size-5" />
+            {/* Cart */}
+            {isCartOpen && (
+              <aside className="min-w-0 overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm xl:sticky xl:top-4">
+                {/* Cart Header */}
+                <div
+                  className={`flex items-center gap-3 py-4 ${"justify-between px-5"}`}
+                >
+                  <>
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                      <ShoppingCart className="size-5" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-bold text-slate-800">
+                        Keranjang
+                      </h3>
+
+                      <p className="truncate text-[10px] text-slate-500">
+                        Parameter yang sudah ditambahkan
+                      </p>
+                    </div>
+                  </>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 shrink-0 rounded-lg text-slate-500 hover:bg-blue-50 hover:text-primary"
+                    aria-label="Tutup keranjang"
+                    title="Tutup keranjang"
+                    onClick={() => setIsCartOpen(false)}
+                  >
+                    <X className="size-4" />
+                  </Button>
                 </div>
 
-                <div>
-                  <h3 className="font-bold text-slate-800">Keranjang</h3>
+                {/* Cart Content */}
+                {isCartOpen && (
+                  <>
+                    {/* Cart Items */}
+                    <div className="max-h-130 divide-y divide-slate-100 overflow-y-auto border-y border-slate-200">
+                      {selectedCartItems.length > 0 ? (
+                        selectedCartItems.map((item) => (
+                          <div
+                            key={`${item.locationId}-${item.parameterId}`}
+                            className="px-5 py-3"
+                          >
+                            <div className="flex gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-bold text-slate-700">
+                                  {item.parameterName}
+                                </p>
 
-                  <p className="text-xs text-slate-500">
-                    Parameter yang sudah ditambahkan
-                  </p>
-                </div>
-              </div>
+                                <p className="mt-1 text-[10px] font-medium text-slate-500 uppercase">
+                                  {item.clusterName} - {item.categoryName}
+                                </p>
 
-              {/* Cart Items */}
-              <div className="mt-5 max-h-screen space-y-3 overflow-y-auto border-y py-4">
-                {selectedCartItems.length > 0 ? (
-                  selectedCartItems.map((item) => (
-                    <div
-                      key={`${item.locationId}-${item.parameterId}`}
-                      className="flex items-start justify-between gap-3 text-sm"
-                    >
-                      <div>
-                        <p className="font-semibold text-slate-700">
-                          {item.parameterName}
-                        </p>
+                                <p className="mt-1 text-xs font-semibold text-primary">
+                                  Rp{" "}
+                                  {(item.price * item.quantity).toLocaleString(
+                                    "id-ID",
+                                  )}
+                                </p>
+                              </div>
 
-                        <p className="text-xs text-slate-400">
-                          {item.locationName} · {item.categoryName}
-                        </p>
+                              <div className="flex shrink-0 flex-col items-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-6 text-red-500 hover:bg-red-50 hover:text-red-600"
+                                  onClick={() =>
+                                    remove(item.parameterId, item.locationId)
+                                  }
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </Button>
+
+                                <div className="flex h-7 items-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7 rounded-none text-xs"
+                                    onClick={() =>
+                                      decrement(
+                                        item.parameterId,
+                                        item.locationId,
+                                      )
+                                    }
+                                  >
+                                    −
+                                  </Button>
+
+                                  <span className="flex w-7 items-center justify-center border-x border-slate-200 text-[11px] font-semibold text-slate-700">
+                                    {item.quantity}
+                                  </span>
+
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7 rounded-none text-xs"
+                                    onClick={() =>
+                                      increment(
+                                        item.parameterId,
+                                        item.locationId,
+                                      )
+                                    }
+                                  >
+                                    +
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-5 py-10 text-center">
+                          <ShoppingCart className="mx-auto mb-3 size-7 text-slate-200" />
+
+                          <p className="text-xs text-slate-400">
+                            Belum ada parameter di keranjang.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Summary */}
+                    <div className="px-5 py-4">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500">Total layanan</span>
+
+                        <span className="font-bold text-slate-700">
+                          {selectedServiceCount}
+                        </span>
                       </div>
 
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-xs font-semibold whitespace-nowrap text-slate-600">
-                          Rp{" "}
-                          {(item.price * item.quantity).toLocaleString("id-ID")}
-                        </span>
-                        <div className="flex items-center rounded-lg border bg-white">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-6"
-                            onClick={() =>
-                              decrement(item.parameterId, item.locationId)
-                            }
-                          >
-                            −
-                          </Button>
-                          <span className="w-6 text-center text-xs font-semibold">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-6"
-                            onClick={() =>
-                              increment(item.parameterId, item.locationId)
-                            }
-                          >
-                            +
-                          </Button>
+                      <div className="mt-4">
+                        <div className="flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-3 text-xs font-bold text-white">
+                          <ShoppingCart className="size-3.5" />
+                          Rp {selectedCartTotal.toLocaleString("id-ID")}
                         </div>
-                        <Button
-                          variant="link"
-                          className="h-auto p-0 text-[10px] text-red-500"
-                          onClick={() =>
-                            remove(item.parameterId, item.locationId)
-                          }
-                        >
-                          Hapus
-                        </Button>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-400">
-                    Belum ada parameter di keranjang.
-                  </p>
+                  </>
                 )}
-              </div>
-
-              {/* Cart Summary */}
-              <div className="mt-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Total layanan</span>
-
-                  <strong>{selectedServiceCount}</strong>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Total biaya</span>
-
-                  <strong className="text-primary">
-                    Rp {selectedCartTotal.toLocaleString("id-ID")}
-                  </strong>
-                </div>
-              </div>
-            </aside>
+              </aside>
+            )}
           </div>
         </div>
       )}
 
       {/* Step 4 */}
       {step === 4 && (
-        <div className="rounded-3xl border border-slate-100 bg-white p-8 text-center shadow-sm">
-          <h2 className="text-xl font-bold text-slate-800">
-            Review & Checkout
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Periksa kembali seluruh parameter sebelum mengirim pesanan.
-          </p>
-          <CheckoutContent />
-        </div>
+        <CheckoutContent
+          companyId={companyId}
+          locationNames={locationNames}
+          items={selectedCartItems}
+        />
       )}
     </div>
   );

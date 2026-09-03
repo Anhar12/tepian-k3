@@ -958,6 +958,32 @@ export const chatbotKnowledgeBase = createTable("chatbot_knowledge_base", {
   ...timestamps,
 });
 
+export const teamMembers = createTable(
+  "team_members",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .notNull()
+      .$default(() => uuidv7()),
+    name: varchar("name", { length: 255 }).notNull(),
+    role: varchar("role", { length: 255 }).notNull(),
+    bio: text("bio"),
+    ...createFileUrlColumn("photo"),
+    socialLinks: jsonb("social_links")
+      .$type<{ platform: string; url: string; label: string }[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    order: integer("order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    index("team_members_id_idx").using("btree", table.id),
+    index("team_members_order_idx").using("btree", table.order),
+    index("team_members_is_active_idx").using("btree", table.isActive),
+  ],
+);
+
 // ##################
 // end authored
 // ##################

@@ -218,7 +218,7 @@ export function SiteHeader() {
     roleNames.some((name) => name !== "user");
 
   return (
-    <header className="sticky top-0 z-40 flex h-13 shrink-0 items-center justify-between border-b px-4 shadow-sm backdrop-blur-md transition-all duration-200 dark:border-zinc-800/80 dark:bg-zinc-950/80">
+    <header className="sticky top-0 z-40 flex h-13 shrink-0 items-center justify-between border-b bg-white px-4 shadow-sm backdrop-blur-md transition-all duration-200 dark:border-zinc-800/80 dark:bg-zinc-950/80">
       {/* Left section: Toggle + Breadcrumbs */}
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1 h-8 w-8 text-slate-800 hover:bg-neutral-100 hover:text-primary dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100" />

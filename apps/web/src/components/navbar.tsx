@@ -23,6 +23,7 @@ const navItems: {
   { label: "Katalog", href: "/katalog" },
   { label: "FAQ", href: "/#faq" },
   { label: "PPID", href: "/ppid" },
+  { label: "Tim Kami", href: "/credit" },
 ];
 
 export default function Navbar() {

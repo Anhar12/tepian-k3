@@ -32,6 +32,8 @@ export const CACHE_KEYS = {
   ROLES_PREFIX: "cache:roles:",
   PERMISSIONS_ALL: "cache:permissions:all",
   PERMISSIONS_PREFIX: "cache:permissions:",
+  TEAM_MEMBERS_ALL: "cache:team-members:all",
+  TEAM_MEMBERS_PREFIX: "cache:team-members:",
 } as const;
 
 export type CacheKey = (typeof CACHE_KEYS)[keyof typeof CACHE_KEYS];

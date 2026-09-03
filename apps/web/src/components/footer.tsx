@@ -72,6 +72,11 @@ export default function Footer() {
                   Verifikasi Sertifikat
                 </a>
               </li>
+              <li>
+                <Link to="/credit" className="transition-all hover:underline">
+                  Tim Kami (Credit)
+                </Link>
+              </li>
             </ul>
           </div>
 

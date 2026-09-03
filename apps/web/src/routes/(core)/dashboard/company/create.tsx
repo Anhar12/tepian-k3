@@ -52,7 +52,6 @@ import {
   TestingLocationList,
   type TestingLocation,
 } from "./-components/testing-location-list";
-import { TestingLocationDialog } from "./-components/testing-location-dialog";
 
 export const Route = createFileRoute("/(core)/dashboard/company/create")({
   loader: async ({ context }) => {
@@ -103,22 +102,11 @@ function RouteComponent() {
   const [regencyOpen, setRegencyOpen] = useState(false);
   const [districtOpen, setDistrictOpen] = useState(false);
   const [villageOpen, setVillageOpen] = useState(false);
-  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [dialogRegencyId, setDialogRegencyId] = useState("");
 
   const [testingLocations, setTestingLocations] = useState<TestingLocation[]>(
     [],
   );
-
-  const [editingLocationIndex, setEditingLocationIndex] = useState<
-    number | null
-  >(null);
-
-  const [editingLocation, setEditingLocation] =
-    useState<TestingLocation | null>(null);
-
-  const [editingLocationRegencyId, setEditingLocationRegencyId] = useState("");
 
   const form = useForm<
     z.input<typeof userCompanySchema.createUserCompanySchema>,
@@ -211,43 +199,44 @@ function RouteComponent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const openAddLocationDialog = () => {
-    setEditingLocationIndex(null);
-    setEditingLocation(null);
-    setDialogRegencyId("");
-    setLocationDialogOpen(true);
+  const addTestingLocation = () => {
+    setTestingLocations((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        regencyId: "",
+        regencyName: "",
+        districtId: "",
+        districtName: "",
+        isNew: true,
+      },
+    ]);
   };
 
-  const openEditLocationDialog = (index: number) => {
-    const location = testingLocations[index];
-
-    if (!location) {
-      return;
-    }
-
-    setEditingLocationIndex(index);
-    setEditingLocation(location);
-    setDialogRegencyId(location.regencyId);
-    setLocationDialogOpen(true);
+  const updateTestingLocation = (index: number, location: TestingLocation) => {
+    setTestingLocations((prev) =>
+      prev.map((item, itemIndex) => (itemIndex === index ? location : item)),
+    );
   };
 
-  const saveTestingLocation = (location: TestingLocation) => {
-    setTestingLocations((prev) => {
-      // ADD
-      if (editingLocationIndex === null) {
-        return [...prev, location];
-      }
-
-      // EDIT
-      return prev.map((item, index) =>
-        index === editingLocationIndex ? location : item,
-      );
-    });
-
-    setEditingLocationIndex(null);
-    setEditingLocation(null);
-    setDialogRegencyId("");
-    setLocationDialogOpen(false);
+  const updateLocationRegency = (index: number, regencyId: string) => {
+    const selected = (locationRegency ?? []).find(
+      (item) => item.id === regencyId,
+    );
+    setTestingLocations((prev) =>
+      prev.map((item, itemIndex) =>
+        itemIndex === index
+          ? {
+              ...item,
+              regencyId,
+              regencyName: selected?.name ?? "",
+              districtId: "",
+              districtName: "",
+            }
+          : item,
+      ),
+    );
   };
 
   const removeTestingLocation = (index: number) => {
@@ -287,14 +276,7 @@ function RouteComponent() {
     ...trpc.platform.regency.getAllRegenciesByProvinceId.queryOptions({
       provinceId,
     }),
-    enabled: !!provinceId && locationDialogOpen,
-  });
-
-  const { data: locationDistrict } = useQuery({
-    ...trpc.platform.district.getAllDistrictsByRegencyId.queryOptions({
-      regencyId: dialogRegencyId,
-    }),
-    enabled: !!dialogRegencyId && locationDialogOpen,
+    enabled: !!provinceId,
   });
 
   const { data: profile } = useSuspenseQuery(
@@ -797,8 +779,10 @@ function RouteComponent() {
               <FieldGroup>
                 <TestingLocationList
                   locations={testingLocations}
-                  onAdd={openAddLocationDialog}
-                  onEdit={openEditLocationDialog}
+                  regency={locationRegency ?? []}
+                  onAdd={addTestingLocation}
+                  onChange={updateTestingLocation}
+                  onRegencyChange={updateLocationRegency}
                   onRemove={removeTestingLocation}
                 />
               </FieldGroup>
@@ -1286,24 +1270,6 @@ function RouteComponent() {
               )}
             </div>
           </form>
-
-          <TestingLocationDialog
-            open={locationDialogOpen}
-            onOpenChange={(open) => {
-              setLocationDialogOpen(open);
-
-              if (!open) {
-                setEditingLocationIndex(null);
-                setEditingLocation(null);
-                setDialogRegencyId("");
-              }
-            }}
-            location={editingLocation}
-            regency={locationRegency ?? []}
-            district={locationDistrict ?? []}
-            onRegencyChange={setDialogRegencyId}
-            onSave={saveTestingLocation}
-          />
         </CardContent>
       </Card>
     </div>

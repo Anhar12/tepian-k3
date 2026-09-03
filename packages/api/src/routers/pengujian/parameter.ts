@@ -12,13 +12,13 @@ export const parameterRouter = createTRPCRouter({
   )
     .input(parameterSchema.getByClusterAndParameterCategorySchema)
     .query(async ({ input }) => {
-      const { data, pageCount } = await runEffect(
+      const { data, pageCount, total } = await runEffect(
         parameterQueries.getOffsetPaginatedParametersByClusterIdAndCategoryId(
           input,
         ),
       );
 
-      return { data, pageCount };
+      return { data, pageCount, total };
     }),
 
   getPaginatedParameters: withPermission("parameters.view")

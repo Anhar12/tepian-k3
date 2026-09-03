@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,7 +13,6 @@ import useDebounced from "@/hooks/use-debounced";
 
 import { getClusterIcon } from "@/lib/cluster-colors";
 
-import { authMeQueryOptions } from "@/utils/auth-query";
 import { trpc } from "@/utils/trpc";
 
 import { useQuery } from "@tanstack/react-query";
@@ -27,12 +25,13 @@ import {
   ShoppingCart,
   X,
 } from "lucide-react";
-import { createElement, useEffect, useState } from "react";
+import { createElement, useEffect, useMemo, useState } from "react";
 
 type CatalogSearch = {
   clusterId?: string;
   parameterCategoryId?: string;
   page?: number;
+  perPage?: number;
   name?: string;
   companyId?: string;
   locationId?: string;
@@ -46,6 +45,16 @@ const clusterColors = [
   "text-emerald-500",
 ];
 
+const clusterActive = [
+  "bg-rose-500/10",
+  "bg-amber-500/10",
+  "bg-violet-500/10",
+  "bg-blue-500/10",
+  "bg-emerald-500/10",
+];
+
+const PER_PAGE_OPTIONS = [5, 10, 20, 50];
+
 export function KatalogBrowser() {
   const navigate = useNavigate();
 
@@ -57,13 +66,8 @@ export function KatalogBrowser() {
 
   const debouncedSearch = useDebounced(searchTerm, 500);
 
-  const [cart, setCart] = useState<
-    Map<string, { quantity: number; price: number }>
-  >(new Map());
-
-  const [adding, setAdding] = useState<string | null>(null);
-
-  const { data: me } = useQuery(authMeQueryOptions());
+  const currentPage = search.page ?? 1;
+  const perPage = search.perPage ?? 10;
 
   const { data: clusters, isLoading: loadingClusters } = useQuery(
     trpc.pengujian.cluster.getAllClusters.queryOptions(),
@@ -78,12 +82,9 @@ export function KatalogBrowser() {
       {
         clusterId: search.clusterId,
         parameterCategoryId: search.parameterCategoryId,
-        page: search.page ?? 1,
-        perPage: 8,
+        page: currentPage,
+        perPage,
         name: search.name,
-      },
-      {
-        enabled: Boolean(search.clusterId),
       },
     ),
   );
@@ -100,7 +101,7 @@ export function KatalogBrowser() {
     });
   }, [debouncedSearch, navigate]);
 
-  const updateSearch = (values: Partial<CatalogSearch>) =>
+  const updateSearch = (values: Partial<CatalogSearch>) => {
     navigate({
       to: "/katalog",
       search: (old) => ({
@@ -109,10 +110,9 @@ export function KatalogBrowser() {
       }),
       resetScroll: false,
     });
+  };
 
   const chooseCluster = (clusterId: string) => {
-    setCart(new Map());
-
     updateSearch({
       clusterId,
       parameterCategoryId: undefined,
@@ -121,14 +121,66 @@ export function KatalogBrowser() {
   };
 
   const resetCluster = () => {
-    setCart(new Map());
-
     updateSearch({
       clusterId: undefined,
       parameterCategoryId: undefined,
       page: 1,
     });
   };
+
+  const resetCategory = () => {
+    updateSearch({
+      parameterCategoryId: undefined,
+      page: 1,
+    });
+  };
+
+  const pageCount = parameters?.pageCount ?? 1;
+
+  const totalData = useMemo(() => {
+    if (!parameters) return 0;
+
+    return parameters.data.length;
+  }, [parameters]);
+
+  const showingFrom = totalData === 0 ? 0 : (currentPage - 1) * perPage + 1;
+
+  const showingTo = Math.min(currentPage * perPage, totalData);
+
+  const paginationItems = useMemo(() => {
+    if (pageCount <= 1) return [1];
+
+    const pages: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
+
+    if (pageCount <= 7) {
+      for (let page = 1; page <= pageCount; page++) {
+        pages.push(page);
+      }
+
+      return pages;
+    }
+
+    pages.push(1);
+
+    if (currentPage > 4) {
+      pages.push("ellipsis-left");
+    }
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(pageCount - 1, currentPage + 1);
+
+    for (let page = start; page <= end; page++) {
+      pages.push(page);
+    }
+
+    if (currentPage < pageCount - 3) {
+      pages.push("ellipsis-right");
+    }
+
+    pages.push(pageCount);
+
+    return pages;
+  }, [currentPage, pageCount]);
 
   return (
     <section
@@ -139,6 +191,7 @@ export function KatalogBrowser() {
         <h2 className="mb-6 text-2xl font-bold text-slate-800">Filter</h2>
 
         <div className="space-y-3">
+          {/* Search */}
           <div className="relative">
             <Search className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-slate-500" />
 
@@ -154,10 +207,10 @@ export function KatalogBrowser() {
           <div className="relative">
             <Select
               value={search.clusterId ?? ""}
-              onValueChange={(value) => chooseCluster(value)}
+              onValueChange={chooseCluster}
             >
               <SelectTrigger className="h-10! w-full rounded-lg border-slate-200">
-                <SelectValue placeholder="Jenis Pengujian" />
+                <SelectValue placeholder="Semua Jenis Pengujian" />
               </SelectTrigger>
 
               <SelectContent>
@@ -201,7 +254,7 @@ export function KatalogBrowser() {
                 }
               >
                 <SelectTrigger className="h-10! w-full rounded-lg border-slate-200">
-                  <SelectValue placeholder="Kategori Parameter" />
+                  <SelectValue placeholder="Semua Kategori Parameter" />
                 </SelectTrigger>
 
                 <SelectContent>
@@ -221,10 +274,7 @@ export function KatalogBrowser() {
                     event.preventDefault();
                     event.stopPropagation();
 
-                    updateSearch({
-                      parameterCategoryId: undefined,
-                      page: 1,
-                    });
+                    resetCategory();
                   }}
                   className="absolute top-1/2 right-9 z-10 flex size-4 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
                 >
@@ -237,17 +287,32 @@ export function KatalogBrowser() {
       </aside>
 
       <div className="min-w-0 space-y-3">
+        {/* Header */}
         <div className="rounded-3xl border bg-white px-8 py-8 shadow-[0_14px_40px_-30px_rgba(16,97,214,0.35)]">
           <h2 className="text-2xl font-bold text-slate-800">
-            Daftar Jenis Pengujian
+            Daftar Parameter Pengujian
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Kelola parameter dan biaya pengujian
+            Lihat dan pilih parameter serta biaya pengujian
           </p>
         </div>
 
+        {/* Cluster */}
         <div className="flex items-center justify-between gap-2 overflow-x-auto rounded-3xl border bg-white px-3 py-3 shadow-[0_14px_40px_-30px_rgba(16,97,214,0.35)]">
+          <button
+            type="button"
+            onClick={resetCluster}
+            className={`flex min-w-32 items-center justify-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-bold uppercase transition-colors ${
+              !search.clusterId
+                ? "bg-slate-100 text-slate-800"
+                : "text-slate-500 hover:bg-slate-50"
+            }`}
+          >
+            <Globe2 className="size-5" />
+            Semua
+          </button>
+
           {loadingClusters
             ? Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton key={index} className="h-10 min-w-28 rounded-xl" />
@@ -259,7 +324,7 @@ export function KatalogBrowser() {
                   onClick={() => chooseCluster(cluster.id)}
                   className={`flex min-w-32 items-center justify-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-bold uppercase transition-colors ${
                     search.clusterId === cluster.id
-                      ? "bg-slate-100"
+                      ? clusterActive[index % clusterColors.length]
                       : "hover:bg-slate-50"
                   } ${clusterColors[index % clusterColors.length]}`}
                 >
@@ -272,117 +337,200 @@ export function KatalogBrowser() {
               ))}
         </div>
 
+        {/* Table */}
         <div className="rounded-3xl border bg-white p-8 shadow-[0_14px_40px_-30px_rgba(16,97,214,0.35)]">
-          {!search.clusterId ? (
-            <div className="flex min-h-96 items-center justify-center text-center text-sm text-slate-400">
-              Pilih klaster pengujian untuk melihat daftar parameter.
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-170 text-left text-xs">
-                  <thead>
-                    <tr className="bg-slate-100 text-sm font-bold text-slate-800">
-                      <th className="rounded-l-full px-5 py-4">
-                        Kategori Parameter
-                      </th>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-170 text-left text-xs">
+              <thead>
+                <tr className="bg-slate-100 text-sm font-bold text-slate-800">
+                  <th className="min-w-48 rounded-l-full px-5 py-4">
+                    Kategori Parameter
+                  </th>
 
-                      <th className="px-5 py-4">Parameter</th>
+                  <th className="px-5 py-4">Parameter</th>
 
-                      <th className="px-5 py-4">Acuan Standar</th>
+                  <th className="min-w-40 px-5 py-4">Acuan Standar</th>
 
-                      <th className="px-5 py-4">Biaya</th>
+                  <th className="px-5 py-4">Biaya</th>
 
-                      <th className="rounded-r-full px-5 py-4" />
+                  <th className="rounded-r-full px-5 py-4" />
+                </tr>
+              </thead>
+
+              <tbody>
+                {loadingParameters ? (
+                  Array.from({ length: perPage }).map((_, index) => (
+                    <tr key={index} className="border-b border-slate-100">
+                      <td colSpan={5} className="px-5 py-4">
+                        <Skeleton className="h-4 w-full" />
+                      </td>
                     </tr>
-                  </thead>
+                  ))
+                ) : parameters?.data?.length ? (
+                  parameters.data.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="border-b border-slate-100 text-slate-600"
+                    >
+                      <td className="px-5 py-2">{row.category.name}</td>
 
-                  <tbody>
-                    {loadingParameters
-                      ? Array.from({ length: 8 }).map((_, index) => (
-                          <tr key={index} className="border-b border-slate-100">
-                            <td colSpan={5} className="px-5 py-4">
-                              <Skeleton className="h-5 w-full" />
-                            </td>
-                          </tr>
-                        ))
-                      : parameters?.data.map((row) => (
-                          <tr
-                            key={row.id}
-                            className="border-b border-slate-100 text-slate-600"
-                          >
-                            <td className="px-5 py-3">{row.category.name}</td>
+                      <td className="px-5 py-2 font-medium text-blue-500">
+                        {row.name}
+                      </td>
 
-                            <td className="px-5 py-3 font-medium text-blue-500">
-                              {row.name}
-                            </td>
+                      <td className="px-5 py-2">{row.reference ?? "-"}</td>
 
-                            <td className="px-5 py-3">
-                              {row.reference ?? "-"}
-                            </td>
+                      <td className="px-5 py-2 whitespace-nowrap">
+                        Rp {row.price.toLocaleString("id-ID")}
+                      </td>
 
-                            <td className="px-5 py-3 whitespace-nowrap">
-                              Rp {row.price.toLocaleString("id-ID")}
-                            </td>
+                      <td className="px-5 py-2 text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          aria-label={`Tambahkan ${row.name} ke keranjang`}
+                          onClick={() =>
+                            navigate({
+                              to: "/pengujian",
+                            })
+                          }
+                        >
+                          <ShoppingCart className="size-4 text-slate-500" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-5 py-16 text-center text-sm text-slate-400"
+                    >
+                      Parameter tidak ditemukan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-                            <td className="px-5 py-3 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  aria-label={`Tambahkan ${row.name} ke keranjang`}
-                                  disabled={adding === row.id}
-                                  onClick={() =>
-                                    navigate({
-                                      to: "/pengujian",
-                                    })
-                                  }
-                                >
-                                  <ShoppingCart className="size-4 text-slate-500" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                  </tbody>
-                </table>
+          {/* Pagination */}
+          {!loadingParameters && (
+            <div className="mt-6 flex flex-col items-center justify-between gap-4 lg:flex-row">
+              {/* Showing data */}
+              <div className="text-xs text-slate-500">
+                Menampilkan{" "}
+                <span className="font-semibold text-slate-700">
+                  {showingFrom}-{showingTo}
+                </span>{" "}
+                dari{" "}
+                <span className="font-semibold text-slate-700">
+                  {totalData}
+                </span>{" "}
+                data
               </div>
 
-              <div className="mt-6 flex justify-center gap-2">
+              <div className="flex items-center gap-3">
+                {/* Per Page */}
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Select
+                    value={String(perPage)}
+                    onValueChange={(value) =>
+                      updateSearch({
+                        perPage: Number(value),
+                        page: 1,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-10 w-16 rounded-xl border-slate-200">
+                      <SelectValue />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {PER_PAGE_OPTIONS.map((option) => (
+                        <SelectItem key={option} value={String(option)}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Page info */}
+                <span className="hidden text-sm font-medium whitespace-nowrap text-slate-700 xl:inline">
+                  Halaman {currentPage} dari {pageCount}
+                </span>
+
+                {/* Previous */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  disabled={(search.page ?? 1) === 1}
+                  aria-label="Halaman sebelumnya"
+                  disabled={currentPage === 1}
                   onClick={() =>
                     updateSearch({
-                      page: (search.page ?? 1) - 1,
+                      page: currentPage - 1,
                     })
                   }
+                  className="rounded-xl"
                 >
-                  <ChevronLeft className="size-4" />
+                  <ChevronLeft className="size-5" />
                 </Button>
 
-                <Badge className="flex h-8 min-w-8 items-center justify-center bg-slate-800">
-                  {search.page ?? 1}
-                </Badge>
+                {/* Page numbers */}
+                <div className="flex items-center gap-1">
+                  {paginationItems.map((item, index) => {
+                    if (item === "ellipsis-left" || item === "ellipsis-right") {
+                      return (
+                        <span
+                          key={`${item}-${index}`}
+                          className="flex size-10 items-center justify-center text-slate-400"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
 
+                    return (
+                      <Button
+                        key={item}
+                        variant={currentPage === item ? "default" : "ghost"}
+                        size="icon"
+                        aria-label={`Halaman ${item}`}
+                        onClick={() =>
+                          updateSearch({
+                            page: item,
+                          })
+                        }
+                        className={`rounded-xl ${
+                          currentPage === item
+                            ? "bg-slate-800 text-white hover:bg-slate-700"
+                            : ""
+                        }`}
+                      >
+                        {item}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                {/* Next */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  disabled={
-                    !parameters?.pageCount ||
-                    search.page === parameters.pageCount
-                  }
+                  aria-label="Halaman berikutnya"
+                  disabled={!parameters?.pageCount || currentPage >= pageCount}
                   onClick={() =>
                     updateSearch({
-                      page: (search.page ?? 1) + 1,
+                      page: currentPage + 1,
                     })
                   }
+                  className="rounded-xl"
                 >
-                  <ChevronRight className="size-4" />
+                  <ChevronRight className="size-5" />
                 </Button>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

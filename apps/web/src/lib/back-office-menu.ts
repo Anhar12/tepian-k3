@@ -23,6 +23,7 @@ import {
   IconSettings,
   IconLayoutGrid,
   IconFileText,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 
 const urlStarter = "/back-office";
@@ -193,6 +194,12 @@ export const backOfficeMenu: {
           permission: "banners.view",
         },
         {
+          title: "Tim Kami",
+          url: `${urlStarter}/team-members`,
+          icon: IconUsersGroup,
+          permission: "banners.view",
+        },
+        {
           title: "Berita",
           url: `${urlStarter}/news`,
           icon: IconNews,
@@ -287,6 +294,12 @@ export const backOfficeMenu: {
           title: "Manajemen Aset Halaman",
           url: `${urlStarter}/landing-settings`,
           icon: IconLayoutGrid,
+          permission: "banners.view",
+        },
+        {
+          title: "Tim Kami",
+          url: `${urlStarter}/team-members`,
+          icon: IconUsersGroup,
           permission: "banners.view",
         },
         {

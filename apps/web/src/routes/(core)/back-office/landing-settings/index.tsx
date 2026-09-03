@@ -58,6 +58,7 @@ import {
   IconFileText,
   IconMessage2Question,
   IconChartBar,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 import SingleImageUpload from "@/components/ui/single-image-upload";
 import ImageWithFallback from "@/components/image-with-fallback";
@@ -67,7 +68,13 @@ import faqSchema from "@tepian-k3/schema/platform/faq.schema";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 
-type TabType = "landing" | "statistik" | "pelatihan" | "ppid" | "faq";
+type TabType =
+  | "landing"
+  | "statistik"
+  | "pelatihan"
+  | "ppid"
+  | "faq"
+  | "credit";
 
 export const Route = createFileRoute("/(core)/back-office/landing-settings/")({
   validateSearch: (search: Record<string, unknown>): { tab: TabType } => {
@@ -77,6 +84,7 @@ export const Route = createFileRoute("/(core)/back-office/landing-settings/")({
       "pelatihan",
       "ppid",
       "faq",
+      "credit",
     ];
     const tabStr = (search.tab as string) || "landing";
     return {
@@ -200,6 +208,12 @@ function LandingSettingsComponent() {
       }),
     );
 
+  const { data: creditHeroSetting, refetch: refetchCreditHero } = useQuery(
+    trpc.platform.setting.getByKey.queryOptions({
+      key: "credit.hero.image_url",
+    }),
+  );
+
   const setSettingMutation = useMutation({
     ...trpc.platform.setting.set.mutationOptions(),
     onSuccess: () => {
@@ -209,6 +223,7 @@ function LandingSettingsComponent() {
       refetchHeroAutoplay();
       refetchHeroNavigatorMode();
       refetchTrainingSlides();
+      refetchCreditHero();
     },
     onError: (err) => {
       globalErrorToast(`Gagal menyimpan pengaturan: ${err.message}`);
@@ -693,6 +708,7 @@ function LandingSettingsComponent() {
       ? [{ id: "ppid", label: "Manajemen PPID", icon: IconFileText }]
       : []),
     { id: "faq", label: "Pertanyaan Umum (FAQ)", icon: IconMessage2Question },
+    { id: "credit", label: "Tim Kami (Credit)", icon: IconUsersGroup },
   ];
 
   return (
@@ -1623,6 +1639,54 @@ function LandingSettingsComponent() {
               </TableBody>
             </Table>
           </div>
+        </div>
+      )}
+
+      {/* ================= TAB 6: TIM KAMI (CREDIT PAGE) ================= */}
+      {activeTab === "credit" && (
+        <div className="space-y-6">
+          {/* Quick link Card to Team Members Management */}
+          <Card className="rounded-2xl border-slate-100 shadow-xs">
+            <CardHeader className="space-y-1">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <CardTitle className="text-lg font-bold text-slate-800">
+                    Manajemen Anggota Tim (The People Behind Tepian K3)
+                  </CardTitle>
+                  <CardDescription>
+                    Kelola daftar anggota tim, jabatan, foto, tautan sosial
+                    media dinamis, dan urutan kartu profil yang ditampilkan pada
+                    halaman publik Tim Kami.
+                  </CardDescription>
+                </div>
+                <Link to="/back-office/team-members">
+                  <Button
+                    size="sm"
+                    className="shrink-0 gap-2 bg-blue-600 font-bold hover:bg-blue-700"
+                  >
+                    <IconUsersGroup className="h-4 w-4" /> Kelola Anggota Tim
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4 text-xs leading-relaxed text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/40 dark:text-blue-200">
+                <p className="mb-1 font-semibold">
+                  ℹ️ Informasi Halaman Tim Kami:
+                </p>
+                <p>
+                  Header hero &amp; kutipan dedikasi pada halaman{" "}
+                  <code className="font-mono font-bold text-blue-700 dark:text-blue-300">
+                    /credit
+                  </code>{" "}
+                  telah dirancang khusus dengan gaya identitas visual Tepian K3.
+                  Anda dapat menambah, mengedit, mengaktifkan/menonaktifkan,
+                  serta mengatur urutan tampilan kartu profil anggota tim
+                  melalui tombol di atas.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 

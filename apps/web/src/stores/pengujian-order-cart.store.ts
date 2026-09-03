@@ -3,6 +3,7 @@ import { create } from "zustand";
 export interface DraftOrderItem {
   parameterId: string;
   parameterName: string;
+  clusterName: string;
   categoryName: string;
   locationId: string;
   locationName: string;

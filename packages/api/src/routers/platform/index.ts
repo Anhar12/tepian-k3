@@ -23,6 +23,7 @@ import { kepegawaianExcelRouter } from "./kepegawaian-excel";
 import { chatbotRouter } from "./chatbot";
 import { landingStatsRouter } from "./landing-stats";
 import { landingRegionRouter } from "./landing-region";
+import { teamMemberRouter } from "./team-member";
 
 export const platformRouter = createTRPCRouter({
   auth: authRouter,
@@ -49,4 +50,5 @@ export const platformRouter = createTRPCRouter({
   chatbot: chatbotRouter,
   landingStats: landingStatsRouter,
   landingRegion: landingRegionRouter,
+  teamMember: teamMemberRouter,
 });

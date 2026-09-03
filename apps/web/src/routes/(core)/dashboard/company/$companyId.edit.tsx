@@ -49,7 +49,6 @@ import {
   TestingLocationList,
   type TestingLocation,
 } from "./-components/testing-location-list";
-import { TestingLocationDialog } from "./-components/testing-location-dialog";
 
 export const Route = createFileRoute(
   "/(core)/dashboard/company/$companyId/edit",
@@ -107,7 +106,6 @@ function RouteComponent() {
   const [emailFocused, setEmailFocused] = useState(false);
   const [picEmailFocused, setPicEmailFocused] = useState(false);
   const [bankAccountFocused, setBankAccountFocused] = useState(false);
-  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
 
   const [testingLocations, setTestingLocations] = useState<TestingLocation[]>(
     [],
@@ -116,35 +114,6 @@ function RouteComponent() {
   const [deletedTestingLocationIds, setDeletedTestingLocationIds] = useState<
     string[]
   >([]);
-
-  const [editingLocationIndex, setEditingLocationIndex] = useState<
-    number | null
-  >(null);
-
-  const [editingLocation, setEditingLocation] =
-    useState<TestingLocation | null>(null);
-
-  const [dialogRegencyId, setDialogRegencyId] = useState("");
-
-  const openAddLocationDialog = () => {
-    setEditingLocationIndex(null);
-    setEditingLocation(null);
-    setDialogRegencyId("");
-    setLocationDialogOpen(true);
-  };
-
-  const openEditLocationDialog = (index: number) => {
-    const location = testingLocations[index];
-
-    if (!location) {
-      return;
-    }
-
-    setEditingLocationIndex(index);
-    setEditingLocation(location);
-    setDialogRegencyId(location.regencyId);
-    setLocationDialogOpen(true);
-  };
 
   const removeTestingLocation = (index: number) => {
     const location = testingLocations[index];
@@ -162,49 +131,48 @@ function RouteComponent() {
     setTestingLocations((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const saveTestingLocation = (location: TestingLocation) => {
-    if (editingLocationIndex === null) {
-      // ADD
-      setTestingLocations((prev) => [
-        ...prev,
-        {
-          ...location,
-          id: undefined,
-          isNew: true,
-        },
-      ]);
-    } else {
-      const currentLocation = testingLocations[editingLocationIndex];
+  const addTestingLocation = () => {
+    setTestingLocations((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        regencyId: "",
+        regencyName: "",
+        districtId: "",
+        districtName: "",
+        isNew: true,
+      },
+    ]);
+  };
 
-      if (!currentLocation) {
-        return;
-      }
-
-      if (currentLocation.id && !currentLocation.isNew) {
-        setDeletedTestingLocationIds((prev) =>
-          prev.includes(currentLocation.id!)
-            ? prev
-            : [...prev, currentLocation.id!],
-        );
-      }
-
-      setTestingLocations((prev) =>
-        prev.map((item, index) =>
-          index === editingLocationIndex
-            ? {
-                ...location,
-                id: undefined,
-                isNew: true,
-              }
-            : item,
-        ),
+  const updateTestingLocation = (index: number, location: TestingLocation) => {
+    const current = testingLocations[index];
+    if (current?.id && !current.isNew) {
+      setDeletedTestingLocationIds((prev) =>
+        prev.includes(current.id!) ? prev : [...prev, current.id!],
       );
     }
+    setTestingLocations((prev) =>
+      prev.map((item, itemIndex) =>
+        itemIndex === index
+          ? { ...location, id: undefined, isNew: true }
+          : item,
+      ),
+    );
+  };
 
-    setEditingLocationIndex(null);
-    setEditingLocation(null);
-    setDialogRegencyId("");
-    setLocationDialogOpen(false);
+  const updateLocationRegency = (index: number, regencyId: string) => {
+    const selected = (locationRegency ?? []).find(
+      (item) => item.id === regencyId,
+    );
+    updateTestingLocation(index, {
+      ...testingLocations[index]!,
+      regencyId,
+      regencyName: selected?.name ?? "",
+      districtId: "",
+      districtName: "",
+    });
   };
 
   const maskEmail = (email: string) => {
@@ -371,14 +339,7 @@ function RouteComponent() {
     ...trpc.platform.regency.getAllRegenciesByProvinceId.queryOptions({
       provinceId,
     }),
-    enabled: !!provinceId && locationDialogOpen,
-  });
-
-  const { data: locationDistrict } = useQuery({
-    ...trpc.platform.district.getAllDistrictsByRegencyId.queryOptions({
-      regencyId: dialogRegencyId,
-    }),
-    enabled: !!dialogRegencyId && locationDialogOpen,
+    enabled: !!provinceId,
   });
 
   useEffect(() => {
@@ -1005,8 +966,10 @@ function RouteComponent() {
                 <FieldGroup>
                   <TestingLocationList
                     locations={testingLocations}
-                    onAdd={openAddLocationDialog}
-                    onEdit={openEditLocationDialog}
+                    regency={locationRegency ?? []}
+                    onAdd={addTestingLocation}
+                    onChange={updateTestingLocation}
+                    onRegencyChange={updateLocationRegency}
                     onRemove={removeTestingLocation}
                   />
                 </FieldGroup>
@@ -1279,24 +1242,6 @@ function RouteComponent() {
               </Button>
             </FieldGroup>
           </form>
-
-          <TestingLocationDialog
-            open={locationDialogOpen}
-            onOpenChange={(open) => {
-              setLocationDialogOpen(open);
-
-              if (!open) {
-                setEditingLocationIndex(null);
-                setEditingLocation(null);
-                setDialogRegencyId("");
-              }
-            }}
-            location={editingLocation}
-            regency={locationRegency ?? []}
-            district={locationDistrict ?? []}
-            onRegencyChange={setDialogRegencyId}
-            onSave={saveTestingLocation}
-          />
         </CardContent>
       </Card>
     </div>

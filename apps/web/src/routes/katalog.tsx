@@ -38,7 +38,7 @@ function RouteComponent() {
       <div className="relative z-10">
         <Navbar />
 
-        <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <main className="mx-auto max-w-360 px-4 py-12 sm:px-6 lg:px-8">
           <section className="mx-auto max-w-3xl space-y-6 text-center">
             <p className="text-sm font-semibold tracking-[0.24em] text-primary uppercase">
               Layanan Pengujian K3

@@ -211,6 +211,13 @@
       "when": 1785959308108,
       "tag": "0041_bored_the_renegades",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1788076434179,
+      "tag": "0042_colossal_blue_shield",
+      "breakpoints": true
     }
   ]
 }

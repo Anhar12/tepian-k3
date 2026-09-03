@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as KatalogRouteImport } from './routes/katalog'
+import { Route as CreditRouteImport } from './routes/credit'
 import { Route as coreRouteRouteImport } from './routes/(core)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -85,6 +86,7 @@ import { Route as coreBackOfficeUsersIndexRouteImport } from './routes/(core)/ba
 import { Route as coreBackOfficeToolsIndexRouteImport } from './routes/(core)/back-office/tools/index'
 import { Route as coreBackOfficeToolCodesIndexRouteImport } from './routes/(core)/back-office/tool-codes/index'
 import { Route as coreBackOfficeTestingsIndexRouteImport } from './routes/(core)/back-office/testings/index'
+import { Route as coreBackOfficeTeamMembersIndexRouteImport } from './routes/(core)/back-office/team-members/index'
 import { Route as coreBackOfficeSurveyQuestionsIndexRouteImport } from './routes/(core)/back-office/survey-questions/index'
 import { Route as coreBackOfficeSertifikatPelatihanIndexRouteImport } from './routes/(core)/back-office/sertifikat-pelatihan/index'
 import { Route as coreBackOfficeRolesIndexRouteImport } from './routes/(core)/back-office/roles/index'
@@ -113,6 +115,7 @@ import { Route as coreDashboardCompanyCreateRouteImport } from './routes/(core)/
 import { Route as coreBackOfficeUsersCreateRouteImport } from './routes/(core)/back-office/users/create'
 import { Route as coreBackOfficeToolsCreateRouteImport } from './routes/(core)/back-office/tools/create'
 import { Route as coreBackOfficeToolCodesCreateRouteImport } from './routes/(core)/back-office/tool-codes/create'
+import { Route as coreBackOfficeTeamMembersCreateRouteImport } from './routes/(core)/back-office/team-members/create'
 import { Route as coreBackOfficeSurveyQuestionsCreateRouteImport } from './routes/(core)/back-office/survey-questions/create'
 import { Route as coreBackOfficePositionsCreateRouteImport } from './routes/(core)/back-office/positions/create'
 import { Route as coreBackOfficePelatihanCreateRouteImport } from './routes/(core)/back-office/pelatihan/create'
@@ -140,6 +143,7 @@ import { Route as coreDashboardCompanyCompanyIdDetailRouteImport } from './route
 import { Route as coreBackOfficeUsersUserIdEditRouteImport } from './routes/(core)/back-office/users/$userId.edit'
 import { Route as coreBackOfficeToolsToolIdDetailRouteImport } from './routes/(core)/back-office/tools/$toolId.detail'
 import { Route as coreBackOfficeTestingsTestingIdDetailRouteImport } from './routes/(core)/back-office/testings/$testingId.detail'
+import { Route as coreBackOfficeTeamMembersMemberIdEditRouteImport } from './routes/(core)/back-office/team-members/$memberId.edit'
 import { Route as coreBackOfficeSurveyQuestionsQuestionIdEditRouteImport } from './routes/(core)/back-office/survey-questions/$questionId.edit'
 import { Route as coreBackOfficeRolesRoleIdEditRouteImport } from './routes/(core)/back-office/roles/$roleId.edit'
 import { Route as coreBackOfficeRolesRoleIdDetailRouteImport } from './routes/(core)/back-office/roles/$roleId.detail'
@@ -183,6 +187,11 @@ const ProfilRoute = ProfilRouteImport.update({
 const KatalogRoute = KatalogRouteImport.update({
   id: '/katalog',
   path: '/katalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditRoute = CreditRouteImport.update({
+  id: '/credit',
+  path: '/credit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const coreRouteRoute = coreRouteRouteImport.update({
@@ -564,6 +573,12 @@ const coreBackOfficeTestingsIndexRoute =
     path: '/testings/',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeTeamMembersIndexRoute =
+  coreBackOfficeTeamMembersIndexRouteImport.update({
+    id: '/team-members/',
+    path: '/team-members/',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeSurveyQuestionsIndexRoute =
   coreBackOfficeSurveyQuestionsIndexRouteImport.update({
     id: '/survey-questions/',
@@ -730,6 +745,12 @@ const coreBackOfficeToolCodesCreateRoute =
     path: '/tool-codes/create',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
+const coreBackOfficeTeamMembersCreateRoute =
+  coreBackOfficeTeamMembersCreateRouteImport.update({
+    id: '/team-members/create',
+    path: '/team-members/create',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
 const coreBackOfficeSurveyQuestionsCreateRoute =
   coreBackOfficeSurveyQuestionsCreateRouteImport.update({
     id: '/survey-questions/create',
@@ -890,6 +911,12 @@ const coreBackOfficeTestingsTestingIdDetailRoute =
   coreBackOfficeTestingsTestingIdDetailRouteImport.update({
     id: '/testings/$testingId/detail',
     path: '/testings/$testingId/detail',
+    getParentRoute: () => coreBackOfficeRouteRoute,
+  } as any)
+const coreBackOfficeTeamMembersMemberIdEditRoute =
+  coreBackOfficeTeamMembersMemberIdEditRouteImport.update({
+    id: '/team-members/$memberId/edit',
+    path: '/team-members/$memberId/edit',
     getParentRoute: () => coreBackOfficeRouteRoute,
   } as any)
 const coreBackOfficeSurveyQuestionsQuestionIdEditRoute =
@@ -1072,6 +1099,7 @@ const coreBackOfficeToolsToolIdCalibrationCalibrationIdDetailRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/credit': typeof CreditRoute
   '/katalog': typeof KatalogRoute
   '/profil': typeof ProfilRoute
   '/unauthorized': typeof UnauthorizedRoute
@@ -1147,6 +1175,7 @@ export interface FileRoutesByFullPath {
   '/back-office/pelatihan/create': typeof coreBackOfficePelatihanCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
+  '/back-office/team-members/create': typeof coreBackOfficeTeamMembersCreateRoute
   '/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
@@ -1175,6 +1204,7 @@ export interface FileRoutesByFullPath {
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/sertifikat-pelatihan': typeof coreBackOfficeSertifikatPelatihanIndexRoute
   '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
+  '/back-office/team-members': typeof coreBackOfficeTeamMembersIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tool-codes': typeof coreBackOfficeToolCodesIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
@@ -1205,6 +1235,7 @@ export interface FileRoutesByFullPath {
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
+  '/back-office/team-members/$memberId/edit': typeof coreBackOfficeTeamMembersMemberIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
@@ -1231,6 +1262,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/credit': typeof CreditRoute
   '/katalog': typeof KatalogRoute
   '/profil': typeof ProfilRoute
   '/unauthorized': typeof UnauthorizedRoute
@@ -1300,6 +1332,7 @@ export interface FileRoutesByTo {
   '/back-office/pelatihan/create': typeof coreBackOfficePelatihanCreateRoute
   '/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
+  '/back-office/team-members/create': typeof coreBackOfficeTeamMembersCreateRoute
   '/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
@@ -1327,6 +1360,7 @@ export interface FileRoutesByTo {
   '/back-office/roles': typeof coreBackOfficeRolesIndexRoute
   '/back-office/sertifikat-pelatihan': typeof coreBackOfficeSertifikatPelatihanIndexRoute
   '/back-office/survey-questions': typeof coreBackOfficeSurveyQuestionsIndexRoute
+  '/back-office/team-members': typeof coreBackOfficeTeamMembersIndexRoute
   '/back-office/testings': typeof coreBackOfficeTestingsIndexRoute
   '/back-office/tool-codes': typeof coreBackOfficeToolCodesIndexRoute
   '/back-office/tools': typeof coreBackOfficeToolsIndexRoute
@@ -1357,6 +1391,7 @@ export interface FileRoutesByTo {
   '/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
+  '/back-office/team-members/$memberId/edit': typeof coreBackOfficeTeamMembersMemberIdEditRoute
   '/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
@@ -1386,6 +1421,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/(auth)': typeof authRouteRouteWithChildren
   '/(core)': typeof coreRouteRouteWithChildren
+  '/credit': typeof CreditRoute
   '/katalog': typeof KatalogRoute
   '/profil': typeof ProfilRoute
   '/unauthorized': typeof UnauthorizedRoute
@@ -1462,6 +1498,7 @@ export interface FileRoutesById {
   '/(core)/back-office/pelatihan/create': typeof coreBackOfficePelatihanCreateRoute
   '/(core)/back-office/positions/create': typeof coreBackOfficePositionsCreateRoute
   '/(core)/back-office/survey-questions/create': typeof coreBackOfficeSurveyQuestionsCreateRoute
+  '/(core)/back-office/team-members/create': typeof coreBackOfficeTeamMembersCreateRoute
   '/(core)/back-office/tool-codes/create': typeof coreBackOfficeToolCodesCreateRoute
   '/(core)/back-office/tools/create': typeof coreBackOfficeToolsCreateRoute
   '/(core)/back-office/users/create': typeof coreBackOfficeUsersCreateRoute
@@ -1490,6 +1527,7 @@ export interface FileRoutesById {
   '/(core)/back-office/roles/': typeof coreBackOfficeRolesIndexRoute
   '/(core)/back-office/sertifikat-pelatihan/': typeof coreBackOfficeSertifikatPelatihanIndexRoute
   '/(core)/back-office/survey-questions/': typeof coreBackOfficeSurveyQuestionsIndexRoute
+  '/(core)/back-office/team-members/': typeof coreBackOfficeTeamMembersIndexRoute
   '/(core)/back-office/testings/': typeof coreBackOfficeTestingsIndexRoute
   '/(core)/back-office/tool-codes/': typeof coreBackOfficeToolCodesIndexRoute
   '/(core)/back-office/tools/': typeof coreBackOfficeToolsIndexRoute
@@ -1520,6 +1558,7 @@ export interface FileRoutesById {
   '/(core)/back-office/roles/$roleId/detail': typeof coreBackOfficeRolesRoleIdDetailRoute
   '/(core)/back-office/roles/$roleId/edit': typeof coreBackOfficeRolesRoleIdEditRoute
   '/(core)/back-office/survey-questions/$questionId/edit': typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
+  '/(core)/back-office/team-members/$memberId/edit': typeof coreBackOfficeTeamMembersMemberIdEditRoute
   '/(core)/back-office/testings/$testingId/detail': typeof coreBackOfficeTestingsTestingIdDetailRoute
   '/(core)/back-office/tools/$toolId/detail': typeof coreBackOfficeToolsToolIdDetailRoute
   '/(core)/back-office/users/$userId/edit': typeof coreBackOfficeUsersUserIdEditRoute
@@ -1548,6 +1587,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/credit'
     | '/katalog'
     | '/profil'
     | '/unauthorized'
@@ -1623,6 +1663,7 @@ export interface FileRouteTypes {
     | '/back-office/pelatihan/create'
     | '/back-office/positions/create'
     | '/back-office/survey-questions/create'
+    | '/back-office/team-members/create'
     | '/back-office/tool-codes/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
@@ -1651,6 +1692,7 @@ export interface FileRouteTypes {
     | '/back-office/roles'
     | '/back-office/sertifikat-pelatihan'
     | '/back-office/survey-questions'
+    | '/back-office/team-members'
     | '/back-office/testings'
     | '/back-office/tool-codes'
     | '/back-office/tools'
@@ -1681,6 +1723,7 @@ export interface FileRouteTypes {
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
     | '/back-office/survey-questions/$questionId/edit'
+    | '/back-office/team-members/$memberId/edit'
     | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/users/$userId/edit'
@@ -1707,6 +1750,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/credit'
     | '/katalog'
     | '/profil'
     | '/unauthorized'
@@ -1776,6 +1820,7 @@ export interface FileRouteTypes {
     | '/back-office/pelatihan/create'
     | '/back-office/positions/create'
     | '/back-office/survey-questions/create'
+    | '/back-office/team-members/create'
     | '/back-office/tool-codes/create'
     | '/back-office/tools/create'
     | '/back-office/users/create'
@@ -1803,6 +1848,7 @@ export interface FileRouteTypes {
     | '/back-office/roles'
     | '/back-office/sertifikat-pelatihan'
     | '/back-office/survey-questions'
+    | '/back-office/team-members'
     | '/back-office/testings'
     | '/back-office/tool-codes'
     | '/back-office/tools'
@@ -1833,6 +1879,7 @@ export interface FileRouteTypes {
     | '/back-office/roles/$roleId/detail'
     | '/back-office/roles/$roleId/edit'
     | '/back-office/survey-questions/$questionId/edit'
+    | '/back-office/team-members/$memberId/edit'
     | '/back-office/testings/$testingId/detail'
     | '/back-office/tools/$toolId/detail'
     | '/back-office/users/$userId/edit'
@@ -1861,6 +1908,7 @@ export interface FileRouteTypes {
     | '/'
     | '/(auth)'
     | '/(core)'
+    | '/credit'
     | '/katalog'
     | '/profil'
     | '/unauthorized'
@@ -1937,6 +1985,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/pelatihan/create'
     | '/(core)/back-office/positions/create'
     | '/(core)/back-office/survey-questions/create'
+    | '/(core)/back-office/team-members/create'
     | '/(core)/back-office/tool-codes/create'
     | '/(core)/back-office/tools/create'
     | '/(core)/back-office/users/create'
@@ -1965,6 +2014,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/roles/'
     | '/(core)/back-office/sertifikat-pelatihan/'
     | '/(core)/back-office/survey-questions/'
+    | '/(core)/back-office/team-members/'
     | '/(core)/back-office/testings/'
     | '/(core)/back-office/tool-codes/'
     | '/(core)/back-office/tools/'
@@ -1995,6 +2045,7 @@ export interface FileRouteTypes {
     | '/(core)/back-office/roles/$roleId/detail'
     | '/(core)/back-office/roles/$roleId/edit'
     | '/(core)/back-office/survey-questions/$questionId/edit'
+    | '/(core)/back-office/team-members/$memberId/edit'
     | '/(core)/back-office/testings/$testingId/detail'
     | '/(core)/back-office/tools/$toolId/detail'
     | '/(core)/back-office/users/$userId/edit'
@@ -2024,6 +2075,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   authRouteRoute: typeof authRouteRouteWithChildren
   coreRouteRoute: typeof coreRouteRouteWithChildren
+  CreditRoute: typeof CreditRoute
   KatalogRoute: typeof KatalogRoute
   ProfilRoute: typeof ProfilRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
@@ -2071,6 +2123,13 @@ declare module '@tanstack/react-router' {
       path: '/katalog'
       fullPath: '/katalog'
       preLoaderRoute: typeof KatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credit': {
+      id: '/credit'
+      path: '/credit'
+      fullPath: '/credit'
+      preLoaderRoute: typeof CreditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(core)': {
@@ -2584,6 +2643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeTestingsIndexRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/team-members/': {
+      id: '/(core)/back-office/team-members/'
+      path: '/team-members'
+      fullPath: '/back-office/team-members'
+      preLoaderRoute: typeof coreBackOfficeTeamMembersIndexRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/survey-questions/': {
       id: '/(core)/back-office/survey-questions/'
       path: '/survey-questions'
@@ -2780,6 +2846,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof coreBackOfficeToolCodesCreateRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
+    '/(core)/back-office/team-members/create': {
+      id: '/(core)/back-office/team-members/create'
+      path: '/team-members/create'
+      fullPath: '/back-office/team-members/create'
+      preLoaderRoute: typeof coreBackOfficeTeamMembersCreateRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
     '/(core)/back-office/survey-questions/create': {
       id: '/(core)/back-office/survey-questions/create'
       path: '/survey-questions/create'
@@ -2967,6 +3040,13 @@ declare module '@tanstack/react-router' {
       path: '/testings/$testingId/detail'
       fullPath: '/back-office/testings/$testingId/detail'
       preLoaderRoute: typeof coreBackOfficeTestingsTestingIdDetailRouteImport
+      parentRoute: typeof coreBackOfficeRouteRoute
+    }
+    '/(core)/back-office/team-members/$memberId/edit': {
+      id: '/(core)/back-office/team-members/$memberId/edit'
+      path: '/team-members/$memberId/edit'
+      fullPath: '/back-office/team-members/$memberId/edit'
+      preLoaderRoute: typeof coreBackOfficeTeamMembersMemberIdEditRouteImport
       parentRoute: typeof coreBackOfficeRouteRoute
     }
     '/(core)/back-office/survey-questions/$questionId/edit': {
@@ -3245,6 +3325,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficePelatihanCreateRoute: typeof coreBackOfficePelatihanCreateRoute
   coreBackOfficePositionsCreateRoute: typeof coreBackOfficePositionsCreateRoute
   coreBackOfficeSurveyQuestionsCreateRoute: typeof coreBackOfficeSurveyQuestionsCreateRoute
+  coreBackOfficeTeamMembersCreateRoute: typeof coreBackOfficeTeamMembersCreateRoute
   coreBackOfficeToolCodesCreateRoute: typeof coreBackOfficeToolCodesCreateRoute
   coreBackOfficeToolsCreateRoute: typeof coreBackOfficeToolsCreateRoute
   coreBackOfficeUsersCreateRoute: typeof coreBackOfficeUsersCreateRoute
@@ -3268,6 +3349,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeRolesIndexRoute: typeof coreBackOfficeRolesIndexRoute
   coreBackOfficeSertifikatPelatihanIndexRoute: typeof coreBackOfficeSertifikatPelatihanIndexRoute
   coreBackOfficeSurveyQuestionsIndexRoute: typeof coreBackOfficeSurveyQuestionsIndexRoute
+  coreBackOfficeTeamMembersIndexRoute: typeof coreBackOfficeTeamMembersIndexRoute
   coreBackOfficeTestingsIndexRoute: typeof coreBackOfficeTestingsIndexRoute
   coreBackOfficeToolCodesIndexRoute: typeof coreBackOfficeToolCodesIndexRoute
   coreBackOfficeToolsIndexRoute: typeof coreBackOfficeToolsIndexRoute
@@ -3284,6 +3366,7 @@ interface coreBackOfficeRouteRouteChildren {
   coreBackOfficeRolesRoleIdDetailRoute: typeof coreBackOfficeRolesRoleIdDetailRoute
   coreBackOfficeRolesRoleIdEditRoute: typeof coreBackOfficeRolesRoleIdEditRoute
   coreBackOfficeSurveyQuestionsQuestionIdEditRoute: typeof coreBackOfficeSurveyQuestionsQuestionIdEditRoute
+  coreBackOfficeTeamMembersMemberIdEditRoute: typeof coreBackOfficeTeamMembersMemberIdEditRoute
   coreBackOfficeTestingsTestingIdDetailRoute: typeof coreBackOfficeTestingsTestingIdDetailRoute
   coreBackOfficeToolsToolIdDetailRoute: typeof coreBackOfficeToolsToolIdDetailRoute
   coreBackOfficeUsersUserIdEditRoute: typeof coreBackOfficeUsersUserIdEditRoute
@@ -3318,6 +3401,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficePositionsCreateRoute: coreBackOfficePositionsCreateRoute,
   coreBackOfficeSurveyQuestionsCreateRoute:
     coreBackOfficeSurveyQuestionsCreateRoute,
+  coreBackOfficeTeamMembersCreateRoute: coreBackOfficeTeamMembersCreateRoute,
   coreBackOfficeToolCodesCreateRoute: coreBackOfficeToolCodesCreateRoute,
   coreBackOfficeToolsCreateRoute: coreBackOfficeToolsCreateRoute,
   coreBackOfficeUsersCreateRoute: coreBackOfficeUsersCreateRoute,
@@ -3348,6 +3432,7 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
     coreBackOfficeSertifikatPelatihanIndexRoute,
   coreBackOfficeSurveyQuestionsIndexRoute:
     coreBackOfficeSurveyQuestionsIndexRoute,
+  coreBackOfficeTeamMembersIndexRoute: coreBackOfficeTeamMembersIndexRoute,
   coreBackOfficeTestingsIndexRoute: coreBackOfficeTestingsIndexRoute,
   coreBackOfficeToolCodesIndexRoute: coreBackOfficeToolCodesIndexRoute,
   coreBackOfficeToolsIndexRoute: coreBackOfficeToolsIndexRoute,
@@ -3371,6 +3456,8 @@ const coreBackOfficeRouteRouteChildren: coreBackOfficeRouteRouteChildren = {
   coreBackOfficeRolesRoleIdEditRoute: coreBackOfficeRolesRoleIdEditRoute,
   coreBackOfficeSurveyQuestionsQuestionIdEditRoute:
     coreBackOfficeSurveyQuestionsQuestionIdEditRoute,
+  coreBackOfficeTeamMembersMemberIdEditRoute:
+    coreBackOfficeTeamMembersMemberIdEditRoute,
   coreBackOfficeTestingsTestingIdDetailRoute:
     coreBackOfficeTestingsTestingIdDetailRoute,
   coreBackOfficeToolsToolIdDetailRoute: coreBackOfficeToolsToolIdDetailRoute,
@@ -3641,6 +3728,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   authRouteRoute: authRouteRouteWithChildren,
   coreRouteRoute: coreRouteRouteWithChildren,
+  CreditRoute: CreditRoute,
   KatalogRoute: KatalogRoute,
   ProfilRoute: ProfilRoute,
   UnauthorizedRoute: UnauthorizedRoute,

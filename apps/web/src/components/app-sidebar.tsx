@@ -43,7 +43,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         pathname.includes("/back-office/sertifikat-pelatihan") ||
         pathname.includes("/back-office/landing-settings") ||
         pathname.includes("/back-office/ppid") ||
-        pathname.includes("/back-office/media-publications")
+        pathname.includes("/back-office/media-publications") ||
+        pathname.includes("/back-office/team-members")
       ) {
         setActiveMode("pelatihan");
       } else if (
